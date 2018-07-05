@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.protocol;
 
-import org.apache.webdav.lib.WebdavException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.LogLevel;
@@ -57,11 +56,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.webdav.WebdavExceptionCode;
 
 /**
  * {@link WebdavProtocolException} - Indicates a WebDAV/XML protocol error.
  * <p>
- * This is a subclass of {@link WebdavException}, therefore its error codes start at <code>1000</code>.
+ * This is a subclass of {@link WebdavExceptionCode}, therefore its error codes start at <code>1000</code>.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

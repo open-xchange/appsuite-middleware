@@ -58,7 +58,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
-import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionServices;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
@@ -107,7 +106,9 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
         /** The <code>"module"</code> parameter */
         MODULE("module"),
         /** The <code>"attachment"</code> parameter */
-        ATTACHMENT("attachment");
+        ATTACHMENT("attachment"),
+        /** The <code>"attachment_module"</code> parameter */
+        ATTACHMENT_MODULE("attachment_module");
 
         private final String name;
 
@@ -208,6 +209,10 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
             failure(req, e);
             LOG.error("", e);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Null dereference.");
+        } catch (RuntimeException e) {
+            failure(req, e);
+            LOG.error("", e);
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             after(req);
 
@@ -302,7 +307,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @throws OXException
      */
     protected Result isEnqueueable(InfostoreRequest request) throws OXException {
-        return EnqueuableAJAXActionServices.resultFor(false);
+        return EnqueuableAJAXActionService.resultFor(false);
     }
 
 

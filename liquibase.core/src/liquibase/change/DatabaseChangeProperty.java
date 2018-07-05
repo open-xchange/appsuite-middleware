@@ -1,11 +1,10 @@
 package liquibase.change;
 
-import liquibase.serializer.LiquibaseSerializable;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import liquibase.serializer.LiquibaseSerializable;
 
 /**
  * Annotation used by {@link AbstractChange } to declare {@link ChangeParameterMetaData} information.

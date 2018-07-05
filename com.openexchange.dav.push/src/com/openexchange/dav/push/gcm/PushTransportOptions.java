@@ -79,6 +79,7 @@ public class PushTransportOptions {
             properties.add("com.openexchange." + client + ".push.davpush.gcm.applicationId");
             properties.add("com.openexchange." + client + ".push.davpush.gcm.gatewayUrl");
             properties.add("com.openexchange." + client + ".push.davpush.gcm.refreshInterval");
+            properties.add("com.openexchange." + client + ".push.davpush.gcm.transportChunkSize");
         }
         return properties.toArray(new String[properties.size()]);
     }
@@ -108,6 +109,7 @@ public class PushTransportOptions {
     private final String gatewayUrl;
     private final String transportID;
     private final String clientID;
+    private final int transportChunkSize;
 
     /**
      * Initializes a new {@link PushTransportOptions}.
@@ -118,8 +120,9 @@ public class PushTransportOptions {
      * @param gatewayUrl The URL to the push gateway
      * @param applicationID The registered application identifier
      * @param refreshInterval The subscription refresh interval
+     * @param transportChunkSize The transport chunk size
      */
-    public PushTransportOptions(String clientID, String transportID, String transportURI, String gatewayUrl, String applicationID, int refreshInterval) {
+    public PushTransportOptions(String clientID, String transportID, String transportURI, String gatewayUrl, String applicationID, int refreshInterval, int transportChunkSize) {
         super();
         this.clientID = clientID;
         this.refreshInterval = refreshInterval;
@@ -127,6 +130,7 @@ public class PushTransportOptions {
         this.applicationID = applicationID;
         this.transportID = transportID;
         this.gatewayUrl = gatewayUrl;
+        this.transportChunkSize = transportChunkSize;
     }
 
     /**
@@ -183,6 +187,15 @@ public class PushTransportOptions {
         return gatewayUrl;
     }
 
+    /**
+     * Gets the transport chunk size.
+     *
+     * @return The transport chunk size
+     */
+    public int getTransportChunkSize() {
+        return transportChunkSize;
+    }
+
     private static PushTransportOptions parse(ConfigurationService configService, String client) throws OXException {
         if (false == configService.getBoolProperty("com.openexchange." + client + ".push.davpush.gcm.enabled", false)) {
             return null;
@@ -195,7 +208,8 @@ public class PushTransportOptions {
         }
         String gatewayUrl = configService.getProperty("com.openexchange." + client + ".push.davpush.gcm.gatewayUrl", "https://push.davpush.com/push/");
         int refreshInterval = configService.getIntProperty("com.openexchange." + client + ".push.davpush.gcm.refreshInterval", 172800);
-        return new PushTransportOptions(client, transportID, transportURI, gatewayUrl, applicationID, refreshInterval);
+        int transportChunkSize = configService.getIntProperty("com.openexchange." + client + ".push.davpush.gcm.transportChunkSize", 100);
+        return new PushTransportOptions(client, transportID, transportURI, gatewayUrl, applicationID, refreshInterval, transportChunkSize);
     }
 
 }

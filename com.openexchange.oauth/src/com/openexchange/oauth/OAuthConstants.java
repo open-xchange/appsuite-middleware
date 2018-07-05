@@ -122,6 +122,16 @@ public final class OAuthConstants {
      */
     public static final String ARGUMENT_SCOPES = "scopes";
 
+    /**
+     * The argument name for the identity. <code>java.lang.String</code>
+     */
+    public static final String ARGUMENT_IDENTITY = "identity";
+
+    /**
+     * The argument name for the action hint. <code>java.lang.String</code>
+     */
+    public static final String ARGUMENT_ACTION_HINT = "actionHint";
+
     /*-
      * ------------------- URL parameters -------------------
      */
@@ -178,6 +188,11 @@ public final class OAuthConstants {
      * greater than the second number.
      */
     public static final String URLPARAM_OAUTH_ACCEPTABLE_TIMESTAMPS = "oauth_acceptable_timestamps";
+
+    /**
+     * The URL parameter for the action hint when initialising an ouath account with the 'init' action
+     */
+    public static final String URLPARAM_ACTION_HINT = "action_hint";
 
     /*-
      * ------------------- Problem constants -------------------
@@ -307,6 +322,11 @@ public final class OAuthConstants {
      * providing request token's secret, call-back URL, whatever.
      */
     public static final String SESSION_PARAM_UUID = "uuid";
+
+    /**
+     * The session parameter providing a hint about updating the scopes upon deletion
+     */
+    public static final String SESSION_PARAM_UPDATE_SCOPES = "__oauth.storage.delete.updateScopes";
 
     /*-
      * ------------------- ID type identifier for accounts -------------------

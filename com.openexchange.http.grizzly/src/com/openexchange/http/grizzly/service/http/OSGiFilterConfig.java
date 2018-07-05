@@ -42,10 +42,9 @@
 
 package com.openexchange.http.grizzly.service.http;
 
+import java.util.Map;
 import org.glassfish.grizzly.servlet.FilterConfigImpl;
 import org.glassfish.grizzly.servlet.WebappContext;
-
-import java.util.Map;
 
 final class OSGiFilterConfig extends FilterConfigImpl {
 

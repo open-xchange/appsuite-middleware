@@ -1,9 +1,8 @@
 package liquibase.snapshot;
 
+import java.util.Comparator;
 import liquibase.database.Database;
 import liquibase.structure.DatabaseObject;
-
-import java.util.Comparator;
 
 class SnapshotGeneratorComparator implements Comparator<SnapshotGenerator> {
 

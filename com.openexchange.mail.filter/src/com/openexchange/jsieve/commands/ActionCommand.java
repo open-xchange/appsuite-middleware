@@ -512,11 +512,13 @@ public class ActionCommand extends ControlOrActionCommand {
      */
     private int countTags() {
         int i = 0;
-        for (final List<String> list : this.tagArguments.values()) {
-            if (list.isEmpty()) {
-                i++;
-            } else {
-                i = i + 2;
+        if (this.tagArguments != null) {
+            for (final List<String> list : this.tagArguments.values()) {
+                if (list.isEmpty()) {
+                    i++;
+                } else {
+                    i = i + 2;
+                }
             }
         }
         return i;
@@ -558,7 +560,7 @@ public class ActionCommand extends ControlOrActionCommand {
     public HashSet<String> getRequired() {
         HashSet<String> result = new HashSet<String>();
         result.addAll(optRequired);
-        result.addAll(this.command.getRequired() == null ? new HashSet<String>() : this.command.getRequired());
+        result.addAll(this.command.getRequired() == null ? new HashSet<>() : this.command.getRequired());
         return result;
     }
 

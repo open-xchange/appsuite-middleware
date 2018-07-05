@@ -59,6 +59,7 @@ import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -136,6 +137,9 @@ public class ContactReader {
                 //TODO: Guests do not have mail settings
                 if (contact.getParentFolderID() != 16 && senderSource.equalsIgnoreCase("defaultSenderAddress")) {
                     UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(contact.getInternalUserId(), getContext(), connection);
+                    if (userSettingMail == null) {
+                        throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Unable to load mail settings.");
+                    }
                     String defaultSendAddress = userSettingMail.getSendAddr();
                     if (false == Strings.isEmpty(defaultSendAddress)) {
                         contact.setEmail1(defaultSendAddress);

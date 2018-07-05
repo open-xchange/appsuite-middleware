@@ -52,7 +52,6 @@ package com.openexchange.imap.storecache;
 import static com.openexchange.imap.IMAPAccess.doIMAPConnect;
 import javax.mail.MessagingException;
 import com.openexchange.imap.IMAPClientParameters;
-import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 

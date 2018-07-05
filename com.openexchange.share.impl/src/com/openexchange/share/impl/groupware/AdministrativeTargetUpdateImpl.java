@@ -50,6 +50,9 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -57,17 +60,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.osgi.ServiceListing;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.HandlerParameters;
+import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.core.groupware.AdministrativeFolderTargetProxy;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -87,9 +94,9 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     private final Connection connection;
     private final HandlerParameters parameters;
     private final OXFolderAccess folderAccess;
-	private ServiceListing<FolderHandlerModuleExtension> folderExtensions;
+	private final ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions;
 
-    public AdministrativeTargetUpdateImpl(ServiceLookup services, int contextID, Connection writeCon, ModuleHandlerRegistry handlers, ServiceListing<FolderHandlerModuleExtension> folderExtensions) throws OXException {
+    public AdministrativeTargetUpdateImpl(ServiceLookup services, int contextID, Connection writeCon, ModuleExtensionRegistry<ModuleHandler> handlers, ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions) throws OXException {
         super(services, handlers);
         this.contextID = contextID;
         this.connection = writeCon;
@@ -125,7 +132,29 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             syntheticOwnerSession.setParameter("com.openexchange.share.administrativeUpdate", Boolean.TRUE);
             syntheticOwnerSession.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), connection);
             OXFolderManager folderManager = OXFolderManager.getInstance(syntheticOwnerSession, folderAccess, connection, connection);
-            folderManager.updateFolder(folderTargetProxy.getFolder(), false, System.currentTimeMillis());
+            FolderObject folder = folderTargetProxy.getFolder();
+            folderManager.updateFolder(folder, false, System.currentTimeMillis());
+
+            if (folder.getModule() == FolderObject.INFOSTORE) {
+                ContextService ctxService = services.getService(ContextService.class);
+                // Add permission to sub folders
+                List<Integer> subfolderIds;
+                try {
+                    subfolderIds = folder.getSubfolderIds(true, ctxService.getContext(contextID));
+                } catch (SQLException e) {
+                    throw ShareExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                }
+
+                List<OCLPermission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
+                List<OCLPermission> removedPermissions = folderTargetProxy.getRemovedPermissions();
+
+                for (Integer id : subfolderIds) {
+                    FolderObject sub = folderAccess.getFolderObject(id.intValue());
+                    prepareInheritedPermissions(sub, appliedPermissions, removedPermissions);
+                    folderManager.updateFolder(sub, false, true, sub.getLastModified().getTime());
+                }
+            }
+
             /*
              * clear some additional caches for all potentially affected users that are not covered when updating through folder manager
              */
@@ -136,6 +165,57 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             }
         }
 
+    }
+
+    private static FolderObject prepareInheritedPermissions(FolderObject folder, List<OCLPermission> added, List<OCLPermission> removed) {
+        List<OCLPermission> originalPermissions = folder.getPermissions();
+        if (null == originalPermissions) {
+            originalPermissions = new ArrayList<>();
+        }
+
+        String parentId = String.valueOf(folder.getParentFolderID());
+        List<OCLPermission> filtered = new ArrayList<>(added.size());
+        for (OCLPermission add : added) {
+            if (add.getType() == FolderPermissionType.LEGATOR) {
+                add.setPermissionLegator(parentId);
+                add.setType(FolderPermissionType.INHERITED);
+                filtered.add(add);
+            }
+        }
+
+        for (OCLPermission rem : removed) {
+            if (rem.getType() == FolderPermissionType.LEGATOR) {
+                rem.setPermissionLegator(parentId);
+            }
+            rem.setType(FolderPermissionType.INHERITED);
+        }
+
+        List<OCLPermission> permissions = new ArrayList<>(originalPermissions.size() + filtered.size());
+        permissions.addAll(originalPermissions);
+        permissions.addAll(filtered);
+        permissions = removePermissions(permissions, removed);
+        folder.setPermissions(permissions);
+        return folder;
+    }
+
+    protected static List<OCLPermission> removePermissions(List<OCLPermission> origPermissions, List<OCLPermission> toRemove) {
+        if (origPermissions == null || origPermissions.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<OCLPermission> newPermissions = new ArrayList<OCLPermission>(origPermissions);
+        Iterator<OCLPermission> it = newPermissions.iterator();
+        while (it.hasNext()) {
+            OCLPermission permission = it.next();
+            for (OCLPermission removable : toRemove) {
+                if (permission.isGroupPermission() == removable.isGroupPermission() && permission.getEntity() == removable.getEntity()) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+
+        return newPermissions;
     }
 
     @Override
@@ -191,12 +271,11 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     }
 
     private TargetProxy optExtendedProxy(ShareTarget folderTarget) throws OXException {
-        for (FolderHandlerModuleExtension folderExtension : folderExtensions) {
-            if (folderExtension.isApplicableFor(folderTarget.getFolder())) {
-                TargetProxy proxy = folderExtension.resolveTarget(folderTarget);
-                if (null != proxy) {
-                    return proxy;
-                }
+        FolderHandlerModuleExtension folderHandler = folderExtensions.opt(folderTarget.getModule());
+        if (null != folderHandler && folderHandler.isApplicableFor(contextID, folderTarget.getFolder())) {
+            TargetProxy proxy = folderHandler.resolveTarget(folderTarget, contextID);
+            if (null != proxy) {
+                return proxy;
             }
         }
         return null;

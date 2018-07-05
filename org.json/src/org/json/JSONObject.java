@@ -30,6 +30,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,6 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import org.json.helpers.FileBackedJSON;
 import org.json.helpers.UnsynchronizedStringReader;
 import org.json.helpers.UnsynchronizedStringWriter;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -128,7 +130,7 @@ public class JSONObject extends AbstractJSONValue {
      */
     private static final class Null implements Cloneable {
 
-        public Null() {
+        Null() {
             super();
         }
 
@@ -177,7 +179,7 @@ public class JSONObject extends AbstractJSONValue {
     public static final Object NULL = new Null();
 
     /**
-     * Construct an empty JSONObject.
+     * Construct an empty JSONObject with the default initial capacity (16).
      */
     public JSONObject() {
         super();
@@ -185,7 +187,10 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
-     * Construct an empty JSONObject.
+     * Construct an empty JSONObject with given initial capacity.
+     *
+     * @param  initialCapacity The initial capacity
+     * @throws IllegalArgumentException If the initial capacity is negative
      */
     public JSONObject(final int initialCapacity) {
         super();
@@ -224,62 +229,7 @@ public class JSONObject extends AbstractJSONValue {
      * @throws JSONException If there is a syntax error in the source string.
      */
     public JSONObject(final JSONTokener x) throws JSONException {
-        this();
-        parseJSONTokener(x);
-    }
-
-    /**
-     * Parses a JSONTokener and fills its values into this JSONObject
-     *
-     * @param tokener A JSONTokener object containing the source string
-     * @throws JSONException
-     */
-    private final void parseJSONTokener(final JSONTokener tokener) throws JSONException {
-        char c;
-        String key;
-        if (tokener.nextClean() != '{') {
-            throw tokener.syntaxError("A JSONObject text must begin with '{'");
-        }
-        for (;;) {
-            c = tokener.nextClean();
-            switch (c) {
-            case 0:
-                throw tokener.syntaxError("A JSONObject text must end with '}'");
-            case '}':
-                return;
-            default:
-                tokener.back();
-                key = tokener.nextValue().toString();
-            }
-            /*
-             * The key is followed by ':'. We will also tolerate '=' or '=>'.
-             */
-            c = tokener.nextClean();
-            if (c == '=') {
-                if (tokener.next() != '>') {
-                    tokener.back();
-                }
-            } else if (c != ':') {
-                throw tokener.syntaxError("Expected a ':' after a key");
-            }
-            put(key, tokener.nextValue());
-            /*
-             * Pairs are separated by ','. We will also tolerate ';'.
-             */
-            switch (tokener.nextClean()) {
-            case ';':
-            case ',':
-                if (tokener.nextClean() == '}') {
-                    return;
-                }
-                tokener.back();
-                break;
-            case '}':
-                return;
-            default:
-                throw tokener.syntaxError("Expected a ',' or '}'");
-            }
-        }
+        this(x.getSource());
     }
 
     /**
@@ -288,7 +238,7 @@ public class JSONObject extends AbstractJSONValue {
      * @param other A JSONObject to initialize the contents of the JSONObject.
      */
     public JSONObject(final JSONObject other) {
-        this(null == other ? null : other.myHashMap);
+        this(null == other ? Collections.emptyMap() : other.myHashMap);
     }
 
     /**
@@ -610,6 +560,21 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
+     * Get the raw value object associated with a key.
+     *
+     * @param key A key string.
+     * @return The raw value associated with the key.
+     * @throws JSONException if the key is not found.
+     */
+    public Object getRaw(final String key) throws JSONException {
+        final Object o = optRaw(key);
+        if (o == null) {
+            throw new JSONException("JSONObject[" + quote(key) + "] not found.");
+        }
+        return o;
+    }
+
+    /**
      * Get the boolean value associated with a key.
      *
      * @param key A key string.
@@ -718,7 +683,41 @@ public class JSONObject extends AbstractJSONValue {
      * @return true if the key exists in the JSONObject.
      */
     public boolean has(final String key) {
-        return this.myHashMap.containsKey(key);
+        return null != key && this.myHashMap.containsKey(key);
+    }
+
+    /**
+     * Determine if the JSONObject contains any of the specified keys.
+     *
+     * @param keys A list of keys to check
+     * @return true if one key exist in the JSONObject
+     */
+    public boolean hasAny(String... keys) {
+        if (keys != null) {
+            for (String key : keys) {
+                if (null != key && this.myHashMap.containsKey(key)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determine if the JSONObject contains any of the specified keys.
+     *
+     * @param keys A list of keys to check
+     * @return true if one key exist in the JSONObject
+     */
+    public boolean hasAny(Collection<String> keys) {
+        if (keys != null) {
+            for (String key : keys) {
+                if (null != key && this.myHashMap.containsKey(key)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -792,12 +791,16 @@ public class JSONObject extends AbstractJSONValue {
      * @return A JSONArray containing the key strings, or null if the JSONObject is empty.
      */
     public JSONArray names() {
-        final JSONArray ja = new JSONArray();
-        final Set<String> keys = keySet();
-        for (final String name : keys) {
+        int length = length();
+        if (length <= 0) {
+            return null;
+        }
+
+        JSONArray ja = new JSONArray(length);
+        for (String name : keySet()) {
             ja.put(name);
         }
-        return ja.length() == 0 ? null : ja;
+        return ja;
     }
 
     /**
@@ -807,7 +810,7 @@ public class JSONObject extends AbstractJSONValue {
      * @return A String.
      * @throws JSONException If n is a non-finite number.
      */
-    static public final String numberToString(final Number n) throws JSONException {
+    public static final String numberToString(final Number n) throws JSONException {
         if (n == null) {
             throw new JSONException("Null pointer");
         }
@@ -833,6 +836,23 @@ public class JSONObject extends AbstractJSONValue {
      * @return An object which is the value, or null if there is no value.
      */
     public Object opt(final String key) {
+        if (key == null) {
+            return null;
+        }
+        Object value = this.myHashMap.get(key);
+        if (null == value) {
+            return null;
+        }
+        return value instanceof CharSequence ? value.toString() : value;
+    }
+
+    /**
+     * Get the raw optional value associated with a key.
+     *
+     * @param key A key string.
+     * @return An object which is the value, or <code>null</code> if there is no such value.
+     */
+    public Object optRaw(final String key) {
         return key == null ? null : this.myHashMap.get(key);
     }
 
@@ -846,8 +866,14 @@ public class JSONObject extends AbstractJSONValue {
         if (key == null) {
             return null;
         }
-        Object object = this.myHashMap.get(key);
-        return NULL == object ? null : object;
+        Object value = this.myHashMap.get(key);
+        if (null == value) {
+            return null;
+        }
+        if (NULL == value) {
+            return null;
+        }
+        return value instanceof CharSequence ? value.toString() : value;
     }
 
     /**
@@ -946,6 +972,17 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
+     * Get an optional JSONValue associated with a key. It returns null if there is no such key, or if its value is not a JSONValue.
+     *
+     * @param key A key string.
+     * @return A JSONValue which is the value.
+     */
+    public JSONValue optJSONValue(final String key) {
+        final Object o = opt(key);
+        return o instanceof JSONValue ? (JSONValue) o : null;
+    }
+
+    /**
      * Get an optional JSONArray associated with a key. It returns null if there is no such key, or if its value is not a JSONArray.
      *
      * @param key A key string.
@@ -965,6 +1002,17 @@ public class JSONObject extends AbstractJSONValue {
     public JSONObject optJSONObject(final String key) {
         final Object o = opt(key);
         return o instanceof JSONObject ? (JSONObject) o : null;
+    }
+
+    /**
+     * Get an optional Number associated with a key. It returns null if there is no such key, or if its value is not a Number.
+     *
+     * @param key A key string.
+     * @return A Number which is the value.
+     */
+    public Number optNumber(final String key) {
+        final Object o = opt(key);
+        return o instanceof Number ? (Number) o : null;
     }
 
     /**
@@ -1351,14 +1399,14 @@ public class JSONObject extends AbstractJSONValue {
             return STR_NULL;
         }
         if (value instanceof JSONString) {
-            Object o;
+            String o;
             try {
                 o = ((JSONString) value).toJSONString();
             } catch (final Exception e) {
                 throw new JSONException(e);
             }
-            if (o instanceof String) {
-                return (String) o;
+            if (o != null) {
+                return o;
             }
             throw new JSONException("Bad value from toJSONString: " + o);
         }
@@ -1389,9 +1437,9 @@ public class JSONObject extends AbstractJSONValue {
         }
         try {
             if (value instanceof JSONString) {
-                final Object o = ((JSONString) value).toJSONString();
-                if (o instanceof String) {
-                    return (String) o;
+                final String result = ((JSONString) value).toJSONString();
+                if (result != null) {
+                    return result;
                 }
             }
         } catch (final Exception e) {
@@ -1522,6 +1570,13 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
+     * The default in-memory threshold of 256,000 characters.
+     * <p>
+     * A String object of that size occupies roughly 0.5 megabytes (see <a href="https://is.gd/jr5JB4">here</a>)
+     */
+    static final int IN_MEMORY_TEXT_THRESHOLD = 256000;
+
+    /**
      * Parses specified JSON object from given parser.
      *
      * @param jParser The JSON parser with {@link JsonToken#START_OBJECT} already consumed
@@ -1566,23 +1621,45 @@ public class JSONObject extends AbstractJSONValue {
                 case VALUE_NUMBER_INT:
                     try {
                         jo.put(fieldName, jParser.getIntValue());
-                        } catch (final JsonParseException e) {
-                            // Outside of range of Java int
-                            try {
-                                jo.put(fieldName, jParser.getLongValue());
-                            } catch (final JsonParseException pe) {
-                                // Outside of range of Java long
-                                // Fallback: Treat number as double, so we don't lose
-                                // too much precision (#44850)
-                                jo.put(fieldName, jParser.getDoubleValue());
-                            }
+                    } catch (final JsonParseException e) {
+                        // Outside of range of Java int
+                        try {
+                            jo.put(fieldName, jParser.getLongValue());
+                        } catch (final JsonParseException pe) {
+                            // Outside of range of Java long
+                            // Fallback: Treat number as double, so we don't lose
+                            // too much precision (#44850)
+                            jo.put(fieldName, jParser.getDoubleValue());
                         }
+                    }
                     break;
                 case VALUE_TRUE:
                     jo.put(fieldName, true);
                     break;
                 case VALUE_STRING:
-                    jo.put(fieldName, jParser.getText());
+                    {
+                        int textLength = jParser.getTextLength();
+                        if (textLength > IN_MEMORY_TEXT_THRESHOLD) {
+                            FileBackedJSONStringProvider provider = FileBackedJSON.getFileBackedJSONStringProvider();
+                            if (null == provider) {
+                                jo.put(fieldName, jParser.getText());
+                            } else {
+                                // Avoid construction of a String object
+                                FileBackedJSONString jsonString = provider.createFileBackedJSONString();
+                                try {
+                                    char[] textCharacters = jParser.getTextCharacters();
+                                    int textOffset = jParser.getTextOffset();
+                                    jsonString.write(textCharacters, textOffset, textLength);
+                                    jsonString.flush();
+                                    jo.put(fieldName, jsonString);
+                                } finally {
+                                    jsonString.close();
+                                }
+                            }
+                        } else {
+                            jo.put(fieldName, jParser.getText());
+                        }
+                    }
                     break;
                 default:
                     // Ignore

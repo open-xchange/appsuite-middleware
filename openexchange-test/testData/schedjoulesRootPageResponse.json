@@ -1,0 +1,594 @@
+{
+    "item_id": 113525,
+    "name": "Calendar Store",
+    "country": "Deutschland",
+    "page_sections": [
+        {
+            "items": [
+                {
+                    "item": {
+                        "item_id": 50111,
+                        "name": "Gesetzliche Feiertage",
+                        "url": "https://openxchange.schedjoules.com/calendars/dbe807996754?l=de&x=239a18",
+                        "category_id": 1,
+                        "category": "Feiertage",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/b67c28dc.png?c499ea5a2b41ffa4841a4ec32e547c09"
+                    },
+                    "item_class": "calendar"
+                },
+                {
+                    "item": {
+                        "item_id": 49734,
+                        "name": "Fest- und Feiertage",
+                        "url": "https://openxchange.schedjoules.com/calendars/18574ca54e6f?l=de&x=239a18",
+                        "category_id": 1,
+                        "category": "Feiertage",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/3d5020d7.png?191f52f892d0fe6acfb8bfd38e0cef7f"
+                    },
+                    "item_class": "calendar"
+                },
+                {
+                    "item": {
+                        "item_id": 92009,
+                        "name": "Feiertage Bundesländer",
+                        "url": "https://api.schedjoules.com/pages/92009?locale=de",
+                        "category_id": 1,
+                        "category": "Feiertage",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/b67c28dc.png?c499ea5a2b41ffa4841a4ec32e547c09"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 117614,
+                        "name": "Schulferien",
+                        "url": "https://api.schedjoules.com/pages/117614?locale=de",
+                        "category_id": 1,
+                        "category": "Feiertage",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/school-book.png?9e162b7cc102a0fa6588ff89f67038d2"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 82932,
+                        "name": "Religiöse Feiertage",
+                        "url": "https://api.schedjoules.com/pages/82932?locale=de",
+                        "category_id": 1,
+                        "category": "Feiertage",
+                        "icon": "https://cdn-images.schedjoules.com/assets/religions.png?de47930ab61307284b3201211cab3603"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 113476,
+                        "name": "Feiertage weltweit",
+                        "url": "https://api.schedjoules.com/pages/113476?locale=de",
+                        "category_id": 1,
+                        "category": "Feiertage",
+                        "icon": "https://cdn-images.schedjoules.com/assets/holidays.png?ca30c78f3a44397f6ffcb01fcc65fb3f"
+                    },
+                    "item_class": "page"
+                }
+            ],
+            "name": "Feiertage"
+        },
+        {
+            "items": [
+                {
+                    "item": {
+                        "item_id": 25896940,
+                        "name": "WM 2018",
+                        "url": "https://api.schedjoules.com/pages/25896940?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "sport": "Fußball",
+                        "season": "2018",
+                        "gender": "Männer",
+                        "icon": "https://cdn-images.schedjoules.com/assets/world-cup-russia.png?32a308eeb59b0827c659e782650a1f43"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 26035546,
+                        "name": "Games 2018",
+                        "url": "https://api.schedjoules.com/pages/26035546?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "season": "2018",
+                        "icon": "https://cdn-images.schedjoules.com/assets/sochi_ceremony.png?e02cbbdbfef7e67032bff69f92cdb2b2"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 17751521,
+                        "name": "F1",
+                        "url": "https://api.schedjoules.com/pages/17751521?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "sport": "Autorennen",
+                        "icon": "https://cdn-images.schedjoules.com/assets/f1.png?ecd26cc2486a401389679f5336b63908"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 17858326,
+                        "name": "MotoGP",
+                        "url": "https://api.schedjoules.com/pages/17858326?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "sport": "Motorradsport",
+                        "icon": "https://cdn-images.schedjoules.com/assets/motogp.png?05c7e94bc8fdc8fec87f1d2dbb781284"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 25005595,
+                        "name": "1. Bundesliga",
+                        "url": "https://api.schedjoules.com/pages/25005595?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Fußball",
+                        "season": "2017-2018",
+                        "gender": "Männer",
+                        "icon": "https://cdn-images.schedjoules.com/assets/football.png?5a8ee83be8bcf8601507876f8f4ef2b5"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 15051593,
+                        "name": "Wintersport",
+                        "url": "https://api.schedjoules.com/pages/15051593?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "sport": "Wintersport",
+                        "icon": "https://cdn-images.schedjoules.com/assets/winter_sports.png?6493ff4433045c3068d15ada03108fec"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 24428315,
+                        "name": "DTM",
+                        "url": "https://openxchange.schedjoules.com/calendars/de6b260b5b04?l=de&x=239a18",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "sport": "Autorennen",
+                        "season": "2018",
+                        "icon": "https://cdn-images.schedjoules.com/assets/dtm.png?774a6e3a77bb594d3d8156c101e3e9f7"
+                    },
+                    "item_class": "calendar"
+                },
+                {
+                    "item": {
+                        "item_id": 25767900,
+                        "name": "Formula E",
+                        "url": "https://openxchange.schedjoules.com/calendars/b0806e222602?l=de&x=239a18",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "sport": "Autorennen",
+                        "season": "2017-2018",
+                        "icon": "https://cdn-images.schedjoules.com/assets/f1.png?ecd26cc2486a401389679f5336b63908"
+                    },
+                    "item_class": "calendar"
+                },
+                {
+                    "item": {
+                        "item_id": 2712242,
+                        "name": "Die Mannschaft",
+                        "url": "https://openxchange.schedjoules.com/calendars/40334f3d11f7?l=de&x=239a18",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Fußball",
+                        "season": "2018",
+                        "gender": "Männer",
+                        "icon": "https://cdn-images.schedjoules.com/assets/dfb.png?630417f59fca532cadf935f3560ad023"
+                    },
+                    "item_class": "calendar"
+                },
+                {
+                    "item": {
+                        "item_id": 24941999,
+                        "name": "UEFA Champions League",
+                        "url": "https://openxchange.schedjoules.com/calendars/ce950acc69bb?l=de&x=239a18",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "sport": "Fußball",
+                        "season": "2017-2018",
+                        "gender": "Männer",
+                        "icon": "https://cdn-images.schedjoules.com/assets/champions_league.png?c83772e048bf7e5880380f517b6a1b7b"
+                    },
+                    "item_class": "calendar"
+                },
+                {
+                    "item": {
+                        "item_id": 24942002,
+                        "name": "UEFA Europa League",
+                        "url": "https://openxchange.schedjoules.com/calendars/b69aae188a34?l=de&x=239a18",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "sport": "Fußball",
+                        "season": "2017-2018",
+                        "gender": "Männer",
+                        "icon": "https://cdn-images.schedjoules.com/assets/europa_league.png?a037b7e75b168f04014690291acd9214"
+                    },
+                    "item_class": "calendar"
+                },
+                {
+                    "item": {
+                        "item_id": 25031027,
+                        "name": "DEL",
+                        "url": "https://api.schedjoules.com/pages/25031027?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Eishockey",
+                        "season": "2017-2018",
+                        "gender": "Männer",
+                        "icon": "https://cdn-images.schedjoules.com/assets/icehockey.png?df261b543a24f7f3b6bdd5208e1b9bff"
+                    },
+                    "item_class": "page"
+                }
+            ],
+            "name": "Beliebt"
+        },
+        {
+            "items": [
+                {
+                    "item": {
+                        "item_id": 24684598,
+                        "name": "Baseball",
+                        "url": "https://api.schedjoules.com/pages/24684598?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Baseball",
+                        "icon": "https://cdn-images.schedjoules.com/assets/baseball.png?a6fe1fc95311e9c21f4d3158007f894a"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 24684583,
+                        "name": "Basketball",
+                        "url": "https://api.schedjoules.com/pages/24684583?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Basketball",
+                        "icon": "https://cdn-images.schedjoules.com/assets/basketball.png?0be1c70958ebfed702de32752cbcd31c"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 24684584,
+                        "name": "Eishockey",
+                        "url": "https://api.schedjoules.com/pages/24684584?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Eishockey",
+                        "icon": "https://cdn-images.schedjoules.com/assets/icehockey.png?df261b543a24f7f3b6bdd5208e1b9bff"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 24684582,
+                        "name": "Fußball",
+                        "url": "https://api.schedjoules.com/pages/24684582?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Fußball",
+                        "icon": "https://cdn-images.schedjoules.com/assets/football.png?5a8ee83be8bcf8601507876f8f4ef2b5"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 24684585,
+                        "name": "Handball",
+                        "url": "https://api.schedjoules.com/pages/24684585?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Handball",
+                        "icon": "https://cdn-images.schedjoules.com/assets/handball.png?33460522f656df2167a4bd0df7b9c41f"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 24684591,
+                        "name": "Hockey",
+                        "url": "https://api.schedjoules.com/pages/24684591?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Hockey",
+                        "icon": "https://cdn-images.schedjoules.com/assets/hockey.png?b9d7f5f723185d0f8d45b754dc01619e"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 24684587,
+                        "name": "Tischtennis",
+                        "url": "https://api.schedjoules.com/pages/24684587?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Tischtennis",
+                        "icon": "https://cdn-images.schedjoules.com/assets/tabletennis.png?0776c3b3fff3788f69abfa85be300607"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 24684594,
+                        "name": "Wasserball",
+                        "url": "https://api.schedjoules.com/pages/24684594?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Wasserball",
+                        "icon": "https://cdn-images.schedjoules.com/assets/waterpolo.png?314624c60f16f9521208918c31459efa"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 24684590,
+                        "name": "Volleyball",
+                        "url": "https://api.schedjoules.com/pages/24684590?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "country": "Deutschland",
+                        "sport": "Volleyball",
+                        "icon": "https://cdn-images.schedjoules.com/assets/volleyball.png?813bd28454f4697234838f4228e52f3d"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 113477,
+                        "name": "Alle Sportarten weltweit",
+                        "url": "https://api.schedjoules.com/pages/113477?locale=de",
+                        "category_id": 2,
+                        "category": "Sport",
+                        "icon": "https://cdn-images.schedjoules.com/assets/sports.png?6857068de88b5583752fcfb901224074"
+                    },
+                    "item_class": "page"
+                }
+            ],
+            "name": "Sport Deutschland"
+        },
+        {
+            "items": [
+                {
+                    "item": {
+                        "item_id": 90734,
+                        "name": "Mondphasen",
+                        "url": "https://openxchange.schedjoules.com/calendars/766e8a162f82?l=de&x=239a18",
+                        "category_id": 5,
+                        "category": "Verschieden",
+                        "icon": "https://cdn-images.schedjoules.com/assets/moonphases.png?fade7194ec4eb1006f9d34e3ec2bffa8"
+                    },
+                    "item_class": "calendar"
+                },
+                {
+                    "item": {
+                        "item_id": 90730,
+                        "name": "Wetter",
+                        "url": "https://openxchange.schedjoules.com/calendars/weather/calendar.ics?l=de&loc={location}&d={temp}&p={rain}&w={wind}&t={time}&x=239a18",
+                        "category_id": 3,
+                        "category": "Wetter",
+                        "icon": "https://cdn-images.schedjoules.com/assets/weather.png?4a3002e01d951a851bbb1d306a522cf9"
+                    },
+                    "item_class": "calendar"
+                },
+                {
+                    "item": {
+                        "item_id": 118685,
+                        "name": "Namenstage Deutschland",
+                        "url": "https://openxchange.schedjoules.com/calendars/f5a5b1c3915c?l=de&x=239a18",
+                        "category_id": 5,
+                        "category": "Verschieden",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/b67c28dc.png?c499ea5a2b41ffa4841a4ec32e547c09"
+                    },
+                    "item_class": "calendar"
+                },
+                {
+                    "item": {
+                        "item_id": 90733,
+                        "name": "Wochennummern",
+                        "url": "https://api.schedjoules.com/pages/90733?locale=de",
+                        "category_id": 5,
+                        "category": "Verschieden",
+                        "icon": "https://cdn-images.schedjoules.com/assets/weeknumbers.png?d3c204c14b91f83a4df0f8eb1c084d08"
+                    },
+                    "item_class": "page"
+                }
+            ],
+            "name": "Menschen & Natur"
+        },
+        {
+            "items": [
+                {
+                    "item": {
+                        "item_id": 1159071,
+                        "name": "ZDF",
+                        "url": "https://api.schedjoules.com/pages/1159071?locale=de",
+                        "category_id": 6,
+                        "category": "TV Sendungen",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/rs_69037383.png?363c4a02119326faa6c97142847d5f13"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 1159074,
+                        "name": "Das Erste",
+                        "url": "https://api.schedjoules.com/pages/1159074?locale=de",
+                        "category_id": 6,
+                        "category": "TV Sendungen",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/rs_69035292.png?801a335caf20b1d0cb79cc4f5f6bd9cc"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 1159076,
+                        "name": "RTL Television",
+                        "url": "https://api.schedjoules.com/pages/1159076?locale=de",
+                        "category_id": 6,
+                        "category": "TV Sendungen",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/rs_69036761.png?780093f7a26e39a6ef47090c71c9b1a1"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 1159078,
+                        "name": "Sat.1",
+                        "url": "https://api.schedjoules.com/pages/1159078?locale=de",
+                        "category_id": 6,
+                        "category": "TV Sendungen",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/rs_69036950.png?375790047002ba0fccb3a8d951b6405d"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 1159079,
+                        "name": "ProSieben",
+                        "url": "https://api.schedjoules.com/pages/1159079?locale=de",
+                        "category_id": 6,
+                        "category": "TV Sendungen",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/rs_69031574.png?97ae52a7ac3e41749d28f07257392be6"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 1471975,
+                        "name": "Deutschland",
+                        "url": "https://api.schedjoules.com/pages/1471975?locale=de",
+                        "category_id": 6,
+                        "category": "TV Sendungen",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/b67c28dc.png?c499ea5a2b41ffa4841a4ec32e547c09"
+                    },
+                    "item_class": "page"
+                }
+            ],
+            "name": "TV"
+        },
+        {
+            "items": [
+                {
+                    "item": {
+                        "item_id": 76543,
+                        "name": "DAX",
+                        "url": "https://api.schedjoules.com/pages/76543?locale=de",
+                        "category_id": 4,
+                        "category": "Gesellschaft Kalender",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/b67c28dc.png?c499ea5a2b41ffa4841a4ec32e547c09"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 91652,
+                        "name": "MDAX",
+                        "url": "https://api.schedjoules.com/pages/91652?locale=de",
+                        "category_id": 4,
+                        "category": "Gesellschaft Kalender",
+                        "country": "Deutschland",
+                        "icon": "https://cdn-images.schedjoules.com/assets/b67c28dc.png?c499ea5a2b41ffa4841a4ec32e547c09"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 90758,
+                        "name": "Euronext 100",
+                        "url": "https://api.schedjoules.com/pages/90758?locale=de",
+                        "category_id": 4,
+                        "category": "Gesellschaft Kalender",
+                        "icon": "https://cdn-images.schedjoules.com/assets/europe.png?6b7ffe7d4da346ad00e770248973a58f"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 91658,
+                        "name": "FTSE Eurotop 100",
+                        "url": "https://api.schedjoules.com/pages/91658?locale=de",
+                        "category_id": 4,
+                        "category": "Gesellschaft Kalender",
+                        "icon": "https://cdn-images.schedjoules.com/assets/europe.png?6b7ffe7d4da346ad00e770248973a58f"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 76547,
+                        "name": "DJ 30",
+                        "url": "https://api.schedjoules.com/pages/76547?locale=de",
+                        "category_id": 4,
+                        "category": "Gesellschaft Kalender",
+                        "country": "Vereinigte Staaten",
+                        "icon": "https://cdn-images.schedjoules.com/assets/9783d4f3.png?8af003b2248e904b3d6369816e7a67f1"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 90632,
+                        "name": "NASDAQ 100",
+                        "url": "https://api.schedjoules.com/pages/90632?locale=de",
+                        "category_id": 4,
+                        "category": "Gesellschaft Kalender",
+                        "country": "Vereinigte Staaten",
+                        "icon": "https://cdn-images.schedjoules.com/assets/9783d4f3.png?8af003b2248e904b3d6369816e7a67f1"
+                    },
+                    "item_class": "page"
+                },
+                {
+                    "item": {
+                        "item_id": 113478,
+                        "name": "Börse weltweit",
+                        "url": "https://api.schedjoules.com/pages/113478?locale=de",
+                        "category_id": 4,
+                        "category": "Gesellschaft Kalender",
+                        "icon": "https://cdn-images.schedjoules.com/assets/finance.png?c30cb8e2bdfad873d93c15a2e87ec05e"
+                    },
+                    "item_class": "page"
+                }
+            ],
+            "name": "Börsen"
+        }
+    ]
+}

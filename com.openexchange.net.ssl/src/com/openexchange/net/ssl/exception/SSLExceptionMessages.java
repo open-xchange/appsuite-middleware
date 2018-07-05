@@ -60,27 +60,35 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class SSLExceptionMessages implements LocalizableStrings {
 
-    // The certificate for domain "%1$s" is untrusted.
-    public final static String UNTRUSTED_CERTIFICATE_MSG = "The certificate for domain \"%1$s\" is untrusted.";
+    // The certificate for domain '%2$s' is untrusted.
+    public final static String UNTRUSTED_CERTIFICATE_MSG = "The certificate for domain '%2$s' is untrusted.";
 
-    // The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
-    public final static String UNTRUSTED_CERT_USER_CONFIG_MSG = "The certificate for domain \"%1$s\" is untrusted. You can change your general trust level in the settings.";
+    // The certificate for domain '%2$s' is untrusted. You can change your general trust level in the settings.
+    public final static String UNTRUSTED_CERT_USER_CONFIG_MSG = "The certificate for domain '%2$s' is untrusted. You can change your general trust level in the settings.";
 
-    // The certificate '%1$s' is not trusted by the user '%2$s' in context '%3$s'
-    public final static String USER_DOES_NOT_TRUST_CERTIFICATE = "The certificate with fingerprint '%1$s' is not trusted by the user '%2$s' in context '%3$s'";
+    // The certificate is not trusted by the user.
+    public final static String USER_DOES_NOT_TRUST_CERTIFICATE = "The certificate with is not trusted by the user.";
 
-    // The root certificate issued by '%1$s' is not trusted
-    public final static String UNTRUSTED_ROOT_CERTIFICATE = "The root certificate issued by '%1$s' is not trusted";
+    // The root certificate issued by '%2$s' is not trusted
+    public final static String UNTRUSTED_ROOT_CERTIFICATE = "The root certificate issued by '%2$s' is not trusted";
 
     // The certificate is self-signed
     public final static String SELF_SIGNED_CERTIFICATE = "The certificate is self-signed";
 
     // The certificate is expired
     public final static String CERTIFICATE_IS_EXPIRED = "The certificate is expired";
-    
+
     // The common name for the certificate is invalid
     public final static String INVALID_COMMON_NAME = "The common name for the certificate is invalid";
 
+    // The root authority for the certificate is untrusted
+    public final static String UNTRUSTED_ROOT_AUTHORITY = "The root authority for the certificate is untrusted";
+
+    // The certificate is using a weak algorithm
+    public final static String WEAK_ALGORITHM = "The certificate is using a weak algorithm";
+
+    // The certificate was revoked
+    public final static String CERTIFICATE_REVOKED = "The certificate was revoked";
 
     private SSLExceptionMessages() {
         super();

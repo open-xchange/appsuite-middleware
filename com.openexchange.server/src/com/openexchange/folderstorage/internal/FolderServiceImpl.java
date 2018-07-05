@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.internal;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
@@ -62,17 +63,22 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.RestoringFolderService;
+import com.openexchange.folderstorage.TrashAwareFolderService;
+import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.performers.AllVisibleFoldersPerformer;
 import com.openexchange.folderstorage.internal.performers.ClearPerformer;
 import com.openexchange.folderstorage.internal.performers.ConsistencyPerformer;
 import com.openexchange.folderstorage.internal.performers.CreatePerformer;
+import com.openexchange.folderstorage.internal.performers.DefaultFolderPerformer;
 import com.openexchange.folderstorage.internal.performers.DeletePerformer;
 import com.openexchange.folderstorage.internal.performers.GetPerformer;
 import com.openexchange.folderstorage.internal.performers.ListPerformer;
 import com.openexchange.folderstorage.internal.performers.PathPerformer;
 import com.openexchange.folderstorage.internal.performers.ReinitializePerformer;
+import com.openexchange.folderstorage.internal.performers.RestorePerformer;
 import com.openexchange.folderstorage.internal.performers.SubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UnsubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
@@ -84,7 +90,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -92,7 +97,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderServiceImpl implements FolderService {
+public final class FolderServiceImpl implements FolderService, TrashAwareFolderService, RestoringFolderService {
 
     /**
      * Initializes a new {@link FolderServiceImpl}.
@@ -169,12 +174,8 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Type type, final User ruser, final Context context, final FolderServiceDecorator decorator) throws OXException {
-        final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
-        if (null == folderStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType.toString());
-        }
-        final String folderId = folderStorage.getDefaultFolderID(user, treeId, contentType, type, new StorageParametersImpl(user, context));
-        return new GetPerformer(user, context, decorator).doGet(treeId, folderId);
+        DefaultFolderPerformer performer = new DefaultFolderPerformer(ruser, context, decorator);
+        return performer.doGet(user, treeId, contentType, type);
     }
 
     @Override
@@ -184,22 +185,8 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Type type, final Session session, final FolderServiceDecorator decorator) throws OXException {
-        /*
-         * prefer the default folder from config tree if possible
-         */
-        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        String folderId = Tools.getConfiguredDefaultFolder(serverSession, contentType, type);
-        if (null == folderId) {
-            /*
-             * get default folder from storage, otherwise
-             */
-            final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
-            if (null == folderStorage) {
-                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType.toString());
-            }
-            folderId = folderStorage.getDefaultFolderID(serverSession.getUser(), treeId, contentType, type, new StorageParametersImpl(serverSession));
-        }
-        return new GetPerformer(serverSession, decorator).doGet(treeId, folderId);
+        DefaultFolderPerformer performer = new DefaultFolderPerformer(ServerSessionAdapter.valueOf(session), decorator);
+        return performer.doGet(user, treeId, contentType, type);
     }
 
     @Override
@@ -352,18 +339,28 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public Map<Integer, ContentType> getAvailableContentTypes() {
+    public Map<Integer, List<ContentType>> getAvailableContentTypes() {
         return ContentTypeRegistry.getInstance().getAvailableContentTypes();
     }
 
     @Override
     public ContentType parseContentType(String value) {
         int module = com.openexchange.java.util.Tools.getUnsignedInteger(value);
-        if (-1 != module) {
-            return ContentTypeRegistry.getInstance().getByModule(module);
-        } else {
-            return ContentTypeRegistry.getInstance().getByString(value);
-        }
+        return module >= 0 ? ContentTypeRegistry.getInstance().getByModule(module) : ContentTypeRegistry.getInstance().getByString(value);
+    }
+
+    @Override
+    public FolderResponse<TrashResult> trashFolder(String treeId, String folderId, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException {
+        final DeletePerformer performer = new DeletePerformer(ServerSessionAdapter.valueOf(session), decorator);
+        TrashResult result = performer.doTrash(treeId, folderId, timeStamp);
+        return FolderResponseImpl.newFolderResponse(result, performer.getWarnings());
+    }
+
+    @Override
+    public FolderResponse<Map<String, List<UserizedFolder>>> restoreFolderFromTrash(String tree, List<String> folderIds, UserizedFolder defaultDestFolder, Session session, FolderServiceDecorator decorator) throws OXException {
+        RestorePerformer performer = new RestorePerformer(ServerSessionAdapter.valueOf(session), decorator);
+        Map<String, List<UserizedFolder>> result = performer.doRestore(tree, folderIds, defaultDestFolder);
+        return FolderResponseImpl.newFolderResponse(result, performer.getWarnings());
     }
 
 }

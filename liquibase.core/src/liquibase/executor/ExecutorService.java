@@ -1,11 +1,10 @@
 package liquibase.executor;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ExecutorService {
 

@@ -51,12 +51,11 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 
@@ -77,10 +76,11 @@ public class DropRendundantIndicesUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        Connection con = Database.getDatabaseService().getForUpdateTask(contextId);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
 
             // Drop redundant index 'accountIndex' in mailSync table
             dropIndex(con, "mailSync", new String[] { "cid", "user", "accountId" });
@@ -98,15 +98,16 @@ public class DropRendundantIndicesUpdateTask extends UpdateTaskAdapter {
             dropIndex(con, "oauthAccessor", new String[] {"cid", "user"});
 
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
-            Database.getDatabaseService().backForUpdateTask(con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
 
     }

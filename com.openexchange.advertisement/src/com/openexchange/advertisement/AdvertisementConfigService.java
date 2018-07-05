@@ -51,9 +51,7 @@ package com.openexchange.advertisement;
 
 import java.util.List;
 import java.util.Map;
-import org.json.JSONObject;
 import org.json.JSONValue;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -137,7 +135,7 @@ public interface AdvertisementConfigService {
      * "config": "configdata..."<br>
      * }<br>
      * <p>
-     * 
+     *
      * Setting the configuration parameter to <code>null</code> will delete the current configuration for the reseller.
      *
      * @param reseller The reseller name

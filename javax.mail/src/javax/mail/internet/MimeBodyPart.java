@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,11 +40,37 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import javax.activation.*;
-import java.io.*;
-import java.util.*;
-import com.sun.mail.util.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.BodyPart;
+import javax.mail.EncodingAware;
+import javax.mail.FolderClosedException;
+import javax.mail.Header;
+import javax.mail.IllegalWriteException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Part;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.FolderClosedIOException;
+import com.sun.mail.util.LineOutputStream;
+import com.sun.mail.util.MessageRemovedIOException;
+import com.sun.mail.util.MimeUtil;
+import com.sun.mail.util.PropUtil;
 
 /**
  * This class represents a MIME body part. It implements the 
@@ -97,6 +123,8 @@ public class MimeBodyPart extends BodyPart implements MimePart {
     private static final boolean ignoreMultipartEncoding =
 	PropUtil.getBooleanSystemProperty(
 	    "mail.mime.ignoremultipartencoding", true);
+    private static final boolean allowutf8 =
+	PropUtil.getBooleanSystemProperty("mail.mime.allowutf8", true);
 
     // Paranoia:
     // allow this last minute change to be disabled if it causes problems
@@ -172,11 +200,11 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception	MessagingException for failures
      */
     public MimeBodyPart(InputStream is) throws MessagingException {
-	if (!(is instanceof ByteArrayInputStream) &&
+	super();
+    if (!(is instanceof ByteArrayInputStream) &&
 	    !(is instanceof BufferedInputStream) &&
 	    !(is instanceof SharedInputStream))
 	    is = new BufferedInputStream(is);
-	
 	headers = new InternetHeaders(is);
 
 	if (is instanceof SharedInputStream) {
@@ -187,9 +215,10 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 		content = ASCIIUtility.getBytes(is);
 	    } catch (IOException ioex) {
 		throw new MessagingException("Error reading input stream", ioex);
+	    } finally {
+	        try { is.close(); } catch (Exception e) {/* ignore */}
 	    }
 	}
-
     }
 
     /**
@@ -225,6 +254,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *
      * @return size in bytes, or -1 if not known
      */
+    @Override
     public int getSize() throws MessagingException {
 	if (content != null)
 	    return content.length;
@@ -254,6 +284,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *
      * @return number of lines, or -1 if not known
      */  
+    @Override
      public int getLineCount() throws MessagingException {
 	return -1;
      }
@@ -269,6 +300,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *
      * @return	Content-Type of this body part
      */
+    @Override
     public String getContentType() throws MessagingException {
 	String s = getHeader("Content-Type", null);
 	s = MimeUtil.cleanContentType(this, s);
@@ -293,6 +325,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *
      * @exception	MessagingException for failures
      */
+    @Override
     public boolean isMimeType(String mimeType) throws MessagingException {
 	return isMimeType(this, mimeType);
     }
@@ -311,6 +344,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception	MessagingException for failures
      * @see #headers
      */
+    @Override
     public String getDisposition() throws MessagingException {
 	return getDisposition(this);
     }
@@ -326,6 +360,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void setDisposition(String disposition) throws MessagingException {
 	setDisposition(this, disposition);
     }
@@ -341,6 +376,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *
      * @see #headers
      */
+    @Override
     public String getEncoding() throws MessagingException {
 	return getEncoding(this);
     }
@@ -353,6 +389,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * This implementation uses <code>getHeader(name)</code>
      * to obtain the requisite header field.
      */
+    @Override
     public String getContentID() throws MessagingException {
 	return getHeader("Content-Id", null);
     }
@@ -385,6 +422,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * This implementation uses <code>getHeader(name)</code>
      * to obtain the requisite header field.
      */
+    @Override
     public String getContentMD5() throws MessagingException {
 	return getHeader("Content-MD5", null);
     }
@@ -397,6 +435,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception	IllegalStateException if this body part is
      *			obtained from a READ_ONLY folder.
      */
+    @Override
     public void setContentMD5(String md5) throws MessagingException {
 	setHeader("Content-MD5", md5);
     }
@@ -410,6 +449,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * This implementation uses <code>getHeader(name)</code>
      * to obtain the requisite header field.
      */
+    @Override
     public String[] getContentLanguage() throws MessagingException {
 	return getContentLanguage(this);
     }
@@ -420,6 +460,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *
      * @param languages 	array of language tags
      */
+    @Override
     public void setContentLanguage(String[] languages)
 			throws MessagingException {
 	setContentLanguage(this, languages);
@@ -440,6 +481,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * 
      * @return	content description
      */
+    @Override
     public String getDescription() throws MessagingException {
 	return getDescription(this);
     }
@@ -469,6 +511,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *                  in the exception chain if the charset
      *                  conversion fails.
      */
+    @Override
     public void setDescription(String description) throws MessagingException {
 	setDescription(description, null);
     }
@@ -523,6 +566,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *
      * @return	filename
      */
+    @Override
     public String getFileName() throws MessagingException {
 	return getFileName(this);
     }
@@ -550,6 +594,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void setFileName(String filename) throws MessagingException {
 	setFileName(this, filename);
     }
@@ -569,6 +614,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @see	#getContentStream
      * @see 	javax.activation.DataHandler#getInputStream
      */
+    @Override
     public InputStream getInputStream() 
 		throws IOException, MessagingException {
 	return getDataHandler().getInputStream();
@@ -622,6 +668,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * the implementation in MimeMessage.
      * @see	MimeMessage#getDataHandler
      */  
+    @Override
     public DataHandler getDataHandler() throws MessagingException {
 	if (dh == null)
 	    dh = new MimePartDataHandler(this);
@@ -649,6 +696,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *			javax.activation.DataHandler for more details.
      * @exception       MessagingException for other failures
      */  
+    @Override
     public Object getContent() throws IOException, MessagingException {
 	if (cachedContent != null)
 	    return cachedContent;
@@ -684,6 +732,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception	IllegalStateException if this body part is
      *			obtained from a READ_ONLY folder.
      */                 
+    @Override
     public void setDataHandler(DataHandler dh) 
 		throws MessagingException {
 	this.dh = dh;
@@ -709,6 +758,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception	IllegalStateException if this body part is
      *			obtained from a READ_ONLY folder.
      */
+    @Override
     public void setContent(Object o, String type) 
 		throws MessagingException {
 	if (o instanceof Multipart) {
@@ -737,6 +787,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception	MessagingException	if an error occurs
      * @see	#setText(String text, String charset)
      */
+    @Override
     public void setText(String text) throws MessagingException {
 	setText(text, null);
     }
@@ -752,6 +803,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @param	charset	the charset to use for the text
      * @exception	MessagingException	if an error occurs
      */
+    @Override
     public void setText(String text, String charset)
 			throws MessagingException {
 	setText(this, text, charset, "plain");
@@ -770,6 +822,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception	MessagingException	if an error occurs
      * @since	JavaMail 1.4
      */
+    @Override
     public void setText(String text, String charset, String subtype)
                         throws MessagingException {
 	setText(this, text, charset, subtype);
@@ -785,6 +838,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception	IllegalStateException if this body part is
      *			obtained from a READ_ONLY folder.
      */
+    @Override
     public void setContent(Multipart mp) throws MessagingException {
 	setDataHandler(new DataHandler(mp, mp.getContentType()));
 	mp.setParent(this);
@@ -891,11 +945,13 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 	}
 
 	// overrides DataSource.getContentType()
+	@Override
 	public String getContentType() {
 	    return contentType != null ? contentType : super.getContentType();
 	}
 
 	// implements EncodingAware.getEncoding()
+	@Override
 	public String getEncoding() {
 	    return encoding;
 	}
@@ -956,6 +1012,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception MessagingException for other failures
      * @see javax.activation.DataHandler#writeTo
      */
+    @Override
     public void writeTo(OutputStream os)
 				throws IOException, MessagingException {
 	writeTo(this, os, null);
@@ -970,6 +1027,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @return  array of headers
      * @see     javax.mail.internet.MimeUtility
      */  
+    @Override
     public String[] getHeader(String name) throws MessagingException {
 	return headers.getHeader(name);
     }
@@ -986,6 +1044,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      *				this name
      * @exception       	MessagingException for failures
      */
+    @Override
     public String getHeader(String name, String delimiter)
 				throws MessagingException {
 	return headers.getHeader(name, delimiter);
@@ -1002,6 +1061,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @param   value   header value
      * @see     javax.mail.internet.MimeUtility
      */
+    @Override
     public void setHeader(String name, String value)
                                 throws MessagingException {
 	headers.setHeader(name, value);
@@ -1017,6 +1077,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @param   value   header value
      * @see     javax.mail.internet.MimeUtility
      */
+    @Override
     public void addHeader(String name, String value)
                                 throws MessagingException {
 	headers.addHeader(name, value);    
@@ -1025,6 +1086,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
     /**
      * Remove all headers with this name.
      */
+    @Override
     public void removeHeader(String name) throws MessagingException {
 	headers.removeHeader(name);
     }
@@ -1033,8 +1095,8 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * Return all the headers from this Message as an Enumeration of
      * Header objects.
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getAllHeaders() throws MessagingException {
+    @Override
+    public Enumeration<Header> getAllHeaders() throws MessagingException {
 	return headers.getAllHeaders();
     }
    
@@ -1042,8 +1104,8 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * Return matching headers from this Message as an Enumeration of
      * Header objects.
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getMatchingHeaders(String[] names)
+    @Override
+    public Enumeration<Header> getMatchingHeaders(String[] names)
                         throws MessagingException {
 	return headers.getMatchingHeaders(names);
     }
@@ -1052,8 +1114,8 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * Return non-matching headers from this Message as an
      * Enumeration of Header objects.
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getNonMatchingHeaders(String[] names)
+    @Override
+    public Enumeration<Header> getNonMatchingHeaders(String[] names)
                         throws MessagingException {
 	return headers.getNonMatchingHeaders(names);
     }
@@ -1061,6 +1123,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
     /**
      * Add a header line to this body part
      */
+    @Override
     public void addHeaderLine(String line) throws MessagingException {
 	headers.addHeaderLine(line);
     }
@@ -1070,8 +1133,8 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * line is a raw RFC 822 header line, containing both the "name"
      * and "value" field.
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getAllHeaderLines() throws MessagingException {
+    @Override
+    public Enumeration<String> getAllHeaderLines() throws MessagingException {
   	return headers.getAllHeaderLines(); 
     }
  
@@ -1080,8 +1143,8 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * A Header line is a raw RFC 822 header line, containing both
      * the "name" and "value" field.
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getMatchingHeaderLines(String[] names)
+    @Override
+    public Enumeration<String> getMatchingHeaderLines(String[] names)
                                     throws MessagingException {
 	return headers.getMatchingHeaderLines(names);
     }
@@ -1091,8 +1154,8 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * A Header line is a raw RFC 822 header line, containing both
      * the "name"  and "value" field.
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getNonMatchingHeaderLines(String[] names)  
+    @Override
+    public Enumeration<String> getNonMatchingHeaderLines(String[] names)  
                                         throws MessagingException {
 	return headers.getNonMatchingHeaderLines(names);
     }
@@ -1336,7 +1399,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 
 	// Tokenize the header to obtain the Language-tags (skip comments)
 	HeaderTokenizer h = new HeaderTokenizer(s, HeaderTokenizer.MIME);
-	List<String> v = new ArrayList<String>();
+	List<String> v = new ArrayList<>();
 
 	HeaderTokenizer.Token tk;
 	int tkType;
@@ -1362,7 +1425,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 
     static void setContentLanguage(MimePart part, String[] languages)
 			throws MessagingException {
-	StringBuffer sb = new StringBuffer(languages[0]);
+	StringBuilder sb = new StringBuilder(languages[0]);
 	int len = "Content-Language".length() + 2 + languages[0].length();
 	for (int i = 1; i < languages.length; i++) {
 	    sb.append(',');
@@ -1609,11 +1672,10 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 	if (os instanceof LineOutputStream) {
 	    los = (LineOutputStream) os;
 	} else {
-	    los = new LineOutputStream(os);
+	    los = new LineOutputStream(os, allowutf8);
 	}
 
 	// First, write out the header
-	@SuppressWarnings("unchecked")
 	Enumeration<String> hdrLines
 		= part.getNonMatchingHeaderLines(ignoreList);
 	while (hdrLines.hasMoreElements())

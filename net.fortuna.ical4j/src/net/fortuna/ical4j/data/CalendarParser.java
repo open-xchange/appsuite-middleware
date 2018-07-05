@@ -31,8 +31,8 @@
  */
 package net.fortuna.ical4j.data;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 
 /**

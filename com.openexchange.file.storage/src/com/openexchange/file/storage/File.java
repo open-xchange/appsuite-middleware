@@ -53,11 +53,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * A {@link File} represents the meta data known about a file
@@ -67,7 +67,7 @@ public interface File {
     /**
      * The default search fields: {@link Field#TITLE}, {@link Field#FILENAME}, {@link Field#DESCRIPTION}, {@link Field#URL}, {@link Field#CATEGORIES}, {@link Field#VERSION_COMMENT}
      */
-    public static final Set<Field> DEFAULT_SEARCH_FIELDS = Collections.unmodifiableSet(EnumSet.of(Field.TITLE, Field.FILENAME, Field.DESCRIPTION, Field.URL, Field.CATEGORIES, Field.VERSION_COMMENT));
+    public static final Set<Field> DEFAULT_SEARCH_FIELDS = ImmutableSet.of(Field.TITLE, Field.FILENAME, Field.DESCRIPTION, Field.URL, Field.CATEGORIES, Field.VERSION_COMMENT);
 
     String getProperty(String key);
 
@@ -127,6 +127,11 @@ public interface File {
 
     void setURL(String url);
 
+    /**
+     * Gets the sequence number associated with this file
+     *
+     * @return The sequence number as a UTC long (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
+     */
     long getSequenceNumber();
 
     String getCategories();
@@ -205,6 +210,29 @@ public interface File {
      */
     void setShareable(boolean shareable);
 
+    /**
+     * Sets the sequence number of the file.
+     * <p>
+     * This method needs to be called, if the internal time stamp changes while the file is processed. If no sequenceNumber is set, the last modified time stamp can be used as well.
+     *
+     * @param sequenceNumber The sequence number as a UTC long (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
+     */
+    void setSequenceNumber(long sequenceNumber);
+
+    /**
+     * Gets the origin folder path.
+     *
+     * @return The origin folder path or <code>null</code>
+     */
+    FolderPath getOrigin();
+
+    /**
+     * Sets the origin folder path.
+     *
+     * @param origin The origin folder path to set
+     */
+    void setOrigin(FolderPath origin);
+
     File dup();
 
     void copyInto(File other);
@@ -258,7 +286,8 @@ public interface File {
         NUMBER_OF_VERSIONS("number_of_versions", 711),
         META("meta", 23),
         OBJECT_PERMISSIONS("object_permissions", 108),
-        SHAREABLE("shareable", 109)
+        SHAREABLE("shareable", 109),
+        ORIGIN("origin", 712)
         ;
 
         private final int number;
@@ -332,6 +361,8 @@ public interface File {
                 return switcher.objectPermissions(args);
             case SHAREABLE:
                 return switcher.shareable(args);
+            case ORIGIN:
+                return switcher.origin(args);
             default:
                 throw new IllegalArgumentException("Don't know field: " + getName());
             }
@@ -375,6 +406,70 @@ public interface File {
                 arg = (T) field.handle(handler, newArgs);
             }
             return arg;
+        }
+
+        public static List<Field> enhanceBy(List<Field> fields, Field... toAdd) {
+            if (null == toAdd || toAdd.length <= 0 || null == fields || fields.isEmpty()) {
+                return fields;
+            }
+
+            List<Field> tmp = null;
+            for (Field fieldToAdd : toAdd) {
+                if (null == tmp) {
+                    if (false == fields.contains(fieldToAdd)) {
+                        tmp = new ArrayList<>(fields);
+                        tmp.add(fieldToAdd);
+                    }
+                } else {
+                    if (false == tmp.contains(fieldToAdd)) {
+                        tmp.add(fieldToAdd);
+                    }
+                }
+            }
+
+            return null == tmp ? fields : tmp;
+        }
+
+        public static List<Field> reduceBy(List<Field> fields, Field... toDrop) {
+            if (null == toDrop || toDrop.length <= 0 || null == fields || fields.isEmpty()) {
+                return fields;
+            }
+
+            List<Field> tmp = null;
+            for (Field fieldToDrop : toDrop) {
+                if (null == tmp) {
+                    if (false == fields.contains(fieldToDrop)) {
+                        tmp = new ArrayList<>(fields);
+                        tmp.remove(fieldToDrop);
+                    }
+                } else {
+                    if (tmp.contains(fieldToDrop)) {
+                        tmp.remove(fieldToDrop);
+                    }
+                }
+            }
+
+            return null == tmp ? fields : tmp;
+        }
+
+        /**
+         * Checks if specified fields contains given field.
+         *
+         * @param metadata The fields
+         * @param f The field
+         * @return <code>true</code> if contained; otherwise <code>false</code>
+         */
+        public static boolean contains(List<Field> fields, Field f) {
+            if (null == fields || fields.isEmpty() || null == f) {
+                return false;
+            }
+
+            for (Field fld : fields) {
+                if (f == fld) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private static final Map<String, Field> byName = new HashMap<String, Field>();

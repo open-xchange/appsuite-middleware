@@ -440,15 +440,19 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         if (useLike) {
             pattern = codec.encode(IMMUNE_WILDCARDS, replaceWildcards(pattern));
             if (searchTerm.isSubstringSearch()) {
-                final StringBuilder tmp = new StringBuilder(pattern.length() + 8);
-                if (!pattern.startsWith("%")) {
-                    tmp.append('%');
+                boolean notStartsWithPercent = !pattern.startsWith("%");
+                boolean notEndsWithPercent = !pattern.endsWith("%");
+                if (notStartsWithPercent || notEndsWithPercent) {
+                    StringBuilder tmp = new StringBuilder(pattern.length() + 4);
+                    if (notStartsWithPercent) {
+                        tmp.append('%');
+                    }
+                    tmp.append(pattern);
+                    if (notEndsWithPercent) {
+                        tmp.append('%');
+                    }
+                    pattern = tmp.toString();
                 }
-                tmp.append(pattern);
-                if (!pattern.endsWith("%")) {
-                    tmp.append('%');
-                }
-                pattern = tmp.toString();
             }
         } else {
             pattern = codec.encode(IMMUNE, pattern);

@@ -60,7 +60,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +68,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -113,17 +113,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return null;
     }
 
-    public static final Set<String> ACTIONS_REQUIRING_BODY = new HashSet<String>() {
-        private static final long serialVersionUID = -4485493200664773739L;
-        {
-
-            add("new");
-            add("update");
-            add("delete");
-            add("list");
-
-        }
-    };
+    public static final Set<String> ACTIONS_REQUIRING_BODY = ImmutableSet.of("new", "update", "delete", "list");
 
     @Override
     public Object performRequest(final String action, final JSONObject request, final ServerSession session, final boolean secure) throws JSONException, OXException {
@@ -237,16 +227,7 @@ public class PublicationMultipleHandler implements MultipleHandler {
         return createList(publications, basicColumns, dynamicColumns, dynamicColumnOrder, tz);
     }
 
-    private static final Set<String> KNOWN_PARAMS = new HashSet<String>() {
-        private static final long serialVersionUID = -6947818649378328911L;
-        {
-            add("entityModule");
-            add("columns");
-            add("session");
-            add("action");
-        }
-    };
-
+    private static final Set<String> KNOWN_PARAMS = ImmutableSet.of("entityModule", "columns", "session", "action");
 
     private Map<String, String[]> getDynamicColumns(final JSONObject request) throws JSONException {
         final List<String> identifiers = getDynamicColumnOrder(request);

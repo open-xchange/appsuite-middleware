@@ -56,12 +56,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Set;
 import java.util.UUID;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -79,17 +78,14 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        Connection connection = Database.getNoTimeout(contextId, true);
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
-            DBUtils.startTransaction(connection);
+            Databases.startTransaction(connection);
+            rollback = true;
+
             if (!Tools.columnExists(connection, "user_alias", "uuid")) {
                 // Create the 'uuid' column
                 Tools.addColumns(connection, "user_alias", new Column("uuid", "BINARY(16) DEFAULT NULL"));
@@ -104,22 +100,18 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
             insertUUIDs(connection);
             // Commit changes
             connection.commit();
-
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(connection);
-            Database.backNoTimeout(contextId, true, connection);
+            if (rollback) {
+                Databases.rollback(connection);
+            }
+            Databases.autocommit(connection);
         }
 
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[0];
@@ -144,8 +136,8 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
             }
             preparedStatment.executeBatch();
         } finally {
-            DBUtils.closeSQLStuff(resultSet, statement);
-            DBUtils.closeSQLStuff(preparedStatment);
+            Databases.closeSQLStuff(resultSet, statement);
+            Databases.closeSQLStuff(preparedStatment);
         }
     }
 
@@ -165,7 +157,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
             }
             preparedStatment.executeBatch();
         } finally {
-            DBUtils.closeSQLStuff(preparedStatment);
+            Databases.closeSQLStuff(preparedStatment);
         }
     }
 

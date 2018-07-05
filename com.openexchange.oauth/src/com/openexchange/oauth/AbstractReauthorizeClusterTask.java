@@ -153,7 +153,7 @@ public abstract class AbstractReauthorizeClusterTask {
      */
     public OAuthAccount getDBAccount() throws OXException {
         if (dbAccount == null) {
-            dbAccount = getOAuthService().getAccount(cachedAccount.getId(), session, session.getUserId(), session.getContextId());
+            dbAccount = getOAuthService().getAccount(session, cachedAccount.getId());
         }
         return dbAccount;
     }
@@ -198,10 +198,10 @@ public abstract class AbstractReauthorizeClusterTask {
 
         // Update the account
         OAuthService oAuthService = getOAuthService();
-        oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
+        oAuthService.updateAccount(session, accountId, arguments);
 
         // Reload
-        return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+        return oAuthService.getAccount(session, accountId);
     }
 
     /**

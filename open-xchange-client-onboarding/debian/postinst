@@ -1,5 +1,5 @@
 #!/bin/bash
-# postinst script for open-xchange-guard
+# postinst script for open-xchange-client-onboarding
 #
 # see: dh_installdeb(1)
 
@@ -18,12 +18,6 @@ set -e
 # the debian-policy package
 
 . /opt/open-xchange/lib/oxfunctions.sh
-
-postInstall() {
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-
-}
 
 postFix() {
     local version=${1%-*}
@@ -84,6 +78,41 @@ postFix() {
     ox_add_property com.openexchange.client.onboarding.caldav.login.customsource false /opt/open-xchange/etc/client-onboarding-caldav.properties
     ox_add_property com.openexchange.client.onboarding.carddav.login.customsource false /opt/open-xchange/etc/client-onboarding-carddav.properties
     ox_add_property com.openexchange.client.onboarding.eas.login.customsource false /opt/open-xchange/etc/client-onboarding-eas.properties
+
+    # SCR-120
+    scenarios=com.openexchange.client.onboarding.windows.desktop.scenarios
+    enabled_scenarios=com.openexchange.client.onboarding.enabledScenarios
+    pfile=/opt/open-xchange/etc/client-onboarding.properties
+
+    scenarios_line=$(ox_read_property ${scenarios} ${pfile})
+    newline=$(sed -r -e 's/oxupdaterinstall *,? *| *,? *oxupdaterinstall//' <<<${scenarios_line})
+    ox_set_property ${scenarios} "${newline}" ${pfile}
+
+    enabled_scenarios_line=$(ox_read_property ${enabled_scenarios} ${pfile})
+    newline=$(sed -r -e 's/oxupdaterinstall *,? *| *,? *oxupdaterinstall//' <<<${enabled_scenarios_line})
+    ox_set_property ${enabled_scenarios} "${newline}" ${pfile}
+
+    # SCR-187
+    pfile=/opt/open-xchange/etc/client-onboarding-mailapp.properties
+    playstore_key=com.openexchange.client.onboarding.mailapp.store.google.playstore
+    playstore_old_default=https://play.google.com/store/apps/details?id=com.openexchange.mobile.mailapp.enterprise
+    playstore_new_default=https://play.google.com/store/apps/details?id=com.openxchange.mobile.oxmail
+    appstore_key=com.openexchange.client.onboarding.mailapp.store.apple.appstore
+    appstore_old_default=https://itunes.apple.com/us/app/ox-mail/id1008644994
+    appstore_new_default=https://itunes.apple.com/us/app/ox-mail-v2/id1385582725
+
+    playstore_curr_val=$(ox_read_property ${playstore_key} ${pfile})
+    if [ "${playstore_curr_val}" == ${playstore_old_default} ]
+    then
+      ox_set_property ${playstore_key} ${playstore_new_default} ${pfile}
+    fi
+
+    appstore_curr_val=$(ox_read_property ${appstore_key} ${pfile})
+    if [ "${appstore_curr_val}" == "${appstore_old_default}" ]
+    then
+      ox_set_property ${appstore_key} ${appstore_new_default} ${pfile}
+    fi
+
 }
 
 case "$1" in
@@ -91,9 +120,6 @@ case "$1" in
         if [ -n "$2" ]; then
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
-        else
-            # we are in install mode
-            postInstall
         fi
     ;;
 

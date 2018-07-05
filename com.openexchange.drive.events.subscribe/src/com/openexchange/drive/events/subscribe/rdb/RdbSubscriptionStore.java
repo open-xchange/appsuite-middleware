@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
@@ -67,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbSubscriptionStore}
@@ -270,7 +270,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setLong(7, subscription.getTimestamp());
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -283,7 +283,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setString(3, token);
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -297,7 +297,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setString(4, SQL.escape(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -312,7 +312,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             resultSet = SQL.logExecuteQuery(stmt);
             return resultSet.next();
         } finally {
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -326,7 +326,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setString(4, oldToken);
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -340,7 +340,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             resultSet = SQL.logExecuteQuery(stmt);
             return resultSet.next();
         } finally {
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -353,7 +353,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setString(3, oldToken);
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -381,7 +381,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
                 subscriptions.add(new Subscription(uuid, cid, user, service, token, folder, timestamp));
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         return subscriptions;
     }
@@ -407,7 +407,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
                 subscriptions.add(new Subscription(uuid, cid, user, service, token, folder, timestamp));
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         return subscriptions;
     }
@@ -421,7 +421,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             stmt.setLong(3, timestamp);
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

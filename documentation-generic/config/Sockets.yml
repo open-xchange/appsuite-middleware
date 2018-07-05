@@ -1,0 +1,140 @@
+feature_name: Socket_Monitoring
+properties:
+    - key: com.openexchange.monitoring.sockets.enabled
+      description: |
+        This property enables/disables socket monitoring at all.
+        
+        If enabled, the Open-Xchange Middleware integrates its own client socket implementation factory into the Java stack.
+        That factory wraps each opened socket with a monitor that delegates to the concrete socket and gives certain call-backs
+        to registered socket monitoring listeners.
+        
+        Such a listener the Open-Xchange Middleware ships with is a tracing listener, which is configurable, too.
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]
+    - key: com.openexchange.monitoring.sockets.tracing.numberOfSamplesPerSocket
+      description: |
+        Specifies how many samples are allowed to be tracked per socket in a LIFO (stack) manner.
+        
+        Older samples, which exceed that limitation, are dropped from the stack. A value of less than/equal to 0 (zero)
+        effectively disables sample recording.
+      defaultValue: 1000
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]
+    - key: com.openexchange.monitoring.sockets.tracing.keepIdleThreshold
+      description: |
+        Gives the time in milliseconds when an idle sample collection gets removed in the background.
+      defaultValue: 300000
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]
+    - key: com.openexchange.monitoring.sockets.tracing.thresholdMillis
+      description: |
+        Defines the threshold in milliseconds that is required to be exceeded to let a sample be added to recorded sample
+        collection. Otherwise the sample is discarded.
+        
+        This allows to only collect those samples that exceed a quite long-running wait for a socket read.
+      defaultValue: 100
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]
+    - key: com.openexchange.monitoring.sockets.tracing.filter.hostnames
+      description: |
+        Allows to define a filter based on host names, IP addresses or IP address ranges.
+        
+        That property allows to exclude socket samples for outer end-points and to only consider for internal ones.
+        I.e com.openexchange.monitoring.sockets.tracing.filter.hostnames=192.168.0.1-192.168.255.255, 10.20.0.1/255, *.mydomain.org, special-service.internal.org
+      defaultValue: 
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]
+    - key: com.openexchange.monitoring.sockets.tracing.filter.ports
+      description: |
+        Allows to define a filter based on port numbers.
+        
+        That property allows to only consider socket samples for certain serves (e.g.143, 993 for only IMAP).
+      defaultValue: 
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]
+    - key: com.openexchange.monitoring.sockets.tracing.logging.enabled
+      description: |
+        Enables/disables dedicated logging
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]
+    - key: com.openexchange.monitoring.sockets.tracing.logging.level
+      description: |
+        Specifies the log level for that dedicated logging allowing the values "error", "warn" and "info"
+      defaultValue: error
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]
+    - key: com.openexchange.monitoring.sockets.tracing.logging.fileLocation
+      description: |
+        Defines the file location (e.g. /var/log/open-xchange/sockets/socket.log)
+      defaultValue: 
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]
+    - key: com.openexchange.monitoring.sockets.tracing.logging.fileLimit
+      description: |
+        Defines the max. size (in bytes) for file
+      defaultValue: 2097152
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]
+    - key: com.openexchange.monitoring.sockets.tracing.logging.fileCount
+      description: |
+        Defines how many individual log files are allowed to be created
+      defaultValue: 99
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: sockets.properties
+      packageName: open-xchange-core
+      tags: ["Socket_Monitoring"]

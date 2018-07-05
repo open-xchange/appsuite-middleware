@@ -1,11 +1,10 @@
 package liquibase.util;
 
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-
 import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 
 /**
  * Generates md5-sums based on a string.

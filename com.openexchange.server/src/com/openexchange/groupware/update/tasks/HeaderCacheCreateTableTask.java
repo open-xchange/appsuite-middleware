@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -124,25 +124,48 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        createTable("mailUUID", getCreateMailUUIDTable(), contextId);
-        createTable("headersAsBlob", getCreateHeaderBlobTable(), contextId);
-    }
-
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final Connection writeCon = Database.get(contextId, true);
-        PreparedStatement stmt = null;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            if (Tools.tableExists(writeCon, tablename)) {
+            boolean mailUUIDExists = Tools.tableExists(con, "mailUUID");
+            boolean headersAsBlobExists = Tools.tableExists(con, "headersAsBlob");
+            if (headersAsBlobExists && mailUUIDExists) {
                 return;
             }
-            stmt = writeCon.prepareStatement(sqlCreate);
+
+            con.setAutoCommit(false);
+            rollback = true;
+
+            if (!mailUUIDExists) {
+                createTable("mailUUID", getCreateMailUUIDTable(), con);
+            }
+            if (!headersAsBlobExists) {
+                createTable("headersAsBlob", getCreateHeaderBlobTable(), con);
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+        }
+    }
+
+    private void createTable(String tablename, String sqlCreate, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(sqlCreate);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            Database.back(contextId, true, writeCon);
         }
     }
 }

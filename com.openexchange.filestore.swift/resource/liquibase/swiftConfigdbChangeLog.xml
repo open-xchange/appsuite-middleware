@@ -36,4 +36,12 @@
         </rollback>
     </changeSet>
 
+	<changeSet id="7.10.0:swift_token:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false">
+		<preConditions onFail="CONTINUE">
+			<changeSetExecuted id="7.8.1:swift_token" author="thorben.betten@open-xchange.com" changeLogFile="swiftConfigdbChangeLog" />
+		</preConditions>
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.filestore.swift.groupware.migration.SwiftTableToUtf8mb4Change" />
+	</changeSet>
+
 </databaseChangeLog>

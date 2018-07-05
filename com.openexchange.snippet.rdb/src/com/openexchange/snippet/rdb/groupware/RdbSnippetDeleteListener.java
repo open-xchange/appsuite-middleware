@@ -49,21 +49,21 @@
 
 package com.openexchange.snippet.rdb.groupware;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.snippet.rdb.RdbSnippetManagement;
 import com.openexchange.snippet.ReferenceType;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.snippet.rdb.RdbSnippetManagement;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
 
 /**
  * {@link RdbSnippetDeleteListener}
@@ -98,7 +98,7 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
             }
             return ids;
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -152,7 +152,7 @@ public final class RdbSnippetDeleteListener implements DeleteListener {
             } catch (final RuntimeException e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         }
     }

@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,13 +40,25 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
-import java.net.*;
-import java.security.*;
-import java.security.cert.*;
-import java.util.*;
-
-import javax.net.ssl.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * An SSL socket factory that makes it easier to specify trust.
@@ -350,6 +362,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
 	 * @see javax.net.ssl.X509TrustManager#checkClientTrusted(
 	 *		java.security.cert.X509Certificate[], java.lang.String)
 	 */
+	@Override
 	public void checkClientTrusted(X509Certificate[] certs, String authType)
 					throws CertificateException {
 	    if (!(isTrustAllHosts() || getTrustedHosts() != null))
@@ -360,6 +373,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
 	 * @see javax.net.ssl.X509TrustManager#checkServerTrusted(
 	 *		java.security.cert.X509Certificate[], java.lang.String)
 	 */
+	@Override
 	public void checkServerTrusted(X509Certificate[] certs, String authType)
 					throws CertificateException {
 
@@ -370,6 +384,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
 	/* (non-Javadoc)
 	 * @see javax.net.ssl.X509TrustManager#getAcceptedIssuers()
 	 */
+	@Override
 	public X509Certificate[] getAcceptedIssuers() {
 	    return adapteeTrustManager.getAcceptedIssuers();
 	}

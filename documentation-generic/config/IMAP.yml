@@ -318,14 +318,14 @@ properties:
         
         Note:  
         This property is statically used in IMAP authentication bundle
-      defaultValue: true
+      defaultValue: SSLv3 TLSv1
       version: 
       reloadable: true
       configcascadeAware: true
       related: 
       file: imap.properties
       packageName: open-xchange-imap
-      tags: ["Mail","IMAP"]
+      tags: ["Mail","IMAP","IMAP Auth","Authentication"]
     - key: com.openexchange.imap.ssl.ciphersuites
       description: |
         Specifies the SSL cipher suites that will be enabled for SSL connections. The property value is a whitespace separated list of tokens.
@@ -334,14 +334,14 @@ properties:
         
         Note:  
         This property is statically used in IMAP authentication bundle.
-      defaultValue: true
+      defaultValue:
       version: 
       reloadable: true
       configcascadeAware: true
       related: 
       file: imap.properties
       packageName: open-xchange-imap
-      tags: ["Mail","IMAP"]
+      tags: ["Mail","IMAP","IMAP Auth","Authentication"]
     - key: com.openexchange.imap.maxMailboxNameLength
       description: |
         The max. length of a mailbox name
@@ -675,17 +675,18 @@ properties:
     - key: com.openexchange.imap.primary.ssl.protocols
       description: |
         Specifies the SSL protocols that will be enabled for SSL connections for the primary account. The property value is a whitespace separated list of tokens.
-        
+        If left empty it falls-back to [[com.openexchange.imap.ssl.protocols]].
+
         Note:  
         This property is statically used in IMAP authentication bundle
-      defaultValue: true
+      defaultValue:
       version: 
       reloadable: true
       configcascadeAware: true
-      related: 
+      related: com.openexchange.imap.ssl.protocols
       file: imap.properties
       packageName: open-xchange-imap
-      tags: ["Mail","IMAP"]
+      tags: ["Mail","IMAP","IMAP Auth","Authentication"]
     - key: com.openexchange.imap.primary.ssl.ciphersuites
       description: |
         Specifies the SSL cipher suites that will be enabled for SSL connections for the primary account. The property value is a whitespace separated list of tokens.
@@ -694,14 +695,14 @@ properties:
         
         Note:  
         This property is statically used in IMAP authentication bundle.
-      defaultValue: true
+      defaultValue:
       version: 
       reloadable: true
       configcascadeAware: true
       related: 
       file: imap.properties
       packageName: open-xchange-imap
-      tags: ["Mail","IMAP"]
+      tags: ["Mail","IMAP","IMAP Auth","Authentication"]
     - key: com.openexchange.imap.primary.auditLog.enabled
       description: |
         Enables the audit log for issued IMAP commands via 'com.sun.mail.imap.AuditLog' class for the primary mail account.
@@ -723,6 +724,42 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.ignoreDeleted
+      description: |
+        Defines whether the middleware should ignore mails marked as deleted or not. If set to 'true' the unread count of mail folders ignores deleted mails. 
+        Also deleted mails are removed from mail requests like 'all'.
+        
+        Note:  
+        This only applies to the primary mail account. 
+        Please also be aware that requesting the unread count with this property set to 'true' requires a select + search query instead of a single status call.
+        Therefore only set this property to 'true' in case the primary imap server is able to perform this operation fast enough. In any case this will slow down the mail folder requests.   
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.attachmentMarker.enabled
+      description: |
+        Enables the use of has-attachment marker for a message through IMAP user flags "$HasAttachment" and "$HasNoAttachment".
+        If enabled, the user is allowed to sort and search messages by has-attachment information. Moreover, advertising
+        whether a message contains file attachments is performed using those flags (if present) instead of examining each
+        message individually.
+        
+        Applies only to the primary mail account!
+        
+        Note:
+        The option "com.openexchange.mail.userFlagsEnabled" is required to be set to "true" (default)
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.userFlagsEnabled
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP"]

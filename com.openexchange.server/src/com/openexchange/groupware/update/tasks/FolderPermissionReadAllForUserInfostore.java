@@ -49,14 +49,14 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Attributes;
@@ -66,7 +66,6 @@ import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderPermissionReadAllForUserInfostore}
@@ -98,11 +97,11 @@ public final class FolderPermissionReadAllForUserInfostore extends UpdateTaskAda
     public void perform(PerformParameters params) throws OXException {
         Logger log = org.slf4j.LoggerFactory.getLogger(FolderPermissionReadAllForUserInfostore.class);
         log.info("Performing update task {}", FolderPermissionReadAllForUserInfostore.class.getSimpleName());
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        Connection connection = params.getConnection();
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
-            adjustReadPermission(connection, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, OCLPermission.READ_ALL_OBJECTS);            
+            adjustReadPermission(connection, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, OCLPermission.READ_ALL_OBJECTS);
             connection.commit();
             committed = true;
         } catch (SQLException e) {
@@ -114,7 +113,6 @@ public final class FolderPermissionReadAllForUserInfostore extends UpdateTaskAda
                 rollback(connection);
             }
             autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
         }
         log.info("{} successfully performed.", FolderPermissionReadAllForUserInfostore.class.getSimpleName());
     }
@@ -135,7 +133,7 @@ public final class FolderPermissionReadAllForUserInfostore extends UpdateTaskAda
             stmt.setInt(2, folderID);
             return stmt.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

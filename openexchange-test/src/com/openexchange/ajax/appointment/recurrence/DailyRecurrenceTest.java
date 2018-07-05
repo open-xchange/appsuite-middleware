@@ -31,7 +31,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         final Appointment appointmentObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testDailyRecurrenceFromWinter2SummerTime", startDate, endDate);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
@@ -88,7 +88,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
@@ -144,7 +144,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
@@ -200,7 +200,7 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
         appointmentObj.setInterval(1);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setUntil(until);
         appointmentObj.setFullTime(true);
         appointmentObj.setIgnoreConflicts(true);

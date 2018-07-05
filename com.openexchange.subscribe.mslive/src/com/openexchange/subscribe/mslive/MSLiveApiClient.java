@@ -60,13 +60,13 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
-import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.mslive.osgi.Services;
 

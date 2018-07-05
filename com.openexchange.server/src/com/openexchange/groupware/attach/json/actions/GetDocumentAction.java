@@ -116,6 +116,8 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
     private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
     private AJAXRequestResult document(final Session session, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final String delivery, final Context ctx, final User user, final UserConfiguration userConfig, final AJAXRequestData requestData) throws OXException {
+        ThresholdFileHolder fileHolder = null;
+        boolean rollback = true;
         try {
             ATTACHMENT_BASE.startTransaction();
             final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
@@ -154,7 +156,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             /*
              * Get input stream & write to sink
              */
-            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            fileHolder = new ThresholdFileHolder();
             InputStream documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
             try {
                 fileHolder.write(documentData);
@@ -168,22 +170,18 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             fileHolder.setName(attachment.getFilename());
             fileHolder.setDelivery(delivery);
             ATTACHMENT_BASE.commit();
-            return new AJAXRequestResult(fileHolder, "file");
-        } catch (final Throwable t) {
-            // This is a bit convoluted: In case the contentType is not
-            // overridden the returned file will be opened
-            // in a new window. To call the JS callback routine from a popup we
-            // can use parent.callback_error() but
-            // must use window.opener.callback_error()
-            rollback();
-            if (t instanceof OXException) {
-                throw (OXException) t;
-            }
-            throw new OXException(t);
+            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
+            fileHolder = null; // Avoid premature closing
+            rollback = false;
+            return requestResult;
         } finally {
+            Streams.close(fileHolder);
+            if (rollback) {
+                rollback();
+            }
             try {
                 ATTACHMENT_BASE.finish();
-            } catch (final OXException e) {
+            } catch (final Exception e) {
                 LOG.debug("", e);
             }
         }

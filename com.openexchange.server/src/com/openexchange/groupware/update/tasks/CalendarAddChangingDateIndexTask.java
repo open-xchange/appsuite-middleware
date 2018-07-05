@@ -49,19 +49,16 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link CalendarAddChangingDateIndexTask} - Adds (cid,changing_date) index to calendar tables if missing
@@ -84,15 +81,15 @@ public final class CalendarAddChangingDateIndexTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int cid = params.getContextId();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection con = dbService.getForUpdateTask(cid);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             con.setAutoCommit(false);
             rollback = true;
+
             final String[] tables = new String[] {"prg_dates", "del_dates"};
             createCalendarIndex(con, tables);
+
             con.commit();
             rollback = false;
         } catch (final SQLException e) {
@@ -104,7 +101,6 @@ public final class CalendarAddChangingDateIndexTask extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            Database.backNoTimeout(cid, true, con);
         }
     }
 

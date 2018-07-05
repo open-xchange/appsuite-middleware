@@ -136,7 +136,10 @@ public enum FindExceptionCode implements DisplayableOXExceptionCode {
      * The query yielded too many results to be displayed. Please refine your search options and try again.
      */
     TOO_MANY_RESULTS(FindExceptionMessages.TOO_MANY_RESULTS, Category.CATEGORY_USER_INPUT, 19, FindExceptionMessages.TOO_MANY_RESULTS),
-
+    /**
+     * The value '%1$s' is invalid for option '%2$s'.
+     */
+    INVALID_OPTION("The value '%1$s' is invalid for option '%2$s'.", Category.CATEGORY_USER_INPUT, 20, FindExceptionMessages.INVALID_OPTION),
     ;
 
     public static final String PREFIX = "FIND";

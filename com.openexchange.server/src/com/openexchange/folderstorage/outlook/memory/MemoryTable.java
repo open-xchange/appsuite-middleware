@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage.outlook.memory;
 
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,6 +59,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
@@ -67,7 +67,7 @@ import com.openexchange.folderstorage.outlook.memory.impl.MemoryFolderImpl;
 import com.openexchange.folderstorage.outlook.memory.impl.MemoryTreeImpl;
 import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 
 /**
  * {@link MemoryTable} - The in-memory representation of the virtual folder table.
@@ -337,7 +337,7 @@ public final class MemoryTable {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -438,7 +438,7 @@ public final class MemoryTable {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -539,7 +539,7 @@ public final class MemoryTable {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -547,7 +547,7 @@ public final class MemoryTable {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system FROM virtualPermission WHERE cid = ? AND user = ? AND tree = ? AND folderId = ?");
+            stmt = con.prepareStatement("SELECT entity, fp, orp, owp, odp, adminFlag, groupFlag, system, type, sharedParentFolder FROM virtualPermission WHERE cid = ? AND user = ? AND tree = ? AND folderId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setInt(3, treeId);
@@ -566,7 +566,7 @@ public final class MemoryTable {
         } catch (final Exception e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

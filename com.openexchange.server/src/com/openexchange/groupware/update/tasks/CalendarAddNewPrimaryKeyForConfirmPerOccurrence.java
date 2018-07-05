@@ -49,18 +49,15 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -84,13 +81,10 @@ public class CalendarAddNewPrimaryKeyForConfirmPerOccurrence extends UpdateTaskA
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextID = params.getContextId();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
-        final Connection connnection = dbService.getForUpdateTask(contextID);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            connnection.setAutoCommit(false);
+            con.setAutoCommit(false);
             rollback = true;
 
             {
@@ -100,27 +94,27 @@ public class CalendarAddNewPrimaryKeyForConfirmPerOccurrence extends UpdateTaskA
 
                 final int[] lengths = new int[5];
                 Arrays.fill(lengths, 0);
-                checkPrimaryKey(columns, lengths, tables, connnection);
+                checkPrimaryKey(columns, lengths, tables, con);
 
                 // Drop & re-create unique key
                 {
                     final String[] oldCols = new String[] {"cid","member_uid","object_id"};
                     final String[] newCols = new String[] {"cid","member_uid","object_id", "occurrence"};
-                    checkUniqueKey(oldCols, newCols, tables, connnection);
+                    checkUniqueKey(oldCols, newCols, tables, con);
                 }
             }
 
             {
                 // Drop foreign key: dateExternal(cid, objectId) -> prg_dates(cid, intfield01)
-                String foreignKey = Tools.existsForeignKey(connnection, "prg_dates", new String[] {"cid", "intfield01"}, "dateExternal", new String[] {"cid", "objectId"});
+                String foreignKey = Tools.existsForeignKey(con, "prg_dates", new String[] {"cid", "intfield01"}, "dateExternal", new String[] {"cid", "objectId"});
                 if (null != foreignKey && !foreignKey.equals("")) {
-                    Tools.dropForeignKey(connnection, "dateExternal", foreignKey);
+                    Tools.dropForeignKey(con, "dateExternal", foreignKey);
                 }
 
                 // Drop foreign key: delDateExternal(cid, objectId) -> del_dates(cid, intfield01)
-                foreignKey = Tools.existsForeignKey(connnection, "del_dates", new String[] {"cid", "intfield01"}, "delDateExternal", new String[] {"cid", "objectId"});
+                foreignKey = Tools.existsForeignKey(con, "del_dates", new String[] {"cid", "intfield01"}, "delDateExternal", new String[] {"cid", "objectId"});
                 if (null != foreignKey && !foreignKey.equals("")) {
-                    Tools.dropForeignKey(connnection, "delDateExternal", foreignKey);
+                    Tools.dropForeignKey(con, "delDateExternal", foreignKey);
                 }
 
                 // Drop & re-create primary key
@@ -129,19 +123,18 @@ public class CalendarAddNewPrimaryKeyForConfirmPerOccurrence extends UpdateTaskA
                 final int[] lengths = new int[4];
                 Arrays.fill(lengths, 0);
                 lengths[2] = 255;
-                checkPrimaryKey(columns, lengths, tables, connnection);
+                checkPrimaryKey(columns, lengths, tables, con);
             }
 
-            connnection.commit();
+            con.commit();
             rollback = false;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                rollback(connnection);
+                rollback(con);
             }
-            autocommit(connnection);
-            Database.backNoTimeout(contextID, true, connnection);
+            autocommit(con);
         }
     }
 

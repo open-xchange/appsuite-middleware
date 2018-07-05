@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -43,16 +43,20 @@ package com.sun.mail.imap;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.Socket;
-import java.nio.*;
-import java.nio.channels.*;
-import java.util.*;
-import java.util.logging.*;
+import java.nio.channels.CancelledKeyException;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
-
-import javax.mail.*;
-
-import com.sun.mail.imap.protocol.IMAPProtocol;
+import java.util.logging.Level;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import javax.mail.Session;
 import com.sun.mail.util.MailLogger;
 
 /**
@@ -154,9 +158,10 @@ public class IdleManager {
      */
     public IdleManager(Session session, Executor es) throws IOException {
 	this.es = es;
-	logger = new MailLogger(this.getClass(), "DEBUG IMAP", session);
+	logger = new MailLogger(this.getClass(), "DEBUG IMAP", session.getDebug(), session.getDebugOut());
 	selector = Selector.open();
 	es.execute(new Runnable() {
+	    @Override
 	    public void run() {
 		logger.fine("IdleManager select starting");
 		try {
@@ -199,8 +204,13 @@ public class IdleManager {
 	    throw new MessagingException("Can only watch IMAP folders");
 	IMAPFolder ifolder = (IMAPFolder)folder;
 	SocketChannel sc = ifolder.getChannel();
-	if (sc == null)
-	    throw new MessagingException("Folder is not using SocketChannels");
+	if (sc == null) {
+	    if (folder.isOpen())
+		throw new MessagingException(
+					"Folder is not using SocketChannels");
+	    else
+		throw new MessagingException("Folder is not open");
+	}
 	if (logger.isLoggable(Level.FINEST))
 	    logger.log(Level.FINEST, "IdleManager watching {0}",
 							folderName(ifolder));
@@ -346,7 +356,7 @@ public class IdleManager {
 	Set<SelectionKey> selectedKeys = selector.selectedKeys();
 	/*
 	 * XXX - this is simpler, but it can fail with
-	 *	 ConncurentModificationException
+	 *	 ConcurrentModificationException
 	 *
 	for (SelectionKey sk : selectedKeys) {
 	    selectedKeys.remove(sk);	// only process each key once
@@ -414,7 +424,7 @@ public class IdleManager {
 		toWatch.remove(folder);
 		final IMAPFolder folder0 = folder;
 		es.execute(new Runnable() {
-		    //@Override
+		    @Override
 		    public void run() {
 			// send the DONE and wait for the response
 			folder0.idleAbortWait();

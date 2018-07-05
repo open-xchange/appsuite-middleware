@@ -236,20 +236,26 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
             if (enabled.booleanValue()) {
                 // Keystore name
                 String keystoreName = getStringOption("keystore", values);
-                if (null == keystoreName) {
+                if (Strings.isEmpty(keystoreName)) {
                     LOG.info("Missing \"keystore\" APNS option for client {}. Ignoring that client's configuration.", client);
-                }
-
-                // Proceed if enabled for associated client
-                if (Strings.isNotEmpty(keystoreName)) {
+                } else {
                     String password = getStringOption("password", values);
                     if (null == password) {
                         LOG.info("Missing \"password\" APNS option for client {}. Ignoring that client's configuration.", client);
                     } else {
                         Boolean production = getBooleanOption("production", Boolean.TRUE, values);
-                        ApnOptions apnOptions = createOptions(keystoreName, password, production.booleanValue());
-                        options.put(client, apnOptions);
-                        LOG.info("Parsed APNS options for client {}.", client);
+                        ApnOptions apnOptions;
+                        try {
+                            apnOptions = createOptions(keystoreName, password, production.booleanValue());
+                        } catch (Exception e) {
+                            apnOptions = null;
+                            LOG.warn("Failed to parse APNS options for client {}.", client, e);
+                        }
+
+                        if (null != apnOptions) {
+                            options.put(client, apnOptions);
+                            LOG.info("Parsed APNS options for client {}.", client);
+                        }
                     }
                 }
             } else {
@@ -302,12 +308,11 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
         };
     }
 
-    private ApnOptions createOptions(String resourceName, String password, boolean production) throws Exception{
-        KeyStore keyStore = null;
+    private ApnOptions createOptions(String resourceName, String password, boolean production) throws Exception {
         InputStream resourceStream = null;
         try {
             resourceStream = new FileInputStream(new File(resourceName));
-            keyStore = KeyStore.getInstance("PKCS12");
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(resourceStream, password.toCharArray());
             return new ApnOptions(keyStore, password, production);
         } finally {

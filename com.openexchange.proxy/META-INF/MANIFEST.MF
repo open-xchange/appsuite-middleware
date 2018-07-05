@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: HTTP Reverse Proxy Servlet
 Bundle-SymbolicName: com.openexchange.proxy
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.proxy.osgi.ProxyActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.i18n,

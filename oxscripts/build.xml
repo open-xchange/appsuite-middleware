@@ -70,7 +70,6 @@
             <mapper type="glob" from="*.in" to="*"/>
         </copy>
         <copy file="${sbinDir}/triggerupdatethemes" todir="${patchSbinDir}" overwrite="true" />
-        <copy file="${sbinDir}/insufficientjava" todir="${patchSbinDir}" overwrite="true" />
         <copy file="${sbinDir}/triggerreloadconfiguration" todir="${patchSbinDir}" overwrite="true" />
         <replace dir="${patchSbinDir}" includes="calculatefilechecksums checkconsistency checkconfigconsistency clearpreviewcache heapdump sanitizefilemimetypes closesessions forceupdatetask getmissingservices listExecutedUpdateTasks logincounter lastlogintimestamp open-xchange restoregabdefaults runupdate">
             <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>

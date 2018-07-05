@@ -23,8 +23,6 @@ import javax.xml.namespace.QName;
  *   &lt;complexContent>
  *     &lt;extension base="{http://dataobjects.rmi.admin.openexchange.com/xsd}EnforceableDataObject">
  *       &lt;sequence>
- *         &lt;element name="clusterWeight" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
- *         &lt;element name="clusterWeightset" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="currentUnits" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
  *         &lt;element name="currentUnitsset" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="driver" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
@@ -104,10 +102,8 @@ public class Database
         @XmlElementRef(name = "passwordset", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class),
         @XmlElementRef(name = "master", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class),
         @XmlElementRef(name = "url", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "clusterWeight", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class),
         @XmlElementRef(name = "masterId", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class),
         @XmlElementRef(name = "schemeset", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class),
-        @XmlElementRef(name = "clusterWeightset", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class),
         @XmlElementRef(name = "poolInitial", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class),
         @XmlElementRef(name = "currentUnits", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class),
         @XmlElementRef(name = "maxUnitsset", namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", type = JAXBElement.class),
@@ -209,30 +205,6 @@ public class Database
         }
         final QName qname = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", name);
         rests.add(new JAXBElement<V>(qname, clazz, value));
-    }
-
-    /**
-     * Ruft den Wert der clusterWeight-Eigenschaft ab.
-     *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *
-     */
-    public Integer getClusterWeight() {
-        return getByName("clusterWeight", null);
-    }
-
-    /**
-     * Legt den Wert der clusterWeight-Eigenschaft fest.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *
-     */
-    public void setClusterWeight(final Integer value) {
-        setByName("clusterWeight", Integer.class, value);
     }
 
     /**

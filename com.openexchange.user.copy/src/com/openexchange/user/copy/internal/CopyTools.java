@@ -240,13 +240,11 @@ public class CopyTools {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public <T> ObjectMapping<T> checkAndExtractGenericMapping(final String key) throws OXException {
-        final Object tmp = copied.get(key);
-        if (tmp instanceof ObjectMapping<?>) {
-            @SuppressWarnings("unchecked")
-            final ObjectMapping<T> tmp2 = (ObjectMapping<T>) tmp;
-
-            return tmp2;
+        final ObjectMapping<?> tmp = copied.get(key);
+        if (tmp != null) {
+            return (ObjectMapping<T>) tmp;
         }
 
         throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create();

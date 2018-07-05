@@ -88,6 +88,8 @@ public final class UserAgents {
 
     public static final String ANDROID_CARDAV_SYNC = "CardDAV-Sync (Android) (like iOS/5.0.1 (9A405) dataaccessd/1.0)";
 
+    public static final String EM_CLIENT_FOR_APP_SUITE = "eM Client for OX App Suite/6.0.28376.0";
+
     public static final String[] MACOS_ALL = { MACOS_10_6_7, MACOS_10_6_8, MACOS_10_6_8_DE, MACOS_10_6_8_NL, MACOS_10_7_2, MACOS_10_7_3, MACOS_10_8_1, MACOS_10_8_2
     };
 
@@ -97,7 +99,7 @@ public final class UserAgents {
     public static final String[] IOS_ALL = { IOS_5_0_1, IOS_5_1_1, IOS_6_1_4, IOS_7_0_0, IOS_8_4_0
     };
 
-    public static final String[] OTHER_ALL = { ANDROID_CARDAV_SYNC
+    public static final String[] OTHER_ALL = { ANDROID_CARDAV_SYNC, EM_CLIENT_FOR_APP_SUITE
     };
 
     private UserAgents() {

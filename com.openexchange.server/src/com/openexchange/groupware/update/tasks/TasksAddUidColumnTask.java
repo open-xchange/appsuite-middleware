@@ -49,22 +49,19 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -81,11 +78,13 @@ public class TasksAddUidColumnTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int ctxId = params.getContextId();
-        final ProgressState progress = params.getProgressState();
-        final Connection con = Database.getNoTimeout(ctxId, true);
+        ProgressState progress = params.getProgressState();
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            startTransaction(con);
+            con.setAutoCommit(false);
+            rollback = true;
+
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "task", "uid")) {
                 Tools.addColumns(con, "task", new Column("uid", "VARCHAR(255)"));
@@ -97,13 +96,18 @@ public class TasksAddUidColumnTask extends UpdateTaskAdapter {
                 fillUIDs(con, "del_task", progress);
                 Tools.modifyColumns(con, "del_task", new Column("uid", "VARCHAR(255) NOT NULL"));
             }
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
-            Database.backNoTimeout(ctxId, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 

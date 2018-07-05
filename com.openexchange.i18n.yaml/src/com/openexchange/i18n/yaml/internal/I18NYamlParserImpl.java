@@ -50,10 +50,11 @@
 package com.openexchange.i18n.yaml.internal;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -65,6 +66,7 @@ import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.yaml.I18NYamlParserService;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
@@ -99,7 +101,7 @@ public class I18NYamlParserImpl implements I18NYamlParserService {
 
     private Set<String> parseFile0(File file) throws I18nYamlParseException {
         try {
-            String content = Streams.reader2string(new FileReader(file));
+            String content = Streams.reader2string(new InputStreamReader(new FileInputStream(file), Charsets.UTF_8));
             Matcher m = pattern.matcher(content);
             if (!m.find()) {
                 return Collections.emptySet();

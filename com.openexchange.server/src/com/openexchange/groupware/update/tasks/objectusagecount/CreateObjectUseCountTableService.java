@@ -59,15 +59,12 @@ import com.openexchange.database.AbstractCreateTableImpl;
  */
 public class CreateObjectUseCountTableService extends AbstractCreateTableImpl {
 
-    private final String CREATE = "CREATE TABLE `object_use_count` (" +
-                                  "  `cid` int(10) unsigned NOT NULL," +
-                                  "  `user` int(10) unsigned NOT NULL," +
-                                  "  `folder` int(10) unsigned NOT NULL," +
-                                  "  `object` int(10) unsigned NOT NULL," +
-                                  "  `value` int(10) unsigned NOT NULL," +
-                                  "  PRIMARY KEY (`cid`,`user`,`folder`,`object`)," +
-                                  "  CONSTRAINT `object_use_count_ibfk_1` FOREIGN KEY (`cid`, `user`) REFERENCES `user` (`cid`, `id`)" +
-                                  ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    /**
+     * Initializes a new {@link CreateObjectUseCountTableService}.
+     */
+    public CreateObjectUseCountTableService() {
+        super();
+    }
 
     @Override
     public String[] requiredTables() {
@@ -81,7 +78,15 @@ public class CreateObjectUseCountTableService extends AbstractCreateTableImpl {
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { CREATE };
+        String stmt = "CREATE TABLE object_use_count (" +
+            "cid int(10) unsigned NOT NULL, " +
+            "user int(10) unsigned NOT NULL, " +
+            "folder int(10) unsigned NOT NULL, " +
+            "object int(10) unsigned NOT NULL, " +
+            "value int(10) unsigned NOT NULL, " +
+            "PRIMARY KEY (cid, user, folder, object)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        return new String[] { stmt };
     }
 
 }

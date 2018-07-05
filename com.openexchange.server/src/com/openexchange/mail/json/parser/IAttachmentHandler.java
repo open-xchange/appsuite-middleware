@@ -51,7 +51,6 @@
 package com.openexchange.mail.json.parser;
 
 import java.util.List;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;

@@ -49,9 +49,6 @@
 
 package com.openexchange.contact.storage.rdb.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,12 +58,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.sql.Table;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.update.PerformParameters;
@@ -78,7 +73,7 @@ import com.planetj.math.rabinhash.RabinHashFunction32;
 
 /**
  * {@link AddFulltextIndexTask} - Checks existence of an appropriate FULLTEXT index for fields configured via
- * <code>"com.openexchange.contact.fulltextIndexFields"</code> setting; creates it if missing &  dropping obsolete ones.
+ * <code>"com.openexchange.contact.fulltextIndexFields"</code> setting; creates it if missing & dropping obsolete ones.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
@@ -99,8 +94,6 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = RdbServiceLookup.getService(DatabaseService.class);
-
         // Prepare indexed columns
         ContactField[] fields = FulltextAutocompleteAdapter.fulltextIndexFields();
         String[] columns = new String[fields.length];
@@ -109,10 +102,11 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
         }
 
         // Create index unless it already exists
-        int contextID = params.getContextId();
-        Connection connection = dbService.getForUpdateTask(contextID);
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
             connection.setAutoCommit(false);
+            rollback = true;
 
             // Generate expected index name (dependent on configured fields)
             String expectedName;
@@ -173,16 +167,18 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
                 // Create new one
                 addFulltextIndex(expectedName, fields, connection);
             }
+
             connection.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connection);
-            Database.backNoTimeout(contextID, true, connection);
+            if (rollback) {
+                Databases.rollback(connection);
+            }
+            Databases.autocommit(connection);
         }
     }
 
@@ -192,7 +188,7 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
             stmt = connection.createStatement();
             return stmt.execute(new StringBuilder("CREATE FULLTEXT INDEX `").append(name).append("` ON ").append(Table.CONTACTS).append(" (").append(Mappers.CONTACT.getColumns(fields)).append(");").toString());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -205,7 +201,7 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
             rs = stmt.executeQuery();
             return rs.next() ? rs.getString(2) : null;
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

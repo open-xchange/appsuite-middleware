@@ -161,6 +161,10 @@ public enum FolderField {
      */
     FOLDER_NAME_RAW(319, "folder_name"),
     /**
+     * The folder's origin path
+     */
+    ORIGIN(320, "origin"),
+    /**
      * The permissions bits
      */
     BITS(-1, "bits"),

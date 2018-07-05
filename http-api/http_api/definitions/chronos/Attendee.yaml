@@ -1,0 +1,83 @@
+type: object
+properties:
+  $ref: CalendarUserRaw.yaml
+  cuType:
+    type: string
+    description: The attendee user type.
+    enum:
+      - INDIVIDUAL
+      - GROUP
+      - RESOURCE
+      - ROOM
+      - UNKNOWN
+  folder: 
+    type: string
+    description: The folder of the attendee.
+  partStat:
+    type: string
+    description: The participation status.
+  role:
+    type: string
+    description: |
+      The type of the attendee.
+      <ul>
+        <li><code>CHAIR</code> - The chair of the calendar entity.</li>
+        <li><code>REQ-PARTICIPANT</code> - A participant whose participation is required.</li>
+        <li><code>OPT-PARTICIPANT</code> - A participant whose participation is optional.</li>
+        <li><code>NON-PARTICIPANT</code> - A participant who is copied for information purposes only.</li>
+      </ul>
+    enum:
+      - CHAIR
+      - REQ-PARTICIPANT
+      - OPT-PARTICIPANT
+      - NON-PARTICIPANT
+  comment: 
+    type: string
+    description: The comment of the attendee.
+  rsvp:
+    type: boolean
+    description: The rsvp expectation of the attendee.
+  member:
+    type: array
+    description: Each element represents the ID of a group or list in which the attendee is a member.
+    items:
+      type: string
+      description: The ID of the group or list.
+  contact:
+    type: object
+    title: contact
+    description: |
+     In case the parameter 'extendedEntities' is set to 'true' and the entity is an internal user 
+     then this field contains some of the contact data of this user.
+    properties:
+      first_name: 
+        type: string
+        description: The first name of the attendee.
+      last_name: 
+        type: string
+        description: The last name of the attendee.
+      title:
+        type: string
+        description: The title of the attendee.
+      display_name:
+        type: string
+        description: The display name of the attendee.
+      image1_url:
+        type: string
+        description: The url to the image of the attendee. 
+  resource:
+    type: object
+    title: resource
+    description: |
+     In case the parameter 'extendedEntities' is set to 'true' and the entity is a resource
+     then this field contains the data of this resource.
+    properties:
+      $ref: ../resources/ResourceDataRaw.yaml
+  group:
+    type: object
+    title: group
+    description: |
+     In case the parameter 'extendedEntities' is set to 'true' and the entity is a group
+     then this field contains the data of this group.
+    properties:
+      $ref: ../groups/GroupDataRaw.yaml

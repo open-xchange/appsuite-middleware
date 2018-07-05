@@ -78,8 +78,6 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerSessionAdapter.class);
-
     /**
      * Gets the server session for specified session.
      *
@@ -448,7 +446,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
             return null;
         }
 
-        if (getUser().isGuest()) {
+        if (getUser().isGuest() && !getUserPermissionBits().hasWebMail()) {
             return null;
         }
 
@@ -522,7 +520,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
             throw ServiceExceptionCode.absentService(UserConfigurationService.class);
         }
 
-        return service.getUserConfiguration(getUserId(), getContext());
+        return service.getUserConfiguration(session());
     }
 
 }

@@ -75,7 +75,7 @@ public class Bug33576Test extends ContactsFindTest {
         String prefix = contact.getGivenName().substring(0, 6);
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier());
         AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
-        FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), DisplayItems.convert(contact).getDisplayName());
+        FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), DisplayItems.convert(contact, getClient().getValues().getLocale(), i18nServiceRegistry).getDisplayName());
         assertNotNull("no facet value found for: " + contact.getGivenName(), foundFacetValue);
     }
 

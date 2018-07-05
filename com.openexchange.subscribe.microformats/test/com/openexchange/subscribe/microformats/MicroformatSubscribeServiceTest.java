@@ -49,6 +49,9 @@
 
 package com.openexchange.subscribe.microformats;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,10 +64,6 @@ import com.openexchange.subscribe.microformats.datasources.SimMicroformatSource;
 import com.openexchange.subscribe.microformats.parser.SimOXMFParser;
 import com.openexchange.subscribe.microformats.parser.SimOXMFParserFactory;
 import com.openexchange.subscribe.microformats.transformers.SimMapTransformer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

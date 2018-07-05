@@ -51,10 +51,10 @@ package com.openexchange.config.lean.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -92,13 +92,13 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
         this.services = services;
 
         // Load parsers
-        Map<Class<?>, PropertyValueParser<?>> vps = new HashMap<>();
+        ImmutableMap.Builder<Class<?>, PropertyValueParser<?>> vps = ImmutableMap.builder();
         vps.put(Integer.class, new IntegerPropertyValueParser());
         vps.put(Long.class, new LongPropertyValueParser());
         vps.put(Float.class, new FloatPropertyValueParser());
         vps.put(Boolean.class, new BooleanPropertyValueParser());
         vps.put(String.class, new StringPropertyValueParser());
-        valueParsers = Collections.unmodifiableMap(vps);
+        valueParsers = vps.build();
     }
 
     /*
@@ -108,7 +108,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public String getProperty(Property property) {
-        return getProperty(property, String.class);
+        return getProperty(property, String.class, Collections.emptyMap());
     }
 
     /*
@@ -118,7 +118,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public int getIntProperty(Property property) {
-        return getProperty(property, Integer.class).intValue();
+        return getProperty(property, Integer.class, Collections.emptyMap()).intValue();
     }
 
     /*
@@ -128,7 +128,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public boolean getBooleanProperty(Property property) {
-        return getProperty(property, Boolean.class).booleanValue();
+        return getProperty(property, Boolean.class, Collections.emptyMap()).booleanValue();
     }
 
     /*
@@ -138,7 +138,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public float getFloatProperty(Property property) {
-        return getProperty(property, Float.class).floatValue();
+        return getProperty(property, Float.class, Collections.emptyMap()).floatValue();
     }
 
     /*
@@ -148,7 +148,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public long getLongProperty(Property property) {
-        return getProperty(property, Long.class).longValue();
+        return getProperty(property, Long.class, Collections.emptyMap()).longValue();
     }
 
     /*
@@ -158,7 +158,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public String getProperty(int userId, int contextId, Property property) {
-        return getProperty(property, userId, contextId, String.class);
+        return getProperty(property, userId, contextId, String.class, Collections.emptyMap());
     }
 
     /*
@@ -168,7 +168,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public int getIntProperty(int userId, int contextId, Property property) {
-        return getProperty(property, userId, contextId, Integer.class).intValue();
+        return getProperty(property, userId, contextId, Integer.class, Collections.emptyMap()).intValue();
     }
 
     /*
@@ -178,7 +178,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public boolean getBooleanProperty(int userId, int contextId, Property property) {
-        return getProperty(property, userId, contextId, Boolean.class).booleanValue();
+        return getProperty(property, userId, contextId, Boolean.class, Collections.emptyMap()).booleanValue();
     }
 
     /*
@@ -188,7 +188,7 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public float getFloatProperty(int userId, int contextId, Property property) {
-        return getProperty(property, userId, contextId, Float.class).floatValue();
+        return getProperty(property, userId, contextId, Float.class, Collections.emptyMap()).floatValue();
     }
 
     /*
@@ -198,7 +198,57 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
      */
     @Override
     public long getLongProperty(int userId, int contextId, Property property) {
-        return getProperty(property, userId, contextId, Long.class).longValue();
+        return getProperty(property, userId, contextId, Long.class, Collections.emptyMap()).longValue();
+    }
+
+    @Override
+    public String getProperty(Property property, Map<String, String> optionals) {
+        return getProperty(property, String.class, optionals);
+    }
+
+    @Override
+    public int getIntProperty(Property property, Map<String, String> optionals) {
+        return getProperty(property, Integer.class, optionals).intValue();
+    }
+
+    @Override
+    public boolean getBooleanProperty(Property property, Map<String, String> optionals) {
+        return getProperty(property, Boolean.class, optionals).booleanValue();
+    }
+
+    @Override
+    public float getFloatProperty(Property property, Map<String, String> optionals) {
+        return getProperty(property, Float.class, optionals).floatValue();
+    }
+
+    @Override
+    public long getLongProperty(Property property, Map<String, String> optionals) {
+        return getProperty(property, Long.class, optionals).longValue();
+    }
+
+    @Override
+    public String getProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+        return getProperty(property, userId, contextId, String.class, optionals);
+    }
+
+    @Override
+    public int getIntProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+        return getProperty(property, userId, contextId, Integer.class, optionals).intValue();
+    }
+
+    @Override
+    public boolean getBooleanProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+        return getProperty(property, userId, contextId, Boolean.class, optionals).booleanValue();
+    }
+
+    @Override
+    public float getFloatProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+        return getProperty(property, userId, contextId, Float.class, optionals).floatValue();
+    }
+
+    @Override
+    public long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+        return getProperty(property, userId, contextId, Long.class, optionals).longValue();
     }
 
     ////////////////////////////////////////HELPERS ///////////////////////////////////////
@@ -206,30 +256,28 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
     /**
      * Get the value T of specified property and coerce it to the specified type T
      *
-     * @param property The {@link MailFilterProperty}
+     * @param property The {@link Property}
      * @param coerceTo The type T to coerce the value of the property
      * @return The value T of the property from the {@link ConfigurationService} or the default value
-     * @throws OXException If an error is occurred while getting the property
      */
-    private <T> T getProperty(Property property, Class<T> coerceTo) {
+    private <T> T getProperty(Property property, Class<T> coerceTo, Map<String, String> optionals) {
         T defaultValue = null;
         String value = null;
         try {
             ConfigurationService configService = getService(ConfigurationService.class);
-            value = configService.getProperty(property.getFQPropertyName());
+            value = configService.getProperty(property.getFQPropertyName(optionals));
             if (value == null) {
                 defaultValue = property.getDefaultValue(coerceTo);
-                LOGGER.debug("The value of property '{}' was 'null'. Returning default value '{}' instead.", property.getFQPropertyName(), defaultValue);
+                LOGGER.debug("The value of property '{}' was 'null'. Returning default value '{}' instead.", property.getFQPropertyName(optionals), defaultValue);
                 return defaultValue;
             }
 
             PropertyValueParser<?> propertyValueParser = valueParsers.get(coerceTo);
 
-            Object parse = propertyValueParser.parse(value);
-            return coerceTo.cast(parse);
+            return (T) propertyValueParser.parse(value);
         } catch (Exception e) {
             defaultValue = property.getDefaultValue(coerceTo);
-            LOGGER.warn("The value '{}' of property '{}' cannot be cast as '{}'. Returning default value '{}' instead.", value, property.getFQPropertyName(), coerceTo.getSimpleName(), defaultValue, e);
+            LOGGER.warn("The value '{}' of property '{}' cannot be cast as '{}'. Returning default value '{}' instead.", value, property.getFQPropertyName(optionals), coerceTo.getSimpleName(), defaultValue, e);
             return defaultValue;
         }
     }
@@ -237,20 +285,19 @@ public class LeanConfigurationServiceImpl implements LeanConfigurationService {
     /**
      * Get the value T of specified property for the specified user in the specified context and coerce it to the specified type T
      *
-     * @param property The {@link MailFilterProperty}
+     * @param property The {@link Property}
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param coerceTo The type T to coerce the value of the property
      * @return The value T of the property from the config cascade or the default value
-     * @throws OXException If an error is occurred while getting the property
      */
-    private <T> T getProperty(Property property, int userId, int contextId, Class<T> coerceTo) {
+    private <T> T getProperty(Property property, int userId, int contextId, Class<T> coerceTo, Map<String, String> optionals) {
         T defaultValue = null;
         try {
             ConfigViewFactory factory = getService(ConfigViewFactory.class);
             ConfigView view = factory.getView(userId, contextId);
 
-            ComposedConfigProperty<T> p = view.property(property.getFQPropertyName(), coerceTo);
+            ComposedConfigProperty<T> p = view.property(property.getFQPropertyName(optionals), coerceTo);
             if (!p.isDefined()) {
                 defaultValue = property.getDefaultValue(coerceTo);
                 return defaultValue;

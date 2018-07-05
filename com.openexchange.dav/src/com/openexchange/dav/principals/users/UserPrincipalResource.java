@@ -49,12 +49,12 @@
 
 package com.openexchange.dav.principals.users;
 
-import com.openexchange.dav.CUType;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
 import com.openexchange.dav.mixins.CalendarUserAddressSet;
-import com.openexchange.dav.mixins.CalendarUserType;
 import com.openexchange.dav.mixins.DisplayName;
 import com.openexchange.dav.mixins.EmailAddressSet;
 import com.openexchange.dav.mixins.FirstName;
@@ -63,7 +63,6 @@ import com.openexchange.dav.mixins.LastName;
 import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.mixins.RecordType;
-import com.openexchange.dav.mixins.ResourceId;
 import com.openexchange.dav.resources.DAVResource;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -89,12 +88,12 @@ public class UserPrincipalResource extends DAVResource {
     public UserPrincipalResource(DAVFactory factory, User user, WebdavPath url) {
         super(factory, url);
         this.user = user;
-        includeProperties(new PrincipalURL(user.getId(), CUType.INDIVIDUAL), new AddressbookHomeSet(),
+        includeProperties(new PrincipalURL(user.getId(), CalendarUserType.INDIVIDUAL), new AddressbookHomeSet(),
             new CalendarHomeSet(), new EmailAddressSet(user), new PrincipalCollectionSet(),
             new CalendarUserAddressSet(factory.getContext().getContextId(), user),
             new DisplayName(user.getDisplayName()), new FirstName(user), new LastName(user),
-            new CalendarUserType(CUType.INDIVIDUAL), new RecordType(RecordType.RECORD_TYPE_USER),
-            new ResourceId(factory.getContext().getContextId(), user.getId(), CUType.INDIVIDUAL),
+            new com.openexchange.dav.mixins.CalendarUserType(CalendarUserType.INDIVIDUAL), new RecordType(RecordType.RECORD_TYPE_USER),
+            new com.openexchange.dav.mixins.ResourceId(ResourceId.forUser(factory.getContext().getContextId(), user.getId())),
             new GroupMembership(user.getGroups())
         );
     }

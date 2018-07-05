@@ -225,7 +225,7 @@ public class ResourceCaches {
      */
     public static String asHex(byte[] hash) {
         int length = hash.length;
-        char[] buf = new char[length * 2];
+        char[] buf = new char[length << 1];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];

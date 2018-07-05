@@ -67,7 +67,7 @@ public class CloseWaitTest {
 
     public static void main(String[] args) throws SQLException, InterruptedException {
         // Check that wait_timeout and interactive_timeout are configured in MySQL to something like 80 seconds. Waits in this code need to be higher, that the server side wait timeouts.
-        Connection con = DriverManager.getConnection("jdbc:mysql://slave01.devel.open-xchange.com/configdb?user=openexchange&password=secret&autoReconnect=false&socketTimeout=15000&connectTimeout=15000");
+        Connection con = DriverManager.getConnection("jdbc:mysql://slave01.devel.open-xchange.com/configdb?user=openexchange&password=secret&autoReconnect=false&socketTimeout=15000&connectTimeout=15000&useSSL=false");
         // Wait for connection to go into CLOSE_WAIT state due to server side close.
         Thread.sleep(2* 60 * 1000);
         System.out.println("Check now connection state.");

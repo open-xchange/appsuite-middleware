@@ -461,6 +461,9 @@ public final class XMLUtils {
                 impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
             }
         }
+        if(impl == null) {
+            throw new Exception("DOMImplementationLS is unavailable.");
+        }
         final LSOutput output = impl.createLSOutput();
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         output.setByteStream(byteArrayOutputStream);

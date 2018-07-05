@@ -54,9 +54,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
@@ -110,7 +110,7 @@ public class ConnectionFetcherTask implements CopyUserTaskService {
         }
 
         try {
-            DBUtils.startTransaction(dstCon);
+            Databases.startTransaction(dstCon);
         } catch (final SQLException e) {
             service.backForUpdateTask(dstCtxId, dstCon);
             service.backReadOnly(srcCtx, srcCon);

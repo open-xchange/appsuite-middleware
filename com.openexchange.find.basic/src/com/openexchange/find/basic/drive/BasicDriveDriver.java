@@ -77,7 +77,6 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
@@ -232,11 +231,10 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 fields = Field.get(columns);
             }
 
-            IDBasedFolderAccess folderAccess = Services.getIdBasedFolderAccessFactory().createAccess(session);
             IDBasedFileAccess fileAccess = Services.getIdBasedFileAccessFactory().createAccess(session);
-            
+
             boolean includeSubfolders = searchRequest.getOptions().getBoolOption("includeSubfolders", true);
-            
+
             // Sort field
             String sortFieldOption = searchRequest.getOptions().getOption("sort", null);
             Field sortField;
@@ -252,19 +250,22 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 sortDirection = SortDirection.DEFAULT;
             } else {
                 sortDirection = SortDirection.get(sortDirectionOption);
-            }
-            
-            if (supportsSearchByTerm(accountAccess)) {
-                return advancedSearch(searchRequest, session, accountAccess, folderAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection);
+                if (sortDirection == null) {
+                   throw FindExceptionCode.INVALID_OPTION.create(sortDirectionOption, "order");
+                }
             }
 
-            return simpleSearch(searchRequest, session, accountAccess, folderAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection);
+            if (supportsSearchByTerm(accountAccess)) {
+                return advancedSearch(searchRequest, accountAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection);
+            }
+
+            return simpleSearch(searchRequest, accountAccess, fileAccess, fields, includeSubfolders, sortField, sortDirection);
         } finally {
             accountAccess.close();
         }
     }
 
-    private SearchResult advancedSearch(SearchRequest searchRequest, ServerSession session, FileStorageAccountAccess accountAccess, IDBasedFolderAccess folderAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
+    private SearchResult advancedSearch(SearchRequest searchRequest, FileStorageAccountAccess accountAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
         // Search by term only if supported
         SearchTerm<?> term = prepareSearchTerm(searchRequest);
         if (term == null) {
@@ -310,7 +311,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
     }
 
-    private SearchResult simpleSearch(SearchRequest searchRequest, ServerSession session, FileStorageAccountAccess accountAccess, IDBasedFolderAccess folderAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
+    private SearchResult simpleSearch(SearchRequest searchRequest, FileStorageAccountAccess accountAccess, IDBasedFileAccess fileAccess, List<Field> fields, boolean includeSubfolders, Field sortField, SortDirection sortDirection) throws OXException {
         // Search by simple pattern as fallback and filter folders manually
         List<String> queries = searchRequest.getQueries();
         String pattern = null != queries && 0 < queries.size() ? queries.get(0) : "*";

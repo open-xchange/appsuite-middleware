@@ -66,10 +66,6 @@ import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.yahoo.internal.YahooRequestTuner;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link YahooSimpleConnectionTest}

@@ -55,6 +55,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
  * {@link UserConfigurationService} - The user configuration service.
@@ -63,6 +64,16 @@ import com.openexchange.osgi.annotation.SingletonService;
  */
 @SingletonService
 public interface UserConfigurationService {
+
+    /**
+     * Determines the instance of <code>UserConfiguration</code> that corresponds to given session.
+     *
+     * @param session The session providing user/context information
+     * @return the instance of <code>UserConfiguration</code>
+     * @throws OXException If user's configuration could not be determined
+     * @see #getUserConfiguration(int, int[], Context)
+     */
+    public UserConfiguration getUserConfiguration(Session session) throws OXException;
 
     /**
      * Determines the instance of <code>UserConfiguration</code> that corresponds to given user ID.

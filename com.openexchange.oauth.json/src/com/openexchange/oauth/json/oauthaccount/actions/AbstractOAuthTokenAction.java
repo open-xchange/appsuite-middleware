@@ -79,21 +79,28 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAPIRegistry;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthInteractionType;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
-import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
+import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -123,11 +130,11 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
          */
         {
             String oauth_problem = request.getParameter(OAuthConstants.URLPARAM_OAUTH_PROBLEM);
-            if(!Strings.isEmpty(oauth_problem)) {
+            if (!Strings.isEmpty(oauth_problem)) {
                 throw fromOauthProblem(oauth_problem, request, service);
             }
             oauth_problem = request.getParameter(OAuthConstants.URLPARAM_ERROR);
-            if(!Strings.isEmpty(oauth_problem)) {
+            if (!Strings.isEmpty(oauth_problem)) {
                 throw fromOauthProblem(oauth_problem, request, service);
             }
         }
@@ -137,7 +144,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             oauthToken = request.getParameter("access_token");
         }
         if (oauthToken != null) {
-        	oauthToken = stripExpireParam(oauthToken);
+            oauthToken = stripExpireParam(oauthToken);
         }
         final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
         if (uuid == null) {
@@ -147,8 +154,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         /*
          * Get request token secret from session parameters
          */
-        @SuppressWarnings("unchecked")
-        final Map<String, Object> state = (Map<String, Object>) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
+        @SuppressWarnings("unchecked") final Map<String, Object> state = (Map<String, Object>) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
         if (null == state) {
             throw OAuthExceptionCodes.CANCELED_BY_USER.create();
         }
@@ -178,6 +184,10 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         token.setSecret(oauthTokenSecret);
         token.setToken(oauthToken);
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, token);
+        final String actionHint = request.getParameter(OAuthConstants.URLPARAM_ACTION_HINT);
+        if (Strings.isNotEmpty(actionHint)) {
+            arguments.put(OAuthConstants.ARGUMENT_ACTION_HINT, actionHint);
+        }
         /*
          * Process arguments
          */
@@ -186,6 +196,22 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
     }
 
     private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
+
+    /**
+     * @param requestData
+     * @return
+     */
+    int getAccountId(AJAXRequestData requestData) {
+        String id = requestData.getParameter(AccountField.ID.getName());
+        if (Strings.isEmpty(id)) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(id);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
 
     /*
      * Fixes bug 24332
@@ -201,7 +227,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         }
         m.appendTail(sb);
         return sb.toString();
-	}
+    }
 
     /**
      * Create the correct {@link OAuthExceptionCode} by mapping the incoming problem against the known problems in {@link OAuthConstants}
@@ -283,7 +309,6 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         return OAuthExceptionCodes.OAUTH_PROBLEM_UNEXPECTED.create(oauth_problem);
     }
 
-
     /**
      * Gets the scopes from the request and converts them to {@link OAuthScope}s using the {@link OAuthScopeRegistry}
      *
@@ -296,8 +321,9 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         // Get the scope parameter
         String scope = request.getParameter("scopes");
+
         OAuthAPIRegistry service = Services.getService(OAuthAPIRegistry.class);
-        if(service==null){
+        if (service == null) {
             throw ServiceExceptionCode.absentService(OAuthAPIRegistry.class);
         }
         if (isEmpty(scope)) {
@@ -309,5 +335,102 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         }
         // Get the scopes
         return scopeRegistry.getAvailableScopes(service.resolveFromServiceId(serviceId), OXScope.valuesOf(scope));
+    }
+
+    class ReauthorizeClusterTask implements ClusterTask<Void> {
+
+        private final String taskName;
+        private final ServerSession session;
+        private final String accountId;
+        private final String serviceId;
+        private final AJAXRequestData request;
+
+        /**
+         * Initialises a new {@link ReauthorizeAction.ReauthorizeClusterTask}.
+         */
+        public ReauthorizeClusterTask(AJAXRequestData request, ServerSession session, String accountId, String serviceId) {
+            super();
+            this.request = request;
+            this.session = session;
+            this.accountId = accountId;
+            this.serviceId = serviceId;
+
+            StringBuilder builder = new StringBuilder();
+            builder.append(session.getUserId()).append("@");
+            builder.append(session.getContextId());
+            builder.append(":").append(accountId);
+            builder.append(":").append(serviceId);
+
+            taskName = builder.toString();
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
+         */
+        @Override
+        public String getTaskName() {
+            return taskName;
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see com.openexchange.cluster.lock.ClusterTask#perform()
+         */
+        @Override
+        public Void perform() throws OXException {
+            OAuthService oauthService = getOAuthService();
+            OAuthAccount dbOAuthAccount = oauthService.getAccount(session, Integer.parseInt(accountId));
+
+            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+            OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceId);
+            OAuthAccess access = oAuthAccessRegistry.get(session.getContextId(), session.getUserId(), dbOAuthAccount.getId());
+
+            if (access == null) {
+                performReauthorize(oauthService);
+            } else {
+                // If the OAuth access is not initialised yet reload from DB, as it may have been changed from another node
+                OAuthAccount cachedOAuthAccount = (access.getOAuthAccount() == null) ? oauthService.getAccount(session, Integer.parseInt(accountId)) : access.getOAuthAccount();
+                if (dbOAuthAccount.getToken().equals(cachedOAuthAccount.getToken()) && dbOAuthAccount.getSecret().equals(cachedOAuthAccount.getSecret())) {
+                    performReauthorize(oauthService);
+                    access.initialize();
+                } else {
+                    access.initialize();
+                }
+            }
+
+            return null;
+        }
+
+        private void performReauthorize(OAuthService oauthService) throws OXException {
+            OAuthServiceMetaData service = oauthService.getMetaDataRegistry().getService(serviceId, session.getUserId(), session.getContextId());
+            Map<String, Object> arguments = processOAuthArguments(request, session, service);
+            // Get the scopes
+            Set<OAuthScope> scopes = getScopes(request, serviceId);
+            // By now it doesn't matter which interaction type is passed
+            oauthService.updateAccount(session, Integer.parseInt(accountId), serviceId, OAuthInteractionType.CALLBACK, arguments, scopes);
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see com.openexchange.cluster.lock.ClusterTask#getContextId()
+         */
+        @Override
+        public int getContextId() {
+            return session.getContextId();
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see com.openexchange.cluster.lock.ClusterTask#getUserId()
+         */
+        @Override
+        public int getUserId() {
+            return session.getUserId();
+        }
     }
 }

@@ -52,7 +52,7 @@ package com.openexchange.share.impl.groupware;
 import com.openexchange.file.storage.File;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.share.groupware.DriveTargetProxyType;
+import com.openexchange.share.groupware.KnownTargetProxyType;
 import com.openexchange.share.groupware.TargetProxyType;
 
 
@@ -75,9 +75,9 @@ public class FileTargetProxyTypeAnalyzer {
         
         //minimalistic distinction between images and other types 
         if (null != mimeType && mimeType.startsWith("image")) {
-            return DriveTargetProxyType.IMAGE;
+            return KnownTargetProxyType.IMAGE;
         }
         
-        return DriveTargetProxyType.FILE;
+        return KnownTargetProxyType.FILE;
     }
 }

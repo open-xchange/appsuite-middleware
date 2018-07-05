@@ -56,6 +56,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.osgi.HTMLServiceActivator;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -266,12 +267,22 @@ public class HtmlServiceImplTest {
             "</html>";
         String test = htmlServiceImpl.getConformHTML(html, "UTF-8");
         Assert.assertTrue(test.indexOf("<meta charset=\"UTF-8\">") > 0);
-        Assert.assertTrue(test.indexOf("<!DOCTYPE html>") >= 0);
+        Assert.assertTrue(test.indexOf("<!doctype html>") >= 0);
     }
 
      @Test
      public void testBug46608() throws Exception {
         HtmlSanitizeResult test = htmlServiceImpl.sanitize(htmlDownlevelRevealed, null, false, null, "ox-36f8df7e2a", 102400);
-        Assert.assertTrue(test.getContent().contains("<p>You should see this</p>"));
+        String content = unfoldAndTrim(test.getContent());
+        Assert.assertTrue(content.contains("<!--[if !IE]--><p>You should see this</p><!--[endif]--><!--[if IE 6]><p>Not this</p><![endif]-->"));
+    }
+
+    private String unfoldAndTrim(String str) {
+        String[] lines = Strings.splitByCRLF(str);
+        StringBuilder sb = new StringBuilder(str.length());
+        for (String line : lines) {
+            sb.append(line.trim());
+        }
+        return sb.toString();
     }
 }

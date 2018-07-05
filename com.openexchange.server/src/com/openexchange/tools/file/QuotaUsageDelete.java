@@ -52,11 +52,11 @@ package com.openexchange.tools.file;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * QuotaUsageDelete
@@ -85,7 +85,7 @@ public class QuotaUsageDelete extends ContextDelete {
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 }

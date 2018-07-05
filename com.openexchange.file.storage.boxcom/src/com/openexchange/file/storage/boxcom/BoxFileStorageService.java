@@ -55,6 +55,8 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.boxcom.BoxComOAuthScope;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -86,5 +88,13 @@ public final class BoxFileStorageService extends AbstractOAuthFileStorageService
     public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         FileStorageAccount account = getAccountAccess(session, accountId);
         return new BoxAccountAccess(this, account, session);
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService#getScope()
+     */
+    @Override
+    protected OAuthScope getScope() {
+        return BoxComOAuthScope.drive;
     }
 }

@@ -96,7 +96,7 @@ public class StrictIPChecker implements IPChecker {
             IPCheckers.kick(current, session);
         }
 
-        IPCheckers.updateIPAddress(current, session, true, whiteListedClient);
+        IPCheckers.updateIPAddress(current, session, whiteListedClient);
     }
 
 }

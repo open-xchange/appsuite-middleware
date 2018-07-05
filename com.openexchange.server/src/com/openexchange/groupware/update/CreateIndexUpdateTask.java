@@ -51,7 +51,7 @@ package com.openexchange.groupware.update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.update.Index;
 import com.openexchange.tools.update.IndexNotFoundException;
@@ -76,21 +76,29 @@ public abstract class CreateIndexUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        Connection con = null;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con = getDatabaseService().getForUpdateTask(contextId);
-            if (!hasIndex(con)) {
-                createIndex(con);
+            if (hasIndex(con)) {
+                return;
             }
+
+            con.setAutoCommit(false);
+            rollback = true;
+
+            createIndex(con);
+
+            con.commit();
+            rollback = false;
         } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x.getMessage(), x);
         } finally {
-            getDatabaseService().backForUpdateTask(contextId, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
-
-    protected abstract DatabaseService getDatabaseService();
 
     protected void createIndex(Connection con) throws SQLException {
         index.create(con);

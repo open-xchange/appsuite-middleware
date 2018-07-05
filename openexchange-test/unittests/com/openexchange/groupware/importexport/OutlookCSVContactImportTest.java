@@ -281,17 +281,6 @@ public class OutlookCSVContactImportTest extends AbstractContactTest {
         }
     }
 
-    @Test
-    public void dontImportIfNoDisplayNameCanBeFormedForAGivenContact() throws Exception {
-        final String file = "Sur name,Bullshit\n,Something unimportant";
-        final List<ImportResult> results = importStuff(file);
-        assertEquals("Should give one result", 1, results.size());
-        ImportResult res = results.get(0);
-        assertTrue("Needs to contain one error", res.hasError());
-        OXException exception = res.getException();
-        assertEquals("Should have a problem because there is no material for a display name", 808, exception.getCode());
-    }
-
     public void assertDateEquals(final Date date1, final Date date2) {
         final Calendar c1 = new GregorianCalendar(), c2 = new GregorianCalendar();
         c1.setTime(date1);

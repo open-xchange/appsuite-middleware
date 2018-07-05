@@ -1,11 +1,10 @@
 package liquibase.exception;
 
+import java.util.ArrayList;
+import java.util.List;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.core.FailedPrecondition;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Thrown when a precondition failed.

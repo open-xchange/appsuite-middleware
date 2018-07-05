@@ -2,13 +2,13 @@ Source: open-xchange-oauth-provider
 Section: web
 Priority: optional
 Maintainer: Steffen Templin <steffen.templin@open-xchange.com>
-Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), java7-jdk | java7-sdk, open-xchange-core (>= @OXVERSION@), open-xchange-client-onboarding (>= @OXVERSION@)
-Standards-Version: 3.8.4
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.9.8
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-oauth-provider
 Architecture: all
-Pre-Depends: open-xchange-core (>= @OXVERSION@), open-xchange-client-onboarding (>= @OXVERSION@)
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Description: The OAuth provider feature
  OX App Suite is able to act as an OAuth 2.0 provider. Registered client

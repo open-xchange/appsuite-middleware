@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,11 +40,19 @@
 
 package com.sun.mail.mbox;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
-import java.util.*;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMultipart;
 import com.sun.mail.util.LineInputStream;
 
 /**
@@ -133,11 +141,10 @@ public class SunV3Multipart extends MimeMultipart {
 	    throw new MessagingException("No inputstream from datasource");
 	}
 
-	String line;
-	int bl = boundary.length();
-	byte[] bndbytes = new byte[bl];
-	boundary.getBytes(0, bl, bndbytes, 0);
+	byte[] bndbytes = boundary.getBytes(StandardCharsets.ISO_8859_1);
+    int bl = bndbytes.length;
 
+    String line;
 	parsing = true;
 	try {
 	    /*
@@ -217,6 +224,9 @@ public class SunV3Multipart extends MimeMultipart {
 	} catch (IOException e) {
 	    throw new MessagingException("IO Error");	// XXX
 	} finally {
+	    if (null != in) {
+            try { in.close(); } catch (Exception e) {/*ignore*/}
+        }
 	    parsing = false;
 	}
 

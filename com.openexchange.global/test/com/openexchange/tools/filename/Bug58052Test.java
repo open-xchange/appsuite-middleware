@@ -71,5 +71,4 @@ public class Bug58052Test extends AbstractFileNameToolsTest {
         assertTrue("Characters wrongly sanitized " + sanitizedString, sanitizedString.contains("\u2462"));
         assertTrue("Unexpected string after sanitizing", fileName.equalsIgnoreCase(sanitizedString));
     }
-
 }

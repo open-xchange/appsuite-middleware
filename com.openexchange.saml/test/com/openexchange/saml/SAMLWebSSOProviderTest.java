@@ -1,5 +1,6 @@
 package com.openexchange.saml;
 
+import static org.hamcrest.Matchers.containsString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -265,8 +266,9 @@ public class SAMLWebSSOProviderTest {
          * Build response and process it
          */
         Response response = buildResponse(authnRequest);
+        String marshall = marshall(response);
         SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
-            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
+            .setParameter("SAMLResponse", Base64.encodeBytes(marshall.getBytes()))
             .setParameter("RelayState", relayState)
             .build());
 
@@ -291,6 +293,64 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
+     @Test
+     public void testLoginRoundtrip_auth_bypass_vul() throws Exception {
+        /*
+         * Trigger AuthnRequest
+         */
+        String requestHost = "webmail.example.com";
+        String requestedLoginPath = "/fancyclient/login.html";
+        SimHttpServletRequest loginHTTPRequest = prepareHTTPRequest("GET", new URIBuilder()
+            .setScheme("https")
+            .setHost(requestHost)
+            .setPath("/appsuite/api/saml/init")
+            .setParameter("flow", "login")
+            .setParameter("loginPath", requestedLoginPath)
+            .setParameter("client", "test-client")
+            .build());
+        URI authnRequestURI = new URI(provider.buildAuthnRequest(loginHTTPRequest, new SimHttpServletResponse()));
+
+        /*
+         * Validate redirect location
+         */
+        String relayState = parseURIQuery(authnRequestURI).get("RelayState");
+        Assert.assertNotNull(relayState);
+        SimHttpServletRequest authnHTTPRequest = prepareHTTPRequest("GET", authnRequestURI);
+        Assert.assertNull(SignatureHelper.validateURISignature(authnHTTPRequest, testCredentials.getSPSigningCredential()));
+        AuthnRequest authnRequest = parseAuthnRequest(authnHTTPRequest);
+
+        /*
+         * Build response and process it
+         */
+        Response response = buildResponse(authnRequest, false);
+        String marshall = marshall(response).replace("oxuser1", "ox<!-- this is a comment -->user1");
+        Assert.assertThat(marshall, containsString("<!-- this is a comment -->"));
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
+            .setParameter("SAMLResponse", Base64.encodeBytes(marshall.getBytes()))
+            .setParameter("RelayState", relayState)
+            .build());
+
+        SimHttpServletResponse httpResponse = new SimHttpServletResponse();
+        provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
+        assertCachingDisabledHeaders(httpResponse);
+
+        /*
+         * Assert final login redirect
+         */
+        Assert.assertEquals(HttpServletResponse.SC_FOUND, httpResponse.getStatus());
+        String location = httpResponse.getHeader("Location");
+        Assert.assertNotNull(location);
+        URI locationURI = new URIBuilder(location).build();
+        Assert.assertEquals(requestHost, locationURI.getHost());
+        Map<String, String> redirectParams = parseURIQuery(locationURI);
+        Assert.assertEquals(requestedLoginPath, redirectParams.get(SAMLLoginTools.PARAM_LOGIN_PATH));
+        Assert.assertEquals("test-client", redirectParams.get(LoginFields.CLIENT_PARAM));
+        Assert.assertEquals(SAMLLoginTools.ACTION_SAML_LOGIN, redirectParams.get("action"));
+        String reservationToken = redirectParams.get(SAMLLoginTools.PARAM_TOKEN);
+        Assert.assertNotNull(reservationToken);
+        Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
+    }
+     
      @Test
      public void testAutoLogin() throws Exception {
         /*
@@ -903,6 +963,11 @@ public class SAMLWebSSOProviderTest {
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
+            @Override
+            public String getUserAgent() {
+                return "User-Agent";
+            }
         };
     }
 
@@ -991,6 +1056,10 @@ public class SAMLWebSSOProviderTest {
     }
 
     private Response buildResponse(AuthnRequest request) throws Exception {
+        return buildResponse(request, true);
+    }
+
+    private Response buildResponse(AuthnRequest request, boolean encrypted) throws Exception {
         String requestID = request.getID();
         Response response = openSAML.buildSAMLObject(Response.class);
         response.setDestination(config.getAssertionConsumerServiceURL());
@@ -1072,8 +1141,12 @@ public class SAMLWebSSOProviderTest {
         openSAML.marshall(assertion); // marshalling is necessary for subsequent signing
         Signer.signObject(assertionSignature);
 
-        EncryptedAssertion encryptedAssertion = getEncrypter().encrypt(assertion);
-        response.getEncryptedAssertions().add(encryptedAssertion);
+        if (encrypted) {
+            EncryptedAssertion encryptedAssertion = getEncrypter().encrypt(assertion);
+            response.getEncryptedAssertions().add(encryptedAssertion);
+        } else {
+            response.getAssertions().add(assertion);
+        }
 
         Signature responseSignature = openSAML.buildSAMLObject(Signature.class);
         responseSignature.setSigningCredential(signingCredential);

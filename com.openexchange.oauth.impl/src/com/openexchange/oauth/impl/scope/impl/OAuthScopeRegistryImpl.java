@@ -56,12 +56,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeExceptionCodes;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
+import com.openexchange.oauth.scope.OXScope;
 
 /**
  * {@link OAuthScopeRegistryImpl}
@@ -158,11 +159,11 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
     @Override
     public Set<OAuthScope> getAvailableScopes(API api, OXScope... modules) throws OXException {
-        Set<OAuthScope> availableScopes = new HashSet<>(modules.length);
+        ImmutableSet.Builder<OAuthScope> availableScopes = ImmutableSet.builder();
         for (OXScope module : modules) {
             availableScopes.add(getScope(api, module));
         }
-        return Collections.unmodifiableSet(availableScopes);
+        return availableScopes.build();
     }
 
     @Override

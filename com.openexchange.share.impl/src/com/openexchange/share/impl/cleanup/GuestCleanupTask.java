@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
@@ -278,6 +279,10 @@ public class GuestCleanupTask extends AbstractTask<Void> {
          * delete user contact
          */
         services.getService(ContactUserStorage.class).deleteGuestContact(context.getContextId(), guestID, new Date(), connection);
+        /*
+         * delete user aliases
+         */
+        services.getService(UserAliasStorage.class).deleteAliases(connection, context.getContextId(), guestID);
         /*
          * delete user
          */

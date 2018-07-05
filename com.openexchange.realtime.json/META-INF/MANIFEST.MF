@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange JSON Realtime Channel Implementation
 Bundle-SymbolicName: com.openexchange.realtime.json
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.realtime.json.osgi.RTJSONActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -26,7 +26,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.configuration,
  com.openexchange.conversion,
  com.openexchange.conversion.simple,
- com.openexchange.documentation,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.file.storage.composition,

@@ -49,8 +49,6 @@
 
 package com.openexchange.imap.search;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import javax.mail.FetchProfile;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
@@ -71,6 +69,8 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link IMAPSearch}
@@ -78,9 +78,6 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPSearch {
-
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(IMAPSearch.class);
 
     /**
      * No instantiation

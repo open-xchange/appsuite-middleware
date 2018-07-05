@@ -51,6 +51,7 @@ package com.openexchange.dav.attachments;
 
 import java.io.InputStream;
 import java.util.Date;
+import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.resources.DAVResource;
 import com.openexchange.exception.OXException;

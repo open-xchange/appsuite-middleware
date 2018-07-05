@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.ajax.Client.USM_EAS;
+import static com.openexchange.ajax.Client.USM_JSON;
 import static com.openexchange.ajax.fields.ResponseFields.ARGUMENTS;
 import static com.openexchange.ajax.fields.ResponseFields.CONTINUATION;
 import static com.openexchange.ajax.fields.ResponseFields.DATA;
@@ -67,9 +69,12 @@ import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
 import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -88,10 +93,11 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.ajax.response.IncludeStackTraceService;
+import com.openexchange.ajax.writer.filter.StackTraceBlacklist;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.PropertyEvent;
-import com.openexchange.config.PropertyEvent.Type;
-import com.openexchange.config.PropertyListener;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.Categories;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -115,12 +121,15 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class ResponseWriter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseWriter.class);
+
     /**
      * A set of reserved identifiers.
      */
     private static final Set<String> RESERVED_IDENTIFIERS = ResponseFields.RESERVED_IDENTIFIERS;
 
     private static volatile Locale defaultLocale;
+
     /**
      * The default locale.
      */
@@ -162,7 +171,10 @@ public final class ResponseWriter {
         INCL_STACKTRACE_REF.set(includeStackTraceService);
     }
 
-    static volatile Boolean includeStackTraceOnError;
+    /** Server side switch to enable stacktrace invocation on responses */
+    private static final String STACKTRACE_INCLUDE_ERROR = "com.openexchange.ajax.response.includeStackTraceOnError";
+    static volatile Boolean     includeStackTraceOnError;
+
     private static boolean includeStackTraceOnError() {
         // First consult IncludeStackTraceService
         {
@@ -192,18 +204,7 @@ public final class ResponseWriter {
                     if (null == service) {
                         return false;
                     }
-                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.ajax.response.includeStackTraceOnError", false, new PropertyListener() {
-
-                        @Override
-                        public void onPropertyChange(PropertyEvent event) {
-                            final Type type = event.getType();
-                            if (Type.DELETED == type) {
-                                includeStackTraceOnError = Boolean.FALSE;
-                            } else if (Type.CHANGED == type) {
-                                includeStackTraceOnError = Boolean.valueOf(event.getValue().trim());
-                            }
-                        }
-                    }));
+                    b = Boolean.valueOf(service.getBoolProperty(STACKTRACE_INCLUDE_ERROR, false));
                     includeStackTraceOnError = b;
                 }
             }
@@ -211,7 +212,10 @@ public final class ResponseWriter {
         return b.booleanValue();
     }
 
-    static volatile Boolean includeArguments;
+    /** Whether the JSON response object in case of an error should include the exception arguments or not */
+    private static final String INCLUDE_ARGUMENTS = "com.openexchange.ajax.response.includeArguments";
+    static volatile Boolean     includeArguments;
+
     private static boolean includeArguments() {
         Boolean b = includeArguments;
         if (null == b) {
@@ -222,18 +226,7 @@ public final class ResponseWriter {
                     if (null == service) {
                         return false;
                     }
-                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.ajax.response.includeArguments", false, new PropertyListener() {
-
-                        @Override
-                        public void onPropertyChange(PropertyEvent event) {
-                            final Type type = event.getType();
-                            if (Type.DELETED == type) {
-                                includeArguments = Boolean.FALSE;
-                            } else if (Type.CHANGED == type) {
-                                includeArguments = Boolean.valueOf(event.getValue().trim());
-                            }
-                        }
-                    }));
+                    b = Boolean.valueOf(service.getBoolProperty(INCLUDE_ARGUMENTS, false));
                     includeArguments = b;
                 }
             }
@@ -453,24 +446,35 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
+     * Writes specified exception to given JSON object using default locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
-     * @param errorKey The key value for the error value inside the JSON object
      * @param exception The exception to write
-     * @param locale The locale
+     * @param includeStackTraceOnError <code>true</code> to append stack trace elements to JSON object; otherwise <code>false</code>
      * @throws JSONException If writing JSON fails
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
-    public static void addException(final JSONObject json, final OXException exception, final Locale locale) throws JSONException {
-        addException(json, ERROR, exception, locale, false);
+    public static void addException(final JSONObject json, final OXException exception, final boolean includeStackTraceOnError) throws JSONException {
+        addException(json, exception, defaultLocale(), includeStackTraceOnError);
     }
 
     /**
      * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
-     * @param errorKey The key value for the error value inside the JSON object
+     * @param exception The exception to write
+     * @param locale The locale
+     * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
+     */
+    public static void addException(final JSONObject json, final OXException exception, final Locale locale) throws JSONException {
+        addException(json, exception, locale, false, ERROR);
+    }
+
+    /**
+     * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
+     *
+     * @param json The JSON object
      * @param exception The exception to write
      * @param locale The locale
      * @param includeStackTraceOnError <code>true</code> to append stack trace elements to JSON object; otherwise <code>false</code>
@@ -478,7 +482,7 @@ public final class ResponseWriter {
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addException(final JSONObject json, final OXException exception, final Locale locale, final boolean includeStackTraceOnError) throws JSONException {
-        addException(json, ERROR, exception, locale, includeStackTraceOnError);
+        addException(json, exception, locale, includeStackTraceOnError, ERROR);
     }
 
     /**
@@ -492,7 +496,7 @@ public final class ResponseWriter {
      * @throws JSONException If writing JSON fails
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
-    public static void addException(final JSONObject json, String errorKey, final OXException exception, final Locale locale, final boolean includeStackTraceOnError) throws JSONException {
+    public static void addException(final JSONObject json, final OXException exception, final Locale locale, final boolean includeStackTraceOnError, String errorKey) throws JSONException {
         addException(json, exception, locale, new WriteExceptionProps().errorKey(errorKey).includeStackTraceOnError(includeStackTraceOnError));
     }
 
@@ -500,7 +504,6 @@ public final class ResponseWriter {
      * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
-     * @param errorKey The key value for the error value inside the JSON object
      * @param exception The exception to write
      * @param locale The locale
      * @param properties The properties to obey when writing specified exception to given JSON object
@@ -549,7 +552,7 @@ public final class ResponseWriter {
          * Categories
          */
         {
-            List<Category> categories = exception.getCategories();
+            List<Category> categories = getCategoriesFrom(exception);
             int size = categories.size();
             if (1 == size) {
                 Category category = categories.get(0);
@@ -583,6 +586,7 @@ public final class ResponseWriter {
         json.put(ERROR_CODE, exception.getErrorCode());
         json.put(ERROR_ID, exception.getExceptionId());
         json.put(ERROR_DESC, exception.getSoleMessage());
+
         /*
          * Problematics
          */
@@ -598,7 +602,7 @@ public final class ResponseWriter {
         /*
          * Stack trace
          */
-        if (properties.checkIncludeStackTraceOnError && (properties.includeStackTraceOnError || includeStackTraceOnError())) {
+        if (includeStacktrace(properties.includeStackTraceOnError, exception)) {
             // Write exception
             StackTraceElement[] traceElements = exception.getStackTrace();
             final JSONArray jsonStack = new JSONArray(traceElements.length << 1);
@@ -622,6 +626,45 @@ public final class ResponseWriter {
             }
             json.put(ERROR_STACK, jsonStack);
         }
+    }
+
+    /**
+     * Checks if a stack-trace should be included in the response.
+     *
+     * @param includeStackTraceOnError <code>true</code> if the client wants to add the stack-trace, <code>false</code> otherwise
+     * @param exception The {@link OXException} to check
+     * @return <code>true</code> If and only if it is supposed to be checked, either client or server configured stack-trace invocation
+     *         and if the exception is not blacklisted for stack-trace writing
+     *         <code>false</code> if one condition is not met
+     */
+    private static boolean includeStacktrace(boolean includeStackTraceOnError, OXException exception) {
+        return (null != exception) && (includeStackTraceOnError || includeStackTraceOnError()) && isIncludeAllowed(exception);
+    }
+
+    private static List<Category> getCategoriesFrom(OXException exception) {
+        List<Category> categories = exception.getCategories();
+        if (null == categories) {
+            return Collections.emptyList();
+        }
+
+        List<Category> nonnulls = null;
+        for (ListIterator<Category> listIterator = categories.listIterator(); listIterator.hasNext();) {
+            int index = listIterator.nextIndex();
+            Category category = listIterator.next();
+            if (null == category) {
+                if (null == nonnulls) {
+                    nonnulls = new ArrayList<>(categories.size());
+                    if (index > 0) {
+                        nonnulls.addAll(categories.subList(0, index));
+                    }
+                }
+            } else {
+                if (null != nonnulls) {
+                    nonnulls.add(category);
+                }
+            }
+        }
+        return null == nonnulls ? categories : nonnulls;
     }
 
     private static void writeElementTo(final StackTraceElement element, final StringBuilder sb) {
@@ -694,6 +737,7 @@ public final class ResponseWriter {
      *
      * @param response - the <code>{@link Response}</code> object to serialize.
      * @param writer - the <code>{@link JSONWriter}</code> to write to
+     * @param locale - the {@link Locale} for {@link OXException#getDisplayMessage(Locale)}
      * @throws JSONException - if writing fails
      */
     public static void write(final Response response, final JSONWriter writer, final Locale locale) throws JSONException {
@@ -794,7 +838,7 @@ public final class ResponseWriter {
             final OXException warning = warnings.get(0);
             writer.object();
             try {
-                writeException(warning/*.setCategory(Category.CATEGORY_WARNING)*/, writer, locale);
+                writeException(warning/* .setCategory(Category.CATEGORY_WARNING) */, writer, locale);
             } finally {
                 writer.endObject();
             }
@@ -813,7 +857,7 @@ public final class ResponseWriter {
                 for (final OXException warning : warnings) {
                     writer.object();
                     try {
-                        writeException(warning/*.setCategory(Category.CATEGORY_WARNING)*/, writer, locale);
+                        writeException(warning/* .setCategory(Category.CATEGORY_WARNING) */, writer, locale);
                     } finally {
                         writer.endObject();
                     }
@@ -865,6 +909,7 @@ public final class ResponseWriter {
      * @param exc - the exception to write
      * @param writer - the writer to write to
      * @param locale The locale to use for internationalization of the error message
+     * @param includeStackTraceOnError <code>true</code> to include the exception's stack trace; otherwise <code>false</code>
      * @throws JSONException - if writing fails
      */
     public static void writeException(final OXException exc, final JSONWriter writer, final Locale locale, final boolean includeStackTraceOnError) throws JSONException {
@@ -894,7 +939,7 @@ public final class ResponseWriter {
             }
         }
         {
-            List<Category> categories = exc.getCategories();
+            List<Category> categories = getCategoriesFrom(exc);
             int size = categories.size();
             if (1 == size) {
                 Category category = categories.get(0);
@@ -935,7 +980,7 @@ public final class ResponseWriter {
             writeArguments(exc, writer);
         }
         // Write stack trace
-        if (includeStackTraceOnError || includeStackTraceOnError()) {
+        if (includeStacktrace(includeStackTraceOnError, exc)) {
             writer.key(ERROR_STACK);
             writer.array();
             try {
@@ -1010,6 +1055,38 @@ public final class ResponseWriter {
         }
     }
 
+    /** The property defining the blacklisted exceptions */
+    private final static String         STACKTRACE_BLACKLIST = "com.openexchange.ajax.response.excludeStackTraceFor";
+    static volatile StackTraceBlacklist blacklist;
+
+    /**
+     * Check if the given {@link OXException} is allowed to be included into a response
+     *
+     * @param exception The {@link OXException} to check
+     * @return <code>true</code> if the exception and its stacktrace can be included into the response
+     *         <code>false</code> otherwise
+     */
+    private static boolean isIncludeAllowed(OXException exception) {
+        StackTraceBlacklist b = blacklist;
+        if (null == b) {
+            synchronized (ResponseWriter.class) {
+                b = blacklist;
+                if (null == b) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        // Trigger default
+                        LOGGER.warn("Couldn't get ConfigurationService. Falling back to default for {}.", STACKTRACE_BLACKLIST);
+                        b = new StackTraceBlacklist(null);
+                    } else {
+                        b = new StackTraceBlacklist(service.getProperty(STACKTRACE_BLACKLIST, ""));
+                    }
+                    blacklist = b;
+                }
+            }
+        }
+        return b.isIncludeAllowed(exception);
+    }
+
     /**
      * Gets a value indicating whether the supplied client identifier indicates an USM session or not.
      *
@@ -1021,7 +1098,46 @@ public final class ResponseWriter {
             return false;
         }
         String uc = Strings.toUpperCase(clientId);
-        return uc.startsWith("USM-EAS") || uc.startsWith("USM-JSON");
+        return uc.startsWith(USM_EAS.getClientId()) || uc.startsWith(USM_JSON.getClientId());
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the <code>Reloadable</code> instance for the {@link ResponseWriter}
+     *
+     * @return The <code>Reloadable</code> to handle reloads
+     */
+    public static Reloadable getReloadable() {
+        return new ResponseWriterReloadable();
+    }
+
+    /**
+     * {@link ResponseWriterReloadable}
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.0
+     */
+    private static final class ResponseWriterReloadable implements Reloadable {
+
+        /**
+         * Initializes a new {@link ResponseWriter.ResponseWriterReloadable}.
+         */
+        ResponseWriterReloadable() {
+            super();
+        }
+
+        @Override
+        public void reloadConfiguration(ConfigurationService configService) {
+            blacklist = new StackTraceBlacklist(configService.getProperty(STACKTRACE_BLACKLIST, ""));
+            includeStackTraceOnError = Boolean.valueOf(configService.getBoolProperty(STACKTRACE_INCLUDE_ERROR, false));
+            includeArguments = Boolean.valueOf(configService.getBoolProperty(INCLUDE_ARGUMENTS, false));
+        }
+
+        @Override
+        public Interests getInterests() {
+            return Reloadables.interestsForProperties(STACKTRACE_BLACKLIST, STACKTRACE_INCLUDE_ERROR, INCLUDE_ARGUMENTS);
+        }
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------
@@ -1043,8 +1159,7 @@ public final class ResponseWriter {
      */
     public static final class WriteExceptionProps {
 
-        String errorKey;
-        boolean checkIncludeStackTraceOnError;
+        String  errorKey;
         boolean includeStackTraceOnError;
         boolean checkProblematic;
         boolean checkTruncated;
@@ -1056,7 +1171,6 @@ public final class ResponseWriter {
             super();
             errorKey = ERROR;
             includeStackTraceOnError = false;
-            checkIncludeStackTraceOnError = true;
             checkProblematic = true;
             checkTruncated = true;
         }
@@ -1073,22 +1187,9 @@ public final class ResponseWriter {
         }
 
         /**
-         * Sets whether the check to include the exception's stack trace should be performed
-         *
-         * @param checkIncludeStackTraceOnError <code>true</code> to check for including exception's stack trace; otherwise <code>false</code>
-         * @return This instance
-         */
-        public WriteExceptionProps checkIncludeStackTraceOnError(boolean checkIncludeStackTraceOnError) {
-            this.checkIncludeStackTraceOnError = checkIncludeStackTraceOnError;
-            return this;
-        }
-
-        /**
          * Sets whether to include the exception's stack trace.
-         * <p>
-         * Provided that {@link #checkIncludeStackTraceOnError(boolean)} is set to <code>true</code>.
          *
-         * @param checkIncludeStackTraceOnError <code>true</code> to include the exception's stack trace; otherwise <code>false</code>
+         * @param includeStackTraceOnError <code>true</code> to include the exception's stack trace; otherwise <code>false</code>
          * @return This instance
          */
         public WriteExceptionProps includeStackTraceOnError(boolean includeStackTraceOnError) {
@@ -1110,7 +1211,7 @@ public final class ResponseWriter {
         /**
          * Sets whether possible truncated arguments as indicated by an {@link OXException} instance should be considered.
          *
-         * @param checkProblematic <code>true</code> to consider possible truncated arguments; otherwise <code>false</code>
+         * @param checkTruncated <code>true</code> to consider possible truncated arguments; otherwise <code>false</code>
          * @return This instance
          */
         public WriteExceptionProps checkTruncated(boolean checkTruncated) {

@@ -266,7 +266,7 @@ public class InternalVisitor implements SieveParserVisitor {
         final ArrayList<String> list = new ArrayList<String>();
         for (int i = 0; i < node.jjtGetNumChildren(); i++) {
             final Node child = node.jjtGetChild(i);
-            final String string = (String) child.jjtAccept(this, null);
+            final String string = (String) child.jjtAccept(this, data);
             list.add(string);
         }
         return list;

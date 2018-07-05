@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-monitoring-2.3.29.jar" sourcepath="lib/source/grizzly-framework-monitoring-2.3.29-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-all-2.3.29.jar" sourcepath="lib/source/grizzly-http-all-2.3.29-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-monitoring-2.3.29.jar" sourcepath="lib/source/grizzly-http-monitoring-2.3.29-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-monitoring-2.3.29.jar" sourcepath="lib/source/grizzly-http-server-monitoring-2.3.29-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-monitoring-2.4.3.jar" sourcepath="lib/source/grizzly-http-server-monitoring-2.4.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-monitoring-2.4.3.jar" sourcepath="lib/source/grizzly-http-monitoring-2.4.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-all-2.4.3.jar" sourcepath="lib/source/grizzly-http-all-2.4.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-monitoring-2.4.3.jar" sourcepath="lib/source/grizzly-framework-monitoring-2.4.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pfl-basic-4.0.0-b004.jar" sourcepath="lib/source/pfl-basic-4.0.0-b004-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pfl-basic-tools-4.0.0-b004.jar" sourcepath="lib/source/pfl-basic-tools-4.0.0-b004-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pfl-tf-tools-4.0.0-b004.jar" sourcepath="lib/source/pfl-tf-tools-4.0.0-b004-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/management-api-3.2.1-b002.jar" sourcepath="lib/source/management-api-3.2.1-b002-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pfl-tf-4.0.0-b004.jar" sourcepath="lib/source/pfl-tf-4.0.0-b004-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gmbal-4.0.0-b001.jar" sourcepath="lib/source/gmbal-4.0.0-b001-sources.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>

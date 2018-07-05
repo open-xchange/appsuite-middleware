@@ -49,12 +49,11 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -75,20 +74,24 @@ public class ParticipantCommentFieldLength extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Connection con = Database.getNoTimeout(params.getContextId(), true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
             checkAndModifyColumns(con, "prg_dates_members", new Column("reason", "TEXT"));
             checkAndModifyColumns(con, "del_dates_members", new Column("reason", "TEXT"));
             checkAndModifyColumns(con, "dateExternal", new Column("reason", "TEXT"));
             checkAndModifyColumns(con, "delDateExternal", new Column("reason", "TEXT"));
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
-            Database.backNoTimeout(params.getContextId(), true, con);
         }
     }
 }

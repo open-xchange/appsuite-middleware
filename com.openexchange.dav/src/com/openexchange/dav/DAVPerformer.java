@@ -71,6 +71,7 @@ import com.openexchange.webdav.action.WebdavRequestCycleAction;
 import com.openexchange.webdav.loader.BulkLoader;
 import com.openexchange.webdav.protocol.WebdavMethod;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
@@ -80,6 +81,8 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  * @since v7.8.1
  */
 public abstract class DAVPerformer implements SessionHolder {
+
+    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DAVPerformer.class);
 
     private final ThreadLocal<ServerSession> sessionHolder;
 
@@ -209,13 +212,7 @@ public abstract class DAVPerformer implements SessionHolder {
             ServletWebdavResponse webdavResponse = new ServletWebdavResponse(response);
             getAction(method).perform(webdavRequest, webdavResponse);
         } catch (WebdavProtocolException e) {
-            if (null != response && false == response.isCommitted()) {
-                if (PreconditionException.class.isInstance(e)) {
-                    ((PreconditionException) e).sendError(response);
-                } else {
-                    response.setStatus(e.getStatus());
-                }
-            }
+            sendErrorResponse(e, request, response);
         } finally {
             sessionHolder.set(null);
         }
@@ -280,6 +277,58 @@ public abstract class DAVPerformer implements SessionHolder {
             session.setParameter("com.openexchange.dav.push.clientToken", pushClientToken);
         }
         return session;
+    }
+
+    /**
+     * Sends an appropriate error response for a WebDAV protocol exception that occurred during processing a request.
+     *
+     * @param e The WebDAV protocol exception to send the error response for
+     * @param request The WebDAV request
+     * @param response The WebDAV response
+     */
+    private void sendErrorResponse(WebdavProtocolException e, HttpServletRequest request, HttpServletResponse response) {
+        if (null == response || response.isCommitted()) {
+            LOG.debug("Unable to send error response (HTTP {}) after protocol exception", Integer.valueOf(e.getStatus()), e);
+            return;
+        }
+        if (PreconditionException.class.isInstance(e)) {
+            ((PreconditionException) e).sendError(response);
+        } else if (HttpServletResponse.SC_CONFLICT == e.getStatus() && isETagMismatch(request)) {
+            LOG.debug("Sending HTTP 412 for HTTP 409 response due to mismatching ETag in \"If-Match\" header: {}", request.getHeader("If-Match"), e);
+            response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+        } else {
+            response.setStatus(e.getStatus());
+        }
+    }
+
+    /**
+     * Gets a value indicating whether an <code>If-Match</code>-header in the supplied HTTP request matches the targeted resource's
+     * current ETag or not.
+     *
+     * @param request The request to check
+     * @return <code>true</code> if the value in the request's <code>If-Match</code>-header doesn't match the resource ETag, <code>false</code>, otherwise
+     */
+    private boolean isETagMismatch(HttpServletRequest request) {
+        String ifMatchHeader = request.getHeader("If-Match");
+        if (Strings.isEmpty(ifMatchHeader)) {
+            return false;
+        }
+        try {
+            ServletWebdavRequest webdavRequest = new ServletWebdavRequest(getFactory(), request);
+            WebdavResource resource = webdavRequest.getResource();
+            if (null == resource || false == resource.exists()) {
+                return false;
+            }
+            String eTag = resource.getETag();
+            for (String value : Strings.splitByComma(ifMatchHeader)) {
+                if (false == "*".equals(value) && false == eTag.equals(Strings.unquote(value))) {
+                    return true;
+                }
+            }
+        } catch (WebdavProtocolException e) {
+            org.slf4j.LoggerFactory.getLogger(DAVPerformer.class).warn("Error re-checking ETag", e);
+        }
+        return false;
     }
 
 }

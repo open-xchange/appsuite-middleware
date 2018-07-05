@@ -27,9 +27,7 @@ public class ObjectFactory {
     private final static QName _DatabaseReadIdset_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "read_idset");
     private final static QName _DatabasePoolMaxset_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "poolMaxset");
     private final static QName _DatabaseMandatoryMembersRegister_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "mandatoryMembersRegister");
-    private final static QName _DatabaseClusterWeightset_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "clusterWeightset");
     private final static QName _DatabaseDriverset_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "driverset");
-    private final static QName _DatabaseClusterWeight_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "clusterWeight");
     private final static QName _DatabasePoolHardLimit_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "poolHardLimit");
     private final static QName _DatabaseLoginset_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "loginset");
     private final static QName _DatabaseMaxUnitsset_QNAME = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", "maxUnitsset");
@@ -131,27 +129,9 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
      *
      */
-    @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "clusterWeightset", scope = Database.class)
-    public JAXBElement<Boolean> createDatabaseClusterWeightset(Boolean value) {
-        return new JAXBElement<Boolean>(_DatabaseClusterWeightset_QNAME, Boolean.class, Database.class, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     *
-     */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "driverset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseDriverset(Boolean value) {
         return new JAXBElement<Boolean>(_DatabaseDriverset_QNAME, Boolean.class, Database.class, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     *
-     */
-    @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "clusterWeight", scope = Database.class)
-    public JAXBElement<Integer> createDatabaseClusterWeight(Integer value) {
-        return new JAXBElement<Integer>(_DatabaseClusterWeight_QNAME, Integer.class, Database.class, value);
     }
 
     /**

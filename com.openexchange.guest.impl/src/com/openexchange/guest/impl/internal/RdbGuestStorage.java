@@ -49,7 +49,6 @@
 
 package com.openexchange.guest.impl.internal;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,6 +56,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.GuestExceptionCodes;
@@ -187,7 +187,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
 
         return guestId;
@@ -219,7 +219,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -246,7 +246,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(result, statement);
+            Databases.closeSQLStuff(result, statement);
         }
 
         return guestId;
@@ -276,7 +276,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(result, statement);
+            Databases.closeSQLStuff(result, statement);
         }
 
         return guestIds;
@@ -305,7 +305,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -332,7 +332,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -354,7 +354,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -383,7 +383,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
         return guestIdsAssigmentsRemovedFor;
     }
@@ -410,7 +410,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
 
         return affectedRows;
@@ -433,7 +433,7 @@ public class RdbGuestStorage extends GuestStorage {
             }
         }
 
-        return commaSepValueBuilder.toString().replaceAll("\\s","");
+        return commaSepValueBuilder.toString().replaceAll("\\s", "");
     }
 
     /**
@@ -455,7 +455,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
 
         return affectedRows;
@@ -483,7 +483,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(result, statement);
+            Databases.closeSQLStuff(result, statement);
         }
 
         return guestAssignments;
@@ -512,7 +512,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(result, statement);
+            Databases.closeSQLStuff(result, statement);
         }
 
         return false;
@@ -544,7 +544,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(result, statement);
+            Databases.closeSQLStuff(result, statement);
         }
         return guestAssignments;
     }
@@ -575,7 +575,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(result, statement);
+            Databases.closeSQLStuff(result, statement);
         }
         return null;
     }
@@ -607,7 +607,7 @@ public class RdbGuestStorage extends GuestStorage {
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
 
     }

@@ -68,4 +68,13 @@ public interface PGPKeyRingParser {
      * @throws IOException due an error while reading from the stream
      */
     KeyRingParserResult parse(InputStream inputStream) throws IOException;
+
+    /**
+     * Parses public and private keys from a given String
+     *
+     * @param inputStream the input stream to parse the keys from
+     * @return a result set of parsed ASCII-armored keys
+     * @throws IOException due an error while reading from the stream
+     */
+    KeyRingParserResult parse(String data) throws IOException;
 }

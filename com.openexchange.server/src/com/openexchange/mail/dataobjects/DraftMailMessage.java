@@ -51,12 +51,14 @@ package com.openexchange.mail.dataobjects;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -884,6 +886,11 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
+    public boolean isHasAttachment() {
+        return message.isHasAttachment();
+    }
+
+    @Override
     public boolean containsHasAttachment() {
         return message.containsHasAttachment();
     }
@@ -896,6 +903,26 @@ public class DraftMailMessage extends MailMessage {
     @Override
     public void setHasAttachment(final boolean hasAttachment) {
         message.setHasAttachment(hasAttachment);
+    }
+
+    @Override
+    public boolean isAlternativeHasAttachment() {
+        return message.isAlternativeHasAttachment();
+    }
+
+    @Override
+    public boolean containsAlternativeHasAttachment() {
+        return message.containsAlternativeHasAttachment();
+    }
+
+    @Override
+    public void removeAlternativeHasAttachment() {
+        message.removeAlternativeHasAttachment();
+    }
+
+    @Override
+    public void setAlternativeHasAttachment(boolean hasAttachment) {
+        message.setAlternativeHasAttachment(hasAttachment);
     }
 
     @Override
@@ -976,6 +1003,201 @@ public class DraftMailMessage extends MailMessage {
     @Override
     public void setUnreadMessages(final int unreadMessages) {
         message.setUnreadMessages(unreadMessages);
+    }
+
+    @Override
+    public void addFrom(Collection<InternetAddress> addrs) {
+        message.addFrom(addrs);
+    }
+
+    @Override
+    public void removeFromPersonals() {
+        message.removeFromPersonals();
+    }
+
+    @Override
+    public void addTo(Collection<InternetAddress> addrs) {
+        message.addTo(addrs);
+    }
+
+    @Override
+    public void removeToPersonals() {
+        message.removeToPersonals();
+    }
+
+    @Override
+    public void addCc(Collection<InternetAddress> addrs) {
+        message.addCc(addrs);
+    }
+
+    @Override
+    public void removeCcPersonals() {
+        message.removeCcPersonals();
+    }
+
+    @Override
+    public void addBcc(Collection<InternetAddress> addrs) {
+        message.addBcc(addrs);
+    }
+
+    @Override
+    public void removeBccPersonals() {
+        message.removeBccPersonals();
+    }
+
+    @Override
+    public InternetAddress[] getAllRecipients() {
+        return message.getAllRecipients();
+    }
+
+    @Override
+    public void addReplyTo(Collection<InternetAddress> addrs) {
+        message.addReplyTo(addrs);
+    }
+
+    @Override
+    public boolean isSubjectDecoded() {
+        return message.isSubjectDecoded();
+    }
+
+    @Override
+    public void addUserFlags(Collection<String> userFlags) {
+        message.addUserFlags(userFlags);
+    }
+
+    @Override
+    public FullnameArgument getOriginalFolder() {
+        return message.getOriginalFolder();
+    }
+
+    @Override
+    public boolean containsOriginalFolder() {
+        return message.containsOriginalFolder();
+    }
+
+    @Override
+    public void removeOriginalFolder() {
+        message.removeOriginalFolder();
+    }
+
+    @Override
+    public void setOriginalFolder(FullnameArgument originalFolder) {
+        message.setOriginalFolder(originalFolder);
+    }
+
+    @Override
+    public String getTextPreview() {
+        return message.getTextPreview();
+    }
+
+    @Override
+    public boolean containsTextPreview() {
+        return message.containsTextPreview();
+    }
+
+    @Override
+    public void removeTextPreview() {
+        message.removeTextPreview();
+    }
+
+    @Override
+    public void setTextPreview(String textPreview) {
+        message.setTextPreview(textPreview);
+    }
+
+    @Override
+    public String getOriginalId() {
+        return message.getOriginalId();
+    }
+
+    @Override
+    public boolean containsOriginalId() {
+        return message.containsOriginalId();
+    }
+
+    @Override
+    public void removeOriginalId() {
+        message.removeOriginalId();
+    }
+
+    @Override
+    public void setOriginalId(String originalId) {
+        message.setOriginalId(originalId);
+    }
+
+    @Override
+    public String[] getReferencesOrInReplyTo() {
+        return message.getReferencesOrInReplyTo();
+    }
+
+    @Override
+    public void setSecurityInfo(SecurityInfo securityInfo) {
+        message.setSecurityInfo(securityInfo);
+    }
+
+    @Override
+    public SecurityInfo getSecurityInfo() {
+        return message.getSecurityInfo();
+    }
+
+    @Override
+    public boolean containsSecurityInfo() {
+        return message.containsSecurityInfo();
+    }
+
+    @Override
+    public void removeSecurityInfo() {
+        message.removeSecurityInfo();
+    }
+
+    @Override
+    public void setSecurityResult(SecurityResult result) {
+        message.setSecurityResult(result);
+    }
+
+    @Override
+    public SecurityResult getSecurityResult() {
+        return message.getSecurityResult();
+    }
+
+    @Override
+    public boolean hasSecurityResult() {
+        return message.hasSecurityResult();
+    }
+
+    @Override
+    public boolean containsSecurityResult() {
+        return message.containsSecurityResult();
+    }
+
+    @Override
+    public void removeSecurityResult() {
+        message.removeSecurityResult();
+    }
+
+    @Override
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        message.setAuthenticityResult(authenticationResult);
+    }
+
+    @Override
+    public MailAuthenticityResult getAuthenticityResult() {
+        return message.getAuthenticityResult();
+    }
+
+    @Override
+    public boolean hasAuthenticityResult() {
+        return message.hasAuthenticityResult();
+    }
+
+    @Override
+    public boolean containsAuthenticityResult() {
+        return message.containsAuthenticityResult();
+    }
+
+    @Override
+    public void removeAuthenticityResult() {
+        message.removeAuthenticityResult();
     }
 
     /**

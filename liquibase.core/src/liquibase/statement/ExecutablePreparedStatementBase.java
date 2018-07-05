@@ -14,15 +14,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.util.file.FilenameUtils;
 import liquibase.util.StreamUtil;
+import liquibase.util.file.FilenameUtils;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 

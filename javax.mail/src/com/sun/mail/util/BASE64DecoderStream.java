@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,7 +40,10 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
+import java.io.EOFException;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * This class implements a BASE64 Decoder. It is implemented as
@@ -105,6 +108,7 @@ public class BASE64DecoderStream extends FilterInputStream {
      * @exception  IOException  if an I/O error occurs.
      * @see        java.io.FilterInputStream#in
      */
+    @Override
     public int read() throws IOException {
 	if (index >= bufsize) {
 	    bufsize = decode(buffer, 0, buffer.length);
@@ -129,6 +133,7 @@ public class BASE64DecoderStream extends FilterInputStream {
      *             the stream has been reached.
      * @exception  IOException  if an I/O error occurs.
      */
+    @Override
     public int read(byte[] buf, int off, int len) throws IOException {
 	// empty out single byte read buffer
 	int off0 = off;
@@ -170,6 +175,7 @@ public class BASE64DecoderStream extends FilterInputStream {
     /**
      * Skips over and discards n bytes of data from this stream.
      */
+    @Override
     public long skip(long n) throws IOException {
 	long skipped = 0;
 	while (n-- > 0 && read() >= 0)
@@ -181,6 +187,7 @@ public class BASE64DecoderStream extends FilterInputStream {
      * Tests if this input stream supports marks. Currently this class
      * does not support marks
      */
+    @Override
     public boolean markSupported() {
 	return false; // Maybe later ..
     }
@@ -191,6 +198,7 @@ public class BASE64DecoderStream extends FilterInputStream {
      * a close approximation in case the original encoded stream
      * contains embedded CRLFs; since the CRLFs are discarded, not decoded
      */ 
+    @Override
     public int available() throws IOException {
 	 // This is only an estimate, since in.available()
 	 // might include CRLFs too ..

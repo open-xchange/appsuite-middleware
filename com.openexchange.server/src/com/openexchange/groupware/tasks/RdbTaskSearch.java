@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,6 +64,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.CombinedSearchIterator;
@@ -313,7 +314,7 @@ public class RdbTaskSearch extends TaskSearch {
                 if (searchObject.hasInternalParticipants() || i++ >= 1) {
                     builder.append(" AND ");
                 }
-                String preparedPattern = StringCollection.prepareForSearch(mail, false, false);
+                String preparedPattern = StringCollection.prepareForSearch(Strings.replaceSurrogatePairs(mail, '@'), false, false);
                 builder.append(" etp.mail = ? ");
                 searchParameters.add(preparedPattern);
             }

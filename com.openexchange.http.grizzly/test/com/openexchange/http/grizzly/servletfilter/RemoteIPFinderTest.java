@@ -52,7 +52,7 @@ package com.openexchange.http.grizzly.servletfilter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
-import com.openexchange.http.grizzly.util.IPTools;
+import com.openexchange.net.IPTools;
 
 /**
  * {@link RemoteIPFinderTest}

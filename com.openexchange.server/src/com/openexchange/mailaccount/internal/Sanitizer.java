@@ -49,22 +49,22 @@
 
 package com.openexchange.mailaccount.internal;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
-import gnu.trove.procedure.TIntProcedure;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
 
 /**
  * {@link Sanitizer} - Sanitizes mail accounts if needed.
@@ -191,7 +191,7 @@ final class Sanitizer {
                 }
             }
             if (!map.isEmpty()) {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
                 rs = null;
                 /*
                  * Batch update broken accounts
@@ -209,20 +209,20 @@ final class Sanitizer {
              */
             con.commit();
         } catch (final SQLException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             final Throwable cause = e.getCause();
             if (null != cause) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(cause, cause.getMessage());
             }
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, true, con);
         }
     }

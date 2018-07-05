@@ -49,7 +49,6 @@
 
 package com.openexchange.find.json;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -83,10 +82,4 @@ public class FindActionFactory implements AJAXActionServiceFactory {
     public AJAXActionService createActionService(String action) throws OXException {
         return actions.get(action);
     }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }

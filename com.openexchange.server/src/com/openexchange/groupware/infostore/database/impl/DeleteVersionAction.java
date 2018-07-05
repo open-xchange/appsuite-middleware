@@ -141,7 +141,7 @@ public class DeleteVersionAction extends AbstractDocumentListAction {
             /*
              * add batches to replace any values in the del_infostore_document table
              */
-            updates.add(new Update(getQueryCatalog().getReplace(InfostoreQueryCatalog.Table.DEL_INFOSTORE_DOCUMENT, slice.size())) {
+            updates.add(new Update(getQueryCatalog().getReplace(InfostoreQueryCatalog.Table.DEL_INFOSTORE_DOCUMENT, slice.size(), "cid")) {
 
                 @Override
                 public void fillStatement() throws SQLException {

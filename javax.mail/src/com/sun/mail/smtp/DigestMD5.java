@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,12 +40,24 @@
 
 package com.sun.mail.smtp;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StreamTokenizer;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
-import java.security.*;
-
-import com.sun.mail.util.*;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.MailLogger;
 
 /**
  * DIGEST-MD5 authentication support.
@@ -91,7 +103,7 @@ public class DigestMD5 {
 	    logger.log(Level.FINE, "NoSuchAlgorithmException", ex);
 	    throw new IOException(ex.toString());
 	}
-	StringBuffer result = new StringBuffer();
+	StringBuilder result = new StringBuilder();
 
 	uri = "smtp/" + host;
 	String nc = "00000001";
@@ -113,6 +125,10 @@ public class DigestMD5 {
 	// server challenge random value
 	String nonce = map.get("nonce");
 
+	// Does server support UTF-8 usernames and passwords?
+	String charset = map.get("charset");
+	boolean utf8 = charset != null && charset.equalsIgnoreCase("utf-8");
+
 	random.nextBytes(bytes);
 	b64os.write(bytes);
 	b64os.flush();
@@ -122,7 +138,11 @@ public class DigestMD5 {
 	bos.reset();
 
 	// DIGEST-MD5 computation, common portion (order critical)
-	md5.update(md5.digest(
+	if (utf8) {
+	    String up = user + ":" + realm + ":" + passwd;
+	    md5.update(md5.digest(up.getBytes(StandardCharsets.UTF_8)));
+	} else
+	    md5.update(md5.digest(
 		ASCIIUtility.getBytes(user + ":" + realm + ":" + passwd)));
 	md5.update(ASCIIUtility.getBytes(":" + nonce + ":" + cnonce));
 	clientResponse = toHex(md5.digest())
@@ -140,6 +160,8 @@ public class DigestMD5 {
 	result.append(",nonce=\"" + nonce + "\"");
 	result.append(",cnonce=\"" + cnonce + "\"");
 	result.append(",digest-uri=\"" + uri + "\"");
+	if (utf8)
+	    result.append(",charset=\"utf-8\"");
 	result.append(",response=" + toHex(md5.digest()));
 
 	if (logger.isLoggable(Level.FINE))
@@ -179,7 +201,7 @@ public class DigestMD5 {
     @SuppressWarnings("fallthrough")
     private Map<String, String> tokenize(String serverResponse)
 	    throws IOException {
-	Map<String, String> map	= new HashMap<String, String>();
+	Map<String, String> map	= new HashMap<>();
 	byte[] bytes = serverResponse.getBytes("iso-8859-1");	// really ASCII?
 	String key = null;
 	int ttype;
@@ -229,7 +251,7 @@ public class DigestMD5 {
      * Convert a byte array to a string of hex digits representing the bytes.
      */
     private static String toHex(byte[] bytes) {
-	char[] result = new char[bytes.length * 2];
+	char[] result = new char[bytes.length << 1];
 
 	for (int index = 0, i = 0; index < bytes.length; index++) {
 	    int temp = bytes[index] & 0xFF;

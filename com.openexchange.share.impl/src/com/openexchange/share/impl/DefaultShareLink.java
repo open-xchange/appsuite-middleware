@@ -56,6 +56,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareLink;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.SubfolderAwareShareInfo;
 
 /**
  * {@link DefaultShareLink}
@@ -111,6 +112,11 @@ public class DefaultShareLink implements ShareLink {
     @Override
     public boolean isNew() {
         return isNew;
+    }
+
+    @Override
+    public boolean isIncludeSubfolders() {
+        return delegate instanceof SubfolderAwareShareInfo ? ((SubfolderAwareShareInfo) delegate).isIncludeSubfolders() : false;
     }
 
 }

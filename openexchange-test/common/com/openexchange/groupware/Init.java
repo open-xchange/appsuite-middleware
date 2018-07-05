@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.spi.CharsetProvider;
@@ -69,17 +68,12 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
-import com.openexchange.calendar.CalendarAdministration;
-import com.openexchange.calendar.CalendarReminderDelete;
-import com.openexchange.calendar.api.AppointmentSqlFactory;
-import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.internal.AbstractCapabilityService;
-import com.openexchange.charset.internal.CollectionCharsetProvider;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.charset.CustomCharsetProviderInit;
+import com.openexchange.charset.internal.CollectionCharsetProvider;
 import com.openexchange.charset.internal.ModifyCharsetExtendedProvider;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.cluster.timer.impl.ClusterTimerServiceImpl;
@@ -114,7 +108,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
-import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
@@ -132,16 +125,12 @@ import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarAdministrationService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
@@ -171,6 +160,8 @@ import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
 import com.openexchange.net.ssl.config.impl.internal.TrustAllSSLConfigurationService;
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
+import com.openexchange.passwordchange.BasicPasswordChangeService;
+import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
 import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
@@ -259,10 +250,6 @@ public final class Init {
          * Reads system.properties.
          */
         com.openexchange.configuration.SystemConfig.getInstance(),
-        /**
-         * Reads the calendar.properties.
-         */
-        com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
         /**
          * Initialization for alias charset provider
          */
@@ -403,10 +390,6 @@ public final class Init {
         System.out.println("startAndInjectCache took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
-        startAndInjectCalendarServices();
-        System.out.println("startAndInjectCalendarServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
-
-        startTestServices = System.currentTimeMillis();
         startAndInjectDatabaseBundle();
         System.out.println("startAndInjectDatabaseBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
@@ -517,6 +500,10 @@ public final class Init {
         startTestServices = System.currentTimeMillis();
         startAndInjectAliasService();
         System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+        startAndInjectPasswordChangeService();
+        System.out.println("startAndInjectPasswordChangeService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
     }
 
     /**
@@ -578,14 +565,16 @@ public final class Init {
         SimpleServiceLookup myServices = new SimpleServiceLookup();
         Object configurationService = services.get(ConfigurationService.class);
         myServices.add(ConfigurationService.class, configurationService);
-        myServices.add(SSLConfigurationService.class, new TrustAllSSLConfigurationService());
+        TrustAllSSLConfigurationService sslConfigService = TrustAllSSLConfigurationService.getInstance();
+        myServices.add(SSLConfigurationService.class, sslConfigService);
         com.openexchange.net.ssl.osgi.Services.setServiceLookup(myServices);
 
-        services.put(SSLSocketFactoryProvider.class, DefaultSSLSocketFactoryProvider.getInstance());
-        services.put(SSLConfigurationService.class, new TrustAllSSLConfigurationService());
+        DefaultSSLSocketFactoryProvider factoryProvider = new DefaultSSLSocketFactoryProvider(sslConfigService);
+        services.put(SSLSocketFactoryProvider.class, factoryProvider);
+        services.put(SSLConfigurationService.class, sslConfigService);
 
-        TestServiceRegistry.getInstance().addService(SSLSocketFactoryProvider.class, DefaultSSLSocketFactoryProvider.getInstance());
-        TestServiceRegistry.getInstance().addService(SSLConfigurationService.class, new TrustAllSSLConfigurationService());
+        TestServiceRegistry.getInstance().addService(SSLSocketFactoryProvider.class, factoryProvider);
+        TestServiceRegistry.getInstance().addService(SSLConfigurationService.class, sslConfigService);
 
         TrustedSSLSocketFactory.init();
     }
@@ -673,37 +662,6 @@ public final class Init {
         return new OXException(9999, null == message ? "[Not available]" : message, cause);
     }
 
-    private static void startAndInjectCalendarServices() {
-        if (null == TestServiceRegistry.getInstance().getService(CalendarCollectionService.class)) {
-            TestServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
-            TestServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
-            TargetRegistry.getInstance().addService(Types.APPOINTMENT, new CalendarReminderDelete());
-            TestServiceRegistry.getInstance().addService(CalendarAdministrationService.class, new CalendarAdministration());
-
-            if (null == CalendarVolatileCache.getInstance()) {
-                try {
-                    /*
-                     * Important cache configuration constants
-                     */
-                    final String regionName = CalendarVolatileCache.REGION;
-                    final int maxObjects = 10000000;
-                    final int maxLifeSeconds = 300;
-                    final int idleTimeSeconds = 180;
-                    final int shrinkerIntervalSeconds = 60;
-                    /*
-                     * Compose cache configuration
-                     */
-                    final byte[] ccf = ("jcs.region." + regionName + "=LTCP\n" + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + "jcs.region." + regionName + ".cacheattributes.MaxObjects=" + maxObjects + "\n" + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=" + idleTimeSeconds + "\n" + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=" + shrinkerIntervalSeconds + "\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=" + maxLifeSeconds + "\n" + "jcs.region." + regionName + ".elementattributes.IdleTime=" + idleTimeSeconds + "\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
-                    final CacheService cacheService = TestServiceRegistry.getInstance().getService(CacheService.class);
-                    cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
-                    CalendarVolatileCache.initInstance(cacheService.getCache(regionName));
-                } catch (final OXException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
-                }
-            }
-        }
-    }
-
     private static void startAndInjectXMLServices() {
         if (null == TestServiceRegistry.getInstance().getService(SpringParser.class)) {
             final SpringParser springParser = new DefaultSpringParser();
@@ -716,20 +674,9 @@ public final class Init {
         }
     }
 
-    private static void startAndInjectImportExportServices() throws OXException {
+    private static void startAndInjectImportExportServices() {
         if (null == com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.get()) {
-            com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.set(new ServiceLookup() {
-
-                @Override
-                public <S> S getService(final Class<? extends S> clazz) {
-                    return TestServiceRegistry.getInstance().getService(clazz);
-                }
-
-                @Override
-                public <S> S getOptionalService(final Class<? extends S> clazz) {
-                    return null;
-                }
-            });
+            com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.set(TestServiceRegistry.getInstance());
             SubscriptionServiceRegistry.getInstance().addService(ContactService.class, services.get(ContactService.class));
         }
     }
@@ -958,6 +905,11 @@ public final class Init {
             services.put(FolderService.class, fs);
             TestServiceRegistry.getInstance().addService(FolderService.class, fs);
         }
+        if (null == TestServiceRegistry.getInstance().getService(com.openexchange.folderstorage.FolderService.class)) {
+            final com.openexchange.folderstorage.FolderService fs = new com.openexchange.folderstorage.internal.FolderServiceImpl();
+            services.put(com.openexchange.folderstorage.FolderService.class, fs);
+            TestServiceRegistry.getInstance().addService(com.openexchange.folderstorage.FolderService.class, fs);
+        }
     }
 
     private static void startAndInjectContextService() {
@@ -990,11 +942,6 @@ public final class Init {
             EventQueue.setNewEventDispatcher(new EventDispatcher() {
 
                 @Override
-                public void addListener(final AppointmentEventInterface listener) {
-                    // Do nothing.
-                }
-
-                @Override
                 public void addListener(final TaskEventInterface listener) {
                     // Do nothing.
                 }
@@ -1013,7 +960,8 @@ public final class Init {
                     return false;
                 }
             };
-            CacheEventService cacheEventService = new CacheEventServiceImpl(config);
+            ThreadPoolService threadPool = (ThreadPoolService) services.get(ThreadPoolService.class);
+            CacheEventService cacheEventService = new CacheEventServiceImpl(config, threadPool);
             services.put(CacheEventService.class, cacheEventService);
             TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);
             JCSCacheServiceInit.initInstance();
@@ -1085,6 +1033,14 @@ public final class Init {
             PhoneNumberParserService service = new PhoneNumberParserServiceImpl();
             services.put(PhoneNumberParserService.class, service);
             TestServiceRegistry.getInstance().addService(PhoneNumberParserService.class, service);
+        }
+    }
+
+    public static void startAndInjectPasswordChangeService() {
+        if (null == TestServiceRegistry.getInstance().getService(BasicPasswordChangeService.class)) {
+            BasicPasswordChangeService service = new DefaultBasicPasswordChangeService();
+            services.put(BasicPasswordChangeService.class, service);
+            TestServiceRegistry.getInstance().addService(BasicPasswordChangeService.class, service);
         }
     }
 

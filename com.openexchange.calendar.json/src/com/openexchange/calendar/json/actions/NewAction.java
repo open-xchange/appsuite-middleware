@@ -49,29 +49,27 @@
 
 package com.openexchange.calendar.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Date;
-import java.util.TimeZone;
-import org.json.JSONArray;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.compat.AppointmentParser;
+import com.openexchange.calendar.json.compat.CalendarDataObject;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link NewAction}
@@ -81,70 +79,56 @@ import com.openexchange.tools.session.ServerSession;
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
 public final class NewAction extends AppointmentAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMEZONE);
 
     /**
      * Initializes a new {@link NewAction}.
      *
-     * @param services
+     * @param services A service lookup reference
      */
-    public NewAction(final ServiceLookup services) {
+    public NewAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final JSONObject jData = req.getData();
-        if (null == jData) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-        }
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
-        }
-        final ServerSession session = req.getSession();
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 
-        final CalendarDataObject appointmentObj = new CalendarDataObject();
-        appointmentObj.setContext(session.getContext());
-
-        final AppointmentParser appointmentParser = new AppointmentParser(timeZone);
-        appointmentParser.parse(appointmentObj, jData);
-
-        if (!appointmentObj.containsParentFolderID()) {
+    @Override
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        JSONObject jsonObject = request.getData();
+        CalendarDataObject appointment = new CalendarDataObject();
+        appointment.setContext(request.getSession().getContext());
+        new AppointmentParser(request.getTimeZone()).parse(appointment, jsonObject);
+        if (false == appointment.containsParentFolderID()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
         }
-
-        convertExternalToInternalUsersIfPossible(appointmentObj, session.getContext(), LOG);
-
-        final AppointmentSqlFactoryService factoryService = getService();
-        if (null == factoryService) {
-            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+        if (appointment.containsNotification()) {
+            session.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }
-        final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
-        final Appointment[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
-
-        final JSONObject jsonResponseObj = new JSONObject();
-
-        Date timestamp = null;
-        if (conflicts == null) {
-            jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
-            timestamp = appointmentObj.getLastModified();
-            countObjectUse(session, appointmentObj);
-        } else {
-            final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(req.getSession());
-            for (final Appointment conflict : conflicts) {
-                final JSONObject jsonAppointmentObj = new JSONObject();
-                appointmentWriter.writeAppointment(conflict, jsonAppointmentObj);
-                jsonConflictArray.put(jsonAppointmentObj);
+        if (false == appointment.getIgnoreConflicts()) {
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
+        }
+        if (false == session.contains(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE)) {
+            session.set(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE, Boolean.TRUE);
+        }
+        Event event = getEventConverter(session).getEvent(appointment, null);
+        String folderID = String.valueOf(appointment.getParentFolderID());
+        CalendarResult result;
+        try {
+            result = session.getCalendarService().createEvent(session, folderID, event);
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.EVENT_CONFLICTS.equals(e) || CalendarExceptionCodes.HARD_EVENT_CONFLICTS.equals(e)) {
+                return getAppointmentConflictResult(getEventConverter(session), CalendarUtils.extractEventConflicts(e));
             }
-
-            jsonResponseObj.put("conflicts", jsonConflictArray);
+            throw e;
         }
-
-        return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
-
+        JSONObject resultObject = new JSONObject(1);
+        if (0 < result.getCreations().size()) {
+            resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
+        }
+        return new AJAXRequestResult(resultObject, new Date(result.getTimestamp()), "json");
     }
 
 }

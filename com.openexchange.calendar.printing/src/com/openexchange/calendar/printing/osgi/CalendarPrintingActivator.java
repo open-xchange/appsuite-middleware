@@ -49,24 +49,20 @@
 
 package com.openexchange.calendar.printing.osgi;
 
-import static com.openexchange.calendar.printing.CPServiceRegistry.getInstance;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
+import com.openexchange.ajax.printing.TemplateHelperFactory;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
 import com.openexchange.calendar.printing.templating.CalendarTemplateHelperFactory;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.folder.FolderService;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
-import com.openexchange.osgi.RegistryCustomizer;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.ajax.printing.TemplateHelperFactory;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
@@ -86,10 +82,8 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
     @Override
     protected void startBundle() {
         track(I18nService.class, new I18nCustomizer(context));
-        track(UserService.class, new RegistryCustomizer<UserService>(context, UserService.class, getInstance()));
-        track(GroupService.class, new RegistryCustomizer<GroupService>(context, GroupService.class, getInstance()));
-        track(ConfigViewFactory.class, new RegistryCustomizer<ConfigViewFactory>(context, ConfigViewFactory.class, getInstance()));
-        track(FolderService.class, new RegistryCustomizer<>(context, FolderService.class, getInstance()));
+        track(GroupService.class);
+        track(ConfigViewFactory.class);
         openTrackers();
         register();
         registerService(PreferencesItemService.class, new CalendarPrintingEnabled());
@@ -99,31 +93,16 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
         capabilityService.declareCapability("calendar-printing");
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            super.stopBundle();
-        } finally {
-            CPServlet.setServiceLookup(null);
-        }
-    }
-
     private void register() {
         final TemplateService templates = getService(TemplateService.class);
-        final AppointmentSqlFactoryService appointmentSqlFactory = getService(AppointmentSqlFactoryService.class);
-        final CalendarCollectionService collectionService = getService(CalendarCollectionService.class);
-
-        if (templates == null || appointmentSqlFactory == null || collectionService == null) {
+        if (templates == null) {
             return;
         }
-
-        CPServlet.setServiceLookup(this);
-
-        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix()+"printCalendar", new CPServlet());
+        registerSessionServlet(getService(DispatcherPrefixService.class).getPrefix() + "printCalendar", new CPServlet(this));
     }
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, DispatcherPrefixService.class, HtmlService.class, UserService.class, ResourceService.class, FolderService.class };
+        return new Class<?>[] { TemplateService.class, DispatcherPrefixService.class, HtmlService.class, UserService.class, ResourceService.class, CalendarService.class };
     }
 }

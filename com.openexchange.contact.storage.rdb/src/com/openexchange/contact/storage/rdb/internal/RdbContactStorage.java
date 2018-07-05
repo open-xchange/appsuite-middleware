@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.Connection;
@@ -69,8 +70,11 @@ import com.openexchange.contact.storage.rdb.fields.QueryFields;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Executor;
 import com.openexchange.contact.storage.rdb.sql.Table;
+import com.openexchange.database.DatabaseExceptionCodes;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.IncorrectStringSQLException;
+import com.openexchange.database.StringLiteralSQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -80,8 +84,10 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.java.Streams;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.search.SearchTerm;
@@ -93,17 +99,13 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbContactStorage} - Database storage for contacts.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias
- *         Friedrich</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class RdbContactStorage extends DefaultContactStorage implements ContactUserStorage {
-
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactStorage.class);
 
     private static boolean PREFETCH_ATTACHMENT_INFO = true;
 
@@ -191,6 +193,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
         final Connection connection = connectionHelper.getWritable();
+        boolean rollback = true;
         try {
             /*
              * (re-)check folder/permissions with this connection
@@ -242,19 +245,21 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final IncorrectStringSQLException e) {
-            DBUtils.rollback(connection);
             throw Tools.getIncorrectStringException(serverSession, connection, e, contact, Table.CONTACTS);
         } catch (final DataTruncation e) {
-            DBUtils.rollback(connection);
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
+        } catch (final StringLiteralSQLException e) {
+            throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
-            DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(connection);
             throw e;
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
             connectionHelper.backWritable();
         }
     }
@@ -266,6 +271,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
         final Connection connection = connectionHelper.getWritable();
+        boolean rollback = true;
         try {
             /*
              * (re-)check folder/permissions with this connection
@@ -285,13 +291,15 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(connection);
             throw e;
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
             connectionHelper.backWritable();
         }
     }
@@ -304,6 +312,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
         final Connection connection = connectionHelper.getWritable();
         int deletedContacts = 0;
+        boolean rollback = true;
         try {
             /*
              * get a list of object IDs to delete
@@ -330,13 +339,15 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(connection);
             throw e;
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
             if (deletedContacts <= 0) {
                 connectionHelper.backWritableAfterReading();
             } else {
@@ -351,6 +362,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
         final Connection connection = connectionHelper.getWritable();
+        boolean rollback = true;
         try {
             /*
              * (re-)check folder/permissions with this connection
@@ -368,13 +380,15 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            DBUtils.rollback(connection);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(connection);
             throw e;
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
             connectionHelper.backWritable();
         }
     }
@@ -388,6 +402,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
         final Connection connection = connectionHelper.getWritable();
+        boolean rollback = true;
         try {
             /*
              * (re-)check folder/permissions with this connection
@@ -461,15 +476,19 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final IncorrectStringSQLException e) {
-            DBUtils.rollback(connection);
             throw Tools.getIncorrectStringException(serverSession, connection, e, contact, Table.CONTACTS);
         } catch (final DataTruncation e) {
-            DBUtils.rollback(connection);
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
+        } catch (final StringLiteralSQLException e) {
+            throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
             connectionHelper.backWritable();
         }
     }
@@ -498,6 +517,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
         final int contextID = session.getContextId();
         final ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        boolean rollback = true;
         try {
             /*
              * Check which existing member references are affected
@@ -530,14 +550,19 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * commit
              */
             connectionHelper.commit();
+            rollback = false;
         } catch (final IncorrectStringSQLException e) {
             throw Tools.getIncorrectStringException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
         } catch (final DataTruncation e) {
-            DBUtils.rollback(connectionHelper.getWritable());
             throw Tools.getTruncationException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
+        } catch (final StringLiteralSQLException e) {
+            throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(connectionHelper.getWritable());
+            }
             connectionHelper.back();
         }
     }
@@ -1004,7 +1029,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             return create(contextId, contact, con);
         } catch (final OXException e) {
             if (newCon) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             throw e;
         } finally {
@@ -1033,12 +1058,12 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
         } catch (final SQLException e) {
             if (newCon) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
             if (newCon) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             throw e;
         } finally {
@@ -1055,14 +1080,14 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
 
             final ContactConfig conf = ContactConfig.getInstance();
-            final boolean scale_images = conf.getBoolean(ContactConfig.Property.SCALE_IMAGES);
+            final boolean scale_images = conf.getBoolean(ContactConfig.Property.SCALE_IMAGES).booleanValue();
             if (!scale_images) {
                 return;
             }
-            final int image_width = Integer.valueOf(conf.getString(ContactConfig.Property.SCALED_IMAGE_WIDTH));
-            final int image_height = Integer.valueOf(conf.getString(ContactConfig.Property.SCALED_IMAGE_HEIGHT));
+            final int image_width = Integer.parseInt(conf.getString(ContactConfig.Property.SCALED_IMAGE_WIDTH));
+            final int image_height = Integer.parseInt(conf.getString(ContactConfig.Property.SCALED_IMAGE_HEIGHT));
             int typeNumber;
-            typeNumber = Integer.valueOf(conf.getString(ContactConfig.Property.SCALE_TYPE));
+            typeNumber = Integer.parseInt(conf.getString(ContactConfig.Property.SCALE_TYPE));
             ScaleType type = ScaleType.CONTAIN;
             switch (typeNumber) {
                 case 1:
@@ -1084,12 +1109,22 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             byte[] transformedImage;
             {
                 ImageTransformationService transformationService = RdbServiceLookup.getService(ImageTransformationService.class, true);
-                BufferedImage originalImage = transformationService.transfom(imageBytes).getImage();
-                if (null == originalImage || originalImage.getWidth() <= image_width && originalImage.getHeight() <= image_height) {
-                    return;
-                }
                 String formatName = null != contact.getImageContentType() ? contact.getImageContentType() : "image/jpeg";
-                transformedImage = transformationService.transfom(originalImage)
+
+                ImageMetadataService imageMetadataService = RdbServiceLookup.optService(ImageMetadataService.class);
+                if (null == imageMetadataService) {
+                    BufferedImage originalImage = transformationService.transfom(imageBytes).getImage();
+                    if (null == originalImage || originalImage.getWidth() <= image_width && originalImage.getHeight() <= image_height) {
+                        return;
+                    }
+                } else {
+                    Dimension dimension = imageMetadataService.getDimensionFor(Streams.newByteArrayInputStream(imageBytes), formatName, null);
+                    if (null != dimension && dimension.getWidth() <= image_width && dimension.getHeight() <= image_height) {
+                        return;
+                    }
+                }
+
+                transformedImage = transformationService.transfom(imageBytes)
                     .rotate()
                     .scale(image_width, image_height, type, true)
                     .getBytes(formatName)
@@ -1099,7 +1134,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 contact.setImage1(transformedImage);
             }
         } catch (OXException | IOException | NumberFormatException ex) {
-            LOG.error("Unable to resize contact image due to " + ex.getMessage());
+            LOG.error("Unable to resize contact image due to " + ex.getMessage(), ex);
         }
     }
 
@@ -1238,7 +1273,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             executor.update(con, Table.CONTACTS, contextId, contactId, now.getTime(), contact, Fields.sort(queryFields.getContactDataFields()));
         } catch (final SQLException e) {
             if (newCon) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {

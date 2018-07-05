@@ -52,8 +52,6 @@ package com.openexchange.passwordchange.history;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.history.PasswordChangeInfo;
-import com.openexchange.passwordchange.history.PasswordChangeRecorder;
 
 /**
  * {@link PasswordChangeRecorder} - Provides methods to retrieve and record password changes.

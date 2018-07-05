@@ -122,10 +122,14 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 	}
 
     protected static String getSelectClause(ContactField[] fields, int forUser) throws OXException {
-        return getSelectClause(fields, true, forUser);
+        return getSelectClause(fields, true, forUser, true);
     }
 
     protected static String getSelectClause(ContactField[] fields, boolean withTable, int forUser) throws OXException {
+        return getSelectClause(fields, withTable, forUser, true);
+    }
+    
+    protected static String getSelectClause(ContactField[] fields, boolean withTable, int forUser, boolean includeObjectUseCount) throws OXException {
         StringBuilder sb = new StringBuilder(256);
         sb.append("SELECT ");
         sb.append(Mappers.CONTACT.getColumns(fields, Table.CONTACTS.getName() + "."));
@@ -133,7 +137,9 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
         if (withTable) {
             sb.append(Table.CONTACTS);
         }
-        insertObjectUseCountClause(sb, forUser);
+        if(includeObjectUseCount) {
+            insertObjectUseCountClause(sb, forUser);
+        }
         return sb.toString();
     }
 

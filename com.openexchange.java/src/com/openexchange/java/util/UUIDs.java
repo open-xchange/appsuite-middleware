@@ -49,6 +49,7 @@
 
 package com.openexchange.java.util;
 
+import java.security.SecureRandom;
 import java.util.UUID;
 
 /**
@@ -63,6 +64,36 @@ public final class UUIDs {
      */
     private UUIDs() {
         super();
+    }
+
+    /*
+     * The random number generator used by this class to create random
+     * based UUIDs. In a holder class to defer initialization until needed.
+     */
+    private static class Holder {
+        static final SecureRandom numberGenerator = new SecureRandom();
+    }
+
+    /**
+     * Static factory to retrieve a type 4 (pseudo randomly generated) UUID.
+     * <p>
+     * The {@code UUID} is generated using a cryptographically strong pseudo random number generator.
+     *
+     * @param lastByte The last byte to set in randomly generated {@code UUID}
+     * @return  A randomly generated {@code UUID}
+     */
+    public static UUID randomUUID(byte lastByte) {
+        SecureRandom ng = Holder.numberGenerator;
+
+        byte[] randomBytes = new byte[16];
+        ng.nextBytes(randomBytes);
+        randomBytes[6] &= 0x0f; /* clear version */
+        randomBytes[6] |= 0x40; /* set to version 4 */
+        randomBytes[8] &= 0x3f; /* clear variant */
+        randomBytes[8] |= 0x80; /* set to IETF variant */
+        randomBytes[15] = lastByte;
+
+        return toUUID0(randomBytes);
     }
 
     /**
@@ -180,11 +211,15 @@ public final class UUIDs {
         if (bytes.length != UUID_BYTE_LENGTH) {
             throw new IllegalArgumentException("UUID must be contructed using a 16 byte array.");
         }
+        return toUUID0(bytes);
+    }
+
+    private static UUID toUUID0(final byte[] bytes) {
         long msb = 0;
-        long lsb = 0;
         for (int i = 0; i < 8; i++) {
             msb = (msb << 8) | (bytes[i] & 0xff);
         }
+        long lsb = 0;
         for (int i = 8; i < 16; i++) {
             lsb = (lsb << 8) | (bytes[i] & 0xff);
         }

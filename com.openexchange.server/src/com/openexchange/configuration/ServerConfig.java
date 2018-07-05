@@ -61,7 +61,6 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentConfig;
-import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.infostore.InfostoreConfig;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.java.Strings;
@@ -138,14 +137,6 @@ public final class ServerConfig implements Reloadable {
             attachmentConfig.start();
         } catch (final Exception e) {
             LOG.warn("Could not reload attachment configuration.", e);
-        }
-
-        try {
-            final CalendarConfig calendarConfig = CalendarConfig.getInstance();
-            calendarConfig.stop();
-            calendarConfig.start();
-        } catch (final Exception e) {
-            LOG.warn("Could not reload calendar configuration.", e);
         }
 
         try {
@@ -508,6 +499,7 @@ public final class ServerConfig implements Reloadable {
         return value;
     }
 
+    //TODO: Make the transition to the ServerProperty
     public static enum Property {
         /**
          * Upload directory.
@@ -521,7 +513,7 @@ public final class ServerConfig implements Reloadable {
         /**
          * Enable/Disable SearchIterator's ResultSet prefetch.
          */
-        PrefetchEnabled("PrefetchEnabled", Boolean.FALSE.toString()),
+        PrefetchEnabled("PrefetchEnabled", Boolean.TRUE.toString()),
         /**
          * Default encoding.
          */

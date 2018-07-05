@@ -63,7 +63,6 @@ import com.box.sdk.BoxAPIException;
 import com.box.sdk.BoxUser;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
-import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -80,6 +79,7 @@ import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
 import com.openexchange.session.Session;
 
 /**
@@ -107,8 +107,8 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             // Grab Box.com OAuth account
             int oauthAccountId = getAccountId();
             OAuthService oAuthService = Services.getService(OAuthService.class);
-            OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, getSession(), getSession().getUserId(), getSession().getContextId());
-            verifyAccount(boxOAuthAccount, OXScope.drive);
+            OAuthAccount boxOAuthAccount = oAuthService.getAccount(getSession(), oauthAccountId);
+            verifyAccount(boxOAuthAccount, oAuthService, OXScope.drive);
             setOAuthAccount(boxOAuthAccount);
             createOAuthClient(boxOAuthAccount);
         }

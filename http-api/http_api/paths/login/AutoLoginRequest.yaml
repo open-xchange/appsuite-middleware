@@ -1,0 +1,30 @@
+/login?action=autologin:
+  get:
+    operationId: autologin
+    tags:
+      - Login
+    summary: Reuse old session saved in cookies by store request
+    description: |
+      If the session ID was stored in a cookie before via the store request, 
+      the user can reuse his old session by using the autologin request.
+    parameters:
+      - $ref: "#/parameters/glbQueryParamsRampUp"
+      - $ref: "#/parameters/glbQueryParamsRampUpFor"
+      - in: query
+        type: string
+        name: authId
+        description: |
+          Identifier for tracing every single login request passed between different systems in a cluster.
+          The value should be some token that is unique for every login request. This parameter must be
+          given as URL parameter and not inside the body of the POST request. (IS OPTIONAL, meaning can be empty)
+        required: false
+      - in: query
+        name: client
+        type: string
+        description: Identifier of the client using the HTTP/JSON interface. This is for statistic evaluations what clients are used with Open-Xchange.
+        required: false
+    responses:
+      200:
+        description: A JSON object containing the session ID used for all subsequent requests. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/LoginResponse"

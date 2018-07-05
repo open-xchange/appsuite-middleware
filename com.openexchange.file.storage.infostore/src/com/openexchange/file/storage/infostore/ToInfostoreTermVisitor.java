@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.file.storage.search.AndTerm;
 import com.openexchange.file.storage.search.CategoriesTerm;
 import com.openexchange.file.storage.search.ColorLabelTerm;
@@ -227,7 +228,7 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     @Override
     public void visit(final VersionTerm term) throws OXException {
         String sVersion = term.getPattern();
-        infstoreTerm = new com.openexchange.groupware.infostore.search.VersionTerm(FileStorageFileAccess.CURRENT_VERSION == sVersion ? InfostoreFacade.CURRENT_VERSION : Integer.parseInt(sVersion.trim()));
+        infstoreTerm = new com.openexchange.groupware.infostore.search.VersionTerm(FileStorageFileAccess.CURRENT_VERSION == sVersion ? InfostoreFacade.CURRENT_VERSION : Utils.parseUnsignedInt(sVersion.trim()));
     }
 
     @Override

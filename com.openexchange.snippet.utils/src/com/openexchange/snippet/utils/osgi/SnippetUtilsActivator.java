@@ -59,8 +59,8 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.snippet.utils.SnippetImageDataSource;
 import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.utils.SnippetImageDataSource;
 import com.openexchange.snippet.utils.internal.Services;
 
 /**

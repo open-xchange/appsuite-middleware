@@ -40,6 +40,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateList;
@@ -56,8 +58,6 @@ import net.fortuna.ical4j.model.property.TzOffsetTo;
 import net.fortuna.ical4j.util.Dates;
 import net.fortuna.ical4j.util.PropertyValidator;
 import net.fortuna.ical4j.util.TimeZones;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * $Id$ [05-Apr-2004]

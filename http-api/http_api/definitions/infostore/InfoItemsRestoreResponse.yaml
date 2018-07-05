@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: The restored items
+    items:
+      $ref: "#/definitions/InfoItemsRestoreResponseData"

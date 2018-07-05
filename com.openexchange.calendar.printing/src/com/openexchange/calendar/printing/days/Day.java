@@ -55,8 +55,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import com.openexchange.calendar.printing.CPAppointment;
 import com.openexchange.calendar.printing.CPCalendar;
+import com.openexchange.calendar.printing.CPEvent;
 
 /**
  * {@link Day}
@@ -68,16 +68,16 @@ public class Day implements Comparable<Day> {
     private final Date time;
     private final CPCalendar cal;
     private final boolean outOfRange;
-    private final List<CPAppointment> wholeDayAppointments = new ArrayList<CPAppointment>();
-    private final SortedSet<CPAppointment> appointments = new TreeSet<CPAppointment>(new AppointmentStartComparator());
-    private final List<SortedSet<CPAppointment>> columns = new ArrayList<SortedSet<CPAppointment>>();
+    private final List<CPEvent> wholeDayAppointments = new ArrayList<CPEvent>();
+    private final SortedSet<CPEvent> appointments = new TreeSet<CPEvent>(new AppointmentStartComparator());
+    private final List<SortedSet<CPEvent>> columns = new ArrayList<SortedSet<CPEvent>>();
 
     public Day(Date time, CPCalendar cal, boolean outOfRange) {
         super();
         this.time = time;
         this.cal = cal;
         this.outOfRange = outOfRange;
-        columns.add(new TreeSet<CPAppointment>(new AppointmentStartComparator()));
+        columns.add(new TreeSet<CPEvent>(new AppointmentStartComparator()));
     }
 
     @Override
@@ -115,11 +115,11 @@ public class Day implements Comparable<Day> {
         return cal.format(pattern, date);
     }
 
-    public void addWholeDay(CPAppointment appointment) {
+    public void addWholeDay(CPEvent appointment) {
         wholeDayAppointments.add(appointment);
     }
 
-    public List<CPAppointment> getWholeDayAppointments() {
+    public List<CPEvent> getWholeDayAppointments() {
         return wholeDayAppointments;
     }
 
@@ -127,11 +127,11 @@ public class Day implements Comparable<Day> {
         return wholeDayAppointments.size() != 0;
     }
 
-    public void add(CPAppointment appointment) {
+    public void add(CPEvent appointment) {
         appointments.add(appointment);
-        for (SortedSet<CPAppointment> column : columns) {
+        for (SortedSet<CPEvent> column : columns) {
             boolean fits = true;
-            for (CPAppointment other : column) {
+            for (CPEvent other : column) {
                 if (CalendarTools.overlaps(appointment, other)) {
                     fits = false;
                     break;
@@ -142,14 +142,14 @@ public class Day implements Comparable<Day> {
                 return;
             }
         }
-        SortedSet<CPAppointment> newColumn = new TreeSet<CPAppointment>(new AppointmentStartComparator());
+        SortedSet<CPEvent> newColumn = new TreeSet<CPEvent>(new AppointmentStartComparator());
         columns.add(newColumn);
         newColumn.add(appointment);
     }
 
-    public List<CPAppointment> getAppointments() {
-        List<CPAppointment> retval = new ArrayList<CPAppointment>(appointments.size());
-        for (CPAppointment appointment : appointments) {
+    public List<CPEvent> getAppointments() {
+        List<CPEvent> retval = new ArrayList<CPEvent>(appointments.size());
+        for (CPEvent appointment : appointments) {
             retval.add(appointment);
         }
         return retval;
@@ -159,7 +159,7 @@ public class Day implements Comparable<Day> {
         return appointments.size() != 0;
     }
 
-    public List<CPAppointment> getAppointmentsStartingBetween(int startMinutes, int endMinutes) {
+    public List<CPEvent> getAppointmentsStartingBetween(int startMinutes, int endMinutes) {
         Date orig = cal.getTime();
         cal.setTime(time);
         cal.add(Calendar.MINUTE, startMinutes);
@@ -167,8 +167,8 @@ public class Day implements Comparable<Day> {
         cal.setTime(time);
         cal.add(Calendar.MINUTE, endMinutes);
         Date endDate = cal.getTime();
-        List<CPAppointment> retval = new ArrayList<CPAppointment>();
-        for (CPAppointment appointment : appointments) {
+        List<CPEvent> retval = new ArrayList<CPEvent>();
+        for (CPEvent appointment : appointments) {
             if (!appointment.getStartDate().before(startDate) && appointment.getStartDate().before(endDate)) {
                 retval.add(appointment);
             }
@@ -177,11 +177,11 @@ public class Day implements Comparable<Day> {
         return retval;
     }
 
-    public List<SortedSet<CPAppointment>> getColumns() {
+    public List<SortedSet<CPEvent>> getColumns() {
         return columns;
     }
 
-    public int getColumn(CPAppointment appointment) {
+    public int getColumn(CPEvent appointment) {
         for (int i = 0; i < columns.size(); i++) {
             if (columns.get(i).contains(appointment)) {
                 return i;

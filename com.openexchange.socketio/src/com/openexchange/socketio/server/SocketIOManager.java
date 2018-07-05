@@ -28,7 +28,9 @@ package com.openexchange.socketio.server;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ThreadLocalRandom;
 import com.openexchange.timer.TimerService;
 
 /**

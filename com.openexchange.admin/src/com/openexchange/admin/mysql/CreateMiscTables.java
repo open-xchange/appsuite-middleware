@@ -78,7 +78,7 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         + "INDEX (firstid),"
         + "INDEX (secondid),"
         + "INDEX (cid)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createReminderTable = "CREATE TABLE reminder ("
         + "cid INT4 UNSIGNED NOT NULL,"
@@ -94,15 +94,15 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         + "PRIMARY KEY (cid,object_id),"
         + "INDEX (cid,userid,alarm),"
         + "INDEX (cid,userid,last_modified),"
-        + "CONSTRAINT reminder_unique UNIQUE (cid,target_id,module,userid)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + "CONSTRAINT reminder_unique UNIQUE (cid,target_id(191),module,userid)"
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createFilestoreUsageTable = "CREATE TABLE filestore_usage ("
         + "cid INT4 UNSIGNED NOT NULL,"
         + "user INT4 UNSIGNED NOT NULL DEFAULT 0,"
         + "used INT8 NOT NULL,"
         + "PRIMARY KEY(cid, user)"
-      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+      + ") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateMiscTables}.

@@ -53,9 +53,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.groupware.update.ChangeColumnTypeUpdateTask;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 
 
@@ -87,7 +87,7 @@ public class AllowTextInValuesOfDynamicUserAttributesTask extends ChangeColumnTy
             stmt = con.prepareStatement("DROP INDEX cid ON user_attribute");
             stmt.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

@@ -49,33 +49,40 @@
 
 package com.openexchange.find.util;
 
+import java.util.Locale;
 import com.openexchange.find.facet.ComplexDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
 import com.openexchange.groupware.contact.ContactUtil;
+import com.openexchange.groupware.contact.helpers.ContactDisplayNameHelper;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 
-
 /**
  * A helper class to create {@link DisplayItem}s for common cases.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.6.1
  */
 public class DisplayItems {
 
-    public static ComplexDisplayItem convert(Contact contact) {
-        String displayName = extractDisplayName(contact);
+    /**
+     * Converts the specified {@link Contact} result into a {@link ComplexDisplayItem}
+     *
+     * @param contact the {@link Contact} to convert
+     * @param locale the user's {@link Locale}
+     * @param i18nServiceRegistry The instance of the {@link I18nServiceRegistry}
+     * @return The {@link ComplexDisplayItem}
+     */
+    public static ComplexDisplayItem convert(Contact contact, Locale locale, I18nServiceRegistry i18nServiceRegistry) {
+        String displayName = ContactDisplayNameHelper.formatDisplayName(i18nServiceRegistry, contact, locale);
         String primaryAddress = extractPrimaryMailAddress(contact);
         if (Strings.isEmpty(displayName)) {
-            if (Strings.isEmpty(primaryAddress)) {
-                displayName = "";
-            } else {
-                displayName = primaryAddress;
-            }
+            displayName = Strings.isEmpty(primaryAddress) ? "" : primaryAddress;
         }
 
         ComplexDisplayItem item = new ComplexDisplayItem(displayName, primaryAddress);
@@ -83,33 +90,16 @@ public class DisplayItems {
         if (imageData != null) {
             item.setImageData(imageData.getFirst(), imageData.getSecond());
         }
+
         return item;
     }
 
-    private static String extractDisplayName(Contact contact) {
-        StringBuilder sb = new StringBuilder(64);
-        String displayName = contact.getDisplayName();
-        if (Strings.isEmpty(displayName)) {
-            String surName = contact.getSurName();
-            String givenName = contact.getGivenName();
-            if (Strings.isEmpty(surName)) {
-                if (!Strings.isEmpty(givenName)) {
-                    sb.append(givenName);
-                }
-            } else {
-                if (Strings.isEmpty(givenName)) {
-                    sb.append(surName);
-                } else {
-                    sb.append(surName).append(", ").append(givenName);
-                }
-            }
-        } else {
-            sb.append(displayName);
-        }
-
-        return sb.toString();
-    }
-
+    /**
+     * Extracts the primary e-mail address of the specified {@link Contact}.
+     *
+     * @param contact The {@link Contact} to extract the e-mail address from
+     * @return The primary e-mail address
+     */
     private static String extractPrimaryMailAddress(Contact contact) {
         String address = contact.getEmail1();
         if (Strings.isEmpty(address)) {

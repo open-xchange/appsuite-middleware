@@ -56,13 +56,14 @@ import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.SubfolderAwareShareInfo;
 
 /**
  * {@link DefaultDriveShareInfo}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DefaultDriveShareInfo implements DriveShareInfo {
+public class DefaultDriveShareInfo implements DriveShareInfo, SubfolderAwareShareInfo {
 
     private final ShareInfo shareInfo;
     private final DriveShareTarget driveTarget;
@@ -91,6 +92,11 @@ public class DefaultDriveShareInfo implements DriveShareInfo {
     @Override
     public ShareTarget getDestinationTarget() {
         return shareInfo.getDestinationTarget();
+    }
+
+    @Override
+    public boolean isIncludeSubfolders() {
+        return shareInfo instanceof SubfolderAwareShareInfo ? ((SubfolderAwareShareInfo) shareInfo).isIncludeSubfolders() : false;
     }
 
 }

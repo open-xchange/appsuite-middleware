@@ -186,13 +186,12 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
 
     /** %1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation of %2$s */
     WARNINGS_AND_TRUNCATED_RESULTS("%1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation of %2$s", CATEGORY_WARNING, 1322, ImportExportExceptionMessages.WARNINGS_AND_TRUNCATED_RESULTS_MSG),
-
     ;
 
-    private String message;
-    private Category category;
-    private int number;
-    private String displayMessage;
+    private final String message;
+    private final Category category;
+    private final int number;
+    private final String displayMessage;
 
     private ImportExportExceptionCodes(final String message, final Category category, final int number, String displayMessage) {
         this.message = message;

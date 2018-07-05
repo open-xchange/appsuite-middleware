@@ -54,6 +54,8 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
@@ -77,7 +79,8 @@ public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivato
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailService.class, ConfigViewFactory.class };
+        return new Class<?>[] { MailService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class,
+            SSLConfigurationService.class };
     }
 
     @Override

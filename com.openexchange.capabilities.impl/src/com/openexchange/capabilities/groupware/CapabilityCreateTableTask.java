@@ -49,19 +49,16 @@
 
 package com.openexchange.capabilities.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.capabilities.osgi.CapabilitiesActivator;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CapabilityCreateTableTask}
@@ -79,33 +76,28 @@ public class CapabilityCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = CapabilitiesActivator.SERVICES.get().getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
         PreparedStatement stmt = null;
         boolean rollback = false;
         boolean restoreAutoCommit = false;
         try {
-            writeCon.setAutoCommit(false); // BEGIN
+            con.setAutoCommit(false); // BEGIN
             restoreAutoCommit = true;
             rollback = true;
             final String[] tableNames = CapabilityCreateTableService.getTablesToCreate();
             final String[] createStmts = CapabilityCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
                 try {
-                    if (tableExists(writeCon, tableNames[i])) {
+                    if (tableExists(con, tableNames[i])) {
                         continue;
                     }
-                    stmt = writeCon.prepareStatement(createStmts[i]);
+                    stmt = con.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();
                 } catch (final SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }
-            writeCon.commit(); // COMMIT
+            con.commit(); // COMMIT
             rollback = false;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -113,13 +105,12 @@ public class CapabilityCreateTableTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(writeCon);
+                Databases.rollback(con);
             }
             closeSQLStuff(stmt);
             if (restoreAutoCommit) {
-                DBUtils.autocommit(writeCon);
+                Databases.autocommit(con);
             }
-            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 

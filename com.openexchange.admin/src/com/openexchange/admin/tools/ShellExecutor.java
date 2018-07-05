@@ -56,23 +56,19 @@ import java.util.ArrayList;
 
 public class ShellExecutor {
 
-    public class ArrayOutput {
+    public static class ArrayOutput {
 
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
         @Override
         public String toString() {
-            String ret = "";
-            ret = "Stdout:\n";
+            StringBuilder ret = new StringBuilder("Stdout:\n");
             for(final String line : stdOutput) {
-                ret += line+"\n";
+                ret.append(line).append("\n");
             }
-            ret += "Stderr:\n";
+            ret.append("Stderr:\n");
             for(final String line : errOutput) {
-                ret += line+"\n";
+                ret.append(line).append("\n");
             }
-            return ret;
+            return ret.toString();
         }
 
         public final ArrayList<String> errOutput = new ArrayList<String>();

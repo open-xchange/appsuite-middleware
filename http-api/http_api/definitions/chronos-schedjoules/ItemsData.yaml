@@ -1,0 +1,9 @@
+type: array
+items:
+  type: object
+  properties:
+    item:
+      $ref: "#/definitions/ItemData"
+    item_class:
+      type: string
+      description: The item's class. Either 'page' or 'calendar'

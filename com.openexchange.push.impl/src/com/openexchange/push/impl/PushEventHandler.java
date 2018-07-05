@@ -49,14 +49,12 @@
 
 package com.openexchange.push.impl;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -74,7 +72,7 @@ public final class PushEventHandler implements EventHandler {
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushEventHandler.class);
 
     /** The topics to consider as an added session */
-    protected static final Set<String> CONSIDER_ADDED = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(SessiondEventConstants.TOPIC_ADD_SESSION, SessiondEventConstants.TOPIC_REACTIVATE_SESSION, SessiondEventConstants.TOPIC_RESTORED_SESSION)));
+    protected static final Set<String> CONSIDER_ADDED = ImmutableSet.of(SessiondEventConstants.TOPIC_ADD_SESSION, SessiondEventConstants.TOPIC_REACTIVATE_SESSION, SessiondEventConstants.TOPIC_RESTORED_SESSION);
 
     /**
      * Initializes a new {@link PushEventHandler}.

@@ -1,23 +1,28 @@
 package liquibase.diff.compare;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
-
-import java.util.*;
 
 public class DatabaseObjectComparatorFactory {
 
     private static DatabaseObjectComparatorFactory instance;
 
-    private List<DatabaseObjectComparator> comparators = new ArrayList<DatabaseObjectComparator>();
+    private final List<DatabaseObjectComparator> comparators = new ArrayList<DatabaseObjectComparator>();
 
-    private Map<String, List<DatabaseObjectComparator>> validComparatorsByClassAndDatabase = new HashMap<String, List<DatabaseObjectComparator>>();
-    private Map<String, DatabaseObjectComparatorChain> comparatorChainsByClassAndDatabase = new HashMap<String, DatabaseObjectComparatorChain>();
+    private final Map<String, List<DatabaseObjectComparator>> validComparatorsByClassAndDatabase = new HashMap<String, List<DatabaseObjectComparator>>();
+    private final Map<String, DatabaseObjectComparatorChain> comparatorChainsByClassAndDatabase = new HashMap<String, DatabaseObjectComparatorChain>();
 
     private DatabaseObjectComparatorFactory() {
         Class[] classes;
@@ -132,7 +137,8 @@ public class DatabaseObjectComparatorFactory {
     public String[] hash(DatabaseObject databaseObject, Database accordingTo) {
         String[] hash = null;
         if (databaseObject != null) {
-            hash = createComparatorChain(databaseObject.getClass(), accordingTo).hash(databaseObject, accordingTo);
+            DatabaseObjectComparatorChain comparatorChain = createComparatorChain(databaseObject.getClass(), accordingTo);
+            hash = null == comparatorChain ? null : comparatorChain.hash(databaseObject, accordingTo);
         }
 
         if (hash == null) {

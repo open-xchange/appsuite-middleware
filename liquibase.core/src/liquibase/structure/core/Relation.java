@@ -1,10 +1,9 @@
 package liquibase.structure.core;
 
-import liquibase.structure.AbstractDatabaseObject;
-import liquibase.structure.DatabaseObject;
-
 import java.util.ArrayList;
 import java.util.List;
+import liquibase.structure.AbstractDatabaseObject;
+import liquibase.structure.DatabaseObject;
 
 /**
  * A container of columns. Usually a table or view.
@@ -84,7 +83,8 @@ public abstract class Relation extends AbstractDatabaseObject {
         return setSchema(new Schema(catalog, schema));
     }
 
-    public int compareTo(Relation o) {
+    @Override
+    public int compareTo(DatabaseObject o) {
         return this.getName().compareToIgnoreCase(o.getName());
     }
 

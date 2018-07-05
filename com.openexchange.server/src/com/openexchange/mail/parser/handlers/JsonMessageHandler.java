@@ -55,6 +55,7 @@ import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
@@ -73,7 +74,8 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -91,23 +93,30 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
+import com.openexchange.mail.authenticity.CustomPropertyJsonHandler;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
+import com.openexchange.mail.config.MailAccountProperties;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecurityInfo;
 import com.openexchange.mail.dataobjects.SecurityResult;
 import com.openexchange.mail.dataobjects.SignatureResult;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -124,6 +133,9 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.filename.FileNameTools;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.procedure.TCharProcedure;
+import gnu.trove.set.TCharSet;
+import gnu.trove.set.hash.TCharHashSet;
 
 /**
  * {@link JsonMessageHandler} - Generates a JSON message representation considering user-sensitive data.
@@ -159,6 +171,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String ORIGINAL_FOLDER_ID = MailJSONField.ORIGINAL_FOLDER_ID.getKey();
     private static final String SECURITY = MailJSONField.SECURITY.getKey();
     private static final String SECURITY_INFO = MailJSONField.SECURITY_INFO.getKey();
+    private static final String TEXT_PREVIEW = MailJSONField.TEXT_PREVIEW.getKey();
+    private static final String AUTHENTICATION_RESULTS = MailJSONField.AUTHENTICITY.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
     private static final String SANITIZED = "sanitized";
@@ -167,8 +181,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String MULTIPART_ID = "___MP-ID___";
 
     private static final String HTML_PREFIX = HtmlExceptionCodes.PREFIX;
-
-    //    private static final int DEFAULT_MAX_NESTED_MESSAGES_LEVELS = 10;
 
     private static final class PlainTextContent {
 
@@ -232,6 +244,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     } // End of class MultipartInfo
 
+    // -----------------------------------------------------------------------------------------------------------------
+
     private final List<OXException> warnings;
     private final Session session;
     private final Context ctx;
@@ -255,6 +269,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private String tokenMailId;
     private final boolean token;
     private final int ttlMillis;
+    private final boolean sanitize;
     private final boolean embedded;
     private final boolean asMarkup;
     private boolean attachHTMLAlternativePart;
@@ -264,6 +279,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private int currentNestingLevel = 0;
     private final int maxNestedMessageLevels;
     private String initialiserSequenceId;
+    private final IMailProperties mailProperties;
 
     /**
      * Initializes a new {@link JsonMessageHandler}
@@ -278,7 +294,24 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(int accountId, String mailPath, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis) throws OXException {
-        this(accountId, new MailPath(mailPath), null, displayMode, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1, -1);
+        this(accountId, new MailPath(mailPath), null, displayMode, true, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1);
+    }
+
+    /**
+     * Initializes a new {@link JsonMessageHandler}
+     *
+     * @param accountId The account ID
+     * @param mailPath The unique mail path
+     * @param displayMode The display mode
+     * @param sanitize Whether HTML/CSS content is supposed to be sanitized (against white-list)
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
+     * @param session The session providing needed user data
+     * @param usm The mail settings used for preparing message content if <code>displayVersion</code> is set to <code>true</code>; otherwise it is ignored.
+     * @throws OXException If JSON message handler cannot be initialized
+     */
+    public JsonMessageHandler(int accountId, String mailPath, DisplayMode displayMode, boolean sanitize, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis) throws OXException {
+        this(accountId, new MailPath(mailPath), null, displayMode, sanitize, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1);
     }
 
     /**
@@ -297,7 +330,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis) throws OXException {
-        this(accountId, mailPath, mail, displayMode, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1, -1);
+        this(accountId, mailPath, mail, displayMode, true, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1);
     }
 
     /**
@@ -307,6 +340,27 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @param mailPath The unique mail path
      * @param mail The mail message to add JSON fields not set by message parser traversal
      * @param displayMode The display mode
+     * @param sanitize Whether HTML/CSS content is supposed to be sanitized (against white-list)
+     * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
+     * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
+     * @param session The session providing needed user data
+     * @param usm The mail settings used for preparing message content if <code>displayVersion</code> is set to <code>true</code>; otherwise it is ignored.
+     * @param token <code>true</code> to add attachment tokens
+     * @param ttlMillis The tokens' timeout
+     * @throws OXException If JSON message handler cannot be initialized
+     */
+    public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean sanitize, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis) throws OXException {
+        this(accountId, mailPath, mail, displayMode, sanitize, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1);
+    }
+
+    /**
+     * Initializes a new {@link JsonMessageHandler}
+     *
+     * @param accountId The account ID
+     * @param mailPath The unique mail path
+     * @param mail The mail message to add JSON fields not set by message parser traversal
+     * @param displayMode The display mode
+     * @param sanitize Whether HTML/CSS content is supposed to be sanitized (against white-list)
      * @param embedded <code>true</code> for embedded display (CSS prefixed, &lt;body&gt; replaced with &lt;div&gt;); otherwise <code>false</code>
      * @param asMarkup <code>true</code> if the content is supposed to be rendered as HTML (be it HTML or plain text); otherwise <code>false</code> to keep content as-is (plain text is left as such)
      * @param session The session providing needed user data
@@ -317,8 +371,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @param maxNestedMessageLevels The number of levels in which deep-parsing of nested messages takes place; otherwise only ID information is set; '<=0' falls back to default value (10)
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
-        this(accountId, mailPath, mail, displayMode, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, maxContentSize, maxNestedMessageLevels);
+    public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean sanitize, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+        this(accountId, mailPath, mail, displayMode, sanitize, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, maxContentSize);
     }
 
     private static Context getContext(final Session session) throws OXException {
@@ -331,10 +385,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JsonMessageHandler} for internal usage
      */
-    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean sanitize, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize) throws OXException {
         super();
         this.warnings = new LinkedList<>();
         this.multiparts = new LinkedList<MultipartInfo>();
+        this.sanitize = sanitize;
         this.embedded = DisplayMode.DOCUMENT.equals(displayMode) ? false : embedded;
         this.asMarkup = asMarkup;
         this.attachHTMLAlternativePart = !usm.isSuppressHTMLAlternativePart();
@@ -343,13 +398,14 @@ public final class JsonMessageHandler implements MailMessageHandler {
         this.accountId = accountId;
         this.modified = new boolean[1];
         this.session = session;
+        this.mailProperties = new MailAccountProperties(null, session.getUserId(), session.getContextId());
         this.ctx = ctx;
         this.usm = usm;
         this.displayMode = displayMode;
         this.mailPath = mailPath;
         this.maxContentSize = maxContentSize;
         this.jsonObject = new JSONObject(32);
-        this.maxNestedMessageLevels = 1; //maxNestedMessageLevels <= 0 ? DEFAULT_MAX_NESTED_MESSAGES_LEVELS : maxNestedMessageLevels;
+        this.maxNestedMessageLevels = 1;
         try {
             if (DisplayMode.MODIFYABLE.equals(this.displayMode) && null != mailPath) {
                 jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
@@ -370,22 +426,29 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (unreadMessages >= 0) {
                     jsonObject.put(UNREAD, unreadMessages);
                 }
-                if (mail.containsHasAttachment()) {
-                    // jsonObject.put(HAS_ATTACHMENTS, mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
-                    // See bug 42695 & 42862
-                    jsonObject.put(HAS_ATTACHMENTS, mail.hasAttachment());
-                }
+                jsonObject.put(HAS_ATTACHMENTS, mail.hasAttachment());
                 jsonObject.put(CONTENT_TYPE, mail.getContentType().getBaseType());
                 jsonObject.put(SIZE, mail.getSize());
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
                 jsonObject.put(MALICIOUS, usm.isSuppressLinks());
+                if (mail.containsTextPreview()) {
+                    jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
+                }
+                MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
+                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? null : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
                 // Guard info
                 if (mail.containsSecurityInfo()) {
-                    jsonObject.put(SECURITY_INFO, securityInfoToJSON(mail.getSecurityInfo()));
+                    SecurityInfo securityInfo = mail.getSecurityInfo();
+                    if (null != securityInfo) {
+                        jsonObject.put(SECURITY_INFO, securityInfoToJSON(securityInfo));
+                    }
                 }
                 if (mail.hasSecurityResult()) {
-                    jsonObject.put(SECURITY, securityResultToJSON(mail.getSecurityResult()));
+                    SecurityResult securityResult = mail.getSecurityResult();
+                    if (null != securityResult) {
+                        jsonObject.put(SECURITY, securityResultToJSON(securityResult));
+                    }
                 }
 
                 this.initialiserSequenceId = mail.getSequenceId();
@@ -445,7 +508,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     /**
-     * Create the JSON representation for this <code>SecurityInfo</code> object.
+     * Creates the JSON representation for specified <code>SecurityInfo</code> instance.
      *
      * @return The JSON representation
      * @throws JSONException If JSON representation cannot be returned
@@ -458,10 +521,98 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     /**
+     * Creates the JSON representation of the essential information for the specified {@link MailAuthenticityResult} instance.
+     * That is the <code>status</code> and the <code>trustedDomain</code> (if present)
+     *
+     * @param authenticityResult The authenticity result to create the JSON representation for
+     * @return The JSON representation or <code>null</code> if no authenticity result available
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public static JSONObject authenticityOverallResultToJson(MailAuthenticityResult authenticityResult) throws JSONException {
+        if (null == authenticityResult) {
+            return null;
+        }
+
+        JSONObject result = new JSONObject(2);
+        result.put("status", authenticityResult.getStatus().getTechnicalName());
+        if (MailAuthenticityStatus.TRUSTED.equals(authenticityResult.getStatus()) && authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE) != null) {
+            result.put("image", authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE));
+        }
+        return result;
+    }
+
+    /**
+     * Creates the JSON representation for specified <code>MailAuthenticityResult</code> instance.
+     *
+     * @param authenticityResult The authenticity result to create the JSON representation for
+     * @return The JSON representation or <code>null</code> if no authenticity result available
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    @SuppressWarnings("unchecked")
+    public static JSONObject authenticationMechanismResultsToJson(MailAuthenticityResult authenticityResult) throws JSONException {
+        if (null == authenticityResult) {
+            return null;
+        }
+
+        JSONObject result;
+        Map<MailAuthenticityResultKey, Object> attributes = authenticityResult.getAttributes();
+        int numOfAttributes = attributes.size();
+        if (numOfAttributes > 0) {
+            result = new JSONObject(numOfAttributes);
+            JSONArray unconsideredResults = new JSONArray();
+            for (Entry<MailAuthenticityResultKey, Object> entry : attributes.entrySet()) {
+                if (!entry.getKey().isVisible()) {
+                    continue;
+                }
+                Object object = entry.getValue();
+                if (object instanceof Collection<?>) {
+                    Collection<?> col = (Collection<?>) object;
+
+                    for (Object o : col) {
+                        if (o instanceof MailAuthenticityMechanismResult) {
+                            MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
+                            JSONObject mailAuthMechResultJson = new JSONObject();
+                            mailAuthMechResultJson.put("result", mechResult.getResult().getTechnicalName());
+                            mailAuthMechResultJson.put("reason", mechResult.getReason());
+                            for (String k : mechResult.getProperties().keySet()) {
+                                mailAuthMechResultJson.put(k, mechResult.getProperties().get(k));
+                            }
+                            result.put(mechResult.getMechanism().getTechnicalName(), mailAuthMechResultJson);
+                        } else if (o instanceof Map) {
+                            unconsideredResults.put(JSONCoercion.coerceToJSON(o));
+                        } else {
+                            unconsideredResults.put(o);
+                        }
+                    }
+                } else {
+                    result.put(entry.getKey().getKey(), entry.getValue());
+                }
+            }
+            if (MailAuthenticityStatus.TRUSTED.equals(authenticityResult.getStatus()) && authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE) != null) {
+                result.put("image", authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE));
+            }
+            result.put("unconsidered_results", unconsideredResults);
+        } else {
+            result = new JSONObject();
+        }
+
+        result.put("status", authenticityResult.getStatus().getTechnicalName());
+
+        if (numOfAttributes > 0) {
+            CustomPropertyJsonHandler customPropertyJsonHandler = MailJSONActivator.SERVICES.get().getOptionalService(CustomPropertyJsonHandler.class);
+            if (customPropertyJsonHandler != null) {
+                result.put("custom", customPropertyJsonHandler.toJson(authenticityResult.getAttribute(MailAuthenticityResultKey.CUSTOM_PROPERTIES, Map.class)));
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Sets whether to set the exact length of mail parts.
      *
      * @param exactLength <code>true</code> to set the exact length of mail parts; otherwise use mail system's size estimation
-     * @return This {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behaviour applied
      */
     public JsonMessageHandler setSizePolicy(final SizePolicy sizePolicy) {
         this.sizePolicy = sizePolicy;
@@ -472,7 +623,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Sets whether the HTML part of a <i>multipart/alternative</i> content shall be attached.
      *
      * @param attachHTMLAlternativePart Whether the HTML part of a <i>multipart/alternative</i> content shall be attached
-     * @return This {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behaviour applied
      */
     public JsonMessageHandler setAttachHTMLAlternativePart(final boolean attachHTMLAlternativePart) {
         this.attachHTMLAlternativePart = attachHTMLAlternativePart;
@@ -483,7 +634,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Sets whether to include raw plain-text in generated JSON object.
      *
      * @param includePlainText <code>true</code> to include raw plain-text; otherwise <code>false</code>
-     * @return This {@link JsonMessageHandler} with new behavior applied
+     * @return This {@link JsonMessageHandler} with new behaviour applied
      */
     public JsonMessageHandler setIncludePlainText(final boolean includePlainText) {
         this.includePlainText = includePlainText;
@@ -736,7 +887,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     int priority = MailMessage.PRIORITY_NORMAL;
                     if (null != entry.getValue()) {
-                        priority = MimeMessageConverter.parseImportance(entry.getValue());
+                        priority = MimeMessageUtility.parseImportance(entry.getValue());
                         jsonObject.put(PRIORITY, priority);
                     }
                 } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(headerName)) {
@@ -746,7 +897,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                          */
                         int priority = MailMessage.PRIORITY_NORMAL;
                         if (null != entry.getValue()) {
-                            priority = MimeMessageConverter.parsePriority(entry.getValue());
+                            priority = MimeMessageUtility.parsePriority(entry.getValue());
                         }
                         jsonObject.put(PRIORITY, priority);
                     }
@@ -852,11 +1003,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                         }
                     }
-
-                    return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id, considerAsInline);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
+            }
+        }
+
+        // Swallow images with Content-Disposition simply set to "inline" having no file name
+        if (mailProperties.hideInlineImages()) {
+            String disposition = part.containsContentDisposition() ? part.getContentDisposition().getDisposition() : null;
+            boolean hideImage = Part.INLINE.equalsIgnoreCase(disposition) && null == part.getFileName();
+            if (hideImage && DisplayMode.DISPLAY.getMode() <= displayMode.getMode()) {
+                return true;
             }
         }
 
@@ -934,7 +1092,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                 String content = jAttachment.optString(CONTENT, "null");
                                 if (!"null".equals(content) && null != mailPath) {
                                     // Append to first one
-                                    HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, embedded, asMarkup, maxContentSize);
+                                    HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, sanitize, embedded, asMarkup, maxContentSize);
                                     content = new StringBuilder(content).append(sanitizeResult.getContent()).toString();
                                     jAttachment.put(CONTENT, content);
                                     return true;
@@ -978,7 +1136,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             String content = jAttachment.optString(CONTENT, "null");
                             if (!"null".equals(content) && null != mailPath) {
                                 // Append to first one
-                                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, embedded, asMarkup, maxContentSize);
+                                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, contentType.getCharsetParameter(), session, mailPath, originalMailPath, usm, modified, displayMode, sanitize, embedded, asMarkup, maxContentSize);
                                 content = new StringBuilder(content).append(sanitizeResult.getContent()).toString();
                                 jAttachment.put(CONTENT, content);
                                 return true;
@@ -1232,10 +1390,25 @@ public final class JsonMessageHandler implements MailMessageHandler {
             final JSONObject jsonObject = new JSONObject(8);
             jsonObject.put(ID, id);
             String contentType = MimeTypes.MIME_APPL_OCTET;
-            final String filename = part.getFileName();
+            String filename = part.getFileName();
             try {
-                final Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
-                contentType = MimeType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
+                TCharSet separators = new TCharHashSet(new char[] {'/', '\\', File.separatorChar});
+                final String fn = filename;
+                boolean containsSeparatorChar = false == separators.forEach(new TCharProcedure() {
+
+                    @Override
+                    public boolean execute(char separator) {
+                        return fn.indexOf(separator) < 0;
+                    }
+                });
+
+                File file = new File(filename);
+                if (containsSeparatorChar) {
+                    filename = file.getName();
+                    file = new File(filename);
+                }
+
+                contentType = Strings.asciiLowerCase(MimeType2ExtMap.getContentType(file.getName()));
             } catch (final Exception e) {
                 final Throwable t = new Throwable(new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
                 LOG.warn("", t);
@@ -1388,7 +1561,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
 
                 // Generate a dedicated JsonMessageHandler instance to parse the nested message
-                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, embedded, asMarkup, session, usm, ctx, token, ttlMillis, maxContentSize, maxNestedMessageLevels);
+                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, sanitize, embedded, asMarkup, session, usm, ctx, token, ttlMillis, maxContentSize);
                 msgHandler.setTimeZone(timeZone);
                 msgHandler.includePlainText = includePlainText;
                 msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
@@ -1503,10 +1676,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Check ICal part for a valid METHOD and its presence in Content-Type header
              */
-            final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
-            if (iCalParser != null) {
+            final ICalService iCalService = ServerServiceRegistry.getInstance().getService(ICalService.class);
+            if (iCalService != null) {
                 try {
-                    final String method = iCalParser.parseProperty("METHOD", part.getInputStream());
+                    final String method = iCalService.getUtilities().parsePropertyValue(part.getInputStream(), "METHOD", null);
                     if (null != method) {
                         /*
                          * Assume an iTIP response or request
@@ -1692,7 +1865,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
             HtmlSanitizeResult sanitizeResult;
             try {
-                sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, originalMailPath, usm, modified, displayMode, embedded, asMarkup, maxContentSize);
+                sanitizeResult = HtmlProcessing.formatHTMLForDisplay(htmlContent, charset, session, mailPath, originalMailPath, usm, modified, displayMode, sanitize, embedded, asMarkup, maxContentSize);
                 jsonObject.put(CONTENT_TYPE, baseContentType);
             } catch (OXException e) {
                 if (!HTML_PREFIX.equals(e.getPrefix())) {

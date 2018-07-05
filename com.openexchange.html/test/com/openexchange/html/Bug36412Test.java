@@ -74,10 +74,8 @@ public class Bug36412Test {
     public void setUp() {
         Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
 
-        @SuppressWarnings("unchecked")
-        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
-        @SuppressWarnings("unchecked")
-        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+        @SuppressWarnings("unchecked") final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked") final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
 
         htmlEntityMap.put("apos", Character.valueOf('\''));
 
@@ -85,22 +83,21 @@ public class Bug36412Test {
     }
 
     @After
-    public void tearDown()
- {
+    public void tearDown() {
         service = null;
     }
 
-     @Test
-     public void testKeepUnicode() throws Exception {
-        String content = "              <table><tr>\n" +
-            "                            <td border=\"1\" class=\"webseminare\"\n" +
-            "                              font-size:14px;=\"\" line-height:=\"\"\n" +
-            "                              18px;\"=\"\" height=\"39\" valign=\"middle\"\n" +
-            "                              align=\"center\" bgcolor=\"#346897\">Web Seminare</td>\n" +
-            "                          </tr></table>";
-        String test = service.sanitize(content, null, true, null, null);
+    @Test
+    public void testKeepUnicode() throws Exception {
+       String content = "              <table><tr>\n" +
+           "                            <td border=\"1\" class=\"webseminare\"\n" +
+           "                              font-size:14px;=\"\" line-height:=\"\"\n" +
+           "                              18px;\"=\"\" height=\"39\" valign=\"middle\"\n" +
+           "                              align=\"center\" bgcolor=\"#346897\">Web Seminare</td>\n" +
+           "                          </tr></table>";
+       String test = service.sanitize(content, null, true, null, null);
+       Assert.assertTrue("Unexpected return value.", test.indexOf("<td class=\"webseminare\" height=\"39\" valign=\"middle\" align=\"center\" bgcolor=\"#346897\">") > 0);
+       Assert.assertTrue("Unexpected return value.", test.indexOf("Web Seminare") > 0);
+   }
 
-        Assert.assertTrue("Unexpected return value.", test.indexOf("<td class=\"webseminare\" height=\"39\" valign=\"middle\" align=\"center\" bgcolor=\"#346897\">") > 0);
-        Assert.assertTrue("Unexpected return value.", test.indexOf("Web Seminare") > 0);
-    }
 }

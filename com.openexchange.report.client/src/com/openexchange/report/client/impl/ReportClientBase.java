@@ -49,6 +49,12 @@
 
 package com.openexchange.report.client.impl;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.F;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -186,6 +192,7 @@ public class ReportClientBase extends AbstractJMXTools {
     private CLIOption timeframeEnd = null;
 
     // After changing to appsuite report as default -x does nothing. To be backward compatible -x will still be accepted.
+    @SuppressWarnings("unused")
     private CLIOption runAndDeliverAsReport = null;
 
     private CLIOption runAndDeliverOldReport = null;
@@ -194,7 +201,7 @@ public class ReportClientBase extends AbstractJMXTools {
 
     public enum ReportMode {
         SENDONLY, DISPLAYONLY, SAVEONLY, MULTIPLE, DISPLAYANDSEND, NONE
-    };
+    }
 
     @Override
     protected void furtherOptionsHandling(final AdminParser parser, final Map<String, String[]> env) {
@@ -491,9 +498,9 @@ public class ReportClientBase extends AbstractJMXTools {
                     if (null != shortName) {
                         final int bit = f.getInt(clazz);
                         if ((bit & accCombi) == bit) {
-                            System.out.printf("%c[32m%35s: on%c[0m\n", 27, shortName, 27);
+                            System.out.printf("%c[32m%35s: on%c[0m%n", I(27), shortName, I(27));
                         } else {
-                            System.out.printf("%c[31m%35s: off%c[0m\n", 27, shortName, 27);
+                            System.out.printf("%c[31m%35s: off%c[0m%n", I(27), shortName, I(27));
                         }
                     }
                 }
@@ -528,10 +535,10 @@ public class ReportClientBase extends AbstractJMXTools {
      * Retrieve a last report of the given type and determine further actions depending on the given {@link ReportMode}
      * what should be done with the report.
      * 
-     * @param reportType, the report type to retrieve
-     * @param mode, the report mode
-     * @param savereport, save this report
-     * @param server, server connection used to invoke report getting methods
+     * @param reportType the report type to retrieve
+     * @param mode the report mode
+     * @param savereport save this report
+     * @param server server connection used to invoke report getting methods
      */
     protected void getASReport(Object reportType, ReportMode mode, boolean savereport, MBeanServerConnection server) {
         if (reportType == null) {
@@ -556,7 +563,7 @@ public class ReportClientBase extends AbstractJMXTools {
                     Iterator<?> keys = errors.keys();
                     while (keys.hasNext()) {
                         String key = (String) keys.next();
-                        Object object = (String) errors.get(key);
+                        Object object = errors.get(key);
                         if (object instanceof String) {
                             System.out.println(errors.get(key));
                         }
@@ -601,23 +608,16 @@ public class ReportClientBase extends AbstractJMXTools {
     /**
      * Generate a report with the given parameters and wait until its finished.
      * 
-     * @param reportType, the report type
-     * @param mode, the mode of report generation
-     * @param silent, should the current status of the report be displayed on the console
-     * @param savereport, save the report to disc or not
-     * @param server, the server connection
-     * @param isCustomTimerange, does this report have a custom timerange
-     * @param start, starting date of the report
-     * @param end, end date of the report
-     * @param isShowSingleTenant, should a report be generated for only one tenant
-     * @param singleTenantId, the id of the tenants admin
-     * @param isIgnoreAdmin, should admin users be ignored
-     * @param isShowDriveMetrics, calculate drive metrics
-     * @param isShowMailMetrics, calculate mail metrics
+     * @param mode the mode of report generation
+     * @param silent should the current status of the report be displayed on the console
+     * @param savereport save the report to disc or not
+     * @param server the server connection
      */
     private void runAndDeliverASReport(ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, ReportConfigs reportConfig) {
         try {
-            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), reportConfig.isSingleDeployment(), reportConfig.isConfigTimerange(), reportConfig.getConsideredTimeframeStart(), reportConfig.getConsideredTimeframeEnd() }, new String[] { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName() });
+            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), B(reportConfig.isSingleDeployment()), B(reportConfig.isConfigTimerange()), L(reportConfig.getConsideredTimeframeStart()),
+                L(reportConfig.getConsideredTimeframeEnd()) }, new String[]
+                { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName() });
 
             // Start polling
             boolean done = false;
@@ -662,31 +662,31 @@ public class ReportClientBase extends AbstractJMXTools {
      * Time | uuid | context/totalContexts | percent | how long the report has been running
      * 13:58:43, 058b5dafb1ec4911917c24290b04b97b: 1/1 (100,00 %) ETA: 0 milliseconds
      * 
-     * @param report
-     * @return
+     * @param report The {@link CompositeData}
+     * @return The length of the written String
      */
     private int printStatusLine(CompositeData report) {
-        Long start = (Long) report.get("startTime");
-        Long now = System.currentTimeMillis();
+        long start = ((Long) report.get("startTime")).longValue();
+        long now = System.currentTimeMillis();
 
         long elapsedTime = now - start;
 
         Integer totalContexts = (Integer) report.get("tasks");
         Integer pendingContexts = (Integer) report.get("pendingTasks");
 
-        int finishedContexts = totalContexts - pendingContexts;
+        Integer finishedContexts = I(i(totalContexts) - i(pendingContexts));
 
         long timePerContext = -1;
-        if (finishedContexts > 0) {
-            timePerContext = elapsedTime / finishedContexts;
+        if (i(finishedContexts) > 0) {
+            timePerContext = elapsedTime / i(finishedContexts);
         }
 
         StringBuilder b = new StringBuilder();
         b.append(getCurrentTimeStamp() + ", ");
         b.append(report.get("uuid")).append(": ");
-        b.append(String.format("%d/%d (%.2f %%) ", finishedContexts, totalContexts, ((float) finishedContexts / totalContexts) * 100f));
+        b.append(String.format("%d/%d (%.2f %%) ", finishedContexts, totalContexts, Float.valueOf((finishedContexts.floatValue() / totalContexts.floatValue()) * 100f)));
         if (timePerContext > 0) {
-            b.append("ETA: " + prettyPrintTimeInterval(timePerContext * pendingContexts));
+            b.append("ETA: " + prettyPrintTimeInterval(timePerContext * pendingContexts.longValue()));
         }
 
         System.out.print(b);
@@ -713,8 +713,8 @@ public class ReportClientBase extends AbstractJMXTools {
     /**
      * Cancel a report of the given type.
      * 
-     * @param reportType, the type of the report
-     * @param server, the server connection
+     * @param reportType the type of the report
+     * @param server the server connection
      */
     private void cancelASReports(Object reportType, MBeanServerConnection server) {
         if (reportType == null) {
@@ -742,8 +742,8 @@ public class ReportClientBase extends AbstractJMXTools {
     /**
      * Get the status of the current running report of the given type.
      * 
-     * @param reportType, the type of the report
-     * @param server, the server connection
+     * @param reportType the type of the report
+     * @param server the server connection
      */
     private void inspectASReports(Object reportType, MBeanServerConnection server) {
         if (reportType == null) {
@@ -768,11 +768,9 @@ public class ReportClientBase extends AbstractJMXTools {
     /**
      * Run a report with the given report type and print out the uuid only. Additionally a custom timerange can be set
      * 
-     * @param reportType, the type of the report
-     * @param server, the server connection
-     * @param isCustomTimerange, should this report have a custom timerange
-     * @param start, starting date of the timerange
-     * @param end, ending time of the timerange
+     * @param reportType the type of the report
+     * @param server the server connection
+     * @param reportConfig The {@link ReportConfigs}
      */
     private void runASReport(Object reportType, MBeanServerConnection server, ReportConfigs reportConfig) {
         if (reportType == null) {
@@ -780,7 +778,9 @@ public class ReportClientBase extends AbstractJMXTools {
         }
         try {
             String uuid = "";
-            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), reportConfig.isSingleDeployment(), reportConfig.isConfigTimerange(), reportConfig.getConsideredTimeframeStart(), reportConfig.getConsideredTimeframeEnd() }, new String[] { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName() });
+            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), B(reportConfig.isSingleDeployment()), B(reportConfig.isConfigTimerange()), L(reportConfig.getConsideredTimeframeStart()),
+                L(reportConfig.getConsideredTimeframeEnd()) }, new String[]
+                { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName() });
             System.out.println("\nRunning report with uuid: " + uuid);
         } catch (Exception e) {
             e.printStackTrace();
@@ -791,39 +791,39 @@ public class ReportClientBase extends AbstractJMXTools {
     /**
      * Print a given reports header with probable time left.
      * 
-     * @param compositeData
+     * @param compositeData The {@link CompositeData}
      */
     private void printASDiagnostics(CompositeData compositeData) {
-        Long start = (Long) compositeData.get("startTime");
-        Long now = System.currentTimeMillis();
+        long start = l((Long) compositeData.get("startTime"));
+        long now = System.currentTimeMillis();
 
         long elapsedTime = now - start;
 
         Integer totalContexts = (Integer) compositeData.get("tasks");
         Integer pendingContexts = (Integer) compositeData.get("pendingTasks");
 
-        int finishedContexts = totalContexts - pendingContexts;
+        Integer finishedContexts = I(i(totalContexts) - i(pendingContexts));
 
         long timePerContext = -1;
-        if (finishedContexts > 0) {
-            timePerContext = elapsedTime / finishedContexts;
+        if (i(finishedContexts) > 0) {
+            timePerContext = elapsedTime / i(finishedContexts);
 
         }
 
         System.out.println("UUID: " + compositeData.get("uuid"));
         System.out.println("Type: " + compositeData.get("type"));
         System.out.println("Current elapsed time: " + prettyPrintTimeInterval(elapsedTime));
-        System.out.println("Finished contexts: " + String.format("%d/%d (%.2f %%)", finishedContexts, totalContexts, ((float) finishedContexts / totalContexts) * 100f));
+        System.out.println("Finished contexts: " + String.format("%d/%d (%.2f %%)", finishedContexts, totalContexts, F((finishedContexts.floatValue() / totalContexts.floatValue()) * 100f)));
         if (timePerContext > 0) {
             System.out.println("Avg. time per context: " + prettyPrintTimeInterval(timePerContext));
-            System.out.println("Projected time left: " + prettyPrintTimeInterval(timePerContext * pendingContexts));
+            System.out.println("Projected time left: " + prettyPrintTimeInterval(timePerContext * i(pendingContexts)));
         }
     }
 
     /**
      * Print the given report to console.
      * 
-     * @param report
+     * @param report The {@link CompositeData}
      */
     private void printASReport(CompositeData report) {
         try {
@@ -843,7 +843,7 @@ public class ReportClientBase extends AbstractJMXTools {
             System.out.println("Type: " + report.get("type"));
             System.out.println("Total time: " + prettyPrintTimeInterval(elapsedTime));
             System.out.println("Avg. time per context: " + prettyPrintTimeInterval(timePerContext));
-            System.out.println("Report was finished: " + new Date(end));
+            System.out.println("Report was finished: " + new Date(l(end)));
             System.out.println("\n------ report -------");
             JSONObject data = new JSONObject((String) report.get("data"));
             if (data.getBoolean("needsComposition")) {
@@ -892,7 +892,7 @@ public class ReportClientBase extends AbstractJMXTools {
      * Example:
      * 0 hours, 28 minutes, 3 seconds
      * 
-     * @param interval, the time in milliseconds
+     * @param interval the time in milliseconds
      *            @return, a pretty time String
      */
     private String prettyPrintTimeInterval(long interval) {
@@ -906,8 +906,8 @@ public class ReportClientBase extends AbstractJMXTools {
         long diff[] = new long[] { 0, 0, 0 };
         /* sec */diff[2] = (diffInSeconds >= 60 ? diffInSeconds % 60 : diffInSeconds);
         /* min */diff[1] = (diffInSeconds = (diffInSeconds / 60)) >= 60 ? diffInSeconds % 60 : diffInSeconds;
-        /* hours */diff[0] = (diffInSeconds = diffInSeconds / 60);
+        /* hours */diff[0] = (diffInSeconds / 60);
 
-        return String.format("%d hour%s, %d minute%s, %d second%s", diff[0], diff[0] > 1 || diff[0] == 0 ? "s" : "", diff[1], diff[1] > 1 || diff[1] == 0 ? "s" : "", diff[2], diff[2] > 1 || diff[2] == 0 ? "s" : "");
+        return String.format("%d hour%s, %d minute%s, %d second%s", L(diff[0]), diff[0] > 1 || diff[0] == 0 ? "s" : "", L(diff[1]), diff[1] > 1 || diff[1] == 0 ? "s" : "", L(diff[2]), diff[2] > 1 || diff[2] == 0 ? "s" : "");
     }
 }

@@ -49,15 +49,15 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.config.actions.GetRequest;
-import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -116,8 +116,8 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * Create appointment in user B's calendar on server
          */
-        String userA = getClient().execute(new GetRequest(Tree.DefaultAddress)).getString();
-        String userB = manager2.getClient().execute(new GetRequest(Tree.DefaultAddress)).getString();
+        String userA = getClient().getValues().getDefaultAddress();
+        String userB = getClient2().getValues().getDefaultAddress();
         String uid = randomUID();
         String summary = "Bug23181Test";
         String location = "tbd";
@@ -139,7 +139,7 @@ public class Bug23181Test extends CalDAVTest {
             "BEGIN:VCALENDAR" + "\r\n" +
             "METHOD:REQUEST" + "\r\n" +
             "PRODID:Microsoft Exchange Server 2007" + "\r\n" +
-            "VERSION:2.0" + "\r\n" + 
+            "VERSION:2.0" + "\r\n" +
             "CALSCALE:GREGORIAN" + "\r\n" +
             "BEGIN:VEVENT" + "\r\n" +
             "ORGANIZER;CN=Extern 1:MAILTO:extern1@example.com" + "\r\n" +
@@ -243,7 +243,12 @@ public class Bug23181Test extends CalDAVTest {
         appointment.setIgnoreConflicts(true);
         appointment.setParentFolderID(manager2.getClient().getValues().getPrivateAppointmentFolder());
         appointment.setSequence(0);
-        manager2.insert(appointment);
+        appointment = manager2.insert(appointment);
+        /*
+         * update the appointment once to increase the sequence number
+         */
+        appointment.setLocation("new location");
+        manager2.update(appointment);
         /*
          * try to confirm updated appointment as user A in client
          */

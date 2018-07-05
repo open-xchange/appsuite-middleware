@@ -58,6 +58,7 @@ import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
@@ -497,6 +498,16 @@ public final class VirtualFolder implements ParameterizedFolder {
     @Override
     public void setSupportedCapabilities(Set<String> capabilities) {
         realFolder.setSupportedCapabilities(capabilities);
+    }
+
+    @Override
+    public FolderPath getOriginPath() {
+        return realFolder.getOriginPath();
+    }
+
+    @Override
+    public void setOriginPath(FolderPath originPath) {
+        realFolder.setOriginPath(originPath);
     }
 
 }

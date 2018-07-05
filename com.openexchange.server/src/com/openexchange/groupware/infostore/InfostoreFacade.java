@@ -153,7 +153,7 @@ public interface InfostoreFacade extends TransactionAware {
      * @return The meta data
      * @throws OXException If operation fails
      * @see #CURRENT_VERSION
-     * @deprecated use {@link InfostoreFacade#getDocument(int, int, long, long, ServerSession)} instead
+     * @deprecated use {@link InfostoreFacade#getDocumentMetadata(long, int, int, ServerSession)} instead
      */
     @Deprecated
     DocumentMetadata getDocumentMetadata(int id, int version, ServerSession session) throws OXException;
@@ -350,6 +350,20 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If remove operation fails
      */
     List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded) throws OXException;
+
+    /**
+     * Moves denoted documents to another folder and saves path to origin folder. Colliding filenames in the target folder may be renamed automatically.
+     *
+     * @param session The session
+     * @param ids The identifiers of the documents to remove
+     * @param sequenceNumber The sequence number to catch concurrent modifications, i.e. the client's most recent time stamp
+     * @param targetFolderID The target folder ID.
+     * @param adjustFilenamesAsNeeded <code>true</code> to adjust filenames in target folder automatically, <code>false</code>, otherwise
+     * @param optOriginPath Origin folder path mapped by file id or <code>null</code> to ignore
+     * @return The identifiers of those documents that could <b>not</b> be moved successfully
+     * @throws OXException If remove operation fails
+     */
+    List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded, Map<String, InfostoreFolderPath> optOriginPath) throws OXException;
 
     /**
      * Removes denoted versions.
@@ -683,5 +697,15 @@ public interface InfostoreFacade extends TransactionAware {
      * @throws OXException If operation fails
      */
     boolean hasDocumentAccess(int id, AccessPermission permission, User user, Context context) throws OXException;
+
+    /**
+     * Restores files from trash folder to origin location. If the path was deleted too, it will be recreated.
+     *
+     * @param toRestore A mapping of target folder identifiers to files to restore
+     * @param session The session
+     * @return The identifiers of those documents that could <b>not</b> be restored successfully
+     * @throws OXException If restore fails
+     */
+    List<IDTuple> restore(Map<String, List<IDTuple>> toRestore, ServerSession session) throws OXException;
 
 }

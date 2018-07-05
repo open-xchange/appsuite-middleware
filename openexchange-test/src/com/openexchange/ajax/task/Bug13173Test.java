@@ -58,7 +58,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.test.TaskTestManager;
 
 public class Bug13173Test extends AbstractAJAXSession {
 

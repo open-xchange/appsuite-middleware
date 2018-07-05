@@ -53,7 +53,9 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 /**
  * {@link OverridingUserConfigurationStorage}
@@ -76,6 +78,12 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     @Override
     protected void stopInternal() throws OXException {
         delegate.stopInternal();
+    }
+
+    @Override
+    public UserConfiguration getUserConfiguration(Session session, int[] groups) throws OXException {
+        UserConfiguration config = getOverride(session.getUserId(), groups, new ContextImpl(session.getContextId()));
+        return config == null ? delegate.getUserConfiguration(session, groups) : config;
     }
 
     @Override

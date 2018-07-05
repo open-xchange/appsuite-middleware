@@ -50,8 +50,6 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,6 +85,8 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 public class TaskRequest extends CalendarRequest {
 

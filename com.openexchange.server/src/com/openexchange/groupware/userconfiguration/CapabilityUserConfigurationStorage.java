@@ -58,9 +58,11 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  * {@link CapabilityUserConfigurationStorage} - The database storage implementation of a user configuration storage.
@@ -88,6 +90,11 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
         /*
          * Nothing to stop
          */
+    }
+
+    @Override
+    public UserConfiguration getUserConfiguration(Session session, int[] groups) throws OXException {
+        return loadUserConfiguration(session, groups);
     }
 
     @Override
@@ -139,6 +146,14 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
         return stringify(capabilityService.getCapabilities(userId, cid));
     }
 
+    private static Set<String> getCapabilities(Session session) throws OXException {
+        CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+        if (capabilityService == null) {
+            return new HashSet<String>();
+        }
+        return stringify(capabilityService.getCapabilities(session));
+    }
+
     private static Set<String> stringify(final CapabilitySet capabilities) {
         Set<String> set = new HashSet<String>(capabilities.size());
         for (Capability capability : capabilities) {
@@ -167,6 +182,21 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
         return userConfiguration;
     }
 
+    /**
+     * Loads the user configuration from database specified through session
+     *
+     * @param session The session providing use/context information
+     * @param groupsArg The group IDs the user belongs to; may be <code>null</code>
+     * @return the instance of <code>{@link UserConfiguration}</code>
+     * @throws OXException - if user's groups are <code>null</code> and could not be determined by <code>{@link UserStorage}</code> implementation
+     * @throws OXException - if a readable connection could not be obtained from connection pool
+     * @throws OXException - if no matching user configuration is kept in database
+     */
+    public static UserConfiguration loadUserConfiguration(Session session, int[] groupsArg) throws OXException {
+        Context ctx = ContextStorage.getStorageContext(session);
+        int[] groups = groupsArg == null ? UserStorage.getInstance().getUser(session.getUserId(), ctx).getGroups() : groupsArg;
+        return new UserConfiguration(getCapabilities(session), session.getUserId(), groups, ctx);
+    }
 
     public static UserConfiguration[] loadUserConfiguration(Context ctx, User[] users) throws OXException {
 

@@ -23,7 +23,7 @@ import liquibase.structure.DatabaseObject;
 
 public class DerbyDatabase extends AbstractJdbcDatabase {
 
-    private Logger log = LogFactory.getLogger();
+    private final Logger log = LogFactory.getLogger();
 
     protected int driverVersionMajor;
     protected int driverVersionMinor;
@@ -114,11 +114,11 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         } else {
             String dateString = super.getDateLiteral(isoDate);
             int decimalDigits = dateString.length() - dateString.indexOf('.') - 2;
-            String padding = "";
+            StringBuilder sb = new StringBuilder();
             for (int i=6; i> decimalDigits; i--) {
-                padding += "0";
+                sb.append("0");
             }
-            return "TIMESTAMP(" + dateString.replaceFirst("'$", padding+"'") + ")";
+            return "TIMESTAMP(" + dateString.replaceFirst("'$", sb.toString()+"'") + ")";
         }
     }
 
@@ -137,7 +137,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         String url = getConnection().getURL();
         String driverName = getDefaultDriver(url);
         super.close();
-        if (driverName.toLowerCase().contains("embedded")) {
+        if (driverName != null && driverName.toLowerCase().contains("embedded")) {
             try {
                 if (url.contains(";")) {
                     url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
@@ -153,9 +153,9 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
                 if (e instanceof SQLException) {
                     String state = ((SQLException) e).getSQLState();
                     if ("XJ015".equals(state) || "08006".equals(state)) {
-                        // "The XJ015 error (successful shutdown of the Derby engine) and the 08006 
-                        // error (successful shutdown of a single database) are the only exceptions 
-                        // thrown by Derby that might indicate that an operation succeeded. All other 
+                        // "The XJ015 error (successful shutdown of the Derby engine) and the 08006
+                        // error (successful shutdown of a single database) are the only exceptions
+                        // thrown by Derby that might indicate that an operation succeeded. All other
                         // exceptions indicate that an operation failed."
                         // See http://db.apache.org/derby/docs/dev/getstart/rwwdactivity3.html
                         return;

@@ -32,7 +32,6 @@
 package net.fortuna.ical4j.model.property;
 
 import java.util.Date;
-
 import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;

@@ -52,11 +52,9 @@ package com.openexchange.groupware.importexport.importers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Expectations;
@@ -65,7 +63,6 @@ import com.openexchange.groupware.importexport.AbstractContactTest;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.importexport.importers.CSVContactImporter;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Part of bugfix 15231
@@ -80,8 +77,6 @@ public class CsvDoesDifferentLanguages extends AbstractContactTest {
     }
 
     private final String dutch = "Voornaam,Achternaam,Weergavenaam,Bijnaam," + "Eerste e-mail,Tweede e-mail,Telefoon werk,Telefoon thuis,Faxnummer,Piepernummer,Mobiel nummer," + "Adres,Adres 2,Woonplaats,Provincie,Postcode,Land," + "Werkadres,Werkadres 2,Werkplaats,Werkprovincie,Werkpostcode,Werkland," + "Werktitel,Afdeling,Organisatie," + "Webpagina 1,Webpagina 2," + "Geboortejaar,Geboortemaand,Geboortedag," + "Overig 1,Overig 2,Overig 3,Overig 4,Aantekeningen,\n" + "Vorname1,Nachname1,,," + "email1@open-xchange.com,email2@open-xchange.com,phone_work1,phone_home1,fax,beeper,mobile," + "home_street1,home_street2,home_city,home_state,555,home_country," + "business_street1,business_street2,business_city,business_state,666,business_country," + "job_title,department,company," + "website1,website2," + "1981,2,1," + "add1,add2,add3,add4,notes,\n";
-
-    private CalendarCollectionService oldInstance;
 
     private void assertBasicFields(String message, Contact c) {
         Expectations expectations = new Expectations();
@@ -119,17 +114,6 @@ public class CsvDoesDifferentLanguages extends AbstractContactTest {
     @Before
     public void setUp() throws Exception {
         AbstractContactTest.initialize();
-        Class<CalendarCollectionService> myClass = CalendarCollectionService.class;
-
-        this.oldInstance = ServerServiceRegistry.getInstance().getService(myClass);
-        ServerServiceRegistry.getInstance().addService(myClass, new MockCalendarCollectionService());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (oldInstance != null) {
-            ServerServiceRegistry.getInstance().addService(CalendarCollectionService.class, oldInstance);
-        }
     }
 
     private Contact makeContact(String csv) throws Throwable {

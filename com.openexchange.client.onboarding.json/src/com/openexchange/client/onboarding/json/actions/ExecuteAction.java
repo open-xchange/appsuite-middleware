@@ -110,7 +110,7 @@ public class ExecuteAction extends AbstractOnboardingAction {
         // Target client
         OnboardingAction action = OnboardingAction.actionFor(sAction);
         if (null == action) {
-            throw AjaxExceptionCodes.IMVALID_PARAMETER.create("action_id");
+            throw AjaxExceptionCodes.INVALID_PARAMETER.create("action_id");
         }
 
         ClientDevice clientDevice;

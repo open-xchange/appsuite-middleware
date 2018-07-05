@@ -49,65 +49,81 @@
 
 package com.openexchange.groupware.update;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.MessageFormat;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link SimpleColumnCreationTask}
+ * {@link SimpleColumnCreationTask} -  A simple abstract class for such update tasks that intend adding a column to one or more tables.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
 
-    private static final String ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1}";
+    /**
+     * Initializes a new {@link SimpleColumnCreationTask}.
+     */
+    protected SimpleColumnCreationTask() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con.setAutoCommit(false);
-            if (columnExists(con)) {
-                return;
+            String columnName = getColumnName();
+            Column columnToAdd = new Column(columnName, getColumnDefinition());
+            for (String table : getTableNames()) {
+                if (false == Tools.columnExists(con, table, columnName)) {
+                    if (false == rollback) {
+                        // Transaction not yet started
+                        con.setAutoCommit(false);
+                        rollback = true;
+                    }
+
+                    Tools.addColumns(con, table, columnToAdd);
+                }
             }
-            Statement stmt = null;
-            try {
-                stmt = con.createStatement();
-                stmt.execute(getStatement());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
+
+            if (rollback) {
+                // Transaction has been started
+                con.commit();
+                rollback = false;
             }
-            con.commit();
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 
-    private String getStatement() {
-        return MessageFormat.format(ADD_COLUMN, getTableName(), getColumnDefinition());
-    }
+    /**
+     * Gets the names of the tables, which are supposed to be extended by a column
+     *
+     * @return The table names (never <code>null</code>)
+     */
+    protected abstract String[] getTableNames();
 
-    private boolean columnExists(Connection con) throws SQLException {
-        return Tools.columnExists(con, getTableName(), getColumnName());
-    }
-
-    protected abstract String getTableName();
-
+    /**
+     * Gets the name of the column, which should be added.
+     *
+     * @return The column name
+     */
     protected abstract String getColumnName();
 
+    /**
+     * Gets the definition of the column, which should be added; e.g. <code>"INT4 UNSIGNED NOT NULL DEFAULT 0"</code>
+     *
+     * @return The column definition
+     */
     protected abstract String getColumnDefinition();
-
 
 }

@@ -49,8 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -61,12 +60,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -90,10 +87,11 @@ public final class DropFKTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int cid = params.getContextId();
-        final Connection con = Database.getNoTimeout(cid, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             Databases.startTransaction(con);
+            rollback = true;
 
             /*
              * Drop foreign keys
@@ -164,15 +162,16 @@ public final class DropFKTask extends UpdateTaskAdapter {
             }
 
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
             autocommit(con);
-            Database.backNoTimeout(cid, true, con);
         }
     }
 
@@ -184,7 +183,7 @@ public final class DropFKTask extends UpdateTaskAdapter {
                 stmt = con.createStatement();
                 stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
             } finally {
-                DBUtils.closeSQLStuff(null, stmt);
+                Databases.closeSQLStuff(null, stmt);
             }
         }
     }

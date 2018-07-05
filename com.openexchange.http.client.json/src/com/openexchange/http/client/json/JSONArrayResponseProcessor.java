@@ -51,7 +51,6 @@ package com.openexchange.http.client.json;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;

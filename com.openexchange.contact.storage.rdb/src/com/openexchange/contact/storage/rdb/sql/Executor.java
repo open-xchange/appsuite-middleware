@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.storage.rdb.sql;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,6 +66,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.fields.Fields;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
@@ -78,12 +78,15 @@ import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchTermAdapter;
 import com.openexchange.database.Databases;
+import com.openexchange.database.EmptyResultSet;
+import com.openexchange.database.StringLiteralSQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.search.SearchTerm;
 
@@ -142,7 +145,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return resultSet.next() ? resultSet.getLong(1) : 0;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -183,7 +186,7 @@ public class Executor {
             int count = resultSet.next() ? resultSet.getInt(1) : 0;
             return count;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -214,7 +217,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContact(fields, false);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -235,7 +238,7 @@ public class Executor {
         resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContact(fields, false);
     } finally {
-        closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
     }
 }
 
@@ -260,7 +263,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return resultSet.next() ? new Date(resultSet.getLong(1)) : null;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -274,6 +277,7 @@ public class Executor {
      */
     public Map<Integer, Date> selectNewestAttachmentDates(final Connection connection, final int contextID, final int objectIDs[]) throws SQLException {
         final StringBuilder stringBuilder = new StringBuilder();
+        // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
         stringBuilder.append("SELECT attached,MAX(creation_date) FROM prg_attachment WHERE cid=? AND module=? AND attached IN (")
         		.append(Tools.toCSV(objectIDs)).append(") GROUP BY attached;");
         PreparedStatement stmt = null;
@@ -289,7 +293,7 @@ public class Executor {
             }
             return dates;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -368,9 +372,9 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, Arrays.asList(fields).contains(ContactField.USE_COUNT));
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -447,7 +451,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -516,7 +520,7 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -539,14 +543,16 @@ public class Executor {
          * construct query string
          */
         SearchAdapter adapter;
+        boolean usesGroupBy = false;
         if (FulltextAutocompleteAdapter.hasFulltextIndex(connection, contextID)) {
             adapter = new FulltextAutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
         } else {
             adapter = new AutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
+            usesGroupBy = ((AutocompleteAdapter) adapter).isUsingGroupBy();
         }
         StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions, true));
+            stringBuilder.append(' ').append(getOrderClause(sortOptions, true, usesGroupBy));
             if (0 < sortOptions.getLimit()) {
                 stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
             }
@@ -567,8 +573,69 @@ public class Executor {
             resultSet = logExecuteQuery(stmt);
             return new ContactReader(contextID, connection, resultSet).readContacts(fields, true);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
+    }
+
+    private static String getOrderClause(final SortOptions sortOptions, boolean forAutocomplete, boolean wrappingClauseForGroupBy) throws OXException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (forAutocomplete || (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && null != sortOptions.getOrder())) {
+            stringBuilder.append("ORDER BY ");
+            if (forAutocomplete) {
+                if(wrappingClauseForGroupBy) {
+                    stringBuilder.append("min(value) DESC, min(fid) ASC, ");
+                } else {
+                    stringBuilder.append("value DESC, fid ASC, ");
+                }
+            }
+            if (null != sortOptions) {
+                final SortOrder[] order = sortOptions.getOrder();
+                if (null != order && 0 < order.length) {
+                    final SuperCollator collator = SuperCollator.get(sortOptions.getCollation());
+                    stringBuilder.append(getOrderClause(order[0], collator, wrappingClauseForGroupBy));
+                    for (int i = 1; i < order.length; i++) {
+                        stringBuilder.append(", ").append(getOrderClause(order[i], collator, wrappingClauseForGroupBy));
+                    }
+                } else {
+                    stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(","));
+                }
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    private static String getOrderClause(final SortOrder order, final SuperCollator collator, boolean wrappingClauseForGroupBy) throws OXException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (null == collator || SuperCollator.DEFAULT.equals(collator)) {
+            ContactField by = order.getBy();
+            if (ContactField.USE_COUNT == by) {
+                if(wrappingClauseForGroupBy) {
+                    stringBuilder.append("min(").append(Table.OBJECT_USE_COUNT).append(".value)");
+                } else {
+                    stringBuilder.append(Table.OBJECT_USE_COUNT).append(".value");
+                }
+            } else {
+                if(wrappingClauseForGroupBy) {
+                    stringBuilder.append("min(").append(Mappers.CONTACT.get(by).getColumnLabel()).append(")");
+                } else {
+                    stringBuilder.append(Mappers.CONTACT.get(by).getColumnLabel());
+                }
+            }
+        } else {
+            if(wrappingClauseForGroupBy) {
+                stringBuilder.append("CONVERT (min(").append(Mappers.CONTACT.get(order.getBy()).getColumnLabel()).append(") USING '")
+                .append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');
+            } else {
+                stringBuilder.append("CONVERT (").append(Mappers.CONTACT.get(order.getBy()).getColumnLabel()).append(" USING '")
+                .append(collator.getSqlCharset()).append("') COLLATE '").append(collator.getSqlCollation()).append('\'');
+            }
+        }
+        if (Order.ASCENDING.equals(order.getOrder())) {
+            stringBuilder.append(" ASC");
+        } else if (Order.DESCENDING.equals(order.getOrder())) {
+            stringBuilder.append(" DESC");
+        }
+        return stringBuilder.toString();
     }
 
     public List<Contact> select(Connection connection, Table table, int contextID, ContactSearchObject contactSearch,
@@ -599,9 +666,15 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
+            boolean withUseCount = false;
+            for(ContactField field: fields){
+                if(ContactField.USE_COUNT.equals(field)){
+                    withUseCount=true;
+                }
+            }
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, withUseCount);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -639,7 +712,7 @@ public class Executor {
             }
             return members.toArray(new DistListMember[members.size()]);
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -685,7 +758,7 @@ public class Executor {
             }
             return members;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -724,7 +797,7 @@ public class Executor {
             }
             return members;
         } finally {
-            closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -739,7 +812,7 @@ public class Executor {
             Mappers.CONTACT.setParameters(stmt, contact, fields);
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -755,7 +828,7 @@ public class Executor {
             Mappers.DISTLIST.setParameters(stmt, member, fields);
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -824,7 +897,7 @@ public class Executor {
              */
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -908,7 +981,7 @@ public class Executor {
              */
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -938,7 +1011,7 @@ public class Executor {
         }
         return logExecuteUpdate(stmt);
     } finally {
-        closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
     }
 }
 
@@ -983,7 +1056,7 @@ public class Executor {
             }
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1008,7 +1081,7 @@ public class Executor {
             }
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1046,7 +1119,7 @@ public class Executor {
             }
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1063,7 +1136,7 @@ public class Executor {
             stmt.setInt(2 + fields.length, member.getEntryID());
             return logExecuteUpdate(stmt);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1092,7 +1165,7 @@ public class Executor {
                 //} catch (SQLException e) {
                 //    LOG.warn("Could not delete contacts from object_use_count table: {}", e.getMessage());
             } finally {
-                closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         }
     }
@@ -1115,7 +1188,7 @@ public class Executor {
             //} catch (SQLException e) {
             //    LOG.warn("Could not delete contact from object_use_count table: {}", e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1157,7 +1230,7 @@ public class Executor {
             deleteFromObjectUseCountTable(connection, contextID, folderID, objectIDs);
             return result;
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1187,7 +1260,7 @@ public class Executor {
             deleteSingleFromObjectUseCountTable(connection, contextID, objectID);
             return result;
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1218,6 +1291,9 @@ public class Executor {
             ResultSet resultSet = stmt.executeQuery();
             LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
             return resultSet;
+        } catch (StringLiteralSQLException e) {
+            // Cannot return any match
+            return EmptyResultSet.getInstance();
         } catch (SQLException e) {
             LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
             throw e;

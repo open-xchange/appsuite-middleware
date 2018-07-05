@@ -1,12 +1,17 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.util.ArrayList;
+import java.util.List;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Creates an index on an existing column.

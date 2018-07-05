@@ -52,8 +52,8 @@ package com.openexchange.logging.mbean;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import ch.qos.logback.classic.Level;
 import com.openexchange.management.MBeanMethodAnnotation;
+import ch.qos.logback.classic.Level;
 
 /**
  * {@link LogbackConfigurationMBean}

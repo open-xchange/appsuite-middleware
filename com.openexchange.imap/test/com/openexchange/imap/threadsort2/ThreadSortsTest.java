@@ -49,13 +49,11 @@
 
 package com.openexchange.imap.threadsort2;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.mail.dataobjects.MailMessage;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

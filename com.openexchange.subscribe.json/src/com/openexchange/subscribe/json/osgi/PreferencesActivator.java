@@ -64,11 +64,6 @@ public class PreferencesActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        closeTrackers();
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
         // Nothing to do
         return null;

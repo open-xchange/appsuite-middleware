@@ -75,14 +75,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.objectusecount.ObjectUseCountService;
-import com.openexchange.objectusecount.SetArguments;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -131,7 +128,7 @@ public class ContactServiceImpl extends DefaultContactService {
         final FolderObject folder = Tools.getFolder(contextID, folderID);
         Check.isContactFolder(folder, session);
         Check.noPrivateInPublic(folder, contact, session);
-        Check.canWriteInGAB(storage, session, folderID, contact);
+        Check.canWriteInGAB(storage, session, folderID, contact, null);
 
         /*
          * prepare create
@@ -237,6 +234,7 @@ public class ContactServiceImpl extends DefaultContactService {
         Contact updatedContact = new Contact();
         ContactMapper.getInstance().mergeDifferences(updatedContact, storedContact);
         ContactMapper.getInstance().mergeDifferences(updatedContact, delta);
+        delta.removeUseCount();
         /*
          * pass through to storage
          */
@@ -268,13 +266,6 @@ public class ContactServiceImpl extends DefaultContactService {
                 targetStorage.delete(session, targetFolderId, Integer.toString(storedContact.getObjectID()),
                         storedContact.getLastModified());
                 throw e;
-            }
-        }
-        if (delta.containsUseCount()) {
-            ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
-            if (null != service) {
-                SetArguments arguments = new SetArguments.Builder(Integer.parseInt(objectID), Integer.parseInt(targetFolderId), delta.getUseCount()).build();
-                service.setObjectUseCount(session, arguments);
             }
         }
         /*
@@ -319,7 +310,7 @@ public class ContactServiceImpl extends DefaultContactService {
         final FolderObject folder = Tools.getFolder(contextID, folderID);
         Check.isContactFolder(folder, session);
         Check.noPrivateInPublic(folder, contact, session);
-        Check.canWriteInGAB(storage, session, folderID, contact);
+        Check.canWriteInGAB(storage, session, folderID, contact, storedContact);
         /*
          * check for not allowed changes
          */
@@ -354,17 +345,11 @@ public class ContactServiceImpl extends DefaultContactService {
         Contact updatedContact = new Contact();
         ContactMapper.getInstance().mergeDifferences(updatedContact, storedContact);
         ContactMapper.getInstance().mergeDifferences(updatedContact, delta);
+        delta.removeUseCount(); // use counts are handled by use count service
         /*
          * pass through to storage
          */
         storage.update(session, folderID, objectID, delta, lastRead);
-        if (delta.containsUseCount()) {
-            ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
-            if (null != service) {
-                SetArguments arguments = new SetArguments.Builder(Integer.parseInt(objectID), Integer.parseInt(folderID), delta.getUseCount()).build();
-                service.setObjectUseCount(session, arguments);
-            }
-        }
         /*
          * merge back differences to supplied contact
          */
@@ -413,7 +398,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * check special GAB permissions
          */
-        Check.canWriteInGAB(storage, session, folderID, contact);
+        Check.canWriteInGAB(storage, session, folderID, contact, storedContact);
         /*
          * check for not allowed changes
          */
@@ -486,7 +471,7 @@ public class ContactServiceImpl extends DefaultContactService {
          * check currently stored contact
          */
         final Contact storedContact = storage.get(session, folderID, objectID, new ContactField[] { ContactField.CREATED_BY,
-                ContactField.LAST_MODIFIED, ContactField.VCARD_ID });
+            ContactField.LAST_MODIFIED, ContactField.VCARD_ID, ContactField.BIRTHDAY });
         Check.contactNotNull(storedContact, contextID, Tools.parse(objectID));
         if (storedContact.getCreatedBy() != userID) {
             Check.canDeleteAll(permission, session, folderID);
@@ -527,7 +512,7 @@ public class ContactServiceImpl extends DefaultContactService {
         List<Contact> storedContacts = new ArrayList<Contact>();
         try {
             searchIterator = storage.list(session, folderID, objectIDs, new ContactField[] { ContactField.CREATED_BY,
-                ContactField.LAST_MODIFIED, ContactField.OBJECT_ID, ContactField.VCARD_ID });
+                ContactField.LAST_MODIFIED, ContactField.OBJECT_ID, ContactField.VCARD_ID, ContactField.BIRTHDAY });
             while (searchIterator.hasNext()) {
                 Contact storedContact = searchIterator.next();
                 if (storedContact.getCreatedBy() != userID) {
@@ -587,7 +572,7 @@ public class ContactServiceImpl extends DefaultContactService {
         List<Contact> storedContacts = new ArrayList<Contact>();
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = storage.all(session, folderID, new ContactField[] { ContactField.CREATED_BY, ContactField.OBJECT_ID, ContactField.VCARD_ID });
+            searchIterator = storage.all(session, folderID, new ContactField[] { ContactField.CREATED_BY, ContactField.OBJECT_ID, ContactField.VCARD_ID, ContactField.BIRTHDAY });
             if (null != searchIterator) {
                 while (searchIterator.hasNext()) {
                     Contact storedContact = searchIterator.next();
@@ -896,7 +881,7 @@ public class ContactServiceImpl extends DefaultContactService {
         if (null == userIDs || 0 == userIDs.length) {
             searchTerm.addSearchTerm(Tools.createContactFieldTerm(
                 ContactField.INTERNAL_USERID, SingleOperation.GREATER_THAN, Integer.valueOf(0)));
-        } else if (null != userIDs && 1 == userIDs.length) {
+        } else if (1 == userIDs.length) {
             searchTerm.addSearchTerm(Tools.createContactFieldTerm(
                 ContactField.INTERNAL_USERID, SingleOperation.EQUALS, Integer.valueOf(userIDs[0])));
         } else {

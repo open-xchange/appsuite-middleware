@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -43,11 +43,13 @@ package com.sun.mail.auth;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
-import java.security.Provider;
-import java.security.Security;
-import javax.security.sasl.*;
-import javax.security.auth.callback.*;
-
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.sasl.SaslClient;
+import javax.security.sasl.SaslException;
 import com.sun.mail.util.ASCIIUtility;
 
 /**
@@ -60,7 +62,7 @@ import com.sun.mail.util.ASCIIUtility;
  * @author Bill Shannon
  */
 public class OAuth2SaslClient implements SaslClient {
-    private CallbackHandler cbh;
+    private final CallbackHandler cbh;
     //private Map<String,?> props;	// XXX - not currently used
     private boolean complete = false;
 
@@ -69,20 +71,21 @@ public class OAuth2SaslClient implements SaslClient {
 	this.cbh = cbh;
     }
 
-    //@Override
+    @Override
     public String getMechanismName() {
 	return "XOAUTH2";
     }
 
-    //@Override
+    @Override
     public boolean hasInitialResponse() {
 	return true;
     }
 
-    //@Override
+    @Override
     public byte[] evaluateChallenge(byte[] challenge) throws SaslException {
-	if (complete)
-	    return new byte[0];
+	if (complete) {
+        return new byte[0];
+    }
 
 	NameCallback ncb = new NameCallback("User name:");
 	PasswordCallback pcb = new PasswordCallback("OAuth token:", false);
@@ -100,7 +103,7 @@ public class OAuth2SaslClient implements SaslClient {
 	 * token in strings.
 	 */
 	String user = ncb.getName();
-	String token = new String(pcb.getPassword());
+	String token = new String(pcb.getPassword() == null ? new char[0] : pcb.getPassword());
 	pcb.clearPassword();
 	String resp = "user=" + user + "\001auth=Bearer " + token + "\001\001";
 	byte[] response;
@@ -114,31 +117,32 @@ public class OAuth2SaslClient implements SaslClient {
 	return response;
     }
 
-    //@Override
+    @Override
     public boolean isComplete() {
 	return complete;
     }
 
-    //@Override
+    @Override
     public byte[] unwrap(byte[] incoming, int offset, int len)
 				throws SaslException {
 	throw new IllegalStateException("OAUTH2 unwrap not supported");
     }
 
-    //@Override
+    @Override
     public byte[] wrap(byte[] outgoing, int offset, int len)
 				throws SaslException {
 	throw new IllegalStateException("OAUTH2 wrap not supported");
     }
 
-    //@Override
+    @Override
     public Object getNegotiatedProperty(String propName) {
-	if (!complete)
-	    throw new IllegalStateException("OAUTH2 getNegotiatedProperty");
+	if (!complete) {
+        throw new IllegalStateException("OAUTH2 getNegotiatedProperty");
+    }
 	return null;
     }
 
-    //@Override
+    @Override
     public void dispose() throws SaslException {
     }
 }

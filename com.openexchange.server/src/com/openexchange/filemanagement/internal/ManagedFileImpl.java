@@ -173,18 +173,22 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
 
     @Override
     public void delete() {
+        deletePlain();
+        management.removeFromFiles(id);
+    }
+
+    /**
+     * Deletes the backing file, but w/o removing from file-management collection.
+     */
+    public void deletePlain() {
         if (file.exists()) {
-            while (!listeners.isEmpty()) {
-                final FileRemovedListener frl = listeners.poll();
-                if (null != frl) {
-                    frl.removePerformed(file);
-                }
+            for (FileRemovedListener frl; (frl = listeners.poll()) != null;) {
+                frl.removePerformed(file);
             }
             if (!file.delete()) {
                 LOG.warn("Temporary file could not be deleted: {}", file.getPath());
             }
         }
-        management.removeFromFiles(id);
     }
 
     @Override
@@ -217,7 +221,9 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
 
     @Override
     public void touch() {
-        lastAccessed = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
+        lastAccessed = now;
+        file.setLastModified(now);
     }
 
     @Override

@@ -1,18 +1,26 @@
 package liquibase.sqlgenerator;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.util.*;
+import liquibase.structure.DatabaseObject;
 
 /**
  * SqlGeneratorFactory is a singleton registry of SqlGenerators.

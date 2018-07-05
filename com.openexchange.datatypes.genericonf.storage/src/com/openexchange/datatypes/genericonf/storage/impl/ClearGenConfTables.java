@@ -49,7 +49,7 @@
 
 package com.openexchange.datatypes.genericonf.storage.impl;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

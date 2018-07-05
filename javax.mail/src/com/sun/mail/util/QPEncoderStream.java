@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,7 +40,9 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * This class implements a Quoted Printable Encoder. It is implemented as
@@ -90,6 +92,7 @@ public class QPEncoderStream extends FilterOutputStream {
      * @param      len   the number of bytes to write.
      * @exception  IOException  if an I/O error occurs.
      */
+    @Override
     public void write(byte[] b, int off, int len) throws IOException {
 	for (int i = 0; i < len; i++)
 	    write(b[off + i]);
@@ -100,6 +103,7 @@ public class QPEncoderStream extends FilterOutputStream {
      * @param      b   the data to be written.
      * @exception  IOException  if an I/O error occurs.
      */
+    @Override
     public void write(byte[] b) throws IOException {
 	write(b, 0, b.length);
     }
@@ -109,6 +113,7 @@ public class QPEncoderStream extends FilterOutputStream {
      * @param      c   the <code>byte</code>.
      * @exception  IOException  if an I/O error occurs.
      */
+    @Override
     public void write(int c) throws IOException {
 	c = c & 0xff; // Turn off the MSB.
 	if (gotSpace) { // previous character was <SPACE>
@@ -148,6 +153,7 @@ public class QPEncoderStream extends FilterOutputStream {
      * to be encoded out to the stream.
      * @exception  IOException  if an I/O error occurs.
      */
+    @Override
     public void flush() throws IOException {
 	if (gotSpace) {
 	    output(' ', true);
@@ -162,6 +168,7 @@ public class QPEncoderStream extends FilterOutputStream {
      *
      * @exception	IOException	for I/O errors
      */
+    @Override
     public void close() throws IOException {
 	flush();
 	out.close();

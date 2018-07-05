@@ -69,6 +69,7 @@ public class ICalResource {
     public static final String VALARM = "VALARM";
     public static final String VTODO = "VTODO";
     public static final String VTIMEZONE = "VTIMEZONE";
+    public static final String VAVAILABILITY = "VAVAILABILITY";
 
     private String eTag;
     private String href;
@@ -110,6 +111,10 @@ public class ICalResource {
 
     public List<Component> getVFreeBusys() {
         return vCalendar.getComponents(VFREEBUSY);
+    }
+
+    public List<Component> getAvailabilities() {
+        return vCalendar.getComponents(VAVAILABILITY);
     }
 
     public void addComponent(Component component) {

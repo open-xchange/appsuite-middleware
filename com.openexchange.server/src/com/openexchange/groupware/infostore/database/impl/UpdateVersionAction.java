@@ -50,9 +50,9 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
 import java.sql.DataTruncation;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -101,7 +101,21 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
      */
     public UpdateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
         List<DocumentMetadata> versions, List<DocumentMetadata> oldVersions, Metadata[] modifiedColums, long sequenceNumber, Session session) {
-        super(provider, queryCatalog, context, versions, oldVersions, modifiedColums, sequenceNumber, session);
+        super(provider, queryCatalog, context, versions, oldVersions, modifiedColums, getMaxSequenceNumber(oldVersions, sequenceNumber), session);
+    }
+
+    /**
+     * Helper method to select either the max sequenceNumber or the higher last modified date of the DocumentMetadata as the last modified date can be set manually by the client
+     * @param oldVersions The oldVersions to be updated
+     * @param sequenceNumber The provided sequenceNumber
+     * @return The max sequence number
+     */
+    private static long getMaxSequenceNumber(List<DocumentMetadata> oldVersions, long sequenceNumber) {
+        for (DocumentMetadata oldVersion : oldVersions) {
+            Date lastModified = oldVersion.getLastModified();
+            sequenceNumber = Math.max(sequenceNumber, null == lastModified ? 0 : lastModified.getTime());
+        }
+        return sequenceNumber;
     }
 
     @Override
@@ -140,6 +154,6 @@ public class UpdateVersionAction extends AbstractDocumentUpdateAction {
 
     @Override
     protected Object[] getAdditionals(final DocumentMetadata doc) {
-        return new Object[] { I(getContext().getContextId()), I(doc.getId()), I(doc.getVersion()), L(getTimestamp()) };
+        return new Object[] { I(getContext().getContextId()), I(doc.getId()), I(doc.getVersion()) };
     }
 }

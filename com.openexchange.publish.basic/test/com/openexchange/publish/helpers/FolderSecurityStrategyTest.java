@@ -49,13 +49,11 @@
 
 package com.openexchange.publish.helpers;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.impl.OCLPermission;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

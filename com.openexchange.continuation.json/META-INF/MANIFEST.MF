@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The JSON interface for continuation module
 Bundle-SymbolicName: com.openexchange.continuation.json
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -21,7 +21,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.capabilities,
  com.openexchange.config.cascade,
  com.openexchange.continuation,
- com.openexchange.documentation,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,

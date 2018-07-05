@@ -118,7 +118,7 @@ class State {
     }
 
     /**
-     * Creates a state object from the inputstream.
+     * Creates a state object from the {@link InputStream}.
      *
      * @param input input stream to read the state file from.
      * @throws OXException if an input error occurs
@@ -130,11 +130,19 @@ class State {
         try {
             isr = new InputStreamReader(input, com.openexchange.java.Charsets.ISO_8859_1);
             reader = new BufferedReader(isr);
-            depth = Integer.parseInt(reader.readLine());
-            entries = Integer.parseInt(reader.readLine());
+            String line = reader.readLine();
+            if (line == null) {
+                throw FileStorageCodes.IOERROR.create("Unable to parse a State object from stream.");
+            }
+            depth = Integer.parseInt(line);
+            line = reader.readLine();
+            if (line == null) {
+                throw FileStorageCodes.IOERROR.create("Unable to parse a State object from stream.");
+            }
+            entries = Integer.parseInt(line);
             nextEntry = reader.readLine();
             unused = new HashSet<String>();
-            String line = reader.readLine();
+            line = reader.readLine();
             while (line != null) {
                 unused.add(line);
                 line = reader.readLine();

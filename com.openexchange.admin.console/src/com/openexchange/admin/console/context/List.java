@@ -76,8 +76,45 @@ public class List extends ListCore {
 
     @Override
     protected Context[] maincall(AdminParser parser, String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException {
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
-        return oxctx.list(search_pattern, auth);
+        OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+        boolean csv = null != parser.getOptionValue(this.csvOutputOption);
+
+        boolean first = true;
+        int offset = 0;
+        int length = 10000;
+        Context[] ctxs;
+        for (; (ctxs = oxctx.list(search_pattern, offset, length, auth)).length == length; offset = offset + length) {
+            if (first) {
+                if (csv) {
+                    precsvinfos(ctxs, parser);
+                } else {
+                    sysoutOutput(ctxs, parser);
+                }
+                first = false;
+            } else {
+                if (csv) {
+                    precsvinfos(ctxs, true, parser);
+                } else {
+                    sysoutOutput(ctxs, true, parser);
+                }
+            }
+        }
+        if (first) {
+            if (csv) {
+                precsvinfos(ctxs, parser);
+            } else {
+                sysoutOutput(ctxs, parser);
+            }
+            first = false;
+        } else {
+            if (csv) {
+                precsvinfos(ctxs, true, parser);
+            } else {
+                sysoutOutput(ctxs, true, parser);
+            }
+        }
+
+        return null;
     }
 
     @Override

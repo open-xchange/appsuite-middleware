@@ -49,7 +49,6 @@
 
 package com.openexchange.publish.database;
 
-import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.SimpleTableCreationTask;
 
 /**
@@ -59,8 +58,8 @@ import com.openexchange.groupware.update.SimpleTableCreationTask;
  */
 public class PublicationWithUsernameAndPasswordUpdateTask extends SimpleTableCreationTask {
 
-    public PublicationWithUsernameAndPasswordUpdateTask(DatabaseService dbService) {
-        super(dbService);
+    public PublicationWithUsernameAndPasswordUpdateTask() {
+        super();
     }
 
     @Override

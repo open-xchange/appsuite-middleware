@@ -52,8 +52,6 @@ package com.openexchange.subscribe.json;
 import static com.openexchange.subscribe.json.MultipleHandlerTools.wrapThrowable;
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.MISSING_PARAMETER;
 import static com.openexchange.subscribe.json.SubscriptionJSONErrorMessages.UNKNOWN_ACTION;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -61,7 +59,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +67,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -77,11 +75,14 @@ import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.secret.SecretService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.tools.QueryStringPositionComparator;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link SubscriptionMultipleHandler}
@@ -91,7 +92,7 @@ import com.openexchange.tools.session.ServerSession;
 public class SubscriptionMultipleHandler implements MultipleHandler {
 
     /** The actions that require a request body */
-    public static final Set<String> ACTIONS_REQUIRING_BODY = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("new","update","delete","list","fetch")));
+    public static final Set<String> ACTIONS_REQUIRING_BODY = ImmutableSet.of("new","update","delete","list","fetch");
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
@@ -306,7 +307,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         return dynamicColumns;
     }
 
-    private static final Set<String> KNOWN_PARAMS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("folder","columns","session","action")));
+    private static final Set<String> KNOWN_PARAMS = ImmutableSet.of("folder","columns","session","action");
 
     private List<String> getDynamicColumnOrder(JSONObject request) throws JSONException {
         if (request.has("dynamicColumnPlugins")) {
@@ -336,6 +337,9 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
         final int id = request.getInt("id");
         final String source = request.optString("source");
         final Subscription subscription = loadSubscription(id, session, source, secretService.getSecret(session));
+        if(subscription == null) {
+            throw SubscriptionErrorMessage.SubscriptionNotFound.create();
+        }
         String sTimeZone = request.optString("timezone");
         TimeZone tz;
         if (sTimeZone != null) {

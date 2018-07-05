@@ -628,7 +628,12 @@ properties:
     tags: ["Server"]  
   - key: com.openexchange.server.knownProxies
     description: |
-      A list of know proxies in front of our httpserver/balancer as comma separated IPs. E.g.: 192.168.1.50, 192.168.1.51
+      A list of know proxies in front of our httpserver/balancer as comma separated IPs and IP ranges. E.g.: 
+      * 192.168.1.50, 192.168.1.51
+      * 192.168.32.0/24, 192.168.33.36
+      * 192.168.32.0-192.168.32.255, 192.168.33.36 
+      * 2001:db8:0:8d3:0:8a2e:70::/112
+      * 2001:DB8:0:8D3:0:8A2E:70:0-2001:DB8:0:8D3:0:8A2E:70:FFFF
     defaultValue: empty
     version: 
     reloadable: false
@@ -796,9 +801,23 @@ properties:
       timezones are retrieved through tzurl.org upon first usage. 
     defaultValue: true
     version: 
-    reloadable: false
+    reloadable: true
     configcascadeAware: false
     related: 
     file: Server.properties
     packageName: open-xchange-core
     tags: ["Server", "Timezone"] 
+  - key: com.openexchange.ajax.response.excludeStackTraceFor
+    description: |
+      Configures wether the stacktrace of specific exceptions should be included into a response or not. This has to be done as a 
+      comma separated list of exceptions codes and prefixes. A wildcard pattern can be used to define the exceptions. 
+      E.g. "SES", "SES*" or "SES-*" will exclude stacktraces in responses for all SessionExceptionCodes. For single ExceptionsCodes 
+      to omit, the ExceptionCode itself must be added. E.g. "SES-0203" will exclude the stacktrace for SessionExceptionCode "SESSION_EXPIRED" on responses. 
+    defaultValue: SES
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: com.openexchange.ajax.response.includeStackTraceOnError
+    file: Server.properties
+    packageName: open-xchange-core
+    tags: ["Server"] 

@@ -57,6 +57,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupEventConstants;
@@ -72,7 +73,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class integrates all operations to be done for deleting a group.
@@ -184,10 +184,10 @@ public final class Delete {
             con.commit();
             propagateDeleteFinished();
         } catch (final SQLException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw e;
         } finally {
             try {
@@ -201,8 +201,7 @@ public final class Delete {
 
     private void propagateDelete(final Connection con) throws OXException {
         // Delete all references to that group.
-        final DeleteEvent event = new DeleteEvent(getOrig(), groupId,
-            DeleteEvent.TYPE_GROUP, ctx);
+        final DeleteEvent event = DeleteEvent.createDeleteEventForGroupDeletion(getOrig(), groupId, ctx);
         DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
     }
 
@@ -214,7 +213,7 @@ public final class Delete {
             LOG.warn("Failed to trigger delete finished listeners", e);
         }
     }
-    
+
     private void delete(final Connection con) throws OXException {
         // Delete the group.
         storage.deleteMember(ctx, con, getOrig(), getOrig().getMember());

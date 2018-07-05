@@ -55,13 +55,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.mime.MimeSnippetManagement;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MimeSnippetDeleteListener}
@@ -93,8 +93,7 @@ public final class MimeSnippetDeleteListener implements DeleteListener {
             {
                 ResultSet rs = null;
                 try {
-                    stmt =
-                        writeCon.prepareStatement("SELECT id FROM snippet WHERE cid = ? AND user = ? AND refType=" + ReferenceType.FILE_STORAGE.getType());
+                    stmt = writeCon.prepareStatement("SELECT id FROM snippet WHERE cid = ? AND user = ? AND refType=" + ReferenceType.FILE_STORAGE.getType());
                     int pos = 1;
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, userId);
@@ -104,10 +103,10 @@ public final class MimeSnippetDeleteListener implements DeleteListener {
                         ids.add(rs.getString(1));
                     }
                 } finally {
-                    DBUtils.closeSQLStuff(rs);
+                    Databases.closeSQLStuff(rs);
                 }
             }
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
             if (ids.isEmpty()) {
                 return;
@@ -123,7 +122,7 @@ public final class MimeSnippetDeleteListener implements DeleteListener {
         } catch (final Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

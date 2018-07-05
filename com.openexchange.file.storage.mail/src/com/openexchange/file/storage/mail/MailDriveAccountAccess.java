@@ -60,6 +60,8 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.mail.FullName.Type;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 
@@ -131,7 +133,12 @@ public final class MailDriveAccountAccess implements FileStorageAccountAccess, C
 
     @Override
     public boolean ping() throws OXException {
-        return MailAccess.getInstance(session).ping();
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(session);
+        try {
+            return mailAccess.ping();
+        } finally {
+            mailAccess.close();
+        }
     }
 
     @Override

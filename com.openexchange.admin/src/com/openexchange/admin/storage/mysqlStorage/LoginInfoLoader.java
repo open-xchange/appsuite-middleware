@@ -49,8 +49,8 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

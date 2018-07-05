@@ -51,15 +51,8 @@ package com.openexchange.ajax.framework;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
-import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.mail.MailTestManager;
-import com.openexchange.exception.OXException;
 import com.openexchange.test.AttachmentTestManager;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.ContactTestManager;
@@ -69,22 +62,10 @@ import com.openexchange.test.ReminderTestManager;
 import com.openexchange.test.ResourceTestManager;
 import com.openexchange.test.TaskTestManager;
 import com.openexchange.test.TestManager;
-import com.openexchange.test.pool.TestContext;
-import com.openexchange.test.pool.TestContextPool;
-import com.openexchange.test.pool.TestUser;
 
-@RunWith(ConcurrentTestRunner.class)
-@Concurrent(count = 5)
-public abstract class AbstractAJAXSession {
-    
+public abstract class AbstractAJAXSession extends AbstractClientSession {
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractAJAXSession.class);
-
-    private AJAXClient client;
-    private AJAXClient client2;
-    protected TestContext testContext;
-    protected TestUser admin;
-    protected TestUser testUser;
-    protected TestUser testUser2;
 
     protected CalendarTestManager catm;
     protected ContactTestManager cotm;
@@ -108,35 +89,11 @@ public abstract class AbstractAJAXSession {
         super();
     }
 
-    protected final AJAXClient getClient() {
-        return client;
-    }
-
-    protected final AJAXClient getClient2() {
-        return client2;
-    }
-
-    /**
-     * Gets the client identifier to use when performing a login
-     *
-     * @return The client identifier or <code>null</code> to use default one (<code>"com.openexchange.ajax.framework.AJAXClient"</code>)
-     */
-    protected String getClientId() {
-        return null;
-    }
-
-    @Before
+    @Override
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
+        super.setUp();
 
-        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        Assert.assertNotNull("Unable to retrieve a context!", testContext);
-        testUser = testContext.acquireUser();
-        testUser2 = testContext.acquireUser();
-        client = generateClient(testUser);
-        client2 = generateClient(testUser2);
-        admin = testContext.getAdmin();
-
+        AJAXClient client = getClient();
         catm = new CalendarTestManager(client);
         testManager.add(catm);
         cotm = new ContactTestManager(client);
@@ -155,11 +112,11 @@ public abstract class AbstractAJAXSession {
         testManager.add(resTm);
         remTm = new ReminderTestManager(client);
         testManager.add(remTm);
-        fttm = new FolderTaskTestManager(client, client2);
+        fttm = new FolderTaskTestManager(client, getClient2());
         testManager.add(fttm);
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
         try {
             for (TestManager manager : testManager) {
@@ -170,120 +127,9 @@ public abstract class AbstractAJAXSession {
                         LOG.error("", e);
                     }
                 }
-            }            
-            client = logoutClient(client, true);
-            client2 = logoutClient(client2, true);
+            }
         } finally {
-            TestContextPool.backContext(testContext);
+            super.tearDown();
         }
-    }
-
-    public AJAXSession getSession() {
-        return client.getSession();
-    }
-    
-    /**
-     * Does a logout for the client. Errors won't be logged.
-     * Example:
-     * <p>
-     * <code>
-     * client = logoutClient(client);
-     * </code>
-     * </p>
-     * 
-     * @param client to logout
-     * @return <code>null</code> to prepare client for garbage collection
-     */
-    protected final AJAXClient logoutClient(AJAXClient client) {
-        return logoutClient(client, false);
-    }
-    
-    /**
-     * Does a logout for the client.
-     * Example:
-     * <p>
-     * <code>
-     * client = logoutClient(client, true);
-     * </code>
-     * </p>
-     * 
-     * @param client to logout
-     * @param loggin Whether to log an error or not
-     * @return <code>null</code> to prepare client for garbage collection
-     */
-    protected final AJAXClient logoutClient(AJAXClient client, boolean loggin) {
-        try {
-            if (client != null) {
-                client.logout();
-            }
-        } catch (Exception e) {
-            if (loggin) {
-                LOG.error("Unable to correctly tear down test setup.", e);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Generates a new {@link AJAXClient}. Uses standard client identifier.
-     * Generated client needs a <b>logout in tearDown()</b>
-     * 
-     * @return The new {@link AJAXClient}
-     * @throws OXException In case no client could be created
-     */
-    protected final AJAXClient generateDefaultClient() throws OXException {
-        return generateClient(getClientId());
-    }
-
-    /**
-     * Generates a new {@link AJAXClient}.
-     * Generated client needs a <b>logout in tearDown()</b>
-     * 
-     * @param client The client identifier to use when performing a login
-     * @return The new {@link AJAXClient}
-     * @throws OXException In case no client could be created
-     */
-    protected final AJAXClient generateClient(String client) throws OXException {
-        return generateClient(client, testContext.acquireUser());
-    }
-    
-    /**
-     * Generates a new {@link AJAXClient} for the {@link TestUser}.
-     * Generated client needs a <b>logout in tearDown()</b>
-     * 
-     * @param user The {@link TestUser} to create a client for
-     * @return The new {@link AJAXClient}
-     * @throws OXException In case no client could be created
-     */
-    protected final AJAXClient generateClient(TestUser user) throws OXException {
-        return generateClient(getClientId(), user);
-    }
-    
-    /**
-     * Generates a new {@link AJAXClient} for the {@link TestUser}.
-     * Generated client needs a <b>logout in tearDown()</b>
-     * 
-     * @param client The client identifier to use when performing a login
-     * @param user The {@link TestUser} to create a client for
-     * @return The new {@link AJAXClient}
-     * @throws OXException In case no client could be created
-     */
-    protected final AJAXClient generateClient(String client, TestUser user) throws OXException {
-        if (null == user) {
-            LOG.error("Can only create a client for an valid user");
-            throw new OXException();
-        }
-        AJAXClient newClient;
-        try {
-            if (null == client || client.isEmpty()) {
-                newClient = new AJAXClient(user);
-            } else {
-                newClient = new AJAXClient(user, client);
-            }
-        } catch (Exception e) {
-            LOG.error("Could not generate new client for user {} in context {} ", user.getUser(), user.getContext());
-            throw new OXException();
-        }
-        return newClient;
     }
 }

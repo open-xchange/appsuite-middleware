@@ -54,8 +54,6 @@ import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.component.VToDo;
-import net.fortuna.ical4j.model.property.Due;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -63,6 +61,8 @@ import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
+import net.fortuna.ical4j.model.component.VToDo;
+import net.fortuna.ical4j.model.property.Due;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

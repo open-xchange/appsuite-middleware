@@ -93,7 +93,9 @@ import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.DocumentType;
 import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
@@ -104,6 +106,7 @@ import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.emoji.EmojiRegistry;
+import com.openexchange.html.internal.filtering.FilterMaps;
 import com.openexchange.html.internal.image.DroppingImageHandler;
 import com.openexchange.html.internal.image.ImageProcessor;
 import com.openexchange.html.internal.image.ProxyRegistryImageHandler;
@@ -112,11 +115,13 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
 import com.openexchange.html.internal.jericho.handler.UrlReplacerJerichoHandler;
 import com.openexchange.html.internal.jsoup.JsoupParser;
 import com.openexchange.html.internal.jsoup.handler.CleaningJsoupHandler;
+import com.openexchange.html.internal.jsoup.handler.CssOnlyCleaningJsoupHandler;
 import com.openexchange.html.internal.jsoup.handler.UrlReplacerJsoupHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.html.whitelist.Whitelist;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -170,6 +175,8 @@ public final class HtmlServiceImpl implements HtmlService {
     private final Tika tika;
     private final String lineSeparator;
     private final HTMLEntityCodec htmlCodec;
+    private final DefaultWhitelist fullWhitelist;
+    private final DefaultWhitelist htmlOnlyWhitelist;
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
@@ -191,6 +198,15 @@ public final class HtmlServiceImpl implements HtmlService {
         this.htmlEntityMap = htmlEntityMap;
         tika = new Tika();
         htmlCodec = new HTMLEntityCodec();
+
+        DefaultWhitelist.Builder builder = DefaultWhitelist.builder();
+        builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
+        builder.setStyleWhitelistMap(FilterMaps.getStaticStyleMap());
+        fullWhitelist = builder.build();
+
+        builder = DefaultWhitelist.builder();
+        builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
+        htmlOnlyWhitelist = builder.build();
     }
 
     @Override
@@ -487,6 +503,11 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlCodec.encode(immune, input);
     }
 
+    @Override
+    public Whitelist getWhitelist(boolean withCss) {
+        return withCss ? fullWhitelist : htmlOnlyWhitelist;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -542,7 +563,7 @@ public final class HtmlServiceImpl implements HtmlService {
             // Check if input is a full HTML document or a fragment of HTML to parse
             boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
 
-            boolean useJericho = HtmlServices.useJericho();
+            boolean useJericho = options.isSanitize() && (HtmlSanitizeOptions.ParserPreference.JERICHO == options.getParserPreference() || HtmlServices.useJericho());
             if (useJericho) {
                 // Normalize the string
                 {
@@ -603,36 +624,73 @@ public final class HtmlServiceImpl implements HtmlService {
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } else {
                 // First, check size
-                int maxLength = HtmlServices.htmlThreshold();
-                if (maxLength > 0 && html.length() > maxLength) {
-                    LOG.info("HTML content is too big: max. '{}', but is '{}'.", I(maxLength), I(html.length()));
-                    throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
-                }
+                checkSize(html);
 
-                CleaningJsoupHandler handler = getJsoupHandlerFor(options.getOptConfigName());
-                handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());
-                handler.setSuppressLinks(options.isSuppressLinks()).setReplaceBodyWithDiv(options.isReplaceBodyWithDiv());
+                if (options.isSanitize()) {
+                    boolean[] sanitized = new boolean[] { true };
+                    while (sanitized[0]) {
+                        sanitized[0] = false;
+                        // Start sanitizing round
+                        html = SaneScriptTags.saneScriptTags(html, sanitized);
+                    }
 
-                boolean[] modified = options.getModified();
+                    CleaningJsoupHandler handler = getJsoupHandlerFor(options.getOptConfigName());
+                    handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());
+                    handler.setSuppressLinks(options.isSuppressLinks()).setReplaceBodyWithDiv(options.isReplaceBodyWithDiv());
 
-                // Parse the HTML content
-                JsoupParser.getInstance().parse(html, handler, false);
+                    boolean[] modified = options.getModified();
 
-                // Check if modified by handler
-                if (options.isDropExternalImages() && null != modified) {
-                    modified[0] |= handler.isImageURLFound();
-                }
+                    // Parse the HTML content
+                    JsoupParser.getInstance().parse(html, handler, false);
 
-                // Get HTML content
-                if (options.isReplaceBodyWithDiv()) {
-                    html = handler.getHtml();
-                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
-                    htmlSanitizeResult.setBodyReplacedWithDiv(true);
+                    // Check if modified by handler
+                    if (options.isDropExternalImages() && null != modified) {
+                        modified[0] |= handler.isImageURLFound();
+                    }
+
+                    // Get HTML content
+                    if (options.isReplaceBodyWithDiv()) {
+                        html = handler.getHtml();
+                        if (false == startsWith("<!doctype html>", html, true)) {
+                            html = "<!doctype html>\n" + html;
+                        }
+                        htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                        htmlSanitizeResult.setBodyReplacedWithDiv(true);
+                    } else {
+                        Document document = handler.getDocument();
+                        handlePrettyPrint(options, document);
+                        html = hasBody ? document.outerHtml() : document.body().html();
+                        htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                    }
                 } else {
-                    Document document = handler.getDocument();
-                    handlePrettyPrint(options, document);
-                    html = hasBody ? document.outerHtml() : document.body().html();
-                    htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                    CssOnlyCleaningJsoupHandler handler = new CssOnlyCleaningJsoupHandler();
+                    handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());
+                    handler.setSuppressLinks(options.isSuppressLinks()).setReplaceBodyWithDiv(options.isReplaceBodyWithDiv());
+
+                    boolean[] modified = options.getModified();
+
+                    // Parse the HTML content
+                    JsoupParser.getInstance().parse(html, handler, false);
+
+                    // Check if modified by handler
+                    if (options.isDropExternalImages() && null != modified) {
+                        modified[0] |= handler.isImageURLFound();
+                    }
+
+                    // Get HTML content
+                    if (options.isReplaceBodyWithDiv()) {
+                        html = handler.getHtml();
+                        if (false == startsWith("<!doctype html>", html, true)) {
+                            html = "<!doctype html>\n" + html;
+                        }
+                        htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                        htmlSanitizeResult.setBodyReplacedWithDiv(true);
+                    } else {
+                        Document document = handler.getDocument();
+                        handlePrettyPrint(options, document);
+                        html = hasBody ? document.outerHtml() : document.body().html();
+                        htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
+                    }
                 }
             }
 
@@ -640,10 +698,26 @@ public final class HtmlServiceImpl implements HtmlService {
             html = keepUnicodeForEntities(html);
             htmlSanitizeResult.setContent(html);
 
+            /*-
+             *
+            System.out.println(" ---------------------------------- ");
+            System.out.println("Was:\n" + htmlContent);
+            System.out.println(" >>>>>>>>>>>>>>>>>>>>>>>> ");
+            System.out.println("Now:\n" + htmlSanitizeResult.getContent());
+            */
+
             return htmlSanitizeResult;
         } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized.", e);
             return htmlSanitizeResult;
+        }
+    }
+
+    private void checkSize(String html) throws OXException {
+        int maxLength = HtmlServices.htmlThreshold();
+        if (maxLength > 0 && html.length() > maxLength) {
+            LOG.info("HTML content is too big: max. '{}', but is '{}'.", I(maxLength), I(html.length()));
+            throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
         }
     }
 
@@ -1367,6 +1441,9 @@ public final class HtmlServiceImpl implements HtmlService {
              * Clean...
              */
             final TagNode htmlNode = newHtmlCleaner().clean(htmlContent);
+            if (null == htmlNode) {
+                return htmlContent;
+            }
             /*
              * Serialize
              */
@@ -1701,6 +1778,59 @@ public final class HtmlServiceImpl implements HtmlService {
             sb.append("</html>").append(lineSeparator);
         }
         return sb.toString();
+    }
+
+    @Override
+    public String getWellFormedHTMLDocument(String htmlContent) throws OXException {
+        if (null == htmlContent || 0 == htmlContent.length()) {
+            return htmlContent;
+        }
+
+        Document document = Jsoup.parse(htmlContent);
+
+        {
+            DocumentType docType = null;
+            List<Node> nodes = document.childNodes();
+            for (Iterator<Node> it = nodes.iterator(); null == docType && it.hasNext();) {
+                Node node = it.next();
+                if (node instanceof DocumentType) {
+                    docType = (DocumentType) node;
+                }
+            }
+            if (null == docType) {
+                docType = new DocumentType("html", "", "");
+                document.insertChildren(0, docType);
+            }
+        }
+
+        {
+            Elements heads = document.getElementsByTag("head");
+            if (false == heads.isEmpty()) {
+                org.jsoup.nodes.Element head = heads.get(0);
+                org.jsoup.nodes.Element meta = null;
+                List<Node> nodes = head.childNodes();
+                for (Iterator<Node> it = nodes.iterator(); null == meta && it.hasNext();) {
+                    Node node = it.next();
+                    if (node instanceof org.jsoup.nodes.Element) {
+                        org.jsoup.nodes.Element e = (org.jsoup.nodes.Element) node;
+                        if ("meta".equals(e.tagName())) {
+                            org.jsoup.nodes.Attributes attributes = e.attributes();
+                            if ("Content-Type".equalsIgnoreCase(attributes.get("http-equiv"))) {
+                                meta = e;
+                            }
+                        }
+                    }
+                }
+                if (null == meta) {
+                    meta = new org.jsoup.nodes.Element("meta");
+                    meta.attr("http-equiv", "Content-Type");
+                    meta.attr("content", "text/html; charset=UTF-8");
+                    head.insertChildren(0, meta);
+                }
+            }
+        }
+
+        return document.outerHtml();
     }
 
     @Override
@@ -2135,7 +2265,7 @@ public final class HtmlServiceImpl implements HtmlService {
      */
     private static String asHex(final byte[] hash) {
         final int length = hash.length;
-        final char[] buf = new char[length * 2];
+        final char[] buf = new char[length << 1];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];
@@ -2288,6 +2418,10 @@ public final class HtmlServiceImpl implements HtmlService {
             String preprocessed = preprocessWithJSoup ? preprocessWithJSoup(htmlContent) : htmlContent;
             preprocessed = replaceSpecialEntities(preprocessed);
             final TagNode htmlNode = newHtmlCleaner().clean(preprocessed);
+            if (null == htmlNode) {
+                LOG.warn("HtmlCleaner library failed to pretty-print HTML content");
+                return htmlContent;
+            }
 
             // Serialize
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
@@ -2339,6 +2473,30 @@ public final class HtmlServiceImpl implements HtmlService {
         } finally {
             Streams.close(fos);
         }
+    }
+
+    private static boolean startsWith(String prefix, String toCheck, boolean ignoreHeadingWhitespaces) {
+        if (null == toCheck) {
+            return false;
+        }
+
+        int len = toCheck.length();
+        if (len <= 0) {
+            return false;
+        }
+
+        if (!ignoreHeadingWhitespaces) {
+            return toCheck.startsWith(prefix);
+        }
+
+        int i = 0;
+        while (i < len && Strings.isWhitespace(toCheck.charAt(i))) {
+            i++;
+        }
+        if (i >= len) {
+            return false;
+        }
+        return toCheck.startsWith(prefix, i);
     }
 
 }

@@ -90,6 +90,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.report.internal.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.snippet.QuotaAwareSnippetService;
@@ -386,11 +387,9 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                     throw e;
                 }
-                String contextids = "";
-                for (final Integer c : ctxs) {
-                    contextids += c + ",";
-                }
+                String contextids = Strings.join(ctxs, ",");
                 contextids = contextids.substring(0, contextids.length() - 1);
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = poolCon.prepareStatement("SELECT cid FROM login2user WHERE cid IN (" + contextids + ") GROUP BY cid");
                 rs = stmt.executeQuery();
                 while (rs.next()) {
@@ -519,7 +518,7 @@ public abstract class Consistency implements ConsistencyMBean {
     @Override
     public void repairFilesInFilestore(final int filestoreId, final String resolverPolicy) throws MBeanException {
         try {
-            repair(toEntities(getContextsForFilestore(filestoreId)), resolverPolicy);
+            repair(getEntitiesForFilestore(filestoreId), resolverPolicy);
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
@@ -705,77 +704,86 @@ public abstract class Consistency implements ConsistencyMBean {
         LOG.info("Found {} files in the filestore for this entity {}", filestoreset.size(), entity);
 
         try {
-            boolean isContext = entity.getType().equals(EntityType.Context);
-
             LOG.info("Loading all infostore filestore locations");
             SortedSet<String> dbfileset;
-            if (isContext) {
-                dbfileset = database.getDocumentFileStoreLocationsperContext(entity.getContext());
-            } else {
-                dbfileset = database.getDocumentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+
+            SortedSet<String> attachmentset;
+            SortedSet<String> snippetset;
+            SortedSet<String> previewset;
+            SortedSet<String> vcardset;
+            switch (entity.getType()) {
+                case Context:
+                    dbfileset = database.getDocumentFileStoreLocationsperContext(entity.getContext());
+
+                    attachmentset = attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
+                    snippetset = getSnippetFileStoreLocationsPerContext(entity.getContext());
+                    previewset = getPreviewCacheFileStoreLocationsPerContext(entity.getContext());
+                    vcardset = getVCardFileStoreLocationsPerContext(entity.getContext());
+                    break;
+                case User:
+                    dbfileset = database.getDocumentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+
+                    attachmentset = attach.getAttachmentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                    snippetset = getSnippetFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                    previewset = getPreviewCacheFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                    vcardset = getVCardFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown entity type '" + entity.getType() + "'");
+
             }
             LOG.info("Found {} infostore filepaths", dbfileset.size());
 
-            if (isContext) {
-                // Get the referenced ones
-                SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
-                LOG.info("Found {} attachments", attachmentset.size());
+            LOG.info("Found {} attachments", attachmentset.size());
+            LOG.info("Found {} snippets", snippetset.size());
+            LOG.info("Found {} previews", previewset.size());
+            LOG.info("Found {} vCards", vcardset.size());
 
-                SortedSet<String> snippetset = getSnippetFileStoreLocationsPerContext(entity.getContext());
-                LOG.info("Found {} snippets", snippetset.size());
+            final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
+            joineddbfileset.addAll(attachmentset);
+            joineddbfileset.addAll(snippetset);
+            joineddbfileset.addAll(previewset);
+            joineddbfileset.addAll(vcardset);
 
-                SortedSet<String> previewset = getPreviewCacheFileStoreLocationsPerContext(entity.getContext());
-                LOG.info("Found {} previews", previewset.size());
+            LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", joineddbfileset.size(), filestoreset.size(), Math.abs(joineddbfileset.size() - filestoreset.size()));
 
-                SortedSet<String> vcardset = getVCardFileStoreLocationsPerContext(entity.getContext());
-                LOG.info("Found {} vCards", vcardset.size());
+            // Build the difference set of the database set, so that the final
+            // dbfileset contains all the members that aren't in the filestoreset
+            if (diffset(dbfileset, filestoreset, "database list", "filestore list")) {
+                // implement the solver for dbfiles here
+                dbSolver.solve(entity, dbfileset);
+            }
 
-                final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
-                joineddbfileset.addAll(attachmentset);
-                joineddbfileset.addAll(snippetset);
-                joineddbfileset.addAll(previewset);
-                joineddbfileset.addAll(vcardset);
+            // Build the difference set of the attachment database set, so that the
+            // final attachmentset contains all the members that aren't in the
+            // filestoreset
+            if (diffset(attachmentset, filestoreset, "database list of attachment files", "filestore list")) {
+                // implement the solver for deleted dbfiles here
+                attachmentSolver.solve(entity, attachmentset);
+            }
 
-                LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", joineddbfileset.size(), filestoreset.size(), Math.abs(joineddbfileset.size() - filestoreset.size()));
+            // Build the difference set of the attachment database set, so that the
+            // final attachmentset contains all the members that aren't in the
+            // filestoreset
+            if (diffset(snippetset, filestoreset, "database list of snippet files", "filestore list")) {
+                // implement the solver for deleted dbfiles here
+                snippetSolver.solve(entity, snippetset);
+            }
 
-                // Build the difference set of the database set, so that the final
-                // dbfileset contains all the members that aren't in the filestoreset
-                if (diffset(dbfileset, filestoreset, "database list", "filestore list")) {
-                    // implement the solver for dbfiles here
-                    dbSolver.solve(entity, dbfileset);
-                }
+            if (diffset(previewset, filestoreset, "database list of cached previews", "filestore list")) {
+                previewSolver.solve(entity, previewset);
+            }
 
-                // Build the difference set of the attachment database set, so that the
-                // final attachmentset contains all the members that aren't in the
-                // filestoreset
-                if (diffset(attachmentset, filestoreset, "database list of attachment files", "filestore list")) {
-                    // implement the solver for deleted dbfiles here
-                    attachmentSolver.solve(entity, attachmentset);
-                }
+            if (diffset(vcardset, filestoreset, "database list of VCard files", "filestore list")) {
+                vCardSolver.solve(entity, vcardset);
+            }
 
-                // Build the difference set of the attachment database set, so that the
-                // final attachmentset contains all the members that aren't in the
-                // filestoreset
-                if (diffset(snippetset, filestoreset, "database list of snippet files", "filestore list")) {
-                    // implement the solver for deleted dbfiles here
-                    snippetSolver.solve(entity, snippetset);
-                }
-
-                if (diffset(previewset, filestoreset, "database list of cached previews", "filestore list")) {
-                    previewSolver.solve(entity, previewset);
-                }
-
-                if (diffset(vcardset, filestoreset, "database list of VCard files", "filestore list")) {
-                    vCardSolver.solve(entity, vcardset);
-                }
-
-                // Build the difference set of the filestore set, so that the final
-                // filestoreset contains all the members that aren't in the dbfileset or
-                // the dbdelfileset
-                if (diffset(filestoreset, joineddbfileset, "filestore list", "one of the databases")) {
-                    // implement the solver for the filestore here
-                    fileSolver.solve(entity, filestoreset);
-                }
+            // Build the difference set of the filestore set, so that the final
+            // filestoreset contains all the members that aren't in the dbfileset or
+            // the dbdelfileset
+            if (diffset(filestoreset, joineddbfileset, "filestore list", "one of the databases")) {
+                // implement the solver for the filestore here
+                fileSolver.solve(entity, filestoreset);
             }
         } catch (final OXException e) {
             erroroutput(e);
@@ -909,6 +917,16 @@ public abstract class Consistency implements ConsistencyMBean {
     protected abstract SortedSet<String> getSnippetFileStoreLocationsPerContext(Context ctx) throws OXException;
 
     /**
+     * Gets a {@link SortedSet} with all snippet file store locations for the specified {@link Context} and {@link User}
+     *
+     * @param ctx the {@link Context}
+     * @param user the {@link User}
+     * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
+     * @throws OXException if the snippet file store locations cannot be returned
+     */
+    protected abstract SortedSet<String> getSnippetFileStoreLocationsPerUser(Context ctx, User user) throws OXException;
+
+    /**
      * Gets a {@link SortedSet} with all vcard file store locations for the specified {@link Context}
      *
      * @param ctx the {@link Context}
@@ -918,6 +936,16 @@ public abstract class Consistency implements ConsistencyMBean {
     protected abstract SortedSet<String> getVCardFileStoreLocationsPerContext(Context ctx) throws OXException;
 
     /**
+     * Gets a {@link SortedSet} with all vcard file store locations for the specified {@link Context} and {@link User}
+     *
+     * @param ctx the {@link Context}
+     * @param user The {@link User}
+     * @return a {@link SortedSet} with all vcard file store locations for the specified {@link Context}
+     * @throws OXException if the vcard file store locations cannot be returned
+     */
+    protected abstract SortedSet<String> getVCardFileStoreLocationsPerUser(Context ctx, User user) throws OXException;
+
+    /**
      * Gets a {@link SortedSet} with all preview cache file store locations for the specified {@link Context}
      *
      * @param ctx the {@link Context}
@@ -925,6 +953,16 @@ public abstract class Consistency implements ConsistencyMBean {
      * @throws OXException if the preview cache file store locations cannot be returned
      */
     protected abstract SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException;
+
+    /**
+     * Gets a {@link SortedSet} with all preview cache file store locations for the specified {@link Context} and {@link User}
+     *
+     * @param ctx the {@link Context}
+     * @param user the {@link User}
+     * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
+     * @throws OXException if the preview cache file store locations cannot be returned
+     */
+    protected abstract SortedSet<String> getPreviewCacheFileStoreLocationsPerUser(Context ctx, User user) throws OXException;
 
     /**
      * Gets the admin {@link User} of the specified {@link Context}

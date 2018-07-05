@@ -59,6 +59,8 @@ import com.openexchange.java.Strings;
  */
 public class NameBuilder {
 
+    private static final String PGP_EXTENSION = ".pgp";
+
     /**
      * Gets the appropriate {@code NameBuilder} instance for specified name.
      * <p>
@@ -80,6 +82,16 @@ public class NameBuilder {
 
         String baseName = name.substring(0, index);
         String extension = name.substring(index);
+
+        if (extension.equals(PGP_EXTENSION)) {
+            // Don't wrongly split filenames with ".pgp" extension in case original extension is also available. E.g.: "test.txt.pgp" -> "test (1).txt.pgp" instead of "test.txt (1).pgp"
+            int i = FilenameUtils.indexOfExtension(baseName);
+            if (i > 0) {
+                baseName = name.substring(0, i);
+                extension = name.substring(i);
+            }
+        }
+
         return new NameBuilder(baseName, extension);
     }
 

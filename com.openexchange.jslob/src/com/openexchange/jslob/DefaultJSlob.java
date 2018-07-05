@@ -53,7 +53,7 @@ import org.json.JSONObject;
 
 /**
  * {@link DefaultJSlob} - A JSlob holding a JSON object.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultJSlob implements JSlob, Cloneable {
@@ -64,8 +64,8 @@ public class DefaultJSlob implements JSlob, Cloneable {
 
         private static final long serialVersionUID = 870193683123103886L;
 
-        protected EmptyJSlob() {
-            super();
+        EmptyJSlob() {
+            super(null, null);
         }
 
         @Override
@@ -91,35 +91,48 @@ public class DefaultJSlob implements JSlob, Cloneable {
      */
     public static final DefaultJSlob EMPTY_JSLOB = new EmptyJSlob();
 
+    /**
+     * Creates a <code>DefaultJSlob</code> instance from specified JSlob.
+     *
+     * @param other The JSlob to copy from
+     * @return The resulting <code>DefaultJSlob</code> instance
+     */
+    public static DefaultJSlob copyOf(JSlob other) {
+        if (null == other) {
+            return null;
+        }
+
+        return other instanceof DefaultJSlob ? (DefaultJSlob) other : new DefaultJSlob(other);
+    }
+
     private JSONObject jsonObject;
     private JSONObject metaObject;
-
     private JSlobId id;
+
+    /**
+     * Initializes a new {@link DefaultJSlob} with given JSON object.
+     *
+     * @param jsonObject The JSON object initially applied to this JSlob
+     */
+    public DefaultJSlob(final JSONObject jsonObject) {
+        this(jsonObject, new JSONObject(4));
+    }
 
     /**
      * Initializes a new empty {@link DefaultJSlob}.
      */
-    public DefaultJSlob() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link DefaultJSlob}.
-     * 
-     * @param jsonObject The JSON object initially applied to this JSlob
-     */
-    public DefaultJSlob(final JSONObject jsonObject) {
+    protected DefaultJSlob(JSONObject jsonObject, JSONObject metaObject) {
         super();
         this.jsonObject = jsonObject;
-        this.metaObject = new JSONObject();
+        this.metaObject = metaObject;
     }
 
     /**
      * Initializes a new {@link DefaultJSlob}.
-     * 
+     *
      * @param other The other JSlob
      */
-    public DefaultJSlob(final JSlob other) {
+    private DefaultJSlob(final JSlob other) {
         super();
         JSONObject jo = other.getJsonObject();
         this.jsonObject = null == jo ? null : new JSONObject(jo);
@@ -177,7 +190,7 @@ public class DefaultJSlob implements JSlob, Cloneable {
 
     /**
      * Sets the JSON object stored in this JSlob.
-     * 
+     *
      * @param jsonObject The JSON object
      * @return This JSlob with new JSON object applied
      */
@@ -193,7 +206,7 @@ public class DefaultJSlob implements JSlob, Cloneable {
 
     /**
      * Sets the json object with unmodifiable metadata describing the regular payload data
-     * 
+     *
      * @param The metadata object
      * @return This JSlob with new metadata object applied
      */

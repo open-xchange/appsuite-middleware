@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,11 +40,13 @@
 
 package com.sun.mail.imap;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.protocol.*;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.ListInfo;
 
 /**
  * The default IMAP folder (root of the naming hierarchy).
@@ -60,19 +62,23 @@ public class DefaultFolder extends IMAPFolder {
 	type = HOLDS_FOLDERS; // obviously
     }
 
+    @Override
     public synchronized String getName() {
 	return fullName;
     }
 
+    @Override
     public Folder getParent() {
 	return null;
     }
 
+    @Override
     public synchronized Folder[] list(final String pattern)
 				throws MessagingException {
 	ListInfo[] li = null;
 
 	li = (ListInfo[])doCommand(new ProtocolCommand() {
+	    @Override
 	    public Object doCommand(IMAPProtocol p) throws ProtocolException {
 		return p.list("", pattern);
 	    }
@@ -87,11 +93,13 @@ public class DefaultFolder extends IMAPFolder {
 	return folders;
     }
 
+    @Override
     public synchronized Folder[] listSubscribed(final String pattern)
 				throws MessagingException {
 	ListInfo[] li = null;
 
 	li = (ListInfo[])doCommand(new ProtocolCommand() {
+	    @Override
 	    public Object doCommand(IMAPProtocol p) throws ProtocolException {
 		return p.lsub("", pattern);
 	    }
@@ -106,30 +114,36 @@ public class DefaultFolder extends IMAPFolder {
 	return folders;
     }
 
+    @Override
     public boolean hasNewMessages() throws MessagingException {
 	// Not applicable on DefaultFolder
 	return false;
     }
 
+    @Override
     public Folder getFolder(String name) throws MessagingException {
 	return ((IMAPStore)store).newIMAPFolder(name, UNKNOWN_SEPARATOR);
     }
 
+    @Override
     public boolean delete(boolean recurse) throws MessagingException {  
 	// Not applicable on DefaultFolder
 	throw new MethodNotSupportedException("Cannot delete Default Folder");
     }
 
+    @Override
     public boolean renameTo(Folder f) throws MessagingException {
 	// Not applicable on DefaultFolder
 	throw new MethodNotSupportedException("Cannot rename Default Folder");
     }
 
+    @Override
     public void appendMessages(Message[] msgs) throws MessagingException {
 	// Not applicable on DefaultFolder
 	throw new MethodNotSupportedException("Cannot append to Default Folder");
     }
 
+    @Override
     public Message[] expunge() throws MessagingException {
 	// Not applicable on DefaultFolder
 	throw new MethodNotSupportedException("Cannot expunge Default Folder");

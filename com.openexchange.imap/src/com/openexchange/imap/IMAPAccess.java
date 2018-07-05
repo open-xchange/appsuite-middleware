@@ -54,10 +54,12 @@ import java.io.IOException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -139,6 +141,7 @@ import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.JavaIMAPStore;
+import com.sun.mail.imap.Rights;
 
 /**
  * {@link IMAPAccess} - Establishes an IMAP access and provides access to storages.
@@ -593,7 +596,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  * Check read access
                  */
                 final ACLExtension aclExtension = imapConfig.getACLExtension();
-                if (!aclExtension.aclSupport() || aclExtension.canRead(IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig))) {
+                Rights ownRights = IMAPFolderConverter.getOwnRights(imapFolder, session, imapConfig);
+                if (!aclExtension.aclSupport() || (ownRights != null && aclExtension.canRead(ownRights))) {
                     retval = IMAPFolderConverter.getUnreadCount(imapFolder);
                 } else {
                     // ACL support AND no read access
@@ -668,7 +672,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 throw MimeMailException.handleMessagingException(e, config, session);
             } catch (final MessagingException e) {
                 if (MimeMailException.isSSLHandshakeException(e)) {
-                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), config.getServer());
+                    List<Object> displayArgs = new ArrayList<>(2);
+                    displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                    displayArgs.add(config.getServer());
+                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), displayArgs.toArray(new Object[] {}));
                     warnings.add(oxe);
                     throw oxe;
                 }
@@ -832,7 +839,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Check for a SocketTimeoutException
                  */
-                if (tmpDownEnabled && MimeMailException.isTimeoutException(e)) {
+                if (tmpDownEnabled && MimeMailException.isTimeoutOrConnectException(e)) {
                     /*
                      * Remember a timed-out IMAP server on connect attempt
                      */
@@ -842,7 +849,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     }
                 }
                 if (MimeMailException.isSSLHandshakeException(e)) {
-                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), server);
+                    List<Object> displayArgs = new ArrayList<>(2);
+                    displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                    displayArgs.add(server);
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), displayArgs.toArray(new Object[] {}));
                 }
                 {
                     Exception next = e.getNextException();
@@ -1075,13 +1085,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
             auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
         }
-        
+
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
         if (null != sessionInformation) {
             LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
         }
         java.net.InetAddress remoteAddress = imapStore.getRemoteAddress();
-        if (null != remoteAddress) {            
+        if (null != remoteAddress) {
             LogProperties.put(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS, remoteAddress.getHostAddress());
         }
     }

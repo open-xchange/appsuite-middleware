@@ -59,7 +59,6 @@ import static com.openexchange.groupware.i18n.FolderStrings.SYSTEM_TRASH_INFOSTO
 import static com.openexchange.groupware.i18n.FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME;
 import static com.openexchange.groupware.i18n.FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME;
 import static com.openexchange.groupware.i18n.FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME;
-import gnu.trove.list.TIntList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -85,6 +84,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import gnu.trove.list.TIntList;
 
 /**
  * {@link SystemInfostoreFolder} - Gets the system infostore folder.

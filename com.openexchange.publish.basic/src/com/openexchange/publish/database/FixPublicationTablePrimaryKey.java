@@ -49,11 +49,10 @@
 
 package com.openexchange.publish.database;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -68,13 +67,8 @@ import com.openexchange.tools.update.Tools;
  */
 public final class FixPublicationTablePrimaryKey extends UpdateTaskAdapter {
 
-    private static final String TABLE = "publications";
-    private static final String[] COLUMNS = { "cid", "id" };
-    private final DatabaseService dbService;
-
-    public FixPublicationTablePrimaryKey(DatabaseService service) {
+    public FixPublicationTablePrimaryKey() {
         super();
-        this.dbService = service;
     }
 
     @Override
@@ -84,21 +78,30 @@ public final class FixPublicationTablePrimaryKey extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        Connection con = dbService.getForUpdateTask(cid);
         try {
-            con.setAutoCommit(false);
-            if (!Tools.existsPrimaryKey(con, TABLE, COLUMNS)) {
-                Tools.dropPrimaryKey(con, TABLE);
-                Tools.createPrimaryKey(con, TABLE, COLUMNS);
+            Connection con = params.getConnection();
+            if (Tools.existsPrimaryKey(con, "publications", new String[] { "cid", "id" })) {
+                return;
             }
-            con.commit();
+
+            boolean rollback = false;
+            try {
+                con.setAutoCommit(false);
+                rollback = true;
+
+                Tools.dropPrimaryKey(con, "publications");
+                Tools.createPrimaryKey(con, "publications", new String[] { "cid", "id" });
+
+                con.commit();
+                rollback = false;
+            } finally {
+                if (rollback) {
+                    rollback(con);
+                }
+                autocommit(con);
+            }
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            autocommit(con);
-            dbService.backForUpdateTask(cid, con);
         }
     }
 }

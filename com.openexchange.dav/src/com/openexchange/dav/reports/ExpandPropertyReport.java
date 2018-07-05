@@ -51,6 +51,7 @@ package com.openexchange.dav.reports;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import com.openexchange.dav.DAVProtocol;
@@ -108,9 +109,9 @@ public class ExpandPropertyReport extends PROPFINDAction {
             Element propstatElement = new Element("propstat", Protocol.DAV_NS);
             Element propElement = new Element("prop", Protocol.DAV_NS);
             for (Element requestedProperty : requestedProperties) {
-                String name = requestedProperty.getAttribute("name").getValue();
-                String namespace = requestedProperty.getAttribute("namespace").getValue();
-                WebdavProperty property = resource.getProperty(namespace, name);
+                String name = optAttributeValue("name", requestedProperty);
+                String namespace = optAttributeValue("namespace", requestedProperty);
+                WebdavProperty property = null == name || null == namespace ? null : resource.getProperty(namespace, name);
                 if (null != property) {
                     Element marshalledProperty = marshaller.marshalProperty(property, protocol);
                     List<Element> propertiesToExpand = requestedProperty.getChildren("property", Protocol.DAV_NS);
@@ -133,6 +134,11 @@ public class ExpandPropertyReport extends PROPFINDAction {
             responseElement.addContent(propstatElement);
         }
         return responseElement;
+    }
+
+    private static String optAttributeValue(String attName, Element requestedProperty) {
+        Attribute attribute = requestedProperty.getAttribute(attName);
+        return null == attribute ? null : attribute.getValue();
     }
 
 }

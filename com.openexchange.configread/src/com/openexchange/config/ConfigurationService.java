@@ -286,22 +286,22 @@ public interface ConfigurationService {
     public int size();
 
     /**
-     * Loads a file and parses it with a YAML parser. The type of object returned depends on the layout of the yaml file and should be known
+     * Loads a file and parses it with a YAML parser. The type of object returned depends on the layout of the YAML file and should be known
      * to clients of this service.
      *
      * @param filename
-     * @return The parsed data
-     * @throws IllegalStateException If .yml file cannot be loaded
+     * @return The parsed data or <code>null</code> if there is no such YAML file
+     * @throws IllegalStateException If YAML file cannot be loaded
      */
     public Object getYaml(String filename);
 
     /**
-     * Loads all files in a directory and parses them with a YAML parser. The type of the objects returned depends on the layout of the yaml
+     * Loads all files in a directory and parses them with a YAML parser. The type of the objects returned depends on the layout of the YAML
      * files.
      *
      * @param dirName
      * @return A map mapping filename to the object that was parsed.
-     * @throws IllegalStateException If .yml file cannot be loaded
+     * @throws IllegalStateException If YAML file cannot be loaded
      */
     public Map<String, Object> getYamlInFolder(String dirName);
 

@@ -82,7 +82,7 @@ public class DAVProperty extends WebdavProperty {
 
     /**
      * Gets the XML element.
-     * 
+     *
      * @return The element
      */
     public Element getElement() {
@@ -107,7 +107,10 @@ public class DAVProperty extends WebdavProperty {
 
     @Override
     public String getValue() {
-        return toString();
+        if (null != element.getChildren() && 0 < element.getChildren().size()) {
+            return toString();
+        }
+        return element.getText();
     }
 
     @Override

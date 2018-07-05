@@ -50,9 +50,9 @@
 package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -64,29 +64,40 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class AllowedSharingModes extends SingleXMLPropertyMixin {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AllowedSharingModes.class);
-    private final Session session;
+
+    private final FolderCollection<?> collection;
 
     /**
      * Initializes a new {@link AllowedSharingModes}.
      *
-     * @param session The session
+     * @param collection The folder collection
      */
-    public AllowedSharingModes(Session session) {
+    public AllowedSharingModes(FolderCollection<?> collection) {
         super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "allowed-sharing-modes");
-        this.session = session;
+        this.collection = collection;
     }
 
     @Override
     protected String getValue() {
+        if (supportsPermissions() && hasFullSharedFolderAccess()) {
+            return "<can-be-shared/><can-be-published/>";
+        }
+        return "<never-shared/><never-publish/>";
+    }
+
+    private boolean supportsPermissions() {
+        return null != collection.getFolder() && null != collection.getFolder().getSupportedCapabilities() &&
+            collection.getFolder().getSupportedCapabilities().contains("permissions");
+    }
+
+    private boolean hasFullSharedFolderAccess() {
         try {
-            UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session).getUserPermissionBits();
-            if (permissionBits.hasFullSharedFolderAccess()) {
-                return "<CS:can-be-shared/><CS:can-be-published/>";
-            }
+            UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(collection.getFactory().getSession()).getUserPermissionBits();
+            return permissionBits.hasFullSharedFolderAccess();
         } catch (OXException e) {
             LOG.warn("Error checking user permission bits", e);
         }
-        return ""; // sharing not allowed
+        return false;
     }
 
 }

@@ -1,10 +1,14 @@
 package liquibase.change;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Factory class for constructing the correct liquibase.change.Change implementation based on a command name.
@@ -17,8 +21,8 @@ public class ChangeFactory {
 
     private static ChangeFactory instance;
 
-    private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
-    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
+    private final Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
+    private final Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
 
     private ChangeFactory() {
     }
@@ -47,7 +51,7 @@ public class ChangeFactory {
     /**
      * Reset the ChangeFactory so it reloads the registry on the next call to @{link #getInstance()}. Mainly used in testing
      */
-    public static void reset() {
+    public static synchronized void reset() {
         instance = null;
     }
 

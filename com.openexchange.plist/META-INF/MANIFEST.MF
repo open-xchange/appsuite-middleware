@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The bundle for composing plist profiles
 Bundle-SymbolicName: com.openexchange.plist
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.ctc.wstx.api;version="4.2.0",
  com.ctc.wstx.cfg;version="4.2.0",
  com.ctc.wstx.dom;version="4.2.0",

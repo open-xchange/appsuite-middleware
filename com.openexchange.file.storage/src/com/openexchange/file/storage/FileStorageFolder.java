@@ -49,14 +49,12 @@
 
 package com.openexchange.file.storage;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link FileStorageFolder} - Represents a file storage folder.
@@ -99,9 +97,9 @@ public interface FileStorageFolder extends FileStorageConstants {
     /**
      * All known capabilities in a set.
      */
-    public static final Set<String> ALL_CAPABILITIES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
-        CAPABILITY_PERMISSIONS, CAPABILITY_PUBLICATION, CAPABILITY_QUOTA, CAPABILITY_SORT, CAPABILITY_SUBSCRIPTION }
-    )));
+    public static final Set<String> ALL_CAPABILITIES = ImmutableSet.of(
+        CAPABILITY_PERMISSIONS, CAPABILITY_PUBLICATION, CAPABILITY_QUOTA, CAPABILITY_SORT, CAPABILITY_SUBSCRIPTION
+    );
 
     /**
      * Gets the capabilities of this folder; e.g <code>"QUOTA"</code>, <code>"PERMISSIONS"</code>, etc.

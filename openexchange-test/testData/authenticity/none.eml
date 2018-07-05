@@ -1,0 +1,106 @@
+Received: from AM3PR04CA0090.eurprd04.prod.outlook.com
+ (2a01:111:e400:5366::16) by AMSPR04MB375.eurprd04.prod.outlook.com
+ (2a01:111:e400:8035::14) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1019.17 via
+ Mailbox Transport; Thu, 13 Apr 2017 10:38:26 +0000
+Received: from inbound.mail.protection.outlook.com (94.245.120.82) by
+ AM3PR04CA0090.outlook.office365.com (10.163.180.144) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
+ 15.1.1034.10 via Frontend Transport; Thu, 13 Apr 2017 10:38:26 +0000
+Received: from DB5EUR03FT060.eop-EUR03.prod.protection.outlook.com
+ (10.152.20.53) by DB5EUR03HT163.eop-EUR03.prod.protection.outlook.com
+ (10.152.21.193) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384_P384) id 15.1.1019.14; Thu, 13
+ Apr 2017 10:38:25 +0000
+Authentication-Results: open-xchange.authenticity.test; spf=none (sender IP is 193.209.119.8)
+ smtp.mailfrom=lists.dovecot.fi; live.com; dkim=none (message not signed)
+ header.d=none; dmarc=none action=none header.from=lists.dovecot.fi;
+Received-SPF: None (protection.outlook.com: lists.dovecot.fi does not
+ designate permitted sender hosts)
+Received: from SNT004-MC3F4.hotmail.com (10.152.20.59) by
+ DB5EUR03FT060.mail.protection.outlook.com (10.152.21.231) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384_P384) id
+ 15.1.1019.14 via Frontend Transport; Thu, 13 Apr 2017 10:38:24 +0000
+X-IncomingTopHeaderMarker: OriginalChecksum:1E741FE6349275EC5F04D76554EB3FFD8412A57AD7C98FD36AD7959882DE7899;UpperCasedChecksum:27EB0B06B29B71B56B57D0BF6727EDFF575DEDA9EA21A5741CEB14B7BCF60FDA;SizeAsReceived:1037;Count:19
+Received: from smtp.dovecot.fi ([193.209.119.8]) by SNT004-MC3F4.hotmail.com over TLS secured channel with Microsoft SMTPSVC(7.5.7601.23143);
+     Thu, 13 Apr 2017 03:38:22 -0700
+Received: from lists.dovecot.net (unknown [10.217.64.10])
+    by smtp.dovecot.fi (Halon) with ESMTP
+    id 4b0d301d-2035-11e7-99ca-4320ffd3db0b;
+    Thu, 13 Apr 2017 13:38:12 +0300 (EEST)
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Subject: Your message to Dev awaits moderator approval
+From: <dev-owner@lists.dovecot.fi>
+To: <ewaldbartkowiak@live.com>
+Message-ID: <mailman.0.1492079843.2154.dev@lists.dovecot.fi>
+Date: Thu, 13 Apr 2017 13:37:23 +0300
+Precedence: bulk
+X-BeenThere: dev@lists.dovecot.fi
+X-Mailman-Version: 2.1.15
+List-Id: <dev.lists.dovecot.fi>
+X-List-Administrivia: yes
+Errors-To: dev-bounces@lists.dovecot.fi
+Sender: Dev <dev-bounces@lists.dovecot.fi>
+Return-Path: dev-bounces@lists.dovecot.fi
+X-OriginalArrivalTime: 13 Apr 2017 10:38:22.0479 (UTC) FILETIME=[12E1B9F0:01D2B442]
+X-IncomingHeaderCount: 19
+X-MS-Exchange-Organization-Network-Message-Id: da04998d-6ba9-4af3-8a9d-08d482593703
+X-EOPAttributedMessage: 0
+X-EOPTenantAttributedMessage: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa:0
+X-MS-Exchange-Organization-MessageDirectionality: Incoming
+CMM-sender-ip: 193.209.119.8
+CMM-sending-ip: 193.209.119.8
+CMM-Authentication-Results: hotmail.com; spf=none (sender IP is
+ 193.209.119.8) smtp.mailfrom=dev-bounces@lists.dovecot.fi; dkim=none
+ header.d=lists.dovecot.fi; x-hmca=none header.id=dev-bounces@lists.dovecot.fi
+CMM-X-SID-PRA: dev-bounces@lists.dovecot.fi
+CMM-X-AUTH-Result: NONE
+CMM-X-SID-Result: NONE
+CMM-X-Message-Status: n:n
+CMM-X-Message-Delivery: Vj0xLjE7dXM9MDtsPTA7YT0wO0Q9MjtHRD0yO1NDTD00
+CMM-X-Message-Info: 11chDOWqoTkcvn/UNuyFWha0Gly/At0OEC7EYR4PYlfkj03Cwm92JBOAg2/Wu4LoPzgHWQeZfMyM+WkVHM0keP7cdt1HgVd2Dq2NbKK2DtpHR3w6VOTIMMv7k8KmJ89fG5HtkLZfnA7FFmpYBBDIrJ9nJJ84qYqTRZ9fRm2TSUaxmP50BVDSS6Zc3gYkrvI+NeJw+MUF+EaQSQ4Jz1405dK+ustIDg1o4aohmdfpsRKfWwj4aEjf4A==
+X-MS-Exchange-Organization-SCL: 5
+X-MS-Exchange-Organization-PCL: 2
+X-Microsoft-Exchange-Diagnostics: 1;DB5EUR03FT060;1:C57dRQD2oZ32EnEBjUuHN0cJA/rV4Vz6LUdm2zggLwzwa6TymkIhW73h6I7sZohuf3oga3+aNUe7aiNA+uQA387RsCtpz8MlusOPWFGrIw1Yockd3hXCglnwY8qRl0VvtvOW13M45X2oWkUVtPFGsUYdNY505pUP6SYuEDARqpnKhj5iOiCN/dWDRS8pMjT+
+X-Forefront-Antispam-Report: EFV:NLI;SFV:SPM;SFS:(28900001);DIR:INB;SFP:;SCL:5;SRVR:DB5EUR03HT163;H:SNT004-MC3F4.hotmail.com;FPR:;SPF:None;LANG:en;
+X-MS-Office365-Filtering-Correlation-Id: da04998d-6ba9-4af3-8a9d-08d482593703
+X-Microsoft-Antispam: BCL:0;PCL:0;RULEID:(22001)(8291500097)(8291501071);SRVR:DB5EUR03HT163;
+X-Microsoft-Exchange-Diagnostics: 1;DB5EUR03HT163;3:tcqI5Q47yPAGtjemOX0DGohlZM37LWK9dIthReC1DbdujiFRdYi8bCTgf6kxX29HjXHw+zGpfAWYOuQP55RA9AchLShi9FtA0YqXpxSbpttBF3UyZLT/ZA+uJNSZouIWeQFBTq4HFQBrczVndK2XlX54ARZLREGqCRsGSkuzdHI1KWtR/xyFouiIDHFQF4+kw61MMuNsKaRs0tL3x2bJQBSnViz/fL7xtdeFHtxgM4ggG3YCyH7T7bayahSWkl+abSAthcfw8z0PeCa0HxpPdu4Iv7xb45slW8umj4GA/t4G12Bgmtk3dqn9yPvewxx/2jvbDMOaGuai8AhLrylj4iBz7+pOT4OUojkKWXtDs20u0JJTPKSCGAIi7R7x5kjrNq++T0OdpO4aLCgNVyehIQ==;25:z90NNZDKxwQ9P9jl8mVoaO8ray1l3M8yQizQrELLMGV7eu4sWfeyKWeMf2+ThmKOz1T+VJxcnuyUQj7IDHbJxRjtXDnv6cackHemXr8lfSOoLJT3t75LCWOLDwakvrUPIaSVeW37BSsOFhW03OUnMpXwVA+kk5ctpclUMHbWtJ9W5akn4GDQKuTlFpABr0/hYfiqWEN+9xqp7cIg6vDcexUcimF9NRjWdafC+XmvBUTs/+XdjF1T3X7wyFLHXT4veMhOmiHnQzRxN6rZ5gc4F3D2e4a6bkOEMxHvAaH9AMY5hbiwLt2kmuGfxCBbOZkBlGFb9G9GzHBV2hiph7xGIcmg4HKUCelwZKW3jmbdvBhF6am6IuTHJde4X1Cq33hgF0iT3XqlToJrqPDRQ8ayrOWwqD8Jz5GjOSiJTV4qHluDRjvKw8BZskiI6lnUGZnRxnheYS3UVvWwoeA88mdIXY2C+ekQk3c62xdZfv7MxSKae4M7m8EwiTsPu/qdAsL7
+X-MS-Exchange-Organization-AVStamp-Service: 1.0
+X-Microsoft-Exchange-Diagnostics: 1;DB5EUR03HT163;31:yLdhip+Z0IXhNrblr0NAcdlzDZFKxSyhmTdcJ5QnLbjE5kQie2MStw8dpC52YCrifkLpHmRGYAOuAVWrUFvApjM8diYCgaBPd4XRPXzmGt2VvAJ2A4y8jR9Qb3K8TjFI74tptSyFGy/2Nz4ZiS47GzGfOMWyCTbWJFHN2mQFA+RxC3qabQiEZN8HuN62OofMqiXnn9eEw+Q0nxphhmGSvLgjBtVT5fMCJqvFl/rPPHmuRpJZu7l0a+vmy0/nMsvnkLKjbdtUUxtlnomlwCxY/3nrPrHRMADyhAD4gtau/KlvnyUCFY+CIIwezna2LeOy;4:8+M1KJqBJhHToZywdXh0BPduiHfbaZulvm6USdgKfbl4nxs5q2dpUczhGNd1qsWxCoxI2GXexAndLy+2FnH9QXeUyG6neFid9PBVclItGCWmPc1qL1R7Lh7mQbyz7MpjZQkrf8GejBSieefxuU8pGCF4JbG7SyO0wNtdfpVqdRtsWFhCl+jJk+XzDPP3Kxq15gyX42zjCkc7lOM/znewftlb6U6PWkDQUp/AJmwmvZeg/gEdRo48zHz27nuakRg3SC3BCPDYVZfQc+hldm8buvTE3JqzdDbd7WAwc9PrpBM=;23:yhQdBNNKr1frw/zaNoKsJO37wycU/BcWu4W+zTv36OPVmVifKcl++9ohc5obAIC1h4Kr79vN14dno/NPDDpIXwi+2qgA3rmF53bfWqi5IrkbeijQE4CMHkwxp3o11myG4UDeku47r0aXp0+J9uQOvu1/Juz1RsNdXO0NuCyiwj+q43xq6E2NwTATivvwdfq1HBIL4/BQbLu6Uq38tVP7fA==
+X-Exchange-Antispam-Report-CFA-Test: BCL:0;PCL:0;RULEID:(444000031);SRVR:DB5EUR03HT163;BCL:0;PCL:0;RULEID:;SRVR:DB5EUR03HT163;
+X-Microsoft-Exchange-Diagnostics: 1;DB5EUR03HT163;6:lWBC3hnD1LSBFwZOqeFViIIo5M4xovHj/4NykekO/+seeSaygY4fLKTelspJuH1E1kB/PL/2GUcVXJQTrZfIIX+b1N9Wk5ELyKJNHxAlwvoJv1tbbLmmLqqbERuxZLcWM5cg2znDyb7/2+HDW5euG6Efcvne4N+eKKbECX2KAcQYZGKKjDq+tpZOJBg32YhmgH6iLSPzI0XXIKquvOsB9l1yezoog0T11GetYvymohDKjodohwfPpxMPhTTlrzvCUv1NyWrsVgSq0botqFeMmbr3qcRLL+jGvVNWjdrpT7IdBcaaXOs/lAMQajD/qczIKYHO+ctJ+P4QqkuChTrps0QJTLR0j9YnuuHP79D2m6XEqgrh9/RzS2dNZ5Kd/3LMBwhRgGo+MAY8U4BHKoTFtg==;5:AcW9ygIOabVDFy0Vgn/Vh/Up2/ctOYKLW1ZViNF8nxl3Ed16GpFmT8biwvocw2HucvO31wWEJ84MCLqmAVwN3ZsyN3ayTBMaKNTNOshMfCjjfui5FR1gN5TjQdanoR1itRPBp8kuDW/1IdKZhaeDFA==;24:9y/4sweDEbhPhguYzgUe7v3bNtWF3r0r08CTlOzrsbF240Bkkqub9V26iy0dBFvljiOSukdsqLgt5yt+Z3i6MQ==
+SpamDiagnosticOutput: 1:22
+SpamDiagnosticMetadata: Default
+X-Microsoft-Exchange-Diagnostics: 1;DB5EUR03HT163;7:mplOEMf9qIOxC0ugNtGXt/HXfy6B9dU9u31ybdohUx6peF5odEGLAlExHGm3+7u6t+GrIAImzuZoFv6dW2Pxdpm83QOuFJ7UmvTTcIfNDJV/jNQ0MGPoqRx9i1GpWOmXeGSWUSvMH/Y2P2kudYN7PpmUFYhiz7EE2OGh7qroHz8L6Lv28XxIUKx7lJdN6OtBSDW+DaM4QJ3ygP8i94q5hE7OU7BZjE2v9mEvA5DF29/VZmsM89y55Bse3HP45OEv97wl9QG+vm2KAZwdZmGeLfhcNt/3Zns1TxQ7aNgI/NwPQDgyG8LgTELWKzlr5yjtjiLtaBD7SpX6EnrErdeHkw==
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Apr 2017 10:38:24.6503
+ (UTC)
+X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
+X-MS-Exchange-CrossTenant-FromEntityHeader: Internet
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB5EUR03HT163
+X-MS-Exchange-Organization-AuthSource: DB5EUR03FT060.eop-EUR03.prod.protection.outlook.com
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-OriginatorOrg: outlook.com
+X-MS-Exchange-Transport-EndToEndLatency: 00:00:01.9085337
+X-Microsoft-Exchange-Diagnostics:
+    1;AMSPR04MB375;27:nUCitaw3NoATyyZuos0Pi07wDTCdOX2Mh89/PqDwapwcb72ajyBw1n4b05d6Sdh/3fXHl2jJsnwzA1uqQpY+uM4oj5p+3KwAltjtXgjawaEqdpCdKb06gjcgfSVwLbcOfYGNjDBVwXn+NsW0KoVPow==
+X-Microsoft-Antispam-Mailbox-Delivery:
+    abwl:0;wl:0;pcwl:0;kl:0;iwl:0;ijl:0;dwl:0;dkl:0;rwl:0;ex:0;psp:0;auth:0;dest:J;WIMS-SenderIP:193.209.119.8;WIMS-SPF:lists%2edovecot%2efi;WIMS-DKIM:lists%2edovecot%2efi;WIMS-822:dev%2downer%40lists%2edovecot%2efi;WIMS-PRA:dev%2dbounces%40lists%2edovecot%2efi;WIMS-AUTH:NONE;ENG:(5061607094)(102400140)(102420017);RF:JunkEmail;OFR:SpamFilterAuthJ;
+MIME-Version: 1.0
+
+Your mail to 'Dev' with the subject
+
+    Live.com mail
+
+Is being held until the list moderator can review it for approval.
+
+The reason it is being held:
+
+    Post by non-member to a members-only list
+
+Either the message will get posted to the list, or you will receive
+notification of the moderator's decision.  If you would like to cancel
+this posting, please visit the following URL:
+
+    https://lists.dovecot.fi/mailman/confirm/dev/b214b9b119ecf457ae7fd79eefb619253ac226fe

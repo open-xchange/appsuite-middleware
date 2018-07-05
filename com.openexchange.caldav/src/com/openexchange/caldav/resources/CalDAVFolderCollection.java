@@ -52,7 +52,6 @@ package com.openexchange.caldav.resources;
 import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -82,9 +81,10 @@ import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.mixins.CalendarColor;
+import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.AbstractFolder;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
@@ -113,8 +113,8 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     protected final GroupwareCaldavFactory factory;
     protected final int folderID;
 
-    private Date minDateTime;
-    private Date maxDateTime;
+    private MinDateTime minDateTime;
+    private MaxDateTime maxDateTime;
     private Date lastModified;
 
     /**
@@ -138,12 +138,28 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
      */
     public CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder);
+        if (null == folder) {
+            throw new OXException(new IllegalArgumentException("folder must not be null"));
+        }
         this.factory = factory;
-        this.folderID = null != folder ? Tools.parse(folder.getID()) : 0;
-        includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this), new Invite(factory, this),
-            new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this),
-            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new CalendarColor(this),
-            new ManagedAttachmentsServerURL(), new CalendarTimezone(factory, this));
+        this.folderID = Tools.parse(folder.getID());
+        this.minDateTime = new MinDateTime(factory);
+        this.maxDateTime = new MaxDateTime(factory);
+        includeProperties(
+            new CurrentUserPrivilegeSet(folder.getOwnPermission()),
+            new SupportedReportSet(),
+            minDateTime,
+            maxDateTime,
+            new Invite(factory, this),
+            new AllowedSharingModes(this),
+            new CalendarOwner(this),
+            new Organizer(this),
+            new ScheduleDefaultCalendarURL(factory),
+            new ScheduleDefaultTasksURL(factory),
+            new CalendarColor(this),
+            new ManagedAttachmentsServerURL(),
+            new CalendarTimezone(factory, this)
+        );
         if (NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }
@@ -169,32 +185,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
      * @return The start of the configured synchronization interval
      */
     public Date getIntervalStart() {
-        if (null == minDateTime) {
-            String value = null;
-            try {
-                value = factory.getConfigValue("com.openexchange.caldav.interval.start", "one_month");
-            } catch (OXException e) {
-                LOG.warn("falling back to 'one_month' as interval start", e);
-                value = "one_month";
-            }
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-            if ("one_year".equals(value)) {
-                calendar.add(Calendar.YEAR, -1);
-                calendar.set(Calendar.DAY_OF_YEAR, 1);
-            } else if ("six_months".equals(value)) {
-                calendar.add(Calendar.MONTH, -6);
-                calendar.set(Calendar.DAY_OF_MONTH, 1);
-            } else {
-                calendar.add(Calendar.MONTH, -1);
-                calendar.set(Calendar.DAY_OF_MONTH, 1);
-            }
-            minDateTime = calendar.getTime();
-        }
-        return minDateTime;
+        return minDateTime.getMinDateTime();
     }
 
     /**
@@ -203,24 +194,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
      * @return The end of the configured synchronization interval
      */
     public Date getIntervalEnd() {
-        if (null == maxDateTime) {
-            String value = null;
-            try {
-                value = factory.getConfigValue("com.openexchange.caldav.interval.end", "one_year");
-            } catch (OXException e) {
-                LOG.warn("falling back to 'one_year' as interval end", e);
-                value = "one_year";
-            }
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.YEAR, "two_years".equals(value) ? 3 : 2);
-            calendar.set(Calendar.DAY_OF_YEAR, 1);
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-            maxDateTime = calendar.getTime();
-        }
-        return maxDateTime;
+        return maxDateTime.getMaxDateTime();
     }
 
     @Override
@@ -258,7 +232,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             /*
              * apply color to meta field
              */
-            AbstractFolder folderToUpdate = getFolderToUpdate();
+            ParameterizedFolder folderToUpdate = getFolderToUpdate();
             Map<String, Object> meta = folderToUpdate.getMeta();
             String value = CalendarColor.parse(prop);
             if (Strings.isEmpty(value)) {
@@ -298,7 +272,16 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     }
 
     protected static <T extends CalendarObject> boolean isInInterval(T object, Date intervalStart, Date intervalEnd) {
-        return null != object && (null == object.getEndDate() || object.getEndDate().after(intervalStart)) && (null == object.getStartDate() || object.getStartDate().before(intervalEnd));
+        if (null == object) {
+            return false;
+        }
+        if (null != intervalStart && null != object.getEndDate() && object.getEndDate().before(intervalStart)) {
+            return false;
+        }
+        if (null != intervalEnd && null != object.getStartDate() && object.getStartDate().after(intervalEnd)) {
+            return false;
+        }
+        return true;
     }
 
     protected List<T> filter(SearchIterator<T> searchIterator) throws OXException {
@@ -373,13 +356,15 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
         List<Object> arguments = new ArrayList<Object>(2);
         if (FilterAnalyzer.VEVENT_RANGE_QUERY_ANALYZER.match(filter, arguments) || FilterAnalyzer.VTODO_RANGE_QUERY_ANALYZER.match(filter, arguments)) {
+            Date intervalStart = getIntervalStart();
             Date from = arguments.isEmpty() ? null : toDate(arguments.get(0));
-            if (null == from || from.before(getIntervalStart())) {
-                from = getIntervalStart();
+            if (null == from || null != intervalStart && from.before(intervalStart)) {
+                from = intervalStart;
             }
+            Date intervalEnd = getIntervalEnd();
             Date until = arguments.isEmpty() ? null : toDate(arguments.get(1));
-            if (null == until || until.after(getIntervalEnd())) {
-                until = getIntervalEnd();
+            if (null == until || null != intervalEnd && until.after(intervalEnd)) {
+                until = intervalEnd;
             }
             try {
                 List<T> objects = this.getObjectsInRange(from, until);

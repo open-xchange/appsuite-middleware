@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,10 +65,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.management.MBeanException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link LoginCounterImpl}
@@ -205,7 +204,7 @@ public class LoginCounterImpl implements LoginCounterService {
                 logger.error("", e);
                 throw new OXException(e);
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
                 dbService.back(readPool, connection);
             }
         }

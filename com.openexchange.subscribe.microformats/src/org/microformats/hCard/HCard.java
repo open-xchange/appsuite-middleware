@@ -27,6 +27,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * Immutable representation of all data that can legally show up in an HCard.
@@ -1167,7 +1168,7 @@ public final class HCard implements Serializable {
 		m.put('\n', "\\n");
 		m.put('\r', "\\r");
 		m.put('\t', "\\t");
-		JSON_STRING_REPLACEMENTS = Collections.unmodifiableMap(m);
+		JSON_STRING_REPLACEMENTS = ImmutableMap.copyOf(m);
 	}
 
 	private static String s2h(String x) {

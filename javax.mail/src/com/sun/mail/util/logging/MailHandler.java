@@ -1,20 +1,20 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2009-2016 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2009-2016 Jason Mehrens. All rights reserved.
+ * Copyright (c) 2009-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009-2017 Jason Mehrens. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -42,8 +42,12 @@
 package com.sun.mail.util.logging;
 
 import static com.sun.mail.util.logging.LogManagerProperties.fromLogManager;
-import java.io.*;
-import java.lang.reflect.Array;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.URLConnection;
@@ -51,12 +55,44 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
-import java.util.logging.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.logging.ErrorManager;
+import java.util.logging.Filter;
 import java.util.logging.Formatter;
-import javax.activation.*;
-import javax.mail.*;
-import javax.mail.internet.*;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.SimpleFormatter;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileTypeMap;
+import javax.activation.MimetypesFileTypeMap;
+import javax.mail.Address;
+import javax.mail.Authenticator;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessageContext;
+import javax.mail.MessagingException;
+import javax.mail.Part;
+import javax.mail.PasswordAuthentication;
+import javax.mail.SendFailedException;
+import javax.mail.Service;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimePart;
+import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
 
 /**
@@ -125,8 +161,8 @@ import javax.mail.util.ByteArrayDataSource;
  * attachment. (default is no attachments)
  *
  * <li>&lt;handler-name&gt;.attachment.names a comma separated
- * list of names or <tt>Formatter</tt> class names of each attachment.  The
- * attachment file names must not contain any line breaks.
+ * list of names or <tt>Formatter</tt> class names of each attachment.  All
+ * control characters are removed from the attachment names.
  * (default is {@linkplain java.util.logging.Formatter#toString() toString}
  * of the attachment formatter)
  *
@@ -216,8 +252,9 @@ import javax.mail.util.ByteArrayDataSource;
  *
  * <li>&lt;handler-name&gt;.subject the name of a
  * <tt>Formatter</tt> class or string literal used to create the subject line.
- * The empty string can be used to specify no subject.  The subject line must
- * not contain any line breaks. (defaults to the empty string)
+ * The empty string can be used to specify no subject.  All control characters
+ * are removed from the subject line. (defaults to {@linkplain
+ * com.sun.mail.util.logging.CollectorFormatter CollectorFormatter}.)
  *
  * <li>&lt;handler-name&gt;.pushFilter the name of a
  * <tt>Filter</tt> class used to trigger an early push.
@@ -238,9 +275,12 @@ import javax.mail.util.ByteArrayDataSource;
  *      <li>If set to a value of <tt>resolve</tt>, the <tt>Handler</tt> will
  *      verify all local settings and try to resolve the remote host name with
  *      the domain name server.
+ *      <li>If set to a value of <tt>login</tt>, the <tt>Handler</tt> will
+ *      verify all local settings and try to establish a connection with
+ *      the email server.
  *      <li>If set to a value of <tt>remote</tt>, the <tt>Handler</tt> will
- *      verify all local settings and try to establish a connection with the
- *      email server.
+ *      verify all local settings, try to establish a connection with the
+ *      email server, and try to verify the envelope of the email message.
  * </ul>
  * If this <tt>Handler</tt> is only implicitly closed by the
  * <tt>LogManager</tt>, then verification should be turned on.
@@ -295,17 +335,18 @@ import javax.mail.util.ByteArrayDataSource;
  *
  * <p>
  * <b>Attachments:</b>
- * This <tt>Handler</tt> allows multiple attachments per each email.
- * The attachment order maps directly to the array index order in this
- * <tt>Handler</tt> with zero index being the first attachment.  The number of
- * attachment formatters controls the number of attachments per email and
- * the content type of each attachment.  The attachment filters determine if a
- * <tt>LogRecord</tt> will be included in an attachment.  If an attachment
- * filter is <tt>null</tt> then all records are included for that attachment.
- * Attachments without content will be omitted from email message.  The
- * attachment name formatters create the file name for an attachment.
- * Custom attachment name formatters can be used to generate an attachment name
- * based on the contents of the attachment.
+ * This <tt>Handler</tt> allows multiple attachments per each email message.
+ * The presence of an attachment formatter will change the content type of the
+ * email message to a multi-part message.  The attachment order maps directly to
+ * the array index order in this <tt>Handler</tt> with zero index being the
+ * first attachment.  The number of attachment formatters controls the number of
+ * attachments per email and the content type of each attachment.  The
+ * attachment filters determine if a <tt>LogRecord</tt> will be included in an
+ * attachment.  If an attachment filter is <tt>null</tt> then all records are
+ * included for that attachment.  Attachments without content will be omitted
+ * from email message.  The attachment name formatters create the file name for
+ * an attachment.  Custom attachment name formatters can be used to generate an
+ * attachment name based on the contents of the attachment.
  *
  * <p>
  * <b>Push Level and Push Filter:</b>
@@ -391,7 +432,7 @@ public class MailHandler extends Handler {
      * 4. MUTEX_REPORT when cycle of records is detected.
      * 5. MUTEXT_LINKAGE when a linkage error is reported.
      */
-    private static final ThreadLocal<Integer> MUTEX = new ThreadLocal<Integer>();
+    private static final ThreadLocal<Integer> MUTEX = new ThreadLocal<>();
     /**
      * The marker object used to report a publishing state.
      * This must be less than the body filter index (-1).
@@ -427,7 +468,7 @@ public class MailHandler extends Handler {
     /**
      * Holds the session object used to generate emails.
      * Sessions can be shared by multiple threads.
-     * See BUGID 6228391 and K 6278.
+     * See JDK-6228391 and K 6278.
      */
     private Session session;
     /**
@@ -970,8 +1011,7 @@ public class MailHandler extends Handler {
                this.errorManager = em;
                super.setErrorManager(em); //Try to free super error manager.
             }
-        } catch (final RuntimeException ignore) {
-        } catch (final LinkageError ignore) {
+        } catch (RuntimeException | LinkageError ignore) {
         }
     }
 
@@ -1003,7 +1043,7 @@ public class MailHandler extends Handler {
             if (newFilter != filter) {
                 clearMatches(-1);
             }
-            this.filter = newFilter;
+            this.filter = newFilter; //Volatile access.
         }
     }
 
@@ -1210,7 +1250,9 @@ public class MailHandler extends Handler {
 
     /**
      * Sets the <tt>Authenticator</tt> used to login to the email server.
-     * @param password a password or null if none is required.
+     * @param password a password, empty array can be used to only supply a
+     * user name set by <tt>mail.user</tt> property, or null if no credentials
+     * are required.
      * @throws SecurityException  if a security manager exists and the
      * caller does not have <tt>LoggingPermission("control")</tt>.
      * @throws IllegalStateException if called from inside a push.
@@ -1228,6 +1270,9 @@ public class MailHandler extends Handler {
     /**
      * A private hook to handle possible future overrides. See public method.
      * @param auth see public method.
+     * @throws SecurityException  if a security manager exists and the
+     * caller does not have <tt>LoggingPermission("control")</tt>.
+     * @throws IllegalStateException if called from inside a push.
      */
     private void setAuthenticator0(final Authenticator auth) {
         checkAccess();
@@ -1319,7 +1364,7 @@ public class MailHandler extends Handler {
         if (filters.length == 0) {
             filters = emptyFilterArray();
         } else {
-            filters = copyOf(filters, filters.length, Filter[].class);
+            filters = Arrays.copyOf(filters, filters.length, Filter[].class);
         }
         synchronized (this) {
             if (this.attachmentFormatters.length != filters.length) {
@@ -1372,7 +1417,7 @@ public class MailHandler extends Handler {
         if (formatters.length == 0) { //Null check and length check.
             formatters = emptyFormatterArray();
         } else {
-            formatters = copyOf(formatters,
+            formatters = Arrays.copyOf(formatters,
                     formatters.length, Formatter[].class);
             for (int i = 0; i < formatters.length; ++i) {
                 if (formatters[i] == null) {
@@ -1408,8 +1453,8 @@ public class MailHandler extends Handler {
     }
 
     /**
-     * Sets the attachment file name for each attachment.  The caller must
-     * ensure that the attachment file names do not contain any line breaks.
+     * Sets the attachment file name for each attachment.  All control
+     * characters are removed from the attachment names.
      * This method will create a set of custom formatters.
      * @param names an array of names.
      * @throws SecurityException  if a security manager exists and the
@@ -1464,10 +1509,10 @@ public class MailHandler extends Handler {
      * typically return an empty string. Instead of being used to format
      * records, it is used to gather information about the contents of an
      * attachment.  The <tt>getTail</tt> method should be used to construct the
-     * attachment file name and reset any formatter collected state.  The
-     * formatter must ensure that the attachment file name does not contain any
-     * line breaks.  The <tt>toString</tt> method of the given formatter should
-     * be overridden to provide a useful attachment file name, if possible.
+     * attachment file name and reset any formatter collected state.  All
+     * control characters will be removed from the output of the formatter.  The
+     * <tt>toString</tt> method of the given formatter should be overridden to
+     * provide a useful attachment file name, if possible.
      * @param formatters and array of attachment name formatters.
      * @throws SecurityException  if a security manager exists and the
      * caller does not have <tt>LoggingPermission("control")</tt>.
@@ -1484,7 +1529,8 @@ public class MailHandler extends Handler {
         if (formatters.length == 0) {
             formatters = emptyFormatterArray();
         } else {
-            formatters = copyOf(formatters, formatters.length, Formatter[].class);
+            formatters = Arrays.copyOf(formatters, formatters.length,
+                    Formatter[].class);
         }
 
         for (int i = 0; i < formatters.length; ++i) {
@@ -1495,7 +1541,8 @@ public class MailHandler extends Handler {
 
         synchronized (this) {
             if (this.attachmentFormatters.length != formatters.length) {
-                throw attachmentMismatch(this.attachmentFormatters.length, formatters.length);
+                throw attachmentMismatch(this.attachmentFormatters.length,
+                        formatters.length);
             }
 
             if (isWriting) {
@@ -1517,8 +1564,8 @@ public class MailHandler extends Handler {
     }
 
     /**
-     * Sets a literal string for the email subject.  The caller must ensure that
-     * the subject line does not contain any line breaks.
+     * Sets a literal string for the email subject.  All control characters are
+     * removed from the subject line.
      * @param subject a non <tt>null</tt> string.
      * @throws SecurityException  if a security manager exists and the
      * caller does not have <tt>LoggingPermission("control")</tt>.
@@ -1543,8 +1590,8 @@ public class MailHandler extends Handler {
      * empty string.  This formatter is used to gather information to create a
      * summary about what information is contained in the email.  The
      * <tt>getTail</tt> method should be used to construct the subject and reset
-     * any formatter collected state.  The formatter must ensure that the
-     * subject line does not contain any line breaks.  The <tt>toString</tt>
+     * any formatter collected state.  All control characters
+     * will be removed from the formatter output.  The <tt>toString</tt>
      * method of the given formatter should be overridden to provide a useful
      * subject, if possible.
      * @param format the subject formatter.
@@ -1588,9 +1635,7 @@ public class MailHandler extends Handler {
             } else {
                 errorManager.error(null, ex, code);
             }
-        } catch (final RuntimeException GLASSFISH_21258) {
-            reportLinkageError(GLASSFISH_21258, code);
-        } catch (final LinkageError GLASSFISH_21258) {
+        } catch (RuntimeException | LinkageError GLASSFISH_21258) {
             reportLinkageError(GLASSFISH_21258, code);
         }
     }
@@ -1610,20 +1655,19 @@ public class MailHandler extends Handler {
      * this type of conversion.  Currently, this is only used for the body
      * since the attachments are computed by filename.
      * Package-private for unit testing.
-     * @param head any head string.
+     * @param chunk any char sequence or null.
      * @return return the mime type or null for text/plain.
      */
-    final String contentTypeOf(String head) {
-        if (!isEmpty(head)) {
+    final String contentTypeOf(CharSequence chunk) {
+        if (!isEmpty(chunk)) {
             final int MAX_CHARS = 25;
-            if (head.length() > MAX_CHARS) {
-                head = head.substring(0, MAX_CHARS);
+            if (chunk.length() > MAX_CHARS) {
+                chunk = chunk.subSequence(0, MAX_CHARS);
             }
             try {
                 final String charset = getEncodingName();
-                final ByteArrayInputStream in
-                        = new ByteArrayInputStream(head.getBytes(charset));
-
+                final byte[] b = chunk.toString().getBytes(charset);
+                final ByteArrayInputStream in = new ByteArrayInputStream(b);
                 assert in.markSupported() : in.getClass().getName();
                 return URLConnection.guessContentTypeFromStream(in);
             } catch (final IOException IOE) {
@@ -1641,14 +1685,26 @@ public class MailHandler extends Handler {
      * Package-private for unit testing.
      *
      * @param f the formatter or null.
-     * @return return the mime type or text/plain.
+     * @return return the mime type or null, meaning text/plain.
      * @since JavaMail 1.5.6
      */
     final String contentTypeOf(final Formatter f) {
+        assert Thread.holdsLock(this);
         if (f != null) {
+            String type = getContentType(f.getClass().getName());
+            if (type != null) {
+                return type;
+            }
+
             for (Class<?> k = f.getClass(); k != Formatter.class;
                     k = k.getSuperclass()) {
-                String name = k.getName().toLowerCase(Locale.ENGLISH);
+                String name;
+                try {
+                    name = k.getSimpleName();
+                } catch (final InternalError JDK8057919) {
+                    name = k.getName();
+                }
+                name = name.toLowerCase(Locale.ENGLISH);
                 for (int idx = name.indexOf('$') + 1;
                         (idx = name.indexOf("ml", idx)) > -1; idx += 2) {
                     if (idx > 0) {
@@ -1663,7 +1719,7 @@ public class MailHandler extends Handler {
                 }
             }
         }
-        return "text/plain";
+        return null;
     }
 
    /**
@@ -1688,10 +1744,25 @@ public class MailHandler extends Handler {
         } catch (final Exception noContent) {
             final String txt = noContent.getMessage();
             if (!isEmpty(txt)) {
-                for (; t != null; t = t.getCause()) {
+                int limit = 0;
+                while (t != null) {
                     if (noContent.getClass() == t.getClass()
                             && txt.equals(t.getMessage())) {
                        return true;
+                    }
+
+                    //Not all JavaMail implementations support JDK 1.4 exception
+                    //chaining.
+                    final Throwable cause = t.getCause();
+                    if (cause == null && t instanceof MessagingException) {
+                        t = ((MessagingException) t).getNextException();
+                    } else {
+                        t = cause;
+                    }
+
+                    //Deal with excessive cause chains and cyclic throwables.
+                    if (++limit == (1 << 16)) {
+                        break; //Give up.
                     }
                 }
             }
@@ -1746,8 +1817,7 @@ public class MailHandler extends Handler {
             try {
                 Thread.currentThread().getUncaughtExceptionHandler()
                         .uncaughtException(Thread.currentThread(), le);
-            } catch (final RuntimeException ignore) {
-            } catch (final LinkageError ignore) {
+            } catch (RuntimeException | LinkageError ignore) {
             } finally {
                 if (idx != null) {
                     MUTEX.set(idx);
@@ -1790,10 +1860,10 @@ public class MailHandler extends Handler {
      * Set the content for a part using the encoding assigned to the handler.
      * @param part the part to assign.
      * @param buf the formatted data.
-     * @param type the mime type.
+     * @param type the mime type or null, meaning text/plain.
      * @throws MessagingException if there is a problem.
      */
-    private void setContent(MimeBodyPart part, CharSequence buf, String type) throws MessagingException {
+    private void setContent(MimePart part, CharSequence buf, String type) throws MessagingException {
         final String charset = getEncodingName();
         if (type != null && !"text/plain".equalsIgnoreCase(type)) {
             type = contentWithEncoding(type, charset);
@@ -1821,7 +1891,7 @@ public class MailHandler extends Handler {
             final ContentType ct = new ContentType(type);
             ct.setParameter("charset", MimeUtility.mimeCharset(encoding));
             encoding = ct.toString(); //See javax.mail.internet.ContentType.
-            if (!isEmpty(encoding)) {
+            if (!isEmpty(encoding)) { //Support pre K5687.
                 type = encoding;
             }
         } catch (final MessagingException ME) {
@@ -1895,7 +1965,7 @@ public class MailHandler extends Handler {
         final int expect = this.attachmentFormatters.length;
         final int current = this.attachmentNames.length;
         if (current != expect) {
-            this.attachmentNames = copyOf(attachmentNames, expect,
+            this.attachmentNames = Arrays.copyOf(attachmentNames, expect,
                     Formatter[].class);
             fixed = current != 0;
         }
@@ -1926,7 +1996,7 @@ public class MailHandler extends Handler {
         final int expect = this.attachmentFormatters.length;
         final int current = this.attachmentFilters.length;
         if (current != expect) {
-            this.attachmentFilters = copyOf(attachmentFilters, expect,
+            this.attachmentFilters = Arrays.copyOf(attachmentFilters, expect,
                     Filter[].class);
             clearMatches(current);
             fixed = current != 0;
@@ -1947,36 +2017,6 @@ public class MailHandler extends Handler {
             assert this.attachmentFilters.length == 0;
         }
         return fixed;
-    }
-
-    /**
-     * Copies the given array. Can be removed when Java Mail requires Java 1.6.
-     * @param a the original array.
-     * @param len the new size.
-     * @return new copy
-     * @since JavaMail 1.5.5
-     */
-    private static int[] copyOf(final int[] a, final int len) {
-        final int[] copy = new int[len];
-        System.arraycopy(a, 0, copy, 0, Math.min(len, a.length));
-        return copy;
-    }
-
-    /**
-     * Copies the given array to a new array type.
-     * Can be removed when Java Mail requires Java 1.6.
-     * @param <U> the class of the objects in the original array
-     * @param <T> the class of the objects in the returned array
-     * @param a the original array.
-     * @param len the new size.
-     * @param type the array type.
-     * @return new copy
-     */
-    @SuppressWarnings("unchecked")
-    private static <T,U> T[] copyOf(U[] a, int len, Class<? extends T[]> type) {
-        final T[] copy = (T[]) Array.newInstance(type.getComponentType(), len);
-        System.arraycopy(a, 0, copy, 0, Math.min(len, a.length));
-        return copy;
     }
 
     /**
@@ -2003,8 +2043,8 @@ public class MailHandler extends Handler {
             newCapacity = capacity;
         }
         assert len != capacity : len;
-        this.data = copyOf(data, newCapacity, LogRecord[].class);
-        this.matched = copyOf(matched, newCapacity);
+        this.data = Arrays.copyOf(data, newCapacity, LogRecord[].class);
+        this.matched = Arrays.copyOf(matched, newCapacity);
     }
 
     /**
@@ -2063,7 +2103,7 @@ public class MailHandler extends Handler {
         try {
             Object canidate;
             Object result;
-            final Map<Object, Object> seen = new HashMap<Object, Object>();
+            final Map<Object, Object> seen = new HashMap<>();
             try {
                 intern(seen, this.errorManager);
             } catch (final SecurityException se) {
@@ -2216,11 +2256,11 @@ public class MailHandler extends Handler {
     }
 
     /**
-     * Checks a string value for null or empty.
-     * @param s the string.
+     * Checks a char sequence value for null or empty.
+     * @param s the char sequence.
      * @return true if the given string is null or zero length.
      */
-    private static boolean isEmpty(final String s) {
+    private static boolean isEmpty(final CharSequence s) {
         return s == null || s.length() == 0;
     }
 
@@ -2337,9 +2377,8 @@ public class MailHandler extends Handler {
                     try {
                         try {
                             a[i] = LogManagerProperties.newFormatter(names[i]);
-                        } catch (final ClassNotFoundException literal) {
-                            a[i] = TailNameFormatter.of(names[i]);
-                        } catch (final ClassCastException literal) {
+                        } catch (ClassNotFoundException
+                                | ClassCastException literal) {
                             a[i] = TailNameFormatter.of(names[i]);
                         }
                     } catch (final SecurityException SE) {
@@ -2380,9 +2419,8 @@ public class MailHandler extends Handler {
                             .newObjectFrom(name, Authenticator.class);
                 } catch (final SecurityException SE) {
                     throw SE;
-                } catch (final ClassNotFoundException literalAuth) {
-                    this.auth = DefaultAuthenticator.of(name);
-                } catch (final ClassCastException literalAuth) {
+                } catch (final ClassNotFoundException
+                        | ClassCastException literalAuth) {
                     this.auth = DefaultAuthenticator.of(name);
                 } catch (final Exception E) {
                     reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
@@ -2481,10 +2519,8 @@ public class MailHandler extends Handler {
             }
         } catch (final SecurityException SE) {
             throw SE; //Avoid catch all.
-        } catch (final UnsupportedEncodingException UEE) {
+        } catch (UnsupportedEncodingException | RuntimeException UEE) {
             reportError(UEE.getMessage(), UEE, ErrorManager.OPEN_FAILURE);
-        } catch (final RuntimeException RE) {
-            reportError(RE.getMessage(), RE, ErrorManager.OPEN_FAILURE);
         }
     }
 
@@ -2497,9 +2533,7 @@ public class MailHandler extends Handler {
         ErrorManager em;
         try { //Try to share the super error manager.
             em = super.getErrorManager();
-        } catch (final RuntimeException ignore) {
-            em = null;
-        } catch (final LinkageError ignore) {
+        } catch (RuntimeException | LinkageError ignore) {
             em = null;
         }
 
@@ -2641,27 +2675,24 @@ public class MailHandler extends Handler {
     private void initSubject(final String p) {
         assert Thread.holdsLock(this);
         String name = fromLogManager(p.concat(".subject"));
+        if (name == null) { //Soft dependency on CollectorFormatter.
+            name = "com.sun.mail.util.logging.CollectorFormatter";
+        }
+
         if (hasValue(name)) {
             try {
                 this.subjectFormatter = LogManagerProperties.newFormatter(name);
             } catch (final SecurityException SE) {
                 throw SE; //Avoid catch all.
-            } catch (final ClassNotFoundException literalSubject) {
-                this.subjectFormatter = TailNameFormatter.of(name);
-            } catch (final ClassCastException literalSubject) {
+            } catch (ClassNotFoundException
+                    | ClassCastException literalSubject) {
                 this.subjectFormatter = TailNameFormatter.of(name);
             } catch (final Exception E) {
                 this.subjectFormatter = TailNameFormatter.of(name);
                 reportError(E.getMessage(), E, ErrorManager.OPEN_FAILURE);
             }
-        } else {
-            if (name != null) {
-                this.subjectFormatter = TailNameFormatter.of(name);
-            }
-        }
-
-        if (this.subjectFormatter == null) { //Ensure not null.
-            this.subjectFormatter = TailNameFormatter.of("");
+        } else { //User has forced empty or literal null.
+            this.subjectFormatter = TailNameFormatter.of(name);
         }
     }
 
@@ -2748,7 +2779,7 @@ public class MailHandler extends Handler {
         try {
             envelopeFor(msg, priority);
             final Object ccl = getAndSetContextClassLoader(MAILHANDLER_LOADER);
-            try {  //BUGID 8025251
+            try {  //JDK-8025251
                 Transport.send(msg); //Calls save changes.
             } finally {
                 getAndSetContextClassLoader(ccl);
@@ -2833,7 +2864,6 @@ public class MailHandler extends Handler {
             initSession();
         }
         MimeMessage msg = new MimeMessage(session);
-        msg.setDescription(descriptionFrom(comparator, pushLevel, pushFilter));
 
         /**
          * Parts are lazily created when an attachment performs a getHead
@@ -2846,13 +2876,19 @@ public class MailHandler extends Handler {
          * The buffers are lazily created when the part requires a getHead.
          */
         StringBuilder[] buffers = new StringBuilder[parts.length];
-
-        String contentType = null;
         StringBuilder buf = null;
+        final MimePart body;
+        if (parts.length == 0) {
+            msg.setDescription(descriptionFrom(
+                    getFormatter(), getFilter(), subjectFormatter));
+            body = msg;
+        } else {
+            msg.setDescription(descriptionFrom(
+                    comparator, pushLevel, pushFilter));
+            body = createBodyPart();
+        }
 
         appendSubject(msg, head(subjectFormatter));
-
-        final MimeBodyPart body = createBodyPart();
         final Formatter bodyFormat = getFormatter();
         final Filter bodyFilter = getFilter();
 
@@ -2871,9 +2907,7 @@ public class MailHandler extends Handler {
                 lmf = bodyFilter;
                 if (buf == null) {
                     buf = new StringBuilder();
-                    final String head = head(bodyFormat);
-                    buf.append(head);
-                    contentType = contentTypeOf(head);
+                    buf.append(head(bodyFormat));
                 }
                 formatted = true;
                 buf.append(format(bodyFormat, r));
@@ -2907,7 +2941,8 @@ public class MailHandler extends Handler {
             }
 
             if (formatted) {
-                if (locale != null && !locale.equals(lastLocale)) {
+                if (body != msg && locale != null
+                        && !locale.equals(lastLocale)) {
                     appendContentLang(msg, locale);
                 }
             } else {  //Belongs to no mime part.
@@ -2947,18 +2982,22 @@ public class MailHandler extends Handler {
 
         appendSubject(msg, tail(subjectFormatter, ""));
 
-        MimeMultipart multipart = new MimeMultipart();
-        String altType = getContentType(bodyFormat.getClass().getName());
+        String contentType = contentTypeOf(buf);
+        String altType = contentTypeOf(bodyFormat);
         setContent(body, buf, altType == null ? contentType : altType);
-        multipart.addBodyPart(body);
+        if (body != msg) {
+            final MimeMultipart multipart = new MimeMultipart();
+            //assert body instanceof BodyPart : body;
+            multipart.addBodyPart((BodyPart) body);
 
-        for (int i = 0; i < parts.length; ++i) {
-            if (parts[i] != null) {
-                multipart.addBodyPart(parts[i]);
+            for (int i = 0; i < parts.length; ++i) {
+                if (parts[i] != null) {
+                    multipart.addBodyPart(parts[i]);
+                }
             }
+            msg.setContent(multipart);
         }
 
-        msg.setContent(multipart);
         return msg;
     }
 
@@ -2983,7 +3022,7 @@ public class MailHandler extends Handler {
                         verifySettings0(session, value);
                     }
                 } else {
-                    if (check != null) { //This call will fail.
+                    if (check != null) { //Pass some invalid string.
                         verifySettings0(session, check.getClass().toString());
                     }
                 }
@@ -3007,9 +3046,10 @@ public class MailHandler extends Handler {
     private void verifySettings0(Session session, String verify) {
         assert verify != null : (String) null;
         if (!"local".equals(verify) && !"remote".equals(verify)
-                && !"limited".equals(verify) && !"resolve".equals(verify)) {
+                && !"limited".equals(verify) && !"resolve".equals(verify)
+                && !"login".equals(verify)) {
             reportError("Verify must be 'limited', local', "
-                    + "'resolve' or 'remote'.",
+                    + "'resolve', 'login', or 'remote'.",
                     new IllegalArgumentException(verify),
                     ErrorManager.OPEN_FAILURE);
             return;
@@ -3051,12 +3091,7 @@ public class MailHandler extends Handler {
 
         setIncompleteCopy(abort); //Original body part is never added.
         envelopeFor(abort, true);
-        try {
-            abort.saveChanges();
-        } catch (final MessagingException ME) {
-            reportError(msg, ME, ErrorManager.FORMAT_FAILURE);
-        }
-
+        saveChangesNoContent(abort, msg);
         try {
             //Ensure transport provider is installed.
             Address[] all = abort.getAllRecipients();
@@ -3068,6 +3103,7 @@ public class MailHandler extends Handler {
                 final Address[] any = all.length != 0 ? all : abort.getFrom();
                 if (any != null && any.length != 0) {
                     t = session.getTransport(any[0]);
+                    session.getProperty("mail.transport.protocol"); //Force copy
                 } else {
                     MessagingException me = new MessagingException(
                             "No recipient or from address.");
@@ -3087,7 +3123,7 @@ public class MailHandler extends Handler {
             }
 
             String local = null;
-            if ("remote".equals(verify)) {
+            if ("remote".equals(verify) || "login".equals(verify)) {
                 MessagingException closed = null;
                 t.connect();
                 try {
@@ -3098,15 +3134,23 @@ public class MailHandler extends Handler {
                         //A message without content will fail at message writeTo
                         //when sendMessage is called.  This allows the handler
                         //to capture all mail properties set in the LogManager.
-                        t.sendMessage(abort, all);
+                        if ("remote".equals(verify)) {
+                            t.sendMessage(abort, all);
+                        }
                     } finally {
-                        try { //Close the transport before reporting errors.
+                        try {
                             t.close();
                         } catch (final MessagingException ME) {
                             closed = ME;
                         }
                     }
-                    reportUnexpectedSend(abort, verify, null);
+                    //Close the transport before reporting errors.
+                    if ("remote".equals(verify)) {
+                        reportUnexpectedSend(abort, verify, null);
+                    } else {
+                        final String protocol = t.getURLName().getProtocol();
+                        verifyProperties(session, protocol);
+                    }
                 } catch (final SendFailedException sfe) {
                     Address[] recip = sfe.getInvalidAddresses();
                     if (recip != null && recip.length != 0) {
@@ -3130,17 +3174,23 @@ public class MailHandler extends Handler {
                     reportError(abort, closed, ErrorManager.CLOSE_FAILURE);
                 }
             } else {
-                //Force a property copy.
+                //Force a property copy, JDK-7092981.
                 final String protocol = t.getURLName().getProtocol();
+                verifyProperties(session, protocol);
                 String mailHost = session.getProperty("mail."
                         + protocol + ".host");
                 if (isEmpty(mailHost)) {
                     mailHost = session.getProperty("mail.host");
+                } else {
+                    session.getProperty("mail.host");
                 }
+
                 local = session.getProperty("mail." + protocol + ".localhost");
                 if (isEmpty(local)) {
                     local = session.getProperty("mail."
                             + protocol + ".localaddress");
+                } else {
+                    session.getProperty("mail." + protocol + ".localaddress");
                 }
 
                 if ("resolve".equals(verify)) {
@@ -3154,15 +3204,10 @@ public class MailHandler extends Handler {
                         } else {
                             verifyHost(mailHost);
                         }
-                    } catch (final IOException IOE) {
+                    } catch (final RuntimeException | IOException IOE) {
                         MessagingException ME =
                                 new MessagingException(msg, IOE);
                         setErrorContent(abort, verify, ME);
-                        reportError(abort, ME, ErrorManager.OPEN_FAILURE);
-                    } catch (final RuntimeException RE) {
-                        MessagingException ME =
-                                new MessagingException(msg, RE);
-                        setErrorContent(abort, verify, RE);
                         reportError(abort, ME, ErrorManager.OPEN_FAILURE);
                     }
                 }
@@ -3170,24 +3215,20 @@ public class MailHandler extends Handler {
 
             if (!"limited".equals(verify)) {
                 try { //Verify host name and hit the host name cache.
-                    if (!"remote".equals(verify)) {
+                    if (!"remote".equals(verify) && !"login".equals(verify)) {
                         local = getLocalHost(t);
                     }
                     verifyHost(local);
-                } catch (final IOException IOE) {
+                } catch (final RuntimeException | IOException IOE) {
                     MessagingException ME = new MessagingException(msg, IOE);
-                    setErrorContent(abort, verify, ME);
-                    reportError(abort, ME, ErrorManager.OPEN_FAILURE);
-                } catch (final RuntimeException RE) {
-                    MessagingException ME = new MessagingException(msg, RE);
                     setErrorContent(abort, verify, ME);
                     reportError(abort, ME, ErrorManager.OPEN_FAILURE);
                 }
 
-
                 try { //Verify that the DataHandler can be loaded.
                     Object ccl = getAndSetContextClassLoader(MAILHANDLER_LOADER);
                     try {
+                        //Always load the multipart classes.
                         MimeMultipart multipart = new MimeMultipart();
                         MimeBodyPart[] ambp = new MimeBodyPart[atn.length];
                         final MimeBodyPart body;
@@ -3198,7 +3239,7 @@ public class MailHandler extends Handler {
                             for (int i = 0; i < atn.length; ++i) {
                                 ambp[i] = createBodyPart(i);
                                 ambp[i].setFileName(atn[i]);
-                                //Convert names to mime type.
+                                //Convert names to mime type under lock.
                                 atn[i] = getContentType(atn[i]);
                             }
                         }
@@ -3266,6 +3307,65 @@ public class MailHandler extends Handler {
             setErrorContent(abort, verify, ME);
             reportError(abort, ME, ErrorManager.OPEN_FAILURE);
         }
+    }
+
+    /**
+     * Handles all exceptions thrown when save changes is called on a message
+     * that doesn't have any content.
+     *
+     * @param abort the message requiring save changes.
+     * @param msg the error description.
+     * @since JavaMail 1.6.0
+     */
+    private void saveChangesNoContent(final Message abort, final String msg) {
+        if (abort != null) {
+            try {
+                try {
+                    abort.saveChanges();
+                } catch (final NullPointerException xferEncoding) {
+                    //Workaround GNU JavaMail bug in MimeUtility.getEncoding
+                    //when the mime message has no content.
+                    try {
+                        String cte = "Content-Transfer-Encoding";
+                        if (abort.getHeader(cte) == null) {
+                            abort.setHeader(cte, "base64");
+                            abort.saveChanges();
+                        } else {
+                            throw xferEncoding;
+                        }
+                    } catch (RuntimeException | MessagingException e) {
+                        if (e != xferEncoding) {
+                           e.addSuppressed(xferEncoding);
+                        }
+                        throw e;
+                    }
+                }
+            } catch (RuntimeException | MessagingException ME) {
+                reportError(msg, ME, ErrorManager.FORMAT_FAILURE);
+            }
+        }
+    }
+
+    /**
+     * Cache common session properties into the LogManagerProperties.  This is
+     * a workaround for JDK-7092981.
+     *
+     * @param session the session.
+     * @param protocol the mail protocol.
+     * @throws NullPointerException if session is null.
+     * @since JavaMail 1.6.0
+     */
+    private static void verifyProperties(Session session, String protocol) {
+        session.getProperty("mail.from");
+        session.getProperty("mail." + protocol + ".from");
+        session.getProperty("mail.dsn.ret");
+        session.getProperty("mail." + protocol + ".dsn.ret");
+        session.getProperty("mail.dsn.notify");
+        session.getProperty("mail." + protocol + ".dsn.notify");
+        session.getProperty("mail." + protocol + ".port");
+        session.getProperty("mail.user");
+        session.getProperty("mail." + protocol + ".user");
+        session.getProperty("mail." + protocol + ".localport");
     }
 
     /**
@@ -3355,10 +3455,8 @@ public class MailHandler extends Handler {
             msg.setDescription(msgDesc);
             setAcceptLang(msg);
             msg.saveChanges();
-        } catch (final MessagingException ME) {
+        } catch (MessagingException | RuntimeException ME) {
             reportError("Unable to create body.", ME, ErrorManager.OPEN_FAILURE);
-        } catch (final RuntimeException RE) {
-            reportError("Unable to create body.", RE, ErrorManager.OPEN_FAILURE);
         }
     }
 
@@ -3925,12 +4023,9 @@ public class MailHandler extends Handler {
                     throw new MessagingException("No local address.");
                 }
             }
-        } catch (final MessagingException ME) {
+        } catch (MessagingException | RuntimeException ME) {
             reportError("Unable to compute a default recipient.",
                     ME, ErrorManager.FORMAT_FAILURE);
-        } catch (final RuntimeException RE) {
-            reportError("Unable to compute a default recipient.",
-                    RE, ErrorManager.FORMAT_FAILURE);
         }
     }
 
@@ -4025,11 +4120,11 @@ public class MailHandler extends Handler {
     private String toRawString(final Message msg) throws MessagingException, IOException {
         if (msg != null) {
             Object ccl = getAndSetContextClassLoader(MAILHANDLER_LOADER);
-            try {  //BUGID 8025251
+            try {  //JDK-8025251
                 int nbytes = Math.max(msg.getSize() + MIN_HEADER_SIZE, MIN_HEADER_SIZE);
                 ByteArrayOutputStream out = new ByteArrayOutputStream(nbytes);
-                msg.writeTo(out);
-                return out.toString("US-ASCII"); //Raw message is always ASCII.
+                msg.writeTo(out);  //Headers can be UTF-8 or US-ASCII.
+                return out.toString("UTF-8");
             } finally {
                 getAndSetContextClassLoader(ccl);
             }
@@ -4054,12 +4149,12 @@ public class MailHandler extends Handler {
                     new ByteArrayOutputStream(MIN_HEADER_SIZE);
 
             //Create an output stream writer so streams are not double buffered.
-            final PrintWriter pw =
-                    new PrintWriter(new OutputStreamWriter(out, charset));
-            pw.println(t.getMessage());
-            t.printStackTrace(pw);
-            pw.flush();
-            pw.close(); //BUG ID 6995537
+            try (OutputStreamWriter ows = new OutputStreamWriter(out, charset);
+                 PrintWriter pw = new PrintWriter(ows)) {
+                pw.println(t.getMessage());
+                t.printStackTrace(pw);
+                pw.flush();
+            } //Close OSW before generating string. JDK-6995537
             return out.toString(charset);
         } catch (final RuntimeException unexpected) {
             return t.toString() + ' ' + unexpected.toString();
@@ -4128,6 +4223,10 @@ public class MailHandler extends Handler {
                     return head;
                 }
             }
+
+            if (optional != required) {
+                required.addSuppressed(optional);
+            }
         }
         return required;
     }
@@ -4141,9 +4240,8 @@ public class MailHandler extends Handler {
     private String getLocalHost(final Service s) {
         try {
             return LogManagerProperties.getLocalHost(s);
-        } catch (final SecurityException ignore) {
-        } catch (final NoSuchMethodException ignore) {
-        } catch (final LinkageError ignore) {
+        } catch (SecurityException | NoSuchMethodException
+                | LinkageError ignore) {
         } catch (final Exception ex) {
             reportError(s.toString(), ex, ErrorManager.OPEN_FAILURE);
         }
@@ -4178,7 +4276,7 @@ public class MailHandler extends Handler {
     }
 
     /**
-     * Outline the creation of the index error message. See BUG ID 6533165.
+     * Outline the creation of the index error message. See JDK-6533165.
      * @param i the index.
      * @return the error message.
      */

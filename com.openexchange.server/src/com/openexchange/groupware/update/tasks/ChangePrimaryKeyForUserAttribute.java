@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -73,11 +70,11 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link ChangePrimaryKeyForUserAttribute} - Changes the PRIMARY KEY of the <code>"user_attribute"</code> table from ("cid", "uuid") to ("cid", "id", "name").
@@ -100,29 +97,23 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        // Get required service
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
         // Initialize connection
-        int contextId = params.getContextId();
-        Connection con = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
 
         // Start task processing
         boolean restoreAutocommit = false;
         boolean rollback = false;
-        boolean modified = false;
         try {
             if (Tools.existsPrimaryKey(con, "user_attribute", new String[] {"cid", "id", "name"})) {
                 // PRIMARY KEY already changed
                 return;
             }
 
-            DBUtils.startTransaction(con);
+            Databases.startTransaction(con);
             restoreAutocommit = true;
             rollback = true;
 
             doPerform(con);
-            modified = true;
 
             con.commit();
             rollback = false;
@@ -132,15 +123,10 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                rollback(con);
+                Databases.rollback(con);
             }
             if (restoreAutocommit) {
-                autocommit(con);
-            }
-            if (modified) {
-                dbService.backForUpdateTask(contextId, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextId, con);
+                Databases.autocommit(con);
             }
         }
     }
@@ -174,7 +160,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         ResultSet rs = null;
         try {
             // Extract all distinct context identifiers
-            stmt = con.prepareStatement("SELECT DISTINCT cid FROM user_attribute");
+            stmt = con.prepareStatement("SELECT cid FROM user_attribute");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 // No rows available in connection-associated schema
@@ -182,10 +168,15 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
             }
 
             // Put context identifiers into a light-weight list
-            TIntList contextIds = new TIntArrayList(512);
-            do {
-                contextIds.add(rs.getInt(1));
-            } while (rs.next());
+            TIntList contextIds;
+            {
+                TIntSet tmp = new TIntHashSet(512);
+                do {
+                    int value = rs.getInt(1);
+                    tmp.add(value);
+                } while (rs.next());
+                contextIds = new TIntArrayList(tmp);
+            }
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
@@ -198,7 +189,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
                 mapping = new HashMap<>(length);
                 for (int off = 0; off < length; off += limit) {
                     int clen = off + limit > length ? length - off : limit;
-                    stmt = con.prepareStatement(DBUtils.getIN("SELECT cid, id, name, value, uuid FROM user_attribute WHERE cid IN (", clen));
+                    stmt = con.prepareStatement(Databases.getIN("SELECT cid, id, name, value, uuid FROM user_attribute WHERE cid IN (", clen));
                     int pos = 1;
                     for (int j = 0; j < clen; j++) {
                         stmt.setInt(pos++, contextIds.get(off+j));
@@ -238,6 +229,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = con.prepareStatement("SELECT cid, id, name, value, uuid FROM user_attribute WHERE (cid, id, name) IN (SELECT cid, id, name FROM user_attribute GROUP BY cid, id, name HAVING COUNT(*) > 1) ORDER BY cid,id,name");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -300,7 +292,7 @@ public final class ChangePrimaryKeyForUserAttribute extends UpdateTaskAdapter {
     private void delete(Duplicate duplicate, List<Value> values, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(DBUtils.getIN("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND uuid IN (", values.size()));
+            stmt = con.prepareStatement(Databases.getIN("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND uuid IN (", values.size()));
             int pos = 1;
             stmt.setInt(pos++, duplicate.contextId);
             stmt.setInt(pos++, duplicate.userId);

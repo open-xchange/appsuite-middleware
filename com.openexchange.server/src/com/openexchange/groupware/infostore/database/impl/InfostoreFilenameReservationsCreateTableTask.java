@@ -55,15 +55,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Creates the table infostoreReservedPaths to exclusively create path and file names through the WebDAV interface.
@@ -85,10 +83,10 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
         return "CREATE TABLE infostoreReservedPaths (" +
                 " cid INT4 unsigned NOT NULL," +
                 " folder INT4 unsigned NOT NULL, " +
-                " name VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " +
+                " name VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, " +
                 " uuid BINARY(16) NOT NULL, " +
                 " PRIMARY KEY (cid, uuid) " +
-                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     @Override
@@ -108,15 +106,15 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        createTable(INFOSTORE_RESERVED_PATHS, getTableSQL(), contextId);
+        Connection con = params.getConnection();
+        createTable(INFOSTORE_RESERVED_PATHS, getTableSQL(), con);
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreFilenameReservationsCreateTableTask.class);
-            logger.info("UpdateTask ''{}'' successfully performed!", InfostoreFilenameReservationsCreateTableTask.class.getSimpleName());
+        logger.info("UpdateTask ''{}'' successfully performed!", InfostoreFilenameReservationsCreateTableTask.class.getSimpleName());
     }
 
     @Override
     public String[] requiredTables() {
-        return new String[] { };
+        return new String[] {};
     }
 
     @Override
@@ -124,22 +122,18 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
         return new String[] { INFOSTORE_RESERVED_PATHS };
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection writeCon = ds.getWritable(contextId);
-
+    private void createTable(String tablename, String sqlCreate, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            if (tableExists(writeCon, tablename)) {
+            if (tableExists(con, tablename)) {
                 return;
             }
-            stmt = writeCon.prepareStatement(sqlCreate);
+            stmt = con.prepareStatement(sqlCreate);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
-            ds.backWritable(contextId, writeCon);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -151,7 +145,7 @@ public class InfostoreFilenameReservationsCreateTableTask extends AbstractCreate
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
         } finally {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
         return retval;
     }

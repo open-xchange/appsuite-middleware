@@ -1,0 +1,169 @@
+startDate:
+    $ref: "#/definitions/DateTimeData"
+    description: The starting date of the event.
+endDate:
+  $ref: "#/definitions/DateTimeData"
+  description: The ending date of the event.
+created:
+  type: integer
+  format: int64
+  description: The creation time.
+timestamp:
+  type: integer
+  format: int64
+  description: The timestamp of the event.
+  readOnly: true
+categories:
+  type: array
+  description: An array of categories.
+  items:
+    type: string
+    description: A category.
+filename:
+  type: string
+  description:  The filename of the event.
+uid:
+  type: string
+  description: The universal identifier of the event.
+description:
+  type: string
+  description: The event's description.
+attendees:
+  type: array
+  description: The attendees of the event.
+  items:
+      $ref: "#/definitions/Attendee"
+alarms:
+  type: array
+  description: The alarms of the event for the current user.
+  items: 
+    $ref: "#/definitions/Alarm"
+lastModified:
+  type: integer
+  format: int64
+  description: The last modification time.
+modifiedBy:
+  $ref: "#/definitions/CalendarUser"
+  description: The id of the user who lastly modified the event.
+summary:
+  type: string
+  description: The summary of the event.
+sequence:
+  type: integer
+  description: The sequence number of the event.
+id:
+  type: string
+  description: The identifier of the event.
+class:
+  type: string
+  description: The classification of the event.
+organizer:
+    $ref: "#/definitions/CalendarUser"
+    description: The organizer of the event.
+transp:
+  type: string
+  description: Defines whether the event is shown in the free-busy view.
+  enum: 
+    - OPAQUE
+    - TRANSPARENT
+color: 
+  type: string
+  description: The color of the even as a css3 color definition.
+folder:
+  type: string
+  description: The folder identifier.
+createdBy: 
+  $ref: "#/definitions/CalendarUser"
+  description: The creator of the event.
+changeExceptionDates:
+  type: array
+  description: An array of changed recurrences.
+  items:
+    type: string
+    description: |
+      The recurrence id of a changed recurrence. The value is either a utc date-time value (E.g. "20170708T220000Z"), a floating date-time (E.g. "20170708T220000") 
+      or a date (E.g. "20170708"). See rfc 5545 chapter 3.3.5. for more informations.
+deleteExceptionDates:
+  type: array
+  description: An array of deleted recurrences.
+  items:
+    type: string
+    description: |
+      The recurrence id of a deleted recurrence. The value is either a utc date-time value (E.g. "20170708T220000Z"), a floating date-time (E.g. "20170708T220000") 
+      or a date (E.g. "20170708"). See rfc 5545 chapter 3.3.5. for more informations.
+recurrenceId:
+  type: string
+  description: |
+   The recurrence id of this recurrence. The value is either a utc date-time value (E.g. "20170708T220000Z"), a floating date-time (E.g. "20170708T220000") 
+   or a date (E.g. "20170708"). See rfc 5545 chapter 3.3.5. for more informations.
+calendarUser:
+  $ref: "#/definitions/CalendarUser"
+  description: The user of this calendar.
+rrule:
+  type: string
+  description: The recurrence rule according to rfc 5545 chapter 3.8.5.3.
+attachments:
+  type: array
+  description: An array of attachments.
+  items:
+    $ref: "#/definitions/ChronosAttachment"
+extendedProperties:
+  type: string
+  description: An JSONObject of extended properties of this event.
+geo:
+  type: object
+  title: Geo
+  description: The geolocation of the event.
+  properties:
+    lat: 
+      type: number
+      format: double
+      description: The latitude geographic coordinate.
+    long: 
+      type: number
+      format: double
+      description: The longitude geographic coordinate.
+url:
+  type: string
+  description: The uniform resource locator (URL) of the event.
+seriesId:
+  type: string
+  description: The identifier of the event series.
+status: 
+  type: string
+  description: The status of the event.
+location:
+  type: string
+  description: The location of the event.
+flags:
+  type: array
+  description: Flags indicating certain aspects of an event.
+  items:
+    type: string
+    enum: ["attachments", "alarms", "scheduled", "organizer", "attendee", "on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ]
+    description: >
+      Event Flags:
+       * `attachments` - The event contains at least one attachment. 
+       * `alarms` - The calendar user has at least one alarm associated with the event.
+       * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.
+       * `organizer` - The calendar user is the <i>organizer<i> of the meeting. 
+       * `attendee` - The calendar user is <i>attendee<i> of the meeting.
+       * `on_behalf` - The current user is different from the calendar user, hence acts <i>on behalf of</i> the calendar user.
+       * `private` - Event is classified <i>private</i>, so is invisible for others. 
+       * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.
+       * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.
+       * `event_tentative` - Indicates that the event's overall status is <i>tentative</i>.
+       * `event_confirmed` - Indicates that the event's overall status is <i>definite</i>.
+       * `event_cancelled` - Indicates that the event's overall status is <i>cancelled</i>.
+       * `needs_action` - The calendar user's participation status is <i>needs action</i>. 
+       * `accepted` - The calendar user's participation status is <i>accepted</i>.
+       * `declined` - The calendar user's participation status is <i>declined</i>.
+       * `tentative` - The calendar user's participation status is <i>tentative</i>.
+       * `delegated` - The calendar user's participation status is <i>delegated</i>.
+       * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. 
+       * `overridden` - The event represents an exception / overridden instance of a recurring event series.
+       * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.
+       * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.
+relatedTo:
+  type: string
+  description: The relationship between this and other events.

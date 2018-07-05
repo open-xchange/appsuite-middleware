@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2016 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -42,9 +42,9 @@ package javax.mail.internet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.Locale;
-import javax.mail.*;
+import java.util.StringTokenizer;
+import javax.mail.Address;
 
 /**
  * This class models an RFC1036 newsgroup address.
@@ -91,6 +91,7 @@ public class NewsAddress extends Address {
      * Return the type of this address.  The type of a NewsAddress
      * is "news".
      */
+    @Override
     public String getType() {
 	return "news";
     }
@@ -136,6 +137,7 @@ public class NewsAddress extends Address {
      *
      * @return		newsgroup
      */
+    @Override
     public String toString() {
 	return newsgroup;
     }
@@ -143,6 +145,7 @@ public class NewsAddress extends Address {
     /**
      * The equality operator.
      */
+    @Override
     public boolean equals(Object a) {
 	if (!(a instanceof NewsAddress))
 	    return false;
@@ -157,6 +160,7 @@ public class NewsAddress extends Address {
     /**
      * Compute a hash code for the address.
      */
+    @Override
     public int hashCode() {
 	int hash = 0;
 	if (newsgroup != null)
@@ -182,8 +186,8 @@ public class NewsAddress extends Address {
 	if (addresses == null || addresses.length == 0)
 	    return null;
 
-	StringBuffer s = 
-		new StringBuffer(((NewsAddress)addresses[0]).toString());
+	StringBuilder s = 
+		new StringBuilder(((NewsAddress)addresses[0]).toString());
 	int used = s.length();
 	for (int i = 1; i < addresses.length; i++) {
 	    s.append(",");
@@ -212,7 +216,7 @@ public class NewsAddress extends Address {
 				throws AddressException {
 	// XXX - verify format of newsgroup name?
 	StringTokenizer st = new StringTokenizer(newsgroups, ",");
-	List<NewsAddress> nglist = new ArrayList<NewsAddress>();
+	List<NewsAddress> nglist = new ArrayList<>();
 	while (st.hasMoreTokens()) {
 	    String ng = st.nextToken();
 	    nglist.add(new NewsAddress(ng));

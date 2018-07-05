@@ -53,7 +53,6 @@ import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
-import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 
@@ -75,46 +74,44 @@ public class DeleteAttachmentSolver implements ProblemSolver {
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        if (entity.getType().equals(EntityType.Context)) {
-            // Now we go through the set an delete each superfluous entry:
-            final Iterator<String> it = problems.iterator();
-            while (it.hasNext()) {
+        // Now we go through the set an delete each superfluous entry:
+        final Iterator<String> it = problems.iterator();
+        while (it.hasNext()) {
+            try {
+                final String identifier = it.next();
+                attachments.setTransactional(true);
+                attachments.startTransaction();
+                final int[] numbers = attachments.removeAttachment(identifier, entity.getContext());
+                attachments.commit();
+                if (numbers[0] == 1) {
+                    LOG.info(MessageFormat.format("Inserted entry for identifier {0} and Context {1} in del_attachments", identifier, entity.getContext().getContextId()));
+                }
+                if (numbers[1] == 1) {
+                    LOG.info(MessageFormat.format("Removed attachment database entry for: {0}", identifier));
+                }
+            } catch (final OXException e) {
+                LOG.debug("{}", e.getMessage(), e);
                 try {
-                    final String identifier = it.next();
-                    attachments.setTransactional(true);
-                    attachments.startTransaction();
-                    final int[] numbers = attachments.removeAttachment(identifier, entity.getContext());
-                    attachments.commit();
-                    if (numbers[0] == 1) {
-                        LOG.info(MessageFormat.format("Inserted entry for identifier {0} and Context {1} in del_attachments", identifier, entity.getContext().getContextId()));
-                    }
-                    if (numbers[1] == 1) {
-                        LOG.info(MessageFormat.format("Removed attachment database entry for: {0}", identifier));
-                    }
+                    attachments.rollback();
+                    return;
+                } catch (final OXException e1) {
+                    LOG.debug("{}", e1.getMessage(), e1);
+                }
+                return;
+            } catch (final RuntimeException e) {
+                LOG.error("{}", e.getMessage(), e);
+                try {
+                    attachments.rollback();
+                    return;
+                } catch (final OXException e1) {
+                    LOG.debug("{}", e1.getMessage(), e1);
+                }
+                return;
+            } finally {
+                try {
+                    attachments.finish();
                 } catch (final OXException e) {
-                    LOG.debug("", e);
-                    try {
-                        attachments.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG.debug("", e1);
-                    }
-                    return;
-                } catch (final RuntimeException e) {
-                    LOG.error("", e);
-                    try {
-                        attachments.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG.debug("", e1);
-                    }
-                    return;
-                } finally {
-                    try {
-                        attachments.finish();
-                    } catch (final OXException e) {
-                        LOG.debug("", e);
-                    }
+                    LOG.debug("{}", e.getMessage(), e);
                 }
             }
         }

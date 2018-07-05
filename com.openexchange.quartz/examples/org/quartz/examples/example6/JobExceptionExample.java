@@ -17,13 +17,11 @@
 
 package org.quartz.examples.example6;
 
+import static org.quartz.DateBuilder.nextGivenSecondDate;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
-import static org.quartz.DateBuilder.*;
-
 import java.util.Date;
-
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;

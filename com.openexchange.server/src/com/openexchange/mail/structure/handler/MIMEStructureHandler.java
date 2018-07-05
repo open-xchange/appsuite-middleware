@@ -82,7 +82,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.google.common.collect.ImmutableSet;
-import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
@@ -118,6 +118,9 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.regex.MatcherReplacer;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import gnu.trove.procedure.TCharProcedure;
+import gnu.trove.set.TCharSet;
+import gnu.trove.set.hash.TCharHashSet;
 
 /**
  * {@link MIMEStructureHandler} - The handler to generate a JSON object reflecting a message's MIME structure.
@@ -312,10 +315,10 @@ public final class MIMEStructureHandler implements StructureHandler {
             /*
              * Check ICal part for a valid METHOD and its presence in Content-Type header
              */
-            final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
-            if (iCalParser != null) {
+            final ICalService iCalService = ServerServiceRegistry.getInstance().getService(ICalService.class);
+            if (iCalService != null) {
                 try {
-                    final String method = iCalParser.parseProperty("METHOD", part.getInputStream());
+                    final String method = iCalService.getUtilities().parsePropertyValue(part.getInputStream(), "METHOD", null);
                     if (null != method) {
                         /*
                          * Assume an iTIP response or request
@@ -395,13 +398,27 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     @Override
     public boolean handleInlineUUEncodedAttachment(final UUEncodedPart part, final String id) throws OXException {
-        final String filename = part.getFileName();
+        String filename = part.getFileName();
         String contentType = MimeTypes.MIME_APPL_OCTET;
         try {
-            contentType = MimeType2ExtMap.getContentType(new File(filename.toLowerCase()).getName()).toLowerCase();
+            TCharSet separators = new TCharHashSet(new char[] {'/', '\\', File.separatorChar});
+            final String fn = filename;
+            boolean containsSeparatorChar = false == separators.forEach(new TCharProcedure() {
+
+                @Override
+                public boolean execute(char separator) {
+                    return fn.indexOf(separator) < 0;
+                }
+            });
+
+            File file = new File(filename);
+            if (containsSeparatorChar) {
+                filename = file.getName();
+                file = new File(filename);
+            }
+            contentType = Strings.asciiLowerCase(MimeType2ExtMap.getContentType(file.getName()));
         } catch (final Exception e) {
-            final Throwable t =
-                new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
+            Throwable t = new Throwable(new StringBuilder("Unable to fetch content-type for '").append(filename).append("': ").append(e).toString());
             LOG.warn("", t);
         }
         /*
@@ -497,7 +514,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             // Dequeue
             mailJsonObjectQueue.removeLast();
             currentMailObject = mailJsonObjectQueue.getLast();
-            currentBodyObject = (JSONValue) currentMailObject.opt(BODY);
+            currentBodyObject = currentMailObject.optJSONValue(BODY);
         }
         return true;
     }
@@ -528,7 +545,7 @@ public final class MIMEStructureHandler implements StructureHandler {
              * Inner parser
              */
             final MIMEStructureHandler inner = new MIMEStructureHandler(maxSize);
-            new StructureMailMessageParser().setParseTNEFParts(true).parseMailMessage(nestedMail, inner, id);
+            new StructureMailMessageParser().setParseTNEFParts(true).setParseUUEncodedParts(true).parseMailMessage(nestedMail, inner, id);
             /*
              * Apply to this handler
              */

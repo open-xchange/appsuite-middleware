@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -71,12 +70,11 @@ import com.openexchange.tools.update.Tools;
  */
 public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
-    private static final org.slf4j.Logger LOG          = org.slf4j.LoggerFactory.getLogger(PasswordChangeHistoryCreateTableTask.class);
-    private static final String           HISTORY_NAME = "user_password_history";
+    private static final String TABLE_NAME = "user_password_history";
 
     private static String getHistoryTable() {
         StringBuilder sb = new StringBuilder();
-        sb.append("CREATE TABLE user_password_history (");
+        sb.append("CREATE TABLE ").append(TABLE_NAME).append(" (");
         sb.append("id INT UNSIGNED NOT NULL AUTO_INCREMENT,");
         sb.append("cid INT UNSIGNED NOT NULL,");
         sb.append("uid INT UNSIGNED NOT NULL,");
@@ -85,7 +83,7 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
         sb.append("ip VARCHAR(45) NULL DEFAULT NULL,");
         sb.append("PRIMARY KEY (id),");
         sb.append("INDEX context_and_user (cid, uid)");
-        sb.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
+        sb.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
         return sb.toString();
     }
 
@@ -101,11 +99,10 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
      *
      * @param tablename The table name
      * @param sqlCreate The command to create the table
-     * @param contextId The context to operate on
+     * @param writeCon The connection to use
      * @throws OXException In case of {@link SQLException}
      */
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final Connection writeCon = Database.get(contextId, true);
+    private void createTable(String tablename, String sqlCreate, Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         try {
             if (Tools.tableExists(writeCon, tablename)) {
@@ -117,7 +114,6 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            Database.back(contextId, true, writeCon);
         }
     }
 
@@ -128,14 +124,12 @@ public class PasswordChangeHistoryCreateTableTask extends AbstractCreateTableImp
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { HISTORY_NAME };
+        return new String[] { TABLE_NAME };
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        final int contextID = params.getContextId();
-        createTable(HISTORY_NAME, getHistoryTable(), contextID);
-        LOG.info("UpdateTask 'PasswordChangeHistoryCreateTableTask' successfully performed!");
+        createTable(TABLE_NAME, getHistoryTable(), params.getConnection());
     }
 
     @Override

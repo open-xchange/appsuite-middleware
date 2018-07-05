@@ -2,17 +2,25 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.find.basic
 Bundle-SymbolicName: com.openexchange.find.basic
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.find.basic.osgi.FindBasicActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.davekoelle,
+ com.google.common.collect;version="23.0.0",
  com.openexchange.api2,
+ com.openexchange.chronos,
+ com.openexchange.chronos.common,
+ com.openexchange.chronos.compat,
+ com.openexchange.chronos.provider.composition,
+ com.openexchange.chronos.service,
  com.openexchange.config,
  com.openexchange.config.cascade,
+ com.openexchange.config.lean,
  com.openexchange.configuration,
  com.openexchange.contact,
  com.openexchange.contacts.json.mapping,
+ com.openexchange.conversion,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.file.storage.composition,
@@ -30,11 +38,11 @@ Import-Package: com.davekoelle,
  com.openexchange.find.tasks,
  com.openexchange.find.util,
  com.openexchange.folderstorage,
+ com.openexchange.folderstorage.calendar.contentType,
  com.openexchange.folderstorage.database.contentType,
  com.openexchange.folderstorage.mail,
  com.openexchange.folderstorage.mail.contentType,
  com.openexchange.folderstorage.type,
- com.openexchange.groupware.calendar,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
@@ -54,6 +62,7 @@ Import-Package: com.davekoelle,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.java.util,
+ com.openexchange.jslob,
  com.openexchange.mail,
  com.openexchange.mail.api,
  com.openexchange.mail.dataobjects,
@@ -80,11 +89,16 @@ Import-Package: com.davekoelle,
  gnu.trove.map,
  gnu.trove.map.hash,
  javax.mail,
+ javax.mail.event,
+ javax.mail.internet,
+ javax.mail.internet.idn,
+ javax.mail.search,
+ javax.mail.util,
+ org.dmfs.rfc5545,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.find.basic.common,
  com.openexchange.find.basic.drive
 Bundle-ClassPath: .

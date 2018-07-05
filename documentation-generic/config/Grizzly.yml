@@ -176,3 +176,90 @@ properties:
       file: grizzly.properties
       packageName: open-xchange-grizzly
       tags: ["Grizzly", "SSL" , "Credential"]
+    - key: com.openexchange.http.grizzly.hasAccessLogEnabled
+      description: |
+        Enables/disables access log for Grizzly.
+      defaultValue: false
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]
+    - key: com.openexchange.http.grizzly.accesslog.file
+      description: |
+        Specifies the path for the Grizzly access log file; e.g. "/tmp/access.log".
+        This property is mandatory in case "com.openexchange.http.grizzly.hasAccessLogEnabled" is set to "true"; otherwise
+        access log will not be enabled.
+      defaultValue:
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]
+    - key: com.openexchange.http.grizzly.accesslog.format
+      description: |
+        Specifies the log record format.
+        If this configuration is not explicitly set, it will default to the NCSA extended/combined log format.
+        
+        The following identifiers are supported:
+        "common" A format compatible with Apache's common format.
+        "combined" A format compatible with Apache's combined format
+        "vhost_common" A format compatible with Apache's common with virtual-hosts format
+        "vhost_combined" A format compatible with Apache's combined with virtual-hosts format
+        "referer" A format compatible with Apache's referer format
+        "agent" A format compatible with Apache's user-agent format
+      defaultValue: combined
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]
+    - key: com.openexchange.http.grizzly.accesslog.rotate
+      description: |
+        Specifies the rotate policy for the access log.
+        If this configuration is not explicitly set, no rotation will be performed.
+        
+        The following identifiers are supported:
+        "none" No ration at all
+        "hourly" Access logs will be rotated hourly. For example, if the file name specified was `access.log`, files will be archived on a hourly basis with names like `access-yyyyMMDDhh.log`
+        "daily" Access logs will be rotated daily. For example, if the file name specified was `access.log`, files will be archived on a daily basis with names like `access-yyyyMMDD.log`
+      defaultValue: none
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]
+    - key: com.openexchange.http.grizzly.accesslog.synchronous
+      description: |
+        Specifies whether access log entries should be written `synchronously` or not. If not specified, logging will occur asynchronously.
+      defaultValue: false
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]
+    - key: com.openexchange.http.grizzly.accesslog.statusThreshold
+      description: |
+        Specifies the minimum HTTP status code that will trigger an entry in the access log. If not specified, then all status codes are valid.
+      defaultValue:
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]
+    - key: com.openexchange.http.grizzly.accesslog.timezone
+      description: |
+        The time zone for the timestamped log records. If not specified, it will default to the timezone of the system running the server.
+      defaultValue: UTC
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      file: grizzly.properties
+      packageName: open-xchange-grizzly
+      tags: ["Grizzly"]

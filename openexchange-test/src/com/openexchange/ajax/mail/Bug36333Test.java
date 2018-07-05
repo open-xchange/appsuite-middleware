@@ -115,7 +115,7 @@ public class Bug36333Test extends AbstractMailTest {
 
     @Test
     public void testBug36333() throws OXException, IOException, JSONException {
-        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "bug36333.eml")), "UTF-8");
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "bug36333.eml")), "UTF-8");
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();
@@ -172,7 +172,7 @@ public class Bug36333Test extends AbstractMailTest {
 
     @Test
     public void testBug36333_2() throws OXException, IOException, JSONException {
-        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "bug36333_2.eml")), "UTF-8");
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "bug36333_2.eml")), "UTF-8");
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();
@@ -231,7 +231,7 @@ public class Bug36333Test extends AbstractMailTest {
     public void testBug36333_3() throws OXException, IOException, JSONException {
         JSONArray json;
         {
-            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "bug36333_3.eml")), "UTF-8");
+            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "bug36333_3.eml")), "UTF-8");
             char[] buf = new char[512];
             int length;
             StringBuilder sb = new StringBuilder();

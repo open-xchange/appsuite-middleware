@@ -1,20 +1,20 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2009-2016 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2009-2016 Jason Mehrens. All rights reserved.
+ * Copyright (c) 2009-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009-2017 Jason Mehrens. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,16 +40,30 @@
  */
 package com.sun.mail.util.logging;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.*;
-import java.util.logging.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.logging.ErrorManager;
+import java.util.logging.Filter;
 import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.LogManager;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.LoggingPermission;
 
 /**
  * An adapter class to allow the Mail API to access the LogManager properties.
@@ -666,7 +680,7 @@ final class LogManagerProperties extends Properties {
         final Class<?> thisClass = LogManagerProperties.class;
         assert Modifier.isFinal(thisClass.getModifiers()) : thisClass;
         try {
-            final HashSet<String> traces = new HashSet<String>();
+            final HashSet<String> traces = new HashSet<>();
             Throwable t = Throwable.class.getConstructor().newInstance();
             for (StackTraceElement ste : t.getStackTrace()) {
                 if (!thisClass.getName().equals(ste.getClassName())) {

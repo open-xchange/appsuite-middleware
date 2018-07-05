@@ -1,29 +1,20 @@
 ---
-Title: List capabilities and configurations
+title: Overview of capabilities and configurations
 ---
+# Overview
 
-The OX middleware provides this clt's to list capabilities or configurations:
+The OX middleware provides multiple command-line tool's to list capabilities and configurations. This page provides an overview over those tools.
 
-* getuserconfigurationsource
-* getusercapabilities
-* getcontextcapabilities
+## getuserconfigurationsource
 
-The clt's getusercapabilites and getcontextcapbilites either list only the provisioned capabilities on user or context level.
-The getuserconfigurationsource clt is much more powerful. It allows to list both capabilities and configurations.
-For the usecase of capabilities it lists the complete configuration of capabilities. For this matter it lists the capabilities on a source based level.
-Currenlty there are four source:
+A powerful tool to list either capabalities or configurations. This tool also helps to identify the source of the configuration. 
+This is especially helpful in case you want to know where the configuration is configured. More information about this tool 
+can be found [here]({{ site.baseurl }}/middleware/components/commandlinetools/getuserconfigurationsource.html).
 
-* permission
-* configuration
-* provisioning
-* programmatic
+## getusercapabilities 
 
-For each source it shows which capabilities are added by this source and which capabilities are revoked.
-In addition it lists the active capabilities for the user at the end of the output.
+This tool lists provisioned capabilities on user level.
 
-The second use case of this clt is to list a filtered list of configurations.
-For example the following command would list all imap configurations for the given user:
+## getcontextcapabilities
 
-    getuserconfigurationsource -A <ctxadmin> -P <password> -c <cid> -u <uid> -o com.openexchange.imap
-
-Besides the name of the configuration and its value the clt also displays the scope of the configuration.
+This tool lists provisioned capabilities on context level.

@@ -61,8 +61,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import net.htmlparser.jericho.Config;
-import net.htmlparser.jericho.LoggerProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
@@ -78,6 +76,8 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import net.htmlparser.jericho.Config;
+import net.htmlparser.jericho.LoggerProvider;
 
 /**
  * {@link HTMLServiceActivator} - Activator for HTML interface.
@@ -146,7 +146,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             /*
              * Close trackers
              */
-            cleanUp();
+            super.stopBundle();
             /*
              * Restore
              */

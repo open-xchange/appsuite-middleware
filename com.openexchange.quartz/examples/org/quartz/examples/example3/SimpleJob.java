@@ -18,9 +18,6 @@
 package org.quartz.examples.example3;
 
 import java.util.Date;
-
-
-
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

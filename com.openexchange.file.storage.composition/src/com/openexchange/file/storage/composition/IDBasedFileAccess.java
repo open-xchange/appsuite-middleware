@@ -59,6 +59,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.search.SearchTerm;
@@ -148,7 +149,7 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      * @param destFolderId The folder to copy into
      * @param update Optional updates to the copy. May be null
      * @param newData Optional new binary data. May be null
-     * @param The fields to use from the update.
+     * @param modifiedFields The fields to use from the update.
      * @return The (fully qualified) unique identifier of the copied file
      * @throws OXException If operation fails
      */
@@ -611,5 +612,15 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      * @throws OXException
      */
     Map<String, String> getETags(List<String> folderIds) throws OXException;
+
+    /**
+     * Restores files from trash folder into its origin location. If the path was deleted too, it will be recreated.
+     *
+     * @param fileIds The identifiers of the files to restore
+     * @param defaultDestFolderId The identifier of the default destination folder
+     * @return A mapping of restored file to new parent's path
+     * @throws OXException If restore fails
+     */
+    Map<FileID, FileStorageFolder[]> restore(List<String> fileIds, String defaultDestFolderId) throws OXException;
 
 }

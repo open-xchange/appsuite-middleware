@@ -74,10 +74,6 @@ public class PropertyHandler {
     private String configdirname;
     private final Properties sysprops;
 
-    //private static final String PROPERTIES_USER             = "USER_PROP_CONFIG";
-    //private static final String PROPERTIES_GROUP            = "GROUP_PROP_CONFIG";
-    //private static final String PROPERTIES_RESOURCE         = "RESOURCE_PROP_CONFIG";
-    //private static final String PROPERTIES_RMI              = "RMI_PROP_CONFIG";
     protected final static String PROPERTIES_SQL = "SQL_PROP_CONFIG";
 
     // The following lines define the property values for the database implementations

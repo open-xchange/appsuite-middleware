@@ -76,6 +76,8 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
         super();
         pattern = new ComparablePattern<Integer>() {
 
+            private static final long serialVersionUID = -1654705730708028618L;
+
             private final Integer i = Integer.valueOf(size);
 
             @Override

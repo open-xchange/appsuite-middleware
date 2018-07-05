@@ -49,12 +49,15 @@
 
 package com.openexchange.tools.arrays;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * Contains convenience methods for dealing with arrays.
@@ -143,6 +146,39 @@ public final class Arrays {
             tmp.add(i);
         }
         return tmp.toArray();
+    }
+
+    /**
+     * Generates consecutive subarrays for an array,each of the same size (the final array may be smaller).
+     * <p>
+     * For example, partitioning an array containing {@code [a, b, c, d, e]} with a partition
+     * size of 3 yields<br>{@code [[a, b, c], [d, e]]} -- an outer list containing two inner array
+     * of three and two elements, all in the original order.
+     *
+     * @param array The array to return consecutive subarrays of
+     * @param size The desired size of each subarray (the last may be smaller)
+     * @return A list of consecutive subarrays
+     * @throws IllegalArgumentException If {@code size} is non-positive
+     */
+    public static <T> List<T[]> partition(T[] array, int size) {
+        checkNotNull(array);
+        checkArgument(size > 0);
+
+        int length = array.length;
+        if (length <= size) {
+            return Collections.singletonList(array);
+        }
+
+        List<T[]> retval = new ArrayList<>((length + size - 1) / size);
+        int stopIndex = 0;
+        for (int startIndex = 0; startIndex + size <= length; startIndex += size) {
+            stopIndex += size;
+            retval.add(java.util.Arrays.copyOfRange(array, startIndex, stopIndex));
+        }
+        if (stopIndex < length) {
+            retval.add(java.util.Arrays.copyOfRange(array, stopIndex, length));
+        }
+        return retval;
     }
 
     public static <T> T[] remove(T[] removeFrom, T... toRemove) {

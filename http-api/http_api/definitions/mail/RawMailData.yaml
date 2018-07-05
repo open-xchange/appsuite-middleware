@@ -17,6 +17,7 @@ from:
   description: Each element is a two-element array specifying one sender (address). The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.
   items:
     type: array
+    title: FromAddress
     items:
       type: string
       description: The personal name and email adress of the from address
@@ -25,6 +26,7 @@ to:
   description: Each element is a two-element array (see the from field) specifying one receiver.
   items:
     type: array
+    title: ToAddress
     items:
       type: string
       description: The personal name and email adress of the to address
@@ -33,6 +35,7 @@ cc:
   description: Each element is a two-element array (see the from field) specifying one carbon-copy receiver.
   items:
     type: array
+    title: CcAddress
     items:
       type: string
       description: The personal name and email adress of the cc address
@@ -41,6 +44,7 @@ bcc:
   description: Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.
   items:
     type: array
+    title: BccAddress
     items:
       type: string
       description: The personal name and email adress of the bcc address
@@ -131,4 +135,6 @@ original_folder_id:
 content_type:
   type: string
   description: The MIME type of the mail.
-
+text_preview:
+  type: string
+  description: The optional preview of the mail body

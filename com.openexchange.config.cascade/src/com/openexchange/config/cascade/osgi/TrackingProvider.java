@@ -56,14 +56,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.LoggerFactory;
-
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.exception.OXException;

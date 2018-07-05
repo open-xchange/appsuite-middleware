@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
@@ -256,5 +257,11 @@ public class InMemoryAttachmentBase implements AttachmentBase {
     @Override
     public TIntObjectMap<Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public SortedSet<String> getAttachmentFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+        // Implement correctly if required
+        return new TreeSet<>();
     }
 }

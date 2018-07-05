@@ -49,8 +49,6 @@
 
 package com.openexchange.data.conversion.ical;
 
-import com.openexchange.data.conversion.ical.itip.ITipMethod;
-
 /**
  * {@link SimpleMode}
  *
@@ -59,27 +57,27 @@ import com.openexchange.data.conversion.ical.itip.ITipMethod;
 public class SimpleMode implements Mode {
 
     private final ZoneInfo zoneInfo;
-    private final ITipMethod method;
+    private final String method;
 
     /**
      * Initializes a new {@link SimpleMode}.
      *
      * @param zoneInfo The time zone information to use
-     * @param method The method to use, or <code>null</code> / {@link ITipMethod#NO_METHOD} for no special method
+     * @param method The method to use, or <code>null</code> for no special method
      */
-    public SimpleMode(ZoneInfo zoneInfo, ITipMethod method) {
+    public SimpleMode(ZoneInfo zoneInfo, String method) {
         super();
         this.zoneInfo = zoneInfo;
         this.method = method;
     }
 
     /**
-     * Initializes a new {@link SimpleMode} using the default {@link ITipMethod#PUBLISH}.
+     * Initializes a new {@link SimpleMode} using the default "PUBLISH".
      *
      * @param zoneInfo The time zone information to use
      */
     public SimpleMode(ZoneInfo zoneInfo) {
-        this(zoneInfo, ITipMethod.PUBLISH);
+        this(zoneInfo, "PUBLISH");
     }
 
     @Override
@@ -88,7 +86,7 @@ public class SimpleMode implements Mode {
     }
 
     @Override
-    public ITipMethod getMethod() {
+    public String getMethod() {
         return method;
     }
 

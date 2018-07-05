@@ -56,8 +56,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+import com.openexchange.imagetransformation.ImageMetadata;
+import com.openexchange.imagetransformation.ImageMetadataOptions;
 import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -86,6 +89,42 @@ public class JavaImageMetadataService implements ImageMetadataService {
             int width = reader.getWidth(0);
             int height = reader.getHeight(0);
             return new Dimension(width, height);
+        } finally {
+            if (null != reader) {
+                try {
+                    reader.dispose();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+            Streams.close(imageInputStream, imageStream);
+        }
+    }
+
+    @Override
+    public ImageMetadata getMetadataFor(InputStream imageStream, String mimeType, String name, ImageMetadataOptions imageMetadataOptions) throws IOException {
+        ImageInputStream imageInputStream = null;
+        ImageReader reader = null;
+        try {
+            imageInputStream = getImageInputStream(imageStream);
+            reader = getImageReader(imageInputStream, mimeType, name);
+            reader.setInput(imageInputStream);
+
+            ImageMetadata.Builder builder = ImageMetadata.builder();
+            if (imageMetadataOptions.isDimension()) {
+                int width = reader.getWidth(0);
+                int height = reader.getHeight(0);
+                builder.withDimension(new Dimension(width, height));
+            }
+
+            if (imageMetadataOptions.isFormatName()) {
+                String formatName = reader.getFormatName();
+                if (null != formatName) {
+                    builder.withFormatName(Strings.asciiLowerCase(formatName));
+                }
+            }
+
+            return builder.build();
         } finally {
             if (null != reader) {
                 try {

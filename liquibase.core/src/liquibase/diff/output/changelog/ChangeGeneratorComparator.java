@@ -1,9 +1,8 @@
 package liquibase.diff.output.changelog;
 
+import java.util.Comparator;
 import liquibase.database.Database;
 import liquibase.structure.DatabaseObject;
-
-import java.util.Comparator;
 
 public class ChangeGeneratorComparator implements Comparator<ChangeGenerator> {
 

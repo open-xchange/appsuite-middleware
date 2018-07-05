@@ -1,12 +1,14 @@
 package liquibase.parser;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
-
-import java.util.*;
 
 public class ChangeLogParserFactory {
 

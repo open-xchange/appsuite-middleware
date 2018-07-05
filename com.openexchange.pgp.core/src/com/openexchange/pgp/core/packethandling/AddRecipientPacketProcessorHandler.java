@@ -55,19 +55,15 @@ import java.util.List;
 import org.bouncycastle.bcpg.ContainedPacket;
 import org.bouncycastle.bcpg.Packet;
 import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
-import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.operator.PGPKeyEncryptionMethodGenerator;
-import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
-import org.bouncycastle.openpgp.operator.bc.BcPublicKeyDataDecryptorFactory;
-import org.bouncycastle.openpgp.operator.bc.BcPublicKeyKeyEncryptionMethodGenerator;
+import com.openexchange.pgp.core.PGPSessionDecrypter;
 
 /**
  * {@link AddRecipientPacketProcessorHandler} adds new recipients to a PGP Message without the need to re-encrypt the whole Message
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public class AddRecipientPacketProcessorHandler implements PacketProcessorHandler {
 
@@ -86,40 +82,6 @@ public class AddRecipientPacketProcessorHandler implements PacketProcessorHandle
         this.identitiesToAdd = identitiesToAdd;
     }
 
-    /**
-     * Simple factory method for creating a decryptor factory
-     *
-     * @return The decryptor factory to use
-     */
-    private PublicKeyDataDecryptorFactory createDecryptorFactory() {
-        return new BcPublicKeyDataDecryptorFactory(addingIdentity);
-    }
-
-    /**
-     * Simple factory method for creating a new Packet for the given identity
-     *
-     * @param identity The identity which should be able to decrypt the PGP Message
-     * @param sessionData The session data which get's encrypted for the given identity
-     * @return The packet to add
-     * @throws PGPException
-     */
-    private ContainedPacket createSessionPacketForIdentitiy(PGPPublicKey identity, byte[] sessionData) throws PGPException {
-        PGPKeyEncryptionMethodGenerator packetGenerator = new BcPublicKeyKeyEncryptionMethodGenerator(identity);
-        return packetGenerator.generate(identity.getAlgorithm(), sessionData);
-    }
-
-    /**
-     * Internal method to decrypt a PGP session packet
-     *
-     * @param sessionPacket The session packet to decrypt
-     * @return The raw decrypted session data
-     * @throws PGPException
-     */
-    private byte[] decryptSessionData(PublicKeyEncSessionPacket sessionPacket) throws PGPException {
-        PublicKeyDataDecryptorFactory decryptorFactory = createDecryptorFactory();
-        return decryptorFactory.recoverSessionData(sessionPacket.getAlgorithm(), sessionPacket.getEncSessionKey());
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -132,17 +94,17 @@ public class AddRecipientPacketProcessorHandler implements PacketProcessorHandle
             List<PGPPacket> ret = new ArrayList<PGPPacket>(Arrays.asList(new PGPPacket[] { packet /* keep the original packet */}));
 
             //Decrypt the session data
-            byte[] sessionData = decryptSessionData((PublicKeyEncSessionPacket) rawPacket);
+            byte[] symmetricSessionKey = new PGPSessionDecrypter().decryptSymmetricSessionKey((PublicKeyEncSessionPacket) rawPacket, addingIdentity);
             try {
                 //Creating a new session packet for each new identity
                 for (PGPPublicKey identities : identitiesToAdd) {
-                    ContainedPacket newPacket = createSessionPacketForIdentitiy(identities, sessionData);
+                    ContainedPacket newPacket = PacketUtil.createSessionPacketForIdentitiy(identities, symmetricSessionKey);
                     ret.add(new PGPPacket(newPacket, null));
                 }
             } finally {
                 //Finally wipe the session data from memory if not used anymore
-                for (int i = 0; i < sessionData.length; i++) {
-                    sessionData[i] = 0x0;
+                for (int i = 0; i < symmetricSessionKey.length; i++) {
+                    symmetricSessionKey[i] = 0x0;
                 }
             }
 
@@ -155,5 +117,13 @@ public class AddRecipientPacketProcessorHandler implements PacketProcessorHandle
             return ret.toArray(new PGPPacket[ret.size()]);
         }
         return new PGPPacket[] { packet };
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.pgp.core.packethandling.PacketProcessorHandler#modifyPacketData(com.openexchange.pgp.core.packethandling.PGPPacket, byte[])
+     */
+    @Override
+    public byte[] handlePacketData(PGPPacket packet, byte[] packetData) {
+        return packetData;
     }
 }

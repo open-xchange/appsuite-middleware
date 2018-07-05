@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CalDAV- and CardDAV push
 Bundle-SymbolicName: com.openexchange.dav.push
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.io;version="19.0.0",
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.io,
+ com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.configuration,
@@ -32,6 +33,7 @@ Import-Package: com.google.common.io;version="19.0.0",
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.session,
+ com.openexchange.version,
  com.openexchange.webdav.action,
  com.openexchange.webdav.protocol,
  com.openexchange.webdav.protocol.helpers,
@@ -40,12 +42,12 @@ Import-Package: com.google.common.io;version="19.0.0",
  javax.mail.internet.idn,
  javax.servlet,
  javax.servlet.http,
- org.apache.http;version="4.4.5",
- org.apache.http.client;version="4.5.2",
- org.apache.http.client.methods;version="4.5.2",
- org.apache.http.entity;version="4.4.5",
- org.apache.http.impl.client;version="4.5.2",
- org.apache.http.util;version="4.4.5",
+ org.apache.http,
+ org.apache.http.client,
+ org.apache.http.client.methods,
+ org.apache.http.entity,
+ org.apache.http.impl.client,
+ org.apache.http.util,
  org.jdom2,
  org.json,
  org.osgi.framework,

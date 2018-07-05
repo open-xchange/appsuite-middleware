@@ -49,23 +49,23 @@
 
 package com.openexchange.user.copy.internal.usecount;
 
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
 import com.openexchange.user.copy.internal.CopyTools;
-import com.openexchange.user.copy.internal.calendar.CalendarCopyTask;
+import com.openexchange.user.copy.internal.chronos.ChronosCopyTask;
 import com.openexchange.user.copy.internal.connection.ConnectionFetcherTask;
 import com.openexchange.user.copy.internal.contact.ContactCopyTask;
 import com.openexchange.user.copy.internal.context.ContextLoadTask;
@@ -92,7 +92,7 @@ public class UseCountCopyTask implements CopyUserTaskService {
     @Override
     public String[] getAlreadyCopied() {
         return new String[] { UserCopyTask.class.getName(), ContextLoadTask.class.getName(), ConnectionFetcherTask.class.getName(), FolderCopyTask.class.getName(),
-            CalendarCopyTask.class.getName(), ContactCopyTask.class.getName(), TaskCopyTask.class.getName() };
+            ChronosCopyTask.class.getName(), ContactCopyTask.class.getName(), TaskCopyTask.class.getName() };
     }
 
     @Override
@@ -150,8 +150,8 @@ public class UseCountCopyTask implements CopyUserTaskService {
         } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, srcStmt);
-            DBUtils.closeSQLStuff(dstStmt);
+            Databases.closeSQLStuff(rs, srcStmt);
+            Databases.closeSQLStuff(dstStmt);
         }
     }
 

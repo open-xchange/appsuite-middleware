@@ -64,6 +64,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Deprecated
 public class Module implements PreferencesItemService {
 
     public Module() {

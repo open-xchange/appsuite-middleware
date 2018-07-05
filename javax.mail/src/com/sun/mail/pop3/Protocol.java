@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2016 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,14 +40,35 @@
 
 package com.sun.mail.pop3;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
-import java.security.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.Socket;
+import java.net.SocketException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
-
-import com.sun.mail.util.*;
+import com.sun.mail.util.LineInputStream;
+import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.SharedByteArrayOutputStream;
+import com.sun.mail.util.SocketFetcher;
+import com.sun.mail.util.TraceInputStream;
+import com.sun.mail.util.TraceOutputStream;
 
 class Response {
     boolean ok = false;		// true if "+OK"
@@ -113,19 +134,11 @@ class Protocol {
 	    initStreams();
 	    r = simpleCommand(null);
 	} catch (IOException ioe) {
-	    try {
-		socket.close();
-	    } finally {
-		throw ioe;
-	    }
+	    throw cleanupAndThrow(socket, ioe);
 	}
 
 	if (!r.ok) {
-	    try {
-		socket.close();
-	    } finally {
-		throw new IOException("Connect failed");
-	    }
+	    throw cleanupAndThrow(socket, new IOException("Connect failed"));
 	}
 	if (enableAPOP && r.data != null) {
 	    int challStart = r.data.indexOf('<');	// start of challenge
@@ -143,6 +156,30 @@ class Protocol {
 	    PropUtil.getBooleanProperty(props, prefix + ".pipelining", false);
 	if (pipelining)
 	    logger.config("PIPELINING enabled");
+    }
+
+    private static IOException cleanupAndThrow(Socket socket, IOException ife) {
+	try {
+	    socket.close();
+	} catch (Throwable thr) {
+	    if (isRecoverable(thr)) {
+		ife.addSuppressed(thr);
+	    } else {
+		thr.addSuppressed(ife);
+		if (thr instanceof Error) {
+		    throw (Error) thr;
+		}
+		if (thr instanceof RuntimeException) {
+		    throw (RuntimeException) thr;
+		}
+		throw new RuntimeException("unexpected exception", thr);
+	    }
+	}
+	return ife;
+    }
+
+    private static boolean isRecoverable(Throwable t) {
+	return (t instanceof Exception) || (t instanceof LinkageError);
     }
 
     /**
@@ -176,6 +213,7 @@ class Protocol {
 			new OutputStreamWriter(traceOutput, "iso-8859-1")));
     }
 
+    @Override
     protected void finalize() throws Throwable {
 	try {
 	    if (socket != null)	// Forgot to logout ?!
@@ -194,7 +232,7 @@ class Protocol {
 	    return;
 	}
 
-	capabilities = new HashMap<String, String>(10);
+	capabilities = new HashMap<>(10);
 	BufferedReader r = null;
 	try {
 	    r = new BufferedReader(new InputStreamReader(in, "us-ascii"));
@@ -327,7 +365,7 @@ class Protocol {
      * Convert a byte array to a string of hex digits representing the bytes.
      */
     private static String toHex(byte[] bytes) {
-	char[] result = new char[bytes.length * 2];
+	char[] result = new char[bytes.length << 1];
 
 	for (int index = 0, i = 0; index < bytes.length; index++) {
 	    int temp = bytes[index] & 0xFF;
@@ -872,7 +910,7 @@ class Protocol {
         if (null == socket) {
             return -1;
         }
-
+        
         int to = socket.getSoTimeout();
         if (readTimeout >= 0) {
             socket.setSoTimeout(readTimeout);

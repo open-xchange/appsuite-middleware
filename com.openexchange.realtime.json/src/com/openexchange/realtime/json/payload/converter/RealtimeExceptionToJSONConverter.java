@@ -35,7 +35,7 @@ public class RealtimeExceptionToJSONConverter extends AbstractPOJOConverter {
             jsonException.put("code", code);
             jsonException.put("plainLogMessage", plainLogMessage);
             JSONArray logArgArray = new JSONArray();
-            
+
             if (logArgs != null) {
                 for (Object arg : logArgs) {
                     if (arg != null) {
@@ -43,7 +43,7 @@ public class RealtimeExceptionToJSONConverter extends AbstractPOJOConverter {
                     }
                 }
             }
-            
+
             jsonException.put("logArgs", logArgArray);
             jsonException.put("localizedMessage", localizedMessage);
             jsonException.put("stackTrace", stackTraceToJSON(stackTraceElements));
@@ -51,7 +51,7 @@ public class RealtimeExceptionToJSONConverter extends AbstractPOJOConverter {
                 jsonException.put("cause", converter.convert(Throwable.class.getSimpleName(), "json", cause, null));
             }
         } catch (Exception e) {
-            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(e, data.toString());
         }
         return jsonException;
     }

@@ -80,9 +80,9 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNKNOWN_OAUTH_SERVICE_META_DATA("Unknown OAuth service meta data: %1$s", CATEGORY_ERROR, 4, null),
     /**
-     * A SQL error occurred: %1$s
+     * An SQL error occurred: %1$s
      */
-    SQL_ERROR("A SQL error occurred: %1$s", CATEGORY_ERROR, 5, OXExceptionStrings.SQL_ERROR_MSG),
+    SQL_ERROR("An SQL error occurred: %1$s", CATEGORY_ERROR, 5, OXExceptionStrings.SQL_ERROR_MSG),
     /**
      * Account not found with identifier %1$s for user %2$s in context %3$s.
      */
@@ -254,18 +254,31 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
      * Please provide at least one scope.
      */
     MISSING_SCOPE("Please provide at least one scope.", CATEGORY_USER_INPUT, 41, OAuthExceptionMessages.MISSING_SCOPE_MSG),
+
     /**
      * The user needs to authorize the '%1$s' provider to gain access to '%2$s'
      */
     NO_SCOPE_PERMISSION("The user needs to authorize the '%1$s' provider to gain access to '%2$s'", CATEGORY_PERMISSION_DENIED, 42, OAuthExceptionMessages.NO_SCOPE_PERMISSION),
+
     /**
      * The provider does not support the demanded scope '%1$s' or it is not enabled (per configuration)
      */
     NO_SUCH_SCOPE_AVAILABLE("The provider does not support the demanded scope '%1$s'", CATEGORY_PERMISSION_DENIED, 43, OAuthExceptionMessages.NO_SUCH_SCOPE_AVAILABLE),
+
     /**
      * '%1$s' OAuth service is not enabled for user '%2$s' in context '%3$s'.
      */
     DISABLED_OAUTH_SERVICE_META_DATA("'%1$s' OAuth service is not enabled for user '%2$s' in context '%3$s'.", CATEGORY_ERROR, 44, OAuthExceptionMessages.DISABLED_OAUTH_SERVICE_META_DATA),
+
+    /**
+     * The user identity cannot be fetched from the '%1$s' provider
+     */
+    CANNOT_GET_USER_IDENTITY("The user identity cannot be fetched from the '%1$s' provider", CATEGORY_ERROR, 45, null),
+
+    /**
+     * The wrong account has been selected for '%1$s'
+     */
+    WRONG_OAUTH_ACCOUNT("The wrong account has been selected for '%1$s'", CATEGORY_USER_INPUT, 46, null),
 
     ;
 

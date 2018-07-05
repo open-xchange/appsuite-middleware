@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,12 +40,37 @@
 
 package com.sun.mail.mbox;
 
-import javax.mail.*;
-import javax.mail.event.*;
-import javax.mail.internet.*;
-import javax.mail.util.*;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.StringTokenizer;
+import javax.mail.Address;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.FolderNotFoundException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.URLName;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.FolderEvent;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.SharedInputStream;
+import javax.mail.util.SharedByteArrayInputStream;
+import com.sun.mail.util.LineInputStream;
 
 /**
  * This class represents a mailbox file containing RFC822 style email messages. 
@@ -60,7 +85,7 @@ public class MboxFolder extends Folder {
     private boolean is_inbox = false;
     private int total;		// total number of messages in mailbox
     private volatile boolean opened = false;
-    private List messages;
+    private List<MessageMetadata> messages;
     private TempFile temp;
     private MboxStore mstore;
     private MailFile folder;
@@ -82,7 +107,9 @@ public class MboxFolder extends Folder {
      * is null; otherwise the MboxMessage object contains the metadata.
      */
     static final class MessageMetadata {
-	public long end;	// offset in temp file of end of this message
+	public long start;	// offset in temp file of start of this message
+	// public long end;	// offset in temp file of end of this message
+	public long dataend;	// offset of end of message data, <= "end"
 	public MboxMessage message;	// the message itself
 	public boolean recent;	// message is recent?
 	public boolean deleted;	// message is marked deleted?
@@ -149,14 +176,14 @@ public class MboxFolder extends Folder {
 	} else {
 	    realdir = mstore.mb.filename(mstore.user, refdir);
 	}
-	Vector flist = new Vector();
+	List<String> flist = new ArrayList<String>();
 	listWork(realdir, refdir, pattern, fromStore ? 0 : 1, flist);
 	if (Match.path("INBOX", pattern, '\0'))
-	    flist.addElement("INBOX");
+	    flist.add("INBOX");
 
 	Folder fl[] = new Folder[flist.size()];
 	for (i = 0; i < fl.length; i++) {
-	    fl[i] = createFolder(mstore, (String)flist.elementAt(i));
+	    fl[i] = createFolder(mstore, (String)flist.get(i));
 	}
 	return fl;
     }
@@ -199,7 +226,7 @@ public class MboxFolder extends Folder {
     }
 
     public Flags getPermanentFlags() {
-	return mstore.permFlags;
+	return MboxStore.permFlags;
     }
 
     public synchronized boolean hasNewMessages() {
@@ -292,13 +319,13 @@ public class MboxFolder extends Folder {
     private boolean delete(File f) {
 	File[] files = f.listFiles();
 	boolean ret = true;
-	if (null != files) {
-	  for (int i = 0; ret && i < files.length; i++) {
-	    if (files[i].isDirectory())
-		ret = delete(files[i]);
-	    else
-		ret = files[i].delete();
-	  }
+	if (null != files) {	    
+	    for (int i = 0; ret && i < files.length; i++) {
+	        if (files[i].isDirectory())
+	            ret = delete(files[i]);
+	        else
+	            ret = files[i].delete();
+	    }
 	}
 	return ret;
     }
@@ -399,7 +426,7 @@ public class MboxFolder extends Folder {
 	}
 	if (!folder.lock("r"))
 	    throw new MessagingException("Failed to lock folder: " + name);
-	messages = new ArrayList();
+	messages = new ArrayList<MessageMetadata>();
 	total = 0;
 	Message[] msglist = null;
 	try {
@@ -457,8 +484,7 @@ public class MboxFolder extends Folder {
 	 */
 	int modified = 0, deleted = 0, recent = 0;
 	for (int msgno = 1; msgno <= total; msgno++) {
-	    MessageMetadata md =
-		(MessageMetadata)messages.get(messageIndexOf(msgno));
+	    MessageMetadata md = messages.get(messageIndexOf(msgno));
 	    MboxMessage msg = md.message;
 	    if (msg != null) {
 		Flags flags = msg.getFlags();
@@ -498,8 +524,7 @@ public class MboxFolder extends Folder {
 	    if (special_imap_message)
 		appendStream(getMessageStream(0), os);
 	    for (int msgno = 1; msgno <= total; msgno++) {
-		MessageMetadata md =
-		    (MessageMetadata)messages.get(messageIndexOf(msgno));
+		MessageMetadata md = messages.get(messageIndexOf(msgno));
 		MboxMessage msg = md.message;
 		if (msg != null) {
 		    if (expunge && msg.isSet(Flags.Flag.DELETED))
@@ -524,7 +549,6 @@ public class MboxFolder extends Folder {
 		folder.touchlock();
 		wr++;
 	    }
-	    file_size = saved_file_size = folder.length();
 	    // If no messages in the mailbox, and we're closing,
 	    // maybe we should remove the mailbox.
 	    if (wr == 0 && closing) {
@@ -544,6 +568,7 @@ e.printStackTrace();
 	    // close the folder, flushing out the data
 	    try {
 		os.close();
+		file_size = saved_file_size = folder.length();
 		if (!keep) {
 		    folder.delete();
 		    file_size = 0;
@@ -613,12 +638,11 @@ e.printStackTrace();
 		NewlineOutputStream nos = new NewlineOutputStream(cos);
 		msg.writeTo(nos);
 		nos.flush();
-		os = new NewlineOutputStream(os);
+		os = new NewlineOutputStream(os, true);
 		os = new ContentLengthUpdater(os, cos.getSize());
 		PrintStream pos = new PrintStream(os, false, "iso-8859-1");
 		pos.println(getUnixFrom(msg));
 		msg.writeTo(pos);
-		pos.println();	// make sure there's a blank line at the end
 		pos.flush();
 	    }
 	} catch (MessagingException me) {
@@ -691,8 +715,7 @@ e.printStackTrace();
 	checkReadable();
 	checkRange(msgno);
 
-	MessageMetadata md =
-	    (MessageMetadata)messages.get(messageIndexOf(msgno));
+	MessageMetadata md = messages.get(messageIndexOf(msgno));
 	MboxMessage m = md.message;
 	if (m == null) {
 	    InputStream is = getMessageStream(msgno);
@@ -714,13 +737,8 @@ e.printStackTrace();
 
     private InputStream getMessageStream(int msgno) {
 	int index = messageIndexOf(msgno);
-	long start;
-	if (index == 0)
-	    start = 0;
-	else
-	    start = ((MessageMetadata)messages.get(index - 1)).end;
-	long end = ((MessageMetadata)messages.get(index)).end;
-	return temp.newStream(start, end);
+	MessageMetadata md = messages.get(index);
+	return temp.newStream(md.start, md.dataend);
     }
 
     public synchronized void appendMessages(Message[] msgs)
@@ -754,7 +772,9 @@ e.printStackTrace();
 	    if (os != null)
 		try {
 		    os.close();
-		} catch (IOException e) {}
+		} catch (IOException e) {
+		    // ignored
+		}
 	    folder.unlock();
 	}
 	if (opened)
@@ -786,8 +806,7 @@ e.printStackTrace();
 	Message[] msglist = new Message[total - wr];
 	int msgno = 1;
 	while (msgno <= total) {
-	    MessageMetadata md =
-		(MessageMetadata)messages.get(messageIndexOf(msgno));
+	    MessageMetadata md = messages.get(messageIndexOf(msgno));
 	    MboxMessage msg = md.message;
 	    if (msg != null) {
 		if (msg.isSet(Flags.Flag.DELETED)) {
@@ -837,7 +856,7 @@ e.printStackTrace();
 	     * IMAP server adds to the mailbox, remember that we've
 	     * seen it so it won't be shown to the user.
 	     */
-	    MessageMetadata md = (MessageMetadata)messages.get(0);
+	    MessageMetadata md = messages.get(0);
 	    if (md.imap) {
 		special_imap_message = true;
 		total--;
@@ -858,12 +877,11 @@ e.printStackTrace();
      */
     private MboxMessage loadMessage(InputStream is, int msgno,
 		boolean writable) throws MessagingException, IOException {
-	DataInputStream in = new DataInputStream(is);
+    LineInputStream in = new LineInputStream(is);
 
 	/*
 	 * Read lines until a UNIX From line,
 	 * skipping blank lines.
-	 * XXX - rewrite this to not need a DataInputStream.
 	 */
 	String line;
 	String unix_from = null;
@@ -922,7 +940,7 @@ e.printStackTrace();
 
 	char separator = getSeparator();
 	String fullname = getFullName();
-	StringBuffer encodedName = new StringBuffer();
+	StringBuilder encodedName = new StringBuilder();
 
 	// We need to encode each of the folder's names, and replace
 	// the store's separator char with the URL char '/'.
@@ -1007,11 +1025,11 @@ e.printStackTrace();
      * @param dir	user's name for realdir
      * @param pat	pattern to match against
      * @param level	level of the directory hierarchy we're in
-     * @param flist	vector to which to add folder names that match
+     * @param flist	list to which to add folder names that match
      */
     // Derived from the c-client listWork() function.
     private void listWork(String realdir, String dir, String pat,
-					int level, Vector flist) {
+					int level, List<String> flist) {
 	String sl[];
 	File fdir = new File(realdir);
 	try {
@@ -1022,7 +1040,7 @@ e.printStackTrace();
 
 	if (level == 0 && dir != null &&
 		Match.path(dir, pat, File.separatorChar))
-	    flist.addElement(dir);
+	    flist.add(dir);
 
 	if (sl == null)
 	    return;	// nothing return, we're done
@@ -1044,18 +1062,18 @@ e.printStackTrace();
 		name = sl[i];
 	    if (mf.isDirectory()) {
 		if (Match.path(name, pat, File.separatorChar)) {
-		    flist.addElement(name);
+		    flist.add(name);
 		    name += File.separator;
 		} else {
 		    name += File.separator;
 		    if (Match.path(name, pat, File.separatorChar))
-			flist.addElement(name);
+			flist.add(name);
 		}
 		if (Match.dir(name, pat, File.separatorChar))
 		    listWork(md, name, pat, level + 1, flist);
 	    } else {
 		if (Match.path(name, pat, File.separatorChar))
-		    flist.addElement(name);
+		    flist.add(name);
 	    }
 	}
     }

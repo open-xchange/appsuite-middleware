@@ -49,14 +49,14 @@
 
 package com.openexchange.share.handler.ical.osgi;
 
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.handler.ical.ICalHandler;
-import com.openexchange.share.handler.ical.Services;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.user.UserService;
 
@@ -76,29 +76,28 @@ public class ICalHandlerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { AppointmentSqlFactoryService.class, ConfigurationService.class, FolderService.class,
-            CalendarCollectionService.class, ICalEmitter.class, UserService.class };
+        return new Class<?>[] { ConfigurationService.class, FolderService.class, UserService.class,
+            ICalEmitter.class, ICalService.class, CalendarService.class, IDBasedCalendarAccessFactory.class };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
     protected void startBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(ICalHandlerActivator.class).info(
-            "Starting bundle: \"com.openexchange.share.handler.ical.osgi\"");
-        /*
-         * set references
-         */
-        Services.set(this);
+        org.slf4j.LoggerFactory.getLogger(ICalHandlerActivator.class).info("starting bundle {}", context.getBundle());
         /*
          * register handler
          */
-        ICalHandler handler = new ICalHandler();
+        ICalHandler handler = new ICalHandler(this);
         registerService(ShareHandler.class, handler, handler.getRanking());
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(ICalHandlerActivator.class).info("Stopping bundle: \"com.openexchange.share.handler.ical.osgi\"");
-        Services.set(null);
+        org.slf4j.LoggerFactory.getLogger(ICalHandlerActivator.class).info("stopping bundle {}", context.getBundle());
         super.stopBundle();
     }
 

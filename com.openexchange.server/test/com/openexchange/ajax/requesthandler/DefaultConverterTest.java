@@ -49,16 +49,16 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import com.openexchange.ajax.requesthandler.DefaultConverter.NoSuchPath;
 import com.openexchange.ajax.requesthandler.DefaultConverter.Step;
 import com.openexchange.ajax.requesthandler.ResultConverter.Quality;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link DefaultConverterTest}

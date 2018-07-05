@@ -49,11 +49,10 @@
 
 package com.openexchange.subscribe.database;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -70,11 +69,9 @@ public final class FixSubscriptionTablePrimaryKey extends UpdateTaskAdapter {
 
     private static final String TABLE = "subscriptions";
     private static final String[] COLUMNS = { "cid", "id" };
-    private final DatabaseService dbService;
 
-    public FixSubscriptionTablePrimaryKey(DatabaseService service) {
+    public FixSubscriptionTablePrimaryKey() {
         super();
-        this.dbService = service;
     }
 
     @Override
@@ -84,21 +81,28 @@ public final class FixSubscriptionTablePrimaryKey extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        Connection con = dbService.getForUpdateTask(cid);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con.setAutoCommit(false);
-            if (!Tools.existsPrimaryKey(con, TABLE, COLUMNS)) {
-                Tools.dropPrimaryKey(con, TABLE);
-                Tools.createPrimaryKey(con, TABLE, COLUMNS);
+            if (Tools.existsPrimaryKey(con, TABLE, COLUMNS)) {
+                return;
             }
+
+            con.setAutoCommit(false);
+            rollback = true;
+
+            Tools.dropPrimaryKey(con, TABLE);
+            Tools.createPrimaryKey(con, TABLE, COLUMNS);
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
-            dbService.backForUpdateTask(cid, con);
         }
     }
 }

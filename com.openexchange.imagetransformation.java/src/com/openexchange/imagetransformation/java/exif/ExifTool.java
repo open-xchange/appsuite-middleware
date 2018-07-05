@@ -207,7 +207,7 @@ public class ExifTool  {
      */
     public static void dumpMetadata(IIOMetadata metadata, PrintStream out) {
         String[] names = metadata.getMetadataFormatNames();
-        int length = names.length;
+        int length = names == null ? 0 : names.length;
         for (int i = 0; i < length; i++) {
             indent(2, out);
             out.println("Format name: " + names[i]);

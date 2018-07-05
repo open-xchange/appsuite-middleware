@@ -50,7 +50,6 @@
 package com.openexchange.admin.console.user;
 
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.OXUserInterface;
@@ -86,14 +85,14 @@ public class Delete extends DeleteCore {
     protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Integer destUser = null;
         if (parser.hasOption(noReassignCLI)) {
-            destUser = 0;
+            destUser = Integer.valueOf(0);
         } else {
             Object o = parser.getOptionValue(reassignCLI);
             if (o != null) {
                 if (o instanceof String) {
                     destUser = Integer.valueOf((String) o);
                 } else {
-                    destUser = Integer.valueOf((int) o);
+                    destUser = (Integer) o;
                 }
             }
         }

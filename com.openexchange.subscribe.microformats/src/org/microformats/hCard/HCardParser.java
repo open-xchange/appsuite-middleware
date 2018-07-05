@@ -169,9 +169,9 @@ public class HCardParser {
 			if ( cards.size() == 0 ) {
                 System.out.println("no hCards found.");
             } else if ( cards.size() == 1 ) {
-                System.out.printf("\n%s\n", cards.get(0));
+                System.out.printf("%n%s%n", cards.get(0));
             } else {
-				System.out.printf("%d hCards found:\n", cards.size());
+				System.out.printf("%d hCards found:%n", cards.size());
 				boolean first = true;
 				for ( final HCard card : cards ) {
 					if ( first ) {

@@ -3,13 +3,16 @@ properties:
   $ref: ./RawShareTargetData.yaml
   url:
     type: string
-    description: The link to share (read-only).
+    description: The link to share.
+    readOnly: true
   entity:
     type: integer
-    description: The identifier of the anonymous user entity for the share (read-only).
+    description: The identifier of the anonymous user entity for the share.
+    readOnly: true
   is_new:
     type: boolean
-    description: Whether the share link is new, i.e. it has been created by the `/share/management?action=getLink` request, or if it already existed (read-only).
+    description: Whether the share link is new, i.e. it has been created by the `/share/management?action=getLink` request, or if it already existed.
+    readOnly: true
   expiry_date:
     type: integer
     format: int64
@@ -20,3 +23,6 @@ properties:
   meta:
     type: object
     description: Can be used by the client to save arbitrary JSON data along with the share.
+  includeSubfolders:
+    type: boolean
+    description: An optional flag indicating whether subfolders should be included or not. Only applicable for Drive folders.

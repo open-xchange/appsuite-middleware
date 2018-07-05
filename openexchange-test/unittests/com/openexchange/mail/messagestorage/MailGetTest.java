@@ -298,7 +298,7 @@ public final class MailGetTest extends MessageStorageTest {
                 assertFalse("Missing mail ID", fetchedMail.getMailId() == null);
                 assertTrue("Missing content type", fetchedMail.containsContentType());
                 assertTrue("Missing flags", fetchedMail.containsFlags());
-                assertTrue("Message must contain attachment information", fetchedMail.containsHasAttachment());
+                assertTrue("Message must contain attachment information", fetchedMail.containsHasAttachment() || fetchedMail.containsAlternativeHasAttachment());
                 if (fetchedMail.getContentType().isMimeType("multipart/*")) {
                     // Signed mails are no longer re
                     assertFalse("Message is of type '" + fetchedMail.getContentType() + "' but signals attachment", fetchedMail.hasAttachment());
@@ -320,7 +320,7 @@ public final class MailGetTest extends MessageStorageTest {
             assertFalse("Missing mail ID", fetchedMail.getMailId() == null);
             assertTrue("Missing content type", fetchedMail.containsContentType());
             assertTrue("Missing flags", fetchedMail.containsFlags());
-            assertTrue("Message must contain attachment information", fetchedMail.containsHasAttachment());
+            assertTrue("Message must contain attachment information", fetchedMail.containsHasAttachment() || fetchedMail.containsAlternativeHasAttachment());
             if (fetchedMail.getContentType().isMimeType("multipart/*")) {
                 assertFalse("Message is of type '" + fetchedMail.getContentType() + "' but signals attachment", fetchedMail.hasAttachment());
             } else {

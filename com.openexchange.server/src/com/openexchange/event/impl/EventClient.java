@@ -61,6 +61,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.ajax.requesthandler.cache.ResourceCache;
+import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -70,8 +72,9 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Contact;
@@ -81,6 +84,9 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.image.ImageDataSource;
+import com.openexchange.image.ImageLocation;
+import com.openexchange.java.util.Pair;
 import com.openexchange.pns.DefaultPushNotification;
 import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.PushNotification;
@@ -171,21 +177,9 @@ public class EventClient {
         try {
             Date[] startAndEndDate = determineStartAndEndDate(appointment);
 
-            Map<String, Object> messageData = PushNotifications.messageDataBilder()
-                .put(PushNotificationField.ID, Integer.valueOf(appointment.getObjectID()))
-                .put(PushNotificationField.FOLDER, folderId)
-                .put(PushNotificationField.APPOINTMENT_TITLE, appointment.getTitle())
-                .put(PushNotificationField.APPOINTMENT_LOCATION, appointment.getLocation())
-                .put(PushNotificationField.APPOINTMENT_START_DATE, startAndEndDate[0])
-                .put(PushNotificationField.APPOINTMENT_END_DATE, startAndEndDate[1])
-                .build();
+            Map<String, Object> messageData = PushNotifications.messageDataBilder().put(PushNotificationField.ID, Integer.valueOf(appointment.getObjectID())).put(PushNotificationField.FOLDER, folderId).put(PushNotificationField.APPOINTMENT_TITLE, appointment.getTitle()).put(PushNotificationField.APPOINTMENT_LOCATION, appointment.getLocation()).put(PushNotificationField.APPOINTMENT_START_DATE, startAndEndDate[0]).put(PushNotificationField.APPOINTMENT_END_DATE, startAndEndDate[1]).build();
 
-            PushNotification notification = DefaultPushNotification.builder()
-                .contextId(contextId)
-                .userId(userId)
-                .topic(KnownTopic.CALENDAR_NEW.getName())
-                .messageData(messageData)
-                .build();
+            PushNotification notification = DefaultPushNotification.builder().contextId(contextId).userId(userId).topic(KnownTopic.CALENDAR_NEW.getName()).messageData(messageData).build();
             pushNotificationService.handle(notification);
         } catch (Exception e) {
             LOG.warn("Failed to deliver \"{}\" event to user {} in context {}", KnownTopic.CALENDAR_NEW.getName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
@@ -203,10 +197,9 @@ public class EventClient {
             return new Date[] { appointment.getStartDate(), appointment.getEndDate() };
         }
 
-        CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         RecurringResultsInterface recuResults = null;
         try {
-            recuResults = calColl.calculateFirstRecurring(appointment);
+            recuResults = CalendarCollectionUtils.calculateRecurring(appointment, 0, 0, 1, CalendarCollectionUtils.MAX_OCCURRENCESE, true);
         } catch (final OXException e) {
             LOG.error("Failed calculating recurrence {}", appointment.getObjectID(), e);
         }
@@ -229,6 +222,7 @@ public class EventClient {
     }
 
     public void modify(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folderObj) throws OXException {
+        appendInformation(oldAppointment, newAppointment);
         final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folderObj });
         final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.APPOINTMENT, newAppointment, oldAppointment, folderObj, null, session);
 
@@ -240,6 +234,32 @@ public class EventClient {
 
         final EventObject eventObject = new EventObject(newAppointment, CHANGED, session);
         EventQueue.add(eventObject);
+    }
+
+    /**
+     * This adds necessary information to the updated appointment if not present.
+     * Mostly a workaround for Bug #53169
+     *
+     * @param oldAppointment
+     * @param newAppointment
+     */
+    private void appendInformation(Appointment oldAppointment, Appointment newAppointment) {
+        if (null == oldAppointment) {
+            // Nothing can be done...
+            return;
+        }
+
+        if (!newAppointment.containsRecurrenceID() && oldAppointment.containsRecurrenceID()) {
+            newAppointment.setRecurrenceID(oldAppointment.getRecurrenceID());
+        }
+
+        if (!newAppointment.containsOrganizer() && oldAppointment.containsOrganizer()) {
+            newAppointment.setOrganizer(oldAppointment.getOrganizer());
+
+            if (!newAppointment.containsOrganizerId() && oldAppointment.containsOrganizerId()) {
+                newAppointment.setOrganizerId(oldAppointment.getOrganizerId());
+            }
+        }
     }
 
     public void accepted(final Appointment appointment) throws OXException {
@@ -404,7 +424,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void accept(final Task oldTask, final Task newTask) throws  OXException {
+    public void accept(final Task oldTask, final Task newTask) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = newTask.getParentFolderID();
@@ -479,7 +499,6 @@ public class EventClient {
     public void delete(final Task task) throws OXException, OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
-
         final int folderId = task.getParentFolderID();
         if (folderId > 0) {
             final FolderObject folder = getFolder(folderId, ctx);
@@ -549,8 +568,39 @@ public class EventClient {
         final Event event = new Event("com/openexchange/groupware/contact/update", ht);
         triggerEvent(event);
 
+        if (oldContact.containsImage1() && newContact.containsImage1()) {
+            invalidateOldPictureResourceCache(oldContact);
+        }
+
         final EventObject eventObject = new EventObject(newContact, CHANGED, session);
         EventQueue.add(eventObject);
+    }
+
+    /**
+     * Invalidates any contact picture that might have been cached in the {@link ResourceCache}
+     *
+     * @param oldContact The old {@link Contact} information
+     * @throws OXException if an error is occurred
+     */
+    private void invalidateOldPictureResourceCache(Contact oldContact) throws OXException {
+        Pair<ImageDataSource, ImageLocation> prepareImageData = ContactUtil.prepareImageData(oldContact);
+        if (prepareImageData == null) {
+            return;
+        }
+        ImageDataSource first = prepareImageData.getFirst();
+        if (first == null) {
+            return;
+        }
+        if (!oldContact.containsImageLastModified() || oldContact.getImageLastModified() == null) {
+            return;
+        }
+        ResourceCache resourceCache = ResourceCaches.getResourceCache();
+        if (null == resourceCache) {
+            LOG.debug("Unable to access resource cache, unable to invalidate contact picture.");
+            return;
+        }
+        ImageLocation imageLocation = new ImageLocation.Builder().folder(oldContact.getParentFolderID()).timestamp(Long.toString(oldContact.getImageLastModified().getTime())).build();
+        resourceCache.removeAlikes(first.getETag(imageLocation, session), 0, contextId);
     }
 
     public void delete(final Contact contact) throws OXException, OXException {
@@ -569,6 +619,7 @@ public class EventClient {
 
         final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
         ht.put(CommonEvent.EVENT_KEY, genericEvent);
+
 
         final Event event = new Event("com/openexchange/groupware/contact/delete", ht);
         triggerEvent(event);
@@ -744,125 +795,12 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-//    public void create(final DocumentMetadata document) throws OXException, OXException {
-//        final Context ctx = ContextStorage.getInstance().getContext(contextId);
-//
-//        final long folderId = document.getFolderId();
-//        if (folderId > 0) {
-//            final FolderObject folder = getFolder((int)folderId, ctx);
-//            create(document, folder);
-//        }
-//    }
-//
-//    public void create(final DocumentMetadata document, final FolderObject folder) throws OXException {
-//        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) document.getFolderId());
-//        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.INSERT, Types.INFOSTORE, document, null, folder, null, session);
-//
-//        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
-//        ht.put(CommonEvent.EVENT_KEY, genericEvent);
-//
-//        final Event event = new Event("com/openexchange/groupware/infostore/insert", ht);
-//        triggerEvent(event);
-//
-//        final EventObject eventObject = new EventObject(document, CREATED, session);
-//        EventQueue.add(eventObject);
-//    }
-//
-//    public void modify(final DocumentMetadata document) throws OXException, OXException {
-//        final Context ctx = ContextStorage.getInstance().getContext(contextId);
-//
-//        final long folderId = document.getFolderId();
-//        if (folderId > 0) {
-//            final FolderObject folder = getFolder((int)folderId, ctx);
-//            modify(null, document, folder);
-//        }
-//    }
-//
-//    public void modify(final DocumentMetadata oldDocument, final DocumentMetadata newDocument, final FolderObject folder) throws OXException {
-//        final Map<Integer, Set<Integer>> affectedUsers;
-//        if (null == oldDocument) {
-//            affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) newDocument.getFolderId());
-//        } else {
-//            affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) oldDocument.getFolderId(), (int) newDocument.getFolderId());
-//        }
-//        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.UPDATE, Types.INFOSTORE, newDocument, oldDocument, folder, null, session);
-//
-//        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
-//        ht.put(CommonEvent.EVENT_KEY, genericEvent);
-//
-//        final Event event = new Event("com/openexchange/groupware/infostore/update", ht);
-//        triggerEvent(event);
-//
-//        final EventObject eventObject = new EventObject(newDocument, CHANGED, session);
-//        EventQueue.add(eventObject);
-//    }
-//
-//    public void delete(final DocumentMetadata document) throws OXException, OXException {
-//        final Context ctx = ContextStorage.getInstance().getContext(contextId);
-//        //FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
-//
-//        final long folderId = document.getFolderId();
-//        if (folderId > 0) {
-//            final FolderObject folder = getFolder((int)folderId, ctx);
-//            delete(document, folder);
-//        }
-//    }
-//
-//    public void delete(final DocumentMetadata document, final FolderObject folder) throws OXException {
-//        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { folder }, (int) document.getFolderId());
-//        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.DELETE, Types.INFOSTORE, document, null, folder, null, session);
-//
-//        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
-//        ht.put(CommonEvent.EVENT_KEY, genericEvent);
-//
-//        final Event event = new Event("com/openexchange/groupware/infostore/delete", ht);
-//        triggerEvent(event);
-//
-//        final EventObject eventObject = new EventObject(document, DELETED, session);
-//        EventQueue.add(eventObject);
-//    }
-//
-//    public void move(final DocumentMetadata document, final FolderObject sourceFolder, final FolderObject destinationFolder) throws OXException {
-//        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new FolderObject[] { sourceFolder, destinationFolder }, (int) document.getFolderId());
-//        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.MOVE, Types.INFOSTORE, document, null, sourceFolder, destinationFolder, session);
-//
-//        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
-//        ht.put(CommonEvent.EVENT_KEY, genericEvent);
-//
-//        final Event event = new Event("com/openexchange/groupware/infostore/move", ht);
-//        triggerEvent(event);
-//
-//        final EventObject eventObject = new EventObject(document, MOVED, session);
-//        EventQueue.add(eventObject);
-//    }
-
     protected void triggerEvent(final Event event) throws OXException {
         final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
         if (eventAdmin == null) {
             throw new OXException().setLogMessage("event service not available");
         }
         eventAdmin.postEvent(event);
-    }
-
-    /**
-     * Constructs the properties for a file storage folder event.
-     *
-     * @param folder The folder
-     * @return The event properties
-     */
-    private Dictionary<String, Object> getEventProperties(FolderObject folder) {
-        return getEventProperties(folder, null);
-    }
-
-    /**
-     * Constructs the properties for a file storage folder event.
-     *
-     * @param folder The folder
-     * @param parentFolder The parent folder
-     * @return The event properties
-     */
-    private Dictionary<String, Object> getEventProperties(FolderObject folder, FolderObject parentFolder) {
-        return getEventProperties(folder, parentFolder, null);
     }
 
     /**
@@ -904,7 +842,7 @@ public class EventClient {
         final Map<Integer, Set<Integer>> retval = new HashMap<Integer, Set<Integer>>();
         retval.put(I(userId), new HashSet<Integer>());
         for (final FolderObject folder : folders) {
-        	addFolderToAffectedMap(retval, folder);
+            addFolderToAffectedMap(retval, folder);
         }
         return retval;
     }

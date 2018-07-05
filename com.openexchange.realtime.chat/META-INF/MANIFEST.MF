@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Realtime Chat
-Bundle-SymbolicName: com.openexchange.realtime.chat
-Bundle-Version: 6.22.0.0
-Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: org.osgi.framework
-Export-Package: com.openexchange.realtime.chat

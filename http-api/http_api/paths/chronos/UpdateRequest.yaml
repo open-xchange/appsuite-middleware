@@ -1,0 +1,97 @@
+/chronos?action=update:
+  put:
+    operationId: updateEvent
+    tags:
+      - Chronos
+    summary: Updates an event.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosRecurrenceID"
+      - $ref: "#/parameters/QueryParamChronosRecurrenceRange"
+      - $ref: "#/parameters/QueryParamChronosCheckConflicts"
+      - $ref: "#/parameters/QueryParamChronosNotification"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - in: query
+        name: rangeStart
+        type: string
+        description: |
+          If expand is set to 'true' this parameter defines a lower inclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+          Only events which start on or after this date are returned.
+        required: false
+      - in: query
+        name: rangeEnd
+        type: string
+        description: |
+          If expand is set to 'true' this parameter defines a upper exclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+          Only events which end before this date are returned.
+        required: false
+      - $ref: "#/parameters/QueryParamChronosExpand"
+      - in: body
+        name: body
+        description: A JSON object containing the event's data.
+        required: true
+        schema:
+          $ref: "#/definitions/EventData"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the event.
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON object containing containing the result of the update. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/ChronosCalendarResultResponse"
+  post:
+    operationId: updateEventWithAttachments
+    tags:
+      - Chronos
+    summary: Updates an event and its attachments.
+    description: |
+      #### Note
+      It is possible to update multiple attachments at once. Therefore add additional form fields and replace "[index]" in `file_[index]` 
+      with the appropriate index, like `file_1`. The index always starts with 0 (mandatory attachment object). There can only be
+      one json payload describing the EventData, the rest json payloads (if present) will simply be ignored.
+      If the event already has attachments, then for each of those attachments their valid manageId must be provided as part of the attachment
+      metadata. The absense of an already existing attachment for the event will result in the deletion of that attachment.
+    consumes:
+      - multipart/form-data
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosRecurrenceID"
+      - $ref: "#/parameters/QueryParamChronosCheckConflicts"
+      - $ref: "#/parameters/QueryParamChronosNotification"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the event.
+        required: true
+      - in: formData
+        name: json_0
+        type: string
+        description: A JSON object containing the event's data as described in [EventData](#/definitions/EventData).
+        required: true
+      - in: formData
+        name: file_0
+        type: file
+        description: The attachment file as per `<input type="file" />`.
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page containing the result of the update or in case of errors an error object (see [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) as an example).
+        schema:
+          type: string

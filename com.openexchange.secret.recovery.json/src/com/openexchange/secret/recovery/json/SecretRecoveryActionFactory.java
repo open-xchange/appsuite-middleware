@@ -49,7 +49,6 @@
 
 package com.openexchange.secret.recovery.json;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,8 +59,8 @@ import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.action.CheckAction;
 import com.openexchange.secret.recovery.json.action.CleanUpAction;
-import com.openexchange.secret.recovery.json.action.RemoveAction;
 import com.openexchange.secret.recovery.json.action.MigrateAction;
+import com.openexchange.secret.recovery.json.action.RemoveAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -92,11 +91,6 @@ public class SecretRecoveryActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

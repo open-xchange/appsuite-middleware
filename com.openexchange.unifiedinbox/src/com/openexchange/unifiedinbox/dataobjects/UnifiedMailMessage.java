@@ -51,6 +51,7 @@ package com.openexchange.unifiedinbox.dataobjects;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -58,8 +59,8 @@ import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.Delegatized;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecurityInfo;
@@ -957,6 +958,11 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     }
 
     @Override
+    public boolean isHasAttachment() {
+        return delegatee.isHasAttachment();
+    }
+
+    @Override
     public boolean containsHasAttachment() {
         return delegatee.containsHasAttachment();
     }
@@ -969,6 +975,26 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     @Override
     public void setHasAttachment(final boolean hasAttachment) {
         delegatee.setHasAttachment(hasAttachment);
+    }
+
+    @Override
+    public boolean isAlternativeHasAttachment() {
+        return delegatee.isAlternativeHasAttachment();
+    }
+
+    @Override
+    public boolean containsAlternativeHasAttachment() {
+        return delegatee.containsAlternativeHasAttachment();
+    }
+
+    @Override
+    public void removeAlternativeHasAttachment() {
+        delegatee.removeAlternativeHasAttachment();
+    }
+
+    @Override
+    public void setAlternativeHasAttachment(boolean hasAttachment) {
+        delegatee.setAlternativeHasAttachment(hasAttachment);
     }
 
     @Override
@@ -1073,10 +1099,114 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
         delegatee.removeSecurityResult();
     }
 
-    private static void closeSafe(MailAccess<?, ?> mailAccess) {
-        if (null != mailAccess) {
-            mailAccess.close(true);
-        }
+    @Override
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        delegatee.setAuthenticityResult(authenticationResult);
+    }
+
+    @Override
+    public MailAuthenticityResult getAuthenticityResult() {
+        return delegatee.getAuthenticityResult();
+    }
+
+    @Override
+    public boolean hasAuthenticityResult() {
+        return delegatee.hasAuthenticityResult();
+    }
+
+    @Override
+    public boolean containsAuthenticityResult() {
+        return delegatee.containsAuthenticityResult();
+    }
+
+    @Override
+    public void removeAuthenticityResult() {
+        delegatee.removeAuthenticityResult();
+    }
+
+    @Override
+    public void addFrom(Collection<InternetAddress> addrs) {
+        delegatee.addFrom(addrs);
+    }
+
+    @Override
+    public void removeFromPersonals() {
+        delegatee.removeFromPersonals();
+    }
+
+    @Override
+    public void addTo(Collection<InternetAddress> addrs) {
+        delegatee.addTo(addrs);
+    }
+
+    @Override
+    public void removeToPersonals() {
+        delegatee.removeToPersonals();
+    }
+
+    @Override
+    public void addCc(Collection<InternetAddress> addrs) {
+        delegatee.addCc(addrs);
+    }
+
+    @Override
+    public void removeCcPersonals() {
+        delegatee.removeCcPersonals();
+    }
+
+    @Override
+    public void addBcc(Collection<InternetAddress> addrs) {
+        delegatee.addBcc(addrs);
+    }
+
+    @Override
+    public void removeBccPersonals() {
+        delegatee.removeBccPersonals();
+    }
+
+    @Override
+    public InternetAddress[] getAllRecipients() {
+        return delegatee.getAllRecipients();
+    }
+
+    @Override
+    public void addReplyTo(Collection<InternetAddress> addrs) {
+        delegatee.addReplyTo(addrs);
+    }
+
+    @Override
+    public boolean isSubjectDecoded() {
+        return delegatee.isSubjectDecoded();
+    }
+
+    @Override
+    public void addUserFlags(Collection<String> userFlags) {
+        delegatee.addUserFlags(userFlags);
+    }
+
+    @Override
+    public String getTextPreview() {
+        return delegatee.getTextPreview();
+    }
+
+    @Override
+    public boolean containsTextPreview() {
+        return delegatee.containsTextPreview();
+    }
+
+    @Override
+    public void removeTextPreview() {
+        delegatee.removeTextPreview();
+    }
+
+    @Override
+    public void setTextPreview(String textPreview) {
+        delegatee.setTextPreview(textPreview);
+    }
+
+    @Override
+    public String[] getReferencesOrInReplyTo() {
+        return delegatee.getReferencesOrInReplyTo();
     }
 
 }

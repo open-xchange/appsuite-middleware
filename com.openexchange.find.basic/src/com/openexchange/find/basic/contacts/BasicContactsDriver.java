@@ -91,6 +91,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -102,7 +103,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link BasicContactsDriver}
  *
@@ -110,10 +110,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriver {
 
-    static final ContactField[] ADDRESSBOOK_FIELDS = merge(
-        AddressFacet.ADDRESS_FIELDS, EmailFacet.EMAIL_FIELDS, NameFacet.NAME_FIELDS, PhoneFacet.PHONE_FIELDS,
-        new ContactField[] { ContactField.CATEGORIES, ContactField.COMPANY, ContactField.DEPARTMENT, ContactField.COMMERCIAL_REGISTER }
-        //TOD=: more fields
+    static final ContactField[] ADDRESSBOOK_FIELDS = merge(AddressFacet.ADDRESS_FIELDS, EmailFacet.EMAIL_FIELDS, NameFacet.NAME_FIELDS, PhoneFacet.PHONE_FIELDS, new ContactField[] { ContactField.CATEGORIES, ContactField.COMPANY, ContactField.DEPARTMENT, ContactField.COMMERCIAL_REGISTER }
+    //TOD=: more fields
     );
 
     private static final String ADDRESS_FIELDS_NAME = "ADDRESS_FIELDS";
@@ -129,9 +127,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     /**
      * Contact fields that are required to perform a {@link Contact#SPECIAL_SORTING} of search results.
      */
-    static final ContactField[] SORT_FIELDS = new ContactField[] {
-        ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME,
-        ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2
+    static final ContactField[] SORT_FIELDS = new ContactField[] { ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2
     };
 
     /**
@@ -172,14 +168,13 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          */
         for (Filter filter : searchRequest.getFilters()) {
             SearchTerm<?> term = getSearchTerm(session, filter);
-            if (null != term) {
-                searchTerm.addSearchTerm(term);
-            } else {
+            if (null == term) {
                 /*
                  * no search results if any filter indicates a FALSE condition
                  */
                 return SearchResult.EMPTY;
             }
+            searchTerm.addSearchTerm(term);
         }
         /*
          * restrict to specific folders if set
@@ -275,10 +270,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
                 prefixTokens = Collections.singletonList(prefix);
             }
 
-            facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
-                .withSimpleDisplayItem(prefix)
-                .withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens))
-                .build());
+            facets.add(newSimpleBuilder(CommonFacetType.GLOBAL).withSimpleDisplayItem(prefix).withFilter(Filter.of(CommonFacetType.GLOBAL.getId(), prefixTokens)).build());
             facets.add(new NameFacet(prefix, prefixTokens));
             facets.add(new EmailFacet(prefix, prefixTokens));
             facets.add(new PhoneFacet(prefix, prefixTokens));
@@ -294,10 +286,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
                     String id = ContactsFacetType.CONTACT.getId();
                     Filter filter = Filter.of(id, String.valueOf(contact.getObjectID()));
                     String valueId = prepareFacetValueId(id, session.getContextId(), Integer.toString(contact.getObjectID()));
-                    builder.addValue(FacetValue.newBuilder(valueId)
-                        .withDisplayItem(DisplayItems.convert(contact))
-                        .withFilter(filter)
-                        .build());
+                    builder.addValue(FacetValue.newBuilder(valueId).withDisplayItem(DisplayItems.convert(contact, session.getUser().getLocale(), Services.optionalService(I18nServiceRegistry.class))).withFilter(filter).build());
                 }
                 facets.add(builder.build());
             }
@@ -404,7 +393,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         return 0 == compositeTerm.getOperands().length ? null : compositeTerm;
     }
 
-    private static ContactField[] merge(ContactField[]...fields) {
+    private static ContactField[] merge(ContactField[]... fields) {
         Set<ContactField> mergedFields = new HashSet<>();
         for (ContactField[] contactFields : fields) {
             mergedFields.addAll(Arrays.asList(contactFields));

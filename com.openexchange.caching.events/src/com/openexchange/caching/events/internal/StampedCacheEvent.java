@@ -54,6 +54,8 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheListener;
+import com.openexchange.caching.events.Condition;
+import com.openexchange.caching.events.ConditionalCacheEvent;
 
 /**
  * {@link StampedCacheEvent}
@@ -62,11 +64,24 @@ import com.openexchange.caching.events.CacheListener;
  */
 public class StampedCacheEvent implements Delayed {
 
-    /** The special poison element */
-    static final StampedCacheEvent POISON = new StampedCacheEvent(null, null, null, false, true);
-
     private static final long MAX_NANOS = TimeUnit.NANOSECONDS.convert(10, TimeUnit.SECONDS);
     private static final long DELAY_NANOS = TimeUnit.NANOSECONDS.convert(2, TimeUnit.SECONDS);
+
+    /** The special poison element */
+    static final StampedCacheEvent POISON = new StampedCacheEvent(null, null, null, false) {
+
+        @Override
+        public int compareTo(final Delayed o) {
+            return -1;
+        }
+
+        @Override
+        public long getDelay(final TimeUnit unit) {
+            return -1L;
+        }
+    };
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     /** The cache event */
     public final CacheEvent event;
@@ -80,33 +95,42 @@ public class StampedCacheEvent implements Delayed {
     /** Whether remotely transport or locally */
     public final boolean fromRemote;
 
+    /** The expiration time stamp, after which the cache event becomes available */
     private volatile long stamp;
-    private final long maxStamp;
-    private final boolean poison;
+
+    /** The max. expiration time stamp, which must not be exceeded when this instance is {@link #reset() reseted} */
+    private volatile long maxStamp;
+
+    /** The optional condition */
+    private final Condition optCondition;
 
     /**
      * Initializes a new {@link StampedCacheEvent}.
-     *
-     * @param event The event
      */
     public StampedCacheEvent(List<CacheListener> listeners, Object sender, CacheEvent event, boolean fromRemote) {
-        this(listeners, sender, event, fromRemote, false);
-    }
-
-    /**
-     * Initializes a new {@link StampedCacheEvent}.
-     */
-    private StampedCacheEvent(List<CacheListener> listeners, Object sender, CacheEvent event, boolean fromRemote, boolean poison) {
         super();
         this.listeners = listeners;
         this.sender = sender;
         this.fromRemote = fromRemote;
         this.event = event;
-        this.poison = poison;
+        if (event instanceof ConditionalCacheEvent) {
+            this.optCondition = ((ConditionalCacheEvent) event).getCondition();
+        } else {
+            this.optCondition = null;
+        }
 
         long now = System.nanoTime();
-        stamp = now;
+        stamp = now + DELAY_NANOS;
         maxStamp = now + MAX_NANOS;
+    }
+
+    /**
+     * Gets the optional condition.
+     *
+     * @return The condition or <code>null</code>
+     */
+    public Condition optCondition() {
+        return optCondition;
     }
 
     /**
@@ -114,14 +138,28 @@ public class StampedCacheEvent implements Delayed {
      */
     public void reset() {
         long now = System.nanoTime();
-        stamp = now > maxStamp ? maxStamp : now;
+        long maxStamp = this.maxStamp;
+        long newStamp = now + DELAY_NANOS;
+        stamp = now > maxStamp ? maxStamp : newStamp;
+    }
+
+    /**
+     * Forcedly<b><i>&#42</i></b> resets this cache event.
+     * <p>
+     * <i>&#42) Means, max. expiration time is adjusted in order to further delay the associated cache event</i>
+     */
+    public void forceReset() {
+        long now = System.nanoTime();
+        long maxStamp = this.maxStamp;
+        long newStamp = now + DELAY_NANOS;
+        stamp = newStamp;
+        if (now > maxStamp) {
+            this.maxStamp = newStamp;
+        }
     }
 
     @Override
     public int compareTo(final Delayed o) {
-        if (poison) {
-            return -1;
-        }
         final long thisStamp = stamp;
         final long otherStamp = ((StampedCacheEvent) o).stamp;
         return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
@@ -129,7 +167,7 @@ public class StampedCacheEvent implements Delayed {
 
     @Override
     public long getDelay(final TimeUnit unit) {
-        return poison ? -1L : (unit.convert(DELAY_NANOS - (System.nanoTime() - stamp), TimeUnit.NANOSECONDS));
+        return unit.convert(stamp - System.nanoTime(), TimeUnit.NANOSECONDS);
     }
 
     @Override

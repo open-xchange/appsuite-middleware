@@ -57,9 +57,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.old.CalendarCollectionFieldMapper;
 import com.openexchange.java.AllocatingStringWriter;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link StringCollection} - Provides useful string utility methods mainly for SQL.
@@ -76,8 +75,6 @@ public final class StringCollection {
     static final byte[] DAP = "'".getBytes();
 
     static final byte[] DAPR = "\\'".getBytes();
-
-    private static final Class<? extends CalendarCollectionService> CalendarCollectionService = CalendarCollectionService.class;
 
     private StringCollection() {
         super();
@@ -523,8 +520,7 @@ public final class StringCollection {
         sb.append("SELECT ");
         boolean first = true;
         for (int a = 0; a < cols.length; a++) {
-            final CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService);
-            final String temp = calColl.getFieldName(cols[a]);
+            final String temp = CalendarCollectionFieldMapper.getFieldName(cols[a]);
             if (temp != null) {
                 if (first) {
                     sb.append(temp);

@@ -165,7 +165,7 @@ public final class LoginConfiguration {
             }
         } catch (OXException e) {
             // fallback to default
-            LOGGER.warn("Failed to retrieve server configuration for host {}. Using default '{}' as fall-back (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName(), e);
+            LOGGER.warn("Failed to retrieve server configuration for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName(), e);
         }
         return sessiondAutoLogin;
     }
@@ -221,7 +221,6 @@ public final class LoginConfiguration {
     public boolean isCheckPunyCodeLoginString() {
         return checkPunyCodeLoginString;
     }
-
 
     // ----------------------------------------------------------------------------------------------------------------------------------------------------------
 

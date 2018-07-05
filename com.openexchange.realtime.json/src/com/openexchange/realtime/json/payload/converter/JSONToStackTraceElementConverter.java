@@ -57,7 +57,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link JSONToStackTraceElementConverter}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class JSONToStackTraceElementConverter extends AbstractJSONConverter {
@@ -82,11 +82,11 @@ public class JSONToStackTraceElementConverter extends AbstractJSONConverter {
             if (stackTraceObject.hasAndNotNull("lineNumber")) {
                 lineNumber = stackTraceObject.getInt("lineNumber");
             }
-            
+
             StackTraceElement stackTraceElement = new StackTraceElement(className, methodName, fileName, lineNumber);
             return stackTraceElement;
         } catch (Exception e) {
-            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(e, data.toString());
         }
     }
 

@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,7 +40,11 @@
 
 package javax.mail.util;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 import javax.mail.internet.SharedInputStream;
 
 /**
@@ -143,6 +147,7 @@ public class SharedFileInputStream extends BufferedInputStream
 	    }
 	}
 
+	@Override
 	protected void finalize() throws Throwable {
 	    try {
 		in.close();
@@ -292,6 +297,7 @@ public class SharedFileInputStream extends BufferedInputStream
      *             stream is reached.
      * @exception  IOException  if an I/O error occurs.
      */
+    @Override
     public synchronized int read() throws IOException {
         ensureOpen();
 	if (pos >= count) {
@@ -344,6 +350,7 @@ public class SharedFileInputStream extends BufferedInputStream
      *             the stream has been reached.
      * @exception  IOException  if an I/O error occurs.
      */
+    @Override
     public synchronized int read(byte b[], int off, int len)
 	throws IOException
     {
@@ -372,6 +379,7 @@ public class SharedFileInputStream extends BufferedInputStream
      * @return     the actual number of bytes skipped.
      * @exception  IOException  if an I/O error occurs.
      */
+    @Override
     public synchronized long skip(long n) throws IOException {
         ensureOpen();
 	if (n <= 0) {
@@ -406,6 +414,7 @@ public class SharedFileInputStream extends BufferedInputStream
      *             stream without blocking.
      * @exception  IOException  if an I/O error occurs.
      */
+    @Override
     public synchronized int available() throws IOException {
         ensureOpen();
 	return (count - pos) + in_available();
@@ -424,6 +433,7 @@ public class SharedFileInputStream extends BufferedInputStream
      *                      the mark position becomes invalid.
      * @see     #reset()
      */
+    @Override
     public synchronized void mark(int readlimit) {
 	marklimit = readlimit;
 	markpos = pos;
@@ -443,6 +453,7 @@ public class SharedFileInputStream extends BufferedInputStream
      *               if the mark has been invalidated.
      * @see        #mark(int)
      */
+    @Override
     public synchronized void reset() throws IOException {
         ensureOpen();
 	if (markpos < 0)
@@ -461,6 +472,7 @@ public class SharedFileInputStream extends BufferedInputStream
      * @see     java.io.InputStream#mark(int)
      * @see     java.io.InputStream#reset()
      */
+    @Override
     public boolean markSupported() {
 	return true;
     }
@@ -471,6 +483,7 @@ public class SharedFileInputStream extends BufferedInputStream
      *
      * @exception  IOException  if an I/O error occurs.
      */
+    @Override
     public void close() throws IOException {
         if (in == null)
             return;
@@ -492,6 +505,7 @@ public class SharedFileInputStream extends BufferedInputStream
      *
      * @return  the current position
      */
+    @Override
     public long getPosition() {
 //System.out.println("getPosition: start " + start + " pos " + pos 
 //	+ " bufpos " + bufpos + " = " + (bufpos + pos - start));
@@ -512,6 +526,7 @@ public class SharedFileInputStream extends BufferedInputStream
      * @param	end	the ending position + 1
      * @return		the new stream
      */
+    @Override
     public synchronized InputStream newStream(long start, long end) {
 	if (in == null)
 	    throw new RuntimeException("Stream closed");
@@ -544,6 +559,7 @@ public class SharedFileInputStream extends BufferedInputStream
     /**
      * Force this stream to close.
      */
+    @Override
     protected void finalize() throws Throwable {
 	super.finalize();
 	close();

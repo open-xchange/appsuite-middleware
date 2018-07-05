@@ -1,0 +1,36 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The chronos calendar account service
+Bundle-SymbolicName: com.openexchange.chronos.calendar.account.service.impl
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.capabilities,
+ com.openexchange.chronos.common,
+ com.openexchange.chronos.exception,
+ com.openexchange.chronos.provider,
+ com.openexchange.chronos.provider.account,
+ com.openexchange.chronos.provider.basic,
+ com.openexchange.chronos.provider.folder,
+ com.openexchange.chronos.service,
+ com.openexchange.chronos.storage,
+ com.openexchange.chronos.storage.operation,
+ com.openexchange.chronos.storage.rdb,
+ com.openexchange.config.cascade,
+ com.openexchange.context,
+ com.openexchange.database,
+ com.openexchange.database.provider,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.delete,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ net.jodah.failsafe,
+ net.jodah.failsafe.function,
+ org.json,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.chronos.calendar.account.service.osgi.CalendarAccountServiceActivator

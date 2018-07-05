@@ -117,15 +117,61 @@ public interface ConfigDatabaseService {
      */
     void backForUpdateTaskAfterReading(Connection con);
 
-    int[] listContexts(int poolId) throws OXException;
+    /**
+     * Lists all identifiers of the contexts associated with specified database pool.
+     *
+     * @param poolId The identifier of the database pool
+     * @param offset The start offset or <code>-1</code> to get full list
+     * @param length The max. number of context identifiers to return (starting from offset) or <code>-1</code> to get full list
+     * @return All identifiers of associated contexts
+     * @throws OXException If context identifiers cannot be returned
+     */
+    int[] listContexts(int poolId, int offset, int length) throws OXException;
 
+    /**
+     * Gets the identifier of the registered server matching the configured <code>SERVER_NAME</code> property.
+     *
+     * @return The server identifier
+     * @throws OXException If there is no such registered server matching configured <code>SERVER_NAME</code> property
+     */
     int getServerId() throws OXException;
 
+    /**
+     * Gets the configured server name (see <code>SERVER_NAME</code> property in 'system.properties' file)
+     *
+     * @return The server name
+     * @throws OXException If server name is absent
+     */
     String getServerName() throws OXException;
 
+    /**
+     * Gets the database pool for specified context.
+     *
+     * @param contextId The identifier of the context for which to return the database pool
+     * @return The identifier of the database pool associated with the context
+     * @throws OXException If an error occurs trying to determine the database pool
+     * @see #getSchemaInfo(int)
+     */
     int getWritablePool(int contextId) throws OXException;
 
+    /**
+     * Gets the schema name for specified context.
+     *
+     * @param contextId The identifier of the context for which to return the schema name
+     * @return The schema name
+     * @throws OXException If an error occurs trying to determine the schema name
+     * @see #getSchemaInfo(int)
+     */
     String getSchemaName(int contextId) throws OXException;
+
+    /**
+     * Gets the schema information (pool identifier and schema name) for specified context.
+     *
+     * @param contextId The identifier of the context for which to return the schema information
+     * @return The schema information (pool identifier and schema name) for the context
+     * @throws OXException If an error occurs trying to determine the schema information
+     */
+    SchemaInfo getSchemaInfo(int contextId) throws OXException;
 
     /**
      * Finds all contexts their data is stored in the same schema and on the same database like the given one.
@@ -137,13 +183,23 @@ public interface ConfigDatabaseService {
 
     /**
      * Finds all contexts their data is stored in the same schema and on the same database like the given one.
-     * @param con connection to the config database
+     *
+     * @param con A connection to the config database
      * @param contextId identifier of a context.
-     * @return all contexts having their data in the same schema and on the same database.
-     * @throws OXException if some problem occurs.
+     * @return All contexts having their data in the same schema and on the same database.
+     * @throws OXException If contexts cannot be returned
      */
     int[] getContextsInSameSchema(Connection con, int contextId) throws OXException;
 
+    /**
+     * Finds all contexts their data is stored in the same schema and on the same database like the given one.
+     *
+     * @param con A connection to the config database
+     * @param poolId The identifier of the database host, on which the schema resides
+     * @param schema The name of the schema
+     * @return All contexts having their data in the same schema and on the same database.
+     * @throws OXException If contexts cannot be returned
+     */
     int[] getContextsInSchema(Connection con, int poolId, String schema) throws OXException;
 
     /**
@@ -187,6 +243,18 @@ public interface ConfigDatabaseService {
      */
     void deleteAssignment(Connection con, int contextId) throws OXException;
 
+    /**
+     * Acquires a global lock for specified database
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: Given connection is required to be in transaction mode.
+     * </div>
+     * <p>
+     *
+     * @param con The connection (in transaction mode)
+     * @param writePoolId The identifier of the (read-write) database for which to acquire a lock
+     * @throws OXException If lock cannot be acquired
+     */
     void lock(Connection con, int writePoolId) throws OXException;
 
     /**

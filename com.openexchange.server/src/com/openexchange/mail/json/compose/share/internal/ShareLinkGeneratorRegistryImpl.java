@@ -54,7 +54,6 @@ import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.share.DefaultShareLinkGenerator;
 import com.openexchange.mail.json.compose.share.spi.ShareLinkGenerator;
 import com.openexchange.osgi.ServiceListing;
-import com.openexchange.session.Session;
 
 /**
  * {@link ShareLinkGeneratorRegistryImpl}

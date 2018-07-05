@@ -73,6 +73,31 @@ public interface EnqueuableAJAXActionService extends AJAXActionService {
     // ---------------------------------------------------------------------------------------------------
 
     /**
+     * Gets the result for specified enqueue-able flag
+     *
+     * @param enqueueable The enqueue-able flag
+     * @return The result
+     */
+    public static Result resultFor(boolean enqueueable) {
+        return enqueueable ? Result.TRUE : Result.FALSE;
+    }
+
+    /**
+     * Gets the result for specified enqueue-able flag
+     *
+     * @param enqueueable The enqueue-able flag
+     * @param optionalKey The key that identifies a certain job; or <code>null</code>
+     * @return The result
+     */
+    public static Result resultFor(boolean enqueueable, JobKey optionalKey) {
+        if (null == optionalKey) {
+            return resultFor(enqueueable);
+        }
+
+        return new Result(enqueueable, optionalKey);
+    }
+
+    /**
      * The result for checking if an action is enqueue-able.
      */
     public static final class Result {

@@ -22,6 +22,17 @@
  */
 package com.openexchange.socketio.websocket;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.google.common.io.ByteStreams;
 import com.openexchange.java.Strings;
 import com.openexchange.socketio.common.ConnectionState;
@@ -41,17 +52,6 @@ import com.openexchange.socketio.server.transport.AbstractTransportConnection;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.websockets.MessageTranscoder;
 import com.openexchange.websockets.WebSocket;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

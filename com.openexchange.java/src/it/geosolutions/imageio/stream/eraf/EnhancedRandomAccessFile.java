@@ -56,6 +56,7 @@ import java.io.RandomAccessFile;
 import java.io.UTFDataFormatException;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 
 /**
  *
@@ -258,10 +259,11 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
      *
      */
     @Override
-    public void finalize() {
+    protected void finalize() {
         try {
             close();
         } catch (IOException ex) {
+            // ignore
         }
     }
 
@@ -1363,7 +1365,7 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
     public String readString(int nbytes) throws IOException {
         final byte[] data = new byte[nbytes];
         readFully(data);
-        return new String(data);
+        return new String(data, StandardCharsets.UTF_8);
     }
 
     //
@@ -1797,6 +1799,7 @@ public class EnhancedRandomAccessFile implements DataInput, DataOutput {
      *             _more_
      */
     public void synch() throws IOException {
+        // nothing to do
     }
 
     public String getLocation() {

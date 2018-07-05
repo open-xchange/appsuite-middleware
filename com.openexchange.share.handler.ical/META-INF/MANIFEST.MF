@@ -2,17 +2,21 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Share handler to output iCal data
 Bundle-SymbolicName: com.openexchange.share.handler.ical
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.ajax,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.hash,
+ com.openexchange.ajax,
  com.openexchange.api2,
+ com.openexchange.chronos,
+ com.openexchange.chronos.ical,
+ com.openexchange.chronos.provider.composition,
+ com.openexchange.chronos.service,
  com.openexchange.config,
  com.openexchange.data.conversion.ical,
  com.openexchange.exception,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.type,
- com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.modules,
@@ -25,9 +29,11 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.share,
  com.openexchange.share.servlet.handler,
  com.openexchange.tools.iterator,
+ com.openexchange.tools.servlet.http,
+ com.openexchange.tx,
  com.openexchange.user,
- javax.servlet;version="2.5.0",
- javax.servlet.http;version="2.5.0",
+ javax.servlet,
+ javax.servlet.http,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.share.handler.ical.osgi.ICalHandlerActivator

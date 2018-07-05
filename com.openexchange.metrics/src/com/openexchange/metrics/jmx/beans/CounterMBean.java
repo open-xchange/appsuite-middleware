@@ -50,7 +50,6 @@
 package com.openexchange.metrics.jmx.beans;
 
 import com.openexchange.management.MBeanMethodAnnotation;
-import com.openexchange.metrics.types.Counter;
 
 /**
  * {@link CounterMBean}

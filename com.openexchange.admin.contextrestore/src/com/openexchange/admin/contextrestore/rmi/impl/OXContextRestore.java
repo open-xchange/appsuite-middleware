@@ -95,7 +95,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
  */
 public class OXContextRestore extends OXCommonImpl implements OXContextRestoreInterface {
 
-    public class RunParserResult {
+    public static class RunParserResult {
 
         private final PoolIdSchemaAndVersionInfo result;
 
@@ -164,7 +164,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
      */
     public static class Parser {
 
-        public class PoolIdSchemaAndVersionInfo {
+        public static class PoolIdSchemaAndVersionInfo {
 
             private final int poolId;
             private final int contextId;
@@ -275,6 +275,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         if (c == ' ') { // Comment line: "-- " + <rest-of-line>
                             searchcontext = false;
                             final String readLine = in.readLine();
+                            if (null == readLine) {
+                                continue;
+                            }
                             final Matcher dbmatcher = database.matcher(readLine);
                             final Matcher tablematcher = table.matcher(readLine);
                             final Matcher datadumpmatcher = datadump.matcher(readLine);
@@ -658,7 +661,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
     public OXContextRestore() throws StorageException {
         super();
-        basicauth = new BasicAuthenticator();
+        basicauth = BasicAuthenticator.createNonPluginAwareAuthenticator();
     }
 
     @Override

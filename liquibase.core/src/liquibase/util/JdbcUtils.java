@@ -1,11 +1,16 @@
 package liquibase.util;
 
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.Collection;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.core.Column;
-
-import java.sql.*;
-import java.util.Collection;
 
 public abstract class JdbcUtils {
 

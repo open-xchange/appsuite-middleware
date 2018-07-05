@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.api;
 
+import com.openexchange.mail.dataobjects.MailMessage;
+
 /**
  * {@link MailCapabilities} - Holds capabilities of the underlying mail system.
  *
@@ -216,6 +218,29 @@ public abstract class MailCapabilities {
     }
 
     /**
+     * Indicates if the mail system supports certain user flags as marker whether a message contains file attachments;<br>
+     * see {@link MailMessage#USER_HAS_ATTACHMENT USER_HAS_ATTACHMENT} and {@link MailMessage#USER_HAS_NO_ATTACHMENT USER_HAS_NO_ATTACHMENT}
+     * <p>
+     * Defaults to <code>false</code>
+     *
+     * @return <code>true</code> if mail system supports marker for file attachments; otherwise <code>false</code>
+     */
+    public boolean hasAttachmentMarker() {
+        return false;
+    }
+
+    /**
+     * Indicates if mail system supports text previews for mails.
+     * <p>
+     * Defaults to <code>false</code>
+     *
+     * @return <code>true</code> if mail system supports text preview; otherwise <code>false</code>
+     */
+    public boolean hasTextPreview() {
+        return false;
+    }
+
+    /**
      * Indicates if mail system supports retrieving folder validity information.
      * <p>
      * Defaults to <code>false</code>
@@ -234,8 +259,8 @@ public abstract class MailCapabilities {
      * <pre>
      * &#064;Override
      * public int getCapabilities() {
-     * 	int retval = super.getCapabilities()
-     * 	// your capabilities added here
+     * int retval = super.getCapabilities()
+     * // your capabilities added here
      * }
      * </pre>
      *
@@ -253,9 +278,6 @@ public abstract class MailCapabilities {
 
     @Override
     public String toString() {
-        return new StringBuilder(64).append(MailCapabilities.class.getSimpleName()).append(": hasPermissions=").append(hasPermissions()).append(
-            ", hasQuota=").append(hasQuota()).append(", hasSort=").append(hasSort()).append(", hasSubscription=").append(hasSubscription()).append(
-            ", hasThreadReferences=").append(hasThreadReferences()).toString();
+        return new StringBuilder(64).append(MailCapabilities.class.getSimpleName()).append(": hasPermissions=").append(hasPermissions()).append(", hasQuota=").append(hasQuota()).append(", hasSort=").append(hasSort()).append(", hasSubscription=").append(hasSubscription()).append(", hasThreadReferences=").append(hasThreadReferences()).toString();
     }
-
 }

@@ -90,6 +90,7 @@ public final class RangeAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         RandomAccessFile raf = null;
+        ThresholdFileHolder fileHolder = null;
         try {
             final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
             if (id == null || id.length() == 0) {
@@ -155,7 +156,7 @@ public final class RangeAction implements AJAXActionService {
             final File tmpFile = file.getFile();
             raf = new RandomAccessFile(tmpFile, "r");
             final long total = raf.length();
-            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            fileHolder = new ThresholdFileHolder();
             if (off >= total) {
                 fileHolder.write(new byte[0]);
             } else {
@@ -192,11 +193,13 @@ public final class RangeAction implements AJAXActionService {
              * Return result
              */
             requestData.setFormat("file");
-            return new AJAXRequestResult(fileHolder, "file");
+            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
+            fileHolder = null;
+            return requestResult;
         } catch (final IOException e) {
             throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(raf);
+            Streams.close(raf, fileHolder);
         }
     }
 

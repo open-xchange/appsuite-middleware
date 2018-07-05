@@ -55,7 +55,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
-import com.openexchange.consistency.Entity.EntityType;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.sql.DBUtils;
@@ -72,48 +72,42 @@ public class DeleteSnippetSolver implements ProblemSolver {
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        if (entity.getType().equals(EntityType.Context)) {
-            // Now we go through the set an delete each superfluous entry:
-            for (Iterator<String> it = problems.iterator(); it.hasNext();) {
-                String old_identifier = it.next();
+        // Now we go through the set an delete each superfluous entry:
+        for (Iterator<String> it = problems.iterator(); it.hasNext();) {
+            String old_identifier = it.next();
 
-                Connection con = null;
-                PreparedStatement stmt = null;
-                boolean rollback = false;
-                try {
-                    con = Database.get(entity.getContext(), true);
-                    con.setAutoCommit(false);
-                    rollback = true;
+            Connection con = null;
+            PreparedStatement stmt = null;
+            boolean rollback = false;
+            try {
+                con = Database.get(entity.getContext(), true);
+                con.setAutoCommit(false);
+                rollback = true;
 
-                    int contextId = entity.getContext().getContextId();
-                    // Not recoverable
-                    if (DBUtils.tableExists(con, "snippet")) {
-                        stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
-                        int pos = 0;
-                        stmt.setInt(++pos, contextId);
-                        stmt.setString(++pos, old_identifier);
-                        stmt.executeUpdate();
-                        DBUtils.closeSQLStuff(stmt);
-                        stmt = null;
-                    }
+                int contextId = entity.getContext().getContextId();
+                // Not recoverable
+                if (DBUtils.tableExists(con, "snippet")) {
+                    stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
+                    int pos = 0;
+                    stmt.setInt(++pos, contextId);
+                    stmt.setString(++pos, old_identifier);
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
 
-                    con.commit();
-                    rollback = false;
-                } catch (final SQLException e) {
-                    LOG.error("", e);
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                } catch (final RuntimeException e) {
-                    LOG.error("", e);
-                } finally {
-                    if (rollback) {
-                        DBUtils.rollback(con);
-                    }
-                    DBUtils.closeSQLStuff(stmt);
-                    if (null != con) {
-                        DBUtils.autocommit(con);
-                        Database.back(entity.getContext(), true, con);
-                    }
+                con.commit();
+                rollback = false;
+            } catch (SQLException | OXException | RuntimeException e) {
+                LOG.error("{}", e.getMessage(), e);
+            } finally {
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.closeSQLStuff(stmt);
+                if (null != con) {
+                    Databases.autocommit(con);
+                    Database.back(entity.getContext(), true, con);
                 }
             }
         }

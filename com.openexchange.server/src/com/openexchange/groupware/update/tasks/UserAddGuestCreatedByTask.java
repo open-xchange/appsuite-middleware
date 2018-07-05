@@ -49,12 +49,10 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -97,28 +95,30 @@ public final class UserAddGuestCreatedByTask extends UpdateTaskAdapter {
         Logger log = org.slf4j.LoggerFactory.getLogger(UserAddGuestCreatedByTask.class);
         log.info("Performing update task {}", UserAddGuestCreatedByTask.class.getSimpleName());
 
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
-        boolean committed = false;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            connection.setAutoCommit(false);
+            con.setAutoCommit(false);
+            rollback = true;
+
             Column guestCreatedByColumn = new Column("guestCreatedBy", "int(10) unsigned NOT NULL DEFAULT 0");
-            Tools.checkAndAddColumns(connection, "user", guestCreatedByColumn);
-            Tools.checkAndAddColumns(connection, "del_user", guestCreatedByColumn);
-            if (null == Tools.existsIndex(connection, "user", new String[] { "cid", "guestCreatedBy"})) {
-                Tools.createIndex(connection, "user", "guestCreatedByIndex", new String[] { "cid", "guestCreatedBy"}, false);
+            Tools.checkAndAddColumns(con, "user", guestCreatedByColumn);
+            Tools.checkAndAddColumns(con, "del_user", guestCreatedByColumn);
+            if (null == Tools.existsIndex(con, "user", new String[] { "cid", "guestCreatedBy"})) {
+                Tools.createIndex(con, "user", "guestCreatedByIndex", new String[] { "cid", "guestCreatedBy"}, false);
             }
-            connection.commit();
-            committed = true;
+
+            con.commit();
+            rollback = false;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (false == committed) {
-                rollback(connection);
+            if (rollback) {
+                Databases.rollback(con);
             }
-            autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
+            Databases.autocommit(con);
         }
 
         log.info("{} successfully performed.", UserAddGuestCreatedByTask.class.getSimpleName());

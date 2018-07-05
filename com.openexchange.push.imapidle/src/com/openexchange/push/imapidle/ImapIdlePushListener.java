@@ -87,7 +87,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -118,6 +117,7 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.Status;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 
@@ -797,7 +797,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 @Override
                 public Object doCommand(IMAPProtocol p) throws ProtocolException {
                     String[] item = { "UIDNEXT" };
-                    return Long.valueOf(p.status(fullName, item).uidnext);
+                    Status status = p.status(fullName, item);
+                    return Long.valueOf(null == status ? -1 : status.uidnext);
                 }
             })).longValue();
         } catch (MessagingException e) {
@@ -900,9 +901,9 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
     private MailMessage convertMessage(IMAPMessage im, String fullName, int unread) throws MessagingException, OXException {
         MailMessage mailMessage = new IDMailMessage(Long.toString(im.getUID()), fullName);
-        mailMessage.addFrom(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_FROM, im));
-        mailMessage.addTo(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_TO, im));
-        mailMessage.addCc(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_CC, im));
+        mailMessage.addFrom(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_FROM, im));
+        mailMessage.addTo(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_TO, im));
+        mailMessage.addCc(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_CC, im));
 
         final Flags msgFlags = im.getFlags();
         int flags = 0;
@@ -930,7 +931,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
         mailMessage.setFlags(flags);
 
-        mailMessage.addBcc(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_BCC, im));
+        mailMessage.addBcc(MimeMessageUtility.getAddressHeader(MessageHeaders.HDR_BCC, im));
         {
             String[] tmp = im.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if ((tmp != null) && (tmp.length > 0)) {
@@ -939,14 +940,14 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 mailMessage.setContentType(MimeTypes.MIME_DEFAULT);
             }
         }
-        mailMessage.setSentDate(MimeMessageConverter.getSentDate(im));
+        mailMessage.setSentDate(MimeMessageUtility.getSentDate(im));
         try {
             mailMessage.setSize(im.getSize());
         } catch (final Exception e) {
             // Size unavailable
             mailMessage.setSize(-1);
         }
-        mailMessage.setSubject(MimeMessageConverter.getSubject(im), true);
+        mailMessage.setSubject(MimeMessageUtility.getSubject(im), true);
         mailMessage.setUnreadMessages(unread);
         return mailMessage;
     }

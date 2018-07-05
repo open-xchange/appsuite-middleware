@@ -1,5 +1,13 @@
 package liquibase.datatype;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import liquibase.database.Database;
 import liquibase.datatype.core.BigIntType;
 import liquibase.datatype.core.IntType;
@@ -9,9 +17,6 @@ import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.core.DataType;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class DataTypeFactory {
 

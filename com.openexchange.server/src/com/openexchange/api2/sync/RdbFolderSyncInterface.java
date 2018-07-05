@@ -118,9 +118,6 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
                 throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(Integer.valueOf(session.getUserId()), folderModule2String(folder.getModule()), Integer.valueOf(ctx.getContextId()));
             }
             if (!effectivePerm.isFolderVisible()) {
-                if (!effectivePerm.getUnderlyingPermission().isFolderVisible()) {
-                    throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folder.getObjectID()), Integer.valueOf(session.getUserId()), Integer.valueOf(ctx.getContextId()));
-                }
                 throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(folder.getObjectID()), Integer.valueOf(session.getUserId()), Integer.valueOf(ctx.getContextId()));
             }
             final long lastModified = System.currentTimeMillis();

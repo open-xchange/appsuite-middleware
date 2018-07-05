@@ -49,10 +49,13 @@
 
 package com.openexchange.config.lean;
 
+import java.util.Map;
+
 /**
  * {@link Property} - Describes a lean property with a fully qualified name and a default value
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  */
 public interface Property {
 
@@ -64,11 +67,76 @@ public interface Property {
     String getFQPropertyName();
 
     /**
+     * Returns the fully qualified name of the {@link Property}
+     * 
+     * @param optionals A {@link Map} containing values for optional parts in the fully
+     *            qualified name. E.g. <code>com.openexchange.test.[replaceMe]</code>
+     *            is returned as <code>com.openexchange.test.success</code> if the Map
+     *            contains a key called <code>replaceMe</code> with the value
+     *            <code>success</code>. If the Map does not contain the key
+     *            <code>com.openexchange.test.[replaceMe]</code> is returned.
+     * 
+     * @return the fully qualified name of the {@link Property}
+     */
+    default String getFQPropertyName(Map<String, String> optionals) {
+        String fqn = getFQPropertyName();
+
+        if (null == optionals || optionals.isEmpty() || !fqn.contains("[")) {
+            // No need to change anything
+            return fqn;
+        }
+
+        // Contains optional parameters
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < fqn.length(); i++) {
+            char c = fqn.charAt(i);
+            switch (c) {
+                case '[':
+                    // Build key word
+                    StringBuilder keyWord = new StringBuilder();
+                    while ((c = fqn.charAt(++i)) != ']' && i < fqn.length()) {
+                        keyWord.append(c);
+                    }
+                    // Search if it is within map
+                    if (optionals.containsKey(keyWord.toString())) {
+                        String value = optionals.get(keyWord.toString());
+                        builder.append(value);
+                    } else {
+                        // Add key back as default
+                        builder.append('[').append(keyWord).append(']');
+                    }
+                    break;
+                default:
+                    builder.append(c);
+                    break;
+            }
+        }
+        return builder.toString();
+
+    }
+
+    /**
+     * Returns the default value of the {@link Property}
+     * 
+     * @return The default value of the {@link Property}
+     */
+    Object getDefaultValue();
+
+    /**
      * Returns the default value of the {@link Property}
      *
      * @param clazz The type of the {@link Property}
      * @return the default value of the {@link Property}
      * @throws IllegalArgumentException If specified type does not match the one of the default value
      */
-    <T extends Object> T getDefaultValue(Class<T> clazz);
+    default <T extends Object> T getDefaultValue(Class<T> clazz) throws IllegalArgumentException {
+        Object defaultValue = getDefaultValue();
+        if (null == defaultValue) {
+            return null;
+        }
+        if (clazz.isAssignableFrom(defaultValue.getClass())) {
+            return clazz.cast(defaultValue);
+        }
+        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
+    }
 }

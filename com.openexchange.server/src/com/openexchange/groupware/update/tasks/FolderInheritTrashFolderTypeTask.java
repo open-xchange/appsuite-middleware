@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,7 +59,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -98,18 +97,24 @@ public final class FolderInheritTrashFolderTypeTask extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         Logger log = org.slf4j.LoggerFactory.getLogger(FolderInheritTrashFolderTypeTask.class);
         log.info("Performing update task {}", FolderInheritTrashFolderTypeTask.class.getSimpleName());
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+
+        Connection connection = params.getConnection();
         boolean rollback = false;
         try {
             connection.setAutoCommit(false);
             rollback = true;
-            List<Integer> trashFolderIDs = getDefaultTrashFolderIDs(connection, params.getContextId());
-            for (Integer trashFolderID : trashFolderIDs) {
-                List<Integer> subfolderIDs = getSubfolderIDsRecursively(connection, params.getContextId(), trashFolderID.intValue());
-                updateFolderType(connection, params.getContextId(), 16, subfolderIDs);
+
+            for (int contextId : params.getContextsInSameSchema()) {
+                List<Integer> trashFolderIDs = getDefaultTrashFolderIDs(connection, contextId);
+                for (Integer trashFolderID : trashFolderIDs) {
+                    List<Integer> subfolderIDs = getSubfolderIDsRecursively(connection, contextId, trashFolderID.intValue());
+                    updateFolderType(connection, contextId, 16, subfolderIDs);
+                }
             }
+
             connection.commit();
             rollback = false;
+            log.info("{} successfully performed.", FolderInheritTrashFolderTypeTask.class.getSimpleName());
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -119,9 +124,7 @@ public final class FolderInheritTrashFolderTypeTask extends UpdateTaskAdapter {
                 rollback(connection);
             }
             autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
         }
-        log.info("{} successfully performed.", FolderInheritTrashFolderTypeTask.class.getSimpleName());
     }
 
     private static List<Integer> getDefaultTrashFolderIDs(Connection connection, int contextID) throws SQLException {

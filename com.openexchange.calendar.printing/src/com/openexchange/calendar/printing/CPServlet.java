@@ -58,12 +58,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.PermissionServlet;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.blocks.CPFactory;
 import com.openexchange.calendar.printing.blocks.CPFormattingInformation;
 import com.openexchange.calendar.printing.blocks.CPPartition;
@@ -72,15 +70,13 @@ import com.openexchange.calendar.printing.blocks.WeekPartitioningStrategy;
 import com.openexchange.calendar.printing.blocks.WorkWeekPartitioningStrategy;
 import com.openexchange.calendar.printing.days.Day;
 import com.openexchange.calendar.printing.days.Partitioner;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
@@ -89,8 +85,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -121,39 +115,18 @@ public class CPServlet extends PermissionServlet {
 
     private static final String DATE_FORMATTER = "dateFormatter";
 
-    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service look-up.
-     *
-     * @param services The service look-up to set
-     */
-    public static void setServiceLookup(final ServiceLookup services) {
-        SERVICES.set(services);
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    private static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final ServiceLookup serviceLookup = SERVICES.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
-        }
-        return serviceLookup.getService(clazz);
-    }
+    private final transient ServiceLookup services;
 
     // --------------------------------------------------------------------------------------- //
 
     /**
      * Initializes a new {@link CPServlet}.
+     *
+     * @param services The {@link ServiceLookup}
      */
-    public CPServlet() {
+    public CPServlet(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -191,39 +164,37 @@ public class CPServlet extends PermissionServlet {
                 tool.calculateNewStartAndEnd(params);
             }
 
+            TemplateService templateService = services.getServiceSafe(TemplateService.class);
             OXTemplate template;
             if(params.hasUserTemplate()) {
-                template = getService(TemplateService.class).loadTemplate(params.getUserTemplate(), params.getTemplate(), session);
+                template = templateService.loadTemplate(params.getUserTemplate(), params.getTemplate(), session);
             } else {
-                template = getService(TemplateService.class).loadTemplate(params.getTemplate());
+                template = templateService.loadTemplate(params.getTemplate());
             }
 
-            final AppointmentSQLInterface appointmentSql = getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-            SearchIterator<Appointment> iterator;
+            // Get calendar session & set parameters for event search
+            CalendarService calendarService = services.getServiceSafe(CalendarService.class);
+            CalendarSession calendarSession = calendarService.init(session);
+            calendarSession.set(CalendarParameters.PARAMETER_RANGE_START, params.getStart());
+            calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, params.getEnd());
+            calendarSession.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.TRUE);
+
+            // Get events
+            List<Event> events;
             if (params.hasFolder()) {
-                iterator = appointmentSql.getAppointmentsBetweenInFolder(params.getFolder(), new int[] {
-                    DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, CalendarObject.USERS }, params.getStart(), params.getEnd(), -1, null);
+               events = calendarService.getEventsInFolder(calendarSession, String.valueOf(params.getFolder()));
             } else {
-                iterator = appointmentSql.getAppointmentsBetween(session.getUserId(), params.getStart(), params.getEnd(), new int[] {
-                    DataObject.OBJECT_ID, FolderChildObject.FOLDER_ID, CalendarObject.USERS }, -1, null);
+                events = calendarService.getEventsOfUser(calendarSession);
             }
-            final List<Appointment> idList = SearchIteratorAdapter.toList(iterator);
 
             final Locale locale = user.getLocale();
             final CPCalendar cal = CPCalendar.getCalendar(zone, locale);
             modifyCalendar(cal, params);
 
-            final CalendarCollectionService calendarTools = getService(CalendarCollectionService.class);
-            final Partitioner partitioner = new Partitioner(params, cal, session.getContext(), appointmentSql, calendarTools);
-            final List<Day> perDayList = partitioner.partition(idList, session.getUserId());
+            final Partitioner partitioner = new Partitioner(params, cal, session.getContext());
+            final List<Day> perDayList = partitioner.partition(services, events, session.getUserId());
 
-            final List<CPAppointment> expandedAppointments = tool.expandAppointements(
-                idList,
-                params.getStart(),
-                params.getEnd(),
-                appointmentSql,
-                calendarTools,
-                session.getUserId());
+            final List<CPEvent> expandedAppointments = tool.toCPEvent(services, events, cal, session.getContext());
 
             tool.sort(expandedAppointments);
 
@@ -247,7 +218,7 @@ public class CPServlet extends PermissionServlet {
             variables.put(DOCUMENT_TITLE, getDocumentTitle(session));
             variables.put(DATE_FORMATTER, new DateFormatter(user.getLocale(), TimeZone.getTimeZone(user.getTimeZone())));
 
-            for (final CPAppointment app : partitions.getAppointments()) {
+            for (final CPEvent app : partitions.getAppointments()) {
                 debuggingItems.add(app.getTitle());
             }
             for (final CPFormattingInformation info : partitions.getFormattingInformation()) {
@@ -255,7 +226,7 @@ public class CPServlet extends PermissionServlet {
             }
             final AllocatingStringWriter htmlWriter = new AllocatingStringWriter();
             template.process(variables, htmlWriter);
-            final String html = getService(HtmlService.class).sanitize(htmlWriter.toString(), null, false, null, null);
+            final String html = services.getServiceSafe(HtmlService.class).sanitize(htmlWriter.toString(), null, false, null, null);
             final PrintWriter writer = resp.getWriter();
             writer.write(html);
             writer.flush();
@@ -265,7 +236,7 @@ public class CPServlet extends PermissionServlet {
     }
 
     private String getDocumentTitle(Session session) {
-        ConfigViewFactory configViewFactory = CPServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         String retval = null;
         if (null != configViewFactory) {
             ConfigView configView;
@@ -284,17 +255,18 @@ public class CPServlet extends PermissionServlet {
 
     /**
      * Write an exception message as HTML to the response
-     * @throws IOException
+     * @throws IOException {@link HttpServletResponse#getWriter()}
      */
     private void writeException(final HttpServletResponse resp, final Throwable t) throws IOException {
         LOG.error("", t);
-        final PrintWriter writer = resp.getWriter();
-        writer.append(t.getMessage());
+        resp.getWriter().append(t.getMessage());
         // TODO Write HTML page as response
     }
 
     /**
      * Modify a calendar according to the given parameters
+     * @param calendar The {@link CPCalendar}
+     * @param params The {@link CPParameters}
      */
     public void modifyCalendar(final CPCalendar calendar, final CPParameters params) {
         if (params.hasWeekStart()) {

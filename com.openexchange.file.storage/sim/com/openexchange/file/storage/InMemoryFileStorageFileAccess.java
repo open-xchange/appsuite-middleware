@@ -75,7 +75,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, FileStorageVersionedFileAccess {
 
-    private final Map<String, Map<String, VersionContainer>> storage = new HashMap<String, Map<String, VersionContainer>>();
+    private final Map<String, Map<String, VersionContainer>> storage = new HashMap<>();
 
     private final String accountId;
 
@@ -148,7 +148,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
         String folderId = file.getFolderId();
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
-            map = new HashMap<String, VersionContainer>();
+            map = new HashMap<>();
             storage.put(folderId, map);
         }
 
@@ -208,7 +208,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
-        List<IDTuple> notRemoved = new ArrayList<IDTuple>();
+        List<IDTuple> notRemoved = new ArrayList<>();
         for (IDTuple tuple : ids) {
             String folderId = tuple.getFolder();
             String id = tuple.getId();
@@ -231,7 +231,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
 
     @Override
     public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
-        List<String> notRemovedList = new ArrayList<String>();
+        List<String> notRemovedList = new ArrayList<>();
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
             return versions;
@@ -363,12 +363,12 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
 
             @Override
             public SearchIterator<File> results() throws OXException {
-                List<File> files = new ArrayList<File>(ids.size());
+                List<File> files = new ArrayList<>(ids.size());
                 for (IDTuple idTuple : ids) {
                     files.add(getVersionContainer(idTuple.getFolder(), idTuple.getId()).getCurrentVersion().getFile());
                 }
 
-                return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+                return new SearchIteratorAdapter<>(files.iterator(), files.size());
             }
 
             @Override
@@ -380,12 +380,12 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, boolean ignoreDeleted) throws OXException {
-        return new DeltaImpl<File>(getDocuments(folderId).results(), SearchIteratorAdapter.<File>emptyIterator(),  SearchIteratorAdapter.<File>emptyIterator(), System.currentTimeMillis());
+        return new DeltaImpl<>(getDocuments(folderId).results(), SearchIteratorAdapter.<File>emptyIterator(),  SearchIteratorAdapter.<File>emptyIterator(), System.currentTimeMillis());
     }
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
-        return new DeltaImpl<File>(getDocuments(folderId, fields, sort, order).results(), SearchIteratorAdapter.<File>emptyIterator(),  SearchIteratorAdapter.<File>emptyIterator(), System.currentTimeMillis());
+        return new DeltaImpl<>(getDocuments(folderId, fields, sort, order).results(), SearchIteratorAdapter.<File>emptyIterator(),  SearchIteratorAdapter.<File>emptyIterator(), System.currentTimeMillis());
     }
 
     @Override
@@ -534,7 +534,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
         private SortDirection order;
 
         public InMemoryTimedResult(Map<String, VersionContainer> files) {
-            this.files = files == null ? new HashMap<String, VersionContainer>() : files;
+            this.files = files == null ? new HashMap<>() : files;
             this.sequenceNumber = System.currentTimeMillis();
         }
 
@@ -546,7 +546,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
 
         @Override
         public SearchIterator<File> results() throws OXException {
-            List<File> fileList = new ArrayList<File>(files.size());
+            List<File> fileList = new ArrayList<>(files.size());
             for (VersionContainer container : files.values()) {
                 File file = container.getCurrentVersion().getFile();
                 fileList.add(file);
@@ -555,7 +555,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
                 Collections.sort(fileList, order.comparatorBy(sort));
             }
 
-            return new SearchIteratorAdapter<File>(fileList.iterator(), fileList.size());
+            return new SearchIteratorAdapter<>(fileList.iterator(), fileList.size());
         }
 
         @Override
@@ -598,7 +598,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
                 return SearchIteratorAdapter.<File> emptyIterator();
             }
             Collection<FileHolder> allVersions = versionContainer.getAllVersions();
-            List<File> versions = new ArrayList<File>(allVersions.size());
+            List<File> versions = new ArrayList<>(allVersions.size());
 
             for (FileHolder fileHolder : allVersions) {
                 versions.add(fileHolder.getFile());
@@ -608,7 +608,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
                 Collections.sort(versions, order.comparatorBy(sort));
             }
 
-            return new SearchIteratorAdapter<File>(versions.iterator(), versions.size());
+            return new SearchIteratorAdapter<>(versions.iterator(), versions.size());
         }
 
         @Override

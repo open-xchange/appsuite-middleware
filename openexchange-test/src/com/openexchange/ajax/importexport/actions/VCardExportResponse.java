@@ -50,6 +50,7 @@
 package com.openexchange.ajax.importexport.actions;
 
 import java.util.Date;
+import org.apache.http.HttpResponse;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -57,12 +58,15 @@ import com.openexchange.exception.OXException.ProblematicAttribute;
 public class VCardExportResponse extends AbstractAJAXResponse {
 
     private String vCard;
+    
+    private final HttpResponse response;
 
     /**
      * @param response
      */
-    public VCardExportResponse() {
+    public VCardExportResponse(HttpResponse response) {
         super(null);
+        this.response = response;
     }
 
     /**
@@ -117,5 +121,12 @@ public class VCardExportResponse extends AbstractAJAXResponse {
     @Override
     public boolean hasError() {
         throw new UnsupportedOperationException();
+    }    
+    
+    /**
+     * @return response the http response
+     */
+    public HttpResponse getHttpResponse() {
+        return response;
     }
 }

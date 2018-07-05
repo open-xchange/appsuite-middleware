@@ -53,13 +53,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.TreeBidiMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.java.Strings;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Parameter;
@@ -268,7 +268,7 @@ public final class ParserTools {
 
     /**
      * Replaces unknown time zones with appropriate java timezones.
-     * 
+     *
      * @param tzid
      * @return
      */
@@ -282,11 +282,12 @@ public final class ParserTools {
      * See https://msdn.microsoft.com/en-us/library/ms912391(v=winembedded.11).aspx
      */
     static {
-        MICROSOFT_TO_JAVA_TIMEZONES = new HashMap<String, TimeZone>();
-        MICROSOFT_TO_JAVA_TIMEZONES.put("Romance Standard Time", TimeZone.getTimeZone("CET"));
-        MICROSOFT_TO_JAVA_TIMEZONES.put("Central Europe Standard Time", TimeZone.getTimeZone("CET"));
-        MICROSOFT_TO_JAVA_TIMEZONES.put("Central European Standard Time", TimeZone.getTimeZone("CET"));
-        MICROSOFT_TO_JAVA_TIMEZONES.put("W. Europe Standard Time", TimeZone.getTimeZone("CET"));
+        ImmutableMap.Builder<String, TimeZone> b = ImmutableMap.builder();
+        b.put("Romance Standard Time", TimeZone.getTimeZone("CET"));
+        b.put("Central Europe Standard Time", TimeZone.getTimeZone("CET"));
+        b.put("Central European Standard Time", TimeZone.getTimeZone("CET"));
+        b.put("W. Europe Standard Time", TimeZone.getTimeZone("CET"));
+        MICROSOFT_TO_JAVA_TIMEZONES = b.build();
     }
 
     /**

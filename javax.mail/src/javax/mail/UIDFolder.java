@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -75,6 +75,7 @@ import java.util.NoSuchElementException;
  *
  * </pre></blockquote><p>
  *
+ * @author Bill Shannon
  * @author John Mani
  */
 
@@ -119,7 +120,24 @@ public interface UIDFolder {
      *
      * @see #getMessagesByUID
      */ 
-    public final static long LASTUID = -1;
+    public static final long LASTUID = -1;
+
+    /**
+     * The largest value possible for a UID, a 32-bit unsigned integer.
+     * This can be used to fetch all new messages by keeping track of the
+     * last UID that was seen and using:
+     * <blockquote><pre>
+     *
+     * 	Folder f = store.getFolder("whatever");
+     *	UIDFolder uf = (UIDFolder)f;
+     *	Message[] newMsgs =
+     *		uf.getMessagesByUID(lastSeenUID + 1, UIDFolder.MAXUID);
+     *
+     * </pre></blockquote><p>
+     *
+     * @since JavaMail 1.6
+     */
+    public static final long MAXUID = 0xffffffffL; // max 32-bit unsigned int
 
     /**
      * Returns the UIDValidity value associated with this folder. <p>
@@ -191,4 +209,22 @@ public interface UIDFolder {
      * @exception	MessagingException for other failures
      */
     public long getUID(Message message) throws MessagingException;
+
+    /**
+     * Returns the predicted UID that will be assigned to the
+     * next message that is appended to this folder.
+     * Messages might be appended to the folder after this value
+     * is retrieved, causing this value to be out of date.
+     * This value might only be updated when a folder is first opened.
+     * Note that messages may have been appended to the folder
+     * while it was open and thus this value may be out of
+     * date. <p>
+     *
+     * If the value is unknown, -1 is returned.  <p>
+     *
+     * @return		the UIDNEXT value, or -1 if unknown
+     * @exception	MessagingException for failures
+     * @since		JavaMail 1.6
+     */
+    public long getUIDNext() throws MessagingException;
 }

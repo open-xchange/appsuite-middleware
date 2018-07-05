@@ -83,7 +83,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.sun.mail.iap.CommandFailedException;
-import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ResponseCode;
 import com.sun.mail.smtp.SMTPAddressFailedException;
 import com.sun.mail.smtp.SMTPSendFailedException;
@@ -480,7 +479,7 @@ public class MimeMailException extends OXException {
                 }
                 return MimeMailExceptionCode.SOCKET_ERROR.create(e, new Object[0]);
             } else if (nextException instanceof java.net.UnknownHostException) {
-                return MimeMailExceptionCode.UNKNOWN_HOST.create(e, appendInfo(e.getMessage(), folder));
+                return MimeMailExceptionCode.UNKNOWN_HOST.create(e, appendInfo(null == mailConfig ? e.getMessage() : mailConfig.getServer(), folder));
             } else if (nextException instanceof java.net.SocketTimeoutException) {
                 mailInterfaceMonitor.changeNumBrokenConnections(true);
                 return MimeMailExceptionCode.READ_TIMEOUT.create(
@@ -715,7 +714,7 @@ public class MimeMailException extends OXException {
                     if (null != oauthService) {
                         OAuthAccount oAuthAccount;
                         try {
-                            oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
+                            oAuthAccount = oauthService.getAccount(session, mailAccount.getMailOAuthId());
                         } catch (Exception x) {
                             LOG.warn("Failed to load mail-associated OAuth account", x);
                             oAuthAccount = null;
@@ -980,6 +979,34 @@ public class MimeMailException extends OXException {
         }
 
         return isEitherOf(e, com.sun.mail.iap.ByeIOException.class, java.net.SocketTimeoutException.class, java.io.EOFException.class);
+    }
+
+    /**
+     * Checks if cause of specified messaging exception indicates a connect problem.
+     *
+     * @param e The messaging exception to examine
+     * @return <code>true</code> if a connect problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isConnectException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.ConnectException.class);
+    }
+
+    /**
+     * Checks if cause of specified messaging exception indicates a timeout or connect problem.
+     *
+     * @param e The messaging exception to examine
+     * @return <code>true</code> if a timeout or connect problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTimeoutOrConnectException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.SocketTimeoutException.class, java.net.ConnectException.class);
     }
 
     /**

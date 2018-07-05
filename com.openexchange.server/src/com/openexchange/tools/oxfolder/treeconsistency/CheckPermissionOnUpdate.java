@@ -49,16 +49,13 @@
 
 package com.openexchange.tools.oxfolder.treeconsistency;
 
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.TIntSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -68,6 +65,10 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
 
 /**
  * {@link CheckPermissionOnUpdate} - Checks for system permissions which shall be updated.
@@ -235,6 +236,8 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
             OCLPermission.NO_PERMISSIONS,
             false,
             OCLPermission.SYSTEM_SYSTEM,
+            FolderPermissionType.NORMAL,
+            null,
             writeCon,
             ctx);
     }

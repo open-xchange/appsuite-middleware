@@ -305,9 +305,9 @@ public final class JerichoParser {
                 prev = handleSegment(handler, segment, css, true, false);
             }
         } catch (InterruptedRuntimeException e) {
-            throw HtmlExceptionCodes.PARSING_FAILED.create("Parser timeout.", e);
+            throw HtmlExceptionCodes.PARSING_FAILED.create(e, "Parser timeout.");
         } catch (StackOverflowError parserOverflow) {
-            throw HtmlExceptionCodes.PARSING_FAILED.create("Parser overflow detected.", parserOverflow);
+            throw HtmlExceptionCodes.PARSING_FAILED.create(parserOverflow, "Parser overflow detected.");
         } finally {
             Streams.close(streamedSource);
         }

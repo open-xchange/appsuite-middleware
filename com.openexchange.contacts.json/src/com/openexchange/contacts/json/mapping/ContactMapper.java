@@ -2767,7 +2767,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
 
         	@Override
-        	public void serialize(Contact from, JSONObject to) throws JSONException {
+        	public void serialize(Contact from, JSONObject to) throws JSONException, OXException {
         		if (this.isSet(from)) {
         			// only serialize if set; workaround for bug #13960
         			super.serialize(from, to);
@@ -2775,7 +2775,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         	}
 
         	@Override
-        	public void serialize(Contact from, JSONObject to, TimeZone timeZone) throws JSONException {
+        	public void serialize(Contact from, JSONObject to, TimeZone timeZone) throws JSONException, OXException {
         		if (this.isSet(from)) {
         			// only serialize if set; workaround for bug #13960
         			super.serialize(from, to, timeZone);
@@ -2783,7 +2783,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         	}
 
         	@Override
-        	public void serialize(Contact from, JSONObject to, TimeZone timeZone, Session session) throws JSONException {
+        	public void serialize(Contact from, JSONObject to, TimeZone timeZone, Session session) throws JSONException, OXException {
         		if (isSet(from)) {
         			// only serialize if set; workaround for bug #13960
         			super.serialize(from, to, timeZone, session);
@@ -2791,7 +2791,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         	}
 
         	@Override
-        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
+        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException, OXException {
         		if (isSet(from)) {
         			// only serialize if set; workaround for bug #13960
         			return super.serialize(from, timeZone, session);
@@ -2825,7 +2825,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
 
         	@Override
-        	public void serialize(Contact from, JSONObject to) throws JSONException {
+        	public void serialize(Contact from, JSONObject to) throws JSONException, OXException {
         		if (this.isSet(from)) {
         			// only serialize if set; workaround for bug #13960
         			super.serialize(from, to);
@@ -2833,7 +2833,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         	}
 
         	@Override
-        	public void serialize(Contact from, JSONObject to, TimeZone timeZone) throws JSONException {
+        	public void serialize(Contact from, JSONObject to, TimeZone timeZone) throws JSONException, OXException {
         		if (this.isSet(from)) {
         			// only serialize if set; workaround for bug #13960
         			super.serialize(from, to, timeZone);
@@ -2841,7 +2841,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         	}
 
         	@Override
-        	public void serialize(Contact from, JSONObject to, TimeZone timeZone, Session session) throws JSONException {
+        	public void serialize(Contact from, JSONObject to, TimeZone timeZone, Session session) throws JSONException, OXException {
         		if (isSet(from)) {
         			// only serialize if set; workaround for bug #13960
         			super.serialize(from, to, timeZone, session);
@@ -2849,7 +2849,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         	}
 
         	@Override
-        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException {
+        	public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException, OXException {
         		if (isSet(from)) {
         			// only serialize if set; workaround for bug #13960
         			return super.serialize(from, timeZone, session);

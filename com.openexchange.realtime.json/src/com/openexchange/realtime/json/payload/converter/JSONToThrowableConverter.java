@@ -76,20 +76,20 @@ public class JSONToThrowableConverter extends AbstractJSONConverter {
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
         try {
             JSONObject throwableJSON = (JSONObject) data;
-            
+
             String message = throwableJSON.optString("message");
             JSONArray traceElements = (JSONArray) throwableJSON.get("stackTrace");
             Throwable throwable = new Throwable(message);
             throwable.setStackTrace(jsonToStackTraceElementArray(traceElements, converter));
             return throwable;
         } catch (Exception e) {
-            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(e, data.toString());
         }
     }
 
     private StackTraceElement[] jsonToStackTraceElementArray(JSONArray stackTrace, SimpleConverter converter) throws OXException {
         List<StackTraceElement> stacktraceList = new ArrayList<StackTraceElement>();
-        
+
         Iterator<Object> iterator = stackTrace.iterator();
         while(iterator.hasNext()) {
             Object converted = converter.convert("json", StackTraceElement.class.getSimpleName(), iterator.next(), null);

@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,10 +40,15 @@
 
 package com.sun.mail.imap;
 
-import java.io.*;
-import javax.mail.*;
-import com.sun.mail.imap.protocol.*;
+import javax.mail.Flags;
+import javax.mail.FolderClosedException;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
 import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+import com.sun.mail.imap.protocol.ENVELOPE;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
  * This class implements a nested IMAP message
@@ -73,6 +78,7 @@ public class IMAPNestedMessage extends IMAPMessage {
      * Get the enclosing message's Protocol object. Overrides
      * IMAPMessage.getProtocol().
      */
+    @Override
     protected IMAPProtocol getProtocol()
 			throws ProtocolException, FolderClosedException {
 	return msg.getProtocol();
@@ -81,6 +87,7 @@ public class IMAPNestedMessage extends IMAPMessage {
     /*
      * Is this an IMAP4 REV1 server?
      */
+    @Override
     protected boolean isREV1() throws FolderClosedException {
 	return msg.isREV1();
     }
@@ -89,6 +96,7 @@ public class IMAPNestedMessage extends IMAPMessage {
      * Get the enclosing message's messageCacheLock. Overrides
      * IMAPMessage.getMessageCacheLock().
      */
+    @Override
     protected Object getMessageCacheLock() {
 	return msg.getMessageCacheLock();
     }
@@ -97,6 +105,7 @@ public class IMAPNestedMessage extends IMAPMessage {
      * Get the enclosing message's sequence number. Overrides
      * IMAPMessage.getSequenceNumber().
      */
+    @Override
     protected int getSequenceNumber() {
 	return msg.getSequenceNumber();
     }
@@ -105,6 +114,7 @@ public class IMAPNestedMessage extends IMAPMessage {
      * Check whether the enclosing message is expunged. Overrides 
      * IMAPMessage.checkExpunged().
      */
+    @Override
     protected void checkExpunged() throws MessageRemovedException {
 	msg.checkExpunged();
     }
@@ -113,6 +123,7 @@ public class IMAPNestedMessage extends IMAPMessage {
      * Check whether the enclosing message is expunged. Overrides
      * Message.isExpunged().
      */
+    @Override
     public boolean isExpunged() {
 	return msg.isExpunged();
     }
@@ -120,6 +131,7 @@ public class IMAPNestedMessage extends IMAPMessage {
     /*
      * Get the enclosing message's fetchBlockSize. 
      */
+    @Override
     protected int getFetchBlockSize() {
 	return msg.getFetchBlockSize();
     }
@@ -127,6 +139,7 @@ public class IMAPNestedMessage extends IMAPMessage {
     /*
      * Get the enclosing message's ignoreBodyStructureSize. 
      */
+    @Override
     protected boolean ignoreBodyStructureSize() {
 	return msg.ignoreBodyStructureSize();
     }
@@ -135,6 +148,7 @@ public class IMAPNestedMessage extends IMAPMessage {
      * IMAPMessage uses RFC822.SIZE. We use the "size" field from
      * our BODYSTRUCTURE.
      */
+    @Override
     public int getSize() throws MessagingException {
 	return bs.size;
     }
@@ -142,6 +156,7 @@ public class IMAPNestedMessage extends IMAPMessage {
     /*
      * Disallow setting flags on nested messages
      */
+    @Override
     public synchronized void setFlags(Flags flag, boolean set) 
 			throws MessagingException {
 	// Cannot set FLAGS on a nested IMAP message	

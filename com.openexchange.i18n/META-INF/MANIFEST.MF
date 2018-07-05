@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange I18n
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-SymbolicName: com.openexchange.i18n
 Bundle-Activator: com.openexchange.i18n.osgi.I18nActivator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,

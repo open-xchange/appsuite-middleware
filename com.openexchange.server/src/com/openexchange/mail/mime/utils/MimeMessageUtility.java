@@ -63,8 +63,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -91,6 +89,7 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Address;
 import javax.mail.BodyPart;
+import javax.mail.Flags;
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessageRemovedException;
@@ -107,9 +106,7 @@ import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 import javax.mail.util.ByteArrayDataSource;
-import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.net.QuotedPrintableCodec;
 import org.apache.james.mime4j.io.LineReaderInputStream;
 import org.apache.james.mime4j.io.LineReaderInputStreamAdaptor;
 import org.apache.james.mime4j.stream.DefaultFieldBuilder;
@@ -137,13 +134,16 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.EmptyStringMimeMultipart;
+import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
@@ -151,7 +151,6 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.DataHandlerWrapper;
 import com.openexchange.mail.mime.converters.FileBackedMimeBodyPart;
-import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.FileDataSource;
@@ -265,7 +264,7 @@ public final class MimeMessageUtility {
      * @return The prepared address
      */
     public static String prepareAddress(final String address) {
-        String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
+        String decoded = toIDN(decodeMultiEncodedHeader(address));
         // Check for slash character -- the delimiting character for MSISDN addresses
         int pos = decoded.indexOf('@');
         if (pos < 0) {
@@ -275,7 +274,7 @@ public final class MimeMessageUtility {
             }
         }
         // Check for dummy domains
-        return MimeMessageUtility.stripDummyDomain(decoded);
+        return stripDummyDomain(decoded);
     }
 
     /**
@@ -310,7 +309,7 @@ public final class MimeMessageUtility {
      *
      * <pre>
      * ...
-     * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+     * final MailDateFormat mdf = getMailDateFormat(session);
      * synchronized(mdf) {
      * mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
      * }
@@ -331,7 +330,7 @@ public final class MimeMessageUtility {
      *
      * <pre>
      * ...
-     * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(session);
+     * final MailDateFormat mdf = getMailDateFormat(session);
      * synchronized(mdf) {
      * mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
      * }
@@ -360,7 +359,7 @@ public final class MimeMessageUtility {
      *
      * <pre>
      * ...
-     * final MailDateFormat mdf = MIMEMessageUtility.getMailDateFormat(timeZoneId);
+     * final MailDateFormat mdf = getMailDateFormat(timeZoneId);
      * synchronized(mdf) {
      * mimeMessage.setHeader(&quot;Date&quot;, mdf.format(sendDate));
      * }
@@ -720,17 +719,6 @@ public final class MimeMessageUtility {
         }
     }
 
-    /*
-     * Multipart subtype constants
-     */
-    private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
-
-    private static final String MULTI_SUBTYPE_RELATED = "RELATED";
-
-    private static final String MULTI_SUBTYPE_MIXED = "MIXED";
-
-    //     private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
-
     /**
      * Checks if given multipart contains (file) attachments
      *
@@ -764,7 +752,7 @@ public final class MimeMessageUtility {
             }
             String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
-                ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
+                ct.setContentType(unfold(tmp[0]));
                 if (ct.startsWith("multipart/")) {
                     found |= hasAttachments(part, ct.getSubType());
                 }
@@ -792,25 +780,27 @@ public final class MimeMessageUtility {
     }
 
     /**
-     * Checks if given multipart contains (file) attachments
+     * Checks if given part contains (file) attachments
      *
-     * @param mp The multipart to examine
-     * @param subtype The multipart's subtype
-     * @return <code>true</code> if given multipart contains (file) attachments; otherwise <code>false</code>
+     * @param part The part to examine
+     * @return <code>true</code> if given part contains (file) attachments; otherwise <code>false</code>
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static boolean hasAttachments(final Part mp) throws MessagingException, OXException, IOException {
-        if (null == mp) {
+    public static boolean hasAttachments(final Part part) throws MessagingException, OXException, IOException {
+        if (null == part) {
             return false;
         }
 
-        if (mp.getContentType().toLowerCase().startsWith("multipart/")) {
-            int count = ((Multipart) mp).getCount();
-            return hasAttachments0((Multipart) mp, count);
+        if (part.getContentType().toLowerCase().startsWith("multipart/")) {
+            Multipart multipart = getMultipartContentFrom(part);
+            if (null != multipart) {
+                int count = multipart.getCount();
+                return hasAttachments0(multipart, count);
+            }
         }
-        return hasAttachmentInMetadata(mp);
+        return hasAttachmentInMetadata(part);
     }
 
     private static boolean hasAttachments0(Multipart mp, int count) throws MessagingException, OXException, IOException {
@@ -823,7 +813,7 @@ public final class MimeMessageUtility {
             }
             String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
-                ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
+                ct.setContentType(unfold(tmp[0]));
                 if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
                     found |= hasAttachments(part);
                 }
@@ -1026,10 +1016,6 @@ public final class MimeMessageUtility {
         boolean isPadded() {
             return value.charAt(value.length() - 1) == '=';
         }
-
-        String asEncodedWord() {
-            return new StringBuilder(value.length() + 8).append("=?").append(charset).append("?B?").append(value).append("?=").toString();
-        }
     }
 
     private static String decodeMultiEncodedHeader0(final String headerValue, final boolean unfold) {
@@ -1098,20 +1084,17 @@ public final class MimeMessageUtility {
 
                     // Remember last match position
                     lastMatch = m.end();
-                } catch (final UnsupportedEncodingException e) {
-                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
-                    sb.append(handleUnsupportedEncoding(encoding, encodedValue));
-                    lastMatch = m.end();
-                } catch (final ParseException e) {
+                } catch (UnsupportedTransferEncodingException e) {
+                    return decodeMultiEncodedHeaderSafe(headerValue);
+                } catch (ParseException e) {
                     return decodeMultiEncodedHeaderSafe(headerValue);
                 }
             } while (m.find());
             if (null != prev) {
                 try {
                     sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
-                } catch (UnsupportedEncodingException e) {
-                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
-                    sb.append(handleUnsupportedEncoding(prev.charset, prev.value.toString()));
+                } catch (UnsupportedTransferEncodingException e) {
+                    return decodeMultiEncodedHeaderSafe(headerValue);
                 } catch (ParseException e) {
                     return decodeMultiEncodedHeaderSafe(headerValue);
                 }
@@ -1147,7 +1130,7 @@ public final class MimeMessageUtility {
         return hdrVal;
     }
 
-    private static String decodeEncodedWord(String charset, String encoding, String encodedValue) throws ParseException, UnsupportedEncodingException {
+    private static String decodeEncodedWord(String charset, String encoding, String encodedValue) throws ParseException, UnsupportedTransferEncodingException {
         if (MessageUtility.isBig5(charset)) {
             String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue);
             if (MessageUtility.containsUnknown(decodeWord)) {
@@ -1177,7 +1160,7 @@ public final class MimeMessageUtility {
         }
     }
 
-    private static String doDecodeEncodedWord(String charset2, String encoding, String encodedValue) throws ParseException, UnsupportedEncodingException {
+    private static String doDecodeEncodedWord(String charset2, String encoding, String encodedValue) throws ParseException, UnsupportedTransferEncodingException {
         String charset = MimeUtility.javaCharset(charset2);
         if (encodedValue.length() <= 0) {
             return "";
@@ -1194,7 +1177,7 @@ public final class MimeMessageUtility {
         } else if (encoding.equalsIgnoreCase("Q")) {
             is = new QDecoderStream(Streams.newByteArrayInputStream(asciiBytes));
         } else {
-            throw new UnsupportedEncodingException("unknown encoding: " + encoding);
+            throw new UnsupportedTransferEncodingException("unknown encoding: " + encoding);
         }
 
         // Read decoded bytes
@@ -1246,44 +1229,6 @@ public final class MimeMessageUtility {
              */
             LOG.warn("Unknown character-encoding: {}", detectedCharset, uce);
             return null;
-        }
-    }
-
-    private static String handleUnsupportedEncoding(String encoding, String encodedValue) {
-        final String asciiText = encodedValue;
-        final String detectedCharset;
-        final byte[] rawBytes;
-        {
-            final String transferEncoding = encoding;
-            if ("Q".equalsIgnoreCase(transferEncoding)) {
-                try {
-                    rawBytes = QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(asciiText));
-                } catch (final DecoderException e) {
-                    /*
-                     * Invalid quoted-printable
-                     */
-                    LOG.warn("Cannot decode quoted-printable", e);
-                    return asciiText;
-                }
-            } else if ("B".equalsIgnoreCase(transferEncoding)) {
-                rawBytes = Base64.decodeBase64(Charsets.toAsciiBytes(asciiText));
-            } else {
-                /*
-                 * Unknown transfer-encoding; just return current match
-                 */
-                LOG.warn("Unknown transfer-encoding: {}", transferEncoding);
-                return asciiText;
-            }
-            detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(rawBytes));
-        }
-        try {
-            return new String(rawBytes, Charsets.forName(detectedCharset));
-        } catch (final UnsupportedCharsetException e) {
-            /*
-             * Even detected charset is unknown... giving up
-             */
-            LOG.warn("Unknown character-encoding: {}", detectedCharset);
-            return asciiText;
         }
     }
 
@@ -1340,7 +1285,7 @@ public final class MimeMessageUtility {
         if (headerValue == null) {
             return null;
         }
-        final String hdrVal = MimeMessageUtility.unfold(headerValue);
+        final String hdrVal = unfold(headerValue);
         final Matcher m = ENC_PATTERN.matcher(hdrVal);
         if (m.find()) {
             final StringBuilder sb = new StringBuilder(hdrVal.length());
@@ -1373,11 +1318,11 @@ public final class MimeMessageUtility {
                     }
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.warn("Unsupported character-encoding in encoded-word: {}", m.group(), e);
+                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 } catch (final ParseException e) {
-                    LOG.warn("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
+                    LOG.debug("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 }
@@ -1454,7 +1399,8 @@ public final class MimeMessageUtility {
     }
 
     private static String qencode(final char toEncode, final String charset) {
-        if (!Charset.isSupported(charset)) {
+        if (!CharsetDetector.isValid(charset)) {
+            LOG.warn("Illegal or unsupported charset name: {}", charset);
             return String.valueOf(toEncode);
         }
         final StringBuilder retval = new StringBuilder(4);
@@ -1492,7 +1438,7 @@ public final class MimeMessageUtility {
             // No file extension given. Check if "name" parameter from Content-Type provides a better "alternative" value
             String name = mailPart.getContentType().getNameParameter();
             if (Strings.isNotEmpty(name) && name.indexOf('.') > 0) {
-                fileName = MimeMessageUtility.decodeMultiEncodedHeader(name);
+                fileName = decodeMultiEncodedHeader(name);
             }
         }
         return fileName;
@@ -1730,10 +1676,6 @@ public final class MimeMessageUtility {
         return sb.toString();
     }
 
-    // private static final Pattern PAT_QUOTED = Pattern.compile("(^\")([^\"]+?)(\"$)");
-
-    // private static final Pattern PAT_QUOTABLE_CHAR = Pattern.compile("[.,:;<>\"]");
-
     private final static String RFC822 = "()<>@,;:\\\".[]";
 
     /**
@@ -1856,7 +1798,7 @@ public final class MimeMessageUtility {
      */
     public static void setFoldedHeader(String headerName, String headerValue, MimeMessage mimeMessage) throws MessagingException {
         if (null != headerName && null != headerValue && null != mimeMessage) {
-            mimeMessage.setHeader(headerName, fold(headerName.length() + 1, headerValue));
+            mimeMessage.setHeader(headerName, fold(headerName.length() + 2, headerValue));
         }
     }
 
@@ -1872,65 +1814,7 @@ public final class MimeMessageUtility {
      * @return The folded string
      */
     public static String fold(final int used, final String foldMe) {
-        int end;
-        char c;
-        /*
-         * Strip trailing spaces and newlines
-         */
-        for (end = foldMe.length() - 1; end >= 0; end--) {
-            c = foldMe.charAt(end);
-            if (c != ' ' && c != '\t' && c != '\r' && c != '\n') {
-                break;
-            }
-        }
-        String s;
-        if (end != foldMe.length() - 1) {
-            s = foldMe.substring(0, end + 1);
-        } else {
-            s = foldMe;
-        }
-        /*
-         * Check if the string fits now
-         */
-        if (used + s.length() <= 76) {
-            return s;
-        }
-        /*
-         * Fold the string
-         */
-        final StringBuilder sb = new StringBuilder(s.length() + 4);
-        char lastc = 0;
-        int usedChars = used;
-        while (usedChars + s.length() > 76) {
-            int lastspace = -1;
-            for (int i = 0; i < s.length(); i++) {
-                if (lastspace != -1 && usedChars + i > 76) {
-                    break;
-                }
-                c = s.charAt(i);
-                if ((c == ' ' || c == '\t') && !(lastc == ' ' || lastc == '\t')) {
-                    lastspace = i;
-                }
-                lastc = c;
-            }
-            if (lastspace == -1) {
-                /*
-                 * No space, use the whole thing
-                 */
-                sb.append(s);
-                s = "";
-                usedChars = 0;
-                break;
-            }
-            sb.append(s.substring(0, lastspace));
-            sb.append("\r\n");
-            lastc = s.charAt(lastspace);
-            sb.append(lastc);
-            s = s.substring(lastspace + 1);
-            usedChars = 1;
-        }
-        sb.append(s);
-        return sb.toString();
+        return MimeUtility.fold(used, foldMe);
     }
 
     private static final Pattern PATTERN_UNFOLD = Pattern.compile("(\\?=)(\\s*)(=\\?)");
@@ -2074,11 +1958,11 @@ public final class MimeMessageUtility {
      */
     public static String extractHeader(final String headerName, final InputStream inputStream, final boolean closeStream) throws IOException {
         boolean close = closeStream;
+        final UnsynchronizedByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
         try {
             /*
              * Gather bytes until empty line, EOF or matching header found
              */
-            final UnsynchronizedByteArrayOutputStream buffer = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
             int start = 0;
             int i = -1;
             boolean firstColonFound = false;
@@ -2150,6 +2034,7 @@ public final class MimeMessageUtility {
             if (close) {
                 Streams.close(inputStream);
             }
+            Streams.close(buffer);
         }
     }
 
@@ -2222,7 +2107,7 @@ public final class MimeMessageUtility {
             /*
              * Write headers
              */
-            @SuppressWarnings("unchecked") final Enumeration<Header> headers = p.getAllHeaders();
+            Enumeration<Header> headers = p.getAllHeaders();
             final StringBuilder sb = new StringBuilder(256);
             while (headers.hasMoreElements()) {
                 final Header header = headers.nextElement();
@@ -2264,7 +2149,7 @@ public final class MimeMessageUtility {
             /*
              * Write headers
              */
-            for (@SuppressWarnings("unchecked") final Enumeration<String> hdrLines = p.getNonMatchingHeaderLines(null); hdrLines.hasMoreElements();) {
+            for (final Enumeration<String> hdrLines = p.getNonMatchingHeaderLines(null); hdrLines.hasMoreElements();) {
                 los.writeln(hdrLines.nextElement());
             }
             /*
@@ -2594,30 +2479,9 @@ public final class MimeMessageUtility {
             File tempFile = sink.getTempFile();
             MimeMessage tmp;
             if (null == tempFile) {
-                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
-
-                    @Override
-                    public Date getReceivedDate() throws MessagingException {
-                        if (null != optReceivedDate) {
-                            return optReceivedDate;
-                        }
-
-                        return retainDate ? getSentDate() : super.getReceivedDate();
-                    }
-                };
+                tmp = new InMemoryMimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream(), optReceivedDate, retainDate);
             } else {
-                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate) {
-
-                    @Override
-                    public Date getReceivedDate() throws MessagingException {
-                        Date optReceivedDate = super.getReceivedDate();
-                        if (null != optReceivedDate) {
-                            return optReceivedDate;
-                        }
-
-                        return retainDate ? getSentDate() : super.getReceivedDate();
-                    }
-                };
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate, retainDate);
             }
             closeSink = false;
             return tmp;
@@ -2724,15 +2588,9 @@ public final class MimeMessageUtility {
             File tempFile = sink.getTempFile();
             MimeMessage tmp;
             if (null == tempFile) {
-                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
-
-                    @Override
-                    public Date getReceivedDate() throws MessagingException {
-                        return null == optReceivedDate ? super.getReceivedDate() : optReceivedDate;
-                    }
-                };
+                tmp = new InMemoryMimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream(), optReceivedDate, false);
             } else {
-                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate, false);
             }
             closeSink = false;
             return tmp;
@@ -2815,7 +2673,7 @@ public final class MimeMessageUtility {
         };
         final ThreadPoolService threadPool = ThreadPools.getThreadPool();
         if (null == threadPool) {
-            new Thread(r, "MimeMessageUtility.getStreamFromPart").start();
+            new Thread(r, "getStreamFromPart").start();
         } else {
             threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
         }
@@ -2853,7 +2711,7 @@ public final class MimeMessageUtility {
             };
             final ThreadPoolService threadPool = ThreadPools.getThreadPool();
             if (null == threadPool) {
-                new Thread(r, "MimeMessageUtility.getStreamFromMailPart").start();
+                new Thread(r, "getStreamFromMailPart").start();
             } else {
                 threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
             }
@@ -2995,16 +2853,9 @@ public final class MimeMessageUtility {
             File tempFile = sink.getTempFile();
             MimeMessage tmp;
             if (null == tempFile) {
-                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
-
-                    @Override
-                    public Date getReceivedDate() throws MessagingException {
-                        return msg.getReceivedDate();
-                    }
-                };
+                tmp = new InMemoryMimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream(), msg.getReceivedDate(), false);
             } else {
-                FileBackedMimeMessage fbm = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, msg.getReceivedDate());
-                tmp = fbm;
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, msg.getReceivedDate(), false);
             }
             closeSink = false;
             return tmp;
@@ -3026,6 +2877,47 @@ public final class MimeMessageUtility {
             }
         }
     }
+
+    private static final class FileBackedMimeMessage extends com.openexchange.mail.mime.converters.FileBackedMimeMessage {
+
+        private final boolean retainDate;
+
+        FileBackedMimeMessage(javax.mail.Session session, File tempFile, Date receivedDate, boolean retainDate) throws MessagingException, IOException {
+            super(session, tempFile, receivedDate);
+            this.retainDate = retainDate;
+        }
+
+        @Override
+        public Date getReceivedDate() throws MessagingException {
+            Date optReceivedDate = super.getReceivedDate();
+            if (null != optReceivedDate) {
+                return optReceivedDate;
+            }
+
+            return retainDate ? getSentDate() : super.getReceivedDate();
+        }
+    } // End of class FileBackedMimeMessage
+
+    private static final class InMemoryMimeMessage extends MimeMessage {
+
+        private final Date optReceivedDate;
+        private final boolean retainDate;
+
+        InMemoryMimeMessage(javax.mail.Session session, InputStream is, Date optReceivedDate, boolean retainDate) throws MessagingException {
+            super(session, is);
+            this.optReceivedDate = optReceivedDate;
+            this.retainDate = retainDate;
+        }
+
+        @Override
+        public Date getReceivedDate() throws MessagingException {
+            if (null != optReceivedDate) {
+                return optReceivedDate;
+            }
+
+            return retainDate ? getSentDate() : super.getReceivedDate();
+        }
+    } // End of class InMemoryMimeMessage
 
     /**
      * The special poison address that denies a message being sent via
@@ -3236,6 +3128,484 @@ public final class MimeMessageUtility {
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets the first header denoted by specified header name and decodes its value to a unicode string if necessary.
+     *
+     * <pre>
+     * &quot;=?UTF-8?Q?=C3=BCber?=&quot; is decoded to &quot;&amp;uumlber&quot;
+     * </pre>
+     *
+     * @param name The header name
+     * @param message The message providing the header
+     * @return The decoded header
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static String getSubject(final Message message) throws MessagingException {
+        final String[] valueArr = message.getHeader(MessageHeaders.HDR_SUBJECT);
+        return decodeSubject(valueArr);
+    }
+
+    /**
+     * Gets the first header denoted by specified header name and decodes its value to a unicode string if necessary.
+     *
+     * <pre>
+     * &quot;=?UTF-8?Q?=C3=BCber?=&quot; is decoded to &quot;&amp;uumlber&quot;
+     * </pre>
+     *
+     * @param name The header name
+     * @param message The message providing the header
+     * @return The decoded header
+     */
+    public static String getSubject(final MailMessage message) {
+        final String[] valueArr = message.getHeader(MessageHeaders.HDR_SUBJECT);
+        return decodeSubject(valueArr);
+    }
+
+    private static String decodeSubject(final String[] valueArr) {
+        if (null == valueArr || valueArr.length == 0) {
+            return null;
+        }
+        return decodeEnvelopeSubject(valueArr[0]);
+    }
+
+    /**
+     * Parses the value of header <code>X-Priority</code>.
+     *
+     * @param priorityStr The header value
+     * @param mailMessage The mail message to fill
+     */
+    public static void parsePriority(final String priorityStr, final MailMessage mailMessage) {
+        mailMessage.setPriority(parsePriority(priorityStr));
+    }
+
+    /**
+     * Parses the value of header <code>X-Priority</code>.
+     *
+     * @param priorityStr The header value
+     */
+    public static int parsePriority(final String priorityStr) {
+        int priority = MailMessage.PRIORITY_NORMAL;
+        if (null != priorityStr) {
+            final String[] tmp = priorityStr.split(" +");
+            try {
+                priority = Integer.parseInt(tmp[0]);
+            } catch (final NumberFormatException nfe) {
+                LOG.debug("Assuming priority NORMAL due to strange X-Priority header: {}", priorityStr);
+                priority = MailMessage.PRIORITY_NORMAL;
+            }
+        }
+        return priority;
+    }
+
+    /**
+     * Parses the value of header <code>Importance</code>.
+     *
+     * @param importance The header value
+     * @param mailMessage The mail message to fill
+     */
+    public static void parseImportance(final String importance, final MailMessage mailMessage) {
+        mailMessage.setPriority(parseImportance(importance));
+    }
+
+    /**
+     * Parses the value of header <code>Importance</code>.
+     *
+     * @param importance The header value
+     */
+    public static int parseImportance(final String importance) {
+        int priority = MailMessage.PRIORITY_NORMAL;
+        if (null != importance) {
+            final String imp = importance.trim();
+            if ("Low".equalsIgnoreCase(imp)) {
+                priority = MailMessage.PRIORITY_LOWEST;
+            } else if ("Medium".equalsIgnoreCase(imp) || "Normal".equalsIgnoreCase(imp)) {
+                priority = MailMessage.PRIORITY_NORMAL;
+            } else if ("High".equalsIgnoreCase(imp)) {
+                priority = MailMessage.PRIORITY_HIGHEST;
+            } else {
+                LOG.debug("Assuming priority NORMAL due to strange Importance header: {}", importance);
+                priority = MailMessage.PRIORITY_NORMAL;
+            }
+        }
+        return priority;
+    }
+
+    private static final String[] EMPTY_STRS = new String[0];
+
+    /**
+     * Parses specified {@link Flags flags} to given {@link MailMessage mail}.
+     *
+     * @param flags The flags to parse
+     * @param mailMessage The mail to apply the flags to
+     * @throws OXException If a mail error occurs
+     */
+    public static void parseFlags(final Flags flags, final MailMessage mailMessage) throws OXException {
+        int retval = 0;
+        if (flags.contains(Flags.Flag.ANSWERED)) {
+            retval |= MailMessage.FLAG_ANSWERED;
+        }
+        if (flags.contains(Flags.Flag.DELETED)) {
+            retval |= MailMessage.FLAG_DELETED;
+        }
+        if (flags.contains(Flags.Flag.DRAFT)) {
+            retval |= MailMessage.FLAG_DRAFT;
+        }
+        if (flags.contains(Flags.Flag.FLAGGED)) {
+            retval |= MailMessage.FLAG_FLAGGED;
+        }
+        if (flags.contains(Flags.Flag.RECENT)) {
+            retval |= MailMessage.FLAG_RECENT;
+        }
+        if (flags.contains(Flags.Flag.SEEN)) {
+            retval |= MailMessage.FLAG_SEEN;
+        }
+        if (flags.contains(Flags.Flag.USER)) {
+            retval |= MailMessage.FLAG_USER;
+        }
+        final String[] userFlags = flags.getUserFlags();
+        if (userFlags != null) {
+            /*
+             * Mark message to contain user flags
+             */
+            mailMessage.addUserFlags(EMPTY_STRS);
+            for (final String userFlag : userFlags) {
+                if (MailMessage.isColorLabel(userFlag)) {
+                    mailMessage.setColorLabel(MailMessage.getColorLabelIntValue(userFlag));
+                } else if (MailMessage.USER_FORWARDED.equalsIgnoreCase(userFlag)) {
+                    retval |= MailMessage.FLAG_FORWARDED;
+                } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
+                    retval |= MailMessage.FLAG_READ_ACK;
+                } else {
+                    mailMessage.addUserFlag(userFlag);
+                }
+            }
+        }
+        /*
+         * Set system flags
+         */
+        mailMessage.setFlags(retval);
+    }
+
+    /**
+     * Gets the address headers denoted by specified header name in a safe manner.
+     * <p>
+     * If strict parsing of address headers yields a {@link AddressException}, then a plain-text version is generated to display broken
+     * address header as it is.
+     *
+     * @param name The address header name
+     * @param message The message providing the address header
+     * @return The parsed address headers as an array of {@link InternetAddress} instances
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static InternetAddress[] getAddressHeader(final String name, final Message message) throws MessagingException {
+        final String[] addressArray = message.getHeader(name);
+        return getAddresses(addressArray);
+    }
+
+    /**
+     * Gets the address headers denoted by specified header name in a safe manner.
+     * <p>
+     * If strict parsing of address headers yields a {@link AddressException}, then a plain-text version is generated to display broken
+     * address header as it is.
+     *
+     * @param name The address header name
+     * @param message The message providing the address header
+     * @return The parsed address headers as an array of {@link InternetAddress} instances
+     */
+    public static InternetAddress[] getAddressHeader(final String name, final MailMessage message) {
+        final String[] addressArray = message.getHeader(name);
+        return getAddresses(addressArray);
+    }
+
+    private static InternetAddress[] getAddresses(final String[] addressArray) {
+        if (null == addressArray || addressArray.length == 0) {
+            return null;
+        }
+        final String addresses;
+        if (addressArray.length > 1) {
+            final StringBuilder sb = new StringBuilder(addressArray[0]);
+            for (int i = 1; i < addressArray.length; i++) {
+                sb.append(',').append(addressArray[i]);
+            }
+            addresses = sb.toString();
+        } else {
+            addresses = addressArray[0];
+        }
+        try {
+            return QuotedInternetAddress.parseHeader(addresses, true);
+        } catch (final AddressException e) {
+            return getAddressHeaderNonStrict(addresses, addressArray);
+        }
+    }
+
+    private static InternetAddress[] getAddressHeaderNonStrict(final String addressStrings, final String[] addressArray) {
+        try {
+            final InternetAddress[] addresses = QuotedInternetAddress.parseHeader(addressStrings, false);
+            final List<InternetAddress> addressList = new ArrayList<InternetAddress>(addresses.length);
+            for (final InternetAddress internetAddress : addresses) {
+                try {
+                    addressList.add(new QuotedInternetAddress(internetAddress.toString()));
+                } catch (final AddressException e) {
+                    addressList.add(internetAddress);
+                }
+            }
+            return addressList.toArray(new InternetAddress[addressList.size()]);
+        } catch (final AddressException e) {
+            LOG.debug("Internet addresses could not be properly parsed. Using plain addresses' string representation instead.", e);
+            return getAddressesOnParseError(addressArray);
+        }
+    }
+
+    /**
+     * Gets the address header from given address header value.
+     *
+     * @param addresses The address header value
+     * @return The parsed addresses
+     */
+    public static InternetAddress[] getAddressHeader(final String addresses) {
+        try {
+            return QuotedInternetAddress.parseHeader(addresses, true);
+        } catch (final AddressException e) {
+            LOG.debug("Internet addresses could not be properly parsed. Using plain addresses' string representation instead.", e);
+            return PlainTextAddress.parseAddresses(addresses);
+        }
+    }
+
+    private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {
+        List<InternetAddress> list = new LinkedList<InternetAddress>();
+        for (int i = 0; i < addrs.length; i++) {
+            InternetAddress[] plainAddresses = PlainTextAddress.parseAddresses(addrs[i]);
+            if (null != plainAddresses && plainAddresses.length > 0) {
+                list.addAll(Arrays.asList(plainAddresses));
+            }
+        }
+        return list.toArray(new InternetAddress[list.size()]);
+    }
+
+    /**
+     * Returns the value of the RFC 822 "Date" field. This is the date on which this message was sent. Returns <code>null</code> if this
+     * field is unavailable or its value is absent.
+     *
+     * @param part The mail part
+     * @return The sent Date
+     */
+    public static Date getSentDate(final MailPart part) {
+        final String dateString = part.getHeader("Date", null);
+        return parseDate(dateString);
+    }
+
+    /**
+     * Returns the value of the RFC 822 "Date" field. This is the date on which this message was sent. Returns <code>null</code> if this
+     * field is unavailable or its value is absent.
+     *
+     * @param mimeMessage The MIME message
+     * @return The sent Date
+     * @throws MessagingException If sent date cannot be returned
+     */
+    public static Date getSentDate(MimeMessage mimeMessage) throws MessagingException {
+        String dateString = mimeMessage.getHeader("Date", null);
+        return parseDate(dateString);
+    }
+
+    private static Date parseDate(String dateString ) {
+        Date result = null;
+        if (dateString != null) {
+            try {
+                MailDateFormat mailDateFormat = getDefaultMailDateFormat();
+                synchronized (mailDateFormat) {
+                    result =  mailDateFormat.parse(dateString);
+                }
+            } catch (java.text.ParseException pex) {
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Gets the Content-Type for given part.
+     *
+     * @param part The part
+     * @return The parsed Content-Type
+     * @throws OXException If parsing fails
+     */
+    public static ContentType getContentType(final Part part) throws OXException {
+        try {
+            final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+            return (tmp != null) && (tmp.length > 0) ? new ContentType(tmp[0]) : new ContentType(MimeTypes.MIME_DEFAULT);
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Gets the multipart from passed message.
+     *
+     * @param message The message
+     * @param contentType The message's Content-Type
+     * @return The appropriate multipart
+     * @throws OXException If content cannot be presented as a multipart
+     */
+    public static Multipart multipartFor(final MimeMessage message, final ContentType contentType) throws OXException {
+        return multipartFor(message, contentType, true);
+    }
+
+    private static Multipart multipartFor(final MimeMessage message, final ContentType contentType, final boolean reparse) throws OXException {
+        try {
+            return multipartFor(message.getContent(), contentType);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (final javax.mail.internet.ParseException e) {
+            if (!reparse) {
+                throw MimeMailException.handleMessagingException(e);
+            }
+            // Sanitize parameterized headers
+            try {
+                final String sContentType = message.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+                message.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new ContentType(sContentType).toString(true));
+                saveChanges(message);
+            } catch (final Exception x) {
+                // Content-Type cannot be sanitized
+                org.slf4j.LoggerFactory.getLogger(MimeFilter.class).debug("Content-Type cannot be sanitized.", x);
+                throw MimeMailException.handleMessagingException(e);
+            }
+            return multipartFor(message, contentType, false);
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Gets the multipart from passed content object.
+     *
+     * @param content The content object
+     * @param contentType The content type
+     * @return The appropriate multipart
+     * @throws OXException If content cannot be presented as a multipart
+     */
+    private static Multipart multipartFor(final Object content, final ContentType contentType) throws OXException {
+        if (null == content) {
+            return null;
+        }
+        if (content instanceof Multipart) {
+            return (Multipart) content;
+        }
+        if (content instanceof InputStream) {
+            try {
+                return new MimeMultipart(new MessageDataSource((InputStream) content, contentType));
+            } catch (final MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+        if (content instanceof String) {
+            try {
+                return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), contentType));
+            } catch (final MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+        throw MailExceptionCode.MESSAGING_ERROR.create("Content is not of type javax.mail.Multipart, but " + content.getClass().getName());
+    }
+
+    /**
+     * Converts specified flags bit mask to an instance of {@link Flags}.
+     *
+     * @param flags The flags bit mask
+     * @return The corresponding instance of {@link Flags}
+     */
+    public static Flags convertMailFlags(int flags) {
+        final Flags flagsObj = new Flags();
+        if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
+            flagsObj.add(Flags.Flag.ANSWERED);
+        }
+        if ((flags & MailMessage.FLAG_DELETED) > 0) {
+            flagsObj.add(Flags.Flag.DELETED);
+        }
+        if ((flags & MailMessage.FLAG_DRAFT) > 0) {
+            flagsObj.add(Flags.Flag.DRAFT);
+        }
+        if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
+            flagsObj.add(Flags.Flag.FLAGGED);
+        }
+        if ((flags & MailMessage.FLAG_RECENT) > 0) {
+            flagsObj.add(Flags.Flag.RECENT);
+        }
+        if ((flags & MailMessage.FLAG_SEEN) > 0) {
+            flagsObj.add(Flags.Flag.SEEN);
+        }
+        if ((flags & MailMessage.FLAG_USER) > 0) {
+            flagsObj.add(Flags.Flag.USER);
+        }
+        if ((flags & MailMessage.FLAG_SPAM) > 0) {
+            flagsObj.add(MailMessage.USER_SPAM);
+        }
+        if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
+            flagsObj.add(MailMessage.USER_FORWARDED);
+        }
+        if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
+            flagsObj.add(MailMessage.USER_READ_ACK);
+        }
+        return flagsObj;
+    }
+
+    private static final Pattern PATTERN_PARSE_HEADER = Pattern.compile("(\\S+):\\p{Blank}?(.*)(?:(?:\r?\n)|(?:$))");
+
+    /**
+     * Parses given message source's headers into a {@link HeaderCollection collection} until EOF or 2 subsequent CRLFs occur.
+     *
+     * @param messageSrc The message source
+     * @return The parsed headers as a {@link HeaderCollection collection}.
+     */
+    public static HeaderCollection loadHeaders(final String messageSrc) {
+        /*
+         * Determine position of double line break
+         */
+        final int len = messageSrc.length();
+        int i;
+        NextRead: for (i = 0; i < len; ++i) {
+            char c = messageSrc.charAt(i);
+            final int prevPos = i;
+            int count = 0;
+            while ((c == '\r') || (c == '\n')) {
+                if ((c == '\n') && (++count >= 2)) {
+                    i = prevPos;
+                    break NextRead;
+                }
+                if (++i >= len) {
+                    i = prevPos;
+                    break NextRead;
+                }
+                c = messageSrc.charAt(i);
+            }
+        }
+        /*
+         * Parse single headers
+         */
+        final Matcher m = PATTERN_PARSE_HEADER.matcher(unfold(messageSrc.substring(0, i)));
+        final HeaderCollection headers = new HeaderCollection();
+        while (m.find()) {
+            final String value = m.group(2);
+            if (value == null || isEmpty(value)) {
+                headers.addHeader(m.group(1), "");
+            } else {
+                headers.addHeader(m.group(1), value);
+            }
+        }
+        return headers;
     }
 
 }

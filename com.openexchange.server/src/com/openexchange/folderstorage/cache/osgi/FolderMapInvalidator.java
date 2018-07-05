@@ -88,16 +88,14 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
 
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
-        if (fromRemote) {
+        if (fromRemote && REGION.equals(cacheEvent.getRegion())) {
             // Remotely received
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);
 
-            if (REGION.equals(cacheEvent.getRegion())) {
-                int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());
-                if (contextId > 0) {
-                    for (Serializable cacheKey : cacheEvent.getKeys()) {
-                        handleCacheKey(cacheKey, contextId);
-                    }
+            int contextId = Tools.getUnsignedInteger(cacheEvent.getGroupName());
+            if (contextId > 0) {
+                for (Serializable cacheKey : cacheEvent.getKeys()) {
+                    handleCacheKey(cacheKey, contextId);
                 }
             }
         }

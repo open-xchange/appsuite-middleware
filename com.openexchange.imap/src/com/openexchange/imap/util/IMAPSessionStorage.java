@@ -49,8 +49,6 @@
 
 package com.openexchange.imap.util;
 
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,6 +64,8 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.imap.IMAPFolder;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TLongHashSet;
 
 /**
  * {@link IMAPSessionStorage} - An IMAP storage held by a session.

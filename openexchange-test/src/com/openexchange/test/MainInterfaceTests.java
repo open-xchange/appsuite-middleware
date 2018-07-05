@@ -76,6 +76,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.group.GroupTestSuite.class,
     com.openexchange.ajax.importexport.ImportExportServerSuite.class,
     com.openexchange.ajax.infostore.InfostoreAJAXSuite.class,
+    com.openexchange.ajax.infostore.apiclient.InfostoreApiClientSuite.class,
     com.openexchange.ajax.mail.MailTestSuite.class,
     com.openexchange.ajax.mail.filter.MailFilterTestSuite.class,
     com.openexchange.ajax.redirect.RedirectTests.class,
@@ -87,12 +88,12 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.user.UserAJAXSuite.class,
     // TODO: enable when MSLiveOAuthClient is implemented
     // com.openexchange.subscribe.mslive.MSLiveTestSuite.class,
-    
+
     com.openexchange.dav.caldav.tests.CalDAVTestSuite.class,
     com.openexchange.dav.caldav.bugs.CalDAVBugSuite.class,
     com.openexchange.dav.carddav.tests.CardDAVTestSuite.class,
     com.openexchange.dav.carddav.bugs.CardDAVBugSuite.class,
-    
+
     com.openexchange.grizzly.GrizzlyTestSuite.class,
 
     com.openexchange.ajax.resource.ResourceSuite.class,
@@ -118,7 +119,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
     OAuthProviderTests.class,
     com.openexchange.ajax.userfeedback.StoreTest.class,
-
+    com.openexchange.ajax.sessionmanagement.SessionManagementSuite.class,
+    com.openexchange.ajax.chronos.ChronosTestSuite.class
 })
 public final class MainInterfaceTests {
 

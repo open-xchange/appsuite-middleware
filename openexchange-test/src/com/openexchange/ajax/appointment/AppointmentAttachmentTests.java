@@ -89,6 +89,7 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
 
     private Date creationDate;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -109,6 +110,7 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
         creationDate = new Date(timestamp - tz.getOffset(timestamp));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -128,7 +130,9 @@ public class AppointmentAttachmentTests extends AbstractAJAXSession {
 
     @Test
     public void testLastModifiedOfNewestAttachmentWithAll() throws Throwable {
-        CommonAllResponse response = getClient().execute(new AllRequest(appointment.getParentFolderID(), new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }, appointment.getStartDate(), appointment.getEndDate(), tz, true));
+        Date rangeStart = TimeTools.getAPIDate(tz, appointment.getStartDate(), 0);
+        Date rangeEnd = TimeTools.getAPIDate(tz, appointment.getEndDate(), 1);
+        CommonAllResponse response = getClient().execute(new AllRequest(appointment.getParentFolderID(), new int[] { Appointment.OBJECT_ID, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT }, rangeStart, rangeEnd, tz, true));
         appointment.setLastModified(response.getTimestamp());
         Appointment test = null;
         int objectIdPos = response.getColumnPos(Appointment.OBJECT_ID);

@@ -124,6 +124,11 @@ public final class ResponseFields {
     public static final String PROBLEMATIC = "problematic";
 
     /**
+     * Name of the JSON attribute containing an array with JSON objects describing exception details like sub exceptions.
+     */
+    public static final String DETAILS = "details";
+
+    /**
      * Name of the JSON attribute containing the timestamp of the most actual returned object.
      */
     public static final String TIMESTAMP = "timestamp";

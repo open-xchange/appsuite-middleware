@@ -49,16 +49,15 @@
 
 package com.openexchange.mail.mime;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import javax.mail.BodyPart;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
 import org.junit.Test;
 import com.openexchange.mail.MailcapInitialization;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

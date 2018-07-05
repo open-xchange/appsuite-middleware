@@ -55,14 +55,14 @@ import static net.fortuna.ical4j.model.property.Clazz.PRIVATE;
 import static net.fortuna.ical4j.model.property.Clazz.PUBLIC;
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.property.Clazz;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.Clazz;
 
 /**
  * {@link Klass} - Represents the attribute converter for <code>"CLASS"</code> element.

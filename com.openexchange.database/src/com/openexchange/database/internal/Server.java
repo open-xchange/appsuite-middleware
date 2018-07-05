@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -71,10 +72,9 @@ public final class Server {
 
     private static final String SELECT = "SELECT server_id FROM server WHERE name=?";
 
-    private static volatile String serverName;
+    private static final AtomicReference<String> SERVER_NAME_REF = new AtomicReference<String>(null);
 
-    private static volatile ConfigDatabaseService configDatabaseService;
-
+    private static final AtomicReference<ConfigDatabaseService> CONFIG_DB_SERVICE_REF = new AtomicReference<ConfigDatabaseService>(null);
 
     /**
      * Prevent instantiation
@@ -84,7 +84,7 @@ public final class Server {
     }
 
     static void setConfigDatabaseService(final ConfigDatabaseService configDatabaseService) {
-        Server.configDatabaseService = configDatabaseService;
+        CONFIG_DB_SERVICE_REF.set(configDatabaseService);
     }
 
     private static volatile Integer serverId;
@@ -115,36 +115,56 @@ public final class Server {
         return tmp.intValue();
     }
 
-    public static final void start(final ConfigurationService service) throws OXException {
-        final String tmp = service.getProperty(PROPERTY_NAME);
+    /**
+     * Initializes the server name using given configuration service.
+     *
+     * @param service The configuration service to use
+     * @throws OXException If <code>SERVER_NAME</code> configuration property is missing
+     */
+    public static final void start(ConfigurationService service) throws OXException {
+        String tmp = service.getProperty(PROPERTY_NAME);
         if (null == tmp || tmp.length() == 0) {
             throw DBPoolingExceptionCodes.NO_SERVER_NAME.create();
         }
-        serverName = tmp;
+        SERVER_NAME_REF.set(tmp);
     }
 
+    /**
+     * Gets the configured server name (see <code>SERVER_NAME</code> property in 'system.properties' file)
+     *
+     * @return The server name
+     * @throws OXException If server name is absent
+     */
     public static String getServerName() throws OXException {
-        final String tmp = Server.serverName;
+        String tmp = SERVER_NAME_REF.get();
         if (null == tmp) {
             throw DBPoolingExceptionCodes.NOT_INITIALIZED.create(Server.class.getName());
         }
         return tmp;
     }
 
+    /**
+     * Resolves specified server name to its registered identifier.
+     *
+     * @param name The server name; e.g. <code>"oxserver"</code>
+     * @return The server identifier or <code>-1</code> if no such server is registered with specified name
+     * @throws OXException If resolving the server name fails
+     */
     private static int loadServerId(final String name) throws OXException {
-        int retval = -1;
+        ConfigDatabaseService myService = CONFIG_DB_SERVICE_REF.get();
+        if (null == myService) {
+            throw DBPoolingExceptionCodes.NOT_INITIALIZED.create(Server.class.getName());
+        }
+
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final ConfigDatabaseService myService = Server.configDatabaseService;
         try {
             con = myService.getReadOnly();
             stmt = con.prepareStatement(SELECT);
             stmt.setString(1, name);
             result = stmt.executeQuery();
-            if (result.next()) {
-                retval = result.getInt(1);
-            }
+            return result.next() ? result.getInt(1) : -1;
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -153,6 +173,6 @@ public final class Server {
                 myService.backReadOnly(con);
             }
         }
-        return retval;
     }
+
 }

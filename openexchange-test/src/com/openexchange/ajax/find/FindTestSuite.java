@@ -75,10 +75,10 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     com.openexchange.ajax.find.calendar.QueryTest.class,
-    //disable AutoCompleteTest for now
-    //com.openexchange.ajax.find.calendar.AutocompleteTest.class,
+    com.openexchange.ajax.find.calendar.AutocompleteTest.class,
     com.openexchange.ajax.find.contacts.QueryTest.class,
-    com.openexchange.ajax.find.contacts.AutocompleteTest.class,
+    com.openexchange.ajax.find.contacts.AutoCompleteTest.class,
+    com.openexchange.ajax.find.contacts.AutoCompleteShowDepartmentsTest.class,
     BasicMailTest.class,
     BasicDriveTest.class,
     FindTasksTestsFilterCombinations.class,

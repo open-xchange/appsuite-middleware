@@ -90,7 +90,7 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
     private static final String TAXONOMY_TYPES_CONFIG_CASCADE = "config/com.openexchange.config.cascade.types";
     private static final String TAXONOMY_TYPE_CONFIGURATION = ".taxonomy.types";
 
-    private static TaxonomyTypesAdvertisementConfigService instance = null;
+    private static volatile TaxonomyTypesAdvertisementConfigService instance;
 
     /**
      * Gets the instance of {@code TaxonomyTypesAdvertisementConfigService}.
@@ -99,10 +99,17 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
      * @throws OXException
      */
     public static TaxonomyTypesAdvertisementConfigService getInstance() throws OXException {
-        if (instance == null) {
-            instance = new TaxonomyTypesAdvertisementConfigService();
+        TaxonomyTypesAdvertisementConfigService tmp = instance;
+        if (null == tmp) {
+            synchronized (TaxonomyTypesAdvertisementConfigService.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = new TaxonomyTypesAdvertisementConfigService();
+                    instance = tmp;
+                }
+            }
         }
-        return instance;
+        return tmp;
     }
 
     private final Map<String, String[]> reseller2Types = new ConcurrentHashMap<>(1);

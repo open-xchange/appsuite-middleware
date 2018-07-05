@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JSON Interface to templating services
 Bundle-SymbolicName: com.openexchange.templating.json
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.templating.json.osgi.TemplatingJSONActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -20,7 +20,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.tools,
  com.openexchange.config,
- com.openexchange.documentation,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.ldap,

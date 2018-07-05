@@ -71,14 +71,8 @@ public class DBWeightComparator implements Comparator<DatabaseHandle> {
 
     @Override
     public int compare(DatabaseHandle db1, DatabaseHandle db2) {
-        int missingUnits1 = getMissingUnits(db1);
-        if (isFull(db1)) {
-            missingUnits1 = Integer.MIN_VALUE;
-        }
-        int missingUnits2 = getMissingUnits(db2);
-        if (isFull(db2)) {
-            missingUnits2 = Integer.MIN_VALUE;
-        }
+        int missingUnits1 = isFull(db1) ? Integer.MIN_VALUE : getMissingUnits(db1);
+        int missingUnits2 = isFull(db2) ? Integer.MIN_VALUE : getMissingUnits(db2);
         return I(missingUnits1).compareTo(I(missingUnits2));
     }
 
@@ -87,7 +81,7 @@ public class DBWeightComparator implements Comparator<DatabaseHandle> {
     }
 
     private int getAverageUnits(final DatabaseHandle db) {
-        return totalUnits * i(db.getClusterWeight()) / totalWeight;
+        return totalUnits * 100 / totalWeight;
     }
 
     private boolean isFull(final DatabaseHandle db) {

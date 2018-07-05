@@ -71,28 +71,6 @@ msgid ""
 "following information."
 msgstr ""
 
-# Updater
-msgid "Updater"
-msgstr ""
-
-# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
-msgid ""
-"When executing the downloaded file, an installation wizard will be launched. "
-"Follow the instructions and install the updater. Installs latest versions of "
-"Windows® client software. The Updater automatically informs about new "
-"updates. You can download the updates from within the Updater."
-msgstr ""
-
-# Connector for Microsoft Outlook®
-msgid "Connector for Microsoft Outlook®"
-msgstr ""
-
-# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
-msgid ""
-"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
-"Shared and System Folders to Microsoft Outlook® clients."
-msgstr ""
-
 # Synchronize your Mail, Calendar and Address Book data with your device.
 msgid ""
 "Synchronize your Mail, Calendar and Address Book data with your device."

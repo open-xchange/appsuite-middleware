@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeScriptResultRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeScriptResultResponse;

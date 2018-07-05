@@ -58,11 +58,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.Parameter;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.parameter.XParameter;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -79,6 +74,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.parameter.XParameter;
 
 /**
  * {@link Attach}
@@ -217,28 +217,27 @@ public class Attach<T extends CalendarComponent, U extends CalendarObject> exten
         Parameter fmttypeParameter = attach.getParameter(Parameter.FMTTYPE);
         String filename = extractFilename(attach);
         String contentType = null != fmttypeParameter ? fmttypeParameter.getValue() : MimeType2ExtMap.getContentType(filename, "application/octet-stream");
-        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        ThresholdFileHolder fileHolder = null;
         StringReader reader = null;
         InputStream inputStream = null;
-        boolean error = true;
         try {
             reader = new StringReader(value);
             inputStream = BaseEncoding.base64().decodingStream(reader);
+            fileHolder = new ThresholdFileHolder();
             fileHolder.write(inputStream);
             /*
              * store additional metadata in fileholder
              */
             fileHolder.setContentType(contentType);
             fileHolder.setName(filename);
-            error = false;
-            return fileHolder;
+
+            ThresholdFileHolder retval = fileHolder;
+            fileHolder = null;
+            return retval;
         } catch (OXException e) {
             warnings.add(new ConversionWarning(index, Code.PARSE_EXCEPTION, e, e.getMessage()));
         } finally {
-            if (error) {
-                Streams.close(fileHolder);
-            }
-            Streams.close(inputStream, reader);
+            Streams.close(fileHolder, inputStream, reader);
         }
 
         return null;

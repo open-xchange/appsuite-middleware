@@ -49,9 +49,9 @@
 
 package com.openexchange.webdav;
 
+import java.util.Date;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import java.util.Date;
 
 /**
  * {@link LastModifiedCache} - Simple cache for last-modified time stamps.

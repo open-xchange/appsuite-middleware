@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The share API bundle
 Bundle-SymbolicName: com.openexchange.share.json
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -32,9 +32,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.conversion,
  com.openexchange.crypto,
  com.openexchange.dispatcher,
- com.openexchange.documentation,
- com.openexchange.documentation.annotations,
- com.openexchange.documentation.descriptions,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.file.storage.composition,
@@ -66,6 +63,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.share.groupware,
  com.openexchange.share.notification,
  com.openexchange.share.recipient,
+ com.openexchange.tools,
  com.openexchange.tools.iterator,
  com.openexchange.tools.servlet,
  com.openexchange.tools.servlet.http,

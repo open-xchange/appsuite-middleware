@@ -50,14 +50,13 @@
 package com.openexchange.messaging.json;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
@@ -70,7 +69,7 @@ import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
  */
 public class AddressHeaderParser implements MessagingHeaderParser {
 
-    private static final Set<String> WHITELIST = new HashSet<String>(Arrays.asList(
+    private static final Set<String> WHITELIST = ImmutableSet.of(
         "From",
         "To",
         "Cc",
@@ -83,7 +82,7 @@ public class AddressHeaderParser implements MessagingHeaderParser {
         "Resent-Sender",
         "Resent-To",
         "Resent-Cc",
-        "Resent-Bcc"));
+        "Resent-Bcc");
 
     @Override
     public int getRanking() {

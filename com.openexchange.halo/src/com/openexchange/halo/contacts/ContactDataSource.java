@@ -79,14 +79,11 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     }
 
 	@Override
-	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session)
-			throws OXException {
-		List<Contact> allContacts = new ArrayList<Contact>();
-
-		allContacts.add(query.getContact());
+	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
 		List<Contact> mergedContacts = query.getMergedContacts();
+		List<Contact> allContacts = new ArrayList<Contact>(mergedContacts.size() + 1);
+		allContacts.add(query.getContact());
 		allContacts.addAll(mergedContacts);
-
 		return new AJAXRequestResult(allContacts, "contact");
 	}
 
@@ -117,7 +114,10 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     }
 
     private Picture getPicture0(HaloContactQuery contactQuery, ServerSession session, boolean withBytes) throws OXException {
-        List<Contact> mergedContacts = contactQuery.getMergedContacts();
+        List<Contact> mergedContacts = contactQuery.getCopyOfMergedContacts();
+        if (mergedContacts == null) {
+            mergedContacts = new ArrayList<>(0);
+        }
         Collections.sort(mergedContacts,  new ImagePrecedence());
 
         for (final Contact contact : mergedContacts) {

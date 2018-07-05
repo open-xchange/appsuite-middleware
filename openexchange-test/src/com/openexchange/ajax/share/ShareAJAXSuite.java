@@ -59,7 +59,6 @@ import com.openexchange.ajax.share.bugs.Bug40596Test;
 import com.openexchange.ajax.share.bugs.Bug40627Test;
 import com.openexchange.ajax.share.bugs.Bug40722Test;
 import com.openexchange.ajax.share.bugs.Bug40826Test;
-import com.openexchange.ajax.share.bugs.Bug40993Test;
 import com.openexchange.ajax.share.bugs.Bug41184Test;
 import com.openexchange.ajax.share.bugs.Bug41287Test;
 import com.openexchange.ajax.share.bugs.Bug41537Test;
@@ -67,6 +66,7 @@ import com.openexchange.ajax.share.bugs.Bug41622Test;
 import com.openexchange.ajax.share.bugs.Bug43270Test;
 import com.openexchange.ajax.share.bugs.Bug44962Test;
 import com.openexchange.ajax.share.bugs.Bug52843Test;
+import com.openexchange.ajax.share.bugs.Bug58051Test;
 import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AddGuestUserToGroupTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
@@ -79,14 +79,14 @@ import com.openexchange.ajax.share.tests.CreateSubfolderTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
 import com.openexchange.ajax.share.tests.DownloadHandlerTest;
 import com.openexchange.ajax.share.tests.EmptyGuestPasswordTest;
-import com.openexchange.ajax.share.tests.ExpiredSharesTest;
 import com.openexchange.ajax.share.tests.FileStorageTransactionTest;
 import com.openexchange.ajax.share.tests.FolderItemCountTest;
 import com.openexchange.ajax.share.tests.FolderTransactionTest;
 import com.openexchange.ajax.share.tests.GetALinkTest;
+import com.openexchange.ajax.share.tests.GetLinkInheritanceTest;
+import com.openexchange.ajax.share.tests.GetLinkInheritanceWrongModuleTest;
 import com.openexchange.ajax.share.tests.GuestAutologinTest;
 import com.openexchange.ajax.share.tests.GuestContactTest;
-import com.openexchange.ajax.share.tests.GuestPasswordTest;
 import com.openexchange.ajax.share.tests.LinkUpdateTest;
 import com.openexchange.ajax.share.tests.ListFileSharesTest;
 import com.openexchange.ajax.share.tests.ListFolderSharesTest;
@@ -97,10 +97,8 @@ import com.openexchange.ajax.share.tests.NotifyFolderSharesTest;
 import com.openexchange.ajax.share.tests.ParallelGuestSessionsTest;
 import com.openexchange.ajax.share.tests.PasswordResetServletTest;
 import com.openexchange.ajax.share.tests.QuotaTest;
-import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 import com.openexchange.ajax.share.tests.ResolveLegacyLinkTest;
 import com.openexchange.ajax.share.tests.SharedFilesFolderTest;
-import com.openexchange.ajax.share.tests.ShowSharedFilesFolderTest;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -112,16 +110,15 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @Suite.SuiteClasses({
     CreateWithGuestPermissionTest.class,
     AddGuestPermissionTest.class,
-    RemoveGuestPermissionTest.class,
-    ExpiredSharesTest.class,
     CreateSubfolderTest.class,
     FolderTransactionTest.class,
     AggregateSharesTest.class,
     FileStorageTransactionTest.class,
     GuestContactTest.class,
     AnonymousGuestPasswordTest.class,
-    GuestPasswordTest.class,
     GetALinkTest.class,
+    GetLinkInheritanceTest.class,
+    GetLinkInheritanceWrongModuleTest.class,
     ParallelGuestSessionsTest.class,
     QuotaTest.class,
     DownloadHandlerTest.class,
@@ -131,7 +128,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     EmptyGuestPasswordTest.class,
     LoginScreenTest.class,
     FolderItemCountTest.class,
-    ShowSharedFilesFolderTest.class,
     AnonymousGuestTest.class,
     LinkUpdateTest.class,
     ListFileSharesTest.class,
@@ -151,7 +147,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug40826Test.class,
     AddGuestUserToGroupTest.class,
     PasswordResetServletTest.class,
-    Bug40993Test.class,
     Bug41184Test.class,
     Bug41287Test.class,
     Bug41537Test.class,
@@ -159,7 +154,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug41622Test.class,
     Bug43270Test.class,
     Bug44962Test.class,
-    Bug52843Test.class
+    Bug52843Test.class,
+    Bug58051Test.class,
 
 })
 public class ShareAJAXSuite  {

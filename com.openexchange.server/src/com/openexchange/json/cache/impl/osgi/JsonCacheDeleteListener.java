@@ -52,11 +52,11 @@ package com.openexchange.json.cache.impl.osgi;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link JsonCacheDeleteListener}
@@ -88,7 +88,7 @@ public class JsonCacheDeleteListener implements DeleteListener {
         } catch (final Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -118,7 +118,7 @@ public class JsonCacheDeleteListener implements DeleteListener {
         } catch (final Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

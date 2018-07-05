@@ -65,6 +65,7 @@ import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdat
 import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdateTaskRetry;
 import com.openexchange.publish.database.PublicationsAddEntityIndex;
 import com.openexchange.publish.database.PublicationsCreatedAndLastModifiedColumn;
+import com.openexchange.publish.database.PublicationsTablesUtf8Mb4UpdateTask;
 
 /**
  * {@link UpdateTaskRegisterer}
@@ -88,13 +89,14 @@ public class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseSe
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
                 return Arrays.asList(
-                    (UpdateTaskV2) new PublicationWithUsernameAndPasswordUpdateTask(service),
-                    new EnabledColumn(service),
-                    new FixPublicationTablePrimaryKey(service),
-                    new PublicationWithUsernameAndPasswordUpdateTaskRetry(service),
-                    new PublicationsCreatedAndLastModifiedColumn(service),
-                    new PublicationUsersCreatedAndLastModifiedColumn(service),
-                    new PublicationsAddEntityIndex(service));
+                    (UpdateTaskV2) new PublicationWithUsernameAndPasswordUpdateTask(),
+                    new EnabledColumn(),
+                    new FixPublicationTablePrimaryKey(),
+                    new PublicationWithUsernameAndPasswordUpdateTaskRetry(),
+                    new PublicationsCreatedAndLastModifiedColumn(),
+                    new PublicationUsersCreatedAndLastModifiedColumn(),
+                    new PublicationsAddEntityIndex(),
+                    new PublicationsTablesUtf8Mb4UpdateTask());
             }
         }, null);
         return service;

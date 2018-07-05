@@ -55,6 +55,7 @@ import java.net.URI;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -82,6 +83,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Creates a new instance implementing the group storage interface.
+     *
      * @return an instance implementing the group storage interface.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
@@ -235,6 +237,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * List all registered file stores.
+     *
      * @param pattern a pattern to search for
      * @return an array of file store objects
      * @throws StorageException
@@ -291,6 +294,13 @@ public abstract class OXUtilStorageInterface {
      * Iterates across all existing file storages and searches for one having enough space for a context.
      */
     public abstract Filestore findFilestoreForContext() throws StorageException;
+
+    /**
+     * Iterates across all existing file storages and searches for one having enough space for a context.
+     *
+     * @param configDbCon A writable {@link Connection} to the ConfigDB
+     */
+    public abstract Filestore findFilestoreForContext(Connection configDbCon) throws StorageException;
 
     /**
      * Iterates across all existing file storages and searches for one having enough space for a user.
@@ -367,34 +377,46 @@ public abstract class OXUtilStorageInterface {
     public abstract MaintenanceReason[] listMaintenanceReasons(final String search_pattern) throws StorageException;
 
     /**
-     * Register a new Database in configdb
+     * Registers a new {@link Database#isMaster() master} or slave database (host) in configdb
      *
-     * @param db
-     *            a database object to register
-     * @return long with the id of the database
+     * @param db A database object to register
+     * @param createSchemas Whether the schemas holding payload data are supposed to be pre-created
+     * @param optNumberOfSchemas Given that <code>createSchemas</code> is <code>true</code> that parameter specifies the number of schemas that shall be created;
+     *            if not set number of schemas is determined by max. units for associated database divides by <code>CONTEXTS_PER_SCHEMA</code> configuration option
+     * @return The identifier of the database
      * @throws StorageException
      */
-    public abstract int registerDatabase(final Database db) throws StorageException;
+    public abstract int registerDatabase(Database db, boolean createSchemas, int optNumberOfSchemas) throws StorageException;
+
+    /**
+     * Creates schemas on given database host.
+     *
+     * @param db A database host
+     * @param optNumberOfSchemas Specifies the number of schemas that shall be created; if not set number of schemas is determined by max. units for associated database divides by <code>CONTEXTS_PER_SCHEMA</code> configuration option
+     * @return The newly created schemas
+     * @throws StorageException If schemas cannot be created
+     */
+    public abstract List<String> createDatabaseSchemas(Database db, int optNumberOfSchemas) throws StorageException;
+
+    /**
+     * Deletes empty schemas from given database host.
+     *
+     * @param db An optional database host; possibly also specifying a certain schema
+     * @param optNumberOfSchemasToKeep Specifies the number of schemas to keep (per database); if not specified all empty schemas are supposed to be deleted
+     * @return The empty schemas that were deleted (grouped by database host association)
+     * @throws StorageException If schema cannot be deleted
+     */
+    public abstract Map<Database, List<String>> deleteEmptyDatabaseSchemas(Database db, int optNumberOfSchemasToKeep) throws StorageException;
 
     /**
      * Creates a new database from scratch on the given database host. Is used
      * ONLY internally at the moment.
      *
-     * @param db
-     *            a database object to create
+     * @param db a database object to create
+     * @param con A writable {@link Connection} to the configdb
      * @throws StorageException
      */
-    public abstract void createDatabase(final Database db) throws StorageException;
-
-    /**
-     * Delete a complete database(scheme) from the given database host. Is used
-     * ONYL internally at the moment.
-     *
-     * @param db
-     *            a database object to be deleted
-     * @throws StorageException
-     */
-    public abstract void deleteDatabase(final Database db) throws StorageException;
+    public abstract void createDatabase(final Database db, Connection con) throws StorageException;
 
     // TODO: cutamasta: please fill javadoc comment
     /**
@@ -433,6 +455,15 @@ public abstract class OXUtilStorageInterface {
     public abstract void unregisterServer(final int server_id) throws StorageException;
 
     /**
+     * Changes the server identifier for the specified schema
+     *
+     * @param serverId The server identifier
+     * @param schemaName The schema name
+     * @throws StorageException
+     */
+    public abstract void changeServer(int serverId, String schemaName) throws StorageException;
+
+    /**
      * Searches for databases matching search_pattern
      *
      * @param search_pattern
@@ -441,6 +472,27 @@ public abstract class OXUtilStorageInterface {
      * @throws StorageException
      */
     public abstract Database[] searchForDatabase(final String search_pattern) throws StorageException;
+
+    /**
+     * Searches for databases schemas matching search_pattern
+     *
+     * @param search_pattern
+     *            a pattern to search for
+     * @param onlyEmptySchemas Whether only empty database schemas are supposed to be considered
+     * @return a database array with schema information
+     * @throws StorageException
+     */
+    public abstract Database[] searchForDatabaseSchema(final String search_pattern, boolean onlyEmptySchemas) throws StorageException;
+
+    /**
+     * Counts schemas per database host matching search_pattern
+     *
+     * @param search_pattern A pattern to search for
+     * @param onlyEmptySchemas Whether only empty database schemas are supposed to be counted
+     * @return The schema counts per database host
+     * @throws StorageException
+     */
+    public abstract Map<Database, Integer> countDatabaseSchema(final String search_pattern, boolean onlyEmptySchemas) throws StorageException;
 
     /**
      * Searchs for server matching given search_pattern
@@ -461,24 +513,24 @@ public abstract class OXUtilStorageInterface {
      */
     public abstract int getWritePoolIdForCluster(final int clusterId) throws StorageException;
 
-
     /**
      * Creates a new schema in the given database if possible. In case the optDBId is null the best suitable DB is selected automatically.
      *
-     * @param optDBId Optional database identifier. If missing the best suitable database is selected automatically.
+     * @param optDatabaseId Optional database identifier. If missing the best suitable database is selected automatically.
      * @return The schema name.
      * @throws StorageException
      */
-    public abstract Database createSchema(Integer optDBId) throws StorageException;
+    public abstract Database createSchema(Integer optDatabaseId) throws StorageException;
 
     /**
      * Determine the next database to use depending on database weight factor. Each database should be equal full according to their weight.
      * Additionally check each master for availability.
      *
      * @param con
+     * @param forContext <code>true</code> if a suitable database is supposed to be determined for a context; otherwise <code>false</code>
      * @return the database
      * @throws SQLException
      * @throws StorageException
      */
-    public abstract Database getNextDBHandleByWeight(Connection con) throws SQLException, StorageException;
+    public abstract Database getNextDBHandleByWeight(Connection con, boolean forContext) throws SQLException, StorageException;
 }

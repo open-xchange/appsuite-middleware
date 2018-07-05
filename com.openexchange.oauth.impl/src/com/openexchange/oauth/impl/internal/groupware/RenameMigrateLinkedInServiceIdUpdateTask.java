@@ -49,87 +49,47 @@
 
 package com.openexchange.oauth.impl.internal.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RenameMigrateLinkedInServiceIdUpdateTask}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RenameMigrateLinkedInServiceIdUpdateTask extends UpdateTaskAdapter {
-
-    private final DatabaseService dbService;
-
-    private static final String RENAME_LINKED_IN = "UPDATE oauthAccounts SET serviceId=? WHERE cid=? AND serviceId=?";
-    private static final String MIGRATE_LINKED_IN = "UPDATE oauthAccounts SET scope=? WHERE cid=? AND serviceId=?";
+public class RenameMigrateLinkedInServiceIdUpdateTask extends AbstractOAuthUpdateTask {
 
     /**
      * Initialises a new {@link RenameMigrateLinkedInServiceIdUpdateTask}.
      */
-    public RenameMigrateLinkedInServiceIdUpdateTask(DatabaseService dbService) {
+    public RenameMigrateLinkedInServiceIdUpdateTask() {
         super();
-        this.dbService = dbService;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection writeCon;
-        try {
-            writeCon = dbService.getForUpdateTask(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
-        PreparedStatement stmt = null;
-        try {
-            startTransaction(writeCon);
-            stmt = writeCon.prepareStatement(RENAME_LINKED_IN);
-            stmt.setString(1, KnownApi.LINKEDIN.getFullName());
-            stmt.setInt(2, contextId);
-            stmt.setString(3, "com.openexchange.socialplugin.linkedin");
-            stmt.execute();
-            stmt.close();
+    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
+        for (int contextId : performParameters.getContextsInSameSchema()) {
+            try (PreparedStatement stmt = connection.prepareStatement("UPDATE oauthAccounts SET serviceId=? WHERE cid=? AND serviceId=?")) {
+                stmt.setString(1, KnownApi.LINKEDIN.getFullName());
+                stmt.setInt(2, contextId);
+                stmt.setString(3, "com.openexchange.socialplugin.linkedin");
+                stmt.execute();
+            }
 
-            stmt = writeCon.prepareStatement(MIGRATE_LINKED_IN);
-            stmt.setString(1, OXScope.contacts_ro.name());
-            stmt.setInt(2, contextId);
-            stmt.setString(3, KnownApi.LINKEDIN.getFullName());
-            stmt.execute();
-
-            writeCon.commit();
-        } catch (SQLException e) {
-            DBUtils.rollback(writeCon);
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            autocommit(writeCon);
-            closeSQLStuff(stmt);
-            dbService.backForUpdateTask(contextId, writeCon);
+            try (PreparedStatement stmt = connection.prepareStatement("UPDATE oauthAccounts SET scope=? WHERE cid=? AND serviceId=?")) {
+                stmt.setString(1, OXScope.contacts_ro.name());
+                stmt.setInt(2, contextId);
+                stmt.setString(3, KnownApi.LINKEDIN.getFullName());
+                stmt.execute();
+            }
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[] { OAuthCreateTableTask2.class.getName(), OAuthAddScopeColumnTask.class.getName() };

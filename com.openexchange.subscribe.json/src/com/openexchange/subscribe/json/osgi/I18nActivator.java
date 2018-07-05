@@ -59,7 +59,10 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class I18nActivator extends HousekeepingActivator {
 
-    I18nActivator() {
+    /**
+     * Initializes a new {@link I18nActivator}.
+     */
+    public I18nActivator() {
         super();
     }
 
@@ -70,13 +73,7 @@ public class I18nActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        closeTrackers();
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return EMPTY_CLASSES;
     }
 }

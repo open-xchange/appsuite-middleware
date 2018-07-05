@@ -58,15 +58,14 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
+import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.IndividualAutoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
@@ -140,13 +139,18 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             return null;
         }
 
-        DefaultHttpClient httpclient = HttpClients.getHttpClient("Open-Xchange ISPDB Client");
-        try {
-            HttpHost proxy = getHttpProxyIfEnabled(httpclient, view);
-            if (null != proxy) {
-                httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-            }
+        ProxyInfo proxy = getHttpProxyIfEnabled(view);
 
+        CloseableHttpClient httpclient;
+        {
+            HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance();
+            clientConfig.setUserAgent("Open-Xchange ISPDB Client");
+            if (null != proxy) {
+                clientConfig.setProxy(proxy.proxyUrl, proxy.proxyLogin, proxy.proxyPassword);
+            }
+            httpclient = HttpClients.getHttpClient(clientConfig);
+        }
+        try {
             int port = url.getPort();
             if (port < 0) {
                 port = url.getProtocol().equalsIgnoreCase("https") ? 443 : 80;
@@ -195,7 +199,11 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             // When HttpClient instance is no longer needed,
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
-            httpclient.close(); // <-- Performs 'getConnectionManager().shutdown();'
+            try {
+                httpclient.close(); // <-- Performs 'getConnectionManager().shutdown();'
+            } catch (Exception x) {
+                // Ignore
+            }
         }
     }
 

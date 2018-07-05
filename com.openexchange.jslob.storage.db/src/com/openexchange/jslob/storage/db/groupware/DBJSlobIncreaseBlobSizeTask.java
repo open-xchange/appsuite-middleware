@@ -49,18 +49,13 @@
 
 package com.openexchange.jslob.storage.db.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -71,33 +66,32 @@ import com.openexchange.tools.update.Tools;
  */
 public class DBJSlobIncreaseBlobSizeTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link DBJSlobIncreaseBlobSizeTask}.
      *
      * @param services The service look-up
      */
-    public DBJSlobIncreaseBlobSizeTask(final ServiceLookup services) {
+    public DBJSlobIncreaseBlobSizeTask() {
         super();
-        this.services = services;
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = services.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
-        boolean writeOperationPerformed = false;
+        Connection writeCon = params.getConnection();
         boolean rollback = false;
         try {
+            String typeName = Tools.getColumnTypeName(writeCon, "jsonStorage", "data");
+            if ("MEDIUMBLOB".equalsIgnoreCase(typeName)) {
+                // Nothing to do
+                return;
+            }
+
+            // Change to MEDIUMBLOB
             writeCon.setAutoCommit(false); // BEGIN
             rollback = true;
 
-            writeOperationPerformed = doPerform(writeCon);
+            Column column = new Column("data", "MEDIUMBLOB");
+            Tools.modifyColumns(writeCon, "jsonStorage", column);
 
             writeCon.commit(); // COMMIT
             rollback = false;
@@ -107,34 +101,8 @@ public class DBJSlobIncreaseBlobSizeTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.autocommit(writeCon);
+                Databases.autocommit(writeCon);
             }
-            if (writeOperationPerformed) {
-                dbService.backForUpdateTask(contextId, writeCon);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextId, writeCon);
-            }
-        }
-    }
-
-    private boolean doPerform(final Connection writeCon) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            boolean writeOperationPerformed = false;
-
-            // Check current type name
-            String typeName = Tools.getColumnTypeName(writeCon, "jsonStorage", "data");
-            if (!"MEDIUMBLOB".equalsIgnoreCase(typeName)) {
-                final Column column = new Column("data", "MEDIUMBLOB");
-                Tools.modifyColumns(writeCon, "jsonStorage", column);
-                writeOperationPerformed = true;
-            }
-
-            return writeOperationPerformed;
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
         }
     }
 

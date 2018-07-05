@@ -57,8 +57,10 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.net.ssl.management.SSLCertificateManagementService;
 import com.openexchange.net.ssl.management.internal.SSLCertificateManagementServiceImpl;
+import com.openexchange.net.ssl.management.storage.AddHashHostColumnUpdateTask;
 import com.openexchange.net.ssl.management.storage.CreateSSLCertificateManagementTable;
 import com.openexchange.net.ssl.management.storage.CreateSSLCertificateManagementTableTask;
+import com.openexchange.net.ssl.management.storage.SSLCertificateManagementTableUtf8Mb4UpdateTask;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -77,7 +79,7 @@ public class SSLCertificateManagementActivator extends HousekeepingActivator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
     @Override
@@ -87,13 +89,13 @@ public class SSLCertificateManagementActivator extends HousekeepingActivator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.DeferredActivator#startBundle()
      */
     @Override
     protected void startBundle() throws Exception {
         registerService(CreateTableService.class, new CreateSSLCertificateManagementTable());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateSSLCertificateManagementTableTask(getService(DatabaseService.class))));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateSSLCertificateManagementTableTask(getService(DatabaseService.class)), new AddHashHostColumnUpdateTask(), new SSLCertificateManagementTableUtf8Mb4UpdateTask()));
         registerService(SSLCertificateManagementService.class, new SSLCertificateManagementServiceImpl(this));
 
         Logger logger = LoggerFactory.getLogger(SSLCertificateManagementActivator.class);
@@ -102,7 +104,7 @@ public class SSLCertificateManagementActivator extends HousekeepingActivator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
      */
     @Override

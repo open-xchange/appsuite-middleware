@@ -49,9 +49,6 @@
 
 package com.openexchange.tools.oxfolder.treeconsistency;
 
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -70,6 +67,9 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link CheckPermissionOnRemove} - Checks for system permissions which shall be removed.
@@ -99,8 +99,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
      * @param lastModified The last-modified time stamp
      * @throws OXException If checking for possible non-visible subfolders fails
      */
-    public void checkPermissionsOnUpdate(final int folderId, final OCLPermission[] removedPerms, final long lastModified)
-            throws OXException {
+    public void checkPermissionsOnUpdate(final int folderId, final OCLPermission[] removedPerms, final long lastModified) throws OXException {
         try {
             /*
              * Remove system permissions from previous parent
@@ -150,8 +149,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
         }
     }
 
-    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup,
-            final TIntObjectMap<ToDoPermission> toRemove) throws OXException, OXException, SQLException {
+    private void hasVisibleSibling(final int parent, final int exclude, final int origin, final int entity, final boolean isGroup, final TIntObjectMap<ToDoPermission> toRemove) throws OXException, OXException, SQLException {
         if (parent < FolderObject.MIN_FOLDER_ID) {
             /*
              * Stop recursive check

@@ -71,6 +71,8 @@ public final class CalendarPrintingStrings implements LocalizableStrings {
     public static final String PARTICIPANTS = "Participants";
 
     public static final String COMMENTS = "Comments";
+    
+    public static final String FULL_TIME = "The entire day";
 
     public CalendarPrintingStrings() {
         super();

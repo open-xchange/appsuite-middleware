@@ -9,6 +9,7 @@ properties:
   createdby:
     type: integer
     description: The user ID of the creator.
+    readOnly: true
   displayname:
     type: string
     description: The display name of the snippet.

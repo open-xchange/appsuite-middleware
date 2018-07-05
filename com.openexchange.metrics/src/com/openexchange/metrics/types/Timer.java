@@ -51,6 +51,7 @@ package com.openexchange.metrics.types;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import com.openexchange.exception.OXException;
 
 /**
@@ -78,6 +79,17 @@ public interface Timer extends Metric {
      * @throws OXException if {@code event} throws an {@link Exception}
      */
     <T> T time(Callable<T> event) throws OXException;
+
+    /**
+     * Times and records the duration of event. Should not throw exceptions, for that use the
+     * {@link #time(Callable)} method.
+     *
+     * @param event a {@link Supplier} whose {@link Supplier#get()} method implements a process
+     *            whose duration should be timed
+     * @param <T> the type of the value returned by {@code event}
+     * @return the value returned by {@code event}
+     */
+    <T> T timeSupplier(Supplier<T> event);
 
     /**
      * Times and records the duration of event.

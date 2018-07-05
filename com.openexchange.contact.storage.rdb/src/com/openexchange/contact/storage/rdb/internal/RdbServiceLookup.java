@@ -79,6 +79,15 @@ public class RdbServiceLookup {
         return ref.get();
     }
 
+    public static <S extends Object> S optService(final Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+
+        return serviceLookup.getOptionalService(c);
+    }
+
     public static <S extends Object> S getService(final Class<? extends S> c) throws OXException {
         return RdbServiceLookup.getService(c, false);
     }

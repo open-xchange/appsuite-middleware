@@ -126,45 +126,47 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
              */
             final DisplayMode mode = detectDisplayMode(edit, requestData.getParameter(PARAMETER_VIEW), usm);
             final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-            for (String content : previewDocument.getContent()) {
-                if (!DisplayMode.RAW.equals(mode)) {
-                    content = htmlService.dropScriptTagsInHeader(content);
-                    if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
-                        final boolean[] modified = new boolean[1];
-                        final String cssPrefix = "ox-" + HtmlProcessing.getHash(Long.toString(System.currentTimeMillis()), 10);
-                        final boolean externalImagesAllowed = usm.isAllowHTMLImages();
-                        content = htmlService.checkBaseTag(content, externalImagesAllowed);
-                        {
-                            // No need to generate well-formed HTML
-                            HtmlSanitizeOptions.Builder optionsBuilder = HtmlSanitizeOptions.builder().setSession(session);
-                            if (externalImagesAllowed) {
-                                optionsBuilder.setDropExternalImages(false);
-                            } else {
-                                optionsBuilder.setDropExternalImages(true).setModified(modified);
+            if (previewDocument.getContent() != null) {
+                for (String content : previewDocument.getContent()) {
+                    if (!DisplayMode.RAW.equals(mode)) {
+                        content = htmlService.dropScriptTagsInHeader(content);
+                        if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
+                            final boolean[] modified = new boolean[1];
+                            final String cssPrefix = "ox-" + HtmlProcessing.getHash(Long.toString(System.currentTimeMillis()), 10);
+                            final boolean externalImagesAllowed = usm.isAllowHTMLImages();
+                            content = htmlService.checkBaseTag(content, externalImagesAllowed);
+                            {
+                                // No need to generate well-formed HTML
+                                HtmlSanitizeOptions.Builder optionsBuilder = HtmlSanitizeOptions.builder().setSession(session);
+                                if (externalImagesAllowed) {
+                                    optionsBuilder.setDropExternalImages(false);
+                                } else {
+                                    optionsBuilder.setDropExternalImages(true).setModified(modified);
+                                }
+                                optionsBuilder.setCssPrefix(cssPrefix).setSuppressLinks(usm.isSuppressLinks());
+                                content = htmlService.sanitize(content, optionsBuilder.build()).getContent();
                             }
-                            optionsBuilder.setCssPrefix(cssPrefix).setSuppressLinks(usm.isSuppressLinks());
-                            content = htmlService.sanitize(content, optionsBuilder.build()).getContent();
-                        }
-                        /*
-                         * Filter inlined images
-                         */
-                        {
-                            final MailMessage mail = (MailMessage) result.getParameter("__mail");
-                            if (mail != null) {
-                                final MailPath mailPath = new MailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId());
-                                content = HtmlProcessing.filterInlineImages(content, session, mailPath);
+                            /*
+                             * Filter inlined images
+                             */
+                            {
+                                final MailMessage mail = (MailMessage) result.getParameter("__mail");
+                                if (mail != null) {
+                                    final MailPath mailPath = new MailPath(mail.getAccountId(), mail.getFolder(), mail.getMailId());
+                                    content = HtmlProcessing.filterInlineImages(content, session, mailPath);
+                                }
                             }
-                        }
-                        /*
-                         * Replace CSS classes
-                         */
-                        content = HtmlProcessing.saneCss(content, htmlService, cssPrefix);
-                        if (asDiv) {
-                            content = toDiv(content);
+                            /*
+                             * Replace CSS classes
+                             */
+                            content = HtmlProcessing.saneCss(content, htmlService, cssPrefix);
+                            if (asDiv) {
+                                content = toDiv(content);
+                            }
                         }
                     }
+                    sanitizedHtml.add(content);
                 }
-                sanitizedHtml.add(content);
             }
         }
         // Return

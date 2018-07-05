@@ -49,12 +49,12 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import static com.openexchange.calendar.storage.ParticipantStorage.extractExternal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -73,6 +73,7 @@ import com.openexchange.ajax.appointment.action.SearchRequest;
 import com.openexchange.ajax.appointment.action.SearchResponse;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
+import com.openexchange.ajax.appointment.helper.ParticipantStorage;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
@@ -99,6 +100,7 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
     private Appointment appointment;
     private ExternalUserParticipant participant;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -124,6 +126,7 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
         client.execute(new InsertRequest(appointment, tz)).fillAppointment(appointment);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -147,13 +150,15 @@ public class ConfirmationsSeriesTest extends AbstractAJAXSession {
         UpdateResponse response2 = client.execute(new UpdateRequest(changeException, tz));
         appointment.setLastModified(response2.getTimestamp());
         GetResponse response3 = client.execute(new GetRequest(appointment));
-        checkConfirmations(extractExternal(appointment.getParticipants()), response3.getAppointment(tz).getConfirmations());
-        CommonAllResponse response4 = client.execute(new AllRequest(folderId, COLUMNS, occurrence3.getStartDate(), occurrence3.getEndDate(), tz));
-        checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response4, response2.getId()));
+        checkConfirmations(ParticipantStorage.extractExternal(appointment.getParticipants()), response3.getAppointment(tz).getConfirmations());
+        Date rangeStart = TimeTools.getAPIDate(tz, occurrence3.getStartDate(), 0);
+        Date rangeEnd = TimeTools.getAPIDate(tz, occurrence3.getEndDate(), 1);
+        CommonAllResponse response4 = client.execute(new AllRequest(folderId, COLUMNS, rangeStart, rangeEnd, tz));
+        checkConfirmations(ParticipantStorage.extractExternal(appointment.getParticipants()), findConfirmations(response4, response2.getId()));
         CommonListResponse response5 = client.execute(new ListRequest(ListIDs.l(new int[] { folderId, response2.getId() }), COLUMNS));
-        checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response5, response2.getId()));
+        checkConfirmations(ParticipantStorage.extractExternal(appointment.getParticipants()), findConfirmations(response5, response2.getId()));
         SearchResponse response6 = client.execute(new SearchRequest("*", folderId, COLUMNS));
-        checkConfirmations(extractExternal(appointment.getParticipants()), findConfirmations(response6, response2.getId()));
+        checkConfirmations(ParticipantStorage.extractExternal(appointment.getParticipants()), findConfirmations(response6, response2.getId()));
     }
 
     private JSONArray findConfirmations(AbstractColumnsResponse response, int id) {

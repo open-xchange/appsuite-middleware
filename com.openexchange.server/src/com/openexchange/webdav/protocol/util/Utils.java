@@ -117,6 +117,8 @@ public class Utils {
                 return "FORBIDDEN";
             case HttpServletResponse.SC_CONFLICT:
                 return "CONFLICT";
+            case 507:
+                return "Insufficient Storage";
             default:
                 return "Unknown";
         }

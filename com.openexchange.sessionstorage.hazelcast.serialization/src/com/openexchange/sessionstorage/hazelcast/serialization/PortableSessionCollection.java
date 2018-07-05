@@ -55,21 +55,25 @@ import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.Portable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
+import com.hazelcast.nio.serialization.VersionedPortable;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.session.Session;
 
 /**
- * {@link PortableSessionCollection} - The portable representation for {@link Session} type.
+ * {@link PortableSessionCollection} - A collection of portable representations for {@link Session} type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PortableSessionCollection implements CustomPortable {
+public class PortableSessionCollection implements CustomPortable, VersionedPortable {
 
     /** The unique portable class ID of the {@link PortableSessionCollection} */
     public static final int CLASS_ID = 403;
 
+    /** The class version for {@link PortableSessionCollection} */
+    public static final int CLASS_VERSION = PortableSession.CLASS_VERSION;
+
     /** The class definition for PortableCacheEvent */
-    public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+    public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID, CLASS_VERSION)
         .addPortableArrayField("sessions", PortableSession.CLASS_DEFINITION)
         .build();
 
@@ -112,6 +116,11 @@ public class PortableSessionCollection implements CustomPortable {
     @Override
     public int getClassId() {
         return CLASS_ID;
+    }
+
+    @Override
+    public int getClassVersion() {
+        return CLASS_VERSION;
     }
 
     @Override

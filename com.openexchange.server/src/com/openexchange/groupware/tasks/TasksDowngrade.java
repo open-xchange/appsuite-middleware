@@ -70,7 +70,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
  * functionalities of the tasks module.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TasksDowngrade extends DowngradeListener {
+public class TasksDowngrade implements DowngradeListener {
 
     /**
      * Logger.
@@ -187,30 +187,28 @@ public class TasksDowngrade extends DowngradeListener {
         }
     }
 
-    private void removeTaskInPrivateFolder(final Session session,
-        final Context ctx, final Connection con, final int userId,
-        final FolderObject folder) throws OXException {
+    private void removeTaskInPrivateFolder(final Session session, final Context ctx, final Connection con, final int userId, final FolderObject folder) throws OXException {
         for (final StorageType type : StorageType.TYPES_AD) {
-            final int[] taskIds = foldStor.getTasksInFolder(ctx, con,
-                folder.getObjectID(), type);
+            final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folder.getObjectID(), type);
             for (final int taskId : taskIds) {
-                final Set<Folder> folders = foldStor.selectFolder(ctx, con,
-                    taskId, type);
+                final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId, type);
                 if (0 == folders.size()) {
                     // Inconsistent data
                     throw TaskExceptionCode.MISSING_FOLDER.create(Integer.valueOf(taskId));
                 } else if (folders.size() > 1) {
                     // Simply remove folder mapping for this user.
-                    final int folderId = FolderStorage.extractFolderOfUser(
-                        folders, userId).getIdentifier();
+                    Folder folderOfUser = FolderStorage.extractFolderOfUser(folders, userId);
+                    if (folderOfUser == null) {
+                        // Inconsistent data
+                        throw TaskExceptionCode.PARTICIPANT_FOLDER_INCONSISTENCY.create(taskId, userId, ctx.getContextId());
+                    }
+                    final int folderId = folderOfUser.getIdentifier();
                     foldStor.deleteFolder(ctx, con, taskId, folderId, type);
                     // And remove participation. No check because task can be
                     // delegated.
-                    partStor.deleteInternal(ctx, con, taskId, userId, type,
-                        false);
+                    partStor.deleteInternal(ctx, con, taskId, userId, type, false);
                 } else {
-                    TaskLogic.removeTask(session, ctx, con, folder.getObjectID(),
-                        taskId, type);
+                    TaskLogic.removeTask(session, ctx, con, folder.getObjectID(), taskId, type);
                 }
             }
         }

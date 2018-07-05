@@ -50,14 +50,15 @@
 package com.openexchange.dav.push.osgi;
 
 import static org.slf4j.LoggerFactory.getLogger;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import org.osgi.framework.ServiceRegistration;
+import java.util.Map;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -96,13 +97,13 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 public class DAVPushActivator extends HousekeepingActivator implements Reloadable  {
 
     private volatile PushSubscribeFactory factory;
-    private ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration;
-    private ServiceRegistration<EventHandler> eventHandlerRegistration;
-    private List<ServiceRegistration<PushNotificationTransport>> pushTransportRegistrations;
+//    private ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration;
+//    private ServiceRegistration<EventHandler> eventHandlerRegistration;
+//    private List<ServiceRegistration<PushNotificationTransport>> pushTransportRegistrations;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, ConfigurationService.class, PushNotificationService.class, PushSubscriptionRegistry.class, ConfigViewFactory.class };
+        return new Class<?>[] { HttpService.class, ConfigurationService.class, PushNotificationService.class, PushSubscriptionRegistry.class, ConfigViewFactory.class, CapabilityService.class };
     }
 
     @Override
@@ -162,52 +163,44 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
 
     private void reinit(ConfigurationService configService) throws OXException {
         /*
-         * unregister previous options provider and transports
+         * unregister previous options provider, transports, event handler & capability checkers
          */
-        ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration = this.optionsProviderRegistration;
-        if (null != optionsProviderRegistration) {
-            optionsProviderRegistration.unregister();
-            this.optionsProviderRegistration = null;
-        }
-        List<ServiceRegistration<PushNotificationTransport>> pushTransportRegistrations = this.pushTransportRegistrations;
-        if (null != pushTransportRegistrations && 0 < pushTransportRegistrations.size()) {
-            for (ServiceRegistration<PushNotificationTransport> pushTransportRegistration : pushTransportRegistrations) {
-                pushTransportRegistration.unregister();
-            }
-            pushTransportRegistrations = null;
-        }
-        ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
-        if (null != eventHandlerRegistration) {
-            eventHandlerRegistration.unregister();
-            this.eventHandlerRegistration = null;
-        }
+        unregisterService(ApnOptionsProvider.class);
+        unregisterService(PushNotificationTransport.class);
+        unregisterService(EventHandler.class);
+        unregisterService(CapabilityChecker.class);
         /*
-         * re-init factory & register options provider and transports
+         * re-init factory & register options provider and transports if not shutting down
          */
-        if (null != configService) {
-            boolean registerEventHandler = false;
-            factory.reinit(configService);
-            DAVApnOptionsProvider optionsProvider = factory.getApnOptionsProvider();
-            if (null != optionsProvider && 0 < optionsProvider.getAvailableOptions().size()) {
-                optionsProviderRegistration = context.registerService(ApnOptionsProvider.class, optionsProvider, null);
-                this.optionsProviderRegistration = optionsProviderRegistration;
-                registerEventHandler = true;
+        if (null == configService) {
+            return;
+        }
+        boolean registerEventHandler = false;
+        factory.reinit(configService);
+        DAVApnOptionsProvider optionsProvider = factory.getApnOptionsProvider();
+        if (null != optionsProvider && 0 < optionsProvider.getAvailableOptions().size()) {
+            registerService(ApnOptionsProvider.class, optionsProvider, null);
+            registerEventHandler = true;
+            CapabilityService capabilityService = getService(CapabilityService.class);
+            for (Map.Entry<String, CapabilityChecker> entry : optionsProvider.getCapabilityCheckers().entrySet()) {
+                String capability = entry.getKey();
+                capabilityService.declareCapability(capability);
+                Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+                properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, capability);
+                registerService(CapabilityChecker.class, entry.getValue(), properties);
             }
-            List<DavPushGateway> pushGateways = factory.getGateways();
-            if (null != pushGateways && 0 < pushGateways.size()) {
-                pushTransportRegistrations = new ArrayList<ServiceRegistration<PushNotificationTransport>>(pushGateways.size());
-                for (DavPushGateway pushGateway : pushGateways) {
-                    pushTransportRegistrations.add(context.registerService(PushNotificationTransport.class, pushGateway, null));
-                }
-                this.pushTransportRegistrations = pushTransportRegistrations;
-                registerEventHandler = true;
+        }
+        List<DavPushGateway> pushGateways = factory.getGateways();
+        if (null != pushGateways && 0 < pushGateways.size()) {
+            for (DavPushGateway pushGateway : pushGateways) {
+                registerService(PushNotificationTransport.class, pushGateway, null);
             }
-            if (registerEventHandler) {
-                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-                serviceProperties.put(EventConstants.EVENT_TOPIC, DAVPushEventHandler.TOPICS);
-                eventHandlerRegistration = context.registerService(EventHandler.class, new DAVPushEventHandler(getService(PushNotificationService.class)), serviceProperties);
-                this.eventHandlerRegistration = eventHandlerRegistration;
-            }
+            registerEventHandler = true;
+        }
+        if (registerEventHandler) {
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, DAVPushEventHandler.TOPICS);
+            registerService(EventHandler.class, new DAVPushEventHandler(getService(PushNotificationService.class)), serviceProperties);
         }
     }
 

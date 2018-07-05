@@ -117,6 +117,10 @@ public enum MailSortField {
      * Flag \FLAGGED (660)
      */
     FLAG_FLAGGED(MailListField.FLAG_FLAGGED),
+    /**
+     * Flag $HasAttachment
+     */
+    FLAG_HAS_ATTACHMENT(MailListField.ATTACHMENT)
 
     ;
 
@@ -159,13 +163,14 @@ public enum MailSortField {
      * <li>{@link #FLAG_FORWARDED}</li>
      * <li>{@link #FLAG_DRAFT}</li>
      * <li>{@link #FLAG_FLAGGED}</li>
+     * <li>{@link #FLAG_HAS_ATTACHMENT}</li>
      * </ul>
      *
      * @param sortField The sort field to check
      * @return <code>true</code> if given sort field is one of special flag sort fields; otherwise <code>false</code>
      */
     public static boolean isFlagSortField(MailSortField sortField) {
-        return FLAG_SEEN == sortField || FLAG_ANSWERED == sortField || FLAG_FORWARDED == sortField || FLAG_DRAFT == sortField || FLAG_FLAGGED == sortField;
+        return FLAG_SEEN == sortField || FLAG_ANSWERED == sortField || FLAG_FORWARDED == sortField || FLAG_DRAFT == sortField || FLAG_FLAGGED == sortField || FLAG_HAS_ATTACHMENT == sortField;
     }
 
     private static final MailSortField[] EMPTY_FIELDS = new MailSortField[0];

@@ -57,12 +57,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 
 
 /**
@@ -134,18 +137,14 @@ public class FileMetadata implements DocumentMetadata {
 
     @Override
     public long getFolderId() {
-        if(file.getFolderId() == null) {
-            return -1;
-        }
-        return Long.valueOf(file.getFolderId());
+        String folderId = file.getFolderId();
+        return folderId == null ? -1 : Long.parseLong(folderId);
     }
 
     @Override
     public int getId() {
-        if(file.getId() == FileStorageFileAccess.NEW) {
-            return InfostoreFacade.NEW;
-        }
-        return Integer.valueOf(file.getId());
+        String fileId = file.getId();
+        return (fileId == FileStorageFileAccess.NEW) ? InfostoreFacade.NEW : Integer.valueOf(fileId);
     }
 
     @Override
@@ -196,7 +195,7 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public int getVersion() {
         final String version = file.getVersion();
-        return com.openexchange.java.Strings.isEmpty(version) ? -1 : Integer.parseInt(version);
+        return com.openexchange.java.Strings.isEmpty(version) ? -1 : Utils.parseUnsignedInt(version);
     }
 
     @Override
@@ -363,18 +362,16 @@ public class FileMetadata implements DocumentMetadata {
             String id = file.getId();
             if (FileStorageFileAccess.NEW != id) {
                 try {
+                    // -1 is a valid id
                     Integer.valueOf(id);
                 } catch (final NumberFormatException e) {
                     throw FileStorageExceptionCodes.INVALID_FILE_IDENTIFIER.create(e, id);
                 }
             }
-            final String folderID = file.getFolderId();
-            if (null != folderID) {
-                try {
-                    Integer.valueOf(folderID);
-                } catch (final NumberFormatException e) {
-                    throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderID);
-                }
+
+            String folderID = file.getFolderId();
+            if (null != folderID && Utils.parseUnsignedLong(folderID) < 0) {
+                throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(folderID);
             }
         }
     }
@@ -517,7 +514,7 @@ public class FileMetadata implements DocumentMetadata {
 
             @Override
             public int getVersion() {
-                return Integer.parseInt(file.getVersion());
+                return Utils.parseUnsignedInt(file.getVersion());
             }
 
             @Override
@@ -571,7 +568,7 @@ public class FileMetadata implements DocumentMetadata {
                 if (FileStorageFileAccess.NEW == id) {
                     return InfostoreFacade.NEW;
                 }
-                return Integer.parseInt(new FileID(id).getFileId());
+                return Utils.parseUnsignedInt(new FileID(id).getFileId());
             }
 
             @Override
@@ -672,7 +669,7 @@ public class FileMetadata implements DocumentMetadata {
             @Override
             public int getOriginalId() {
                 if (file instanceof UserizedFile) {
-                    return Integer.parseInt(((UserizedFile) file).getOriginalId());
+                    return Utils.parseUnsignedInt(((UserizedFile) file).getOriginalId());
                 }
 
                 return getId();
@@ -681,10 +678,24 @@ public class FileMetadata implements DocumentMetadata {
             @Override
             public long getOriginalFolderId() {
                 if (file instanceof UserizedFile) {
-                    return Long.parseLong(((UserizedFile) file).getOriginalFolderId());
+                    return Utils.parseUnsignedLong(((UserizedFile) file).getOriginalFolderId());
                 }
 
                 return getFolderId();
+            }
+
+            @Override
+            public void setSequenceNumber(long sequenceNumber) {
+                file.setSequenceNumber(sequenceNumber);
+            }
+
+            public InfostoreFolderPath getOriginFolderPath() {
+                return null;
+            }
+
+            @Override
+            public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
+                // nothing to do
             }
 
         };
@@ -694,7 +705,7 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public int getOriginalId() {
         if (file instanceof UserizedFile) {
-            return Integer.parseInt(((UserizedFile) file).getOriginalId());
+            return Utils.parseUnsignedInt(((UserizedFile) file).getOriginalId());
         }
 
         return getId();
@@ -721,6 +732,21 @@ public class FileMetadata implements DocumentMetadata {
         if (file instanceof UserizedFile) {
             ((UserizedFile) file).setOriginalFolderId(Long.toString(id));
         }
+    }
+
+    @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        file.setSequenceNumber(sequenceNumber);
+    }
+
+    public InfostoreFolderPath getOriginFolderPath() {
+        FolderPath folderPath = file.getOrigin();
+        return null == folderPath ? null : InfostoreFolderPath.copyOf(folderPath);
+    }
+
+    @Override
+    public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
+        file.setOrigin(null == originFolderPath ? null : FolderPath.copyOf(originFolderPath));
     }
 
 }

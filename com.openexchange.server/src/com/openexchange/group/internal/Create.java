@@ -55,6 +55,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupEventConstants;
@@ -68,7 +69,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class contains the glue code to join all several operations to be done
@@ -153,10 +153,10 @@ public final class Create {
             insert(con);
             con.commit();
         } catch (final SQLException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw e;
         } finally {
             try {

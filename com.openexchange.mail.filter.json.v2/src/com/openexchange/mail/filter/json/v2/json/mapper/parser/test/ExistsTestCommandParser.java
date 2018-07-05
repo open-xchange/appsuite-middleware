@@ -104,10 +104,8 @@ public class ExistsTestCommandParser extends AbstractTestCommandParser {
         jsonObject.put(HeaderTestField.values.name(), new JSONArray());
 
         JSONArray headers = new JSONArray((List<?>) command.getArguments().get(0));
-        boolean simplified = false;
         for (SimplifiedHeaderTest simplifiedTest : SimplifiedHeaderTest.values()) {
-            simplified = TestCommandUtil.isSimplified(simplifiedTest, headers);
-            if (simplified) {
+            if (TestCommandUtil.isSimplified(simplifiedTest, headers)) {
                 // Simplified detected, overwrite the 'id'
                 jsonObject.put(GeneralField.id.name(), simplifiedTest.getCommandName());
                 return;
@@ -115,8 +113,6 @@ public class ExistsTestCommandParser extends AbstractTestCommandParser {
         }
 
         // No simplified test detected, therefore overwrite the headers with the custom header names
-        if (!simplified) {
-            jsonObject.put(ExistsTestField.headers.name(), headers);
-        }
+        jsonObject.put(ExistsTestField.headers.name(), headers);
     }
 }

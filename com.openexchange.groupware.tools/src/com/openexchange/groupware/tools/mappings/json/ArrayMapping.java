@@ -67,7 +67,7 @@ import com.openexchange.session.Session;
  */
 public abstract class ArrayMapping<T, O> extends DefaultJsonMapping<T[], O> implements ArrayFactory<T> {
 
-	public ArrayMapping(final String ajaxName, final int columnID) {
+    public ArrayMapping(final String ajaxName, final Integer columnID) {
 		super(ajaxName, columnID);
 	}
 

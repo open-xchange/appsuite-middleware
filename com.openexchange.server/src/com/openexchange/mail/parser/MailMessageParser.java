@@ -72,20 +72,6 @@ import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
-import net.fortuna.ical4j.model.Property;
-import net.freeutils.tnef.Attachment;
-import net.freeutils.tnef.Attr;
-import net.freeutils.tnef.CompressedRTFInputStream;
-import net.freeutils.tnef.MAPIProp;
-import net.freeutils.tnef.MAPIProps;
-import net.freeutils.tnef.MAPIValue;
-import net.freeutils.tnef.RawInputStream;
-import net.freeutils.tnef.TNEFInputStream;
-import net.freeutils.tnef.TNEFUtils;
-import net.freeutils.tnef.mime.ContactHandler;
-import net.freeutils.tnef.mime.RawDataSource;
-import net.freeutils.tnef.mime.ReadReceiptHandler;
-import net.freeutils.tnef.mime.TNEFMime;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESigned;
@@ -121,6 +107,20 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.tnef.TNEF2ICal;
+import net.fortuna.ical4j.model.Property;
+import net.freeutils.tnef.Attachment;
+import net.freeutils.tnef.Attr;
+import net.freeutils.tnef.CompressedRTFInputStream;
+import net.freeutils.tnef.MAPIProp;
+import net.freeutils.tnef.MAPIProps;
+import net.freeutils.tnef.MAPIValue;
+import net.freeutils.tnef.RawInputStream;
+import net.freeutils.tnef.TNEFInputStream;
+import net.freeutils.tnef.TNEFUtils;
+import net.freeutils.tnef.mime.ContactHandler;
+import net.freeutils.tnef.mime.RawDataSource;
+import net.freeutils.tnef.mime.ReadReceiptHandler;
+import net.freeutils.tnef.mime.TNEFMime;
 
 /**
  * {@link MailMessageParser} - A callback parser to parse instances of {@link MailMessage} by invoking the <code>handleXXX()</code> methods
@@ -361,6 +361,7 @@ public final class MailMessageParser {
                     }
                     MimeMessage mimeMessage = cloneMessage(mail, mail.getReceivedDate());
                     MailMessage reparsedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
+                    reset();
                     parseMailContent(reparsedMail, handler, prefix, 1);
                 }
             }
@@ -467,12 +468,7 @@ public final class MailMessageParser {
                  */
                 LOG.error("Multipart mail could not be parsed", rte);
                 warnings.add(MailExceptionCode.UNPARSEABLE_MESSAGE.create(rte, new Object[0]));
-                if (!handler.handleInlinePlainText(
-                    "",
-                    ContentType.DEFAULT_CONTENT_TYPE,
-                    0,
-                    fileName,
-                    MailMessageParser.getSequenceId(prefix, partCount))) {
+                if (!handler.handleInlinePlainText("", ContentType.DEFAULT_CONTENT_TYPE, 0, fileName, MailMessageParser.getSequenceId(prefix, partCount))) {
                     stop = true;
                     return;
                 }
@@ -1144,14 +1140,8 @@ public final class MailMessageParser {
     private static String getFileName(String rawFileName, ContentType contentType, String sequenceId, String baseMimeType) {
         String filename = rawFileName;
         if (Strings.isEmpty(filename)) {
-            List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
-            if (exts == null) {
-                sb.append("dat");
-            } else {
-                sb.append(exts.get(0));
-            }
-            filename = sb.toString();
+            List<String> exts = MimeType2ExtMap.getFileExtensions(Strings.asciiLowerCase(baseMimeType));
+            filename = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.').append(exts == null ? "dat" : exts.get(0)).toString();
         } else {
             filename = MimeMessageUtility.decodeMultiEncodedHeader(filename);
             if (filename.indexOf('.') < 0) {

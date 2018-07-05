@@ -114,8 +114,10 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
             /*
              * Remove duplicate attachment ids
              */
-            Set<String> attachmentIds = new LinkedHashSet<>(Arrays.asList(sequenceIds));
-            sequenceIds = attachmentIds.toArray(new String[attachmentIds.size()]);
+            if (sequenceIds != null) {
+                Set<String> attachmentIds = new LinkedHashSet<>(Arrays.asList(sequenceIds));
+                sequenceIds = attachmentIds.toArray(new String[attachmentIds.size()]);
+            }
 
             /*
              * Get mail interface
@@ -150,26 +152,31 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 }
                 // The regular way
                 mf = mailInterface.getMessageAttachments(folderPath, uid, sequenceIds);
-                final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                 /*
                  * Write from content's input stream to response output stream
                  */
-                {
-                    final InputStream zipInputStream = mf.getInputStream();
+                ThresholdFileHolder fileHolder = null;
+                try {
+                    InputStream zipInputStream = mf.getInputStream();
                     try {
+                        fileHolder = new ThresholdFileHolder();
                         fileHolder.write(zipInputStream);
                     } finally {
                         Streams.close(zipInputStream);
+                        zipInputStream = null;
                     }
+                    /*
+                     * Parameterize file holder
+                     */
+                    req.getRequest().setFormat("file");
+                    fileHolder.setName(fullFileName);
+                    fileHolder.setContentType("application/zip");
+                    AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
+                    fileHolder = null;
+                    return requestResult;
+                } finally {
+                    Streams.close(fileHolder);
                 }
-                /*
-                 * Parameterize file holder
-                 */
-                req.getRequest().setFormat("file");
-                fileHolder.setName(fullFileName);
-                // fileHolder.setContentType("application/octet-stream");
-                fileHolder.setContentType("application/zip");
-                return new AJAXRequestResult(fileHolder, "file");
             } finally {
                 if (null != mf) {
                     mf.delete();

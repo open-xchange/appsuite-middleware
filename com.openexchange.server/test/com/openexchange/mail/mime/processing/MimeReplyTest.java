@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.mime.processing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -67,10 +70,6 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

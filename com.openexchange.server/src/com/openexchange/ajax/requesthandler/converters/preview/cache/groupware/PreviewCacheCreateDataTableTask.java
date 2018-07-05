@@ -49,19 +49,16 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link PreviewCacheCreateDataTableTask}
@@ -79,12 +76,7 @@ public class PreviewCacheCreateDataTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection writeCon = params.getConnection();
         PreparedStatement stmt = null;
         boolean rollback = false;
         boolean restoreAutoCommit = false;
@@ -111,14 +103,13 @@ public class PreviewCacheCreateDataTableTask extends UpdateTaskAdapter {
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                DBUtils.rollback(writeCon);
-            }
             closeSQLStuff(stmt);
-            if (restoreAutoCommit) {
-                DBUtils.autocommit(writeCon);
+            if (rollback) {
+                Databases.rollback(writeCon);
             }
-            dbService.backForUpdateTask(contextId, writeCon);
+            if (restoreAutoCommit) {
+                Databases.autocommit(writeCon);
+            }
         }
     }
 

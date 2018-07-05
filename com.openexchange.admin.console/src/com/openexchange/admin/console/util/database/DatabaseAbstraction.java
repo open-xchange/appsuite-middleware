@@ -57,6 +57,7 @@ import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.util.UtilAbstraction;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.java.Strings;
 
 /**
  * This is an abstract class for all common attributes and methods of database related command line tools
@@ -101,10 +102,6 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected final static String OPT_NAME_MASTER_ID_LONG = "masterid";
 
-    protected final static char OPT_NAME_WEIGHT_SHORT = 'w';
-
-    protected final static String OPT_NAME_WEIGHT_LONG = "dbweight";
-
     protected final static char OPT_NAME_MAX_UNITS_SHORT = 'x';
 
     protected final static String OPT_NAME_MAX_UNITS_LONG = "maxunit";
@@ -116,6 +113,14 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     protected final static char OPT_NAME_IS_MASTER_SHORT = 'm';
 
     protected final static String OPT_NAME_IS_MASTER_LONG = "master";
+
+    protected final static String OPT_NAME_CREATE_SCHMEMAS_LONG = "create-userdb-schemas";
+
+    protected final static String OPT_NAME_NUMBER_OF_SCHMEMAS_LONG = "userdb-schema-count";
+
+    protected final static String OPT_NAME_NUMBER_OF_SCHMEMAS_TO_KEEP_LONG = "schemas-to-keep";
+
+    protected final static String OPT_NAME_ONLY_EMPTY_SCHEMAS_LONG = "only-empty-schemas";
 
     protected final static String OPT_NAME_SCHEMA_LONG = "schema";
 
@@ -131,8 +136,6 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected CLIOption databaseMasterIDOption = null;
 
-    protected CLIOption databaseWeightOption = null;
-
     protected CLIOption databaseNameOption = null;
 
     protected CLIOption hostnameOption = null;
@@ -147,9 +150,86 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected CLIOption schemaOption = null;
 
+    protected CLIOption createSchemasOption = null;
+
+    protected CLIOption numberOfSchemasOption = null;
+
+    protected CLIOption schemasToKeepOption = null;
+
+    protected CLIOption onlyEmptySchemasOption = null;
+
     // Needed for right error output
     protected String dbid = null;
     protected String dbname = null;
+
+    protected Boolean createSchemas;
+    protected Integer numberOfSchemas;
+
+    protected Integer schemasToKeep;
+
+    protected Boolean onlyEmptySchemas;
+
+    protected void parseAndSetCreateAndNumberOfSchemas(final AdminParser parser) throws InvalidDataException {
+        if (null == parser.getOptionValue(this.createSchemasOption)) {
+            createSchemas = Boolean.FALSE;
+            numberOfSchemas = Integer.valueOf(0);
+            return;
+        }
+
+        createSchemas = Boolean.TRUE;
+
+        String tmp = (String) parser.getOptionValue(this.numberOfSchemasOption);
+        if (createSchemas.booleanValue()) {
+            if (Strings.isEmpty(tmp)) {
+                numberOfSchemas = Integer.valueOf(0);
+            } else {
+                try {
+                    numberOfSchemas = Integer.valueOf(tmp.trim());
+                } catch (NumberFormatException e) {
+                    throw new InvalidDataException("Invalid value specified for \"" + OPT_NAME_NUMBER_OF_SCHMEMAS_LONG + "\" option. Should be a number.", e);
+                }
+            }
+        } else {
+            if (!Strings.isEmpty(tmp)) {
+                throw new InvalidDataException("\"" + OPT_NAME_NUMBER_OF_SCHMEMAS_LONG + "\" option can only be set, if \"" + OPT_NAME_CREATE_SCHMEMAS_LONG + "\" is set to \"true\"");
+            }
+            numberOfSchemas = Integer.valueOf(0);
+        }
+    }
+
+    protected void parseAndSetNumberOfSchemas(final AdminParser parser) throws InvalidDataException {
+        String tmp = (String) parser.getOptionValue(this.numberOfSchemasOption);
+        if (Strings.isEmpty(tmp)) {
+            numberOfSchemas = Integer.valueOf(0);
+        } else {
+            try {
+                numberOfSchemas = Integer.valueOf(tmp.trim());
+            } catch (NumberFormatException e) {
+                throw new InvalidDataException("Invalid value specified for \"" + OPT_NAME_NUMBER_OF_SCHMEMAS_LONG + "\" option. Should be a number.", e);
+            }
+        }
+    }
+
+    protected void parseAndSetSchemasToKeep(final AdminParser parser) throws InvalidDataException {
+        String tmp = (String) parser.getOptionValue(this.schemasToKeepOption);
+        if (Strings.isEmpty(tmp)) {
+            schemasToKeep = Integer.valueOf(0);
+        } else {
+            try {
+                schemasToKeep = Integer.valueOf(tmp.trim());
+            } catch (NumberFormatException e) {
+                throw new InvalidDataException("Invalid value specified for \"" + OPT_NAME_NUMBER_OF_SCHMEMAS_TO_KEEP_LONG + "\" option. Should be a number.", e);
+            }
+        }
+    }
+
+    protected void parseAndSetOnlyEmptySchemas(final AdminParser parser) throws InvalidDataException {
+        if (null != parser.getOptionValue(this.onlyEmptySchemasOption)) {
+            onlyEmptySchemas = Boolean.TRUE;
+        } else {
+            onlyEmptySchemas = Boolean.FALSE;
+        }
+    }
 
     protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
         dbid = (String) parser.getOptionValue(this.databaseIdOption);
@@ -227,13 +307,6 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
         }
     }
 
-    private void parseAndSetDatabaseWeight(final AdminParser parser, final Database db) {
-        final String databaseweight = (String) parser.getOptionValue(this.databaseWeightOption);
-        if (databaseweight != null) {
-            db.setClusterWeight(Integer.parseInt(databaseweight));
-        }
-    }
-
     private void parseAndSetDBUsername(final AdminParser parser, final Database db) {
         final String username = (String) parser.getOptionValue(this.databaseUsernameOption);
         if (null != username) {
@@ -271,18 +344,37 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
         }
     }
 
+    protected void setCreateAndNumberOfSchemasOption(final AdminParser parser) {
+        this.createSchemasOption = setLongOpt(parser, OPT_NAME_CREATE_SCHMEMAS_LONG, "A flag that signals whether userdb schemas are supposed to be pre-created", false, false);
+        this.numberOfSchemasOption = setLongOpt(parser, OPT_NAME_NUMBER_OF_SCHMEMAS_LONG, "(Optionally) Specifies the number of userdb schemas that are supposed to be pre-created. If missing, number of schemas is calculated by \"" + OPT_NAME_MAX_UNITS_LONG + "\" divided by CONTEXTS_PER_SCHEMA config option from hosting.properties", true, false);
+    }
+
+    protected void setNumberOfSchemasOption(final AdminParser parser) {
+        this.numberOfSchemasOption = setLongOpt(parser, OPT_NAME_NUMBER_OF_SCHMEMAS_LONG, "(Optionally) Specifies the number of userdb schemas that are supposed to be pre-created. If missing, number of schemas is calculated by \"" + OPT_NAME_MAX_UNITS_LONG + "\" divided by CONTEXTS_PER_SCHEMA config option from hosting.properties", true, false);
+    }
+
+    protected void setSchemasToKeepOption(final AdminParser parser) {
+        this.schemasToKeepOption = setLongOpt(parser, OPT_NAME_NUMBER_OF_SCHMEMAS_TO_KEEP_LONG, "(Optionally) Specifies the number of empty schemas that are supposed to be kept (per database host). If missing, all empty schemas are attempted to be deleted. Ineffective if \"" + OPT_NAME_SCHEMA_LONG + "\" option is specified", true, false);
+    }
+
+    protected void setOnlyEmptySchemas(final AdminParser parser) {
+        this.onlyEmptySchemasOption = setLongOpt(parser, OPT_NAME_ONLY_EMPTY_SCHEMAS_LONG, "(Optionally) Specifies to list only empty schemas (per database host). If missing, all empty schemas are considered", false, false);
+    }
+
     protected void setDatabaseIDOption(final AdminParser parser) {
-        this.databaseIdOption = setShortLongOpt(
-            parser,
-            OPT_NAME_DATABASE_ID_SHORT,
-            OPT_NAME_DATABASE_ID_LONG,
-            "The id of the database.",
-            true,
-            NeededQuadState.eitheror);
+        setDatabaseIDOption(parser, NeededQuadState.eitheror, "The id of the database.");
+    }
+
+    protected void setDatabaseIDOption(final AdminParser parser, NeededQuadState state, String description) {
+        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT, OPT_NAME_DATABASE_ID_LONG, description, true, state);
     }
 
     protected void setDatabaseSchemaOption(final AdminParser parser) {
-        this.schemaOption = setLongOpt(parser, OPT_NAME_SCHEMA_LONG, "The optional schema name of the database.", true, false);
+        setDatabaseSchemaOption(parser, false);
+    }
+
+    protected void setDatabaseSchemaOption(final AdminParser parser, boolean required) {
+        this.schemaOption = setLongOpt(parser, OPT_NAME_SCHEMA_LONG, "The optional schema name of the database.", true, required);
     }
 
     protected void setDatabasePoolMaxOption(final AdminParser parser, final String defaultvalue, final boolean required) {
@@ -398,27 +490,6 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
             convertBooleantoTriState(required));
     }
 
-    protected void setDatabaseWeightOption(final AdminParser parser, final String defaultvalue, final boolean required) {
-        if (null != defaultvalue) {
-            this.databaseWeightOption = setShortLongOptWithDefault(
-                parser,
-                OPT_NAME_WEIGHT_SHORT,
-                OPT_NAME_WEIGHT_LONG,
-                "The db weight for this database",
-                defaultvalue,
-                true,
-                convertBooleantoTriState(required));
-        } else {
-            this.databaseWeightOption = setShortLongOpt(
-                parser,
-                OPT_NAME_WEIGHT_SHORT,
-                OPT_NAME_WEIGHT_LONG,
-                "The db weight for this database",
-                true,
-                convertBooleantoTriState(required));
-        }
-    }
-
     protected void setDatabaseMaxUnitsOption(final AdminParser parser, final String defaultvalue, final boolean required) {
         if (null != defaultvalue) {
             this.maxUnitsOption = setShortLongOptWithDefault(
@@ -463,13 +534,11 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     }
 
     protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required) {
-        this.databaseNameOption = setShortLongOpt(
-            parser,
-            OPT_NAME_DBNAME_SHORT,
-            OPT_NAME_DBNAME_LONG,
-            "Name of the database",
-            true,
-            required);
+        setDatabaseNameOption(parser, required, "Name of the database");
+    }
+
+    protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required, String description) {
+        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT, OPT_NAME_DBNAME_LONG, description, true, required);
     }
 
     @Override
@@ -493,7 +562,5 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
         parseAndSetPoolInitial(parser, db);
 
         parseAndSetPoolmax(parser, db);
-
-        parseAndSetDatabaseWeight(parser, db);
     }
 }

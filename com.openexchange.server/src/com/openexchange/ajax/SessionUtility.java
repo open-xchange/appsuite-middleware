@@ -66,7 +66,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import net.sf.uadetector.UserAgentFamily;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.Header;
@@ -103,6 +102,7 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.uadetector.UserAgentParser;
+import net.sf.uadetector.UserAgentFamily;
 
 
 /**
@@ -299,6 +299,7 @@ public final class SessionUtility {
                     return true;
                 } catch (final OXException e) {
                     // Verification of public session failed
+                    LOG.debug("Verification of public session failed", e);
                 }
 
                 // Look-up failed
@@ -344,6 +345,7 @@ public final class SessionUtility {
                 return true;
             } catch (final OXException e) {
                 // Verification of public session failed
+                LOG.debug("Verification of public session failed", e);
             }
         }
 
@@ -380,13 +382,13 @@ public final class SessionUtility {
     }
 
     /**
-     * Checks whether passed exception indicates an IP check error.
+     * Checks whether passed exception indicates an session expired error.
      *
      * @param e The exception to check
-     * @return <code>true</code> if passed exception indicates an IP check error; otherwise <code>false</code>
+     * @return <code>true</code> if passed exception indicates an session expired error; otherwise <code>false</code>
      */
-    public static boolean isIpCheckError(final OXException e) {
-        final SessionExceptionCodes code = SessionExceptionCodes.WRONG_CLIENT_IP;
+    public static boolean isSessionExpiredError(final OXException e) {
+        final SessionExceptionCodes code = SessionExceptionCodes.SESSION_EXPIRED;
         return (code.equals(e)) && code.getCategory().equals(e.getCategory());
     }
 
@@ -497,8 +499,6 @@ public final class SessionUtility {
      *         <ul>
      *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
      *              the according context or user have been deleted/disabled.</li>
-     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
-     *              passed ID does not match to the requests secret cookie.</li>
      *         </ul>
      */
     public static SessionResult<ServerSession> getSession(HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
@@ -521,8 +521,6 @@ public final class SessionUtility {
      *         <ul>
      *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
      *              the according context or user have been deleted/disabled.</li>
-     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
-     *              passed ID does not match to the requests secret cookie.</li>
      *         </ul>
      */
     public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
@@ -547,19 +545,17 @@ public final class SessionUtility {
      *         <ul>
      *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
      *              the according context or user have been deleted/disabled.</li>
-     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
-     *              passed ID does not match to the requests secret cookie.</li>
      *         </ul>
      */
     public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService, SessionSecretChecker optChecker) throws OXException {
         Session session = sessiondService.getSession(sessionId);
         if (null == session) {
-            if (!"unset".equals(sessionId)) {
+            req.setAttribute("__session.absent", sessionId);
+            if (false == "unset".equals(sessionId)) {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
             }
-            /*
-             * Session MISS -- Consult session inspector
-             */
+
+            // Session MISS -- Consult session inspector
             if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionMiss(sessionId, req, resp)) {
                 return new SessionResult<ServerSession>(Reply.STOP, null);
             }
@@ -676,8 +672,8 @@ public final class SessionUtility {
             if (logInfo && null != secret) {
                 LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
             }
-            final OXException oxe = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
-            oxe.setProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name(), null == secret ? "null" : secret);
+            final OXException oxe = SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
+            oxe.setProperty(SessionExceptionCodes.SESSION_EXPIRED.name(), null == secret ? "null" : secret);
             throw oxe;
         }
     }

@@ -52,6 +52,8 @@ package com.openexchange.sessionstorage;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.OptionalService;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
@@ -60,6 +62,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@SingletonService
+@OptionalService
 public interface SessionStorageService {
 
     /**

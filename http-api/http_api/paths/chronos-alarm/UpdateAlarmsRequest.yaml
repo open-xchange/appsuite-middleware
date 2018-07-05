@@ -1,0 +1,36 @@
+/chronos/alarm?action=updateAlarms:
+  put:
+    operationId: updateAlarms
+    tags:
+      - Chronos
+    summary: Updates the personal alarms of an event.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosRecurrenceID"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the event.
+        required: true
+      - in: body
+        name: body
+        description: A JSON array containing the alarms.
+        required: true
+        schema:
+          type: array
+          title: Alarms
+          items:
+            $ref: "#/definitions/Alarm"
+    responses:
+      200:
+        description: |
+          A JSON object containing containing the result of the update. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/ChronosCalendarResultResponse"

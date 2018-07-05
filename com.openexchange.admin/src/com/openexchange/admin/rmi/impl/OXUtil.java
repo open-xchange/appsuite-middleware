@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -75,6 +76,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -85,6 +87,7 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.filestore.StorageInfo;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.user.UserService;
 
@@ -104,12 +107,12 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     public OXUtil() throws StorageException {
         super();
         oxutil = OXUtilStorageInterface.getInstance();
-        basicauth = new BasicAuthenticator();
+        basicauth = BasicAuthenticator.createNonPluginAwareAuthenticator();
     }
 
     @Override
     public Filestore registerFilestore(final Filestore fstore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(fstore);
         } catch (final InvalidDataException e1) {
@@ -162,7 +165,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public void changeFilestore(final Filestore fstore, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(fstore);
         } catch (final InvalidDataException e1) {
@@ -186,7 +189,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public Filestore[] listFilestore(String searchPattern, Credentials credentials, boolean omitUsage) throws StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials myCreds = credentials == null ? new Credentials("","") : credentials;
+        Credentials myCreds = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(searchPattern);
             if (0 == searchPattern.trim().length()) {
@@ -213,7 +216,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public void unregisterFilestore(final Filestore store, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(store);
             doNullCheck(store.getId());
@@ -236,10 +239,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         oxutil.unregisterFilestore(store.getId());
     }
 
-
     @Override
     public MaintenanceReason createMaintenanceReason(final MaintenanceReason reason, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(reason);
         } catch (final InvalidDataException e1) {
@@ -257,11 +259,11 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException("Reason already exists!");
         }
 
-        return  new MaintenanceReason(oxutil.createMaintenanceReason(reason));
+        return new MaintenanceReason(oxutil.createMaintenanceReason(reason));
     }
 
     public MaintenanceReason[] listMaintenanceReasons(Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         basicauth.doAuthentication(auth);
 
         return oxutil.getAllMaintenanceReasons();
@@ -288,8 +290,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     public void createDatabase(final Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
-        try{
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
             doNullCheck(db);
         } catch (final InvalidDataException e1) {
             log.error("Invalid data sent by client!", e1);
@@ -302,10 +304,10 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         try {
             if (!db.mandatoryCreateMembersSet()) {
-                throw new InvalidDataException("Mandatory fields not set: "+ db.getUnsetMembers());
+                throw new InvalidDataException("Mandatory fields not set: " + db.getUnsetMembers());
             }
 
-            if(db.getName()!=null && tool.existsDatabaseName(db.getName())){
+            if (db.getName() != null && tool.existsDatabaseName(db.getName())) {
                 throw new InvalidDataException("Database " + db.getName() + " already exists!");
             }
 
@@ -313,37 +315,13 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException(e.getMessage());
         }
 
-        oxutil.createDatabase(db);
-    }
-
-    public void deleteDatabase(final Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
-        try{
-            doNullCheck(db);
-        } catch (final InvalidDataException e1) {
-            log.error("Invalid data sent by client!", e1);
-            throw e1;
-        }
-
-        basicauth.doAuthentication(auth);
-
-        log.debug(db.toString());
-
-        try {
-            if (!db.mandatoryDeleteMembersSet()) {
-                throw new InvalidDataException("Mandatory fields not set: " + db.getUnsetMembers());
-            } else {
-                oxutil.deleteDatabase(db);
-            }
-        } catch (EnforceableDataObjectException e) {
-            throw new InvalidDataException(e.getMessage());
-        }
+        oxutil.createDatabase(db, null);
     }
 
     @Override
-    public Database registerDatabase(final Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
-        try{
+    public Database registerDatabase(Database db, Boolean createSchemas, Integer optNumberOfSchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
             doNullCheck(db);
         } catch (final InvalidDataException e1) {
             log.error("Invalid data sent by client!", e1);
@@ -358,7 +336,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             if (!db.mandatoryRegisterMembersSet()) {
                 throw new InvalidDataException("Mandatory fields not set: " + db.getUnsetMembers());
             }
-            if(db.getName()!=null && tool.existsDatabaseName(db.getName())){
+            if (db.getName() != null && tool.existsDatabaseName(db.getName())) {
                 throw new InvalidDataException("Database " + db.getName() + " already exists!");
             }
 
@@ -391,24 +369,83 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             db.setPoolHardLimit(DEFAULT_POOL_HARD_LIMIT ? 1 : 0);
         }
 
-        if (null == db.getClusterWeight()) {
-            db.setClusterWeight(DEFAULT_DB_WEIGHT);
-        } else if (db.getClusterWeight() < 0 || db.getClusterWeight() > 100) {
-            throw new InvalidDataException("Clusterweight not within range (0-100)");
-        }
-
         if (null == db.getUrl()) {
             db.setUrl("jdbc:mysql://" + DEFAULT_HOSTNAME + "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=false&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
         }
 
-        return new Database(oxutil.registerDatabase(db));
+        boolean bCreateSchemas = null != createSchemas && createSchemas.booleanValue();
+        int iOptNumberOfSchemas = null != optNumberOfSchemas ? optNumberOfSchemas.intValue() : 0;
+        return new Database(oxutil.registerDatabase(db, bCreateSchemas, iOptNumberOfSchemas));
     }
 
+    @Override
+    public String[] createSchemas(Database db, Integer optNumberOfSchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(db);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+
+        basicauth.doAuthentication(auth);
+
+        log.debug(db.toString());
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, db);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchDatabaseException(e);
+        }
+
+        db = tool.loadDatabaseById(db.getId().intValue()); // Implicitly checks existence
+
+        int iOptNumberOfSchemas = null != optNumberOfSchemas ? optNumberOfSchemas.intValue() : 0;
+        List<String> createdSchemas = oxutil.createDatabaseSchemas(db, iOptNumberOfSchemas);
+        return createdSchemas.toArray(new String[createdSchemas.size()]);
+    }
+
+    @Override
+    public int deleteEmptySchemas(Database db, Integer optNumberOfSchemasToKeep, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        if (null != db) {
+            try {
+                setIdOrGetIDFromNameAndIdObject(null, db);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchDatabaseException(e);
+            }
+        }
+
+        basicauth.doAuthentication(auth);
+
+        Database existing = null == db ? null : tool.loadDatabaseById(db.getId().intValue()); // Implicitly checks existence
+
+        if (null != db && null != db.getScheme()) {
+            existing.setScheme(db.getScheme());
+
+            if (false == OXUtilMySQLStorageCommon.existsDatabase(existing)) {
+                throw new StorageException("Schema \"" + db.getScheme() + "\" does not exist in database " + db.getId());
+            }
+
+            if (tool.schemaInUse(db.getId().intValue(), db.getScheme())) {
+                throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
+            }
+        }
+
+        int iOptNumberOfSchemasToKeep = null != optNumberOfSchemasToKeep ? optNumberOfSchemasToKeep.intValue() : 0;
+        Map<Database, List<String>> deletedSchemas = oxutil.deleteEmptyDatabaseSchemas(existing, iOptNumberOfSchemasToKeep);
+        int numDeleted = 0;
+        for (List<String> schemas : deletedSchemas.values()) {
+            numDeleted += schemas.size();
+        }
+        return numDeleted;
+    }
 
     @Override
     public Server registerServer(final Server srv, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
-        try{
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
             doNullCheck(srv);
             doNullCheck(srv.getName());
         } catch (final InvalidDataException e1) {
@@ -428,7 +465,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException("Server " + srv.getName() + " already exists!");
         }
 
-        final Server sr = new Server ();
+        final Server sr = new Server();
         sr.setName(srv.getName());
         sr.setId(oxutil.registerServer(srv.getName()));
         return sr;
@@ -436,19 +473,19 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public void unregisterDatabase(final Database database, final Credentials credentials) throws StorageException, InvalidCredentialsException, InvalidDataException {
-        try{
+        try {
             doNullCheck(database);
         } catch (final InvalidDataException e) {
             log.error("Invalid data sent by client!", e);
             throw e;
         }
-        basicauth.doAuthentication(null == credentials ? new Credentials("","") : credentials);
+        basicauth.doAuthentication(null == credentials ? new Credentials("", "") : credentials);
 
         log.debug(database.toString());
         try {
             setIdOrGetIDFromNameAndIdObject(null, database);
         } catch (NoSuchObjectException e) {
-         // FIXME normally NoSuchDatabaseException needs to be thrown here. Unfortunately it is not already in the throws declaration.
+            // FIXME normally NoSuchDatabaseException needs to be thrown here. Unfortunately it is not already in the throws declaration.
             throw new StorageException(e);
         }
         if (!tool.existsDatabase(i(database.getId()))) {
@@ -463,8 +500,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public void unregisterServer(final Server server, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
-        try{
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
             doNullCheck(server);
         } catch (final InvalidDataException e1) {
             log.error("Invalid data sent by client!", e1);
@@ -484,17 +521,96 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException("No such server " + server);
         }
         if (tool.serverInUse(server.getId())) {
-            throw new StorageException("Server " + server+ " is in use");
+            throw new StorageException("Server " + server + " is in use");
         }
 
         oxutil.unregisterServer(server.getId());
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.admin.rmi.OXUtilInterface#changeServer(com.openexchange.admin.rmi.dataobjects.Server, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
+     */
+    @Override
+    public void changeServer(Server server, String schemaName, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(server);
+            doNullCheck(schemaName);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+        basicauth.doAuthentication(auth);
+
+        log.debug("Server: {}, Schema Name: {}", server.toString(), schemaName);
+
+        if (Strings.isEmpty(schemaName)) {
+            throw new InvalidDataException("Invalid schema name. The schema name can neither be 'null' nor empty.");
+        }
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, server);
+        } catch (NoSuchObjectException e) {
+            throw new InvalidDataException(e);
+        }
+        if (!tool.existsServer(server.getId())) {
+            throw new InvalidDataException("No such server " + server);
+        }
+         oxutil.changeServer(server.getId(), schemaName);
+    }
+
+    @Override
+    public Map<Database, Integer> countDatabaseSchema(final String search_pattern, Boolean onlyEmptySchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(search_pattern);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+        basicauth.doAuthentication(auth);
+
+        log.debug(search_pattern);
+
+        if (search_pattern.length() == 0) {
+            throw new InvalidDataException("Invalid search pattern");
+        }
+
+        boolean bOnlyEmptySchemas = null != onlyEmptySchemas && onlyEmptySchemas.booleanValue();
+        return oxutil.countDatabaseSchema(search_pattern, bOnlyEmptySchemas);
+    }
+
+    @Override
+    public Database[] listDatabaseSchema(String search_pattern, Boolean onlyEmptySchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(search_pattern);
+        } catch (final InvalidDataException e1) {
+            log.error("Invalid data sent by client!", e1);
+            throw e1;
+        }
+        basicauth.doAuthentication(auth);
+
+        log.debug(search_pattern);
+
+        if (search_pattern.length() == 0) {
+            throw new InvalidDataException("Invalid search pattern");
+        }
+
+        boolean bOnlyEmptySchemas = null != onlyEmptySchemas && onlyEmptySchemas.booleanValue();
+        return oxutil.searchForDatabaseSchema(search_pattern, bOnlyEmptySchemas);
+    }
+
+    @Override
+    public Database[] listAllDatabaseSchema(Boolean onlyEmptySchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        return listDatabaseSchema("*", onlyEmptySchemas, credentials);
+    }
 
     @Override
     public Database[] listDatabase(final String search_pattern, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
-        try{
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e1) {
             log.error("Invalid data sent by client!", e1);
@@ -518,7 +634,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public Database[][] checkDatabase(Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         basicauth.doAuthentication(auth);
 
         OXToolStorageInterface oxtools = OXToolStorageInterface.getInstance();
@@ -559,7 +675,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public Database[] unblockDatabase(Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(db);
         } catch (final InvalidDataException e1) {
@@ -586,8 +702,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public Server[] listServer(final String search_pattern, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
-        try{
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
             doNullCheck(search_pattern);
         } catch (final InvalidDataException e1) {
             log.error("Invalid data sent by client!", e1);
@@ -611,7 +727,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public void changeDatabase(final Database db, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(db);
         } catch (final InvalidDataException e1) {
@@ -634,14 +750,8 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException("No such database with id " + id);
         }
 
-        if(db.getName()!=null && tool.existsDatabaseName(db)){
+        if (db.getName() != null && tool.existsDatabaseName(db)) {
             throw new InvalidDataException("Database " + db.getName() + " already exists!");
-        }
-
-        if (db.getClusterWeight() != null) {
-            if (db.getClusterWeight() < 0 || db.getClusterWeight() > 100) {
-                throw new InvalidDataException("Clusterweight not within range (0-100)");
-            }
         }
 
         oxutil.changeDatabase(db);
@@ -649,9 +759,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public void deleteMaintenanceReason(final MaintenanceReason[] reasons, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck((Object[])reasons);
+            doNullCheck((Object[]) reasons);
         } catch (final InvalidDataException e1) {
             log.error("Invalid data sent by client!", e1);
             throw e1;
@@ -696,15 +806,15 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
-    public Database createSchema(Credentials credentials, Integer optDBId) throws RemoteException, StorageException, InvalidCredentialsException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+    public Database createSchema(Credentials credentials, Integer optDatabaseId) throws RemoteException, StorageException, InvalidCredentialsException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         basicauth.doAuthentication(auth);
-        return oxutil.createSchema(optDBId);
+        return oxutil.createSchema(optDatabaseId);
     }
 
     @Override
     public void recalculateFilestoreUsage(Integer contextId, Integer userId, Credentials credentials) throws InvalidCredentialsException, StorageException, RemoteException, InvalidDataException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(contextId);
         } catch (final InvalidDataException e1) {
@@ -800,7 +910,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
     @Override
     public void recalculateFilestoreUsage(RecalculationScope scope, Integer optContextId, Credentials credentials) throws InvalidCredentialsException, StorageException, RemoteException {
-        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
         basicauth.doAuthentication(auth);
 

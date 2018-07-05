@@ -3,8 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Bundle wrapping jsr305 1.1.0 jar file
 Bundle-SymbolicName: javax.annotation.concurrent
 Bundle-Version: 1.1.0
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ClassPath: lib/jsr305-3.0.1.jar,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: lib/jsr305-3.0.2.jar,
  .
 Export-Package: javax.annotation;version="1.1.0";uses:="javax.annotation.meta",
  javax.annotation.concurrent;version="1.1.0",

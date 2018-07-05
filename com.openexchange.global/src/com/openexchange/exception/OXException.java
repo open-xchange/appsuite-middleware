@@ -739,7 +739,13 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the sole message.
+     * Gets the sole message
+     * <p>
+     * In opposite to {@link #getLogMessage()} this method only returns the "Message" part (without code, categories, and whatever);<br>
+     * e.g. <pre>
+     *  OX-0001 Categories=ERROR Message="Huston, we have a problem" exceptionID=147
+     *                                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+     *  </pre>
      *
      * @return The sole message
      */
@@ -785,7 +791,8 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The first category.
      */
     public Category getCategory() {
-        return getCategories().get(0);
+        List<Category> categories = getCategories();
+        return categories.isEmpty() ? CATEGORY_ERROR : categories.get(0);
     }
 
     /**
@@ -794,18 +801,19 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The (sorted) categories
      */
     public List<Category> getCategories() {
-        if (categories.isEmpty()) {
-            /*
-             * No category specified. Fall back to default one.
-             */
-            return Collections.<Category> singletonList(CATEGORY_ERROR);
+        List<Category> categories = new ArrayList<>(this.categories);
+        int size = categories.size();
+        switch (size) {
+            case 0:
+                // No category specified. Fall back to default one.
+                return Collections.<Category> singletonList(CATEGORY_ERROR);
+            case 1:
+                return categories;
+            default:
+                // Sort before return
+                sortCategories(categories);
+                return categories;
         }
-        if (1 == categories.size()) {
-            return Collections.unmodifiableList(categories);
-        }
-        // Sort before return
-        sortCategories(categories);
-        return Collections.unmodifiableList(categories);
     }
 
     /**
@@ -1206,6 +1214,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     public final ProblematicAttribute[] getProblematics() {
         return problematics.isEmpty() ? EMPTY_PROBLEMATICS : problematics.toArray(new ProblematicAttribute[problematics.size()]);
     }
+
 
     /*-
      * ----------------------------- Arguments related methods -----------------------------

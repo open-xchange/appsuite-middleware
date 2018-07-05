@@ -58,6 +58,7 @@ import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -89,14 +90,14 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = configDatabaseService.getAssignment(contextId);
-        Connection connection = get(assign, write, noTimeout);
         setSchemaLogProperty(assign.getSchema());
+        Connection connection = get(assign, write, noTimeout);
         return connection;
     }
 
     private Connection get(final AssignmentImpl assign, final boolean write, final boolean noTimeout) throws OXException {
-        Connection connection = monitor.checkActualAndFallback(pools, assign, noTimeout, write);
         setSchemaLogProperty(assign.getSchema());
+        Connection connection = monitor.checkActualAndFallback(pools, assign, noTimeout, write);
         return connection;
     }
 
@@ -192,8 +193,8 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public int[] listContexts(final int poolId) throws OXException {
-        return configDatabaseService.listContexts(poolId);
+    public int[] listContexts(int poolId, int offset, int length) throws OXException {
+        return configDatabaseService.listContexts(poolId, offset, length);
     }
 
     @Override
@@ -214,6 +215,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public String getSchemaName(int contextId) throws OXException {
         return configDatabaseService.getSchemaName(contextId);
+    }
+
+    @Override
+    public SchemaInfo getSchemaInfo(int contextId) throws OXException {
+        return configDatabaseService.getSchemaInfo(contextId);
     }
 
     @Override
@@ -360,7 +366,8 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public Connection get(final int poolId, final String schema) throws OXException {
-        final Connection con;
+        setSchemaLogProperty(schema);
+        Connection con;
         try {
             con = pools.getPool(poolId).get();
         } catch (final PoolingException e) {
@@ -369,14 +376,16 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             if (null != schema && !con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
-                setSchemaLogProperty(schema);
             }
         } catch (final SQLException e) {
             try {
                 pools.getPool(poolId).back(con);
+                con = null;
             } catch (final PoolingException e1) {
-                Databases.close(con);
                 LOG.error(e1.getMessage(), e1);
+            } finally {
+                // Something went wrong while trying to put back into pool if con is not null
+                close(con);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
@@ -385,7 +394,8 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public Connection getNoTimeout(final int poolId, final String schema) throws OXException {
-        final Connection con;
+        setSchemaLogProperty(schema);
+        Connection con;
         try {
             con = pools.getPool(poolId).getWithoutTimeout();
         } catch (final PoolingException e) {
@@ -394,14 +404,16 @@ public final class DatabaseServiceImpl implements DatabaseService {
         try {
             if (null != schema && !con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
-                setSchemaLogProperty(schema);
             }
         } catch (final SQLException e) {
             try {
                 pools.getPool(poolId).back(con);
+                con = null;
             } catch (final PoolingException e1) {
-                Databases.close(con);
                 LOG.error(e1.getMessage(), e1);
+            } finally {
+                // Something went wrong while trying to put back into pool if con is not null
+                close(con);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
@@ -469,24 +481,33 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public void back(final int poolId, final Connection con) {
+    public void back(final int poolId, final Connection connection) {
+        Connection con = connection;
         try {
             pools.getPool(poolId).back(con);
+            con = null;
         } catch (final PoolingException e) {
-            Databases.close(con);
             final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
             LOG.error("", e2);
         } catch (final OXException e) {
             LOG.error("", e);
+        } finally {
+            // Something went wrong while trying to put back into pool if con is not null
+            close(con);
         }
     }
 
     @Override
-    public void backNoTimeoout(final int poolId, final Connection con) {
+    public void backNoTimeoout(final int poolId, final Connection connection) {
+        Connection con = connection;
         try {
             pools.getPool(poolId).backWithoutTimeout(con);
+            con = null;
         } catch (final OXException e) {
             LOG.error("", e);
+        } finally {
+            // Something went wrong while trying to put back into pool if con is not null
+            close(con);
         }
     }
 
@@ -597,6 +618,16 @@ public final class DatabaseServiceImpl implements DatabaseService {
             } catch (Exception e) {
                 // Ignore...
                 LOG.debug("Failed to obtain schema name from connection", e);
+            }
+        }
+    }
+
+    private static void close(Connection con) {
+        if (null != con) {
+            try {
+                con.close();
+            } catch (Exception e) {
+                LOG.error("Failed to close connection.", e);
             }
         }
     }

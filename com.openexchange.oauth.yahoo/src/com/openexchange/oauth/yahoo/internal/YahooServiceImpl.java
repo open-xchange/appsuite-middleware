@@ -119,12 +119,12 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
     public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry registry = registryService.get(KnownApi.YAHOO.getFullName());
-        OAuthAccess oAuthAccess = registry.get(cid, user);
+        OAuthAccess oAuthAccess = registry.get(cid, user, id);
         if (oAuthAccess == null || oAuthAccess.getAccountId() != id) {
             return;
         }
 
-        boolean purged = registry.purgeUserAccess(cid, user);
+        boolean purged = registry.purgeUserAccess(cid, user, id);
         if (purged) {
             LOGGER.info("Removed Yahoo! OAuth access from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", id, user, cid);
         }
@@ -223,11 +223,11 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
     private OAuthAccess getOAuthAccess(Session session, int accountId) throws OXException {
         OAuthAccessRegistryService service = services.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry oAuthAccessRegistry = service.get(KnownApi.YAHOO.getFullName());
-        OAuthAccess oAuthAccess = oAuthAccessRegistry.get(session.getContextId(), session.getUserId());
+        OAuthAccess oAuthAccess = oAuthAccessRegistry.get(session.getContextId(), session.getUserId(), accountId);
         if (oAuthAccess == null) {
             OAuthAccess access = new YahooOAuthAccess(session, accountId);
 
-            oAuthAccess = oAuthAccessRegistry.addIfAbsent(session.getContextId(), session.getUserId(), access);
+            oAuthAccess = oAuthAccessRegistry.addIfAbsent(session.getContextId(), session.getUserId(), accountId, access);
             if (oAuthAccess == null) {
                 access.initialize();
                 oAuthAccess = access;

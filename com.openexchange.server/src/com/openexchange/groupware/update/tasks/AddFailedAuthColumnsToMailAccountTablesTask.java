@@ -53,14 +53,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -82,9 +79,7 @@ public class AddFailedAuthColumnsToMailAccountTablesTask extends UpdateTaskAdapt
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection con = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             Databases.startTransaction(con);
@@ -120,8 +115,7 @@ public class AddFailedAuthColumnsToMailAccountTablesTask extends UpdateTaskAdapt
             if (rollback) {
                 Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
+            Databases.autocommit(con);
         }
     }
 

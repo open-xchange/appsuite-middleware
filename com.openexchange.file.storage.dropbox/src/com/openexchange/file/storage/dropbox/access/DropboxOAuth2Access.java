@@ -68,6 +68,7 @@ import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -80,29 +81,36 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
     private final FileStorageAccount fsAccount;
 
     /**
-     * Initialises a new {@link DropboxOAuth2Access}.
+     * Initializes a new {@link DropboxOAuth2Access}.
      */
     public DropboxOAuth2Access(FileStorageAccount fsAccount, Session session) throws OXException {
         super(session);
         this.fsAccount = fsAccount;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
-     */
+    @Override
+    public void dispose() {
+        OAuthClient<DropboxClient> oAuthClient = this.<DropboxClient> getOAuthClient();
+        if (null != oAuthClient) {
+            HttpRequestor httpRequestor = oAuthClient.client.httpRequestor;
+            if (httpRequestor instanceof ApacheHttpClientHttpRequestor) {
+                HttpClients.shutDown(((ApacheHttpClientHttpRequestor) httpRequestor).getHttpClient());
+            }
+        }
+        super.dispose();
+    }
+
     @Override
     public void initialize() throws OXException {
         final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
         try {
-            final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), getSession(), getSession().getUserId(), getSession().getContextId());
-            verifyAccount(oauthAccount, OXScope.drive);
-            HttpRequestor httpRequestor = new DropboxStandardHttpRequestor();
+            final OAuthAccount oauthAccount = oAuthService.getAccount(getSession(), getAccountId());
+            verifyAccount(oauthAccount, oAuthService, OXScope.drive);
+            HttpRequestor httpRequestor = new ApacheHttpClientHttpRequestor(ApacheHttpClientHttpRequestor.defaultApacheHttpClient());
             DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName(), null, httpRequestor);
             String accessToken = oauthAccount.getToken();
             DbxClientV2 dbxClient = new DbxClientV2(config, accessToken);
-            OAuthClient<DbxClientV2> oAuthClient = new OAuthClient<DbxClientV2>(dbxClient, accessToken);
+            OAuthClient<DropboxClient> oAuthClient = new OAuthClient<DropboxClient>(new DropboxClient(dbxClient, httpRequestor), accessToken);
             setOAuthClient(oAuthClient);
             setOAuthAccount(oauthAccount);
         } catch (RuntimeException e) {
@@ -110,37 +118,22 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
-     */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.access.OAuthAccess#ping()
-     */
     @Override
     public boolean ping() throws OXException {
         try {
-            DbxClientV2 client = (DbxClientV2) getClient().client;
-            client.users().getCurrentAccount();
+            DropboxClient client = (DropboxClient) getClient().client;
+            client.dbxClient.users().getCurrentAccount();
             return true;
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, getSession(), getOAuthAccount());
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
-     */
     @Override
     public int getAccountId() throws OXException {
         try {

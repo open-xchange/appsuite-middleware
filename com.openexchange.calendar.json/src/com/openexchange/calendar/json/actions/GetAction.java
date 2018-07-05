@@ -49,22 +49,22 @@
 
 package com.openexchange.calendar.json.actions;
 
-import java.sql.SQLException;
 import java.util.Date;
+import java.util.Set;
+import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.compat.Appointment;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link GetAction}
@@ -74,39 +74,32 @@ import com.openexchange.tools.session.ServerSession;
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
 public final class GetAction extends AppointmentAction {
 
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMEZONE);
+
     /**
      * Initializes a new {@link GetAction}.
-     * @param services
+     *
+     * @param services A service lookup reference
      */
-    public GetAction(final ServiceLookup services) {
+    public GetAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException {
-        Date timestamp = null;
-        final int id = req.checkInt( AJAXServlet.PARAMETER_ID);
-        final int inFolder = req.checkInt( AJAXServlet.PARAMETER_FOLDERID);
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 
-        final ServerSession session = req.getSession();
-        final AppointmentSqlFactoryService sqlFactoryService = getService();
-        if (null == sqlFactoryService) {
-            throw ServiceExceptionCode.serviceUnavailable(AppointmentSqlFactoryService.class);
-        }
-        final AppointmentSQLInterface appointmentsql = sqlFactoryService.createAppointmentSql(session);
-
-        try {
-            final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
-            if(shouldAnonymize(appointmentobject, session.getUserId())) {
-                anonymize(appointmentobject);
-            }
-
-            timestamp = appointmentobject.getLastModified();
-
-            return new AJAXRequestResult(appointmentobject, timestamp, "appointment");
-        } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
-        }
+    @Override
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
+        int recurrencePosition = request.optInt(CalendarFields.RECURRENCE_POSITION);
+        EventID eventID = getEventConverter(session).getEventID(folderId, objectId, recurrencePosition);
+        session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
+        Event event = session.getCalendarService().getEvent(session, folderId, eventID);
+        Appointment appointment = getEventConverter(session).getAppointment(event);
+        return new AJAXRequestResult(appointment, new Date(event.getTimestamp()), "appointment");
     }
 
 }

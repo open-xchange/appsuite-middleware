@@ -51,8 +51,6 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -64,7 +62,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +72,13 @@ import com.openexchange.database.Assignment;
 import com.openexchange.database.AssignmentInsertData;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.lock.AccessControl;
+import com.openexchange.lock.LockService;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
 
 /**
  * Reads assignments from the database, maybe stores them in a cache for faster access.
@@ -91,39 +94,61 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String UPDATE = "UPDATE context_server2db_pool SET read_db_pool_id=?,write_db_pool_id=?,db_schema=? WHERE server_id=? AND cid=?";
     private static final String DELETE = "DELETE FROM context_server2db_pool WHERE cid=? AND server_id=?";
     private static final String CONTEXTS_IN_SCHEMA = "SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=?";
-    private static final String CONTEXTS_IN_DATABASE = "SELECT cid FROM context_server2db_pool WHERE read_db_pool_id=? OR write_db_pool_id=?";
-    private static final String NOTFILLED = "SELECT db_schema,COUNT(db_schema) AS count FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema HAVING count<? ORDER BY count ASC";
-
-    private final ConfigDatabaseService configDatabaseService;
+    private static final String NOTFILLED = "SELECT schemaname,count FROM contexts_per_dbschema WHERE db_pool_id=? AND count<? ORDER BY count ASC";
 
     private static final String CACHE_NAME = "OXDBPoolCache";
 
+    private static class CacheLockHolder {
+        // Wrapper class to initialize only when needed
+        static final CacheLock fallbackGlobalCacheLock = CacheLock.cacheLockFor(new ReentrantLock(true));
+    }
+
+    private final ConfigDatabaseService configDatabaseService;
     private volatile CacheService cacheService;
-
     private volatile Cache cache;
-
-    /**
-     * Lock for the cache.
-     */
-    private final Lock cacheLock = new ReentrantLock(true);
+    private final LockMech lockMech;
 
     /**
      * Default constructor.
      */
-    public ContextDatabaseAssignmentImpl(final ConfigDatabaseService configDatabaseService) {
+    public ContextDatabaseAssignmentImpl(final ConfigDatabaseService configDatabaseService, LockMech lockMech) {
         super();
         this.configDatabaseService = configDatabaseService;
+        this.lockMech = lockMech;
+    }
+
+    private CacheLock cacheLockFor(int contextId) throws OXException {
+        LockService lockService = Initialization.getLockService();
+        if (null == lockService) {
+            return CacheLockHolder.fallbackGlobalCacheLock;
+        }
+
+        AccessControl accessControl = lockService.getAccessControlFor(new StringBuilder(16).append(contextId).append('-').append("dbassign").toString(), 1, 1, contextId);
+        return CacheLock.cacheLockFor(accessControl);
     }
 
     @Override
     public AssignmentImpl getAssignment(final int contextId) throws OXException {
+        return getAssignment(null, contextId, true);
+    }
+
+    /**
+     * Gets the assignment for specified context.
+     *
+     * @param con The (optional) connection to use
+     * @param contextId The context identifier
+     * @param errorOnAbsence <code>true</code> to throw an error in case no such assignment exists; otherwise <code>false</code>
+     * @return The assignment or <code>null</code> (if parameter <code>errorOnAbsence</code> has been set to <code>false</code>)
+     * @throws OXException If loading the assignment fails or no such assignment exists (if parameter <code>errorOnAbsence</code> has been set to <code>true</code>)
+     */
+    private AssignmentImpl getAssignment(Connection con, int contextId, boolean errorOnAbsence) throws OXException {
         CacheService myCacheService = this.cacheService;
         Cache myCache = this.cache;
 
         // Check cache references
         if (null == myCache || null == myCacheService) {
             // No cache available
-            return loadAssignment(contextId);
+            return loadAssignment(con, contextId, errorOnAbsence);
         }
 
         // Use that cache
@@ -134,25 +159,28 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         }
 
         // Need to load - synchronously!
+        CacheLock cacheLock = cacheLockFor(contextId);
         cacheLock.lock();
         try {
-            AssignmentImpl retval = (AssignmentImpl) myCache.get(key);
-            if (null == retval) {
-                retval = loadAssignment(contextId);
-                try {
-                    myCache.putSafe(key, retval);
-                } catch (OXException e) {
-                    LOG.error("Cannot put database assignment into cache.", e);
-                }
+            object = myCache.get(key);
+            if (object instanceof AssignmentImpl) {
+                // Loaded meanwhile
+                return (AssignmentImpl) object;
             }
-            return retval;
+
+            AssignmentImpl loaded = loadAssignment(con, contextId, errorOnAbsence);
+            try {
+                myCache.putSafe(key, loaded);
+            } catch (OXException e) {
+                LOG.error("Cannot put database assignment into cache.", e);
+            }
+            return loaded;
         } finally {
             cacheLock.unlock();
         }
     }
 
-    private static AssignmentImpl loadAssignment(Connection con, int contextId) throws OXException {
-        final AssignmentImpl retval;
+    private AssignmentImpl loadAssignment(Connection con, int contextId) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -160,39 +188,46 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             stmt.setInt(1, Server.getServerId());
             stmt.setInt(2, contextId);
             result = stmt.executeQuery();
-            if (result.next()) {
-                int pos = 1;
-                retval = new AssignmentImpl(contextId, Server.getServerId(), result.getInt(pos++), result.getInt(pos++),
-                        result.getString(pos++));
-            } else {
-                retval = null;
+
+            if (false == result.next()) {
+                return null;
             }
+
+            int pos = 1;
+            return new AssignmentImpl(contextId, Server.getServerId(), result.getInt(pos++), result.getInt(pos++), result.getString(pos++));
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return retval;
     }
 
-    private AssignmentImpl loadAssignment(final int contextId) throws OXException {
-        final AssignmentImpl retval;
-        final Connection con = configDatabaseService.getReadOnly();
-        try {
-            retval = loadAssignment(con, contextId);
-        } finally {
-            configDatabaseService.backReadOnly(con);
+    private AssignmentImpl loadAssignment(Connection conn, int contextId, boolean errorOnAbsence) throws OXException {
+        Connection con = conn;
+        if (null == con) {
+            con = configDatabaseService.getReadOnly();
+            try {
+                return loadAndCheck(con, contextId, errorOnAbsence);
+            } finally {
+                configDatabaseService.backReadOnly(con);
+            }
         }
-        if (null == retval) {
+
+        return loadAndCheck(con, contextId, errorOnAbsence);
+    }
+
+    private AssignmentImpl loadAndCheck(Connection con, int contextId, boolean errorOnAbsence) throws OXException {
+        AssignmentImpl retval = loadAssignment(con, contextId);
+        if (errorOnAbsence && null == retval) {
             throw DBPoolingExceptionCodes.RESOLVE_FAILED.create(I(contextId), I(Server.getServerId()));
         }
         return retval;
     }
 
-    private static void writeAssignmentDB(Connection con, Assignment assign, boolean update) throws OXException {
+    private void writeNewAssignmentDB(Connection con, Assignment assign, boolean updateCounters) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(update ? UPDATE : INSERT);
+            stmt = con.prepareStatement(INSERT);
             int pos = 1;
             stmt.setInt(pos++, assign.getReadPoolId());
             stmt.setInt(pos++, assign.getWritePoolId());
@@ -203,6 +238,11 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             if (1 != count) {
                 throw DBPoolingExceptionCodes.INSERT_FAILED.create(I(assign.getContextId()), I(assign.getServerId()));
             }
+            Databases.closeSQLStuff(stmt);
+
+            if (updateCounters) {
+                updateCountTables(con, assign.getWritePoolId(), assign.getSchema(), true);
+            }
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -210,15 +250,92 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         }
     }
 
+    private void writeExistingAssignmentDB(Connection con, Assignment assign, AssignmentImpl oldAssign, boolean updateCounters) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(UPDATE);
+            int pos = 1;
+            stmt.setInt(pos++, assign.getReadPoolId());
+            stmt.setInt(pos++, assign.getWritePoolId());
+            stmt.setString(pos++, assign.getSchema());
+            stmt.setInt(pos++, assign.getServerId());
+            stmt.setInt(pos++, assign.getContextId());
+            int count = stmt.executeUpdate();
+            if (1 != count) {
+                throw DBPoolingExceptionCodes.INSERT_FAILED.create(I(assign.getContextId()), I(assign.getServerId()));
+            }
+            Databases.closeSQLStuff(stmt);
+
+            if (updateCounters) {
+                int oldPoolId = oldAssign.getWritePoolId();
+                int newPoolId = assign.getWritePoolId();
+
+                if (oldPoolId != newPoolId) {
+                    updateCountTables(con, oldPoolId, oldAssign.getSchema(), false);
+                    updateCountTables(con, newPoolId, assign.getSchema(), true);
+                } else {
+                    String oldSchema = oldAssign.getSchema();
+                    String newSchema = assign.getSchema();
+                    if (false == oldSchema.equals(newSchema)) {
+                        updateSchemaCountTable(con, oldPoolId, oldSchema, false);
+                        updateSchemaCountTable(con, oldPoolId, newSchema, true);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void updateCountTables(Connection con, int poolId, String schemaName, boolean increment) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE contexts_per_dbpool SET count=count" + (increment ? '+' : '-') + "1 WHERE db_pool_id=?");
+            stmt.setInt(1, poolId);
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            updateSchemaCountTable(con, poolId, schemaName, increment);
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void updateSchemaCountTable(Connection con, int poolId, String schemaName, boolean increment) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE contexts_per_dbschema SET count=count" + (increment ? '+' : '-') + "1 WHERE db_pool_id=? AND schemaname=?");
+            stmt.setInt(1, poolId);
+            stmt.setString(2, schemaName);
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     @Override
     public void writeAssignment(Connection con, Assignment assign) throws OXException {
-        boolean update = assign instanceof AssignmentInsertData ? false : null != loadAssignment(con, assign.getContextId());
+        // Create or update...
+        boolean updateCounters = true;
+        AssignmentImpl oldAssign;
+        if (assign instanceof AssignmentInsertData) {
+            oldAssign = null;
+            updateCounters = ((AssignmentInsertData) assign).updateDatabaseCounters();
+        } else {
+            oldAssign = getAssignment(con, assign.getContextId(), false);
+        }
+
+        // Update cache
         Cache myCache = this.cache;
         if (null != myCache) {
             final CacheKey key = myCache.newCacheKey(assign.getContextId(), assign.getServerId());
+            CacheLock cacheLock = cacheLockFor(assign.getContextId());
             cacheLock.lock();
             try {
-                if (update) {
+                if (null != oldAssign) {
                     myCache.remove(key);
                 }
                 AssignmentImpl cacheValue = new AssignmentImpl(assign);
@@ -234,16 +351,31 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
                 cacheLock.unlock();
             }
         }
-        writeAssignmentDB(con, assign, update);
+
+        // Create/update assignment
+        if (null == oldAssign) {
+            writeNewAssignmentDB(con, assign, updateCounters);
+        } else {
+            writeExistingAssignmentDB(con, assign, oldAssign, updateCounters);
+        }
     }
 
-    private static void deleteAssignmentDB(Connection con, int contextId) throws OXException {
+    private void deleteAssignmentDB(Connection con, int contextId) throws OXException {
+        AssignmentImpl assignment = getAssignment(con, contextId, false);
+        if (null == assignment) {
+            // No such assignment, hence no need for deletion
+            return;
+        }
+
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(DELETE);
             stmt.setInt(1, contextId);
             stmt.setInt(2, Server.getServerId());
             stmt.executeUpdate();
+            closeSQLStuff(stmt);
+
+            updateCountTables(con, assignment.getWritePoolId(), assignment.getSchema(), false);
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -298,35 +430,67 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         }
     }
 
-    private static int[] listContexts(Connection con, int poolId) throws OXException {
-        final List<Integer> tmp = new LinkedList<Integer>();
+    private static int[] listContexts(Connection con, int poolId, int offset, int length) throws OXException {
+        boolean withLimit = true;
+        if (offset < 0 || length < 0) {
+            withLimit = false;
+        }
+        if (withLimit && length < 0) {
+            throw OXException.general("Invalid length: " + length);
+        }
+        if (withLimit && (offset + length) < 0) {
+            throw OXException.general("Invalid offset/length: " + offset + ", " + length);
+        }
+        if (length == 0) {
+            return new int[0];
+        }
+
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(CONTEXTS_IN_DATABASE);
+            // Get the identifier of the read-write pool for given database pool identifier
+            stmt = con.prepareStatement("SELECT write_db_pool_id FROM db_cluster WHERE read_db_pool_id=? OR write_db_pool_id=?");
             stmt.setInt(1, poolId);
             stmt.setInt(2, poolId);
             result = stmt.executeQuery();
-            while (result.next()) {
-                tmp.add(I(result.getInt(1)));
+            if (false == result.next()) {
+                // No such database known
+                return new int[0];
             }
+
+            int writePoolId = result.getInt(1);
+            closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
+
+            if (withLimit) {
+                stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE write_db_pool_id=? ORDER BY cid LIMIT " + offset + ", " + length);
+            } else {
+                stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE write_db_pool_id=?");
+            }
+            stmt.setInt(1, writePoolId);
+            result = stmt.executeQuery();
+            if (false == result.next()) {
+                return new int[0];
+            }
+
+            TIntList tmp = length > 0 ? new TIntArrayList(length) : new TIntArrayList(2048);
+            do {
+                tmp.add(result.getInt(1));
+            } while (result.next());
+            return tmp.toArray();
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        final int[] retval = new int[tmp.size()];
-        for (int i = 0; i < tmp.size(); i++) {
-            retval[i] = tmp.get(i).intValue();
-        }
-        return retval;
     }
 
     @Override
-    public int[] getContextsInDatabase(int poolId) throws OXException {
+    public int[] getContextsInDatabase(int poolId, int offset, int length) throws OXException {
         final Connection con = configDatabaseService.getReadOnly();
         try {
-            return listContexts(con, poolId);
+            return listContexts(con, poolId, offset, length);
         } finally {
             configDatabaseService.backReadOnly(con);
         }
@@ -341,13 +505,17 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             stmt.setInt(1, poolId);
             stmt.setInt(2, maxContexts);
             result = stmt.executeQuery();
+            if (false == result.next()) {
+                return new String[0];
+            }
+
             List<String> retval = new LinkedList<String>();
-            while (result.next()) {
+            do {
                 String schema = result.getString(1);
                 int count = result.getInt(2);
                 LOG.debug("schema {} is filled with {} contexts.", schema, I(count));
                 retval.add(schema);
-            }
+            } while (result.next());
             return retval.toArray(new String[retval.size()]);
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -365,13 +533,17 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             stmt.setInt(1, poolId);
             stmt.setInt(2, maxContexts);
             result = stmt.executeQuery();
+            if (false == result.next()) {
+                return Collections.emptyMap();
+            }
+
             Map<String, Integer> retval = new LinkedHashMap<String, Integer>(32, 0.9F);
-            while (result.next()) {
+            do {
                 String schema = result.getString(1);
                 int count = result.getInt(2);
                 LOG.debug("schema {} is filled with {} contexts.", schema, I(count));
                 retval.put(schema, I(count));
-            }
+            } while (result.next());
             return retval;
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -384,9 +556,19 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     public void lock(Connection con, int writePoolId) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("SELECT COUNT(*) FROM context_server2db_pool WHERE write_db_pool_id=? FOR UPDATE");
-            stmt.setInt(1, writePoolId);
-            stmt.execute();
+            switch (lockMech) {
+                case GLOBAL_LOCK: {
+                    stmt = con.prepareStatement("UPDATE ctx_per_schema_sem SET id=id+1");
+                    stmt.executeUpdate();
+                    break;
+                }
+                case ROW_LOCK: {
+                    stmt = con.prepareStatement("SELECT 1 FROM dbpool_lock WHERE db_pool_id=? FOR UPDATE");
+                    stmt.setInt(1, writePoolId);
+                    stmt.executeQuery();
+                    break;
+                }
+            }
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -428,13 +610,13 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = con.prepareStatement("SELECT db_schema, server_id FROM context_server2db_pool WHERE write_db_pool_id=? GROUP by db_schema");
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
+                stmt = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=? AND server_id=? GROUP by db_schema");
                 stmt.setInt(1, clusterEntry.getKey().intValue());
+                stmt.setInt(2, serverId);
                 rs = stmt.executeQuery();
                 while (rs.next()) {
-                    if (serverId == rs.getInt(2)) {
-                        allSchemas.put(rs.getString(1), clusterEntry.getValue());
-                    }
+                    allSchemas.put(rs.getString(1), clusterEntry.getValue());
                 }
             } catch (SQLException e) {
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());

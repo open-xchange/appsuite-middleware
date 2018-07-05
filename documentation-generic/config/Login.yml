@@ -178,3 +178,102 @@ properties:
     file: login.properties
     packageName: open-xchange-core
     tags: ["Login"] 
+  - key: com.openexchange.ajax.login.rampup.debugThresholdMillis
+    description: |
+      Specify the execution time threshold in milliseconds since when individual calls issued by rampup request are logged
+      along-side with execution time in milliseconds.
+  
+      Note: This property requires DEBUG logging to be effective for class 'com.openexchange.login.DefaultAppSuiteLoginRampUp'.
+      E.g. Enhance 'logback.xml' file by the following logger statement:
+      <pre>  
+      &lt;logger name="com.openexchange.login.DefaultAppSuiteLoginRampUp" level="DEBUG"/&gt;
+      </pre>
+
+      If this property is not specified, every individual call will be logged. If a negative value is specified, logging is
+      disabled. In case a positive value is specified, a call will only be logged if its execution time exceeds that threshold.
+    defaultValue: 0
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]
+  - key: com.openexchange.ajax.login.rampup.disabled.[client-id].jslobs
+    description: |
+      If set to "true" the "jslobs" element of the login ramp-up gets disabled.
+      
+      The "[client-id]" placeholder may hold the identifier of the client to which the setting applies; e.g. "open-xchange-appsuite"
+    defaultValue: false
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]
+  - key: com.openexchange.ajax.login.rampup.disabled.[client-id].oauth
+    description: |
+      If set to "true" the "oauth" element of the login ramp-up gets disabled.
+      
+      The "[client-id]" placeholder may hold the identifier of the client to which the setting applies; e.g. "open-xchange-appsuite"
+    defaultValue: false
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]
+  - key: com.openexchange.ajax.login.rampup.disabled.[client-id].folder
+    description: |
+      If set to "true" the "folder" element of the login ramp-up gets disabled.
+      
+      The "[client-id]" placeholder may hold the identifier of the client to which the setting applies; e.g. "open-xchange-appsuite"
+    defaultValue: false
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]
+  - key: com.openexchange.ajax.login.rampup.disabled.[client-id].folderlist
+    description: |
+      If set to "true" the "folderlist" element of the login ramp-up gets disabled.
+      
+      The "[client-id]" placeholder may hold the identifier of the client to which the setting applies; e.g. "open-xchange-appsuite"
+    defaultValue: false
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]
+  - key: com.openexchange.ajax.login.rampup.disabled.[client-id].user
+    description: |
+      If set to "true" the "user" element of the login ramp-up gets disabled.
+      
+      The "[client-id]" placeholder may hold the identifier of the client to which the setting applies; e.g. "open-xchange-appsuite"
+    defaultValue: false
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]
+  - key: com.openexchange.ajax.login.rampup.disabled.[client-id].accounts
+    description: |
+      If set to "true" the "accounts" element of the login ramp-up gets disabled.
+      
+      The "[client-id]" placeholder may hold the identifier of the client to which the setting applies; e.g. "open-xchange-appsuite"
+    defaultValue: false
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]

@@ -35,6 +35,7 @@ properties:
     type: integer
     format: int64
     description: 'The time until which this item will presumably be locked. Only set if the docment is currently locked, `0` otherwise.'
+    readOnly: true
   file_md5sum:
     type: string
     description: MD5Sum of the document.
@@ -44,9 +45,11 @@ properties:
   current_version:
     type: boolean
     description: '`true` if this version is the current version, `false` otherwise. Note: This is not writeable.'
+    readOnly: true
   number_of_versions:
     type: integer
     description: 'The number of all versions of the item. Note: This is not writeable.'
+    readOnly: true
   com.openexchange.share.extendedObjectPermissions:
     type: array
     description: An array of extended object permissions (read-only).
@@ -54,7 +57,11 @@ properties:
       $ref: "#/definitions/InfoItemExtendedPermission"
   com.openexchange.realtime.resourceID:
     type: string
-    description: The resource identifier for the infoitem for usage within the realtime component (read-only).
+    description: The resource identifier for the infoitem for usage within the realtime component.
+    readOnly: true
   com.openexchange.file.storage.mail.mailMetadata:
     type: object
-    description: Contains additional metadata for items in the "maildrive" file storage (read-only).
+    description: Contains additional metadata for items in the "maildrive" file storage.
+    readOnly: true
+required:
+  - folder_id

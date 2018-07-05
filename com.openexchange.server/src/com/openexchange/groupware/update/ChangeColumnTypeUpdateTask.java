@@ -52,6 +52,7 @@ package com.openexchange.groupware.update;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
@@ -93,21 +94,29 @@ public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        Connection con = null;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con = getDatabaseService().getForUpdateTask(contextId);
-            if ( ! correctType(con) ) {
-                before(con);
-                changeType(con);
-                after(con);
+            if (correctType(con)) {
+                return;
             }
+
+            con.setAutoCommit(false);
+            rollback = true;
+
+            before(con);
+            changeType(con);
+            after(con);
+
+            con.commit();
+            rollback = false;
         } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x.getMessage(), x);
         } finally {
-            if(con != null) {
-                getDatabaseService().backForUpdateTask(contextId, con);
+            if (rollback) {
+                Databases.rollback(con);
             }
+            Databases.autocommit(con);
         }
     }
 

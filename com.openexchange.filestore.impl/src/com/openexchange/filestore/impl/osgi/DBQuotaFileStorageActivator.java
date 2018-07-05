@@ -56,9 +56,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -73,7 +70,6 @@ import com.openexchange.filestore.impl.groupware.AddUserColumnToFilestoreUsageTa
 import com.openexchange.filestore.impl.groupware.MakeQuotaMaxConsistentInUserTable;
 import com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaDeleteListener;
 import com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaFilestoreDataMoveListener;
-import com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaUtils;
 import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;

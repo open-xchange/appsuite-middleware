@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.attach;
 
-import gnu.trove.map.TIntObjectMap;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.SortedSet;
@@ -62,6 +61,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionException;
+import gnu.trove.map.TIntObjectMap;
 
 public interface AttachmentBase extends TransactionAware {
 
@@ -87,11 +87,21 @@ public interface AttachmentBase extends TransactionAware {
     public abstract InputStream getAttachedFile(Session session, int folderId, int attachedId, int moduleId, int id, Context context, User user, UserConfiguration userConfig)  throws OXException;
 
     /**
-     * This method is used to get alle file_ids which are refered to by attachments. This is used by the consistency tool at the moment
+     * This method is used to get all file_ids which are refered to by attachments. This is used by the consistency tool at the moment
+     * 
      * @param ctx The Context
      * @return A sorted set of the file_ids
      */
     public abstract SortedSet<String> getAttachmentFileStoreLocationsperContext(Context ctx) throws OXException;
+
+    /**
+     * This method is used to get all file_ids which are refered to by attachments. This is used by the consistency tool at the moment
+     * 
+     * @param ctx The Context
+     * @param user the user
+     * @return A sorted set of the file_ids
+     */
+    public abstract SortedSet<String> getAttachmentFileStoreLocationsPerUser(Context ctx, User user) throws OXException;
 
     public abstract TimedResult<AttachmentMetadata> getAttachments(Session session, int folderId, int attachedId, int moduleId, Context context, User user, UserConfiguration userConfig) throws OXException;
 

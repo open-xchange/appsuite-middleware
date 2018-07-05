@@ -63,7 +63,6 @@ import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mime.MimeTypeMap;
 import com.sun.mail.imap.IMAPMessage;
@@ -163,7 +162,7 @@ public final class MailDriveFile extends DefaultFile {
     private MailDriveFile parseMessage(IMAPMessage message, List<Field> fields) throws MessagingException, OXException {
         if (null != message) {
             try {
-                String name = MimeMessageConverter.getSubject(message);
+                String name = MimeMessageUtility.getSubject(message);
                 if (Strings.isEmpty(name)) {
                     return null;
                 }

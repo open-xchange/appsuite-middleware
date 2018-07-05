@@ -49,20 +49,20 @@
 
 package com.openexchange.tools.oxfolder.downgrade.sql;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.TIntCollection;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.groupware.container.FolderObject;
+import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link OXFolderDowngradeSQL} - Provides several SQL commands in order to
@@ -139,7 +139,8 @@ public final class OXFolderDowngradeSQL {
 		 * @param src
 		 *            The permission
 		 */
-		public Permission(final int entity, final Permission src) {
+        @SuppressWarnings("unused")
+        public Permission(final int entity, final Permission src) {
 			super();
 			this.entity = entity;
 			this.fuid = src.fuid;
@@ -236,10 +237,11 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(pos++, entity);
 			stmt.executeUpdate();
 		} finally {
-			closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
 		}
 	}
 
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
 	private static final String SQL_SEL_MOD_PRIV_FLD = "SELECT ot.fuid FROM " + RPL_FOLDER
 			+ " AS ot WHERE ot.cid = ? AND ot.type = ? AND ot.created_from = ? AND ot.module = ?"
 			+ " AND ot.default_flag = 0 GROUP BY ot.fuid";
@@ -279,7 +281,7 @@ public final class OXFolderDowngradeSQL {
 			}
 			return list;
 		} finally {
-			closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 		}
 
 	}
@@ -316,7 +318,7 @@ public final class OXFolderDowngradeSQL {
 			}
 			stmt.executeBatch();
 		} finally {
-			closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
 		}
 	}
 
@@ -352,14 +354,16 @@ public final class OXFolderDowngradeSQL {
 			}
 			stmt.executeBatch();
 		} finally {
-			closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
 		}
 	}
 
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
 	private static final String SQL_SEL_PUBLIC_FLDS_ALL = "SELECT op.fuid FROM " + RPL_PERM + " AS op JOIN "
 			+ RPL_FOLDER + " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE ot.module = ? "
 			+ "AND op.permission_id = ? AND ot.type = ? GROUP BY op.fuid";
 
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
 	private static final String SQL_SEL_PUBLIC_FLDS_WO_DEFAULT = "SELECT op.fuid FROM " + RPL_PERM + " AS op JOIN "
 			+ RPL_FOLDER + " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE ot.module = ? "
 			+ "AND op.permission_id = ? AND ot.type = ? AND ot.default_flag = 0 GROUP BY op.fuid";
@@ -407,7 +411,7 @@ public final class OXFolderDowngradeSQL {
 			}
 			return list;
 		} finally {
-			closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 		}
 	}
 
@@ -455,7 +459,7 @@ public final class OXFolderDowngradeSQL {
 			}
 			fuid = rs.getInt(1);
 		} finally {
-			closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 			rs = null;
 			stmt = null;
 		}
@@ -466,7 +470,7 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(3, entity);
 			stmt.executeUpdate();
 		} finally {
-			closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 		}
 		return fuid;
 	}
@@ -506,7 +510,7 @@ public final class OXFolderDowngradeSQL {
 						.getInt(6) > 0, rs.getInt(7) > 0));
 			}
 		} finally {
-			closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 			stmt = null;
 			rs = null;
 		}
@@ -539,7 +543,9 @@ public final class OXFolderDowngradeSQL {
 				 * entity's permission
 				 */
 				final Permission entityPerm = getEntityPerm(perms, entity);
-				deleteSingleEntityPermission(entityPerm, permTable, writeCon, cid);
+                if (entityPerm != null) {
+                    deleteSingleEntityPermission(entityPerm, permTable, writeCon, cid);
+                }
 			}
 		}
 
@@ -593,7 +599,7 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(10, permission.fuid);
 			stmt.executeUpdate();
 		} finally {
-			closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
 		}
 	}
 
@@ -610,7 +616,7 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(3, permission.fuid);
 			stmt.executeUpdate();
 		} finally {
-			closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
 		}
 	}
 
@@ -628,7 +634,7 @@ public final class OXFolderDowngradeSQL {
 			}
 			return rs.getInt(1);
 		} finally {
-			closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 		}
 	}
 
@@ -685,7 +691,7 @@ public final class OXFolderDowngradeSQL {
             stmt.setInt(5, entity);
             stmt.executeUpdate();
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             stmt = null;
         }
         try {
@@ -709,7 +715,7 @@ public final class OXFolderDowngradeSQL {
             stmt.setInt(5, entity);
             stmt.executeUpdate();
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         return ids;
     }
@@ -759,7 +765,7 @@ public final class OXFolderDowngradeSQL {
 			    fuids.add(rs.getInt(1));
 			}
 		} finally {
-			closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 			rs = null;
 			stmt = null;
 		}
@@ -787,7 +793,7 @@ public final class OXFolderDowngradeSQL {
 				list.add(rs.getInt(1));
 			}
 		} finally {
-			closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 			stmt = null;
 		}
 		final TIntIterator iter = list.iterator();

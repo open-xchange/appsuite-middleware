@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
@@ -259,10 +260,12 @@ public abstract class OXContextStorageInterface {
      * @param search_pattern
      * @param filters
      * @param loaders
+     * @param offset The start offset
+     * @param length The max. number of contexts to return
      * @return
      * @throws StorageException
      */
-    public abstract Context[] listContext(final String search_pattern, List<Filter<Integer, Integer>> filters, List<Filter<Context, Context>> loaders) throws StorageException;
+    public abstract Context[] listContext(final String search_pattern, List<Filter<Integer, Integer>> filters, List<Filter<Context, Context>> loaders, int offset, int length) throws StorageException;
 
     /**
      * @param ctx
@@ -310,18 +313,22 @@ public abstract class OXContextStorageInterface {
     public abstract void enableAll() throws StorageException;
 
     /**
-     * @param db_host
+     * @param db_host The database host to filter by
+     * @param offset The start offset in returned chunk
+     * @param length The max. number of contexts to return (starting from offset)
      * @return
      * @throws StorageException
      */
-    public abstract Context[] searchContextByDatabase(final Database db_host) throws StorageException;
+    public abstract Context[] searchContextByDatabase(Database db_host, int offset, int length) throws StorageException;
 
     /**
-     * @param filestore
+     * @param filestore The file storage to filter by
+     * @param offset The start offset in returned chunk
+     * @param length The max. number of contexts to return (starting from offset)
      * @return
      * @throws StorageException
      */
-    public abstract Context[] searchContextByFilestore(final Filestore filestore) throws StorageException;
+    public abstract Context[] searchContextByFilestore(Filestore filestore, int offset, int length) throws StorageException;
 
     /**
      * Gets all contexts that belong to the given schema.
@@ -373,5 +380,24 @@ public abstract class OXContextStorageInterface {
      * @throws StorageException
      */
     public abstract String createSchema(int targetClusterId) throws StorageException;
+
+    /**
+     * Checks the consistencies for the count tables
+     *
+     * @param configCon The connection to the ConfigDb
+     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
+     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
+     * @throws StorageException If check fails
+     */
+    public abstract void checkCountsConsistency(Connection configCon, boolean checkDatabaseCounts, boolean checkFilestoreCounts) throws StorageException;
+
+    /**
+     * Checks the consistencies for the count tables
+     *
+     * @param checkDatabaseCounts Whether to check the counts related to context to database/schema associations
+     * @param checkFilestoreCounts Whether to check the counts related to context to filestore associations
+     * @throws StorageException If check fails
+     */
+    public abstract void checkCountsConsistency(boolean checkDatabaseCounts, boolean checkFilestoreCounts) throws StorageException;
 
 }

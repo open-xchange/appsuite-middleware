@@ -1,0 +1,51 @@
+/export?action=CSV:
+  get:
+    operationId: exportAsCSV
+    tags:
+      - Export
+    summary: Exports contact data to a CSV file.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: Object ID of the folder whose content shall be exported. This must be a contact folder.
+        required: true
+      - in: query
+        name: columns
+        type: string
+        description: 'A comma-separated list of columns to export, like "501,502". A column is specified by a numeric column identifier, see [Detailed contact data](#detailed-contact-data).'
+        required: false
+      - in: query
+        name: export_dlists
+        type: string
+        description: 'Toggles whether distribution lists shall be exported too (default is `false`).'
+        required: false
+    responses:
+      200:
+        description: 'An input stream containing the content of the CSV file with the MIME type `text/csv`.'
+        schema:
+          type: string
+  put:
+    operationId: exportAsCSV
+    tags:
+      - Export
+    summary: Exports a batch of contact data to a CSV file.
+    description: Exports a batch of contact data to a CSV file.
+    consumes:
+      - application/json
+    parameters:  
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON array of JSON objects with the id and folder_id.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/InfoItemExport"
+    responses:
+      200:
+        description: 'An input stream containing the content of the CSV file with the MIME type `text/csv`.'
+        schema:
+          type: string

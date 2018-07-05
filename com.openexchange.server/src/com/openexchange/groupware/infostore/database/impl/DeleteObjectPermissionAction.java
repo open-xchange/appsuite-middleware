@@ -113,7 +113,7 @@ public class DeleteObjectPermissionAction extends AbstractObjectPermissionAction
                             stmt.setInt(6, document.getModifiedBy());
                             stmt.setInt(7, document.getCreatedBy());
                             stmt.setInt(8, objectPermission.getPermissions());
-                            stmt.setLong(9, document.getLastModified().getTime());
+                            stmt.setLong(9, document.getSequenceNumber());
                             stmt.setBoolean(10, objectPermission.isGroup());
                         }
                     });
@@ -145,7 +145,7 @@ public class DeleteObjectPermissionAction extends AbstractObjectPermissionAction
                             stmt.setInt(6, document.getModifiedBy());
                             stmt.setInt(7, document.getCreatedBy());
                             stmt.setInt(8, objectPermission.getPermissions());
-                            stmt.setLong(9, document.getLastModified().getTime());
+                            stmt.setLong(9, document.getSequenceNumber());
                             stmt.setBoolean(10, objectPermission.isGroup());
                         }
                     });

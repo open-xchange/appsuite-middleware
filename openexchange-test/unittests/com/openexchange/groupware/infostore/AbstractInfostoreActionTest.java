@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -26,7 +27,6 @@ import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
-import com.openexchange.tools.sql.DBUtils;
 
 public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 
@@ -117,7 +117,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
             rs = stmt.executeQuery();
             return rs.next();
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             getProvider().releaseReadConnection(getContext(), readCon);
         }
     }

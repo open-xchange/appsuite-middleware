@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2016 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,26 +40,23 @@
 
 package com.sun.mail.pop3;
 
-import java.util.Properties;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.lang.reflect.*;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-import java.io.File;
-import java.io.PrintStream;
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Map;
-
-import com.sun.mail.util.PropUtil;
-import com.sun.mail.util.MailLogger;
-import com.sun.mail.util.SocketConnectException;
-import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.imap.protocol.IMAPProtocol;
+import java.util.logging.Level;
+import javax.mail.AuthenticationFailedException;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.URLName;
 import com.sun.mail.util.MailConnectException;
+import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.SocketConnectException;
 
 /**
  * A POP3 Message Store.  Contains only one folder, "INBOX".
@@ -111,10 +108,10 @@ public class POP3Store extends Store {
 	    name = url.getProtocol();
 	this.name = name;
 	logger = new MailLogger(this.getClass(),
-				"DEBUG POP3", session);
+				"DEBUG POP3", session.getDebug(), session.getDebugOut());
 
 	if (!isSSL)
-	    isSSL = PropUtil.getBooleanSessionProperty(session,
+	    isSSL = PropUtil.getBooleanProperty(session.getProperties(),
 				"mail." + name + ".ssl.enable", false);
 	if (isSSL)
 	    this.defaultPort = 995;
@@ -177,7 +174,7 @@ public class POP3Store extends Store {
      */
     private final synchronized boolean getBoolProp(String prop) {
 	prop = "mail." + name + "." + prop;
-	boolean val = PropUtil.getBooleanSessionProperty(session, prop, false);
+	boolean val = PropUtil.getBooleanProperty(session.getProperties(), prop, false);
 	if (logger.isLoggable(Level.CONFIG))
 	    logger.config(prop + ": " + val);
 	return val;
@@ -190,6 +187,7 @@ public class POP3Store extends Store {
         return session;
     }
 
+    @Override
     protected synchronized boolean protocolConnect(String host, int portNum,
 		String user, String passwd) throws MessagingException {
 		    
@@ -200,7 +198,7 @@ public class POP3Store extends Store {
 	// if port is not specified, set it to value of mail.pop3.port
         // property if it exists, otherwise default to 110
         if (portNum == -1)
-	    portNum = PropUtil.getIntSessionProperty(session,
+	    portNum = PropUtil.getIntProperty(session.getProperties(),
 				"mail." + name + ".port", -1);
 
 	if (portNum == -1)
@@ -235,6 +233,7 @@ public class POP3Store extends Store {
      * as long as we can reconnect at that point.  This means that we
      * need to be able to reconnect the Store on demand.
      */
+    @Override
     public synchronized boolean isConnected() {
 	if (!super.isConnected())
 	    // if we haven't been connected at all, don't bother with
@@ -252,9 +251,8 @@ public class POP3Store extends Store {
 		super.close();		// notifies listeners
 	    } catch (MessagingException mex) {
 		// ignore it
-	    } finally {
-		return false;
 	    }
+	    return false;
 	}
     }
 
@@ -278,21 +276,13 @@ public class POP3Store extends Store {
 		    p.setCapabilities(p.capa());
 		} else if (requireStartTLS) {
 		    logger.fine("STLS required but failed");
-		    try {
-			p.quit();
-		    } catch (IOException ioex) {
-		    } finally {
-			throw new EOFException("STLS required but failed");
-		    }
+		    throw cleanupAndThrow(p,
+			    new EOFException("STLS required but failed"));
 		}
 	    } else if (requireStartTLS) {
 		logger.fine("STLS required but not supported");
-		try {
-		    p.quit();
-		} catch (IOException ioex) {
-		} finally {
-		    throw new EOFException("STLS required but not supported");
-		}
+		throw cleanupAndThrow(p,
+			new EOFException("STLS required but not supported"));
 	    }
 	}
 
@@ -315,12 +305,7 @@ public class POP3Store extends Store {
 
 	String msg = null;
 	if ((msg = p.login(user, passwd)) != null) {
-	    try {
-		p.quit();
-	    } catch (IOException ioex) {
-	    } finally {
-		throw new EOFException(msg);
-	    }
+	    throw cleanupAndThrow(p, new EOFException(msg));
 	}
 
 	/*
@@ -340,6 +325,30 @@ public class POP3Store extends Store {
 	return p;
     }
 
+    private static IOException cleanupAndThrow(Protocol p, IOException ife) {
+	try {
+	    p.quit();
+	} catch (Throwable thr) {
+	    if (isRecoverable(thr)) {
+		ife.addSuppressed(thr);
+	    } else {
+		thr.addSuppressed(ife);
+		if (thr instanceof Error) {
+		    throw (Error) thr;
+		}
+		if (thr instanceof RuntimeException) {
+		    throw (RuntimeException) thr;
+		}
+		throw new RuntimeException("unexpected exception", thr);
+	    }
+	}
+	return ife;
+    }
+
+    private static boolean isRecoverable(Throwable t) {
+	return (t instanceof Exception) || (t instanceof LinkageError);
+    }
+
     synchronized void closePort(POP3Folder owner) {
 	if (portOwner == owner) {
 	    port = null;
@@ -347,6 +356,7 @@ public class POP3Store extends Store {
 	}
     }
 
+    @Override
     public synchronized void close() throws MessagingException {
 	close(false);
     }
@@ -368,6 +378,7 @@ public class POP3Store extends Store {
 	}
     }
 
+    @Override
     public Folder getDefaultFolder() throws MessagingException {
 	checkConnected();
 	return new DefaultFolder(this);
@@ -376,11 +387,13 @@ public class POP3Store extends Store {
     /**
      * Only the name "INBOX" is supported.
      */
+    @Override
     public Folder getFolder(String name) throws MessagingException {
 	checkConnected();
 	return new POP3Folder(this, name);
     }
 
+    @Override
     public Folder getFolder(URLName url) throws MessagingException {
 	checkConnected();
 	return new POP3Folder(this, url.getFile());
@@ -450,6 +463,7 @@ public class POP3Store extends Store {
 	return usingSSL;
     }
 
+    @Override
     protected void finalize() throws Throwable {
 	try {
 	    if (port != null)	// don't force a connection attempt

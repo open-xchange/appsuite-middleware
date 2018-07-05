@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Halo API
 Bundle-SymbolicName: com.openexchange.halo
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.cache,
+ com.google.common.collect,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.requesthandler,

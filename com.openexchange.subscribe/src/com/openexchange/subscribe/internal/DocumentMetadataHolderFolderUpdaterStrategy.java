@@ -60,7 +60,6 @@ import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Streams;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
@@ -212,18 +211,14 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
 
     private class InfostoreSession {
 
-        public int folderId;
-        public User user;
-        public UserPermissionBits permissionBits;
-        public ServerSession serverSession;
+        final int folderId;
+        final User user;
+        final ServerSession serverSession;
 
-        public InfostoreSession(final TargetFolderDefinition target) throws OXException, OXException, OXException {
+        InfostoreSession(final TargetFolderDefinition target) throws OXException, OXException, OXException {
             user = users.getUser(target.getUserId(), target.getContext());
-            permissionBits = userPermissions.getUserPermissionBits(target.getUserId(), target.getContext());
-
             serverSession = new ServerSessionAdapter(new TargetFolderSession(target), target.getContext(), user);
             folderId = target.getFolderIdAsInt();
-
         }
     }
 

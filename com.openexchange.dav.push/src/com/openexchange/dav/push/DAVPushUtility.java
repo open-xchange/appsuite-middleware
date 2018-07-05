@@ -56,9 +56,9 @@ import org.jdom2.Namespace;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
-import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVRootCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -150,7 +150,7 @@ public class DAVPushUtility {
                 }
             }
         } catch (IllegalArgumentException e) {
-            throw PushExceptionCodes.INVALID_TOPIC.create(pushKey, e);
+            throw PushExceptionCodes.INVALID_TOPIC.create(e, pushKey);
         }
         throw PushExceptionCodes.INVALID_TOPIC.create(pushKey);
     }
@@ -196,8 +196,8 @@ public class DAVPushUtility {
             if (DAVRootCollection.class.isInstance(resource)) {
                 return getClientId((DAVRootCollection) resource);
             }
-            if (CommonFolderCollection.class.isInstance(resource)) {
-                return getClientId((CommonFolderCollection<?>) resource);
+            if (FolderCollection.class.isInstance(resource)) {
+                return getClientId((FolderCollection<?>) resource);
             }
         }
         return null;
@@ -212,7 +212,7 @@ public class DAVPushUtility {
     public static String getPushKey(WebdavResource resource) {
         if (null != resource && DAVCollection.class.isInstance(resource)) {
             DAVCollection collection = (DAVCollection) resource;
-            String topic = collection.getPushTopic();
+            String topic = getFolderTopic(resource);
             if (null != topic) {
                 return getPushKey(topic, collection.getFactory().getContext().getContextId(), collection.getFactory().getUser().getId());
             }
@@ -251,11 +251,63 @@ public class DAVPushUtility {
      *
      * @param clientId The client identifier to get the topic for
      * @param folderId The folder identifier to get the topic for
+     * @param individualFolderTopics <code>true</code> if individual topics should be used, <code>false</code>, otherwise
      * @return The folder topic, or <code>null</code> if passed client identifier was <code>null</code>
      */
     public static String getFolderTopic(String clientId, String folderId) {
         String rootTopic = getRootTopic(clientId);
-        return null != rootTopic ? rootTopic + ":" + folderId : null;
+        if (null != rootTopic) {
+            return isUseIndividualTopics(clientId) ? rootTopic + ":" + folderId : rootTopic;
+        }
+        return null;
+    }
+
+    /**
+     * Gets the push topic for a specific WebDAV resource.
+     *
+     * @param resource The WebDAV resource to get the topic for
+     * @return The folder topic, or <code>null</code> if not available for the passed resource
+     */
+    public static String getFolderTopic(WebdavResource resource) {
+        if (DAVCollection.class.isInstance(resource)) {
+            String topic = ((DAVCollection) resource).getPushTopic();
+            if (null != topic) {
+                return isUseIndividualTopics(resource) ? topic : getRootTopic(getClientId(resource));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets a value indicating whether individual, collection-based push topics should be used, or just a single, general topic.
+     *
+     * @param clientId The client identifier to evaluate the topic-mode for
+     * @return <code>true</code> if individual topics should be used, <code>false</code>, otherwise
+     */
+    public static boolean isUseIndividualTopics(String clientId) {
+        return false; // always false for now
+    }
+
+    /**
+     * Gets a value indicating whether individual, collection-based push topics should be used, or just a single, general topic.
+     *
+     * @param resource The WebDAV resource to evaluate the topic-mode for
+     * @return <code>true</code> if individual topics should be used, <code>false</code>, otherwise
+     */
+    public static boolean isUseIndividualTopics(WebdavResource resource) {
+        return isUseIndividualTopics(getClientId(resource));
+//        String client = getClientId(resource);
+//        if (null != client && DAVCollection.class.isInstance(resource)) {
+//            String propertyName = "com.openexchange." + client + ".push.individualTopics";
+//            DAVFactory factory = ((DAVCollection) resource).getFactory();
+//            try {
+//                ConfigView configView = factory.getService(ConfigViewFactory.class).getView(factory.getUser().getId(), factory.getContext().getContextId());
+//                return Boolean.TRUE.equals(configView.get(propertyName, Boolean.class));
+//            } catch (OXException e) {
+//                getLogger(DAVPushUtility.class).error("error evaluating \"{}\"", propertyName, e);
+//            }
+//        }
+//        return false;
     }
 
     private static String getClientId(DAVRootCollection rootCollection) {
@@ -270,7 +322,7 @@ public class DAVPushUtility {
         return null;
     }
 
-    private static String getClientId(CommonFolderCollection<?> folderCollection) {
+    private static String getClientId(FolderCollection<?> folderCollection) {
         UserizedFolder folder = folderCollection.getFolder();
         if (null != folder) {
             ContentType contentType = folder.getContentType();

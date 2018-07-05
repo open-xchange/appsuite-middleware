@@ -2,7 +2,6 @@
 
 Name:          open-xchange-push-imapidle
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -10,17 +9,13 @@ BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
 BuildRequires: open-xchange-imap
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 35
+%define        ox_release 10
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,25 +51,10 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_imapidle.properties
-
-    # SoftwareChange_Request-2103
     PFILE=/opt/open-xchange/etc/push_imapidle.properties
-    ox_add_property com.openexchange.push.imapidle.delay "5000" $PFILE
-    ox_add_property com.openexchange.push.imapidle.clusterLock "hz" $PFILE
-    if ox_exists_property com.openexchange.push.imapidle.errordelay  $PFILE; then
-        ox_remove_property com.openexchange.push.imapidle.errordelay  $PFILE
-    fi
-    if ox_exists_property com.openexchange.push.imapidle.debug $PFILE; then
-        ox_remove_property com.openexchange.push.imapidle.debug $PFILE
-    fi
-
-    # SoftwareChange_Request-2572
-    ox_add_property com.openexchange.push.imapidle.supportsPermanentListeners false $PFILE
 
     # SCR-4030
     ox_set_property com.openexchange.push.imapidle.clusterLock local $PFILE
-
 fi
 
 %clean
@@ -92,70 +72,28 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/imapidle.properties
 
 %changelog
-* Tue Jun 26 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-06-21 (4801)
-* Mon Jun 18 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-06-25 (4791)
-* Fri Jun 08 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-06-11 (4771)
-* Tue Jun 05 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-06-06 (4773)
-* Tue May 22 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-05-28 (4758)
-* Mon Apr 30 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-05-07 (4685)
-* Mon Apr 30 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-04-30 (4691)
-* Fri Apr 20 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-04-23 (4670)
-* Thu Apr 12 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-04-12 (4674)
+* Fri Jun 29 2018 Carsten Hoeger <choeger@open-xchange.com>
+Fourth candidate for 7.10.0 release
+* Wed Jun 27 2018 Carsten Hoeger <choeger@open-xchange.com>
+Third candidate for 7.10.0 release
+* Mon Jun 25 2018 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.10.0 release
+* Mon Jun 11 2018 Carsten Hoeger <choeger@open-xchange.com>
+First candidate for 7.10.0 release
+* Fri May 18 2018 Carsten Hoeger <choeger@open-xchange.com>
+Sixth preview of 7.10.0 release
+* Thu Apr 19 2018 Carsten Hoeger <choeger@open-xchange.com>
+Fifth preview of 7.10.0 release
 * Tue Apr 03 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-04-03 (4642)
-* Fri Mar 23 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-03-26 (4619)
-* Mon Mar 12 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-03-12 (4602)
-* Mon Feb 26 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-02-26 (4583)
-* Mon Jan 29 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-02-05 (4555)
-* Mon Jan 15 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-01-22 (4538)
-* Tue Jan 02 2018 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2018-01-08 (4516)
-* Fri Dec 08 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for Patch 2017-12-11 (4473)
-* Thu Nov 16 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-11-20 (4441)
-* Tue Nov 14 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-11-15 (4448)
-* Wed Oct 25 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-10-30 (4415)
-* Mon Oct 23 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-10-29 (4425)
-* Mon Oct 16 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-10-16 (4394)
-* Wed Sep 27 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-10-02 (4377)
-* Thu Sep 21 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-09-22 (4373)
-* Tue Sep 12 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-09-18 (4354)
-* Fri Sep 01 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-09-04 (4328)
-* Mon Aug 14 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-08-21 (4318)
-* Tue Aug 01 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-08-07 (4304)
-* Mon Jul 17 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-07-24 (4285)
-* Mon Jul 03 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-07-10 (4257)
-* Wed Jun 21 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-06-26 (4233)
-* Tue Jun 06 2017 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2017-06-08 (4180)
+Fourth preview of 7.10.0 release
+* Tue Feb 20 2018 Carsten Hoeger <choeger@open-xchange.com>
+Third preview of 7.10.0 release
+* Fri Feb 02 2018 Carsten Hoeger <choeger@open-xchange.com>
+Second preview for 7.10.0 release
+* Fri Dec 01 2017 Carsten Hoeger <choeger@open-xchange.com>
+First preview for 7.10.0 release
+* Thu Oct 12 2017 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Carsten Hoeger <choeger@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Carsten Hoeger <choeger@open-xchange.com>

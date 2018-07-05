@@ -1,0 +1,69 @@
+/folders?action=delete:
+  put:
+    operationId: deleteFolders
+    tags:
+      - Folders
+    summary: Deletes a list of folders.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: The optional timestamp of the last update of the deleted folders.
+        required: false
+      - $ref: "#/parameters/gblQueryParamAllowedModules"
+      - in: query
+        name: hardDelete
+        type: boolean
+        description: |
+          If set to `true`, the folders are deleted permanently. Otherwise, and if the underlying storage
+          supports a trash folder and the folders are not yet located below the trash folder, they are moved
+          to the trash folder.
+        required: false
+        default: false
+      - in: query
+        name: failOnError
+        type: boolean
+        description: |
+          If an error occured for one folder and this parameter is set to `true` the process will abort and throw an error. 
+          If this parameter is set to 'false' the process will continue for the remaining folders and will add a warning to the response instead.
+        required: false
+        default: false
+      - in: query
+        name: extendedResponse
+        type: boolean
+        description: |
+          If this parameter is set to `true` a different response will be returned.
+          The response contains an array of json objects, which can contain the following fields:
+            <ul>
+              <li><code>new_path</code> - The new path of the folder in case of a trash operation.</li>
+              <li><code>path</code> - The old path.</li>
+              <li><code>hasFailed</code> - A boolean flag indicating that the delete operation has failed.</li>
+              <li><code>isTrashed</code> - A boolean flag indicating that the folder has been trashed.</li>
+              <li><code>isSuppoprted</code> - A boolean flag indicating that the folder storage supports trashing.</li>
+            </ul>
+
+        required: false
+        default: false
+      - in: body
+        name: body
+        description: A JSON array with object IDs of the folders.
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+    responses:
+      200:
+        description: |
+          An array with object IDs of folders that were NOT deleted. There may be a lot of different causes
+          for a not deleted folder: A folder has been modified in the mean time, the user does not have the
+          permission to delete it or those permissions have just been removed, the folder does not exist, etc.
+          You receive an empty JSON array if everything worked well. In case of errors the responsible fields
+          in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/FoldersCleanUpResponse"

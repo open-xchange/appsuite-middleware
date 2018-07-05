@@ -42,14 +42,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.util.CompatibilityHints;
 import net.fortuna.ical4j.util.Configurator;
 import net.fortuna.ical4j.util.Dates;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * $Id$ [18-Apr-2004]

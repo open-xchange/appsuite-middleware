@@ -49,13 +49,11 @@
 
 package com.openexchange.sso.action;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -116,7 +114,7 @@ public final class GetAction implements AJAXActionService {
         }
     }
 
-    private static final Set<String> LOCAL_HOST = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("127.0.0.1", "localhost", "::1/128", "::1")));
+    private static final Set<String> LOCAL_HOST = ImmutableSet.of("127.0.0.1", "localhost", "::1/128", "::1");
 
     private boolean isLocalHost(final String hostname) {
         return null != hostname && LOCAL_HOST.contains(hostname.toLowerCase(Locale.US));

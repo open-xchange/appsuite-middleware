@@ -1,13 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: com.openexchange.http.grizzly
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ClassPath: lib/grizzly-framework-monitoring-2.3.29.jar,
- lib/grizzly-http-all-2.3.29.jar,
- lib/grizzly-http-monitoring-2.3.29.jar,
- lib/grizzly-http-server-monitoring-2.3.29.jar,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: lib/grizzly-framework-monitoring-2.4.3.jar,
+ lib/grizzly-http-all-2.4.3.jar,
+ lib/grizzly-http-monitoring-2.4.3.jar,
+ lib/grizzly-http-server-monitoring-2.4.3.jar,
  lib/gmbal-4.0.0-b001.jar,
  lib/management-api-3.2.1-b002.jar,
  lib/pfl-basic-tools-4.0.0-b004.jar,
@@ -38,6 +38,7 @@ Import-Package: com.google.common.base,
  com.openexchange.tools.exceptions,
  com.openexchange.tools.servlet,
  com.openexchange.tools.servlet.http,
+ com.openexchange.version,
  javax.management,
  javax.management.modelmbean,
  javax.management.openmbean,
@@ -47,10 +48,10 @@ Import-Package: com.google.common.base,
  javax.security.auth,
  javax.security.auth.x500,
  javax.security.cert,
- javax.servlet;version="[3.1,4)",
- javax.servlet.annotation;version="[3.1,4)",
- javax.servlet.descriptor;version="[3.1,4)",
- javax.servlet.http;version="[3.1,4)",
+ javax.servlet;version="[4,5)",
+ javax.servlet.annotation;version="[4,5)",
+ javax.servlet.descriptor;version="[4,5)",
+ javax.servlet.http;version="[4,5)",
  org.apache.commons.codec.binary,
  org.apache.commons.collections,
  org.apache.commons.collections.iterators,

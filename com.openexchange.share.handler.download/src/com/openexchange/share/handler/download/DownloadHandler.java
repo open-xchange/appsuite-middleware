@@ -70,7 +70,9 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.AccessShareRequest;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
@@ -115,13 +117,12 @@ public class DownloadHandler extends HttpAuthShareHandler {
     }
 
     @Override
-    protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        if (shareRequest.isInvalidTarget()) {
-            return false;
+    protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) {
+        if (indicatesDownload(request) || indicatesRaw(request)) {
+            ShareTarget target = shareRequest.getTarget();
+            return null == target || Module.INFOSTORE.getFolderConstant() == target.getModule() && null != target.getItem();
         }
-
-        ShareTarget target = shareRequest.getTarget();
-        return Module.INFOSTORE.getFolderConstant() == target.getModule() && null != target.getItem() && (indicatesDownload(request) || indicatesRaw(request));
+        return false;
     }
 
     @Override
@@ -130,71 +131,82 @@ public class DownloadHandler extends HttpAuthShareHandler {
          * get document
          */
         ServerSession session = ServerSessionAdapter.valueOf(resolvedShare.getSession());
-        final String id = resolvedShare.getShareRequest().getTarget().getItem();
+        ShareTarget target = resolvedShare.getShareRequest().getTarget();
+        if (null == target) {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(resolvedShare.getShareRequest().getTargetPath());
+        }
+        final String id = target.getItem();
         final String version = null; // as per com.openexchange.file.storage.FileStorageFileAccess.CURRENT_VERSION
         IDBasedFileAccessFactory service = Services.getService(IDBasedFileAccessFactory.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(IDBasedFileAccessFactory.class);
         }
         final IDBasedFileAccess fileAccess = service.createAccess(session);
-        FileHolder fileHolder;
-        String eTag;
         final Document document = fileAccess.getDocumentAndMetadata(id, version);
-        if (null != document) {
-            /*
-             * prefer document and metadata if available
-             */
-            fileHolder = new FileHolder(new IFileHolder.InputStreamClosure() {
-
-                @Override
-                public InputStream newStream() throws OXException, IOException {
-                    return document.getData();
-                }
-
-            }, document.getSize(), document.getMimeType(), document.getName());
-            eTag = document.getEtag();
-        } else {
-            /*
-             * load metadata, document on demand
-             */
-            final File fileMetadata = fileAccess.getFileMetadata(id, version);
-            IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
-
-                @Override
-                public InputStream newStream() throws OXException, IOException {
-                    InputStream inputStream = fileAccess.getDocument(id, version);
-                    if (BufferedInputStream.class.isInstance(inputStream) || ByteArrayInputStream.class.isInstance(inputStream)) {
-                        return inputStream;
-                    }
-                    return new BufferedInputStream(inputStream, 65536);
-                }
-            };
-            fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
-            eTag = FileStorageUtility.getETagFor(fileMetadata);
-        }
         /*
-         * prepare renderer-compatible request result
+         * create file holder
          */
-        AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(resolvedShare.getRequest(), false, false, session, "/share", resolvedShare.getResponse());
-        request.setSession(session);
-        AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-        if (null != eTag) {
-            result.setHeader("ETag", eTag);
-        }
-        /*
-         * render response via file response renderer
-         */
-        if (indicatesRaw(resolvedShare.getRequest())) {
-            fileHolder.setDelivery("view");
-            fileHolder.setDisposition("inline");
-        } else {
-            fileHolder.setDelivery("download");
-            fileHolder.setDisposition("attachment");
-        }
+        FileHolder fileHolder = null;
         try {
-            renderer.write(request, result, resolvedShare.getRequest(), resolvedShare.getResponse());
-        } catch (RateLimitedException e) {
-            e.send(resolvedShare.getResponse());
+            String eTag;
+            if (null == document) {
+                /*
+                 * load metadata, document on demand
+                 */
+                final File fileMetadata = fileAccess.getFileMetadata(id, version);
+                IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
+
+                    @Override
+                    public InputStream newStream() throws OXException, IOException {
+                        InputStream inputStream = fileAccess.getDocument(id, version);
+                        if (BufferedInputStream.class.isInstance(inputStream) || ByteArrayInputStream.class.isInstance(inputStream)) {
+                            return inputStream;
+                        }
+                        return new BufferedInputStream(inputStream, 65536);
+                    }
+                };
+                fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
+                eTag = FileStorageUtility.getETagFor(fileMetadata);
+            } else {
+                /*
+                 * prefer document and metadata if available
+                 */
+                fileHolder = new FileHolder(new IFileHolder.InputStreamClosure() {
+
+                    @Override
+                    public InputStream newStream() throws OXException, IOException {
+                        return document.getData();
+                    }
+
+                }, document.getSize(), document.getMimeType(), document.getName());
+                eTag = document.getEtag();
+            }
+            /*
+             * prepare renderer-compatible request result
+             */
+            AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(resolvedShare.getRequest(), false, false, session, "/share", resolvedShare.getResponse());
+            request.setSession(session);
+            AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            if (null != eTag) {
+                result.setHeader("ETag", eTag);
+            }
+            /*
+             * render response via file response renderer
+             */
+            if (indicatesRaw(resolvedShare.getRequest())) {
+                fileHolder.setDelivery("view");
+                fileHolder.setDisposition("inline");
+            } else {
+                fileHolder.setDelivery("download");
+                fileHolder.setDisposition("attachment");
+            }
+            try {
+                renderer.write(request, result, resolvedShare.getRequest(), resolvedShare.getResponse());
+            } catch (RateLimitedException e) {
+                e.send(resolvedShare.getResponse());
+            }
+        } finally {
+            Streams.close(fileHolder);
         }
     }
 

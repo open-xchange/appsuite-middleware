@@ -50,65 +50,36 @@
 package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertEquals;
-import java.io.IOException;
+import static org.junit.Assert.assertNotNull;
 import java.util.Date;
-import java.util.TimeZone;
-import org.json.JSONException;
 import org.junit.Test;
-import com.openexchange.ajax.appointment.action.AllRequest;
-import com.openexchange.ajax.appointment.action.GetRequest;
-import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.importexport.ImportResult;
 
 /**
  * @author tobiasp
  */
 public class ICalSeriesTests extends ManagedAppointmentTest {
 
-    public ICalSeriesTests() {
-        super();
-    }
-
     @Test
-    public void testDeleteException() throws OXException, IOException, JSONException {
-        String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" + "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20100202T103000\n" + "DTEND;TZID=Europe/Rome:20100202T120000\n" + "RRULE:FREQ=DAILY;UNTIL=20100204T215959Z\n" + "EXDATE:20100203T103000\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:Exceptional Meeting #1\n" + "END:VEVENT\n";
-
-        AJAXClient client = getClient();
-        int fid = folder.getObjectID();
-        TimeZone tz = client.getValues().getTimeZone();
-
-        ICalImportRequest request = new ICalImportRequest(fid, ical);
-        client.execute(request);
-
-        AllRequest allRequest = new AllRequest(fid, Appointment.ALL_COLUMNS, D("2010-02-03 00:00", tz), D("2010-02-04 00:00", tz), tz, false);
-        CommonAllResponse response2 = client.execute(allRequest);
-
-        Object[][] data = response2.getArray();
-        assertEquals(0, data.length);
-    }
-
-    @Test
-    public void testChangeExceptionWithExceptionFirst() throws Exception {
-        String uid = "change-exception-" + new Date().getTime();
-        String title = "Change to exceptional meeting #3: One hour later";
-        String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" +
-
-            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20100204T113000\n" + "DTEND;TZID=Europe/Rome:20100204T130000\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:" + title + "\n" + "UID:" + uid + "\n" + "END:VEVENT\n" +
-
-            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20100202T103000\n" + "DTEND;TZID=Europe/Rome:20100202T120000\n" + "RRULE:FREQ=DAILY;UNTIL=20100228T215959Z\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:Exceptional meeting #3\n" + "UID:" + uid + "\n" + "END:VEVENT\n";
-
-        TimeZone tz = TimeZone.getTimeZone("GMT");
-
-        Date start = D("2010-02-04 00:00", tz);
-        Date end = D("2010-02-05 00:00", tz);
-
-        testChangeException(ical, title, start, end);
+    public void testDeleteException() throws Exception {
+        String ical =
+            "BEGIN:VCALENDAR\n" +
+            "VERSION:2.0\n" +
+            "BEGIN:VEVENT\n" +
+            "DTSTART;TZID=Europe/Rome:20100202T103000\n" +
+            "DTEND;TZID=Europe/Rome:20100202T120000\n" +
+            "RRULE:FREQ=DAILY;UNTIL=20100204T215959Z\n" +
+            "EXDATE:20100203T103000\n" +
+            "DTSTAMP:20110105T174810Z\n" +
+            "SUMMARY:Exceptional Meeting #1\n" +
+            "END:VEVENT\n"
+        ;
+        testChangeException(ical, "Exceptional Meeting #1", 1);
     }
 
     @Test
@@ -116,39 +87,50 @@ public class ICalSeriesTests extends ManagedAppointmentTest {
         String uid = "change-exception-" + new Date().getTime();
 
         String title = "Change to exceptional meeting #2: Five hours later";
-        String ical = "BEGIN:VCALENDAR\n" + "VERSION:2.0\n" +
-
-            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20100202T110000\n" + "DTEND;TZID=Europe/Rome:20100202T120000\n" + "RRULE:FREQ=DAILY;UNTIL=20100228T215959Z\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:Exceptional meeting #2\n" + "UID:" + uid + "\n" + "END:VEVENT\n" +
-
-            "BEGIN:VEVENT\n" + "DTSTART;TZID=Europe/Rome:20100204T160000\n" + "DTEND;TZID=Europe/Rome:20100204T170000\n" + "DTSTAMP:20110105T174810Z\n" + "SUMMARY:" + title + "\n" + "UID:" + uid + "\n" + "END:VEVENT\n";
-
-        TimeZone tz = TimeZone.getTimeZone("GMT");
-        Date start = D("2010-02-04 00:00", tz);
-        Date end = D("2010-02-05 00:00", tz);
-
-        testChangeException(ical, title, start, end);
+        String ical =
+            "BEGIN:VCALENDAR\n" +
+            "VERSION:2.0\n" +
+            "BEGIN:VEVENT\n" +
+            "DTSTART;TZID=Europe/Rome:20100202T110000\n" +
+            "DTEND;TZID=Europe/Rome:20100202T120000\n" +
+            "RRULE:FREQ=DAILY;UNTIL=20100228T215959Z\n" +
+            "DTSTAMP:20110105T174810Z\n" +
+            "SUMMARY:Exceptional meeting #2\n" +
+            "UID:" + uid + "\n" +
+            "END:VEVENT\n" +
+            "BEGIN:VEVENT\n" +
+            "DTSTART;TZID=Europe/Rome:20100204T160000\n" +
+            "DTEND;TZID=Europe/Rome:20100204T170000\n" +
+            "DTSTAMP:20110105T174810Z\n" +
+            "SUMMARY:" + title + "\n" +
+            "RECURRENCE-ID:20100204T100000Z\n" +
+            "UID:" + uid + "\n" +
+            "END:VEVENT\n"
+        ;
+        testChangeException(ical, title, 2);
     }
 
-    protected void testChangeException(String ical, String expectedTitle, Date start, Date end) throws Exception {
+    protected void testChangeException(String ical, String expectedTitle, int expectedLength) throws Exception {
         AJAXClient client = getClient();
         int fid = folder.getObjectID();
-        TimeZone tz = client.getValues().getTimeZone();
 
         ICalImportRequest request = new ICalImportRequest(fid, ical);
-        client.execute(request);
+        ICalImportResponse response = client.execute(request);
 
-        AllRequest allRequest = new AllRequest(fid, new int[] { Appointment.OBJECT_ID }, start, end, tz, false);
-        CommonAllResponse response2 = client.execute(allRequest);
+        ImportResult[] imports = response.getImports();
+        assertNotNull(imports);
+        assertEquals(expectedLength, imports.length);
 
-        Object[][] data = response2.getArray();
-        assertEquals(1, data.length);
-
-        int oid = (Integer) data[0][response2.getColumnPos(ContactField.OBJECT_ID.getNumber())];
-        GetRequest getRequest = new GetRequest(fid, oid);
-        GetResponse getResponse = client.execute(getRequest);
-
-        Appointment actual = getResponse.getAppointment(tz);
-        assertEquals(expectedTitle, actual.getTitle());
+        Appointment matchingAppointment = null;
+        for (ImportResult result : imports) {
+            Appointment appointment = catm.get(fid, Integer.parseInt(result.getObjectId()));
+            assertNotNull(appointment);
+            if (expectedTitle.equals(appointment.getTitle())) {
+                matchingAppointment = appointment;
+                break;
+            }
+        }
+        assertNotNull("No appointment with title " + expectedTitle + " found", matchingAppointment);
     }
 
 }

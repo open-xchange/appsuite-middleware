@@ -54,14 +54,15 @@ import java.util.Set;
 import java.util.logging.Level;
 import javax.activation.CommandMap;
 import javax.activation.MailcapCommandMap;
+import javax.mail.Session;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.QueuingIMAPStore;
 import com.sun.mail.imap.ProtocolListener;
+import com.sun.mail.imap.QueuingIMAPStore;
 import com.sun.mail.util.MailLogger;
 
 
@@ -84,6 +85,7 @@ public final class JavaMailActivator implements BundleActivator {
     @Override
     public synchronized void start(final BundleContext context) throws Exception {
         try {
+            Session.setActiveBundle(context.getBundle());
             /*-
              * Add handlers for mail MIME types
              *
@@ -161,6 +163,7 @@ public final class JavaMailActivator implements BundleActivator {
                 this.protocolListenerTracker = null;
                 protocolListenerTracker.close();
             }
+            Session.setActiveBundle(null);
         } catch (final Exception e) {
             final MailLogger logger = new MailLogger(JavaMailActivator.class, "JavaMail Activator", true, System.out);
             logger.log(Level.SEVERE, "Error stopping JavaMail bundle.", e);

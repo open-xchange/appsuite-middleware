@@ -59,7 +59,6 @@ import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_PER
 import static com.openexchange.sessiond.SessionExceptionMessages.NO_SESSION_FOR_TOKENS_MSG;
 import static com.openexchange.sessiond.SessionExceptionMessages.PASSWORD_UPDATE_FAILED_MSG;
 import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_EXPIRED_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_INVALIDATED_MSG;
 import java.util.regex.Pattern;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -129,17 +128,6 @@ public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
      * Context %1$d (%2$s) is currently not enabled.
      */
     CONTEXT_LOCKED("Context %1$d (%2$s) is currently not enabled.", CONTEXT_LOCKED_MSG, Category.CATEGORY_TRY_AGAIN, 204),
-    /**
-     * Request to server was refused. Original client IP address changed. Please try again.<br>
-     * Client login IP changed from %1$s to %2$s and is not covered by IP white-list or netmask.
-     */
-    WRONG_CLIENT_IP("Request to server was refused. Original client IP address changed. Please try again." +
-        System.getProperty("line.separator") + "Client login IP changed from %1$s to %2$s and is not covered by IP white-list or netmask.",
-        SESSION_INVALIDATED_MSG, Category.CATEGORY_PERMISSION_DENIED, 205),
-    /**
-     * Your session was invalidated. Please try again.
-     */
-    WRONG_SESSION_SECRET("Your session was invalidated. Please try again.", SESSION_INVALIDATED_MSG, Category.CATEGORY_TRY_AGAIN, 206),
     /**
      * Max. number of sessions exceeded for client %1$s of user %2$s in context %3$s
      */

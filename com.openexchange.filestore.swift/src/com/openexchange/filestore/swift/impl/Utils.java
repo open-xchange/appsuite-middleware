@@ -57,6 +57,7 @@ import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -214,12 +215,12 @@ class Utils {
      */
     static Map<String, String> mapFor(String... args) {
         if (null == args) {
-            return null;
+            return Collections.emptyMap();
         }
 
         int length = args.length;
         if (0 == length || (length % 2) != 0) {
-            return null;
+            return Collections.emptyMap();
         }
 
         Map<String, String> map = new LinkedHashMap<String, String>(length >> 1);
@@ -367,7 +368,7 @@ class Utils {
      */
     private static String asHex(final byte[] hash) {
         final int length = hash.length;
-        final char[] buf = new char[length * 2];
+        final char[] buf = new char[length << 1];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];

@@ -1,15 +1,25 @@
 package liquibase.change.custom;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.CustomChangeException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
-
-import java.util.*;
 
 /**
  * Adapts CustomChange implementations to the standard change system used by Liquibase.

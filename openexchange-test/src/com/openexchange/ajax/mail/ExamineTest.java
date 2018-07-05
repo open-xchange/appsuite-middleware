@@ -64,7 +64,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.ExamineRequest;
 import com.openexchange.ajax.mail.actions.ExamineResponse;
@@ -105,8 +104,6 @@ public class ExamineTest extends AbstractMailTest {
 
     @Test
     public void testExamineTest() throws OXException, IOException, JSONException {
-
-        AJAXClient client = getClient();
         UserValues values = getClient().getValues();
         String folder = values.getInboxFolder();
 
@@ -122,7 +119,7 @@ public class ExamineTest extends AbstractMailTest {
         {
             InputStreamReader streamReader = null;
             try {
-                streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "mail010.eml")), "UTF-8");
+                streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "mail010.eml")), "UTF-8");
                 char[] buf = new char[2048];
                 for (int read; (read = streamReader.read(buf, 0, 2048)) > 0;) {
                     sb.append(buf, 0, read);

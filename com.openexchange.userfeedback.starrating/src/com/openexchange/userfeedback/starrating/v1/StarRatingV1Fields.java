@@ -52,6 +52,7 @@ package com.openexchange.userfeedback.starrating.v1;
 import java.util.HashSet;
 import java.util.Set;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link StarRatingV1Fields}
@@ -76,12 +77,14 @@ public enum StarRatingV1Fields {
     client_version("Client Version"),
     ;
 
-    private static final Set<String> INTERNAL_KEYS = new HashSet<String>();
+    private static final Set<String> INTERNAL_KEYS;
 
     static {
+        ImmutableSet.Builder<String> keys = ImmutableSet.builder();
         for (StarRatingV1Fields field : StarRatingV1Fields.values()) {
-            INTERNAL_KEYS.add(field.name().toLowerCase());
+            keys.add(field.name().toLowerCase());
         }
+        INTERNAL_KEYS = keys.build();
     }
 
     private String displayName;
@@ -101,7 +104,7 @@ public enum StarRatingV1Fields {
 
     /**
      * Returns keys that are required within the to persist JSONObject. Those removed from {@link com.openexchange.userfeedback.starrating.v1.StarRatingV1Fields#values()} are retrieved from other tables.
-     * 
+     *
      * @return Set of {@link String} that are required within the {@link JSONObject}
      */
     public static Set<String> requiredJsonKeys() {

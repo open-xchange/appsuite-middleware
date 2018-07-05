@@ -82,36 +82,57 @@ public abstract class AbstractExportAction implements AJAXActionService {
     private static final String DOWNLOAD = "download";
 
     private AJAXRequestResult perform(ExportRequest req) throws OXException {
-        final List<Integer> cols = req.getColumns();
-        final SizedInputStream sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, getOptionalParams(req));
+        int[] fieldsToBeExported = req.getColumns() != null ? I2i(req.getColumns()) : null;
+        Map<String, List<String>> batchIds = req.getBatchIds();
+        Exporter exporter = getExporter();
+
+        SizedInputStream sis;
+
+        if (doBatchExport(batchIds)) {
+            sis = exporter.exportBatchData(req.getSession(), getFormat(), batchIds, fieldsToBeExported, getOptionalParams(req));
+        } else {
+            sis = exporter.exportFolderData(req.getSession(), getFormat(), req.getFolder(), fieldsToBeExported, getOptionalParams(req));
+        }
+
         if (null == sis) {
             // Streamed
             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
         }
 
-        final FileHolder fileHolder = new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), "export." + sis.getFormat().getExtension());
+        final FileHolder fileHolder = new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), getExportFileName(req, sis.getFormat().getExtension()));
         fileHolder.setDisposition("attachment");
         req.getRequest().setFormat("file");
         return new AJAXRequestResult(fileHolder, "file");
     }
 
-    protected Map<String, Object> getOptionalParams(ExportRequest req) {
-        final Map<String, Object> optionalParams;
-        final AJAXRequestData request = req.getRequest();
+    private boolean doBatchExport(Map<String, List<String>> batchIds) {
+        return null != batchIds && false == batchIds.isEmpty();
+    }
 
-        final boolean responseAccess = request.isHttpServletResponseAvailable();
-        if (responseAccess) {
-            optionalParams = new HashMap<String, Object>(4);
-            optionalParams.put("__requestData", request);
-            String contentType = request.getParameter(PARAMETER_CONTENT_TYPE);
-            String delivery = request.getParameter(DELIVERY);
-            if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
-                optionalParams.put("__saveToDisk", Boolean.TRUE);
-            }
-        } else {
-            optionalParams = null;
+    protected Map<String, Object> getOptionalParams(ExportRequest req) {
+        AJAXRequestData request = req.getRequest();
+        boolean responseAccess = request.isHttpServletResponseAvailable();
+        if (!responseAccess) {
+            return null;
+        }
+
+        Map<String, Object> optionalParams = new HashMap<>(4);
+        optionalParams.put("__requestData", request);
+        String contentType = request.getParameter(PARAMETER_CONTENT_TYPE);
+        String delivery = request.getParameter(DELIVERY);
+        if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
+            optionalParams.put("__saveToDisk", Boolean.TRUE);
         }
 
         return optionalParams;
     }
+
+    private String getExportFileName(ExportRequest req, String extension) {
+        Map<String, List<String>> batchIds = req.getBatchIds();
+        if (null == batchIds || batchIds.isEmpty()) {
+            return getExporter().getFolderExportFileName(req.getSession(), req.getFolder(), extension);
+        }
+        return getExporter().getBatchExportFileName(req.getSession(), batchIds, extension);
+    }
+
 }

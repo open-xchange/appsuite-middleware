@@ -81,7 +81,7 @@ public class DropboxApi2 extends DefaultApi20 {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.scribe.builder.api.DefaultApi20#getAccessTokenEndpoint()
      */
     @Override
@@ -91,7 +91,7 @@ public class DropboxApi2 extends DefaultApi20 {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.scribe.builder.api.DefaultApi20#getAuthorizationUrl(org.scribe.model.OAuthConfig)
      */
     @Override
@@ -101,7 +101,7 @@ public class DropboxApi2 extends DefaultApi20 {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.scribe.builder.api.DefaultApi20#createService(org.scribe.model.OAuthConfig)
      */
     @Override
@@ -111,7 +111,7 @@ public class DropboxApi2 extends DefaultApi20 {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.scribe.builder.api.DefaultApi20#getAccessTokenVerb()
      */
     @Override
@@ -121,7 +121,7 @@ public class DropboxApi2 extends DefaultApi20 {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.scribe.builder.api.DefaultApi20#getAccessTokenExtractor()
      */
     @Override
@@ -135,12 +135,12 @@ public class DropboxApi2 extends DefaultApi20 {
      */
     public static class DropboxOAuth2Service extends OAuth20ServiceImpl {
 
-        private DefaultApi20 api;
-        private OAuthConfig config;
+        private final DefaultApi20 api;
+        private final OAuthConfig config;
 
         /**
          * Initialises a new {@link DropboxOAuth2Service}.
-         * 
+         *
          * @param api
          * @param config
          */
@@ -152,7 +152,7 @@ public class DropboxApi2 extends DefaultApi20 {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see org.scribe.oauth.OAuth20ServiceImpl#getAccessToken(org.scribe.model.Token, org.scribe.model.Verifier)
          */
         @Override
@@ -164,9 +164,18 @@ public class DropboxApi2 extends DefaultApi20 {
             request.addBodyParameter(OAuthConstants.CLIENT_ID, config.getApiKey());
             request.addBodyParameter(OAuthConstants.CLIENT_SECRET, config.getApiSecret());
             request.addBodyParameter(OAuthConstants.REDIRECT_URI, config.getCallback());
-
             Response response = request.send();
             return api.getAccessTokenExtractor().extract(response.getBody());
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see org.scribe.oauth.OAuth20ServiceImpl#signRequest(org.scribe.model.Token, org.scribe.model.OAuthRequest)
+         */
+        @Override
+        public void signRequest(Token accessToken, OAuthRequest request) {
+            request.addQuerystringParameter("authorization", "Bearer " + accessToken.getToken());
         }
     }
 }

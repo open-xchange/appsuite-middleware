@@ -60,14 +60,15 @@ public class CreateSSLCertificateManagementTable extends AbstractCreateTableImpl
 
     private static final String TABLE_NAME = "user_certificate";
 
-    private static final String CREATE_STATEMENT = "CREATE TABLE `user_certificate` (" + 
-        "`cid` INT4 UNSIGNED NOT NULL," + 
-        "`userid` INT UNSIGNED NOT NULL," + 
-        "`host` VARCHAR(255) NOT NULL," + 
-        "`fingerprint` VARCHAR(64) NOT NULL," + 
-        "`trusted` BOOLEAN NOT NULL," + 
-        "PRIMARY KEY (`cid`,`userid`,`host`,`fingerprint`)" + 
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    private static final String CREATE_STATEMENT = "CREATE TABLE `user_certificate` (" +
+        "`cid` INT4 UNSIGNED NOT NULL," +
+        "`userid` INT UNSIGNED NOT NULL," +
+        "`host` VARCHAR(255) NOT NULL," +
+        "`host_hash` VARCHAR(64) NOT NULL," +
+        "`fingerprint` VARCHAR(64) NOT NULL," +
+        "`trusted` BOOLEAN NOT NULL," +
+        "PRIMARY KEY (`cid`,`userid`,`host_hash`,`fingerprint`)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     /**
      * Initialises a new {@link CreateSSLCertificateManagementTable}.
@@ -78,7 +79,7 @@ public class CreateSSLCertificateManagementTable extends AbstractCreateTableImpl
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.database.CreateTableService#requiredTables()
      */
     @Override
@@ -88,7 +89,7 @@ public class CreateSSLCertificateManagementTable extends AbstractCreateTableImpl
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.database.CreateTableService#tablesToCreate()
      */
     @Override
@@ -98,7 +99,7 @@ public class CreateSSLCertificateManagementTable extends AbstractCreateTableImpl
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
      */
     @Override

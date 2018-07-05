@@ -60,7 +60,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
- * {@link MailField} - An enumeration of mail fields to define which fields to prefill.
+ * {@link MailField} - An enumeration of mail fields to define which fields to pre-fill.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,15 +72,19 @@ public enum MailField {
      */
     ID(MailListField.ID),
     /**
-     * The folder ID or fullname<br>
+     * The folder ID or full name<br>
      * <b>[low cost]</b>
      */
     FOLDER_ID(MailListField.FOLDER_ID),
     /**
-     * The Content-Type; includes whether message contains attachments or not<br>
+     * Whether message contains attachments or not<br>
+     */
+    ATTACHMENT(MailListField.ATTACHMENT),
+    /**
+     * The Content-Type
      * <b>[low cost]</b>
      */
-    CONTENT_TYPE(MailListField.ATTACHMENT),
+    CONTENT_TYPE(MailListField.MIME_TYPE),
     /**
      * The MIME type<br>
      * <b>[low cost]</b>
@@ -177,21 +181,46 @@ public enum MailField {
     SUPPORTS_CONTINUATION(null),
     /**
      * The original mail ID.
+     *
      * @since v7.8.0
      */
     ORIGINAL_ID(MailListField.ORIGINAL_ID),
     /**
      * The original folder ID
+     *
      * @since v7.8.0
      */
     ORIGINAL_FOLDER_ID(MailListField.ORIGINAL_FOLDER_ID),
-
     /**
      * The attachment name.
+     *
      * @since v7.8.2
      */
-    ATTACHMENT_NAME(null)
-
+    ATTACHMENT_NAME(null),
+    /**
+     * The message's text preview only if immediately available
+     *
+     * @since v7.10.0
+     */
+    TEXT_PREVIEW_IF_AVAILABLE(MailListField.TEXT_PREVIEW_IF_AVAILABLE),
+    /**
+     * The message's text preview; generate it if absent (may be slow)
+     *
+     * @since v7.10.0
+     */
+    TEXT_PREVIEW(MailListField.TEXT_PREVIEW),
+    /**
+     * The message's authentication overall result (light version); maps to <code>"Authentication-Results"</code> header
+     *
+     * @since v7.10.0
+     */
+    AUTHENTICATION_OVERALL_RESULT(MailListField.AUTHENTICATION_OVERALL_RESULT),
+    /**
+     * The message's authentication mechanism results (heavy version); maps to <code>"Authentication-Results"</code> header
+     *
+     * @since v7.10.0
+     */
+    AUTHENTICATION_MECHANISM_RESULTS(MailListField.AUTHENTICATION_MECHANISM_RESULTS),
     ;
 
     private static final EnumMap<MailListField, MailField> LIST_FIELDS_MAP = new EnumMap<MailListField, MailField>(MailListField.class);
@@ -219,9 +248,7 @@ public enum MailField {
      * ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
      * DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL
      */
-    public static final MailField[] FIELDS_LOW_COST = {
-        ID, FOLDER_ID, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
-        DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL };
+    public static final MailField[] FIELDS_LOW_COST = { ID, FOLDER_ID, ATTACHMENT, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL, DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL };
 
     /**
      * All fields except {@link #BODY} and {@link #FULL}.
@@ -229,9 +256,7 @@ public enum MailField {
      * ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
      * DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS
      */
-    public static final MailField[] FIELDS_WO_BODY = {
-        ID, FOLDER_ID, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
-        DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS };
+    public static final MailField[] FIELDS_WO_BODY = { ID, FOLDER_ID, ATTACHMENT, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL, DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS };
 
     private final MailListField listField;
 
@@ -379,6 +404,68 @@ public enum MailField {
         final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
         searchTerm.addMailField(set);
         return set;
+    }
+
+    /**
+     * Checks if specified fields contains one of the given fields
+     *
+     * @param mailFields The fields
+     * @param fieldsToCheck The fields to check for
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public static boolean contains(MailField[] mailFields, MailField... fieldsToCheck) {
+        if (null == mailFields || fieldsToCheck == null || fieldsToCheck.length == 0) {
+            return false;
+        }
+
+        for (MailField mailField : mailFields) {
+            for (MailField fieldToCheck : fieldsToCheck) {
+                if (mailField == fieldToCheck) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Adds specified fields to given fields if not yet contained
+     *
+     * @param mailFields The fields to add to
+     * @param fieldsToAdd The fields to add
+     * @return The resulting fields extended by missing fields
+     */
+    public static MailField[] add(MailField[] mailFields, MailField... fieldsToAdd) {
+        if (null == mailFields || fieldsToAdd == null || fieldsToAdd.length == 0) {
+            return mailFields;
+        }
+
+        List<MailField> toAdd = new ArrayList<>(fieldsToAdd.length);
+        int numOfFields = mailFields.length;
+        for (MailField fieldToAdd : fieldsToAdd) {
+            boolean add = true;
+            for (int i = numOfFields; add && i-- > 0;) {
+                MailField mailField = mailFields[i];
+                if (mailField == fieldToAdd) {
+                    // Already contained
+                    add = false;
+                }
+            }
+            if (add) {
+                toAdd.add(fieldToAdd);
+            }
+        }
+
+        int numOfFieldsToAdd = toAdd.size();
+        if (numOfFieldsToAdd <= 0) {
+            return mailFields;
+        }
+        MailField[] newFields = new MailField[numOfFields + numOfFieldsToAdd];
+        System.arraycopy(mailFields, 0, newFields, 0, numOfFields);
+        for (MailField addMe : toAdd) {
+            newFields[numOfFields++] = addMe;
+        }
+        return newFields;
     }
 
 }

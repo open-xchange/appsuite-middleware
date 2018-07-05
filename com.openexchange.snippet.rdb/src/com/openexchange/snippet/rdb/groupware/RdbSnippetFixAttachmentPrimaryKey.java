@@ -51,14 +51,12 @@ package com.openexchange.snippet.rdb.groupware;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.snippet.rdb.Services;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -85,9 +83,7 @@ public class RdbSnippetFixAttachmentPrimaryKey extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        DatabaseService dbService = getService(DatabaseService.class);
-        Connection con = dbService.getForUpdateTask(cid);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             if (Tools.existsPrimaryKey(con, "snippetAttachment", new String[] { "cid", "user", "id", "referenceId" })) {
@@ -96,8 +92,10 @@ public class RdbSnippetFixAttachmentPrimaryKey extends UpdateTaskAdapter {
 
             Databases.startTransaction(con);
             rollback = true;
+
             Tools.dropPrimaryKey(con, "snippetAttachment");
             Tools.createPrimaryKey(con, "snippetAttachment", new String[] { "cid", "user", "id", "referenceId" }, new int[] { 0, 0, 0, 64 });
+
             con.commit();
             rollback = false;
         } catch (SQLException e) {
@@ -106,10 +104,9 @@ public class RdbSnippetFixAttachmentPrimaryKey extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
-            dbService.backForUpdateTask(cid, con);
+            Databases.autocommit(con);
         }
     }
 

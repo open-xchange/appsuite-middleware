@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -147,6 +147,7 @@ public final class MailLogger {
      * @param	prefix	the prefix for debug output, or null for none
      * @param	session	where to get the debug flag and PrintStream
      */
+    @Deprecated
     public MailLogger(String name, String prefix, Session session) {
 	this(name, prefix, session.getDebug(), session.getDebugOut());
     }
@@ -161,6 +162,7 @@ public final class MailLogger {
      * @param	prefix	the prefix for debug output, or null for none
      * @param	session	where to get the debug flag and PrintStream
      */
+    @Deprecated
     public MailLogger(Class<?> clazz, String prefix, Session session) {
 	this(clazz, prefix, session.getDebug(), session.getDebugOut());
     }
@@ -263,7 +265,7 @@ public final class MailLogger {
      * @param msg the message.
      * @param params the message parameters.
      */
-    public void log(Level level, String msg, Object params[]) {
+    public void log(Level level, String msg, Object... params) {
 	if (debug) {
 	    msg = MessageFormat.format(msg, params);
 	    debugOut(msg);

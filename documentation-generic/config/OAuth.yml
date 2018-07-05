@@ -1,7 +1,7 @@
 feature_name: OAuth
 feature_description: |
   See [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth.html]] and
-  [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth_provider.html]] for mor informations.
+  [[https://documentation.open-xchange.com/{{version}}/middleware/components/oauth_provider.html]] for more informations.
 properties:
     - key: com.openexchange.oauth.modules.enabled.[oauth_provider]
       description: |
@@ -29,7 +29,7 @@ properties:
             <tr>
               <td>contacts_ro</td>
               <td>Allows read-only access to contact data of the OAuth provider</td>
-              <td>google, linkedin, msliveconnect, xing, yahoo</td>
+              <td>google, msliveconnect, xing, yahoo</td>
             </tr>
             <tr>
               <td>calendar</td>
@@ -44,7 +44,7 @@ properties:
             <tr>
               <td>drive</td>
               <td>Allows access to files/documents API of the OAuth provider</td>
-              <td>boxcom, dropbox, google, msliveconnect, </td>
+              <td>boxcom, dropbox, google, msliveconnect </td>
             </tr>
             <tr>
               <td>feeds</td>
@@ -69,7 +69,6 @@ properties:
            <li>boxcom</li>
            <li>dropbox</li>
            <li>google</li>
-           <li>linkedin</li>
            <li>msliveconnect</li>
            <li>twitter</li>
            <li>xing</li>
@@ -82,7 +81,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oauth
-      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo"]
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "MS Live Connect", "Twitter", "Xing", "Yahoo"]
     - key: com.openexchange.oauth.[serviceId].apiKey
       description: |
         The api key of your [serviceId] application.
@@ -95,7 +94,7 @@ properties:
       related:
       file: 
       packageName: open-xchange-oauth
-      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
     - key: com.openexchange.oauth.[serviceId].apiSecret
       description: |
         The api secret of your [serviceId] application.
@@ -108,7 +107,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oauth
-      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "LinkedIn", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
+      tags: ["OAuth", "Boxcom", "Dropbox", "Google", "MS Live Connect", "Twitter", "Xing", "Yahoo", "Credential"]
     - key: com.openexchange.oauth.[serviceId].redirectUrl
       description: |
         The redirect url of your [serviceId] application. E.g.:

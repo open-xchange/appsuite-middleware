@@ -49,13 +49,11 @@
 
 package com.openexchange.config.cascade.context.matching;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.HashSet;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link ContextSetTermParserTest}

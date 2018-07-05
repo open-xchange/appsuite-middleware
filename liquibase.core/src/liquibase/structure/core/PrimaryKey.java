@@ -1,12 +1,10 @@
 package liquibase.structure.core;
 
+import java.util.ArrayList;
+import java.util.List;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
-
-import javax.swing.text.TableView;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PrimaryKey extends AbstractDatabaseObject {
 
@@ -65,7 +63,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
 
 
     @Override
-    public int compareTo(Object other) {
+    public int compareTo(DatabaseObject other) {
         PrimaryKey o = (PrimaryKey) other;
         int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
         if (returnValue == 0) {
@@ -81,8 +79,12 @@ public class PrimaryKey extends AbstractDatabaseObject {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         PrimaryKey that = (PrimaryKey) o;
 

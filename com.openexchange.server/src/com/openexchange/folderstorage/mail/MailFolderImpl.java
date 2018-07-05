@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.mail;
 import static com.openexchange.folderstorage.mail.MailFolderStorage.closeMailAccess;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
-import gnu.trove.map.hash.TIntIntHashMap;
 import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Locale;
@@ -91,6 +90,7 @@ import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.DefaultMailPermission;
@@ -99,6 +99,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
+import gnu.trove.map.hash.TIntIntHashMap;
 
 /**
  * {@link MailFolderImpl} - A mail folder.
@@ -117,6 +118,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final String CAPABILITY_STORE_SEEN = "STORE_SEEN";
     private static final String CAPABILITY_FOLDER_VALIDITY = "FOLDER_VALIDITY";
     private static final String CAPABILITY_FILENAME_SEARCH = "FILENAME_SEARCH";
+    private static final String CAPABILITY_ATTACHMENT_MARKER = "ATTACHMENT_MARKER";
+    private static final String CAPABILITY_TEXT_PREVIEW = "TEXT_PREVIEW";
 
     /**
      * The mail folder content type.
@@ -315,12 +318,19 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
         }
 
-        this.capabilities = mailConfig.getCapabilities().getCapabilities();
-        if (mailConfig.getCapabilities().hasFileNameSearch()) {
+        MailCapabilities mailCapabilities = mailConfig.getCapabilities();
+        this.capabilities = mailCapabilities.getCapabilities();
+        if (mailCapabilities.hasFileNameSearch()) {
             addSupportedCapabilities(CAPABILITY_FILENAME_SEARCH);
         }
-        if (mailConfig.getCapabilities().hasFolderValidity()) {
+        if (mailCapabilities.hasAttachmentMarker()) {
+            addSupportedCapabilities(CAPABILITY_ATTACHMENT_MARKER);
+        }
+        if (mailCapabilities.hasFolderValidity()) {
             addSupportedCapabilities(CAPABILITY_FOLDER_VALIDITY);
+        }
+        if (mailCapabilities.hasTextPreview()) {
+            addSupportedCapabilities(CAPABILITY_TEXT_PREVIEW);
         }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation

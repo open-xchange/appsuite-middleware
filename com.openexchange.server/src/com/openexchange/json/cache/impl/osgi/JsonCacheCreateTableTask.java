@@ -49,18 +49,16 @@
 
 package com.openexchange.json.cache.impl.osgi;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link JsonCacheCreateTableTask}
@@ -81,43 +79,40 @@ public class JsonCacheCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection writeCon = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
-        boolean transactional = false;
         try {
-            DBUtils.startTransaction(writeCon); // BEGIN
-            transactional = true;
+            con.setAutoCommit(false);
+            rollback = true;
+
             final String[] tableNames = JsonCacheCreateTableService.getTablesToCreate();
             final String[] createStmts = JsonCacheCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
                 try {
-                    if (tableExists(writeCon, tableNames[i])) {
+                    if (tableExists(con, tableNames[i])) {
                         continue;
                     }
-                    stmt = writeCon.prepareStatement(createStmts[i]);
+                    stmt = con.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();
+                    closeSQLStuff(stmt);
                 } catch (final SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }
-            writeCon.commit(); // COMMIT
-        } catch (final OXException e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
-            throw e;
-        } catch (final Exception e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            if (transactional) {
-                DBUtils.autocommit(writeCon);
+            if (rollback) {
+                Databases.rollback(con);
             }
-            Database.backNoTimeout(contextId, true, writeCon);
+            Databases.autocommit(con);
         }
     }
 

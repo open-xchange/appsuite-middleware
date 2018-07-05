@@ -123,8 +123,7 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
             /*
              * apply jslob
              */
-            DefaultJSlob jslob = new DefaultJSlob();
-            jslob.setJsonObject(json);
+            DefaultJSlob jslob = new DefaultJSlob(json);
             jslob.setId(new JSlobId(serviceId, "io.ox/core/properties", session.getUserId(), session.getContextId()));
             return jslob;
         } catch (JSONException e) {

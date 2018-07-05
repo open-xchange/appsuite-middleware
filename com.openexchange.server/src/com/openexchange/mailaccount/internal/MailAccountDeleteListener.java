@@ -49,25 +49,29 @@
 
 package com.openexchange.mailaccount.internal;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collections;
+import java.util.Map;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCode;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.procedure.TIntErrorAwareAbstractProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedExceptionCode;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailAccountDeleteListener} - {@link DeleteListener} for mail account storage.
@@ -85,7 +89,8 @@ public class MailAccountDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
-        if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+        int type = deleteEvent.getType();
+        if (type == DeleteEvent.TYPE_USER) {
             final int userId = deleteEvent.getId();
             final int contextId = deleteEvent.getContext().getContextId();
 
@@ -111,6 +116,26 @@ public class MailAccountDeleteListener implements DeleteListener {
             if (null != err) {
                 throw err;
             }
+        } else if (type == DeleteEvent.TYPE_CONTEXT) {
+            handleContextDeletion(writeCon, deleteEvent.getContext());
+        }
+    }
+
+    private void handleContextDeletion(Connection writeCon, Context ctx) throws OXException {
+        Statement stmt = null;
+        try {
+            stmt = writeCon.createStatement();
+
+            stmt.addBatch("DELETE FROM user_transport_account_properties WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_transport_account WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_mail_account_properties WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM user_mail_account WHERE cid=" + ctx.getContextId());
+
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 

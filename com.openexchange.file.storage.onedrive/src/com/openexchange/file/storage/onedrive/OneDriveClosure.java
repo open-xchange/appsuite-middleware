@@ -50,8 +50,8 @@
 package com.openexchange.file.storage.onedrive;
 
 import java.io.IOException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -81,7 +81,7 @@ public abstract class OneDriveClosure<R> {
      * @throws JSONException If a JSON error occurs
      * @throws IOException If an I/O error occurred
      */
-    protected abstract R doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException;
+    protected abstract R doPerform(HttpClient httpClient) throws OXException, JSONException, IOException;
 
     /**
      * Performs this closure's operation.
@@ -92,11 +92,11 @@ public abstract class OneDriveClosure<R> {
      * @return The return value
      * @throws OXException If operation fails
      */
-    public R perform(AbstractOneDriveResourceAccess resourceAccess, DefaultHttpClient httpClient, Session session) throws OXException {
+    public R perform(AbstractOneDriveResourceAccess resourceAccess, HttpClient httpClient, Session session) throws OXException {
         return null == resourceAccess ? innerPerform(false, null, httpClient, session) : innerPerform(true, resourceAccess, httpClient, session);
     }
 
-    private R innerPerform(boolean handleAuthError, AbstractOneDriveResourceAccess resourceAccess, DefaultHttpClient httpClient, Session session) throws OXException {
+    private R innerPerform(boolean handleAuthError, AbstractOneDriveResourceAccess resourceAccess, HttpClient httpClient, Session session) throws OXException {
         try {
             return doPerform(httpClient);
         } catch (HttpResponseException e) {

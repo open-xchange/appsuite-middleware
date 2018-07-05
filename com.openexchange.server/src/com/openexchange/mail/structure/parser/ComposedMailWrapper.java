@@ -51,6 +51,7 @@ package com.openexchange.mail.structure.parser;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -58,9 +59,13 @@ import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.SecurityInfo;
+import com.openexchange.mail.dataobjects.SecurityResult;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -911,6 +916,11 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
+    public boolean isHasAttachment() {
+        return mail.isHasAttachment();
+    }
+
+    @Override
     public boolean containsHasAttachment() {
         return mail.containsHasAttachment();
     }
@@ -923,6 +933,26 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     @Override
     public void setHasAttachment(final boolean hasAttachment) {
         mail.setHasAttachment(hasAttachment);
+    }
+
+    @Override
+    public boolean isAlternativeHasAttachment() {
+        return mail.isAlternativeHasAttachment();
+    }
+
+    @Override
+    public boolean containsAlternativeHasAttachment() {
+        return mail.containsAlternativeHasAttachment();
+    }
+
+    @Override
+    public void removeAlternativeHasAttachment() {
+        mail.removeAlternativeHasAttachment();
+    }
+
+    @Override
+    public void setAlternativeHasAttachment(boolean hasAttachment) {
+        mail.setAlternativeHasAttachment(hasAttachment);
     }
 
     @Override
@@ -993,6 +1023,201 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     @Override
     public void setUnreadMessages(final int unreadMessages) {
         mail.setUnreadMessages(unreadMessages);
+    }
+
+    @Override
+    public void addFrom(Collection<InternetAddress> addrs) {
+        mail.addFrom(addrs);
+    }
+
+    @Override
+    public void removeFromPersonals() {
+        mail.removeFromPersonals();
+    }
+
+    @Override
+    public void addTo(Collection<InternetAddress> addrs) {
+        mail.addTo(addrs);
+    }
+
+    @Override
+    public void removeToPersonals() {
+        mail.removeToPersonals();
+    }
+
+    @Override
+    public void addCc(Collection<InternetAddress> addrs) {
+        mail.addCc(addrs);
+    }
+
+    @Override
+    public void removeCcPersonals() {
+        mail.removeCcPersonals();
+    }
+
+    @Override
+    public void addBcc(Collection<InternetAddress> addrs) {
+        mail.addBcc(addrs);
+    }
+
+    @Override
+    public void removeBccPersonals() {
+        mail.removeBccPersonals();
+    }
+
+    @Override
+    public InternetAddress[] getAllRecipients() {
+        return mail.getAllRecipients();
+    }
+
+    @Override
+    public void addReplyTo(Collection<InternetAddress> addrs) {
+        mail.addReplyTo(addrs);
+    }
+
+    @Override
+    public boolean isSubjectDecoded() {
+        return mail.isSubjectDecoded();
+    }
+
+    @Override
+    public void addUserFlags(Collection<String> userFlags) {
+        mail.addUserFlags(userFlags);
+    }
+
+    @Override
+    public FullnameArgument getOriginalFolder() {
+        return mail.getOriginalFolder();
+    }
+
+    @Override
+    public boolean containsOriginalFolder() {
+        return mail.containsOriginalFolder();
+    }
+
+    @Override
+    public void removeOriginalFolder() {
+        mail.removeOriginalFolder();
+    }
+
+    @Override
+    public void setOriginalFolder(FullnameArgument originalFolder) {
+        mail.setOriginalFolder(originalFolder);
+    }
+
+    @Override
+    public String getTextPreview() {
+        return mail.getTextPreview();
+    }
+
+    @Override
+    public boolean containsTextPreview() {
+        return mail.containsTextPreview();
+    }
+
+    @Override
+    public void removeTextPreview() {
+        mail.removeTextPreview();
+    }
+
+    @Override
+    public void setTextPreview(String textPreview) {
+        mail.setTextPreview(textPreview);
+    }
+
+    @Override
+    public String getOriginalId() {
+        return mail.getOriginalId();
+    }
+
+    @Override
+    public boolean containsOriginalId() {
+        return mail.containsOriginalId();
+    }
+
+    @Override
+    public void removeOriginalId() {
+        mail.removeOriginalId();
+    }
+
+    @Override
+    public void setOriginalId(String originalId) {
+        mail.setOriginalId(originalId);
+    }
+
+    @Override
+    public String[] getReferencesOrInReplyTo() {
+        return mail.getReferencesOrInReplyTo();
+    }
+
+    @Override
+    public void setSecurityInfo(SecurityInfo securityInfo) {
+        mail.setSecurityInfo(securityInfo);
+    }
+
+    @Override
+    public SecurityInfo getSecurityInfo() {
+        return mail.getSecurityInfo();
+    }
+
+    @Override
+    public boolean containsSecurityInfo() {
+        return mail.containsSecurityInfo();
+    }
+
+    @Override
+    public void removeSecurityInfo() {
+        mail.removeSecurityInfo();
+    }
+
+    @Override
+    public void setSecurityResult(SecurityResult result) {
+        mail.setSecurityResult(result);
+    }
+
+    @Override
+    public SecurityResult getSecurityResult() {
+        return mail.getSecurityResult();
+    }
+
+    @Override
+    public boolean hasSecurityResult() {
+        return mail.hasSecurityResult();
+    }
+
+    @Override
+    public boolean containsSecurityResult() {
+        return mail.containsSecurityResult();
+    }
+
+    @Override
+    public void removeSecurityResult() {
+        mail.removeSecurityResult();
+    }
+
+    @Override
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        mail.setAuthenticityResult(authenticationResult);
+    }
+
+    @Override
+    public MailAuthenticityResult getAuthenticityResult() {
+        return mail.getAuthenticityResult();
+    }
+
+    @Override
+    public boolean hasAuthenticityResult() {
+        return mail.hasAuthenticityResult();
+    }
+
+    @Override
+    public boolean containsAuthenticityResult() {
+        return mail.containsAuthenticityResult();
+    }
+
+    @Override
+    public void removeAuthenticityResult() {
+        mail.removeAuthenticityResult();
     }
 
     @Override

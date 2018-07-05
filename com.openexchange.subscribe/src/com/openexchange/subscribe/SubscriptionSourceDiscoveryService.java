@@ -62,11 +62,55 @@ import com.openexchange.osgi.annotation.SingletonService;
  */
 @SingletonService
 public interface SubscriptionSourceDiscoveryService {
+
+    /**
+     * Retrieves all {@link SubscriptionSource}s
+     * 
+     * @return A list of {@link SubscriptionSource}s
+     */
     public List<SubscriptionSource> getSources();
+
+    /**
+     * Retrieves all {@link SubscriptionSource}s of the given folder module
+     * 
+     * @param folderModule The folder module
+     * @return A list of {@link SubscriptionSource}s
+     */
     public List<SubscriptionSource> getSources(int folderModule);
+
+    /**
+     * Gets the {@link SubscriptionSource} for the given identifier
+     * 
+     * @param identifier The {@link SubscriptionSource} identifier
+     * @return The {@link SubscriptionSource}
+     */
     public SubscriptionSource getSource(String identifier);
+
+    /**
+     * Gets a {@link SubscriptionSource} for a given subscription
+     * 
+     * @param context The context
+     * @param subscriptionId The id of the subscription
+     * @return The subscription source
+     * @throws OXException
+     */
     public SubscriptionSource getSource(Context context, int subscriptionId) throws OXException;
+
+    /**
+     * Checks if the given identifier is a known {@link SubscriptionSource}
+     * 
+     * @param identifier The identifier
+     * @return true if it is known, false otherwise
+     */
     public boolean knowsSource(String identifier);
 
+    /**
+     * Gets a {@link SubscriptionSourceDiscoveryService} which filters {@link SubscriptionSource}s based on user and context.
+     *
+     * @param user The user id
+     * @param context The context id
+     * @return The {@link SubscriptionSourceDiscoveryService}
+     * @throws OXException
+     */
     public SubscriptionSourceDiscoveryService filter(int user, int context) throws OXException;
 }

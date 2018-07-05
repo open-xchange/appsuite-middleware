@@ -50,9 +50,11 @@
 package com.openexchange.sessiond.impl;
 
 /**
- * SessionConfig
+ * 
+ * {@link SessiondConfigInterface}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
 public interface SessiondConfigInterface {
 
@@ -63,8 +65,6 @@ public interface SessiondConfigInterface {
     int getNumberOfSessionContainers();
 
     int getMaxSessions();
-
-    int getMaxSessionsPerUser();
 
     int getMaxSessionsPerClient();
 
@@ -94,5 +94,4 @@ public interface SessiondConfigInterface {
      * @return The obfuscation key
      */
     String getObfuscationKey();
-
 }

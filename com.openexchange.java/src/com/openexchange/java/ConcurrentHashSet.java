@@ -51,6 +51,7 @@ package com.openexchange.java;
 
 import java.io.Serializable;
 import java.util.AbstractSet;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -106,6 +107,8 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
      */
     private ConcurrentMap<E, Object> map;
 
+    private transient Set<E> keys;
+
     /**
      * Creates a new, empty set with the specified initial capacity, load factor, and concurrency level.
      *
@@ -119,6 +122,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
     public ConcurrentHashSet(final int initialCapacity, final float loadFactor, final int concurrencyLevel) {
         super();
         map = new ConcurrentHashMap<E, Object>(initialCapacity, loadFactor, concurrencyLevel);
+        keys = map.keySet();
     }
 
     /**
@@ -151,7 +155,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
 
     @Override
     public Iterator<E> iterator() {
-        return map.keySet().iterator();
+        return keys.iterator();
     }
 
     @Override
@@ -170,6 +174,21 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
     }
 
     @Override
+    public boolean containsAll(Collection<?> c) {
+        return keys.containsAll(c);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o == this || keys.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return keys.hashCode();
+    }
+
+    @Override
     public boolean add(final E o) {
         return map.put(o, PRESENT) == null;
     }
@@ -179,9 +198,9 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
      *
      * <pre>
      * if (!set.contains(e))
-     *     return set.add(e);
+     * return set.add(e);
      * else
-     *     return false
+     * return false
      * </pre>
      *
      * except that the action is performed atomically.
@@ -198,15 +217,25 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
         return map.remove(o) == PRESENT;
     }
 
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        return keys.removeAll(c);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return keys.retainAll(c);
+    }
+
     /**
      * Removes the entry for a key only if currently mapped to a given value. This is equivalent to
      *
      * <pre>
      * if (set.contains(o)) {
-     *     set.remove(o);
-     *     return true;
+     * set.remove(o);
+     * return true;
      * } else {
-     *     return false;
+     * return false;
      * }
      * </pre>
      *
@@ -222,6 +251,21 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
     @Override
     public void clear() {
         map.clear();
+    }
+
+    @Override
+    public Object[] toArray() {
+        return keys.toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return keys.toArray(a);
+    }
+
+    @Override
+    public String toString() {
+        return keys.toString();
     }
 
     @Override

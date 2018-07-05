@@ -1,10 +1,9 @@
 package liquibase.util.ui;
 
+import javax.swing.JOptionPane;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.util.StreamUtil;
-
-import javax.swing.*;
 
 public class SwingUIFacade implements UIFacade {
     /**

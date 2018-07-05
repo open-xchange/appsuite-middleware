@@ -57,14 +57,18 @@ package com.openexchange.share.recipient;
  */
 public class GuestRecipient extends ShareRecipient {
 
+    private static final long serialVersionUID = -1684289453388992393L;
+
     private String emailAddress;
     private String displayName;
     private String contactID;
     private String contactFolder;
     private String password;
+    private String preferredLanguage;
 
     public GuestRecipient() {
         super();
+        this.preferredLanguage = null;
     }
 
     @Override
@@ -160,6 +164,22 @@ public class GuestRecipient extends ShareRecipient {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * Sets the preferred language for the recipient
+     * @param lang
+     */
+    public void setPreferredLanguage(String lang) {
+        this.preferredLanguage = lang;
+    }
+
+    /**
+     * Gets the preferred language for the recipient
+     * @return language
+     */
+    public String getPreferredLanguage() {
+        return this.preferredLanguage;
     }
 
     @Override

@@ -32,7 +32,6 @@
 package net.fortuna.ical4j.util;
 
 import java.util.Map;
-
 import edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap;
 
 /**

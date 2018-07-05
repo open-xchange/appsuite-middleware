@@ -49,7 +49,7 @@
 
 package com.openexchange.mailaccount.internal;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -72,7 +73,6 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
 /**
@@ -331,7 +331,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
         } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -364,7 +364,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
                 return -1;
             }
             int id = rs.getInt(1);
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 
             stmt = con.prepareStatement(SQL_ENABLED);
             stmt.setInt(1, contextId);
@@ -374,7 +374,7 @@ public final class UnifiedInboxManagementImpl implements UnifiedInboxManagement 
         } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

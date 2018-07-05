@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,13 +40,18 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import javax.activation.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.UnknownServiceException;
-import com.sun.mail.util.MessageRemovedIOException;
-import com.sun.mail.util.PropUtil;
+import javax.activation.DataSource;
+import javax.mail.FolderClosedException;
+import javax.mail.MessageAware;
+import javax.mail.MessageContext;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
 import com.sun.mail.util.FolderClosedIOException;
+import com.sun.mail.util.MessageRemovedIOException;
 
 /**
  * A utility class that implements a DataSource out of
@@ -92,6 +97,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
      * @see	javax.mail.internet.MimeUtility#decode
      * @return 	decoded input stream
      */
+    @Override
     public InputStream getInputStream() throws IOException {
 	InputStream is;
 
@@ -124,6 +130,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
      *
      * This implementation throws the UnknownServiceException.
      */
+    @Override
     public OutputStream getOutputStream() throws IOException {
 	throw new UnknownServiceException("Writing not supported");
     }
@@ -134,6 +141,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
      * This implementation just invokes the <code>getContentType</code>
      * method on the MimePart.
      */
+    @Override
     public String getContentType() {
 	try {
 	    return part.getContentType();
@@ -151,6 +159,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
      *
      * This implementation just returns an empty string.
      */
+    @Override
     public String getName() {
 	try {
 	    if (part instanceof MimeBodyPart)
@@ -165,6 +174,7 @@ public class MimePartDataSource implements DataSource, MessageAware {
      * Return the <code>MessageContext</code> for the current part.
      * @since JavaMail 1.1
      */
+    @Override
     public synchronized MessageContext getMessageContext() {
 	if (context == null)
 	    context = new MessageContext(part);

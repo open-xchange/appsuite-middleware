@@ -195,7 +195,7 @@ public class Hazelcasts {
      * @param remoteMembers The remote members by which the task is supposed to be executed
      * @param executor The executor to use
      * @param filter The filter which accepts or declines a result
-     * @return The result accepted by specified filter or <code>null</code>
+     * @return The first<b>(!)</b> result accepted by specified filter or <code>null</code>
      * @throws ExecutionException If execution fails on any remote member
      */
     public static <R, F> F executeByMembersAndFilter(Callable<R> task, Set<Member> remoteMembers, IExecutorService executor, Filter<R, F> filter) throws ExecutionException {
@@ -212,7 +212,7 @@ public class Hazelcasts {
      * @param executor The executor to use
      * @param filter The filter which accepts or declines a result
      * @param fetcher An optional executor to check remote results concurrently
-     * @return The result accepted by specified filter or <code>null</code>
+     * @return The first<b>(!)</b> result accepted by specified filter or <code>null</code>
      * @throws ExecutionException If execution fails on any remote member
      */
     public static <R, F> F executeByMembersAndFilter(Callable<R> task, Set<Member> remoteMembers, IExecutorService executor, Filter<R, F> filter, ExecutorService fetcher) throws ExecutionException {

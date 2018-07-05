@@ -120,13 +120,15 @@ public class ReplaceDocumentIntoDelTableAction extends AbstractDocumentListActio
             /*
              * REPLACE INTO del_infostore (...) VALUES (...);
              */
-            updates.add(new Update(getQueryCatalog().getReplace(Table.DEL_INFOSTORE, slice.size())) {
+            updates.add(new Update(getQueryCatalog().getReplace(Table.DEL_INFOSTORE, slice.size(), "last_modified", "cid")) {
 
                 @Override
                 public void fillStatement() throws SQLException {
                     int parameterIndex = 1;
+                    Long sequenceNumber = Long.valueOf(System.currentTimeMillis());
                     for (DocumentMetadata document : slice) {
-                        parameterIndex = fillStmt(parameterIndex, stmt, getQueryCatalog().getWritableDelDocumentFields(), document, contextID);
+                        document.setSequenceNumber(sequenceNumber);
+                        parameterIndex = fillStmt(parameterIndex, stmt, getQueryCatalog().getWritableDelDocumentFields(), document, sequenceNumber, contextID);
                     }
                 }
             });

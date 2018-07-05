@@ -139,7 +139,7 @@ public class AttachmentCopyTest extends AbstractUserCopyTest {
             copyTask.copyUser(mapping);    
             dstCon.commit();
         } catch (final OXException e) {
-            DBUtils.rollback(dstCon);
+            Databases.rollback(dstCon);
             e.printStackTrace();
             fail("A UserCopyException occurred.");
         }
@@ -190,7 +190,7 @@ public class AttachmentCopyTest extends AbstractUserCopyTest {
                 }
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     } 
     
@@ -200,7 +200,7 @@ public class AttachmentCopyTest extends AbstractUserCopyTest {
     @After
     public void tearDown()
  throws Exception {
-        DBUtils.autocommit(dstCon);
+        Databases.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "prg_attachment");
         super.tearDown();
     }    

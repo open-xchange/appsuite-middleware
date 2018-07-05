@@ -49,11 +49,12 @@
 
 package com.openexchange.passwordchange.history.impl.events;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
-import com.openexchange.passwordchange.history.PasswordChangeInfo;
+import com.openexchange.passwordchange.history.PasswordChangeClients;
 import com.openexchange.passwordchange.history.PasswordChangeRecorder;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
 import com.openexchange.passwordchange.history.impl.PasswordChangeInfoImpl;
 
 /**
@@ -79,7 +80,7 @@ public class PasswordChangeHelper {
      * @param contextId The context of the user
      * @param userId The ID representing the user. For this user the password change will be recorded
      * @param ipAddress The IP address if available
-     * @param client The calling resource. E.g. {@link PasswordChangeInfo#PROVISIONING}
+     * @param client The calling resource. E.g. {@link PasswordChangeClients#PROVISIONING}
      * @param registry The recorder registry
      */
     public static void recordChangeSafe(int contextId, int userId, String ipAddress, String client, PasswordChangeRecorderRegistryService registry) {
@@ -88,12 +89,12 @@ public class PasswordChangeHelper {
             recorder.trackPasswordChange(userId, contextId, new PasswordChangeInfoImpl(System.currentTimeMillis(), client, ipAddress));
         } catch (OXException e) {
             if (PasswordChangeRecorderException.DENIED_FOR_GUESTS.equals(e) || PasswordChangeRecorderException.DISABLED.equals(e)) {
-                LOG.debug("No password change recording for user {} in context {}", userId, contextId, e);
+                LOG.debug("No password change recording for user {} in context {}", I(userId), I(contextId), e);
             } else {
-                LOG.error("Failed password change recording for user {} in context {}", userId, contextId, e);
+                LOG.error("Failed password change recording for user {} in context {}", I(userId), I(contextId), e);
             }
         } catch (Exception e) {
-            LOG.error("Failed password change recording for user {} in context {}", userId, contextId, e);
+            LOG.error("Failed password change recording for user {} in context {}", I(userId), I(contextId), e);
         }
     }
 
@@ -111,12 +112,12 @@ public class PasswordChangeHelper {
             recorder.clear(userId, contextId, limit);
         } catch (OXException e) {
             if (PasswordChangeRecorderException.DENIED_FOR_GUESTS.equals(e) || PasswordChangeRecorderException.DISABLED.equals(e)) {
-                LOG.debug("No password change recording for user {} in context {}", userId, contextId, e);
+                LOG.debug("No password change recording for user {} in context {}", I(userId), I(contextId), e);
             } else {
-                LOG.error("Error while deleting password change history for user {} in context {}.", userId, contextId, e);
+                LOG.error("Error while deleting password change history for user {} in context {}.", I(userId), I(contextId), e);
             }
         } catch (Exception e) {
-            LOG.error("Error while deleting password change history for user {} in context {}.", userId, contextId, e);
+            LOG.error("Error while deleting password change history for user {} in context {}.", I(userId), I(contextId), e);
         }
     }
 

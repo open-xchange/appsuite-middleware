@@ -49,10 +49,12 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.exception.OXException;
@@ -60,7 +62,6 @@ import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.webdav.xml.fields.FolderFields;
 
 /**
  * {@link GetResponse}
@@ -102,6 +103,9 @@ public final class GetResponse extends AbstractAJAXResponse {
                     if (tmp.startsWith(FolderObject.SHARED_PREFIX)) {
                         data.put(FolderFields.FOLDER_ID, Integer.toString(FolderObject.SYSTEM_SHARED_FOLDER_ID));
                     }
+                }
+                if (data.has(FolderFields.LAST_MODIFIED)) {
+                    parsed.setLastModified(new Date(data.getLong(FolderFields.LAST_MODIFIED)));
                 }
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create();

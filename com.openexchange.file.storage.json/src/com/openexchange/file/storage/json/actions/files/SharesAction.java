@@ -86,6 +86,13 @@ public class SharesAction extends AbstractListingAction {
             }
             columns.add(File.Field.ID);
         }
+        if (!columns.contains(File.Field.SEQUENCE_NUMBER)) {
+            if (!copy) {
+                columns = new ArrayList<File.Field>(columns);
+                copy = true;
+            }
+            columns.add(File.Field.SEQUENCE_NUMBER);
+        }
 
         SearchIterator<File> searchIterator = fileAccess.getUserSharedDocuments(columns, sortingField, sortDirection);
         if (Field.CREATED_BY.equals(sortingField)) {

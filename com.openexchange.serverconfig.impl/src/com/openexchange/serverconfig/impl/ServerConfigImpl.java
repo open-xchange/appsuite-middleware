@@ -50,20 +50,20 @@
 package com.openexchange.serverconfig.impl;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.java.Strings;
 import com.openexchange.serverconfig.ClientServerConfigFilter;
-import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.NotificationMailConfig;
+import com.openexchange.serverconfig.ServerConfig;
 
 /**
  * {@link ServerConfigImpl}

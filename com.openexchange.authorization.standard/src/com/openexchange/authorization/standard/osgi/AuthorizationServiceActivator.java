@@ -59,47 +59,19 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class AuthorizationServiceActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthorizationServiceActivator.class);
-
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { };
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        LOG.warn("Absent service: {}", clazz.getName());
-    }
-
-    @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        LOG.info("Re-available service: {}", clazz.getName());
-    }
-
-    @Override
     public void startBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AuthorizationServiceActivator.class);
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            LOG.info("starting bundle: com.openexchange.authorization.standard");
+            logger.info("starting bundle: com.openexchange.authorization.standard");
             registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
         } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        try {
-            cleanUp();
-            /*
-             * Clear service registry
-             */
-            // getServiceRegistry().clearRegistry();
-        } catch (final Exception e) {
-            LOG.error("", e);
+            logger.error("", e);
             throw e;
         }
     }

@@ -49,6 +49,9 @@
 
 package com.openexchange.report.appsuite.defaultHandlers;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -116,7 +119,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void runContextReport(ContextReport contextReport) {
         // Grab the file store quota from the context and save them in the report
         Context ctx = contextReport.getContext();
-        LOG.trace("Process context: {} of report with uuid: {}", ctx.getContextId(), contextReport.getUUID());
+        LOG.trace("Process context: {} of report with uuid: {}", I(ctx.getContextId()), contextReport.getUUID());
         try {
             QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
             if (null == storageService) {
@@ -124,7 +127,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             }
             QuotaFileStorage userStorage = storageService.getQuotaFileStorage(ctx.getContextId(), Info.administrative());
             long quota = userStorage.getQuota();
-            contextReport.set(Report.MACDETAIL_QUOTA, Report.QUOTA, quota);
+            contextReport.set(Report.MACDETAIL_QUOTA, Report.QUOTA, L(quota));
         } catch (OXException e) {
             LOG.error("", e);
             Services.getService(ReportService.class).abortContextReport(contextReport.getUUID(), contextReport.getType());
@@ -145,7 +148,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     }
 
     private CapabilitySet getUserCapabilities(User user, Context context) throws OXException {
-        CapabilitySet userCapabilitySet = new CapabilitySet(0);
+        CapabilitySet userCapabilitySet;
         if (user.isGuest()) {
             userCapabilitySet = Services.getService(CapabilityService.class).getCapabilities(user.getCreatedBy(), context.getContextId());
         } else {
@@ -218,7 +221,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void merge(ContextReport contextReport, Report report) {
         // Retrieve the quota
         boolean storeCapS = false;
-        long quota = contextReport.get(Report.MACDETAIL_QUOTA, Report.QUOTA, 0l, Long.class);
+        long quota = contextReport.get(Report.MACDETAIL_QUOTA, Report.QUOTA, L(0), Long.class).longValue();
         Collection<Object> reportValues = report.getNamespace(Report.MACDETAIL).values();
         if (reportValues.size() >= ReportProperties.getMaxChunkSize()) {
             storeCapS = true;
@@ -236,8 +239,8 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             // The report contains a count of unique capablities + quotas, so our identifier is the
             // alphabetically sorted and comma separated String of capabilities combined with a quota specification
             String capSpec = entry.getKey() + "," + quotaSpec;
-            HashMap<String, Object> counts = (HashMap) entry.getValue();
-            counts.put(Report.QUOTA, quota);
+            HashMap<String, Object> counts = (HashMap<String, Object>) entry.getValue();
+            counts.put(Report.QUOTA, L(quota));
 
             // Retrieve or create (if this is the first merge) the total counts for the system thusfar
             HashMap<String, Object> storedCapSData = report.get(Report.MACDETAIL, capSpec, HashMap.class);
@@ -263,18 +266,17 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
     private HashMap<String, Object> prepareCapSData(ContextReport contextReport, String capS, long quota) {
         HashMap<String, Object> capSData = new HashMap<>();
-        capSData = new HashMap<String, Object>();
-        capSData.put(Report.ADMIN, 0l);
-        capSData.put(Report.DISABLED, 0l);
-        capSData.put(Report.TOTAL, 0l);
+        capSData.put(Report.ADMIN, L(0));
+        capSData.put(Report.DISABLED, L(0));
+        capSData.put(Report.TOTAL, L(0));
         capSData.put(Report.CAPABILITIES, contextReport.get(Report.MACDETAIL_LISTS, capS, ArrayList.class));
-        capSData.put(Report.QUOTA, quota);
-        capSData.put(Report.GUESTS, 0l);
-        capSData.put(Report.LINKS, 0l);
-        capSData.put(Report.CONTEXTS, 0l);
-        capSData.put(Report.CONTEXT_USERS_MAX, 0l);
-        capSData.put(Report.CONTEXT_USERS_MIN, 0l);
-        capSData.put(Report.CONTEXT_USERS_AVG, 0l);
+        capSData.put(Report.QUOTA, L(quota));
+        capSData.put(Report.GUESTS, L(0));
+        capSData.put(Report.LINKS, L(0));
+        capSData.put(Report.CONTEXTS, L(0));
+        capSData.put(Report.CONTEXT_USERS_MAX, L(0));
+        capSData.put(Report.CONTEXT_USERS_MIN, L(0));
+        capSData.put(Report.CONTEXT_USERS_AVG, L(0));
 
         return capSData;
     }
@@ -303,7 +305,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void prepareReportForStorageOfContent(Report report) {
         report.setNeedsComposition(true);
         Map<String, Object> reportMacdetail = report.getNamespace(Report.MACDETAIL);
-        ArrayList values = new ArrayList(reportMacdetail.values());
+        ArrayList<Object> values = new ArrayList<Object>(reportMacdetail.values());
         report.clearNamespace(Report.MACDETAIL);
         this.sumClientsInSingleMap(values);
         report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
@@ -314,7 +316,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void finish(Report report) throws OXException {
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
 
-        ArrayList<Object> values = new ArrayList(macdetail.values());
+        ArrayList<Object> values = new ArrayList<Object>(macdetail.values());
 
         if (report.getType().equals("extended")) {
             addDriveMetricsToReport(report);
@@ -346,7 +348,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         // calculate correct drive average values
         this.calculateCorrectDriveAvg(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class));
-        report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList(macdetail.values()));
+        report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<Object>(macdetail.values()));
     }
 
     @Override
@@ -380,13 +382,13 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      * Set the user specific data for the given {@link ContextReport}. The capability-set specific values
      * like total, admin... are incremented depending on the given {@link UserReport}.
      *
-     * @param userReport
-     * @param contextReport
+     * @param userReport The {@link UserReport}
+     * @param contextReport The {@link ContextReport}
      */
     private void handleInternalUser(UserReport userReport, ContextReport contextReport) {
         // Retrieve the capabilities String and List from the userReport
         String capString = userReport.get(Report.MACDETAIL, Report.CAPABILITIES, String.class);
-        ArrayList capSet = userReport.get(Report.MACDETAIL, Report.CAPABILITY_LIST, ArrayList.class);
+        ArrayList<?> capSet = userReport.get(Report.MACDETAIL, Report.CAPABILITY_LIST, ArrayList.class);
 
         // The context report maintains a mapping of unique capabilities set -> a map of counts for admins / disabled users  and regular users
         HashMap<String, Long> counts = contextReport.get(Report.MACDETAIL, capString, HashMap.class);
@@ -394,9 +396,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             counts = new HashMap<String, Long>();
         }
         // Depending on the users type, we have to increase the accompanying count
-        if (userReport.get(Report.MACDETAIL, Report.MAILADMIN, Boolean.class)) {
+        if (userReport.get(Report.MACDETAIL, Report.MAILADMIN, Boolean.class).booleanValue()) {
             incrementCounter(counts, Report.ADMIN);
-        } else if (userReport.get(Report.MACDETAIL, Report.DISABLED, Boolean.class)) {
+        } else if (userReport.get(Report.MACDETAIL, Report.DISABLED, Boolean.class).booleanValue()) {
             incrementCounter(counts, Report.DISABLED);
         }
 
@@ -416,10 +418,10 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         LinkedHashMap<Integer, ArrayList<Integer>> capSContextMap = contextReport.getCapSToContext().get(capString);
         if (capSContextMap == null) {
             capSContextMap = new LinkedHashMap<Integer, ArrayList<Integer>>();
-            capSContextMap.put(contextReport.getContext().getContextId(), new ArrayList<Integer>());
+            capSContextMap.put(I(contextReport.getContext().getContextId()), new ArrayList<Integer>());
             contextReport.getCapSToContext().put(capString, capSContextMap);
         }
-        capSContextMap.get(contextReport.getContext().getContextId()).add(userReport.getUser().getId());
+        capSContextMap.get(I(contextReport.getContext().getContextId())).add(I(userReport.getUser().getId()));
     }
 
     private void incrementGuestOrLinkCount(UserReport userReport, ContextReport contextReport) {
@@ -436,41 +438,41 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     private void incrementCounter(HashMap<String, Long> counterMap, String keyOfValueToIncrement) {
         Long value = counterMap.get(keyOfValueToIncrement);
         if (value == null) {
-            value = Long.valueOf(0);
+            value = L(0);
         }
-        counterMap.put(keyOfValueToIncrement, value + 1);
+        counterMap.put(keyOfValueToIncrement, L(value.longValue() + 1));
     }
 
     /**
      * Calculate drive specific average-metrics and clean up the given map form unneeded parameters.
      *
-     * @param driveTotalMap, the map with all relevant drive metrics.
+     * @param driveTotalMap the map with all relevant drive metrics.
      */
     private void calculateCorrectDriveAvg(LinkedHashMap<String, Long> driveTotalMap) {
         Long totalDriveUsers = driveTotalMap.get("users");
         // No Drive users, nothing to do here
-        if (totalDriveUsers != null && totalDriveUsers != 0) {
-            if (driveTotalMap.get("file-size-total") != null && driveTotalMap.get("file-count-overall-total") != null && driveTotalMap.get("file-count-overall-total") != 0) {
-                driveTotalMap.put("file-size-avg", driveTotalMap.get("file-size-total") / driveTotalMap.get("file-count-overall-total"));
+        if (totalDriveUsers != null && totalDriveUsers.longValue() != 0) {
+            if (driveTotalMap.get("file-size-total") != null && driveTotalMap.get("file-count-overall-total") != null && l(driveTotalMap.get("file-count-overall-total")) != 0) {
+                driveTotalMap.put("file-size-avg", L(l(driveTotalMap.get("file-size-total")) / l(driveTotalMap.get("file-count-overall-total"))));
             }
             if (driveTotalMap.get("storage-use-total") != null) {
-                driveTotalMap.put("storage-use-avg", driveTotalMap.get("storage-use-total") / totalDriveUsers);
+                driveTotalMap.put("storage-use-avg", L(l(driveTotalMap.get("storage-use-total")) / l(totalDriveUsers)));
             }
             if (driveTotalMap.get("file-count-overall-total") != null) {
-                driveTotalMap.put("file-count-overall-avg", driveTotalMap.get("file-count-overall-total") / totalDriveUsers);
+                driveTotalMap.put("file-count-overall-avg", L(l(driveTotalMap.get("file-count-overall-total")) / l(totalDriveUsers)));
             }
             if (driveTotalMap.get("file-count-in-timerange-total") != null) {
-                driveTotalMap.put("file-count-in-timerange-avg", driveTotalMap.get("file-count-in-timerange-total") / totalDriveUsers);
+                driveTotalMap.put("file-count-in-timerange-avg", L(l(driveTotalMap.get("file-count-in-timerange-total")) / l(totalDriveUsers)));
             }
             if (driveTotalMap.get("quota-usage-percent-sum") != null && driveTotalMap.get("quota-usage-percent-total") != null && driveTotalMap.get("quota-usage-percent-total") != 0) {
-                driveTotalMap.put("quota-usage-percent-avg", driveTotalMap.get("quota-usage-percent-sum") / driveTotalMap.get("quota-usage-percent-total"));
+                driveTotalMap.put("quota-usage-percent-avg", L(l(driveTotalMap.get("quota-usage-percent-sum")) / l(driveTotalMap.get("quota-usage-percent-total"))));
             }
             driveTotalMap.remove("quota-usage-percent-total");
             driveTotalMap.remove("quota-usage-percent-sum");
         }
 
-        if (driveTotalMap.get("external-storages-users") != null && driveTotalMap.get("external-storages-users") != 0) {
-            driveTotalMap.put("external-storages-avg", driveTotalMap.get("external-storages-total") / driveTotalMap.get("external-storages-users"));
+        if (driveTotalMap.get("external-storages-users") != null && l(driveTotalMap.get("external-storages-users")) != 0) {
+            driveTotalMap.put("external-storages-avg", L(l(driveTotalMap.get("external-storages-total")) / l(driveTotalMap.get("external-storages-users"))));
         }
     }
 
@@ -479,12 +481,12 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      * capSMap. All new total values on report level are then recalculated and saved into the given
      * report.
      *
-     * @param capSMap, the capability-set key/value pairs
-     * @param usersInContext, all relevant contexts and users for this capability-set
-     * @param consideredTimeframeStart, beginning of potential timeframe for calculating file count
-     * @param consideredTimeframeEnd, end of potential timeframe for calculating file count
-     * @param report, the report with all values
-     * @throws OXException
+     * @param capSMap the capability-set key/value pairs
+     * @param usersInContext all relevant contexts and users for this capability-set
+     * @param consideredTimeframeStart beginning of potential timeframe for calculating file count
+     * @param consideredTimeframeEnd end of potential timeframe for calculating file count
+     * @param report the report with all values
+     * @throws OXException If the mapping cannot be returned
      */
     private void addDriveMetricsToCapS(Map<String, Object> capSMap, Map<Integer, List<Integer>> usersInContext, Date consideredTimeframeStart, Date consideredTimeframeEnd, Report report, List<String> compositionCapS) throws OXException {
 
@@ -525,7 +527,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             LOG.error("Unable to gather drive metrics.", e);
         }
 
-        driveUserMetrics.put("users", driveUserMetrics.get("file-count-overall-users") == null ? 0 : driveUserMetrics.get("file-count-overall-users"));
+        driveUserMetrics.put("users", I(driveUserMetrics.get("file-count-overall-users") == null ? 0 : driveUserMetrics.get("file-count-overall-users").intValue()));
         driveUserMetrics.remove("file-count-overall-users");
         capSMap.put(Report.DRIVE_USER, driveUserMetrics);
         capSMap.put(Report.DRIVE_OVERALL, driveMetrics);
@@ -536,16 +538,16 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         for (Entry<String, Integer> entry : driveUserMetrics.entrySet()) {
             Long value = totalDrive.get(entry.getKey());
-            Long newValue = entry.getValue() == null ? 0l : entry.getValue().longValue();
+            Long newValue = entry.getValue() == null ? L(0) : Long.valueOf(entry.getValue().intValue());
             if (value == null) {
                 totalDrive.put(entry.getKey(), newValue);
             } else {
-                if (entry.getKey().contains("min") && newValue < value && newValue != 0) {
+                if (entry.getKey().contains("min") && l(newValue) < l(value) && l(newValue) != 0) {
                     totalDrive.put(entry.getKey(), newValue);
-                } else if (entry.getKey().contains("max") && newValue > value) {
+                } else if (entry.getKey().contains("max") && l(newValue) > l(value)) {
                     totalDrive.put(entry.getKey(), newValue);
                 } else if (entry.getKey().contains("total") || entry.getKey().contains("sum") || entry.getKey().contains("users")) {
-                    totalDrive.put(entry.getKey(), totalDrive.get(entry.getKey()) + newValue);
+                    totalDrive.put(entry.getKey(), L(l(totalDrive.get(entry.getKey())) + l(newValue)));
                 }
             }
 
@@ -557,9 +559,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         for (Entry<String, Integer> entry : driveMetrics.entrySet()) {
             Long value = totalDrive.get(entry.getKey());
             if (value == null) {
-                totalDrive.put(entry.getKey(), entry.getValue().longValue());
+                totalDrive.put(entry.getKey(), L(entry.getValue().longValue()));
             } else {
-                totalDrive.put(entry.getKey(), totalDrive.get(entry.getKey()) + entry.getValue());
+                totalDrive.put(entry.getKey(), L(l(totalDrive.get(entry.getKey())) + entry.getValue().longValue()));
             }
         }
         report.set(Report.TOTAL, Report.DRIVE_TOTAL, totalDrive);
@@ -588,23 +590,23 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     }
 
     private void addNewValuesToExistingValues(Map<String, Object> existingValues, Map<String, Object> newValues) {
-        existingValues.put(Report.CONTEXTS, Long.parseLong(String.valueOf(existingValues.get(Report.CONTEXTS))) + 1L);
+        existingValues.put(Report.CONTEXTS, L(Long.parseLong(String.valueOf(existingValues.get(Report.CONTEXTS))) + 1L));
         for (Map.Entry<String, Object> entry : newValues.entrySet()) {
             if (entry.getValue() instanceof Long) {
                 Long value = (Long) existingValues.get(entry.getKey());
                 if (value == null) {
-                    value = Long.valueOf(0);
+                    value = L(0);
                 }
-                existingValues.put(entry.getKey(), value + (Long) entry.getValue());
+                existingValues.put(entry.getKey(), L(l(value) + l((Long) entry.getValue())));
                 if (entry.getKey().equals(Report.TOTAL)) {
                     Long newValue = (Long) entry.getValue();
-                    if (newValue > (Long) existingValues.get(Report.CONTEXT_USERS_MAX)) {
+                    if (l(newValue) > l((Long) existingValues.get(Report.CONTEXT_USERS_MAX))) {
                         existingValues.put(Report.CONTEXT_USERS_MAX, newValue);
                     }
-                    if (newValue < (Long) existingValues.get(Report.CONTEXT_USERS_MIN) || (Long) existingValues.get(Report.CONTEXT_USERS_MIN) == 0l) {
+                    if (l(newValue) < l((Long) existingValues.get(Report.CONTEXT_USERS_MIN)) || l((Long) existingValues.get(Report.CONTEXT_USERS_MIN)) == 0l) {
                         existingValues.put(Report.CONTEXT_USERS_MIN, newValue);
                     }
-                    existingValues.put(Report.CONTEXT_USERS_AVG, (Long) existingValues.get(Report.TOTAL) / (Long) existingValues.get(Report.CONTEXTS));
+                    existingValues.put(Report.CONTEXT_USERS_AVG, L(l((Long) existingValues.get(Report.TOTAL)) / l((Long) existingValues.get(Report.CONTEXTS))));
                 }
             }
         }

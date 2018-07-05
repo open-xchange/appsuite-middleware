@@ -49,12 +49,8 @@
 
 package com.openexchange.unifiedinbox;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TObjectProcedure;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
@@ -67,6 +63,9 @@ import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.config.MailAccountUnifiedINBOXProperties;
 import com.openexchange.unifiedinbox.config.UnifiedInboxConfig;
 import com.openexchange.unifiedinbox.services.Services;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 
 /**
  * {@link UnifiedInboxAccess} - Access to Unified Mail.
@@ -319,7 +318,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
         @Override
         public boolean execute(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> openedMailAccess) {
-            Streams.close(openedMailAccess);
+            MailAccess.closeInstance(openedMailAccess);
             return true;
         }
     };

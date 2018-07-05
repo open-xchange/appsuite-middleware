@@ -49,6 +49,9 @@
 
 package com.openexchange.messaging.json;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -74,10 +77,6 @@ import com.openexchange.messaging.MessagingMessageGetSwitch;
 import com.openexchange.messaging.MultipartContent;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.tools.encoding.Base64;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

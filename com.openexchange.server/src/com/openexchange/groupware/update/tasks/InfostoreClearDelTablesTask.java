@@ -49,22 +49,18 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link InfostoreClearDelTablesTask} - Removes obsolete data from the 'del_infostore_document' table.
@@ -92,12 +88,12 @@ public class InfostoreClearDelTablesTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection con = databaseService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
+            rollback = true;
             LOG.info("Clearing obsolete fields in 'del_infostore_document'...");
 
             String query = "UPDATE " +
@@ -119,16 +115,17 @@ public class InfostoreClearDelTablesTask extends UpdateTaskAdapter {
             int cleared = stmt.executeUpdate();
             LOG.info("Cleared {} rows in 'del_infostore_document'.", cleared);
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
+            if (rollback) {
+                Databases.rollback(con);
+            }
             autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
         }
     }
 

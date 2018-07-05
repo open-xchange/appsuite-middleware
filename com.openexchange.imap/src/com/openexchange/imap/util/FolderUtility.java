@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.util;
 
+import javax.mail.FolderNotFoundException;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
@@ -106,6 +107,7 @@ public final class FolderUtility {
     public static final MailFolder loadFolder(String fullName, IMAPFolderStorage folderStorage, IMAPFolder imapFolder) throws OXException {
         Session session = folderStorage.getSession();
         IMAPConfig imapConfig = folderStorage.getImapConfig();
+        String imapFullName = fullName;
         try {
             IMAPFolderWorker.checkFailFast(folderStorage.getImapStore(), fullName);
             if (null != imapFolder) {
@@ -114,14 +116,12 @@ public final class FolderUtility {
 
             // Load w/o IMAP folder instance
             IMAPStore imapStore = folderStorage.getImapStore();
-            String imapFullName;
             IMAPFolder f;
             if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName) || 0 == fullName.length()) {
                 f = (IMAPFolder) imapStore.getDefaultFolder();
                 imapFullName = "";
             } else {
                 f = (IMAPFolder) imapStore.getFolder(fullName);
-                imapFullName = fullName;
                 boolean ignoreSubscription = folderStorage.getImapConfig().getIMAPProperties().isIgnoreSubscription();
                 boolean exists = "INBOX".equals(imapFullName) || ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session, ignoreSubscription).exists();
                 if (!exists) {
@@ -136,6 +136,9 @@ public final class FolderUtility {
                 }
             }
             return IMAPFolderConverter.convertFolder(f, session, folderStorage.getImapAccess(), folderStorage.getContext());
+        } catch (FolderNotFoundException e) {
+            ListLsubCache.removeCachedEntry(imapFullName, folderStorage.getAccountId(), session);
+            throw folderStorage.handleMessagingException(fullName, e);
         } catch (MessagingException e) {
             throw folderStorage.handleMessagingException(fullName, e);
         }

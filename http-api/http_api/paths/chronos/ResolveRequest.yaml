@@ -1,0 +1,18 @@
+/chronos?action=resolve:
+  get:
+    operationId: resolveEvent
+    tags:
+      - Chronos
+    summary: Resolves an event identifier to an event, and returns it in the perspective of the current session's user, i.e. having an appropriate parent folder identifier assigned. 
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+    responses:
+      200:
+        description: |
+          An object containing all data of the requested event, or an empty result if no event was found. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/EventResponse"

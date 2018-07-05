@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Infostore Online Publish
 Bundle-SymbolicName: com.openexchange.publish.online.infostore
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.publish.online.infostore.osgi.Activator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,
  com.openexchange.ajax,
+ com.openexchange.ajax.helper,
  com.openexchange.api2,
  com.openexchange.context,
  com.openexchange.datatypes.genericonf,

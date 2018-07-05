@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.tools.iterator;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,8 +59,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -71,8 +69,10 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.BoolReference;
 import com.openexchange.java.Streams;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
@@ -80,7 +80,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 import com.openexchange.tools.oxfolder.OXFolderUtility;
-import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoaderService;
+import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoader;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
@@ -167,15 +167,11 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private final boolean resideInCache;
 
-    private final boolean containsPermissions;
-
-    private final HashMap<Integer, FolderObject> folders;
-
     private final List<OXException> warnings;
 
     private FolderObject future;
 
-    private final PermissionLoaderService permissionLoader;
+    private final PermissionLoader permissionLoader;
 
     private static final String[] selectFields = {
         "fuid", "parent", "fname", "module", "type", "creating_date", "created_from", "changing_date", "changed_from", "permission_flag",
@@ -207,7 +203,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         return fields.toString();
     }
 
-    private static final String[] selectFieldsPerm = { "permission_id", "fp", "orp", "owp", "odp", "admin_flag", "group_flag", "system" };
+    private static final String[] selectFieldsPerm = { "permission_id", "fp", "orp", "owp", "odp", "admin_flag", "group_flag", "system", "type", "sharedParentFolder" };
 
     /**
      * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i> statement needed to create instances of
@@ -267,17 +263,15 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         FolderCacheManager manager;
         try {
             manager = FolderCacheManager.isInitialized() ? FolderCacheManager.getInstance() : null;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             manager = null;
         }
         cache = manager;
         closeCon = false;
         resideInCache = false;
-        containsPermissions = false;
         ctx = null;
         prefetchQueue = null;
         folderIds = null;
-        folders = null;
         warnings = new ArrayList<OXException>(2);
         permissionLoader = null;
     }
@@ -293,18 +287,16 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         FolderCacheManager manager;
         try {
             manager = FolderCacheManager.isInitialized() ? FolderCacheManager.getInstance() : null;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             manager = null;
         }
         cache = manager;
         folderIds = null;
-        folders = null;
         warnings = new ArrayList<OXException>(2);
         rs = null;
         stmt = null;
         ctx = null;
         closeCon = false;
-        containsPermissions = false;
         this.resideInCache = resideInCache;
         if ((col == null) || col.isEmpty()) {
             next = null;
@@ -328,22 +320,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      * @throws OXException If instantiation fails.
      */
     public FolderObjectIterator(final ResultSet rs, final Statement stmt, final boolean resideInCache, final Context ctx, final Connection readCon, final boolean closeCon) throws OXException {
-        this(rs, stmt, resideInCache, false, ctx, readCon, closeCon);
-    }
-
-    /**
-     * Initializes a new {@link FolderObjectIterator}
-     *
-     * @param rs The result set providing selected folder data
-     * @param stmt The fired statement (to release all resources on iterator end)
-     * @param resideInCache If objects shall reside in cache permanently or shall be removed according to cache policy
-     * @param containsPermissions If result set contains duplicates because of selected folder permissions; otherwise <code>false</code>
-     * @param ctx The context
-     * @param readCon A connection holding at least read capability
-     * @param closeCon Whether to close given connection or not
-     * @throws OXException If instantiation fails.
-     */
-    public FolderObjectIterator(final ResultSet rs, final Statement stmt, final boolean resideInCache, final boolean containsPermissions, final Context ctx, final Connection readCon, final boolean closeCon) throws OXException {
         super();
         if (dbGrouping) {
             folderIds = null;
@@ -353,11 +329,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         FolderCacheManager manager;
         try {
             manager = FolderCacheManager.isInitialized() && FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             manager = null;
         }
         cache = manager;
-        folders = containsPermissions ? new LinkedHashMap<Integer, FolderObject>(32) : null;
         warnings = new ArrayList<OXException>(2);
         this.rs = rs;
         this.stmt = stmt;
@@ -365,19 +340,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         this.ctx = ctx;
         this.closeCon = closeCon;
         this.resideInCache = resideInCache;
-        this.containsPermissions = containsPermissions;
-        if (containsPermissions) {
-            permissionLoader = null;
-        } else {
-            permissionLoader = PermissionLoaderService.getInstance();
-        }
+        permissionLoader = new PermissionLoader();
         /*
          * Set next to first result set entry
          */
         final boolean prefetchEnabled = ServerConfig.getBoolean(Property.PrefetchEnabled);
         try {
             if (this.rs.next()) {
-                next = createFolderObjectFromSelectedEntry(true);
+                next = createFolderObjectFromSelectedEntry(true, null);
             } else if (!prefetchEnabled) {
                 closeResources();
             }
@@ -390,18 +360,24 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
              * ResultSet prefetch is enabled. Fill iterator with whole ResultSet's content
              */
             try {
-                final TIntList tmp = new TIntArrayList();
+                BoolReference fetchedFromCache = new BoolReference(false);
+                TIntList tmp = new TIntArrayList();
                 while (this.rs.next()) {
-                    FolderObject fo = createFolderObjectFromSelectedEntry(false);
+                    FolderObject fo = createFolderObjectFromSelectedEntry(false, fetchedFromCache);
                     while ((fo == null) && rs.next()) {
-                        fo = createFolderObjectFromSelectedEntry(false);
+                        fo = createFolderObjectFromSelectedEntry(false, fetchedFromCache);
                     }
                     if (null != fo) {
                         prefetchQueue.offer(fo);
-                        tmp.add(fo.getObjectID());
+                        if (false == fetchedFromCache.getValue()) {
+                            // Need to load permissions since NOT fetched from cache
+                            tmp.add(fo.getObjectID());
+                        }
                     }
                 }
-                permissionLoader.submitPermissionsFor(ctx.getContextId(), tmp.toArray());
+                if (!tmp.isEmpty()) {
+                    permissionLoader.submitPermissionsFor(ctx.getContextId(), tmp.toArray());
+                }
                 if (future != null) {
                     prefetchQueue.offer(future);
                     future = null;
@@ -427,11 +403,17 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     }
 
     private final ElementAttributes getEternalAttributes() throws OXException {
+        ElementAttributes attribs = this.attribs;
         if (attribs == null) {
             attribs = cache.getDefaultFolderObjectAttributes();
+            if (null == attribs) {
+                return null;
+            }
+
             attribs.setIdleTime(-1); // eternal
             attribs.setMaxLifeSeconds(-1); // eternal
             attribs.setIsEternal(true);
+            this.attribs = attribs;
         }
         return attribs.copy();
     }
@@ -439,25 +421,21 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     /**
      * @return a <code>FolderObject</code> from current <code>ResultSet.next()</code> data
      */
-    private final FolderObject createFolderObjectFromSelectedEntry(final boolean submitPermissions) throws SQLException, OXException {
+    private final FolderObject createFolderObjectFromSelectedEntry(boolean submitPermissions) throws SQLException, OXException {
+        return createFolderObjectFromSelectedEntry(submitPermissions, null);
+    }
+
+    /**
+     * @return a <code>FolderObject</code> from current <code>ResultSet.next()</code> data
+     */
+    private final FolderObject createFolderObjectFromSelectedEntry(boolean submitPermissions, BoolReference fetchedFromCache) throws SQLException, OXException {
         // fname, fuid, module, type, creator
+        if (null != fetchedFromCache) {
+            fetchedFromCache.setValue(false);
+        }
         final int folderId = rs.getInt(1);
         final FolderObject fo;
-        if (containsPermissions) {
-            /*
-             * No cache look-up in this mode to not being confused with result set state
-             */
-            final Integer key = Integer.valueOf(folderId);
-            FolderObject current = folders.get(key);
-            if (null == current) {
-                current = createNewFolderObject(folderId);
-                folders.put(key, current);
-                addPermissions(folderId, current);
-            } else {
-                addPermissions(folderId, current);
-            }
-            fo = current;
-        } else {
+        {
             if (!dbGrouping) {
                 if (folderIds.contains(folderId)) {
                     return null;
@@ -470,6 +448,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             if (null != cache) {
                 final FolderObject fld = cache.getFolderObject(folderId, ctx);
                 if (fld != null) {
+                    if (null != fetchedFromCache) {
+                        fetchedFromCache.setValue(true);
+                    }
                     return fld;
                 }
             }
@@ -530,37 +511,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }
         }
         return fo;
-    }
-
-    private void addPermissions(final int folderId, final FolderObject current) throws SQLException {
-        future = null;
-        addNewPermission(current);
-        /*
-         * Read all available permissions for current folder
-         */
-        boolean hasNext;
-        while ((hasNext = rs.next()) && folderId == rs.getInt(1)) {
-            addNewPermission(current);
-        }
-        if (hasNext) {
-            final int fuid = rs.getInt(1);
-            future = createNewFolderObject(fuid);
-            folders.put(Integer.valueOf(fuid), future);
-            /*
-             * Add first available permission from current row
-             */
-            addNewPermission(future);
-        }
-    }
-
-    private void addNewPermission(final FolderObject current) throws SQLException {
-        final OCLPermission p = new OCLPermission();
-        p.setEntity(rs.getInt(13)); // Entity
-        p.setAllPermission(rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17)); // fp, orp, owp, and odp
-        p.setFolderAdmin(rs.getInt(18) > 0 ? true : false); // admin_flag
-        p.setGroupPermission(rs.getInt(19) > 0 ? true : false); // group_flag
-        p.setSystem(rs.getInt(20)); // system
-        current.addPermission(p);
     }
 
     private final void closeResources() throws OXException {
@@ -710,14 +660,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         /*
          * Close other stuff
          */
+        if (null != permissionLoader) {
+            permissionLoader.stop();
+        }
         if (null != prefetchQueue) {
             prefetchQueue.clear();
         }
         if (null != folderIds) {
             folderIds.clear();
-        }
-        if (null != folders) {
-            folders.clear();
         }
         isClosed = true;
     }
@@ -783,8 +733,8 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }
             retval.add(prepareFolderObject(next));
             if (prefetchQueue != null) {
-                while (!prefetchQueue.isEmpty()) {
-                    retval.add(prepareFolderObject(prefetchQueue.poll()));
+                for (FolderObject fo; (fo = prefetchQueue.poll()) != null;) {
+                    retval.add(prepareFolderObject(fo));
                 }
                 return retval;
             }
@@ -810,24 +760,24 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             /*
              * Close other stuff
              */
+            if (null != permissionLoader) {
+                permissionLoader.stop();
+            }
             if (null != prefetchQueue) {
                 prefetchQueue.clear();
             }
             if (null != folderIds) {
                 folderIds.clear();
             }
-            if (null != folders) {
-                folders.clear();
-            }
             isClosed = true;
         }
     }
 
     private static final String SQL_LOAD_P =
-        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system, type, sharedParentFolder FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
 
     private static final String SQL_LOAD_P_BACKUP =
-        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM del_oxfolder_permissions WHERE cid = ? AND fuid = ?";
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system, type, sharedParentFolder FROM del_oxfolder_permissions WHERE cid = ? AND fuid = ?";
 
     private static final OCLPermission[] loadFolderPermissions(final int folderId, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
@@ -861,6 +811,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
                 p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
                 p.setSystem(rs.getInt(8)); // system
+                p.setType(FolderPermissionType.getType(rs.getInt(9)));
+                int legator = rs.getInt(10);
+                p.setPermissionLegator(legator == 0 ? null : String.valueOf(legator)); // permission legator
                 ret.add(p);
             } while (rs.next());
             return ret.toArray(new OCLPermission[ret.size()]);

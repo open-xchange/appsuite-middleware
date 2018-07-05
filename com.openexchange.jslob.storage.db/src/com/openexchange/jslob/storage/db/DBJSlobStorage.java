@@ -49,9 +49,6 @@
 
 package com.openexchange.jslob.storage.db;
 
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -84,6 +81,9 @@ import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.db.cache.CachingJSlobStorage;
 import com.openexchange.server.ServiceLookup;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link DBJSlobStorage}
@@ -127,8 +127,6 @@ public final class DBJSlobStorage implements JSlobStorage {
         return ID;
     }
 
-    private static final String SQL_DELETE_ALL_USER = "DELETE FROM jsonStorage WHERE cid = ? AND user = ?";
-
     /**
      * Drops all JSlob entries associated with specified user.
      *
@@ -153,10 +151,58 @@ public final class DBJSlobStorage implements JSlobStorage {
              */
             con.setAutoCommit(false); // BEGIN
             committed = false;
-            stmt = con.prepareStatement(SQL_DELETE_ALL_USER);
+            stmt = con.prepareStatement("DELETE FROM jsonStorage WHERE cid = ? AND user = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, userId);
             stmt.executeUpdate();
+            con.commit(); // COMMIT
+            committed = true;
+        } catch (final SQLException e) {
+            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (!committed) {
+                Databases.rollback(con);
+            }
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    /**
+     * Drops all JSlob entries associated with specified users.
+     *
+     * @param userIds The user identifiers
+     * @param contextId The context identifier
+     * @throws OXException If deleting all user entries fails
+     */
+    public void dropAllUsersJSlobs(List<Integer> userIds, int contextId) throws OXException {
+        for (Integer userId : userIds) {
+            final CachingJSlobStorage cachingJSlobStorage = CachingJSlobStorage.getInstance();
+            if (null != cachingJSlobStorage) {
+                cachingJSlobStorage.dropAllUserJSlobs(userId.intValue(), contextId);
+            }
+        }
+
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(contextId);
+        boolean committed = true;
+        PreparedStatement stmt = null;
+        try {
+            /*
+             * Now delete
+             */
+            con.setAutoCommit(false); // BEGIN
+            committed = false;
+
+            stmt = con.prepareStatement("DELETE FROM jsonStorage WHERE cid = ? AND user = ?");
+            stmt.setLong(1, contextId);
+            for (Integer userId : userIds) {
+                stmt.setLong(2, userId.intValue());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+
             con.commit(); // COMMIT
             committed = true;
         } catch (final SQLException e) {

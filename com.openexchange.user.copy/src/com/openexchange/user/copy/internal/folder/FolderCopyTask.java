@@ -63,10 +63,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
@@ -203,8 +203,9 @@ public class FolderCopyTask implements CopyUserTaskService {
         final SortedMap<Integer, FolderEqualsWrapper> movedFolders = loadFoldersFromDB(dstCon, i(dstCtxId), i(dstUsrId));
         final FolderMapping folderMapping = new FolderMapping();
 
-        for (final Integer fuid : originFolders.keySet()) {
-            final FolderEqualsWrapper originWrapper = originFolders.get(fuid);
+        for (final Map.Entry<Integer, FolderEqualsWrapper> entry : originFolders.entrySet()) {
+            Integer fuid = entry.getKey();
+            FolderEqualsWrapper originWrapper = entry.getValue();
             final Integer targetId = idMapping.get(fuid);
             if (targetId == null) {
                 throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create();
@@ -242,7 +243,7 @@ public class FolderCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
 
         return folderMap;
@@ -289,8 +290,7 @@ public class FolderCopyTask implements CopyUserTaskService {
          * If the tree does not contain the parent already, the parent will be added first.
          */
         final Tree<FolderEqualsWrapper> folderTree = new Tree<FolderEqualsWrapper>(rootFolder);
-        for (final Integer folderId : extendedMap.keySet()) {
-            final FolderEqualsWrapper folder = extendedMap.get(folderId);
+        for (FolderEqualsWrapper folder : extendedMap.values()) {
             addFoldersRecursive(extendedMap, folderTree, folder);
         }
 
@@ -368,7 +368,7 @@ public class FolderCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -443,7 +443,7 @@ public class FolderCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -477,7 +477,7 @@ public class FolderCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
 
         return folderList;
@@ -550,7 +550,7 @@ public class FolderCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

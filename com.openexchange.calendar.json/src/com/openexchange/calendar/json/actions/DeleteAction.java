@@ -49,27 +49,19 @@
 
 package com.openexchange.calendar.json.actions;
 
-import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction}
@@ -82,72 +74,22 @@ public final class DeleteAction extends AppointmentAction {
     /**
      * Initializes a new {@link DeleteAction}.
      *
-     * @param services
+     * @param services A service lookup reference
      */
-    public DeleteAction(final ServiceLookup services) {
+    public DeleteAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        if (req.getData() instanceof JSONObject) {
-            final JSONObject jData = req.getData();
-            final CalendarDataObject appointmentObj = new CalendarDataObject();
-            appointmentObj.setObjectID(DataParser.checkInt(jData, DataFields.ID));
-            final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
-            if (jData.has(CalendarFields.RECURRENCE_POSITION)) {
-                appointmentObj.setRecurrencePosition(DataParser.checkInt(jData, CalendarFields.RECURRENCE_POSITION));
-            } else if (jData.has(CalendarFields.RECURRENCE_DATE_POSITION)) {
-                appointmentObj.setRecurrenceDatePosition(DataParser.checkDate(jData, CalendarFields.RECURRENCE_DATE_POSITION));
-
-            }
-            final ServerSession session = req.getSession();
-            appointmentObj.setContext(session.getContext());
-            final AppointmentSqlFactoryService factoryService = getService();
-            if (null == factoryService) {
-                throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
-            }
-            final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(session);
-            try {
-                appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
-                if (appointmentObj.getLastModified() != null) {
-                    timestamp = appointmentObj.getLastModified();
-                }
-            } catch (final SQLException e) {
-                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
-            }
-        } else if (req.getData() instanceof JSONArray) {
-            JSONArray jsonArray = req.getData();
-            for (int i = 0; i < jsonArray.length(); i++) {
-                final JSONObject jData = jsonArray.getJSONObject(i);
-                final CalendarDataObject appointmentObj = new CalendarDataObject();
-                appointmentObj.setObjectID(DataParser.checkInt(jData, DataFields.ID));
-                final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
-                if (jData.has(CalendarFields.RECURRENCE_POSITION)) {
-                    appointmentObj.setRecurrencePosition(DataParser.checkInt(jData, CalendarFields.RECURRENCE_POSITION));
-                } else if (jData.has(CalendarFields.RECURRENCE_DATE_POSITION)) {
-                    appointmentObj.setRecurrenceDatePosition(DataParser.checkDate(jData, CalendarFields.RECURRENCE_DATE_POSITION));
-
-                }
-                final ServerSession session = req.getSession();
-                appointmentObj.setContext(session.getContext());
-                final AppointmentSqlFactoryService factoryService = getService();
-                if (null == factoryService) {
-                    throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
-                }
-                final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(session);
-                try {
-                    appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
-                    if (appointmentObj.getLastModified() != null) {
-                        timestamp = appointmentObj.getLastModified();
-                    }
-                } catch (final SQLException e) {
-                    throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
-                }
-            }
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        List<EventID> requestedIDs = parseRequestedIDs(session, request);
+        long clientTimestamp = parseClientTimestamp(request);
+        long timestamp = 0L;
+        for (EventID id : requestedIDs) {
+            CalendarResult result = session.getCalendarService().deleteEvent(session, id, clientTimestamp);
+            timestamp = getLatestTimestamp(timestamp, result.getTimestamp());
         }
-        return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
+        return new AJAXRequestResult(new JSONArray(0), new Date(timestamp), "json");
     }
 
 }

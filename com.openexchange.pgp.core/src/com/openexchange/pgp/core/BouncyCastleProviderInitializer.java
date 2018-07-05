@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * Initializes the Bouncy Castle provider
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.0
+ * @since v7.8.4
  */
 public class BouncyCastleProviderInitializer {
 

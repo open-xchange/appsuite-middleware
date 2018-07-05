@@ -1,0 +1,12 @@
+type: object
+properties:
+  item_id:
+    type: string
+    description: For search will always be 'nil'
+  name:
+    type: string
+    description: The query that was used to search
+  page_sections:
+    type: array
+    items:
+      $ref: "#/definitions/PageSectionsData"

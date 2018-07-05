@@ -49,14 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -64,15 +58,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import org.slf4j.Logger;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence} - Adapts the keys for those calendar tables that carry confirmation information to new "occurrence" column.
@@ -95,19 +92,16 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextID = params.getContextId();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
-        final Connection connnection = dbService.getForUpdateTask(contextID);
+        final Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            connnection.setAutoCommit(false);
+            con.setAutoCommit(false);
             rollback = true;
 
             final Logger logger = org.slf4j.LoggerFactory.getLogger(CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence.class);
 
             {
-                final TIntObjectMap<TIntSet> cid2ids = determineAffectedAppointments("del_dates_members", "delDateExternal", connnection);
+                final TIntObjectMap<TIntSet> cid2ids = determineAffectedAppointments("del_dates_members", "delDateExternal", con);
 
                 if (null != cid2ids) {
                     cid2ids.forEachEntry(new TIntObjectProcedure<TIntSet>() {
@@ -136,7 +130,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                             {
                                 Statement stmt = null;
                                 try {
-                                    stmt = connnection.createStatement();
+                                    stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM delDateExternal WHERE cid = " + contextId + " AND objectId IN " + str);
                                 } catch (final Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
@@ -148,7 +142,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                             {
                                 Statement stmt = null;
                                 try {
-                                    stmt = connnection.createStatement();
+                                    stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM del_date_rights WHERE cid = " + contextId + " AND object_id IN " + str);
                                 } catch (final Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
@@ -160,7 +154,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                             {
                                 Statement stmt = null;
                                 try {
-                                    stmt = connnection.createStatement();
+                                    stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM del_dates_members WHERE cid = " + contextId + " AND object_id IN " + str);
                                 } catch (final Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
@@ -172,7 +166,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                             {
                                 Statement stmt = null;
                                 try {
-                                    stmt = connnection.createStatement();
+                                    stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM del_dates WHERE cid = " + contextId + " AND intfield01 IN " + str);
                                 } catch (final Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
@@ -188,7 +182,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
             }
 
             {
-                final TIntObjectMap<TIntSet> cid2ids = determineAffectedAppointments("prg_dates_members", "dateExternal", connnection);
+                final TIntObjectMap<TIntSet> cid2ids = determineAffectedAppointments("prg_dates_members", "dateExternal", con);
 
                 if (null != cid2ids) {
                     cid2ids.forEachEntry(new TIntObjectProcedure<TIntSet>() {
@@ -216,7 +210,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                             {
                                 Statement stmt = null;
                                 try {
-                                    stmt = connnection.createStatement();
+                                    stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM dateExternal WHERE cid = " + contextId + " AND objectId IN " + str);
                                 } catch (final Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
@@ -228,7 +222,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                             {
                                 Statement stmt = null;
                                 try {
-                                    stmt = connnection.createStatement();
+                                    stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM prg_date_rights WHERE cid = " + contextId + " AND object_id IN " + str);
                                 } catch (final Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
@@ -240,7 +234,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                             {
                                 Statement stmt = null;
                                 try {
-                                    stmt = connnection.createStatement();
+                                    stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM prg_dates_members WHERE cid = " + contextId + " AND object_id IN " + str);
                                 } catch (final Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
@@ -252,7 +246,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                             {
                                 Statement stmt = null;
                                 try {
-                                    stmt = connnection.createStatement();
+                                    stmt = con.createStatement();
                                     stmt.executeUpdate("DELETE FROM prg_dates WHERE cid = " + contextId + " AND intfield01 IN " + str);
                                 } catch (final Exception e) {
                                     logger.error("Couldn't delete appointment data.", e);
@@ -274,7 +268,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                 {
                     final String[] oldCols = new String[] {"cid","member_uid","object_id", "occurrence"};
                     final String[] newCols = new String[] {"cid","member_uid","object_id"};
-                    checkUniqueKey(oldCols, newCols, tables, connnection);
+                    checkUniqueKey(oldCols, newCols, tables, con);
                 }
 
                 // Drop & re-create primary key
@@ -282,20 +276,20 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
 
                 final int[] lengths = new int[4];
                 Arrays.fill(lengths, 0);
-                checkPrimaryKey(columns, lengths, tables, connnection);
+                checkPrimaryKey(columns, lengths, tables, con);
             }
 
             {
                 // Drop foreign key: dateExternal(cid, objectId) -> prg_dates(cid, intfield01)
-                String foreignKey = Tools.existsForeignKey(connnection, "prg_dates", new String[] {"cid", "intfield01"}, "dateExternal", new String[] {"cid", "objectId"});
+                String foreignKey = Tools.existsForeignKey(con, "prg_dates", new String[] {"cid", "intfield01"}, "dateExternal", new String[] {"cid", "objectId"});
                 if (null != foreignKey && !foreignKey.equals("")) {
-                    Tools.dropForeignKey(connnection, "dateExternal", foreignKey);
+                    Tools.dropForeignKey(con, "dateExternal", foreignKey);
                 }
 
                 // Drop foreign key: delDateExternal(cid, objectId) -> del_dates(cid, intfield01)
-                foreignKey = Tools.existsForeignKey(connnection, "del_dates", new String[] {"cid", "intfield01"}, "delDateExternal", new String[] {"cid", "objectId"});
+                foreignKey = Tools.existsForeignKey(con, "del_dates", new String[] {"cid", "intfield01"}, "delDateExternal", new String[] {"cid", "objectId"});
                 if (null != foreignKey && !foreignKey.equals("")) {
-                    Tools.dropForeignKey(connnection, "delDateExternal", foreignKey);
+                    Tools.dropForeignKey(con, "delDateExternal", foreignKey);
                 }
 
                 // Drop & re-create primary key
@@ -304,19 +298,18 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
                 final int[] lengths = new int[3];
                 Arrays.fill(lengths, 0);
                 lengths[2] = 255;
-                checkPrimaryKey(columns, lengths, tables, connnection);
+                checkPrimaryKey(columns, lengths, tables, con);
             }
 
-            connnection.commit();
+            con.commit();
             rollback = false;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                rollback(connnection);
+                rollback(con);
             }
-            autocommit(connnection);
-            Database.backNoTimeout(contextID, true, connnection);
+            autocommit(con);
         }
     }
 
@@ -326,6 +319,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = connnection.prepareStatement("SELECT cid, object_id FROM "+table+" GROUP BY cid, object_id, member_uid HAVING count(*) > 1");
                 rs = stmt.executeQuery();
                 if (rs.next()) {
@@ -347,6 +341,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = connnection.prepareStatement("SELECT cid, objectId FROM "+table2+" GROUP BY cid, objectId, mailAddress HAVING count(*) > 1");
                 rs = stmt.executeQuery();
                 if (rs.next()) {

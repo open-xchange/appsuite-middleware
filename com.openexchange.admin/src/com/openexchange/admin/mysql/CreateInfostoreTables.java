@@ -79,10 +79,11 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`last_modified` int8 NOT NULL,"
       + "`created_by` int4 unsigned NOT NULL,"
       + "`changed_by` int4 unsigned ,"
+      + "`origin` varchar(255) DEFAULT NULL ,"
       + "PRIMARY KEY (`cid`,`id`, `folder_id`),"
       + "INDEX `lastModified` (`cid`,`last_modified`),"
       + "INDEX `folder` (`cid`,`folder_id`)"
-    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createInfostoreDocumentTable = "CREATE TABLE `infostore_document` ("
       + "`cid` int4 unsigned NOT NULL,"
@@ -106,7 +107,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "PRIMARY KEY (`cid`,`infostore_id`,`version_number`),"
       + "FOREIGN KEY (cid, infostore_id) REFERENCES infostore (cid, id),"
       + "INDEX `md5sumIndex` (`cid`, `file_md5sum`)"
-    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createDelInfostoreTable = "CREATE TABLE `del_infostore` ("
       + "`cid` int4 unsigned NOT NULL,"
@@ -118,10 +119,11 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`last_modified` int8 NOT NULL,"
       + "`created_by` int4 unsigned NOT NULL,"
       + "`changed_by` int4 unsigned ,"
+      + "`origin` varchar(255) DEFAULT NULL ,"
       + "PRIMARY KEY (`cid`,`id`,`folder_id`),"
       + "INDEX `lastModified` (`cid`,`last_modified`),"
       + "INDEX `folder` (`cid`,`folder_id`)"
-    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createDelInfostoreDocumentTable = "CREATE TABLE `del_infostore_document` ("
       + "`cid` int4 unsigned NOT NULL,"
@@ -144,7 +146,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`meta` BLOB default NULL,"
       + "PRIMARY KEY (`cid`,`infostore_id`,`version_number`),"
       + "INDEX `md5sumIndex` (`cid`, `file_md5sum`)"
-    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createInfostorePropertyTable = "CREATE TABLE `infostore_property` ("
       + "`cid` int4 unsigned NOT NULL,"
@@ -155,7 +157,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`language` varchar(128) ,"
       + "`xml` boolean,"
       + "PRIMARY KEY (`cid`,`id`,`name`,`namespace`)"
-    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createInfostoreLockTable = "CREATE TABLE `infostore_lock` ("
       + "`cid` int4 unsigned NOT NULL,"
@@ -167,14 +169,14 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`scope` tinyint unsigned NOT NULL,"
       + "`ownerDesc` varchar(128) ,"
       + "PRIMARY KEY (`cid`,`id`)"
-    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createLockNullTable = "CREATE TABLE `lock_null` ("
       + "`cid` int4 unsigned NOT NULL,"
       + "`id` int4 unsigned NOT NULL,"
       + "`url` varchar(255) NOT NULL,"
       + "PRIMARY KEY (`cid`,`id`)"
-    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createLockNullLockTable = "CREATE TABLE `lock_null_lock` ("
       + "`cid` int4 unsigned NOT NULL,"
@@ -186,7 +188,7 @@ public class CreateInfostoreTables extends AbstractCreateTableImpl {
       + "`scope` tinyint unsigned ,"
       + "`ownerDesc` varchar(128) ,"
       + "PRIMARY KEY (`cid`,`id`)"
-    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateInfostoreTables}.

@@ -56,7 +56,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.NearRegistryServiceTracker;
@@ -92,7 +91,7 @@ public class ServerConfigActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {ConfigurationService.class, ConfigViewFactory.class, CapabilityService.class, SimpleConverter.class};
+        return new Class[] { ConfigurationService.class, ConfigViewFactory.class, CapabilityService.class };
     }
 
     @Override

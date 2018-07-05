@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
@@ -108,14 +109,14 @@ public class ExtendedFolderPermissionsField implements AdditionalFolderField {
         List<Object> values = new ArrayList<Object>();
         for (FolderObject folder : folders) {
             List<OCLPermission> oclPermissions = folder.getPermissions();
-            if (null != oclPermissions) {
+            if (null == oclPermissions) {
+                values.add(null);
+            } else {
                 List<ExtendedFolderPermission> extendedPermissions = new ArrayList<ExtendedFolderPermission>(oclPermissions.size());
                 for (OCLPermission oclPermission : oclPermissions) {
                     extendedPermissions.add(new ExtendedFolderPermission(resolver, folder, oclPermission));
                 }
                 values.add(extendedPermissions);
-            } else {
-                values.add(null);
             }
         }
         return values;
@@ -123,21 +124,23 @@ public class ExtendedFolderPermissionsField implements AdditionalFolderField {
 
     @Override
     public Object renderJSON(AJAXRequestData requestData, Object value) {
-        if (null != value && List.class.isInstance(value)) {
-            List<?> values = (List<?>) value;
-            JSONArray jsonArray = new JSONArray(values.size());
-            for (Object item : values) {
-                if (ExtendedFolderPermission.class.isInstance(item)) {
-                    try {
-                        jsonArray.put(((ExtendedFolderPermission) item).toJSON(requestData));
-                    } catch (JSONException | OXException e) {
-                        org.slf4j.LoggerFactory.getLogger(ExtendedFolderPermissionsField.class).error("Error serializing extended permissions", e);
-                    }
+        // The method returns a non null value if the value is non-null and can be cast to java.util.List
+        if (null == requestData || false == List.class.isInstance(value)) {
+            return JSONObject.NULL;
+        }
+
+        List<?> values = (List<?>) value;
+        JSONArray jsonArray = new JSONArray(values.size());
+        for (Object item : values) {
+            if (ExtendedFolderPermission.class.isInstance(item)) {
+                try {
+                    jsonArray.put(((ExtendedFolderPermission) item).toJSON(requestData));
+                } catch (JSONException | OXException e) {
+                    org.slf4j.LoggerFactory.getLogger(ExtendedFolderPermissionsField.class).error("Error serializing extended permissions", e);
                 }
             }
-            return jsonArray;
         }
-        return null;
+        return jsonArray;
     }
 
 }

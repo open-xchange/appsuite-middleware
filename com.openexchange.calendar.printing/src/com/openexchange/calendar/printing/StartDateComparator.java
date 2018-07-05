@@ -55,10 +55,10 @@ import java.util.Comparator;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class StartDateComparator implements Comparator<CPAppointment> {
+public class StartDateComparator implements Comparator<CPEvent> {
 
     @Override
-    public int compare(CPAppointment o1, CPAppointment o2) {
+    public int compare(CPEvent o1, CPEvent o2) {
         return o1.getStartDate().compareTo(o2.getStartDate());
     }
 

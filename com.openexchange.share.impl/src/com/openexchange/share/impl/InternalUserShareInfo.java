@@ -79,9 +79,10 @@ public class InternalUserShareInfo extends AbstractShareInfo {
      * @param user The user
      * @param srcTarget The share target from the sharing users point of view
      * @param dstTarget The share target from the recipients point of view
+     * @param includeSubfolders Whether sub-folders should be included in case the target is a infostore folder
      */
-    public InternalUserShareInfo(int contextID, User user, ShareTarget srcTarget, ShareTarget dstTarget) {
-        super(srcTarget, dstTarget);
+    public InternalUserShareInfo(int contextID, User user, ShareTarget srcTarget, ShareTarget dstTarget, boolean includeSubfolders) {
+        super(srcTarget, dstTarget, includeSubfolders);
         this.contextID = contextID;
         this.user = user;
     }

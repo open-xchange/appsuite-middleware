@@ -49,17 +49,16 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -85,26 +84,30 @@ public class AddUUIDForUserAttributeTable extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.getContextId();
         ProgressState progress = params.getProgressState();
-        Connection con = Database.getNoTimeout(ctxId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             startTransaction(con);
+            rollback = true;
+
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "user_attribute", "uuid")) {
                 Tools.addColumns(con, "user_attribute", new Column("uuid", "BINARY(16) DEFAULT NULL"));
                 fillUUIDs(con, progress);
             }
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
             autocommit(con);
-            Database.backNoTimeout(ctxId, true, con);
         }
     }
 

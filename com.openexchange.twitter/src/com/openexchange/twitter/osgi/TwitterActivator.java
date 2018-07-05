@@ -92,27 +92,7 @@ public final class TwitterActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterActivator.class);
-        try {
-            log.info("stopping bundle: com.openexchange.twitter");
-            /*
-             * Unregister
-             */
-            unregisterServices();
-            /*
-             * Close trackers
-             */
-            closeTrackers();
-        } catch (final Exception e) {
-            log.error("Failed shut-down of bundle com.openexchange.twitter", e);
-            throw e;
-        }
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
         return EMPTY_CLASSES;
     }
 

@@ -119,6 +119,9 @@ public class ExtractJULModificationsCLT {
             }
             // Write output
             final OutputStream os = determineOutput(!cmd.hasOption('o'), cmd.getOptionValue('o'));
+            if(os == null) {
+                return 1;
+            }
             try {
                 added.store(os, "added loggers in file-logging.properties");
             } finally {

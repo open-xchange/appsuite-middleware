@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Image Transformation Bundle based on ImageMagick command-line
 Bundle-SymbolicName: com.openexchange.imagetransformation.imagemagick
-Bundle-Version: 7.8.1
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.config,

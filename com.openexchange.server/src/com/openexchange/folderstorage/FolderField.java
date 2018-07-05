@@ -58,7 +58,7 @@ import java.io.Serializable;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderField implements Serializable {
+public class FolderField implements Serializable {
 
     private static final long serialVersionUID = 3017091379073715144L;
 
@@ -105,6 +105,26 @@ public final class FolderField implements Serializable {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Deserializes a folder property from its serialized representation.
+     *
+     * @param value The value to parse
+     * @return The parsed folder property
+     */
+    public FolderProperty parse(Object value) {
+        return null == value ? null : new FolderProperty(name, value);
+    }
+
+    /**
+     * Serializes a folder property.
+     *
+     * @param property The folder property to write
+     * @return The serialized value
+     */
+    public Object write(FolderProperty property) {
+        return null == property ? defaultValue : property.getValue();
     }
 
     @Override

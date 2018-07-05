@@ -52,6 +52,7 @@ package com.openexchange.groupware.infostore.facade.impl;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -66,8 +67,8 @@ import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.session.ServerSession;
@@ -107,16 +108,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
 
-        com.openexchange.filestore.FileStorage fs = getFileStorage(infoPerm.getFolderOwner(), session.getContextId());
-        InputStream document;
-        if (dm.getFilestoreLocation() == null) {
-            document = Streams.newByteArrayInputStream(new byte[0]);
-        } else if (0 == offset && -1 == length) {
-            document = fs.getFile(dm.getFilestoreLocation());
-        } else {
-            document = fs.getFile(dm.getFilestoreLocation(), offset, length);
-        }
-
+        InputStream document = getDocument(session, infoPerm.getFolderOwner(), dm, offset, length);
         fireEvent(FileStorageEventHelper.buildAccessEvent(session, SERVICE_ID, ACCOUNT_ID, getFolderID(dm), getFileID(dm), dm.getFileName()));
         return document;
     }
@@ -176,9 +168,9 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
 
     @Override
     protected List<DocumentMetadata> moveDocuments(ServerSession session, List<DocumentMetadata> documents, long destinationFolderID,
-        long sequenceNumber, boolean adjustFilenamesAsNeeded) throws OXException {
+        long sequenceNumber, boolean adjustFilenamesAsNeeded, Map<String, InfostoreFolderPath> originFolderPath) throws OXException {
         List<DocumentMetadata> rejectedDocuments = super.moveDocuments(
-            session, documents, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
+            session, documents, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded, originFolderPath);
         if (!documents.isEmpty()) {
             for (DocumentMetadata document : documents) {
                 if (null != rejectedDocuments && rejectedDocuments.contains(document)) {

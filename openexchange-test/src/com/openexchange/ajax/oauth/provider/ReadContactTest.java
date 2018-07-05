@@ -50,6 +50,7 @@
 package com.openexchange.ajax.oauth.provider;
 
 import static org.junit.Assert.assertNotNull;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.junit.After;
@@ -153,7 +154,7 @@ public class ReadContactTest extends AbstractOAuthTest {
                 "8bPRlTLgDRkM1TQWGHUMrgAeDZnRkMEVArjE8aYZWKMHl2ZixEkxA69jQEU5Mwew4QyqX8jAIL0g\n" +
                 "M4gFVG12EmspLnV4QwaXJlqJjzoGV8iOhsxoyOAKAVziADt/ifvTHt/1AAAAAElFTkSuQmCC";
 
-            image = Base64.decodeBase64(base64Image);
+            image = Base64.decodeBase64(base64Image.getBytes(StandardCharsets.US_ASCII));
         }
 
         Contact contact = new Contact();
@@ -168,28 +169,28 @@ public class ReadContactTest extends AbstractOAuthTest {
         contact.setTelephoneBusiness1("+49112233445566");
         contact.setCompany("Internal Test AG");
         contact.setEmail1("hebert.meier@open-xchange.com");
-        contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
+        contact.setParentFolderID(oAuthClient.getValues().getPrivateContactFolder());
         contact.setFileAs("I'm the file_as field of Herbert Meier");
         contact.setImage1(image);
 
         InsertRequest insertContactReq = new InsertRequest(contact);
-        InsertResponse insertContactResp = getClient().execute(insertContactReq);
+        InsertResponse insertContactResp = oAuthClient.execute(insertContactReq);
         try {
             insertContactResp.fillObject(contact);
 
-            com.openexchange.ajax.contact.action.GetRequest getContactReq = new com.openexchange.ajax.contact.action.GetRequest(contact.getParentFolderID(), contact.getObjectID(), getClient().getValues().getTimeZone());
-            com.openexchange.ajax.contact.action.GetResponse getContactResp = getClient().execute(getContactReq);
+            com.openexchange.ajax.contact.action.GetRequest getContactReq = new com.openexchange.ajax.contact.action.GetRequest(contact.getParentFolderID(), contact.getObjectID(), oAuthClient.getValues().getTimeZone());
+            com.openexchange.ajax.contact.action.GetResponse getContactResp = oAuthClient.execute(getContactReq);
 
             JSONObject jContact = (JSONObject) getContactResp.getResponse().getData();
             String imageUrl = jContact.getString(ContactFields.IMAGE1_URL); // e.g. "/ajax/image/user/picture?id=273&timestamp=1468497596841"
 
             ImageRequest imageRequest = ImageRequest.parseFrom(imageUrl);
-            ImageResponse imageResponse = getClient().execute(imageRequest);
+            ImageResponse imageResponse = oAuthClient.execute(imageRequest);
 
             assertNotNull(imageResponse.getImage());
         } finally {
             com.openexchange.ajax.contact.action.DeleteRequest deleteContactReq = new com.openexchange.ajax.contact.action.DeleteRequest(contact, false);
-            getClient().execute(deleteContactReq);
+            oAuthClient.execute(deleteContactReq);
         }
     }
 

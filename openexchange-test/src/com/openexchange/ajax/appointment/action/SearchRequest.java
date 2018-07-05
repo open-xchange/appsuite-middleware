@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.SearchFields;
-import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.java.Strings;
 
 /**
@@ -91,7 +90,7 @@ public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
         param(AJAXServlet.PARAMETER_START, startDate);
         param(AJAXServlet.PARAMETER_END, endDate);
         if (recurrenceMaster) {
-            param(AppointmentRequest.RECURRENCE_MASTER, String.valueOf(recurrenceMaster));
+            param(AJAXServlet.PARAMETER_RECURRENCE_MASTER, String.valueOf(recurrenceMaster));
         }
 
         try {

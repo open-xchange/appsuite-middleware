@@ -17,7 +17,6 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="clusterWeight" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
  *         &lt;element name="currentUnits" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
  *         &lt;element name="driver" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
@@ -43,7 +42,6 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Database", propOrder = {
-    "clusterWeight",
     "currentUnits",
     "driver",
     "id",
@@ -62,8 +60,6 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Database {
 
-    @XmlElement(nillable = true)
-    protected Integer clusterWeight;
     @XmlElement(nillable = true)
     protected Integer currentUnits;
     @XmlElement(nillable = true)
@@ -94,30 +90,6 @@ public class Database {
     protected String scheme;
     @XmlElement(nillable = true)
     protected String url;
-
-    /**
-     * Ruft den Wert der clusterWeight-Eigenschaft ab.
-     *
-     * @return
-     *     possible object is
-     *     {@link Integer }
-     *
-     */
-    public Integer getClusterWeight() {
-        return clusterWeight;
-    }
-
-    /**
-     * Legt den Wert der clusterWeight-Eigenschaft fest.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link Integer }
-     *
-     */
-    public void setClusterWeight(Integer value) {
-        this.clusterWeight = value;
-    }
 
     /**
      * Ruft den Wert der currentUnits-Eigenschaft ab.

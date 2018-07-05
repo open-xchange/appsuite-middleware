@@ -58,7 +58,6 @@ import com.openexchange.global.tools.iterator.MergingSearchIteratorTest;
 import com.openexchange.sessiond.SessionFilterTest;
 import com.openexchange.tools.filename.Bug53791Test;
 import com.openexchange.tools.filename.Bug55271Test;
-import com.openexchange.tools.filename.Bug56499Test;
 
 /**
  * {@link UnitTests}
@@ -74,7 +73,7 @@ import com.openexchange.tools.filename.Bug56499Test;
     Bug50893Test.class,
     Bug53791Test.class,
     Bug55271Test.class,
-    Bug56499Test.class,
+    com.openexchange.tools.filename.Bug56499Test.class,
     com.openexchange.tools.filename.Bug58052Test.class,
 })
 public class UnitTests {

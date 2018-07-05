@@ -49,7 +49,8 @@
 
 package com.openexchange.mailaccount.json.actions;
 
-import static com.openexchange.tools.sql.DBUtils.*;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -89,6 +90,7 @@ import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -113,10 +115,10 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
     @Override
     protected AJAXRequestResult innerPerform(AJAXRequestData requestData, ServerSession session, JSONValue jData) throws OXException, JSONException {
         if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
-            throw
-            MailAccountExceptionCodes.NOT_ENABLED.create(
-                Integer.valueOf(session.getUserId()),
-                Integer.valueOf(session.getContextId()));
+            throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+        }
+        if (null == jData) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 
         MailAccountDescription accountDescription = new MailAccountDescription();
@@ -224,15 +226,19 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 Map<String, String> defaultFolderNames = null;
                 if (!pop3 && valid) {
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                    mailAccess = getMailAccess(accountDescription, session, warnings);
-                    mailAccess.connect(false);
-                    IMailFolderStorage storage = mailAccess.getFolderStorage();
-                    IMailFolderStorageDefaultFolderAware defaultFolderAware = storage.supports(IMailFolderStorageDefaultFolderAware.class);
-                    if (null != defaultFolderAware) {
-                        defaultFolderNames = defaultFolderAware.getSpecialUseFolder();
+                    try {
+                        mailAccess = getMailAccess(accountDescription, session, warnings);
+                        mailAccess.connect(false);
+                        IMailFolderStorage storage = mailAccess.getFolderStorage();
+                        IMailFolderStorageDefaultFolderAware defaultFolderAware = storage.supports(IMailFolderStorageDefaultFolderAware.class);
+                        if (null != defaultFolderAware) {
+                            defaultFolderNames = defaultFolderAware.getSpecialUseFolder();
+                        }
+                    } finally {
+                        if (null != mailAccess) {
+                            mailAccess.close(false);
+                        }
                     }
-                    mailAccess.close(false);
-                    mailAccess = null;
                 }
 
                 if (valid) {

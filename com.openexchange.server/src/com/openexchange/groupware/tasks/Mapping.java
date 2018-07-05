@@ -49,11 +49,6 @@
 
 package com.openexchange.groupware.tasks;
 
-import gnu.trove.TCollections;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.PreparedStatement;
@@ -80,6 +75,11 @@ import com.openexchange.groupware.tasks.mapping.TargetCosts;
 import com.openexchange.groupware.tasks.mapping.TargetDuration;
 import com.openexchange.groupware.tasks.mapping.UID;
 import com.openexchange.sql.tools.SQLTools;
+import gnu.trove.TCollections;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * This class contains the methods for mapping object attributes to database columns and vice versa.

@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The chronos compatibility implementation bundle
+Bundle-SymbolicName: com.openexchange.chronos.compat.impl
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.common,
+ com.openexchange.chronos.exception,
+ com.openexchange.chronos.service,
+ com.openexchange.chronos.storage,
+ com.openexchange.exception,
+ com.openexchange.folderstorage,
+ com.openexchange.folderstorage.type,
+ com.openexchange.groupware,
+ com.openexchange.groupware.attach,
+ com.openexchange.groupware.contexts,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.osgi.util,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.service,
+ com.openexchange.tools.session,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.chronos.compat.impl.osgi.ChronosCompatActivator

@@ -49,8 +49,8 @@
 
 package com.openexchange.group.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -94,8 +94,9 @@ public final class AllAction extends AbstractGroupAction {
         GroupStorage groupStorage = GroupStorage.getInstance();
         Group[] groups = groupStorage.getGroups(loadMembers, req.getSession().getContext());
 
-        List<Group> groupList = new LinkedList<Group>();
-        for (int a = 0; a < groups.length; a++) {
+        int length = groups.length;
+        List<Group> groupList = new ArrayList<Group>(length);
+        for (int a = 0; a < length; a++) {
             Group group = groups[a];
             groupList.add(group);
 

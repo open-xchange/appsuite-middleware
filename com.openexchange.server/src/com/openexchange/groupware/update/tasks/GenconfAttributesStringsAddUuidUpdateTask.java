@@ -54,13 +54,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -78,40 +77,34 @@ public class GenconfAttributesStringsAddUuidUpdateTask extends UpdateTaskAdapter
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        Connection con = Database.getNoTimeout(cid, true);
-        Column column = new Column("uuid", "BINARY(16) DEFAULT NULL");
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
+            Column column = new Column("uuid", "BINARY(16) DEFAULT NULL");
             if (!Tools.columnExists(con, "genconf_attributes_strings", column.name)) {
                 Tools.checkAndAddColumns(con, "genconf_attributes_strings", column);
             }
             setUUID(con);
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
-            Database.backNoTimeout(cid, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[0];
@@ -167,11 +160,11 @@ public class GenconfAttributesStringsAddUuidUpdateTask extends UpdateTaskAdapter
                     stmt2.setString(newPos++, value);
                     stmt2.execute();
                 } finally {
-                    DBUtils.closeSQLStuff(stmt2);
+                    Databases.closeSQLStuff(stmt2);
                 }
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

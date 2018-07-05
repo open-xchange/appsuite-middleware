@@ -96,7 +96,7 @@ public class MoveTest extends AbstractAJAXSession {
                 request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
-                request.setParameter("folder_id", "1");
+                request.setParameter("folder_id", "default0/INBOX");
                 response = getClient().execute(request);
                 newMailId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newMailId);
@@ -161,7 +161,7 @@ public class MoveTest extends AbstractAJAXSession {
                 request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
-                request.setParameter("folder_id", "1");
+                request.setParameter("folder_id", "default0/INBOX");
                 response = getClient().execute(request);
                 newMailId = (String) response.getData();
                 assertNotNull("New ID must not be null!", newMailId);

@@ -170,11 +170,15 @@ public class PortableStanzaDispatcher implements Callable<IDMap<OXException>>, C
     @Override
     public void readPortable(PortableReader reader) throws IOException {
         Portable[] portableTargets = reader.readPortableArray(FIELD_TARGETS);
-        for (Portable portableTarget : portableTargets) {
-            if (PortableID.class.isInstance(portableTarget)) {
-                targets.add(PortableID.class.cast(portableTarget));
-            } else {
-                LOG.error("Expected a PortableID instead of {}", portableTarget);
+        if(null == portableTargets) {
+            LOG.warn("Unable to find any portable targets.");
+        } else {
+            for (Portable portableTarget : portableTargets) {
+                if (PortableID.class.isInstance(portableTarget)) {
+                    targets.add(PortableID.class.cast(portableTarget));
+                } else {
+                    LOG.error("Expected a PortableID instead of {}", portableTarget);
+                }
             }
         }
         byte[] stanzaBytes = reader.readByteArray(FIELD_STANZA);

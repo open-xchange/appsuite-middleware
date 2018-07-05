@@ -118,7 +118,7 @@ public class ActivatorTest {
         activator.overrideLoggerLevels(loggerContext);
 
         Mockito.verify(loggerContext, Mockito.atLeast(1)).getLogger(Matchers.anyString());
-        Mockito.verify(activatorLogger, Mockito.atLeast(1)).warn(Matchers.anyString(), Matchers.any());
+        Mockito.verify(activatorLogger, Mockito.atLeast(1)).warn(Matchers.anyString(), Matchers.anyString());
     }
 
      @Test

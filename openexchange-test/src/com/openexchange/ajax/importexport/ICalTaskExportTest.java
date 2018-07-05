@@ -29,4 +29,5 @@ public class ICalTaskExportTest extends ManagedTaskTest {
 
         assertTrue(iCal.contains(title));
     }
+    
 }

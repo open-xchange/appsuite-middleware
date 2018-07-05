@@ -1,11 +1,15 @@
 package liquibase.structure.core;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import liquibase.CatalogAndSchema;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
-
-import java.util.*;
 
 public class Schema extends AbstractDatabaseObject {
 

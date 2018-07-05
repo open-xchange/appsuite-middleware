@@ -57,13 +57,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.Streams;
@@ -153,14 +153,7 @@ public class LocalFileStorage extends DefaultFileStorage {
     /**
      * Set of Filenames that will not appear in the getFileList
      */
-    protected static final Set<String> SPECIAL_FILENAMES;
-
-    static {
-        final Set<String> tmp = new HashSet<String>();
-        tmp.add(LOCK_FILENAME);
-        tmp.add(STATEFILENAME);
-        SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
-    }
+    protected static final Set<String> SPECIAL_FILENAMES = ImmutableSet.of(LOCK_FILENAME, STATEFILENAME);
 
     /**
      * Initializes a new {@link LocalFileStorage}.
@@ -184,20 +177,17 @@ public class LocalFileStorage extends DefaultFileStorage {
 
     /**
      * Constructor for subclassing to run tests. It should be removed an the subclass should implement the whole FileStorage interface.
+     *
+     * @throws IOException
      */
-    protected LocalFileStorage() {
+    protected LocalFileStorage() throws IOException {
         this(assignStorage());
     }
 
     //Ugly workaround because someone insisted to make storage final:
-	private static File assignStorage() {
-		try {
-        	return File.createTempFile("test-storage", "tmp");
-		} catch (final IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+    private static File assignStorage() throws IOException {
+        return File.createTempFile("test-storage", "tmp");
+    }
 
     /**
      * Checks, if Statefile is correct. Especially if nextEntry is right and all Files really exist.
@@ -229,6 +219,9 @@ public class LocalFileStorage extends DefaultFileStorage {
 
             // Convert next Entry to decimals as Array fields
             final String previousEntry = getPreviousEntry(state.getNextEntry());
+            if (previousEntry == null) {
+                return false;
+            }
             final String[] tokens = previousEntry.split("/");
             final int[] parts = new int[tokens.length];
 

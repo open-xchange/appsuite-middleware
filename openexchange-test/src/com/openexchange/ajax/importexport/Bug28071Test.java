@@ -94,11 +94,6 @@ public class Bug28071Test extends ManagedAppointmentTest {
          */
         icalResponse = getClient().execute(new ICalImportRequest(folder.getObjectID(), iCal, false));
         assertTrue("Expected UID conflict", icalResponse.hasError());
-        assertNotNull("Should have processed 3 appointments", icalResponse.getImports());
-        assertEquals("Should have processed 3 appointments", 3, icalResponse.getImports().length);
-        for (int i = 0; i < 3; i++) {
-            assertTrue("Expected an error", icalResponse.getImports()[i].hasError());
-        }
         /*
          * import a second time ignoring UIDs
          */

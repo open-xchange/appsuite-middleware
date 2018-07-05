@@ -53,13 +53,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.groupware.update.TransactionalUpdateTaskAdapter;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -68,7 +65,7 @@ import com.openexchange.tools.update.Tools;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MakeQuotaMaxConsistentInUserTable extends UpdateTaskAdapter {
+public class MakeQuotaMaxConsistentInUserTable extends TransactionalUpdateTaskAdapter {
 
     /**
      * Initializes a new {@link MakeQuotaMaxConsistentInUserTable}.
@@ -78,44 +75,21 @@ public class MakeQuotaMaxConsistentInUserTable extends UpdateTaskAdapter {
     }
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
+    protected void performChanges(PerformParameters params, Connection con) throws OXException, SQLException {
         Logger log = org.slf4j.LoggerFactory.getLogger(MakeQuotaMaxConsistentInUserTable.class);
         log.info("Performing update task {}", MakeQuotaMaxConsistentInUserTable.class.getSimpleName());
 
-        DatabaseService databaseService = Services.requireService(DatabaseService.class);
+        // Converts all NULL values to -1
+        turnNulltoNumber("user", con);
+        turnNulltoNumber("del_user", con);
 
-        int ctxId = params.getContextId();
-        Connection con = databaseService.getForUpdateTask(ctxId);
-        boolean rollback = false;
-        try {
-            Databases.startTransaction(con);
-            rollback = true;
-
-            // Turns all NULL values to -1
-            turnNulltoNumber("user", con);
-            turnNulltoNumber("del_user", con);
-
-            // Changes "quota_max BIGINT(20) DEFAULT NULL" to "quota_max BIGINT(20) NOT NULL DEFAULT -1" (if not yet performed)
-            Column column = new Column("quota_max", "BIGINT(20) NOT NULL DEFAULT -1");
-            if (Tools.isNullable(con, "user", "quota_max")) {
-                Tools.modifyColumns(con, "user", column);
-            }
-            if (Tools.isNullable(con, "del_user", "quota_max")) {
-                Tools.modifyColumns(con, "del_user", column);
-            }
-
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
-            databaseService.backForUpdateTask(ctxId, con);
+        // Changes "quota_max BIGINT(20) DEFAULT NULL" to "quota_max BIGINT(20) NOT NULL DEFAULT -1" (if not yet performed)
+        Column column = new Column("quota_max", "BIGINT(20) NOT NULL DEFAULT -1");
+        if (Tools.isNullable(con, "user", "quota_max")) {
+            Tools.modifyColumns(con, "user", column);
+        }
+        if (Tools.isNullable(con, "del_user", "quota_max")) {
+            Tools.modifyColumns(con, "del_user", column);
         }
 
         log.info("{} successfully performed.", MakeQuotaMaxConsistentInUserTable.class.getSimpleName());

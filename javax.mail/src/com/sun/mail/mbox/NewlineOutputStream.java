@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,14 +40,20 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Convert the various newline conventions to the local platform's
- * newline convention.
+ * newline convention.  Optionally, make sure the output ends with
+ * a blank line.
  */
 public class NewlineOutputStream extends FilterOutputStream {
     private int lastb = -1;
+    private int bol = 1; // number of times in a row we're at beginning of line
+    private final boolean endWithBlankLine;
     private static final byte[] newline;
 
     static {
@@ -59,22 +65,30 @@ public class NewlineOutputStream extends FilterOutputStream {
 	}
 	if (s == null || s.length() <= 0)
 	    s = "\n";
-	newline = new byte[s.length()];
-	s.getBytes(0, s.length(), newline, 0);
+	newline = s.getBytes(StandardCharsets.ISO_8859_1);
     }
 
     public NewlineOutputStream(OutputStream os) {
+	this(os, false);
+    }
+
+    public NewlineOutputStream(OutputStream os, boolean endWithBlankLine) {
 	super(os);
+	this.endWithBlankLine = endWithBlankLine;
     }
 
     public void write(int b) throws IOException {
 	if (b == '\r') {
 	    out.write(newline);
+	    bol++;
 	} else if (b == '\n') {
-	    if (lastb != '\r')
+	    if (lastb != '\r') {
 		out.write(newline);
+		bol++;
+	    }
 	} else {
 	    out.write(b);
+	    bol = 0;	// no longer at beginning of line
 	}
 	lastb = b;
     }
@@ -87,5 +101,20 @@ public class NewlineOutputStream extends FilterOutputStream {
 	for (int i = 0 ; i < len ; i++) {
 	    write(b[off + i]);
 	}
+    }
+
+    public void flush() throws IOException {
+	if (endWithBlankLine) {
+	    if (bol == 0) {
+		// not at bol, return to bol and add a blank line
+		out.write(newline);
+		out.write(newline);
+	    } else if (bol == 1) {
+		// at bol, add a blank line
+		out.write(newline);
+	    }
+	}
+	bol = 2;
+	out.flush();
     }
 }

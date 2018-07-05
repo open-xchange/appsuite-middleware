@@ -56,6 +56,7 @@ import java.util.Set;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -68,17 +69,18 @@ public class TargetFolderSession implements Session {
     private final int contextId;
     private final int userId;
     private final Map<String, Object> params;
-    private final Session session;
+    private final Session             session;
 
     public TargetFolderSession(final TargetFolderDefinition target) {
         super();
         contextId = target.getContext().getContextId();
         userId = target.getUserId();
+
         // Initialize
         final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
         Session ses = null;
         if (null != service && null != (ses = service.getAnyActiveSessionForUser(target.getUserId(), target.getContext().getContextId()))) {
-            session = ses;
+            session = ServerSessionAdapter.valueOf(ses, target.getContext());
             params = null;
         } else {
             session = null;
@@ -193,7 +195,9 @@ public class TargetFolderSession implements Session {
                 params.put(name, value);
             }
         } else {
-            session.setParameter(name, value);
+            if (null != session) {
+                session.setParameter(name, value);
+            }
         }
     }
 
@@ -242,11 +246,33 @@ public class TargetFolderSession implements Session {
 
     @Override
     public Set<String> getParameterNames() {
-        Set<String> retval = new HashSet<String>();
+        Set<String> retval = new HashSet<String>(8);
         if (null != params) {
             retval.addAll(params.keySet());
+        } else {
+            if (null != session) {
+                retval.addAll(session.getParameterNames());
+            }
         }
-        retval.addAll(session.getParameterNames());
         return retval;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder retval = new StringBuilder();
+        retval.append("Context=").append(contextId).append(",");
+        retval.append("UserId=").append(userId).append(",");
+        if (null != session) {
+            retval.append(session.toString());
+        } else {
+            retval.append("parameters:[");
+            for (String s : getParameterNames()) {
+                retval.append(s).append("=").append(getParameter(s));
+                retval.append(",");
+            }
+            retval.deleteCharAt(retval.length() - 1);
+            retval.append("]");
+        }
+        return retval.toString();
     }
 }

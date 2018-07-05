@@ -237,6 +237,25 @@ public class Utility {
     }
 
     /**
+     * Gets the meta-data for specified image data.
+     *
+     * @param imageStream The image data
+     * @param mimeType The image MIME type
+     * @param name The image name
+     * @param options The options for retrieving image's meta-data
+     * @return The meta-data
+     * @throws IOException If meta-data cannot be returned
+     */
+    public static ImageMetadata getImageMetadataFor(InputStream imageStream, String mimeType, String name, ImageMetadataOptions options) throws IOException {
+        ImageMetadataService service = Services.optService(ImageMetadataService.class);
+        if (null == service) {
+            throw new IOException("No such service: " + ImageMetadataService.class.getName());
+        }
+
+        return service.getMetadataFor(imageStream, mimeType, name, options);
+    }
+
+    /**
      * Strips a leading "image/" as well as trailing additional properties after the first ";" from the supplied value if necessary from
      * image formats passed as content type. Also implicitly converts "pjpeg"- and "x-png"-formats as used by Internet Explorer to their
      * common format names.

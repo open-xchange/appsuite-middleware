@@ -1,10 +1,9 @@
 package liquibase.precondition;
 
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
-
 import java.util.HashMap;
 import java.util.Map;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.servicelocator.ServiceLocator;
 
 public class PreconditionFactory {
     @SuppressWarnings("unchecked")

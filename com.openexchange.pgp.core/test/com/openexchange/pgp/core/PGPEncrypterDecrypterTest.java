@@ -49,13 +49,17 @@
 
 package com.openexchange.pgp.core;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
 import org.bouncycastle.openpgp.PGPKeyRingGenerator;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
@@ -73,7 +77,7 @@ import com.openexchange.exception.OXException;
  * {@link PGPEncrypterDecrypterTest}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 @RunWith(value = Parameterized.class)
 public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
@@ -117,7 +121,7 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
         //Setting up a strategy for key retrieving, this is used when decrypting data
         keyRetrievalStrategy = mock(PGPKeyRetrievalStrategy.class);
         when(keyRetrievalStrategy.getPublicKey(anyLong())).thenReturn(publicKey);
-        when(keyRetrievalStrategy.getSecretKey(anyLong(),anyString(),any(char[].class))).thenReturn(decodePrivateKey(secretKey, TEST_PASSWORD));
+        when(keyRetrievalStrategy.getSecretKey(anyLong(),anyString(),any(char[].class))).thenReturn(decodePrivateKey(secretKey, TEST_IDENTITY_PASSWORD));
     }
 
     @Test
@@ -133,8 +137,9 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
         //Decrypting the data
         InputStream encryptedDataInput = new ByteArrayInputStream(encryptedData.toByteArray());
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-        List<PGPSignatureVerificationResult> verifyResults =
-            new PGPDecrypter(keyRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY, TEST_PASSWORD);
+        PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME,
+            TEST_IDENTITY_PASSWORD);
+        List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
         Assert.assertTrue("Verification results should be empty for non signed data", verifyResults.isEmpty());
         Assert.assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), testData);
 
@@ -150,13 +155,14 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
 
         //Encrypting the data
         ByteArrayOutputStream encryptedData = new ByteArrayOutputStream();
-        new PGPEncrypter().encryptSigned(plainTextData, encryptedData, armored, secretKey, TEST_PASSWORD, publicKey);
+        new PGPEncrypter().encryptSigned(plainTextData, encryptedData, armored, secretKey, TEST_IDENTITY_PASSWORD, publicKey);
 
         //Decrypting the data
         InputStream encryptedDataInput = new ByteArrayInputStream(encryptedData.toByteArray());
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-        List<PGPSignatureVerificationResult> verifyResults =
-            new PGPDecrypter(keyRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY, TEST_PASSWORD);
+        PGPDecryptionResult result =
+                new PGPDecrypter(keyRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
+        List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
         Assert.assertEquals("We should have obtained one verification result", 1, verifyResults.size());
         Assert.assertTrue("Signature should have been verified",verifyResults.get(0).isVerified());
         Assert.assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), testData);
@@ -173,8 +179,7 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
 
         //Trying to decrypt emtpy data should result in an OXException
         InputStream nonPGPData = new ByteArrayInputStream(new byte[] {});
-        List<PGPSignatureVerificationResult> verifyRestults =
-            new PGPDecrypter(keyRetrievalStrategy).decrypt(nonPGPData, new ByteArrayOutputStream(), TEST_IDENTITY, TEST_PASSWORD);
+        new PGPDecrypter(keyRetrievalStrategy).decrypt(nonPGPData, new ByteArrayOutputStream(), TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
     }
 
     @Test
@@ -192,13 +197,12 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
 
         //Encrypting the data
         ByteArrayOutputStream encryptedData = new ByteArrayOutputStream();
-        new PGPEncrypter().encryptSigned(plainTextData, encryptedData, armored, secretKey, TEST_PASSWORD, publicKey);
+        new PGPEncrypter().encryptSigned(plainTextData, encryptedData, armored, secretKey, TEST_IDENTITY_PASSWORD, publicKey);
 
         //Decrypting the data
         InputStream encryptedDataInput = new ByteArrayInputStream(encryptedData.toByteArray());
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-        List<PGPSignatureVerificationResult> verifyResults =
-            new PGPDecrypter(noKeyFoundRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY, TEST_PASSWORD);
+        new PGPDecrypter(noKeyFoundRetrievalStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
     }
 
     @Test
@@ -208,7 +212,7 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
         secretKey = getSecretKeyFromGenerator(keyGenerator);
         publicKey = getPublicKeyFromGenerator(keyGenerator);
         PGPKeyRetrievalStrategy onlyFindSecretKeyStrategy = mock(PGPKeyRetrievalStrategy.class);
-        when(onlyFindSecretKeyStrategy.getSecretKey(anyLong(),anyString(),any(char[].class))).thenReturn(decodePrivateKey(secretKey, TEST_PASSWORD));
+        when(onlyFindSecretKeyStrategy.getSecretKey(anyLong(),anyString(),any(char[].class))).thenReturn(decodePrivateKey(secretKey, TEST_IDENTITY_PASSWORD));
         when(onlyFindSecretKeyStrategy.getPublicKey(anyLong())).thenReturn(null);
 
         byte[] testData = "test".getBytes();
@@ -216,13 +220,14 @@ public class PGPEncrypterDecrypterTest extends AbstractPGPTest {
 
         //Encrypting the data
         ByteArrayOutputStream encryptedData = new ByteArrayOutputStream();
-        new PGPEncrypter().encryptSigned(plainTextData, encryptedData, armored, secretKey, TEST_PASSWORD, publicKey);
+        new PGPEncrypter().encryptSigned(plainTextData, encryptedData, armored, secretKey, TEST_IDENTITY_PASSWORD, publicKey);
 
         //Decrypting the data
         InputStream encryptedDataInput = new ByteArrayInputStream(encryptedData.toByteArray());
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-        List<PGPSignatureVerificationResult> verifyResults =
-            new PGPDecrypter(onlyFindSecretKeyStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY, TEST_PASSWORD);
+        PGPDecryptionResult result =
+            new PGPDecrypter(onlyFindSecretKeyStrategy).decrypt(encryptedDataInput, decryptedData, TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
+        List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
 
         Assert.assertEquals("We should have obtained one verification result", 1, verifyResults.size());
         Assert.assertFalse("Signature should NOT have been verified due to missing public key",verifyResults.get(0).isVerified());

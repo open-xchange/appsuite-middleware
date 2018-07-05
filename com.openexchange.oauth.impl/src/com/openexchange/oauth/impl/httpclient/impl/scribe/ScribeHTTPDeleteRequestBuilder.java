@@ -50,7 +50,6 @@
 package com.openexchange.oauth.impl.httpclient.impl.scribe;
 
 import org.scribe.model.Verb;
-
 import com.openexchange.http.client.builder.HTTPDeleteRequestBuilder;
 import com.openexchange.oauth.impl.httpclient.OAuthHTTPRequestBuilder;
 

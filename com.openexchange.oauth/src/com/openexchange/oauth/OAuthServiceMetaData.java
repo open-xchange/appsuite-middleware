@@ -229,7 +229,9 @@ public interface OAuthServiceMetaData {
     String getRegisterToken(String authUrl);
 
     /**
-     * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s
+     * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s.
+     * <p>
+     * Available scopes are all scopes offered by associated OAuth API filtered by <i>possibly</i> defined configuration (e.g. <code>"com.openexchange.oauth.modules.enabled.google"</code> property).
      *
      * @param userId The user id
      * @param ctxId The context id
@@ -237,4 +239,18 @@ public interface OAuthServiceMetaData {
      * @throws OXException if available scopes couldn't be retrieved
      */
     Set<OAuthScope> getAvailableScopes(int userId, int ctxId) throws OXException;
+
+    /**
+     * Issues a request to the respective OAuth provider and fetches the identity of the current user.
+     * 
+     * Some providers need the 'profile user' scope enabled before they can return the user identity.
+     * 
+     * @param session The {@link Session}
+     * @param accountId The account's identifier
+     * @param accessToken access token
+     * @param accessSecret The access secret
+     * @return the user's identity or <code>null</code> if none can be retrieved.
+     * @throws OXException if an error is occurred
+     */
+    String getUserIdentity(Session session, int accountId, String accessToken, String accessSecret) throws OXException;
 }

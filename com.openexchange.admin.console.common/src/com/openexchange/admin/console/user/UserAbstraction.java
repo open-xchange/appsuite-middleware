@@ -66,7 +66,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
@@ -77,14 +76,17 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import au.com.bytecode.opencsv.CSVReader;
 
 public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     private interface MethodDateClosure {
+
         public void callMethod(final Date value) throws ParseException;
     }
 
     protected interface MethodStringClosure {
+
         public void callMethod(final String value) throws ParseException, InvalidDataException;
     }
 
@@ -100,7 +102,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     }
 
-    protected class MethodAndNames {
+    protected static class MethodAndNames {
+
         private Method method = null;
 
         private String name = null;
@@ -144,7 +147,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     }
 
-    protected class OptionAndMethod {
+    protected static class OptionAndMethod {
+
         private Method method = null;
 
         private CLIOption option = null;
@@ -201,6 +205,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessTasks(9, OPT_ACCESS_TASKS, false),
         accessVcard(10, OPT_ACCESS_VCARD, false),
         accessWebdav(11, OPT_ACCESS_WEBDAV, false),
+        /** @deprecated */
         accessWebdavxml(12, OPT_ACCESS_WEBDAV_XML, false),
         accessWebmail(13, OPT_ACCESS_WEBMAIL, false),
         accessEditgroup(14, OPT_ACCESS_EDIT_GROUP, false),
@@ -212,6 +217,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessPublication(20, OPT_ACCESS_PUBLICATION, false),
         accessActiveSync(21, OPT_ACCESS_ACTIVE_SYNC, false),
         accessUsm(22, OPT_ACCESS_USM, false),
+        @Deprecated
         accessOlox20(23, OPT_ACCESS_OLOX20, false),
         accessDeniedPortal(24, OPT_ACCESS_DENIED_PORTAL, false),
         accessGlobalAddressBookDisabled(25, OPT_DISABLE_GAB, false);
@@ -232,7 +238,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         public String getString() {
             return string;
         }
-
 
         @Override
         public int getIndex() {
@@ -391,7 +396,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             return string;
         }
 
-
         @Override
         public int getIndex() {
             return index;
@@ -461,6 +465,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_TASKS = "access-tasks";
     protected static final String OPT_ACCESS_VCARD = "access-vcard";
     protected static final String OPT_ACCESS_WEBDAV = "access-webdav";
+    @Deprecated
     protected static final String OPT_ACCESS_WEBDAV_XML = "access-webdav-xml";
     protected static final String OPT_ACCESS_WEBMAIL = "access-webmail";
     protected static final String OPT_ACCESS_EDIT_GROUP = "access-edit-group";
@@ -472,6 +477,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_PUBLICATION = "access-publication";
     protected static final String OPT_ACCESS_ACTIVE_SYNC = "access-active-sync";
     protected static final String OPT_ACCESS_USM = "access-usm";
+    @Deprecated
     protected static final String OPT_ACCESS_OLOX20 = "access-olox20";
     protected static final String OPT_ACCESS_DENIED_PORTAL = "access-denied-portal";
     protected static final String OPT_DISABLE_GAB = "access-global-address-book-disabled";
@@ -647,6 +653,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessTasksOption = null;
     protected CLIOption accessVcardOption = null;
     protected CLIOption accessWebdavOption = null;
+    @Deprecated
     protected CLIOption accessWebdavXmlOption = null;
     protected CLIOption accessWebmailOption = null;
     protected CLIOption accessEditGroupOption = null;
@@ -658,11 +665,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessSubscription = null;
     protected CLIOption accessActiveSync = null;
     protected CLIOption accessUSM = null;
+    @Deprecated
     protected CLIOption accessOLOX20 = null;
     protected CLIOption accessDeniedPortal = null;
     protected CLIOption accessGAB = null;
     protected CLIOption accessPublicFolderEditable = null;
-
 
     // non-generic extended option
     protected CLIOption addGUISettingOption = null;
@@ -955,7 +962,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return parseBool(string);
     }
 
-    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true","1","yes","y","on")));
+    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes", "y", "on")));
 
     private static boolean parseBool(final String parameter) {
         return (null != parameter) && BOOL_VALS.contains(com.openexchange.java.Strings.toLowerCase(parameter.trim()));
@@ -981,6 +988,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected Context getContext(final String[] nextLine, final int[] idarray) throws InvalidDataException, ParseException {
         final Context context = new Context();
         setValue(nextLine, idarray, Constants.CONTEXTID, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) throws InvalidDataException {
                 try {
@@ -997,18 +1005,21 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected User getUser(final String[] nextLine, final int[] idarray) throws InvalidDataException, ParseException {
         final User user = new User();
         setValue(nextLine, idarray, Constants.USERNAME, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setName(value);
             }
         });
         setValue(nextLine, idarray, Constants.PASSWORD, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setPassword(value);
             }
         });
         setValue(nextLine, idarray, Constants.EMAIL, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setPrimaryEmail(value);
@@ -1016,30 +1027,35 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         });
         setValue(nextLine, idarray, Constants.DISPLAYNAME, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setDisplay_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.SURNAME, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setSur_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.GIVENNAME, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setGiven_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.LANGUAGE, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setLanguage(value);
             }
         });
         setValue(nextLine, idarray, Constants.timezone, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTimezone(value);
@@ -1070,438 +1086,511 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
         setValue(nextLine, idarray, Constants.department, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setDepartment(value);
             }
         });
         setValue(nextLine, idarray, Constants.company, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCompany(value);
             }
         });
         setValue(nextLine, idarray, Constants.EMAIL1, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setEmail1(value);
             }
         });
         setValue(nextLine, idarray, Constants.mailenabled, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setMailenabled(Boolean.valueOf(stringToBool(value)));
             }
         });
         setValue(nextLine, idarray, Constants.birthday, new MethodDateClosure() {
+
             @Override
             public void callMethod(final Date value) {
                 user.setBirthday(value);
             }
         });
         setValue(nextLine, idarray, Constants.anniversary, new MethodDateClosure() {
+
             @Override
             public void callMethod(final Date value) {
                 user.setAnniversary(value);
             }
         });
         setValue(nextLine, idarray, Constants.branches, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setBranches(value);
             }
         });
         setValue(nextLine, idarray, Constants.business_category, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setBusiness_category(value);
             }
         });
         setValue(nextLine, idarray, Constants.postal_code_business, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setPostal_code_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.state_business, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setState_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.street_business, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setStreet_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_callback, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_callback(value);
             }
         });
         setValue(nextLine, idarray, Constants.city_home, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCity_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.commercial_register, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCommercial_register(value);
             }
         });
         setValue(nextLine, idarray, Constants.country_home, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCountry_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.email2, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setEmail2(value);
             }
         });
         setValue(nextLine, idarray, Constants.email3, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setEmail3(value);
             }
         });
         setValue(nextLine, idarray, Constants.employeetype, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setEmployeeType(value);
             }
         });
         setValue(nextLine, idarray, Constants.fax_business, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setFax_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.fax_home, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setFax_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.fax_other, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setFax_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.imapserver, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setImapServer(value);
             }
         });
         setValue(nextLine, idarray, Constants.imaplogin, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setImapLogin(value);
             }
         });
         setValue(nextLine, idarray, Constants.smtpserver, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setSmtpServer(value);
             }
         });
         setValue(nextLine, idarray, Constants.instant_messenger1, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setInstant_messenger1(value);
             }
         });
         setValue(nextLine, idarray, Constants.instant_messenger2, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setInstant_messenger2(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_ip, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_ip(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_isdn, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_isdn(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_drafts_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setMail_folder_drafts_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_sent_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setMail_folder_sent_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_spam_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setMail_folder_spam_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_trash_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setMail_folder_trash_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_archive_full_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setMail_folder_archive_full_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.manager_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setManager_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.marital_status, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setMarital_status(value);
             }
         });
         setValue(nextLine, idarray, Constants.cellular_telephone1, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCellular_telephone1(value);
             }
         });
         setValue(nextLine, idarray, Constants.cellular_telephone2, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCellular_telephone2(value);
             }
         });
         setValue(nextLine, idarray, Constants.info, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setInfo(value);
             }
         });
         setValue(nextLine, idarray, Constants.nickname, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setNickname(value);
             }
         });
         setValue(nextLine, idarray, Constants.number_of_children, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setNumber_of_children(value);
             }
         });
         setValue(nextLine, idarray, Constants.note, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setNote(value);
             }
         });
         setValue(nextLine, idarray, Constants.number_of_employee, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setNumber_of_employee(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_pager, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_pager(value);
             }
         });
         setValue(nextLine, idarray, Constants.password_expired, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setPassword_expired(Boolean.valueOf(stringToBool(value)));
             }
         });
         setValue(nextLine, idarray, Constants.telephone_assistant, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_assistant(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_business1, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_business1(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_business2, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_business2(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_car, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_car(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_company, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_company(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_home1, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_home1(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_home2, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_home2(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_other, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.position, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setPosition(value);
             }
         });
         setValue(nextLine, idarray, Constants.postal_code_home, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setPostal_code_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.profession, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setProfession(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_radio, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_radio(value);
             }
         });
         setValue(nextLine, idarray, Constants.room_number, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setRoom_number(value);
             }
         });
         setValue(nextLine, idarray, Constants.sales_volume, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setSales_volume(value);
             }
         });
         setValue(nextLine, idarray, Constants.city_other, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCity_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.country_other, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCountry_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.middle_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setMiddle_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.postal_code_other, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setPostal_code_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.state_other, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setState_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.street_other, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setStreet_other(value);
             }
         });
         setValue(nextLine, idarray, Constants.spouse_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setSpouse_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.state_home, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setState_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.street_home, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setStreet_home(value);
             }
         });
         setValue(nextLine, idarray, Constants.suffix, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setSuffix(value);
             }
         });
         setValue(nextLine, idarray, Constants.tax_id, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTax_id(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_telex, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_telex(value);
             }
         });
         setValue(nextLine, idarray, Constants.title, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTitle(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_ttytdd, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_ttytdd(value);
             }
         });
         setValue(nextLine, idarray, Constants.UPLOADFILESIZELIMIT, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) throws InvalidDataException {
                 try {
@@ -1512,6 +1601,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         });
         setValue(nextLine, idarray, Constants.uploadfilesizelimitperfile, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) throws InvalidDataException {
                 try {
@@ -1522,192 +1612,224 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         });
         setValue(nextLine, idarray, Constants.url, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUrl(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield01, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield01(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield02, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield02(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield03, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield03(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield04, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield04(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield05, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield05(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield06, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield06(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield07, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield07(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield08, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield08(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield09, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield09(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield10, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield10(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield11, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield11(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield12, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield12(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield13, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield13(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield14, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield14(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield15, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield15(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield16, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield16(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield17, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield17(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield18, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield18(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield19, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield19(value);
             }
         });
         setValue(nextLine, idarray, Constants.userfield20, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setUserfield20(value);
             }
         });
         setValue(nextLine, idarray, Constants.city_business, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCity_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.country_business, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCountry_business(value);
             }
         });
         setValue(nextLine, idarray, Constants.assistant_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setAssistant_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.telephone_primary, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setTelephone_primary(value);
             }
         });
         setValue(nextLine, idarray, Constants.categories, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setCategories(value);
             }
         });
         setValue(nextLine, idarray, Constants.PASSWORDMECH, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setPasswordMech(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_confirmed_ham_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setMail_folder_confirmed_ham_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.mail_folder_confirmed_spam_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setMail_folder_confirmed_spam_name(value);
             }
         });
         setValue(nextLine, idarray, Constants.DEFAULTSENDERADDRESS, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setDefaultSenderAddress(value);
             }
         });
         setValue(nextLine, idarray, Constants.gui_spam_filter_capabilities_enabled, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setGui_spam_filter_enabled(Boolean.valueOf(stringToBool(value)));
             }
         });
         setValue(nextLine, idarray, Constants.primary_account_name, new MethodStringClosure() {
+
             @Override
             public void callMethod(final String value) {
                 user.setPrimaryAccountName(value);
@@ -1733,7 +1855,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 }
             }
         }
-
 
         return user;
     }
@@ -1776,105 +1897,105 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return value;
     }
 
-    protected final void setIdOption(final AdminParser admp){
-        this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededQuadState.eitheror);
+    protected final void setIdOption(final AdminParser admp) {
+        this.idOption = setShortLongOpt(admp, OPT_ID_SHORT, OPT_ID_LONG, "Id of the user", true, NeededQuadState.eitheror);
     }
 
     protected final void setUsernameOption(final AdminParser admp, final NeededQuadState needed) {
-        this.userNameOption = setShortLongOpt(admp,OPT_USERNAME_SHORT,OPT_USERNAME_LONG,"Username of the user", true, needed);
+        this.userNameOption = setShortLongOpt(admp, OPT_USERNAME_SHORT, OPT_USERNAME_LONG, "Username of the user", true, needed);
     }
 
     protected final void setDisplayNameOption(final AdminParser admp, final NeededQuadState needed) {
-        this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, needed);
+        this.displayNameOption = setShortLongOpt(admp, OPT_DISPLAYNAME_SHORT, OPT_DISPLAYNAME_LONG, "Display name of the user", true, needed);
     }
 
     protected final void setPasswordOption(final AdminParser admp, final NeededQuadState needed) {
-        this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, needed);
+        this.passwordOption = setShortLongOpt(admp, OPT_PASSWORD_SHORT, OPT_PASSWORD_LONG, "Password for the user", true, needed);
     }
 
     protected final void setGivenNameOption(final AdminParser admp, final NeededQuadState needed) {
-        this.givenNameOption =  setShortLongOpt(admp,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, needed);
+        this.givenNameOption = setShortLongOpt(admp, OPT_GIVENNAME_SHORT, OPT_GIVENNAME_LONG, "Given name for the user", true, needed);
     }
 
-    protected final void setSurNameOption(final AdminParser admp, final NeededQuadState needed){
-        this.surNameOption =  setShortLongOpt(admp,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, needed);
+    protected final void setSurNameOption(final AdminParser admp, final NeededQuadState needed) {
+        this.surNameOption = setShortLongOpt(admp, OPT_SURNAME_SHORT, OPT_SURNAME_LONG, "Sur name for the user", true, needed);
     }
 
-    protected final void setLanguageOption(final AdminParser admp){
-        this.languageOption =  setShortLongOpt(admp,OPT_LANGUAGE_SHORT,OPT_LANGUAGE_LONG,"Language for the user (de_DE,en_US)", true, NeededQuadState.notneeded);
+    protected final void setLanguageOption(final AdminParser admp) {
+        this.languageOption = setShortLongOpt(admp, OPT_LANGUAGE_SHORT, OPT_LANGUAGE_LONG, "Language for the user (de_DE,en_US)", true, NeededQuadState.notneeded);
     }
 
-    protected final void setTimezoneOption(final AdminParser admp){
-        this.timezoneOption =  setShortLongOpt(admp,OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, NeededQuadState.notneeded);
+    protected final void setTimezoneOption(final AdminParser admp) {
+        this.timezoneOption = setShortLongOpt(admp, OPT_TIMEZONE_SHORT, OPT_TIMEZONE_LONG, "Timezone of the user (Europe/Berlin)", true, NeededQuadState.notneeded);
     }
 
-    protected final void setPrimaryMailOption(final AdminParser admp, final NeededQuadState needed){
-        this.primaryMailOption =  setShortLongOpt(admp,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, needed);
+    protected final void setPrimaryMailOption(final AdminParser admp, final NeededQuadState needed) {
+        this.primaryMailOption = setShortLongOpt(admp, OPT_PRIMARY_EMAIL_SHORT, OPT_PRIMARY_EMAIL_LONG, "Primary mail address", true, needed);
     }
 
-    protected final void setDepartmentOption(final AdminParser admp){
-        this.departmentOption = setShortLongOpt(admp,OPT_DEPARTMENT_SHORT,OPT_DEPARTMENT_LONG,"Department of the user", true, NeededQuadState.notneeded);
+    protected final void setDepartmentOption(final AdminParser admp) {
+        this.departmentOption = setShortLongOpt(admp, OPT_DEPARTMENT_SHORT, OPT_DEPARTMENT_LONG, "Department of the user", true, NeededQuadState.notneeded);
     }
 
-    protected final void setCompanyOption(final AdminParser admp){
-        this.companyOption = setShortLongOpt(admp,OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, NeededQuadState.notneeded);
+    protected final void setCompanyOption(final AdminParser admp) {
+        this.companyOption = setShortLongOpt(admp, OPT_COMPANY_SHORT, OPT_COMPANY_LONG, "Company of the user", true, NeededQuadState.notneeded);
     }
 
     protected void setAddAccessRightCombinationNameOption(final AdminParser parser) {
-        this.accessRightsCombinationName = setLongOpt(parser,OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,false);
+        this.accessRightsCombinationName = setLongOpt(parser, OPT_ACCESSRIGHTS_COMBINATION_NAME, "Access combination name", true, false, false);
     }
 
     protected void setPersonal(final AdminParser parser) {
-        this.personal = setLongOpt(parser,OPT_PERSONAL,"The personal of user's mail address or special value \"NULL\" to drop the personal (if any)", true, false, false);
+        this.personal = setLongOpt(parser, OPT_PERSONAL, "The personal of user's mail address or special value \"NULL\" to drop the personal (if any)", true, false, false);
     }
 
     protected void setCapsToAdd(final AdminParser parser) {
-        this.capsToAdd = setLongOpt(parser,OPT_CAPABILITIES_TO_ADD,"The capabilities to add as a comma-separated string; e.g. \"portal, -autologin\"", true, false,false);
+        this.capsToAdd = setLongOpt(parser, OPT_CAPABILITIES_TO_ADD, "The capabilities to add as a comma-separated string; e.g. \"portal, -autologin\"", true, false, false);
     }
 
     protected void setCapsToRemove(final AdminParser parser) {
-        this.capsToRemove = setLongOpt(parser,OPT_CAPABILITIES_TO_REMOVE,"The capabilities to remove as a comma-separated string; e.g. \"cap2, cap2\"", true, false,false);
+        this.capsToRemove = setLongOpt(parser, OPT_CAPABILITIES_TO_REMOVE, "The capabilities to remove as a comma-separated string; e.g. \"cap2, cap2\"", true, false, false);
     }
 
     protected void setCapsToDrop(final AdminParser parser) {
-        this.capsToDrop = setLongOpt(parser,OPT_CAPABILITIES_TO_DROP,"The capabilities to drop (clean from storage) as a comma-separated string; e.g. \"cap2, cap2\"", true, false,false);
+        this.capsToDrop = setLongOpt(parser, OPT_CAPABILITIES_TO_DROP, "The capabilities to drop (clean from storage) as a comma-separated string; e.g. \"cap2, cap2\"", true, false, false);
     }
 
     protected void setQuotaModule(final AdminParser parser) {
-        this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The (comma-separated) list of identifiers for those modules to which to apply the quota value; currently supported values: [task, calendar, contact, infostore, attachment]", true, false,false);
+        this.quotaModule = setLongOpt(parser, OPT_QUOTA_MODULE, "The (comma-separated) list of identifiers for those modules to which to apply the quota value; currently supported values: [task, calendar, contact, infostore, attachment]", true, false, false);
     }
 
     protected void setQuotaValue(final AdminParser parser) {
-        this.quotaValue = setLongOpt(parser,OPT_QUOTA_VALUE,"The numeric quota value specifying the max. number of items allowed for context. Zero is unlimited. A value less than zero deletes the quota entry (and falls back to configured behavior)", true, false,false);
+        this.quotaValue = setLongOpt(parser, OPT_QUOTA_VALUE, "The numeric quota value specifying the max. number of items allowed for context. Zero is unlimited. A value less than zero deletes the quota entry (and falls back to configured behavior)", true, false, false);
     }
 
-    protected final void setAliasesOption(final AdminParser admp){
-        this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Comma separated list of the email aliases of the user", true, NeededQuadState.notneeded);
+    protected final void setAliasesOption(final AdminParser admp) {
+        this.aliasesOption = setShortLongOpt(admp, OPT_ALIASES_SHORT, OPT_ALIASES_LONG, "Comma separated list of the email aliases of the user", true, NeededQuadState.notneeded);
     }
 
-    protected final void setImapOnlyOption(final AdminParser admp){
-        this.imapOnlyOption =  setLongOpt(admp,OPT_IMAPONLY_LONG,"Do this operation only for the IMAP account of the user", false, false);
+    protected final void setImapOnlyOption(final AdminParser admp) {
+        this.imapOnlyOption = setLongOpt(admp, OPT_IMAPONLY_LONG, "Do this operation only for the IMAP account of the user", false, false);
     }
 
-    protected final void setDBOnlyOption(final AdminParser admp){
-        this.dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Do this operation only in Database system (parameters which apply to extensions will be ignored)", false, false);
+    protected final void setDBOnlyOption(final AdminParser admp) {
+        this.dbOnlyOption = setLongOpt(admp, OPT_DBONLY_LONG, "Do this operation only in Database system (parameters which apply to extensions will be ignored)", false, false);
     }
 
-    protected final void setAddGuiSettingOption(final AdminParser admp){
-        this.addGUISettingOption = setLongOpt(admp,OPT_ADD_GUI_SETTING_LONG,"Add a GUI setting (key=value)", true, false);
+    protected final void setAddGuiSettingOption(final AdminParser admp) {
+        this.addGUISettingOption = setLongOpt(admp, OPT_ADD_GUI_SETTING_LONG, "Add a GUI setting (key=value)", true, false);
     }
 
-    protected final void setRemoveGuiSettingOption(final AdminParser admp){
-        this.removeGUISettingOption = setLongOpt(admp,OPT_REMOVE_GUI_SETTING_LONG,"Remove a GUI setting", true, false);
+    protected final void setRemoveGuiSettingOption(final AdminParser admp) {
+        this.removeGUISettingOption = setLongOpt(admp, OPT_REMOVE_GUI_SETTING_LONG, "Remove a GUI setting", true, false);
     }
 
-    protected final void setConfigOption(final AdminParser adminParser){
+    protected final void setConfigOption(final AdminParser adminParser) {
         // The CLIOption instances for "config" and "remove-config" options are only for the purpose to mention these options for a "--help" invocation
         // Their values are set through AdminParser's dynamic options!
         this.configOption_NO_READ = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.twitter=false|true'", false, false);
     }
 
-    protected final void setRemoveConfigOption(final AdminParser adminParser){
+    protected final void setRemoveConfigOption(final AdminParser adminParser) {
         // The CLIOption instances for "config" and "remove-config" options are only for the purpose to mention these options for a "--help" invocation
         // Their values are set through AdminParser's dynamic options!
         this.removeConfigOption_NO_READ = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.twitter'", false, false);
@@ -1883,7 +2004,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     /**
      * @param theMethods
      * @param notallowedOrReplace Here we define the methods we don't want or want to replace. The name is the name of method without the prefix.
-     * get or is. If the value of the map contains a string with length > 0, then this string will be used as columnname
+     *            get or is. If the value of the map contains a string with length > 0, then this string will be used as columnname
      * @return
      */
     protected final ArrayList<MethodAndNames> getGetters(final Method[] theMethods, final Map<String, String> notallowedOrReplace) {
@@ -1909,7 +2030,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         // First we get all the getters of the user data class
         for (final Method method : theMethods) {
             // Getters shouldn't need parameters
-            if(method.getParameterTypes().length > 0) {
+            if (method.getParameterTypes().length > 0) {
                 continue;
             }
             final String methodname = method.getName();
@@ -2079,24 +2200,30 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected final void parseAndSetMandatoryOptionsWithoutUsernameInUser(final AdminParser parser, final User usr) {
         String optionValue2 = (String) parser.getOptionValue(this.displayNameOption);
         if (null != optionValue2) {
-            if ("".equals(optionValue2)) { optionValue2 = null; }
+            if ("".equals(optionValue2)) {
+                optionValue2 = null;
+            }
             usr.setDisplay_name(optionValue2);
         }
 
         String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
         if (null != optionValue3) {
-            if ("".equals(optionValue3)) { optionValue3 = null; }
+            if ("".equals(optionValue3)) {
+                optionValue3 = null;
+            }
             usr.setGiven_name(optionValue3);
         }
 
         String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
         if (null != optionValue4) {
-            if ("".equals(optionValue4)) { optionValue4 = null; }
+            if ("".equals(optionValue4)) {
+                optionValue4 = null;
+            }
             usr.setSur_name(optionValue4);
         }
 
         String optionValue5 = null;
-        if( NEW_USER_PASSWORD != null ) {
+        if (NEW_USER_PASSWORD != null) {
             optionValue5 = NEW_USER_PASSWORD;
         } else {
             optionValue5 = (String) parser.getOptionValue(this.passwordOption);
@@ -2130,27 +2257,27 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      * @param usr User object which will be changed
      */
     protected final void setModuleAccessOptionsinUserCreate(final AdminParser parser, final UserModuleAccess access) {
-        access.setCalendar(accessOption2BooleanCreate(parser,this.accessCalendarOption));
-        access.setContacts(accessOption2BooleanCreate(parser,this.accessContactOption));
-        access.setDelegateTask(accessOption2BooleanCreate(parser,this.accessDelegateTasksOption));
-        access.setEditPublicFolders(accessOption2BooleanCreate(parser,this.accessEditPublicFolderOption));
-        access.setIcal(accessOption2BooleanCreate(parser,this.accessIcalOption));
-        access.setInfostore(accessOption2BooleanCreate(parser,this.accessInfostoreOption));
-        access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser,this.accessReadCreateSharedFolderOption));
-        access.setSyncml(accessOption2BooleanCreate(parser,this.accessSyncmlOption));
-        access.setTasks(accessOption2BooleanCreate(parser,this.accessTasksOption));
-        access.setVcard(accessOption2BooleanCreate(parser,this.accessVcardOption));
-        access.setWebdav(accessOption2BooleanCreate(parser,this.accessWebdavOption));
-        access.setWebdavXml(accessOption2BooleanCreate(parser,this.accessWebdavXmlOption));
-        access.setWebmail(accessOption2BooleanCreate(parser,this.accessWebmailOption));
-        access.setEditGroup(accessOption2BooleanCreate(parser,this.accessEditGroupOption));
-        access.setEditResource(accessOption2BooleanCreate(parser,this.accessEditResourceOption));
-        access.setEditPassword(accessOption2BooleanCreate(parser,this.accessEditPasswordOption));
-        access.setCollectEmailAddresses(accessOption2BooleanCreate(parser,this.accessCollectEmailAddresses));
-        access.setMultipleMailAccounts(accessOption2BooleanCreate(parser,this.accessMultipleMailAccounts));
-        access.setSubscription(accessOption2BooleanCreate(parser,this.accessSubscription));
-        access.setPublication(accessOption2BooleanCreate(parser,this.accessPublication));
-        access.setActiveSync(accessOption2BooleanCreate(parser,this.accessActiveSync));
+        access.setCalendar(accessOption2BooleanCreate(parser, this.accessCalendarOption));
+        access.setContacts(accessOption2BooleanCreate(parser, this.accessContactOption));
+        access.setDelegateTask(accessOption2BooleanCreate(parser, this.accessDelegateTasksOption));
+        access.setEditPublicFolders(accessOption2BooleanCreate(parser, this.accessEditPublicFolderOption));
+        access.setIcal(accessOption2BooleanCreate(parser, this.accessIcalOption));
+        access.setInfostore(accessOption2BooleanCreate(parser, this.accessInfostoreOption));
+        access.setReadCreateSharedFolders(accessOption2BooleanCreate(parser, this.accessReadCreateSharedFolderOption));
+        access.setSyncml(accessOption2BooleanCreate(parser, this.accessSyncmlOption));
+        access.setTasks(accessOption2BooleanCreate(parser, this.accessTasksOption));
+        access.setVcard(accessOption2BooleanCreate(parser, this.accessVcardOption));
+        access.setWebdav(accessOption2BooleanCreate(parser, this.accessWebdavOption));
+        access.setWebdavXml(accessOption2BooleanCreate(parser, this.accessWebdavXmlOption));
+        access.setWebmail(accessOption2BooleanCreate(parser, this.accessWebmailOption));
+        access.setEditGroup(accessOption2BooleanCreate(parser, this.accessEditGroupOption));
+        access.setEditResource(accessOption2BooleanCreate(parser, this.accessEditResourceOption));
+        access.setEditPassword(accessOption2BooleanCreate(parser, this.accessEditPasswordOption));
+        access.setCollectEmailAddresses(accessOption2BooleanCreate(parser, this.accessCollectEmailAddresses));
+        access.setMultipleMailAccounts(accessOption2BooleanCreate(parser, this.accessMultipleMailAccounts));
+        access.setSubscription(accessOption2BooleanCreate(parser, this.accessSubscription));
+        access.setPublication(accessOption2BooleanCreate(parser, this.accessPublication));
+        access.setActiveSync(accessOption2BooleanCreate(parser, this.accessActiveSync));
         access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
         access.setOLOX20(accessOption2BooleanCreate(parser, this.accessOLOX20));
         access.setDeniedPortal(accessOption2BooleanCreate(parser, this.accessDeniedPortal));
@@ -2158,7 +2285,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setPublicFolderEditable(accessOption2BooleanCreate(parser, this.accessPublicFolderEditable));
     }
 
-    protected final boolean accessOption2BooleanCreate(final AdminParser parser,final CLIOption accessOption){
+    protected final boolean accessOption2BooleanCreate(final AdminParser parser, final CLIOption accessOption) {
         // option was set, check what text was sent
         final String optionValue = (String) parser.getOptionValue(accessOption);
         if (optionValue == null) {
@@ -2256,27 +2383,27 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             access.setPublication(accessOption2BooleanCreate(parser, this.accessPublication));
             changed = true;
         }
-        if((String) parser.getOptionValue(this.accessActiveSync) != null) {
+        if ((String) parser.getOptionValue(this.accessActiveSync) != null) {
             access.setActiveSync(accessOption2BooleanCreate(parser, this.accessActiveSync));
             changed = true;
         }
-        if((String) parser.getOptionValue(this.accessUSM) != null) {
+        if ((String) parser.getOptionValue(this.accessUSM) != null) {
             access.setUSM(accessOption2BooleanCreate(parser, this.accessUSM));
             changed = true;
         }
-        if((String) parser.getOptionValue(this.accessOLOX20) != null) {
+        if ((String) parser.getOptionValue(this.accessOLOX20) != null) {
             access.setOLOX20(accessOption2BooleanCreate(parser, this.accessOLOX20));
             changed = true;
         }
-        if((String) parser.getOptionValue(this.accessDeniedPortal) != null) {
+        if ((String) parser.getOptionValue(this.accessDeniedPortal) != null) {
             access.setDeniedPortal(accessOption2BooleanCreate(parser, this.accessDeniedPortal));
             changed = true;
         }
-        if((String) parser.getOptionValue(this.accessGAB) != null) {
+        if ((String) parser.getOptionValue(this.accessGAB) != null) {
             access.setGlobalAddressBookDisabled(accessOption2BooleanCreate(parser, this.accessGAB));
             changed = true;
         }
-        if((String) parser.getOptionValue(this.accessPublicFolderEditable) != null) {
+        if ((String) parser.getOptionValue(this.accessPublicFolderEditable) != null) {
             access.setPublicFolderEditable(accessOption2BooleanCreate(parser, this.accessPublicFolderEditable));
             changed = true;
         }
@@ -2330,36 +2457,36 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
     }
 
-
     protected final void setModuleAccessOptions(final AdminParser admp) {
         setModuleAccessOptions(admp, false, true);
     }
 
+    @SuppressWarnings("unused")
     protected void setModuleAccessOptions(final AdminParser admp, final boolean required, final boolean extended) {
         // TODO: The default values should be dynamically generated from the setting in the core
-        this.accessCalendarOption = setLongOpt(admp, OPT_ACCESS_CALENDAR,"on/off","Calendar module (Default is off)", true, false,true);
-        this.accessContactOption = setLongOpt(admp, OPT_ACCESS_CONTACTS,"on/off","Contact module access (Default is on)", true, false,true);
-        this.accessDelegateTasksOption = setLongOpt(admp, OPT_ACCESS_DELEGATE_TASKS,"on/off","Delegate tasks access (Default is off)", true, false,true);
-        this.accessEditPublicFolderOption = setLongOpt(admp, OPT_ACCESS_EDIT_PUBLIC_FOLDERS,"on/off","Edit public folder access (Default is off)", true, false,true);
-        this.accessIcalOption = setLongOpt(admp, OPT_ACCESS_ICAL,"on/off","Ical module access (Default is off)", true, false,true);
-        this.accessInfostoreOption = setLongOpt(admp, OPT_ACCESS_INFOSTORE,"on/off","Infostore module access (Default is off)", true, false,true);
-        this.accessReadCreateSharedFolderOption = setLongOpt(admp, OPT_ACCESS_READCREATE_SHARED_FOLDERS,"on/off","Read create shared folder access (Default is off)", true, false,true);
-        this.accessSyncmlOption = setLongOpt(admp, OPT_ACCESS_SYNCML,"on/off","Syncml access (Default is off)", true, false,true);
-        this.accessTasksOption = setLongOpt(admp, OPT_ACCESS_TASKS,"on/off","Tasks access (Default is off)", true, false,true);
-        this.accessVcardOption = setLongOpt(admp, OPT_ACCESS_VCARD,"on/off","Vcard access (Default is off)", true, false,true);
-        this.accessWebdavOption = setLongOpt(admp, OPT_ACCESS_WEBDAV,"on/off","Webdav access (Default is off)", true, false,true);
-        this.accessWebdavXmlOption = setLongOpt(admp, OPT_ACCESS_WEBDAV_XML,"on/off","Webdav-Xml access (Default is off)", true, false,true);
-        this.accessWebmailOption = setLongOpt(admp, OPT_ACCESS_WEBMAIL,"on/off","Webmail access (Default is on)", true, false,true);
-        this.accessEditGroupOption = setLongOpt(admp, OPT_ACCESS_EDIT_GROUP,"on/off","Edit Group access (Default is off)", true, false,true);
-        this.accessEditResourceOption = setLongOpt(admp, OPT_ACCESS_EDIT_RESOURCE,"on/off","Edit Resource access (Default is off)", true, false,true);
-        this.accessEditPasswordOption = setLongOpt(admp, OPT_ACCESS_EDIT_PASSWORD,"on/off","Edit Password access (Default is off)", true, false,true);
-        this.accessCollectEmailAddresses = setLongOpt(admp, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES,"on/off","Collect Email Addresses access (Default is off)", true, false,true);
-        this.accessMultipleMailAccounts = setLongOpt(admp, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS,"on/off","Multiple Mail Accounts access (Default is off)", true, false,true);
-        this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION,"on/off","Subscription access (Default is off)", true, false,true);
-        this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, false,true);
+        this.accessCalendarOption = setLongOpt(admp, OPT_ACCESS_CALENDAR, "on/off", "Calendar module (Default is off)", true, false, true);
+        this.accessContactOption = setLongOpt(admp, OPT_ACCESS_CONTACTS, "on/off", "Contact module access (Default is on)", true, false, true);
+        this.accessDelegateTasksOption = setLongOpt(admp, OPT_ACCESS_DELEGATE_TASKS, "on/off", "Delegate tasks access (Default is off)", true, false, true);
+        this.accessEditPublicFolderOption = setLongOpt(admp, OPT_ACCESS_EDIT_PUBLIC_FOLDERS, "on/off", "Edit public folder access (Default is off)", true, false, true);
+        this.accessIcalOption = setLongOpt(admp, OPT_ACCESS_ICAL, "on/off", "Ical module access (Default is off)", true, false, true);
+        this.accessInfostoreOption = setLongOpt(admp, OPT_ACCESS_INFOSTORE, "on/off", "Infostore module access (Default is off)", true, false, true);
+        this.accessReadCreateSharedFolderOption = setLongOpt(admp, OPT_ACCESS_READCREATE_SHARED_FOLDERS, "on/off", "Read create shared folder access (Default is off)", true, false, true);
+        this.accessSyncmlOption = setLongOpt(admp, OPT_ACCESS_SYNCML, "on/off", "Syncml access (Default is off)", true, false, true);
+        this.accessTasksOption = setLongOpt(admp, OPT_ACCESS_TASKS, "on/off", "Tasks access (Default is off)", true, false, true);
+        this.accessVcardOption = setLongOpt(admp, OPT_ACCESS_VCARD, "on/off", "Vcard access (Default is off)", true, false, true);
+        this.accessWebdavOption = setLongOpt(admp, OPT_ACCESS_WEBDAV, "on/off", "Webdav access (Default is off)", true, false, true);
+        this.accessWebdavXmlOption = setLongOpt(admp, OPT_ACCESS_WEBDAV_XML, "on/off", "Webdav-Xml access (Default is off) [DEPRECATED]", true, false, true);
+        this.accessWebmailOption = setLongOpt(admp, OPT_ACCESS_WEBMAIL, "on/off", "Webmail access (Default is on)", true, false, true);
+        this.accessEditGroupOption = setLongOpt(admp, OPT_ACCESS_EDIT_GROUP, "on/off", "Edit Group access (Default is off)", true, false, true);
+        this.accessEditResourceOption = setLongOpt(admp, OPT_ACCESS_EDIT_RESOURCE, "on/off", "Edit Resource access (Default is off)", true, false, true);
+        this.accessEditPasswordOption = setLongOpt(admp, OPT_ACCESS_EDIT_PASSWORD, "on/off", "Edit Password access (Default is off)", true, false, true);
+        this.accessCollectEmailAddresses = setLongOpt(admp, OPT_ACCESS_COLLECT_EMAIL_ADDRESSES, "on/off", "Collect Email Addresses access (Default is off)", true, false, true);
+        this.accessMultipleMailAccounts = setLongOpt(admp, OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS, "on/off", "Multiple Mail Accounts access (Default is off)", true, false, true);
+        this.accessSubscription = setLongOpt(admp, OPT_ACCESS_SUBSCRIPTION, "on/off", "Subscription access (Default is off)", true, false, true);
+        this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION, "on/off", "Publication access (Default is off)", true, false, true);
         this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, false, true);
         this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, false, true);
-        this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off)", true, false, true);
+        this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off) [DEPRECATED]", true, false, true);
         this.accessDeniedPortal = setLongOpt(admp, OPT_ACCESS_DENIED_PORTAL, "on/off", "Denies portal access (Default is off)", true, false, true);
         this.accessGAB = setLongOpt(admp, OPT_DISABLE_GAB, "on/off", "Disable Global Address Book access (Default is off)", true, false, true);
         this.accessPublicFolderEditable = setLongOpt(admp, OPT_ACCESS_PUBLIC_FOLDER_EDITABLE, "on/off", "Whether public folder(s) is/are editable (Default is off). Applies only to context admin user.", true, false, true);
@@ -2375,7 +2502,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         setGivenNameOption(parser, needed);
         setSurNameOption(parser, needed);
         // if password of new user is supplied in environment, do not insist on password option
-        if( NEW_USER_PASSWORD != null ) {
+        if (NEW_USER_PASSWORD != null) {
             setPasswordOption(parser, NeededQuadState.notneeded);
         } else {
             setPasswordOption(parser, needed);
@@ -2394,7 +2521,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected void setExtendedOptions(final AdminParser parser) {
         setAddGuiSettingOption(parser);
 
-        if( this.getClass().getName().endsWith("Change") ) {
+        if (this.getClass().getName().endsWith("Change")) {
             setRemoveGuiSettingOption(parser);
         }
 
@@ -2509,18 +2636,16 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         setModuleAccessOptions(parser);
     }
 
-    protected final void setPrimaryAccountOption(AdminParser parser){
+    protected final void setPrimaryAccountOption(AdminParser parser) {
         this.primaryAccountNameOption = setLongOpt(parser, OPT_PRIMARY_ACCOUNT_NAME, "The name of the primary mail account.", true, false, true);
     }
 
-    protected final void setGui_Spam_option(final AdminParser admp){
-        this.spamFilterOption =  setSettableBooleanLongOpt(admp, OPT_GUI_LONG, "true / false", "GUI_Spam_filter_capabilities_enabled", true, false, true);
+    protected final void setGui_Spam_option(final AdminParser admp) {
+        this.spamFilterOption = setSettableBooleanLongOpt(admp, OPT_GUI_LONG, "true / false", "GUI_Spam_filter_capabilities_enabled", true, false, true);
     }
 
     protected final void setCsvImport(final AdminParser admp) {
-        admp.setCsvImportOption(setLongOpt(admp, OPT_CSV_IMPORT, "CSV file","Full path to CSV file with user data to import. This option makes \r\n" +
-            "                                                   mandatory command line options obsolete, except credential options (if\r\n" +
-            "                                                   needed). But they have to be set in the CSV file.", true, false, false));
+        admp.setCsvImportOption(setLongOpt(admp, OPT_CSV_IMPORT, "CSV file", "Full path to CSV file with user data to import. This option makes \r\n" + "                                                   mandatory command line options obsolete, except credential options (if\r\n" + "                                                   needed). But they have to be set in the CSV file.", true, false, false));
     }
 
     /**
@@ -2536,28 +2661,28 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      */
     protected final void applyExtendedOptionsToUser(final AdminParser parser, final User usr) throws IllegalArgumentException, InvalidDataException {
 
-        String addguival    = (String)parser.getOptionValue(this.addGUISettingOption);
-        if( addguival != null ) {
+        String addguival = (String) parser.getOptionValue(this.addGUISettingOption);
+        if (addguival != null) {
             addguival = addguival.trim();
-            if( addguival.length() == 0 ) {
+            if (addguival.length() == 0) {
                 throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (empty value)");
             }
-            if( addguival.indexOf('=') < 0 ) {
+            if (addguival.indexOf('=') < 0) {
                 throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (not key = value)");
             }
             final int idx = addguival.indexOf('=');
             final String key = addguival.substring(0, idx).trim();
-            final String val = addguival.substring(idx+1, addguival.length()).trim();
-            if(key.length() == 0 || val.length() == 0) {
+            final String val = addguival.substring(idx + 1, addguival.length()).trim();
+            if (key.length() == 0 || val.length() == 0) {
                 throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (key or val empty)");
             }
             usr.addGuiPreferences(key, val);
         }
-        if( this.getClass().getName().endsWith("Change") ) {
-            String removeguival = (String)parser.getOptionValue(this.removeGUISettingOption);
-            if( removeguival != null ) {
+        if (this.getClass().getName().endsWith("Change")) {
+            String removeguival = (String) parser.getOptionValue(this.removeGUISettingOption);
+            if (removeguival != null) {
                 removeguival = removeguival.trim();
-                if( removeguival.length() == 0 ) {
+                if (removeguival.length() == 0) {
                     throw new InvalidDataException("Argument for " + OPT_REMOVE_GUI_SETTING_LONG + "is wrong (empty value)");
                 }
                 usr.removeGuiPreferences(removeguival);
@@ -2565,14 +2690,14 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
 
         {
-            Boolean spamfilter = (Boolean)parser.getOptionValue(this.spamFilterOption);
+            Boolean spamfilter = (Boolean) parser.getOptionValue(this.spamFilterOption);
             if (null != spamfilter) {
                 usr.setGui_spam_filter_enabled(spamfilter);
             }
         }
 
         {
-            String value = (String)parser.getOptionValue(email1Option);
+            String value = (String) parser.getOptionValue(email1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
                 if (value.length() == 0) {
@@ -2582,7 +2707,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
         {
-            final Boolean value = (Boolean)parser.getOptionValue(mailenabledOption);
+            final Boolean value = (Boolean) parser.getOptionValue(mailenabledOption);
             if (null != value) {
                 usr.setMailenabled(value);
             }
@@ -2607,8 +2732,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
             sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
             try {
-                final String date = (String)parser.getOptionValue(anniversaryOption);
-                if( date != null ) {
+                final String date = (String) parser.getOptionValue(anniversaryOption);
+                if (date != null) {
                     final Date value = sdf.parse(date);
                     if (null != value) {
                         usr.setAnniversary(value);
@@ -2619,781 +2744,961 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
         {
-            String value = (String)parser.getOptionValue(branchesOption);
+            String value = (String) parser.getOptionValue(branchesOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setBranches(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(business_categoryOption);
+            String value = (String) parser.getOptionValue(business_categoryOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setBusiness_category(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(postal_code_businessOption);
+            String value = (String) parser.getOptionValue(postal_code_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setPostal_code_business(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(state_businessOption);
+            String value = (String) parser.getOptionValue(state_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setState_business(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(street_businessOption);
+            String value = (String) parser.getOptionValue(street_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setStreet_business(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_callbackOption);
+            String value = (String) parser.getOptionValue(telephone_callbackOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_callback(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(city_homeOption);
+            String value = (String) parser.getOptionValue(city_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setCity_home(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(commercial_registerOption);
+            String value = (String) parser.getOptionValue(commercial_registerOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setCommercial_register(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(country_homeOption);
+            String value = (String) parser.getOptionValue(country_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setCountry_home(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(email2Option);
+            String value = (String) parser.getOptionValue(email2Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setEmail2(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(email3Option);
+            String value = (String) parser.getOptionValue(email3Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setEmail3(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(employeetypeOption);
+            String value = (String) parser.getOptionValue(employeetypeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setEmployeeType(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(fax_businessOption);
+            String value = (String) parser.getOptionValue(fax_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setFax_business(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(fax_homeOption);
+            String value = (String) parser.getOptionValue(fax_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setFax_home(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(fax_otherOption);
+            String value = (String) parser.getOptionValue(fax_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setFax_other(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(imapserverOption);
+            String value = (String) parser.getOptionValue(imapserverOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setImapServer(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(imaploginOption);
+            String value = (String) parser.getOptionValue(imaploginOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setImapLogin(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(smtpserverOption);
+            String value = (String) parser.getOptionValue(smtpserverOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setSmtpServer(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(instant_messenger1Option);
+            String value = (String) parser.getOptionValue(instant_messenger1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setInstant_messenger1(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(instant_messenger2Option);
+            String value = (String) parser.getOptionValue(instant_messenger2Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setInstant_messenger2(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_ipOption);
+            String value = (String) parser.getOptionValue(telephone_ipOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_ip(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_isdnOption);
+            String value = (String) parser.getOptionValue(telephone_isdnOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_isdn(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(mail_folder_drafts_nameOption);
+            String value = (String) parser.getOptionValue(mail_folder_drafts_nameOption);
             if (null != value) {
                 usr.setMail_folder_drafts_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(mail_folder_sent_nameOption);
+            String value = (String) parser.getOptionValue(mail_folder_sent_nameOption);
             if (null != value) {
                 usr.setMail_folder_sent_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(mail_folder_spam_nameOption);
+            String value = (String) parser.getOptionValue(mail_folder_spam_nameOption);
             if (null != value) {
                 usr.setMail_folder_spam_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(mail_folder_trash_nameOption);
+            String value = (String) parser.getOptionValue(mail_folder_trash_nameOption);
             if (null != value) {
                 usr.setMail_folder_trash_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(mail_folder_archive_full_nameOption);
+            String value = (String) parser.getOptionValue(mail_folder_archive_full_nameOption);
             if (null != value) {
                 usr.setMail_folder_archive_full_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(manager_nameOption);
+            String value = (String) parser.getOptionValue(manager_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setManager_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(marital_statusOption);
+            String value = (String) parser.getOptionValue(marital_statusOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setMarital_status(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(cellular_telephone1Option);
+            String value = (String) parser.getOptionValue(cellular_telephone1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setCellular_telephone1(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(cellular_telephone2Option);
+            String value = (String) parser.getOptionValue(cellular_telephone2Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setCellular_telephone2(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(infoOption);
+            String value = (String) parser.getOptionValue(infoOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setInfo(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(nicknameOption);
+            String value = (String) parser.getOptionValue(nicknameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setNickname(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(number_of_childrenOption);
+            String value = (String) parser.getOptionValue(number_of_childrenOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setNumber_of_children(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(noteOption);
+            String value = (String) parser.getOptionValue(noteOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setNote(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(number_of_employeeOption);
+            String value = (String) parser.getOptionValue(number_of_employeeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setNumber_of_employee(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_pagerOption);
+            String value = (String) parser.getOptionValue(telephone_pagerOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_pager(value);
             }
         }
         {
-            final Boolean value = (Boolean)parser.getOptionValue(password_expiredOption);
+            final Boolean value = (Boolean) parser.getOptionValue(password_expiredOption);
             if (null != value) {
                 usr.setPassword_expired(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_assistantOption);
+            String value = (String) parser.getOptionValue(telephone_assistantOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_assistant(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_business1Option);
+            String value = (String) parser.getOptionValue(telephone_business1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_business1(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_business2Option);
+            String value = (String) parser.getOptionValue(telephone_business2Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_business2(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_carOption);
+            String value = (String) parser.getOptionValue(telephone_carOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_car(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_companyOption);
+            String value = (String) parser.getOptionValue(telephone_companyOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_company(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_home1Option);
+            String value = (String) parser.getOptionValue(telephone_home1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_home1(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_home2Option);
+            String value = (String) parser.getOptionValue(telephone_home2Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_home2(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_otherOption);
+            String value = (String) parser.getOptionValue(telephone_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_other(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(postal_code_homeOption);
+            String value = (String) parser.getOptionValue(postal_code_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setPostal_code_home(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(professionOption);
+            String value = (String) parser.getOptionValue(professionOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setProfession(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_radioOption);
+            String value = (String) parser.getOptionValue(telephone_radioOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_radio(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(room_numberOption);
+            String value = (String) parser.getOptionValue(room_numberOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setRoom_number(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(sales_volumeOption);
+            String value = (String) parser.getOptionValue(sales_volumeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setSales_volume(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(city_otherOption);
+            String value = (String) parser.getOptionValue(city_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setCity_other(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(country_otherOption);
+            String value = (String) parser.getOptionValue(country_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setCountry_other(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(middle_nameOption);
+            String value = (String) parser.getOptionValue(middle_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setMiddle_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(postal_code_otherOption);
+            String value = (String) parser.getOptionValue(postal_code_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setPostal_code_other(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(state_otherOption);
+            String value = (String) parser.getOptionValue(state_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setState_other(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(street_otherOption);
+            String value = (String) parser.getOptionValue(street_otherOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setStreet_other(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(spouse_nameOption);
+            String value = (String) parser.getOptionValue(spouse_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setSpouse_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(state_homeOption);
+            String value = (String) parser.getOptionValue(state_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setState_home(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(street_homeOption);
+            String value = (String) parser.getOptionValue(street_homeOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setStreet_home(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(suffixOption);
+            String value = (String) parser.getOptionValue(suffixOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setSuffix(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(tax_idOption);
+            String value = (String) parser.getOptionValue(tax_idOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTax_id(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_telexOption);
+            String value = (String) parser.getOptionValue(telephone_telexOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_telex(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_ttytddOption);
+            String value = (String) parser.getOptionValue(telephone_ttytddOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_ttytdd(value);
             }
         }
         {
-            final Integer value = (Integer)parser.getOptionValue(uploadfilesizelimitOption);
+            final Integer value = (Integer) parser.getOptionValue(uploadfilesizelimitOption);
             if (null != value) {
                 usr.setUploadFileSizeLimit(value);
             }
         }
         {
-            final Integer value = (Integer)parser.getOptionValue(uploadfilesizelimitperfileOption);
+            final Integer value = (Integer) parser.getOptionValue(uploadfilesizelimitperfileOption);
             if (null != value) {
                 usr.setUploadFileSizeLimitPerFile(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(urlOption);
+            String value = (String) parser.getOptionValue(urlOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUrl(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield01Option);
+            String value = (String) parser.getOptionValue(userfield01Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield01(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield02Option);
+            String value = (String) parser.getOptionValue(userfield02Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield02(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield03Option);
+            String value = (String) parser.getOptionValue(userfield03Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield03(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield04Option);
+            String value = (String) parser.getOptionValue(userfield04Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield04(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield05Option);
+            String value = (String) parser.getOptionValue(userfield05Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield05(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield06Option);
+            String value = (String) parser.getOptionValue(userfield06Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield06(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield07Option);
+            String value = (String) parser.getOptionValue(userfield07Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield07(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield08Option);
+            String value = (String) parser.getOptionValue(userfield08Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield08(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield09Option);
+            String value = (String) parser.getOptionValue(userfield09Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield09(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield10Option);
+            String value = (String) parser.getOptionValue(userfield10Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield10(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield11Option);
+            String value = (String) parser.getOptionValue(userfield11Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield11(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield12Option);
+            String value = (String) parser.getOptionValue(userfield12Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield12(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield13Option);
+            String value = (String) parser.getOptionValue(userfield13Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield13(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield14Option);
+            String value = (String) parser.getOptionValue(userfield14Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield14(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield15Option);
+            String value = (String) parser.getOptionValue(userfield15Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield15(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield16Option);
+            String value = (String) parser.getOptionValue(userfield16Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield16(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield17Option);
+            String value = (String) parser.getOptionValue(userfield17Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield17(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield18Option);
+            String value = (String) parser.getOptionValue(userfield18Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield18(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield19Option);
+            String value = (String) parser.getOptionValue(userfield19Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield19(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(userfield20Option);
+            String value = (String) parser.getOptionValue(userfield20Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setUserfield20(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(city_businessOption);
+            String value = (String) parser.getOptionValue(city_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setCity_business(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(assistant_nameOption);
+            String value = (String) parser.getOptionValue(assistant_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setAssistant_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(telephone_primaryOption);
+            String value = (String) parser.getOptionValue(telephone_primaryOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTelephone_primary(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(categoriesOption);
+            String value = (String) parser.getOptionValue(categoriesOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setCategories(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(passwordmechOption);
+            String value = (String) parser.getOptionValue(passwordmechOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setPasswordMech(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(mail_folder_confirmed_ham_nameOption);
+            String value = (String) parser.getOptionValue(mail_folder_confirmed_ham_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setMail_folder_confirmed_ham_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(mail_folder_confirmed_spam_nameOption);
+            String value = (String) parser.getOptionValue(mail_folder_confirmed_spam_nameOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setMail_folder_confirmed_spam_name(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(defaultsenderaddressOption);
+            String value = (String) parser.getOptionValue(defaultsenderaddressOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setDefaultSenderAddress(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(country_businessOption);
+            String value = (String) parser.getOptionValue(country_businessOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setCountry_business(value);
             }
         }
         {
-            final Integer value = (Integer)parser.getOptionValue(foldertreeOption);
+            final Integer value = (Integer) parser.getOptionValue(foldertreeOption);
             if (null != value) {
                 usr.setFolderTree(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(titleOption);
+            String value = (String) parser.getOptionValue(titleOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setTitle(value);
             }
         }
         {
-            String value = (String)parser.getOptionValue(positionOption);
+            String value = (String) parser.getOptionValue(positionOption);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if ("".equals(value)) {
+                    value = null;
+                }
                 usr.setPosition(value);
             }
         }
         {
-            final String value = (String)parser.getOptionValue(primaryAccountNameOption);
+            final String value = (String) parser.getOptionValue(primaryAccountNameOption);
             if (null != value) {
                 usr.setPrimaryAccountName(value);
             }
@@ -3442,9 +3747,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected void applyDynamicOptionsToUser(final AdminParser parser, final User usr) {
         final Map<String, Map<String, String>> dynamicArguments = parser.getDynamicArguments();
-        for(final Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
+        for (final Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
             final String namespace = namespaced.getKey();
-            for(final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+            for (final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
                 final String name = pair.getKey();
                 final String value = pair.getValue();
 
@@ -3452,7 +3757,6 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
     }
-
 
     protected final OXUserInterface getUserInterface() throws NotBoundException, MalformedURLException, RemoteException {
         return (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
@@ -3507,7 +3811,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
 
         // First read the column names, we will use them later on like the parameter names for the clts
-        String [] nextLine = reader.readNext();
+        String[] nextLine = reader.readNext();
         if (null == nextLine) {
             throw new InvalidDataException("no columnnames found");
         }

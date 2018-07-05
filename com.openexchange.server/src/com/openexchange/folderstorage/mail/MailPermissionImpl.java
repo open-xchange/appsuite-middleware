@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.mail;
 
-import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.mail.permission.MailPermission;
 
 /**
@@ -57,23 +57,13 @@ import com.openexchange.mail.permission.MailPermission;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailPermissionImpl implements Permission {
+public final class MailPermissionImpl extends BasicPermission {
 
-    private int system;
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = -7950338717809340367L;
 
-    private int deletePermission;
-
-    private int folderPermission;
-
-    private int readPermission;
-
-    private int writePermission;
-
-    private boolean admin;
-
-    private int entity;
-
-    private boolean group;
 
     /**
      * Initializes an empty {@link MailPermissionImpl}.
@@ -83,7 +73,7 @@ public final class MailPermissionImpl implements Permission {
     }
 
     /**
-     * Initializes an empty {@link MailPermissionImpl}.
+     * Initializes a new {@link MailPermissionImpl}.
      */
     public MailPermissionImpl(final MailPermission mailPermission) {
         super();
@@ -94,181 +84,8 @@ public final class MailPermissionImpl implements Permission {
         group = mailPermission.isGroupPermission();
         readPermission = mailPermission.getReadPermission();
         system = mailPermission.getSystem();
+        type = mailPermission.getType();
+        legator = mailPermission.getPermissionLegator();
         writePermission = mailPermission.getWritePermission();
     }
-
-    @Override
-    public boolean isVisible() {
-        return isAdmin() || getFolderPermission() > NO_PERMISSIONS;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (admin ? 1231 : 1237);
-        result = prime * result + deletePermission;
-        result = prime * result + entity;
-        result = prime * result + folderPermission;
-        result = prime * result + (group ? 1231 : 1237);
-        result = prime * result + readPermission;
-        result = prime * result + system;
-        result = prime * result + writePermission;
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof Permission)) {
-            return false;
-        }
-        final Permission other = (Permission) obj;
-        if (admin != other.isAdmin()) {
-            return false;
-        }
-        if (deletePermission != other.getDeletePermission()) {
-            return false;
-        }
-        if (entity != other.getEntity()) {
-            return false;
-        }
-        if (folderPermission != other.getFolderPermission()) {
-            return false;
-        }
-        if (group != other.isGroup()) {
-            return false;
-        }
-        if (readPermission != other.getReadPermission()) {
-            return false;
-        }
-        if (system != other.getSystem()) {
-            return false;
-        }
-        if (writePermission != other.getWritePermission()) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int getDeletePermission() {
-        return deletePermission;
-    }
-
-    @Override
-    public int getEntity() {
-        return entity;
-    }
-
-    @Override
-    public int getFolderPermission() {
-        return folderPermission;
-    }
-
-    @Override
-    public int getReadPermission() {
-        return readPermission;
-    }
-
-    @Override
-    public int getSystem() {
-        return system;
-    }
-
-    @Override
-    public int getWritePermission() {
-        return writePermission;
-    }
-
-    @Override
-    public boolean isAdmin() {
-        return admin;
-    }
-
-    @Override
-    public boolean isGroup() {
-        return group;
-    }
-
-    @Override
-    public void setAdmin(final boolean admin) {
-        this.admin = admin;
-    }
-
-    @Override
-    public void setAllPermissions(final int folderPermission, final int readPermission, final int writePermission, final int deletePermission) {
-        this.folderPermission = folderPermission;
-        this.readPermission = readPermission;
-        this.deletePermission = deletePermission;
-        this.writePermission = writePermission;
-    }
-
-    @Override
-    public void setDeletePermission(final int permission) {
-        deletePermission = permission;
-    }
-
-    @Override
-    public void setEntity(final int entity) {
-        this.entity = entity;
-    }
-
-    @Override
-    public void setFolderPermission(final int permission) {
-        folderPermission = permission;
-    }
-
-    @Override
-    public void setGroup(final boolean group) {
-        this.group = group;
-    }
-
-    @Override
-    public void setMaxPermissions() {
-        folderPermission = Permission.MAX_PERMISSION;
-        readPermission = Permission.MAX_PERMISSION;
-        deletePermission = Permission.MAX_PERMISSION;
-        writePermission = Permission.MAX_PERMISSION;
-        admin = true;
-    }
-
-    @Override
-    public void setNoPermissions() {
-        folderPermission = Permission.NO_PERMISSIONS;
-        readPermission = Permission.NO_PERMISSIONS;
-        deletePermission = Permission.NO_PERMISSIONS;
-        writePermission = Permission.NO_PERMISSIONS;
-        admin = false;
-    }
-
-    @Override
-    public void setReadPermission(final int permission) {
-        readPermission = permission;
-    }
-
-    @Override
-    public void setSystem(final int system) {
-        this.system = system;
-    }
-
-    @Override
-    public void setWritePermission(final int permission) {
-        writePermission = permission;
-    }
-
-    @Override
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (final CloneNotSupportedException e) {
-            throw new InternalError(e.getMessage());
-        }
-    }
-
 }

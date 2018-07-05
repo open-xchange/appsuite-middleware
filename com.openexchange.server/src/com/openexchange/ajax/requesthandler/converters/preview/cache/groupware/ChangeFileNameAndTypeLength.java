@@ -49,12 +49,11 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -76,8 +75,7 @@ public class ChangeFileNameAndTypeLength extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        Connection con = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             startTransaction(con);
@@ -96,7 +94,6 @@ public class ChangeFileNameAndTypeLength extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
         }
     }
 

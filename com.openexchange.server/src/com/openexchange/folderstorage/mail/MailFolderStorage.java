@@ -51,9 +51,6 @@ package com.openexchange.folderstorage.mail;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TObjectProcedure;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,6 +91,8 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.TrashAwareFolderStorage;
+import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -120,6 +119,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
+import com.openexchange.mail.api.IMailFolderStorageTrashAware;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
@@ -147,13 +147,16 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 
 /**
  * {@link MailFolderStorage} - The mail folder storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailFolderStorage implements FolderStorageFolderModifier<MailFolderImpl> {
+public final class MailFolderStorage implements FolderStorageFolderModifier<MailFolderImpl>, TrashAwareFolderStorage {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFolderStorage.class);
 
@@ -383,7 +386,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     if (null == decorator) {
                         for (int j = 0; j < size; j++) {
                             final MailFolderInfo mfi = folderInfos.get(j);
-                            list.add(new MailId(prepareFullname(mailAccess.getAccountId(), mfi.getFullname()), j).setName(translate ? mfi.getDisplayName() : mfi.getName()));
+                            list.add(new MailId(prepareFullname(accountId, mfi.getFullname()), j).setName(translate ? mfi.getDisplayName() : mfi.getName()));
                         }
                     } else {
                         final List<MailAccount> accountList;
@@ -419,7 +422,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                         int start = list.size();
                         for (int j = 0; j < size; j++) {
                             final MailFolderInfo mfi = folderInfos.get(j);
-                            list.add(new MailId(prepareFullname(mailAccess.getAccountId(), mfi.getFullname()), start++).setName(translate ? mfi.getDisplayName() : mfi.getName()));
+                            list.add(new MailId(prepareFullname(accountId, mfi.getFullname()), start++).setName(translate ? mfi.getDisplayName() : mfi.getName()));
                         }
                         // Add root folders for external accounts
                         final int sz = accountList.size();
@@ -457,7 +460,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             if (null == decorator) {
                 for (int j = 0; j < size; j++) {
                     final MailFolder mf = folders.get(j);
-                    list.add(new MailId(prepareFullname(mailAccess.getAccountId(), mf.getFullname()), j).setName(mf.getName()));
+                    list.add(new MailId(prepareFullname(accountId, mf.getFullname()), j).setName(mf.getName()));
                 }
             } else {
                 final List<MailAccount> accountList;
@@ -493,7 +496,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 int start = list.size();
                 for (int j = 0; j < size; j++) {
                     final MailFolder mf = folders.get(j);
-                    list.add(new MailId(prepareFullname(mailAccess.getAccountId(), mf.getFullname()), start++).setName(mf.getName()));
+                    list.add(new MailId(prepareFullname(accountId, mf.getFullname()), start++).setName(mf.getName()));
                 }
                 // Add root folders for external accounts
                 final int sz = accountList.size();
@@ -787,6 +790,79 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 postEventRemote(accountId, trashFullname, false, folderPath, storageParameters);
             }
             postEvent4Subfolders(accountId, subfolders, true, storageParameters);
+        } finally {
+            closeMailAccess(mailAccess);
+        }
+    }
+
+    @Override
+    public TrashResult trashFolder(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
+        MailAccess<?, ?> mailAccess = null;
+        try {
+            final FullnameArgument arg = prepareMailFolderParam(folderId);
+            final int accountId = arg.getAccountId();
+            final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
+            if (cannotConnect(session)) {
+                throw FolderExceptionErrorMessage.MISSING_PARAMETER.create("session.password");
+            }
+            mailAccess = mailAccessFor(session, accountId);
+            final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
+            mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
+            final String fullName = arg.getFullname();
+
+            if (isDefaultFolder(fullName, mailAccess)) {
+                throw MailExceptionCode.NO_DEFAULT_FOLDER_DELETE.create(fullName);
+            }
+
+            /*
+             * Only backup if full name does not denote trash (sub)folder, and hardDelete property is not set in decorator
+             */
+            String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
+            String parentFullname = mailAccess.getFolderStorage().getFolder(fullName).getParentFullname();
+            boolean hardDelete;
+            if (fullName.startsWith(trashFullname)) {
+                hardDelete = true;
+            } else {
+                FolderServiceDecorator decorator = storageParameters.getDecorator();
+                hardDelete = null != decorator && (Boolean.TRUE.equals(decorator.getProperty("hardDelete")) || decorator.getBoolProperty("hardDelete"));
+            }
+            Map<String, Map<?, ?>> subfolders = subfolders(fullName, mailAccess);
+            IMailFolderStorage mailFolderStorage = mailAccess.getFolderStorage();
+
+            TrashResult result = null;
+            if (hardDelete) {
+                mailFolderStorage.deleteFolder(fullName, true);
+                result = new TrashResult(null, fullName);
+            } else {
+                if (mailFolderStorage instanceof IMailFolderStorageTrashAware) {
+                    String newFullName = ((IMailFolderStorageTrashAware) mailFolderStorage).trashFolder(fullName);
+                    newFullName = MailFolderUtility.prepareFullname(arg.getAccountId(), newFullName);
+                    result = new TrashResult(newFullName, folderId);
+                } else {
+                    throw FolderExceptionErrorMessage.UNSUPPORTED_OPERATION.create();
+                }
+            }
+            addWarnings(mailAccess, storageParameters);
+            String[] folderPath = null == parentFullname ? new String[] { MailFolderUtility.prepareFullname(accountId, fullName) } : new String[] { MailFolderUtility.prepareFullname(accountId, fullName), MailFolderUtility.prepareFullname(accountId, parentFullname) };
+            postEventRemote(accountId, fullName, false, true, false, folderPath, storageParameters);
+            try {
+                /*
+                 * Update message cache
+                 */
+                MailMessageCache.getInstance().removeFolderMessages(accountId, fullName, storageParameters.getUserId(), storageParameters.getContextId());
+            } catch (final OXException e) {
+                LOG.error("", e);
+            }
+            if (!hardDelete) {
+                // New folder in trash folder
+                folderPath = new String[] { MailFolderUtility.prepareFullname(accountId, trashFullname) };
+                postEventRemote(accountId, trashFullname, false, folderPath, storageParameters);
+            }
+            postEvent4Subfolders(accountId, subfolders, true, storageParameters);
+            return result;
         } finally {
             closeMailAccess(mailAccess);
         }
@@ -2219,7 +2295,7 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
 
     private boolean cannotConnect(Session session) throws OXException {
         PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
-        if (passwordSource == PasswordSource.SESSION && session.getPassword() == null) {
+        if (passwordSource == PasswordSource.SESSION && session.getPassword() == null && !Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
             return true;
         }
 
@@ -2261,16 +2337,6 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------- //
-
-    private static void postEvent(final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean async, final StorageParameters params) {
-        if (MailAccount.DEFAULT_ID != accountId) {
-            /*
-             * TODO: No event for non-primary account?
-             */
-            return;
-        }
-        EventPool.getInstance().put(new PooledEvent(params.getContextId(), params.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, false, params.getSession()).setAsync(async));
-    }
 
     private static void postEventRemote(int accountId, String fullname, boolean contentRelated, boolean immediateDelivery, boolean async, String[] folderPath, StorageParameters params) {
         if (MailAccount.DEFAULT_ID != accountId) {

@@ -250,7 +250,7 @@ public class HostList {
                 }
             }
         }
-        return this.matchingHostNames.contains(Strings.asciiLowerCase(toCheck));
+        return this.matchingHostNames.contains(toCheck);
     }
 
     @Override

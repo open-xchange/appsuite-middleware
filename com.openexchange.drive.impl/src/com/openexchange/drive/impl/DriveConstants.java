@@ -174,17 +174,4 @@ public class DriveConstants {
         "^(?:/|(?:/[^<>:/?*\"\\\\|\\x00-\\x1F]*[^<>:/?*\"\\\\|\\x00-\\x1F\\ .])+)$",
         Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
-//    /**
-//     * Pattern to match filenames that are excluded from synchronization, i.e. system files like "Thumbs.db" or ".DS_Store".
-//     */
-//    public static final Pattern EXCLUDED_FILENAMES_PATTERN;
-//
-//    static {
-//        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
-//        String excludedFilesPattern = "thumbs\\.db|desktop\\.ini|\\.ds_store|icon\\\r";
-//        if (null != configService) {
-//            excludedFilesPattern = configService.getProperty("com.openexchange.drive.excludedFilesPattern", excludedFilesPattern);
-//        }
-//        EXCLUDED_FILENAMES_PATTERN = Pattern.compile(excludedFilesPattern, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-//    }
 }

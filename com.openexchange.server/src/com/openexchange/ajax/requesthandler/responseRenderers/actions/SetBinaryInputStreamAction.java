@@ -53,8 +53,8 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.ajax.fileholder.InputStreamReadable;
 import com.openexchange.ajax.fileholder.IFileHolder.RandomAccess;
+import com.openexchange.ajax.fileholder.InputStreamReadable;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 
 /**

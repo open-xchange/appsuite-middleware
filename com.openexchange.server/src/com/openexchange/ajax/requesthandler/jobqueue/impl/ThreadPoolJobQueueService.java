@@ -167,7 +167,7 @@ public class ThreadPoolJobQueueService implements JobQueueService {
         int defaultMaxRequestAgeMillis = 10000;
         maxRequestAgeMillis = configService.getIntProperty("com.openexchange.jobqueue.waitMillis", defaultMaxRequestAgeMillis);
 
-        final RemovalListener<UUID, FutureJobInfo> listener = new RemovalListener<UUID, FutureJobInfo>() {
+        RemovalListener<UUID, FutureJobInfo> listener = new RemovalListener<UUID, FutureJobInfo>() {
 
             @Override
             public void onRemoval(RemovalNotification<UUID, FutureJobInfo> notification) {
@@ -228,7 +228,7 @@ public class ThreadPoolJobQueueService implements JobQueueService {
         JobKey key = job.getOptionalKey();
         if (null == key) {
             // No key given
-            Future<AJAXRequestResult> f = threadPool.submit(jobTaskFor(job), CallerRunsBehavior.<AJAXRequestResult> getInstance());
+            Future<AJAXRequestResult> f = threadPool.submit(jobTaskFor(job), CallerRunsBehavior.getInstance());
             FutureJobInfo jobInfo = new FutureJobInfo(id, job, f, jobsById);
 
             jobsById.put(id, jobInfo);
@@ -238,7 +238,7 @@ public class ThreadPoolJobQueueService implements JobQueueService {
         Cache<String, UUID> jobsByKey = allKeys.getUnchecked(userAndContext);
         jobsByKey.put(key.getIdentifier(), id);
 
-        Future<AJAXRequestResult> f = threadPool.submit(jobTaskFor(job, key, jobsByKey), CallerRunsBehavior.<AJAXRequestResult> getInstance());
+        Future<AJAXRequestResult> f = threadPool.submit(jobTaskFor(job, key, jobsByKey), CallerRunsBehavior.getInstance());
         FutureJobInfo jobInfo = new FutureJobInfo(id, job, f, jobsById);
 
         jobsById.put(id, jobInfo);
@@ -254,7 +254,7 @@ public class ThreadPoolJobQueueService implements JobQueueService {
 
         // Sumbit for execution
         JobTask jobTask = jobTaskFor(job);
-        Future<AJAXRequestResult> f = threadPool.submit(jobTask, CallerRunsBehavior.<AJAXRequestResult> getInstance());
+        Future<AJAXRequestResult> f = threadPool.submit(jobTask, CallerRunsBehavior.getInstance());
         try {
             AJAXRequestResult result = f.get(timeout, unit);
             return new ExecutedJobInfo(result, job);

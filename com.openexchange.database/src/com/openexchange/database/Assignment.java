@@ -54,16 +54,44 @@ package com.openexchange.database;
  * when a certain context is processed on a certain server.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public interface Assignment {
 
+    /**
+     * Gets the identifier of the context associated with this assignment
+     *
+     * @return The context identifier
+     */
     int getContextId();
 
+    /**
+     * Gets the identifier of the registered server associated with this assignment
+     *
+     * @return The server identifier
+     */
     int getServerId();
 
+    /**
+     * Gets the identifier of the read-only database pool associated with this assignment.
+     * <p>
+     * Simply returns the identifier of the read-write database pool if there is no read-only one.
+     *
+     * @return The read-only database pool identifier
+     */
     int getReadPoolId();
 
+    /**
+     * Gets the identifier of the (read-write) database pool associated with this assignment.
+     *
+     * @return The (read-write) database pool identifier
+     */
     int getWritePoolId();
 
+    /**
+     * Gets the name of the schema (residing in database pool), in which the context is located
+     *
+     * @return The schema name
+     */
     String getSchema();
 }

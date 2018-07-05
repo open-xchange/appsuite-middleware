@@ -51,9 +51,6 @@ package com.openexchange.groupware.userconfiguration;
 
 import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,6 +58,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.java.Strings;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
 
 /**
  * Enumeration of known permissions.
@@ -72,6 +72,8 @@ public enum Permission {
     CONTACTS(UserConfiguration.CONTACTS, "Contacts"),
     TASKS(UserConfiguration.TASKS, "Tasks"),
     INFOSTORE(UserConfiguration.INFOSTORE, "Infostore"),
+    /** @deprecated */
+    @Deprecated
     WEBDAV_XML(UserConfiguration.WEBDAV_XML, "WebDAVXML"),
     WEBDAV(UserConfiguration.WEBDAV, "WebDAV"),
     ICAL(UserConfiguration.ICAL, "ICal"),
@@ -89,6 +91,8 @@ public enum Permission {
     PUBLICATION(UserConfiguration.PUBLICATION, "Publication"),
     ACTIVE_SYNC(UserConfiguration.ACTIVE_SYNC, "ActiveSync"),
     USM(UserConfiguration.USM, "USM"),
+    /** @deprecated */
+    @Deprecated
     OLOX20(UserConfiguration.OLOX20, "OLOX20"),
     DENIED_PORTAL(UserConfiguration.DENIED_PORTAL, "DeniedPortal"),
     CALDAV(UserConfiguration.CALDAV, "CalDAV"),
@@ -232,7 +236,7 @@ public enum Permission {
             return null;
         }
         final String upperCase = toUpperCase(name);
-        for (Permission p: values()) {
+        for (Permission p : values()) {
             if (p.name().equals(upperCase)) {
                 return p;
             }

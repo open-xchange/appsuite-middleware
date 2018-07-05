@@ -49,13 +49,21 @@
 
 package com.openexchange.groupware.reminder.json.actions;
 
-import java.util.TimeZone;
+import java.util.Date;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarServiceUtilities;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -66,7 +74,6 @@ import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 
-
 /**
  * {@link DeleteAction}
  *
@@ -75,11 +82,11 @@ import com.openexchange.server.services.ServerServiceRegistry;
 @OAuthAction(ReminderActionFactory.OAUTH_WRITE_SCOPE)
 public final class DeleteAction extends AbstractReminderAction {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteAction.class);
 
     /**
      * Initializes a new {@link DeleteAction}.
+     *
      * @param services
      */
     public DeleteAction(final ServiceLookup services) {
@@ -90,53 +97,47 @@ public final class DeleteAction extends AbstractReminderAction {
     protected AJAXRequestResult perform(final ReminderAJAXRequest req) throws OXException, JSONException {
         final JSONArray response = new JSONArray();
         if (req.getData() instanceof JSONObject) {
-            final JSONObject jData = req.getData();
-            final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
-            final TimeZone tz = req.getTimeZone();
-            try {
-                final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
-                final ReminderObject reminder = reminderService.loadReminder(req.getSession(), id);
 
-                if (reminder.isRecurrenceAppointment()) {
-                    final ReminderObject nextReminder = getNextRecurringReminder(req.getSession(), tz, reminder);
-                    if (nextReminder != null) {
-                        reminderService.updateReminder(req.getSession(), nextReminder);
-                        response.put(nextReminder.getObjectId());
-                    } else {
-                        reminderService.deleteReminder(req.getSession(), reminder);
+            final JSONObject jData = req.getData();
+            final long longId = DataParser.checkLong(jData, AJAXServlet.PARAMETER_ID);
+
+            if (longId > Integer.MAX_VALUE) {
+                try {
+                    // reminder is an event reminder
+                    int alarmId = (int) (longId >> 32);
+                    int eventIdInt = (int) longId;
+                    CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
+                    CalendarSession calendarSession = calendarService.init(req.getSession());
+                    CalendarServiceUtilities calendarServiceUtilities = calendarService.getUtilities();
+                    Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt));
+                    List<Alarm> alarms = event.getAlarms();
+                    for (Alarm alarm : alarms) {
+                        if (alarm.getId() == alarmId) {
+                            alarm.setAcknowledged(new Date());
+                        }
                     }
-                } else {
-                    reminderService.deleteReminder(req.getSession(), reminder);
+                    EventID eventId = null;
+                    if (event.containsRecurrenceId()) {
+                        eventId = new EventID(event.getFolderId(), event.getId(), event.getRecurrenceId());
+                    } else {
+                        eventId = new EventID(event.getFolderId(), event.getId());
+                    }
+                    CalendarResult updateAlarms = calendarService.updateAlarms(calendarSession, eventId, alarms, event.getTimestamp());
+                    if (updateAlarms.getUpdates() != null && updateAlarms.getUpdates().size() == 1) {
+                        response.put(longId);
+                    }
+                } catch (OXException oxe) {
+                    LOG.debug("", oxe);
+                    // TODO Eventually wrap the OXException into a reminder exception ?
+                    throw oxe;
                 }
-            } catch (final OXException oxe) {
-                LOG.debug("", oxe);
-                if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
-                    response.put(id);
-                    return new AJAXRequestResult(response, "json");
-                }
-                throw oxe;
-            }
-        } else {
-            JSONArray jsonArray = req.getData();
-            for (int i = 0; i < jsonArray.length(); i++) {
-                final JSONObject jData = jsonArray.getJSONObject(i);
-                final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
-                final TimeZone tz = req.getTimeZone();
+            } else {
+
+                final int id = (int) longId;
                 try {
                     final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
                     final ReminderObject reminder = reminderService.loadReminder(req.getSession(), id);
-
-                    if (reminder.isRecurrenceAppointment()) {
-                        final ReminderObject nextReminder = getNextRecurringReminder(req.getSession(), tz, reminder);
-                        if (nextReminder != null) {
-                            reminderService.updateReminder(req.getSession(), nextReminder);
-                            response.put(nextReminder.getObjectId());
-                        } else {
-                            reminderService.deleteReminder(req.getSession(), reminder);
-                        }
-                    } else {
-                        reminderService.deleteReminder(req.getSession(), reminder);
-                    }
+                    reminderService.deleteReminder(req.getSession(), reminder);
                 } catch (final OXException oxe) {
                     LOG.debug("", oxe);
                     if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
@@ -144,6 +145,58 @@ public final class DeleteAction extends AbstractReminderAction {
                         return new AJAXRequestResult(response, "json");
                     }
                     throw oxe;
+                }
+            }
+        } else {
+            JSONArray jsonArray = req.getData();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                final JSONObject jData = jsonArray.getJSONObject(i);
+                final long longId = DataParser.checkLong(jData, AJAXServlet.PARAMETER_ID);
+
+                if (longId > Integer.MAX_VALUE) {
+                    try {
+                        // reminder is an event reminder
+                        int eventIdInt = (int) (longId >> 32);
+                        int alarmId = (int) longId;
+                        CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
+                        CalendarSession calendarSession = calendarService.init(req.getSession());
+                        CalendarServiceUtilities calendarServiceUtilities = calendarService.getUtilities();
+                        Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt));
+                        List<Alarm> alarms = event.getAlarms();
+                        for (Alarm alarm : alarms) {
+                            if (alarm.getId() == alarmId) {
+                                alarm.setAcknowledged(new Date());
+                            }
+                        }
+                        EventID eventId = null;
+                        if (event.containsRecurrenceId()) {
+                            eventId = new EventID(event.getFolderId(), event.getId(), event.getRecurrenceId());
+                        } else {
+                            eventId = new EventID(event.getFolderId(), event.getId());
+                        }
+                        CalendarResult updateAlarms = calendarService.updateAlarms(calendarSession, eventId, alarms, event.getTimestamp());
+                        if (updateAlarms.getUpdates() != null && updateAlarms.getUpdates().size() == 1) {
+                            response.put(longId);
+                        }
+                    } catch (OXException oxe) {
+                        LOG.debug("", oxe);
+                        // TODO Eventually wrap the OXException into a reminder exception ?
+                        throw oxe;
+                    }
+                } else {
+                    final int id = (int) longId;
+                    try {
+                        final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
+                        final ReminderObject reminder = reminderService.loadReminder(req.getSession(), id);
+                        reminderService.deleteReminder(req.getSession(), reminder);
+                    } catch (final OXException oxe) {
+                        LOG.debug("", oxe);
+                        if (ReminderExceptionCode.NOT_FOUND.equals(oxe)) {
+                            response.put(id);
+                            return new AJAXRequestResult(response, "json");
+                        }
+                        throw oxe;
+                    }
                 }
             }
         }

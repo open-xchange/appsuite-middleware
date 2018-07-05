@@ -49,27 +49,18 @@
 
 package com.openexchange.groupware.reminder.internal;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * Retrieves the arising reminder for a user.
@@ -78,7 +69,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class GetArisingReminder {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetArisingReminder.class);
     private static final ReminderStorage STORAGE = ReminderStorage.getInstance();
 
     private final Session session;
@@ -100,61 +90,14 @@ public class GetArisingReminder {
         return new ArrayIterator<ReminderObject>(reminders);
     }
 
-    public ReminderObject[] removeAppointments(final ReminderObject[] reminders) throws OXException {
-        AppointmentSqlFactoryService factoryService = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class, true);
-        final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
+    public ReminderObject[] removeAppointments(final ReminderObject[] reminders) {
         final List<ReminderObject> retval = new ArrayList<ReminderObject>(reminders.length);
-        final Date now = new Date();
         for (final ReminderObject reminder : reminders) {
-            if (Types.APPOINTMENT == reminder.getModule()) {
-
-                // Check folder existence
-                final boolean folderExists = new OXFolderAccess(ctx).exists(reminder.getFolder());
-                if (folderExists) {
-                    final CalendarDataObject appointment;
-                    try {
-                        appointment = appointmentSql.getObjectById(reminder.getTargetId(), reminder.getFolder());
-                    } catch (final OXException e) {
-                        if (e.isGeneric(Generic.NOT_FOUND)) {
-                            STORAGE.deleteReminder(ctx, reminder);
-                            continue;
-                        }
-                        LOG.debug("", e);
-                        continue;
-                    } catch (final SQLException e) {
-                        final OXException re = ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                        LOG.debug("", re);
-                        continue;
-                    }
-                    if (appointment.getRecurrenceType() != CalendarObject.NO_RECURRENCE && (!appointment.containsUntil() || appointment.getUntil().after(now))) {
-                        retval.add(reminder);
-                    } else if (appointment.getEndDate().after(now)) {
-                        retval.add(reminder);
-                    } else {
-                        deleteReminder(reminder);
-                    }
-                } else {
-                    STORAGE.deleteReminder(ctx, reminder);
-                    continue;
-                }
-            } else {
+            if (Types.APPOINTMENT != reminder.getModule() || Types.TASK != reminder.getModule()) {
                 retval.add(reminder);
             }
         }
         return retval.toArray(new ReminderObject[retval.size()]);
-    }
-
-    private void deleteReminder(final ReminderObject reminder) throws OXException {
-        if (null != reminder) {
-            try {
-                new DeleteReminder(ctx, reminder).perform();
-            } catch (final OXException e) {
-                if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                // Ignore
-            }
-        }
     }
 
 }

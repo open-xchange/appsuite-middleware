@@ -1,8 +1,5 @@
 package liquibase.integration.commandline;
 
-import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -10,6 +7,8 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtils;
 
 /**
  * Implementation of liquibase.FileOpener for the command line app.

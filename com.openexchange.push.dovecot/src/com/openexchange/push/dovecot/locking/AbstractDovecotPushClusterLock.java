@@ -49,10 +49,7 @@
 
 package com.openexchange.push.dovecot.locking;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.concurrent.Future;
-import com.hazelcast.core.Member;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -61,8 +58,6 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractDovecotPushClusterLock implements DovecotPushClusterLock {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractDovecotPushClusterLock.class);
 
     /** The service look-up */
     protected final ServiceLookup services;
@@ -110,21 +105,6 @@ public abstract class AbstractDovecotPushClusterLock implements DovecotPushClust
     protected long parseMillisFromValue(String value) {
         int pos = value.indexOf('?');
         return Long.parseLong(pos > 0 ? value.substring(0, pos) : value);
-    }
-
-    /**
-     * Gets the other cluster members
-     *
-     * @param allMembers All known members
-     * @param localMember The local member
-     * @return Other cluster members
-     */
-    public static Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
-        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
-        if (!otherMembers.remove(localMember)) {
-            LOG.warn("Couldn't remove local member from cluster members.");
-        }
-        return otherMembers;
     }
 
     /**

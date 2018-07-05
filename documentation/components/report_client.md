@@ -27,187 +27,8 @@ You will find further information at the Open-Xchange Frequent Asked Questions (
 
 # Installation on OX App Suite
 
-## Debian GNU/Linux 7.0
+The `open-xchange-report-client` package, which is part of the `backend` software repository, must be installed.
 
-Add the following entry to <code>/etc/apt/sources.list.d/open-xchange.list</code> if not already present:
-
-
- 	deb https://software.open-xchange.com/products/appsuite/stable/backend/DebianWheezy/ /
-
-	# if you have a valid maintenance subscription, please uncomment the 
-	# following and add the ldb account data to the url so that the most recent
-	# packages get installed
-	# deb https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/stable/backend/updates/DebianWheezy/ /
-
-and run
-
-	$ apt-get update 
-	$ apt-get install open-xchange-report-client
-
-## Debian GNU/Linux 8.0
-
-Add the following entry to <code>/etc/apt/sources.list.d/open-xchange.list</code> if not already present:
-
- 	deb https://software.open-xchange.com/products/appsuite/stable/backend/DebianJessie/ /
- 	
-	# if you have a valid maintenance subscription, please uncomment the 
-	# following and add the ldb account data to the url so that the most recent
-	# packages get installed
-	# deb https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/stable/backend/updates/DebianJessie/ /
-	
-and run
-
-	$ apt-get update
-	$ apt-get install open-xchange-report-client
-
-## SUSE Linux Enterprise Server 11
-
-Add the package repository using <code>zypper</code> if not already present:
-
-	$ zypper ar https://software.open-xchange.com/products/appsuite/stable/backend/SLES11 ox
-
-If you have a valid maintenance subscription, please run the following command and add the ldb account data to the url so that
-the most recent packages get installed:
-
-	$ zypper ar https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/stable/backend/updates/SLES11 ox-updates
-	
-and run
-
-	$ zypper ref
-	$ zypper in open-xchange-report-client
-
-## SUSE Linux Enterprise Server 12
-
-Add the package repository using <code>zypper</code> if not already present:
-
-	$ zypper ar https://software.open-xchange.com/products/appsuite/stable/backend/SLE_12 ox
-	
-If you have a valid maintenance subscription, please run the following command and add the ldb account data to the url so that the most recent packages get installed:
- 
-	$ zypper ar https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/appsuite/stable/backend/updates/SLES11 ox-updates
-
-and run
-
-	$ zypper ref
-	$ zypper in open-xchange-report-client
-
-## RedHat Enterprise Linux 6
-
-Start a console and create a software repository file if not already present:
-
-	$ vim /etc/yum.repos.d/ox.repo
-
-	[ox]
-	name=Open-Xchange
-	baseurl=https://software.open-xchange.com/products/appsuite/stable/backend/RHEL6/	gpgkey=https://software.open-xchange.com/oxbuildkey.pub
-	enabled=1
-	gpgcheck=1
-	metadata_expire=0m
-
-	# if you have a valid maintenance subscription, please uncomment the 
-	# following and add the ldb account data to the url so that the most recent
-	# packages get installed
-	# [ox-updates]
-	# name=Open-Xchange Updates
-	# baseurl=https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/stable/backend/updates/RHEL6/
-	# gpgkey=https://software.open-xchange.com/oxbuildkey.pub
-	# enabled=1
-	# gpgcheck=1
-	# metadata_expire=0m
-
-and run
-
-	$ yum update
-	$ yum install open-xchange-report-client
-	
-## RedHat Enterprise Linux 7
-
-Start a console and create a software repository file if not already present:
-
-	$ vim /etc/yum.repos.d/ox.repo
-
-	[ox]
-	name=Open-Xchange
-	baseurl=https://software.open-xchange.com/products/appsuite/stable/backend/RHEL7/
-	gpgkey=https://software.open-xchange.com/oxbuildkey.pub
-	enabled=1
-	gpgcheck=1
-	metadata_expire=0m
-
-	# if you have a valid maintenance subscription, please uncomment the 
-	# following and add the ldb account data to the url so that the most recent
-	# packages get installed
-	# [ox-updates]
-	# name=Open-Xchange Updates
-	# baseurl=https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/stable/backend/RHEL7/
-	# gpgkey=https://software.open-xchange.com/oxbuildkey.pub
-	# enabled=1
-	# gpgcheck=1
-	# metadata_expire=0m
-
-and run
-
-	$ yum update
-	$ yum install open-xchange-report-client
-
-## CentOS 6
-
-Start a console and create a software repository file if not already present:
-
-	$ vim /etc/yum.repos.d/ox.repo
-
-	[ox]
-	name=Open-Xchange
-	baseurl=https://software.open-xchange.com/products/appsuite/stable/backend/RHEL6/	gpgkey=https://software.open-xchange.com/oxbuildkey.pub
-	enabled=1
-	gpgcheck=1
-	metadata_expire=0m
-
-	# if you have a valid maintenance subscription, please uncomment the 
-	# following and add the ldb account data to the url so that the most recent
-	# packages get installed
-	# [ox-updates]
-	# name=Open-Xchange Updates
-	# baseurl=https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/stable/backend/RHEL6/
-	# gpgkey=https://software.open-xchange.com/oxbuildkey.pub
-	# enabled=1
-	# gpgcheck=1
-	# metadata_expire=0m
-
-and run
-
-	$ yum update
-	$ yum install open-xchange-report-client
-
-## CentOS 7
-
-Start a console and create a software repository file if not already present:
-
-	$ vim /etc/yum.repos.d/ox.repo
-
-	[ox]
-	name=Open-Xchange
-	baseurl=https://software.open-xchange.com/products/appsuite/stable/backend/RHEL7/
-	gpgkey=https://software.open-xchange.com/oxbuildkey.pub
-	enabled=1
-	gpgcheck=1
-	metadata_expire=0m
-
-	# if you have a valid maintenance subscription, please uncomment the 
-	# following and add the ldb account data to the url so that the most recent
-	# packages get installed
-	# [ox-updates]
-	# name=Open-Xchange Updates
-	# baseurl=https://[CUSTOMERID:PASSWORD]@software.open-xchange.com/products/appsuite/stable/backend/RHEL7/
-	# gpgkey=https://software.open-xchange.com/oxbuildkey.pub
-	# enabled=1
-	# gpgcheck=1
-	# metadata_expire=0m
-
-and run
-
-	$ yum update
-	$ yum install open-xchange-report-client
 
 # Configuration
 
@@ -280,20 +101,20 @@ displayed after the report has been sent to activation.open-xchange.com.
 ## Report performance and storage
 With version 7.8.3 new properties are introduced.
 
-* [com.openexchange.report.appsuite.fileStorage](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.fileStorage)
+* [com.openexchange.report.appsuite.fileStorage](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.fileStorage)
  
  Describes the storage path for all report relevant data. Saving a report will place a JSON-Version of the report in that folder.
 
-* [com.openexchange.report.appsuite.maxChunkSize](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.maxChunkSize=200)
+* [com.openexchange.report.appsuite.maxChunkSize](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.maxChunkSize=200)
 	
  This property enables the client to store parts of the report on hard drive to keep memory usage small. A chunk is a CapabilitySet.
  The stored parts are combined into a single .report file and then deleted when the report is finished. The .report file is not deleted automatically.
 
-* [com.openexchange.report.appsuite.maxThreadPoolSize](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.maxThreadPoolSize)
+* [com.openexchange.report.appsuite.maxThreadPoolSize](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.maxThreadPoolSize)
 	
  The report will use multithreading for faster processing. Therefore the user can edit the threadpoolsize by editing this property value. Each thread is processing the needed values from a schema. If the threadpool is smaller then the schemas in the database, the threads are queued.
 
-* [com.openexchange.report.appsuite.threadPriority](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.threadPriority)
+* [com.openexchange.report.appsuite.threadPriority](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.threadPriority)
 	
  This property determines the used threads priotity. It can range from 1 (lowest) to 10 (highest).
 

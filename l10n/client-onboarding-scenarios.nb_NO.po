@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-11 12:42+0000\n"
+"POT-Creation-Date: 2018-05-09 10:22+0000\n"
 "PO-Revision-Date: 2016-03-02 22:39+0000\n"
 "Last-Translator: hv@webhuset.no <hv@webhuset.no>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -79,34 +79,6 @@ msgstr ""
 "For å manuelt sette opp kontoer for kalender og adressebok, vennligst bruk "
 "den følgende informasjonen."
 
-# Updater
-msgid "Updater"
-msgstr "Updater"
-
-# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
-msgid ""
-"When executing the downloaded file, an installation wizard will be launched. "
-"Follow the instructions and install the updater. Installs latest versions of "
-"Windows® client software. The Updater automatically informs about new "
-"updates. You can download the updates from within the Updater."
-msgstr ""
-"Når du kjører den nedlastede filen vil det startes en installasjonsveiviser. "
-"Følg instruksjonene og installer Updater-programmet. Programmet vil "
-"automatisk informere om nye oppdateringer, og du kan laste dem ned i Updater-"
-"programmet."
-
-# Connector for Microsoft Outlook®
-msgid "Connector for Microsoft Outlook®"
-msgstr "Connector for Microsoft Outlook®"
-
-# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
-msgid ""
-"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
-"Shared and System Folders to Microsoft Outlook® clients."
-msgstr ""
-"Synkronisering av epost, kalender, kontakter, oppgaver, sammen med "
-"offentlige og delte mapper med Outlook-klienter."
-
 # Synchronize your Mail, Calendar and Address Book data with your device.
 msgid ""
 "Synchronize your Mail, Calendar and Address Book data with your device."
@@ -134,3 +106,31 @@ msgid ""
 msgstr ""
 "For å manuelt sette opp epostkontoen din, vennligst bruk den følgende "
 "informasjonen"
+
+# Updater
+#~ msgid "Updater"
+#~ msgstr "Updater"
+
+# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
+#~ msgid ""
+#~ "When executing the downloaded file, an installation wizard will be launched. "
+#~ "Follow the instructions and install the updater. Installs latest versions of "
+#~ "Windows® client software. The Updater automatically informs about new "
+#~ "updates. You can download the updates from within the Updater."
+#~ msgstr ""
+#~ "Når du kjører den nedlastede filen vil det startes en installasjonsveiviser. "
+#~ "Følg instruksjonene og installer Updater-programmet. Programmet vil "
+#~ "automatisk informere om nye oppdateringer, og du kan laste dem ned i Updater-"
+#~ "programmet."
+
+# Connector for Microsoft Outlook®
+#~ msgid "Connector for Microsoft Outlook®"
+#~ msgstr "Connector for Microsoft Outlook®"
+
+# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
+#~ msgid ""
+#~ "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
+#~ "Shared and System Folders to Microsoft Outlook® clients."
+#~ msgstr ""
+#~ "Synkronisering av epost, kalender, kontakter, oppgaver, sammen med "
+#~ "offentlige og delte mapper med Outlook-klienter."

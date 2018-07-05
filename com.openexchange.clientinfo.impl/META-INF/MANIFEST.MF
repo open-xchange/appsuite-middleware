@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange client info implementation bundle
+Bundle-SymbolicName: com.openexchange.clientinfo.impl
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.cache,
+ com.google.common.collect,
+ com.openexchange.ajax,
+ com.openexchange.clientinfo,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.i18n.tools,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.server,
+ com.openexchange.serverconfig,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.uadetector,
+ net.sf.uadetector,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.clientinfo.impl.osgi.ClientInfoActivator

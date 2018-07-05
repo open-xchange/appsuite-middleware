@@ -13,7 +13,7 @@ public class Bug19915Test extends ManagedAppointmentTest {
     public void testParsing() throws Exception {
         ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), getIcal(), false);
         ICalImportResponse response = getClient().execute(request);
-        assertFalse(response.hasError());
+        assertFalse(response.getErrorMessage(), response.hasError());
         assertFalse(response.hasConflicts());
     }
 

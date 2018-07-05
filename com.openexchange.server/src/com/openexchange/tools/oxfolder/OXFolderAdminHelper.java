@@ -58,10 +58,6 @@ import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
 import static com.openexchange.server.impl.OCLPermission.READ_FOLDER;
 import static com.openexchange.server.impl.OCLPermission.WRITE_OWN_OBJECTS;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -76,6 +72,7 @@ import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
@@ -97,7 +94,9 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
 
 /**
  * {@link OXFolderAdminHelper} - Helper class for admin.
@@ -160,7 +159,7 @@ public final class OXFolderAdminHelper {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -212,7 +211,7 @@ public final class OXFolderAdminHelper {
                 } else {
                     system = -1;
                 }
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
                 rs = null;
                 /*
                  * Check user
@@ -257,7 +256,7 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, 0); // system
                     stmt.executeUpdate();
                 }
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
                 stmt = null;
                 /*
                  * Update last-modified of folder
@@ -285,7 +284,7 @@ public final class OXFolderAdminHelper {
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
         }
     }
@@ -334,7 +333,7 @@ public final class OXFolderAdminHelper {
                 } catch (final SQLException e) {
                     throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
                 } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
             /*
@@ -395,7 +394,7 @@ public final class OXFolderAdminHelper {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -464,7 +463,7 @@ public final class OXFolderAdminHelper {
             final boolean update = rs.next();
             final int system = (update) ? rs.getInt(2) : -1;
 
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             /*
              * Insert/Update
@@ -509,7 +508,7 @@ public final class OXFolderAdminHelper {
                 stmt.setInt(pos++, 0); // system
                 stmt.executeUpdate();
             }
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
             /*
              * Update last-modified of folder
@@ -550,7 +549,7 @@ public final class OXFolderAdminHelper {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -664,9 +663,9 @@ public final class OXFolderAdminHelper {
         if (!checkFolderExistence(cid, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, writeCon)) {
             createSystemInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
         }
-        /*
+        /*-
          * Insert system system_global folder aka 'Shared Address Book'
-         */
+         *
         systemPermission.setAllPermission(CREATE_SUB_FOLDERS, ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
@@ -681,6 +680,7 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        */
         /*
          * Insert system internal users folder aka 'Global Address Book'
          */
@@ -741,7 +741,7 @@ public final class OXFolderAdminHelper {
         if (!checkFolderExistence(cid, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, writeCon)) {
             createSystemPublicInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
         }
-        LOG.info("All System folders successfully created for context {}", cid);
+        LOG.debug("All System folders successfully created for context {}", cid);
         /*
          * Add mailadmin's folder rights to context's system folders and create his standard folders
          */
@@ -758,9 +758,9 @@ public final class OXFolderAdminHelper {
             cid,
             writeCon);
          */
-        /*
+        /*-
          * Grant full access for 'Shared Address Book' to admin
-         */
+         *
         createSingleUserPermission(
             FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
             mailAdmin,
@@ -768,6 +768,7 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
+        */
         if (ADMIN_EDITABLE) {
             /*
              * Grant admin access for public infostore folder to admin
@@ -791,7 +792,7 @@ public final class OXFolderAdminHelper {
                 writeCon);
         }
         addUserToOXFolders(mailAdmin, mailAdminDisplayName, language, cid, writeCon, OXFolderDefaultMode.DEFAULT);
-        LOG.info("Folder rights for mail admin successfully added for context {}", cid);
+        LOG.debug("Folder rights for mail admin successfully added for context {}", cid);
     }
 
     /**
@@ -953,7 +954,7 @@ public final class OXFolderAdminHelper {
             stmt.setInt(3, userId);
             return (rs = stmt.executeQuery()).next();
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -982,7 +983,7 @@ public final class OXFolderAdminHelper {
             }
             return new int[] { rs.getInt(1), rs.getInt(2), rs.getInt(3), rs.getInt(4) };
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -1003,7 +1004,7 @@ public final class OXFolderAdminHelper {
             stmt.setInt(2, folderId);
             return stmt.executeQuery().next();
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -1172,7 +1173,7 @@ public final class OXFolderAdminHelper {
                     oxfolderTables.add(rs.getString(3));
                 }
             } finally {
-                closeSQLStuff(rs);
+                Databases.closeSQLStuff(rs);
             }
             try {
                 rs = databaseMetaData.getTables(null, null, "del_oxfolder_%", null);
@@ -1180,7 +1181,7 @@ public final class OXFolderAdminHelper {
                     delOxfolderTables.add(rs.getString(3));
                 }
             } finally {
-                closeSQLStuff(rs);
+                Databases.closeSQLStuff(rs);
             }
             /*
              * Remove root tables
@@ -1250,6 +1251,7 @@ public final class OXFolderAdminHelper {
 
     private static final String SQL_UPDATE_FOLDER_TIMESTAMP = "UPDATE #FT# AS ot SET ot.changing_date = ? WHERE ot.cid = ? AND ot.fuid = ?";
 
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
     private static final String SQL_SELECT_FOLDER_IN_PERMISSIONS =
         "SELECT ot.fuid FROM #FT# AS ot JOIN #PT# as op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? WHERE op.permission_id = ? GROUP BY ot.fuid";
 
@@ -1295,7 +1297,7 @@ public final class OXFolderAdminHelper {
             while (rs.next()) {
                 list.add(rs.getInt(1));
             }
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
             if (!list.isEmpty()) {
@@ -1423,7 +1425,7 @@ public final class OXFolderAdminHelper {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -1494,8 +1496,8 @@ public final class OXFolderAdminHelper {
             if (defaultInfostoreTrashName == null || defaultInfostoreTrashName.length() == 0) {
                 defaultInfostoreTrashName = DEFAULT_INFOSTORE_TRASH_NAME;
             }
-            
-            LOG.info("Folder names determined for default folders:\n\tCalendar={}\tContact={}\tTask={}\tInfostore Trash={}",
+
+            LOG.debug("Folder names determined for default folders:\n\tCalendar={}\tContact={}\tTask={}\tInfostore Trash={}",
                 defaultCalName, defaultConName, defaultTaskName, defaultInfostoreTrashName);
             /*
              * Insert default calendar folder
@@ -1515,7 +1517,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.CALENDAR);
             int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, true, ctx, writeCon);
-            LOG.info("User's default CALENDAR folder successfully created");
+            LOG.debug("User's default CALENDAR folder successfully created");
             /*
              * Insert default contact folder
              */
@@ -1523,7 +1525,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.CONTACT);
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, true, ctx, writeCon);
-            LOG.info("User's default CONTACT folder successfully created");
+            LOG.debug("User's default CONTACT folder successfully created");
             /*
              * Insert default contact folder
              */
@@ -1531,7 +1533,7 @@ public final class OXFolderAdminHelper {
             fo.setModule(FolderObject.TASK);
             newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
             OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, true, ctx, writeCon);
-            LOG.info("User's default TASK folder successfully created");
+            LOG.debug("User's default TASK folder successfully created");
             /*
              * Insert default infostore folders
              */
@@ -1546,7 +1548,7 @@ public final class OXFolderAdminHelper {
                     InfoStoreFolderAdminHelper.addDefaultFolders(writeCon, cid, userId);
             }
 
-            LOG.info("All user default folders were successfully created");
+            LOG.debug("All user default folders were successfully created");
             /*
              * TODO: Set standard special folders (projects, ...) located beneath system user folder
              */

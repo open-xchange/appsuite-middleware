@@ -252,8 +252,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
     }
 
     private StringBuilder appendRealm(StringBuilder builder) {
-        builder.append("Share/").append(context.getContextId()).append('/').append(user.getId());
-        return builder;
+        return builder.append("Share/").append(Strings.isEmpty(user.getMail()) ? "Anonymous/" : "Guest/").append(context.getContextId()).append('/').append(user.getId());
     }
 
     private static String getAuthHeader(LoginResultImpl loginResult) {

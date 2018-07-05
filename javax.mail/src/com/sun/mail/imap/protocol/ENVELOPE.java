@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,16 +40,15 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.List;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
-import javax.mail.internet.InternetAddress;
+import java.util.List;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
-import javax.mail.internet.MimeUtility;
-import com.sun.mail.iap.*;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Response;
 import com.sun.mail.util.PropUtil;
 
 /**
@@ -145,7 +144,7 @@ public class ENVELOPE implements Item {
 	if (parseDebug)
 	    System.out.println("  Message-ID: " + messageId);
 
-	if (r.readByte() != ')')
+	if (!r.isNextNonSpace(')'))
 	    throw new ParsingException("ENVELOPE parse error");
     }
 
@@ -160,12 +159,10 @@ public class ENVELOPE implements Item {
 	     * list instead of NIL.  Handle that here even though it
 	     * doesn't conform to the IMAP spec.
 	     */
-	    if (r.peekByte() == ')') {
-		r.skip(1);
+	    if (r.isNextNonSpace(')'))
 		return null;
-	    }
 
-	    List<InternetAddress> v = new ArrayList<InternetAddress>();
+	    List<InternetAddress> v = new ArrayList<>();
 
 	    do {
 		IMAPAddress a = new IMAPAddress(r);
@@ -174,10 +171,7 @@ public class ENVELOPE implements Item {
 		// if we see an end-of-group address at the top, ignore it
 		if (!a.isEndOfGroup())
 		    v.add(a);
-	    } while (r.peekByte() != ')');
-
-	    // skip the terminating ')' at the end of the addresslist
-	    r.skip(1);
+	    } while (!r.isNextNonSpace(')'));
 
 	    return v.toArray(new InternetAddress[v.size()]);
 	} else if (b == 'N' || b == 'n') { // NIL
@@ -209,7 +203,7 @@ class IMAPAddress extends InternetAddress {
 	// skip bogus spaces inserted by Yahoo IMAP server if
 	// "undisclosed-recipients" is a recipient
 	r.skipSpaces();
-        if (r.readByte() != ')') // skip past terminating ')'
+	if (!r.isNextNonSpace(')')) // skip past terminating ')'
             throw new ParsingException("ADDRESS parse error");
 
 	if (host == null) {
@@ -220,10 +214,10 @@ class IMAPAddress extends InternetAddress {
 		return;
 	    // Accumulate a group list.  The members of the group
 	    // are accumulated in a List and the corresponding string
-	    // representation of the group is accumulated in a StringBuffer.
-	    StringBuffer sb = new StringBuffer();
+	    // representation of the group is accumulated in a StringBuilder.
+	    StringBuilder sb = new StringBuilder();
 	    sb.append(groupname).append(':');
-	    List<InternetAddress> v = new ArrayList<InternetAddress>();
+	    List<InternetAddress> v = new ArrayList<>();
 	    while (r.peekByte() != ')') {
 		IMAPAddress a = new IMAPAddress(r);
 		if (a.isEndOfGroup())	// reached end of group
@@ -251,10 +245,12 @@ class IMAPAddress extends InternetAddress {
 	return group && groupname == null;
     }
 
+    @Override
     public boolean isGroup() {
 	return group;
     }
 
+    @Override
     public InternetAddress[] getGroup(boolean strict) throws AddressException {
 	if (grouplist == null)
 	    return null;

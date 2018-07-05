@@ -58,6 +58,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AuthInfo;
@@ -68,6 +69,7 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Status;
 import com.openexchange.mailaccount.TransportAuth;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
@@ -96,33 +98,22 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException {
         try {
-
             MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             List<OXException> warnings = new LinkedList<>();
 
             {
                 int id = optionalIntParameter(AJAXServlet.PARAMETER_ID, -1, requestData);
                 if (id >= 0) {
-                    if (!session.getUserPermissionBits().isMultipleMailAccounts() && MailAccount.DEFAULT_ID != id) {
-                        throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-                    }
-
-                    Status status = determineAccountStatus(id, true, storageService, warnings, session);
-                    String message = status.getMessage(session.getUser().getLocale());
-
-                    JSONObject jStatus = new JSONObject(4).put("status", status.getId());
-                    if (Strings.isNotEmpty(message)) {
-                        jStatus.put("message", message);
-                    }
-                    return new AJAXRequestResult(new JSONObject(2).put(Integer.toString(id), jStatus), "json").addWarnings(warnings);
+                    return getStatusFor(id, session, storageService, warnings);
                 }
             }
 
-            // Get status for all mail accounts
             if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
-                throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                // Only primary allowed
+                return getStatusFor(MailAccount.DEFAULT_ID, session, storageService, warnings);
             }
 
+            // Get status for all mail accounts
             MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             JSONObject jStatuses = new JSONObject(accounts.length);
 
@@ -145,6 +136,24 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
         }
     }
 
+    private AJAXRequestResult getStatusFor(int id, final ServerSession session, MailAccountStorageService storageService, List<OXException> warnings) throws OXException, JSONException {
+        if (MailAccount.DEFAULT_ID != id && !session.getUserPermissionBits().isMultipleMailAccounts()) {
+            UnifiedInboxManagement unifiedInboxManagement = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
+            if ((null == unifiedInboxManagement) || (id != unifiedInboxManagement.getUnifiedINBOXAccountID(session))) {
+                throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+            }
+        }
+
+        Status status = determineAccountStatus(id, true, storageService, warnings, session);
+        String message = status.getMessage(session.getUser().getLocale());
+
+        JSONObject jStatus = new JSONObject(4).put("status", status.getId());
+        if (Strings.isNotEmpty(message)) {
+            jStatus.put("message", message);
+        }
+        return new AJAXRequestResult(new JSONObject(2).put(Integer.toString(id), jStatus), "json").addWarnings(warnings);
+    }
+
     private Status determineAccountStatus(int id, boolean singleRequested, MailAccountStorageService storageService, List<OXException> warnings, ServerSession session) throws OXException {
         MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
@@ -160,8 +169,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             return KnownStatus.DISABLED;
         }
 
-        Boolean valid = actionValidateBoolean(mailAccount, session, false, warnings, false);
-        return valid.booleanValue() ? KnownStatus.OK : KnownStatus.INVALID_CREDENTIALS;
+        return checkStatus(mailAccount, session, false, warnings, false);
     }
 
     /**
@@ -175,10 +183,10 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
      * @return <code>true</code> for successful validation; otherwise <code>false</code>
      * @throws OXException If an severe error occurs
      */
-    public static Boolean actionValidateBoolean(MailAccount account, ServerSession session, boolean ignoreInvalidTransport, List<OXException> warnings, boolean errorOnDenied) throws OXException {
+    public static KnownStatus checkStatus(MailAccount account, ServerSession session, boolean ignoreInvalidTransport, List<OXException> warnings, boolean errorOnDenied) throws OXException {
         // Check for primary account
         if (MailAccount.DEFAULT_ID == account.getId()) {
-            return Boolean.TRUE;
+            return KnownStatus.OK;
         }
 
         boolean ignoreTransport = ignoreInvalidTransport;
@@ -199,7 +207,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
 
         if (!isEmpty(account.getTransportServer())) {
             if (TransportAuth.NONE == account.getTransportAuth()) {
-                return ValidateAction.actionValidateBoolean(accountDescription, session, ignoreTransport, warnings, errorOnDenied);
+                return checkStatus(accountDescription, session, ignoreTransport, warnings, errorOnDenied);
             }
 
             accountDescription.setTransportServer(account.getTransportServer());
@@ -223,7 +231,69 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             }
         }
 
-        return ValidateAction.actionValidateBoolean(accountDescription, session, ignoreTransport, warnings, errorOnDenied);
+        return checkStatus(accountDescription, session, ignoreTransport, warnings, errorOnDenied);
     }
 
+    /**
+     * Validates specified account description.
+     *
+     * @param accountDescription The account description
+     * @param session The associated session
+     * @param ignoreInvalidTransport
+     * @param warnings The warnings list
+     * @param errorOnDenied <code>true</code> to throw an error in case account description is denied (either by host or port); otherwise <code>false</code>
+     * @return <code>true</code> for successful validation; otherwise <code>false</code>
+     * @throws OXException If an severe error occurs
+     */
+    public static KnownStatus checkStatus(MailAccountDescription accountDescription, ServerSession session, boolean ignoreInvalidTransport, List<OXException> warnings, boolean errorOnDenied) throws OXException {
+        // Check for primary account
+        if (MailAccount.DEFAULT_ID == accountDescription.getId()) {
+            return KnownStatus.OK;
+        }
+        // Validate mail server
+        boolean validated = checkMailServerURL(accountDescription, session, warnings, errorOnDenied);
+        // Failed?
+        if (!validated) {
+            KnownStatus status = testForCommunicationProblem(warnings, false, accountDescription);
+            return null == status ? KnownStatus.INVALID_CREDENTIALS : status;
+        }
+        if (ignoreInvalidTransport) {
+            // No need to check transport settings then
+            return KnownStatus.OK;
+        }
+        // Now check transport server URL, if a transport server is present
+        if (!isEmpty(accountDescription.getTransportServer())) {
+            validated = checkTransportServerURL(accountDescription, session, warnings, errorOnDenied);
+            if (!validated) {
+                KnownStatus status = testForCommunicationProblem(warnings, true, accountDescription);
+                return null == status ? KnownStatus.INVALID_CREDENTIALS : status;
+            }
+        }
+        return KnownStatus.OK ;
+    }
+
+    protected static KnownStatus testForCommunicationProblem(List<OXException> warnings, boolean transport, MailAccountDescription accountDescription) {
+        if (null != warnings && !warnings.isEmpty()) {
+            OXException warning = warnings.get(0);
+            if (indicatesCommunicationProblem(warning.getCause())) {
+                OXException newWarning;
+                if (transport) {
+                    String login = accountDescription.getTransportLogin();
+                    if (!seemsValid(login)) {
+                        login = accountDescription.getLogin();
+                    }
+                    newWarning = MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(accountDescription.getTransportServer(), login);
+                } else {
+                    newWarning = MailAccountExceptionCodes.VALIDATE_FAILED_MAIL.create(accountDescription.getMailServer(), accountDescription.getLogin());
+                }
+                newWarning.setCategory(Category.CATEGORY_WARNING);
+                warnings.clear();
+                warnings.add(newWarning);
+            } else if (indicatesSSLProblem(warning)) {
+                warnings.add(warning);
+                return KnownStatus.INVALID_SSL_CERTIFICATE;
+            }
+        }
+        return null;
+    }
 }

@@ -1386,8 +1386,10 @@ public abstract class CalendarObject extends CommonObject {
         	break;
         case CHANGE_EXCEPTIONS:
             removeChangeExceptions();
+            break;
         case DELETE_EXCEPTIONS:
             removeDeleteExceptions();
+            break;
         case RECURRENCE_CALCULATOR:
             return;
         case ORGANIZER:

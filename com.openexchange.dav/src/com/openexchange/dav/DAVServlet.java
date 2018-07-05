@@ -58,10 +58,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
+import com.openexchange.login.LoginRequest;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
+import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -100,13 +102,28 @@ public class DAVServlet extends OXServlet {
     }
 
     @Override
-    protected LoginCustomizer getLoginCustomizer() {
-        return ALLOW_ASTERISK_LOGIN_CUSTOMIZER;
+    protected LoginRequest parseLoginRequest(Credentials credentials, HttpServletRequest request) {
+        String userAgent = request.getHeader("user-agent");
+        DAVUserAgent davUserAgent = DAVUserAgent.parse(userAgent);
+        LoginRequest loginRequest = new LoginRequestImpl(request, credentials.getLogin(), credentials.getPassword(), getInterface(davUserAgent), davUserAgent.getReadableName(), null, userAgent);
+        return ALLOW_ASTERISK_LOGIN_CUSTOMIZER.modifyLogin(loginRequest);
     }
 
     @Override
     protected Interface getInterface() {
         return interfaze;
+    }
+
+    private Interface getInterface(DAVUserAgent userAgent) {
+        switch (userAgent) {
+            case CARDDAV_SYNC:
+            case MAC_CONTACTS:
+                return Interface.CARDDAV;
+            case UNKNOWN:
+                return getInterface();
+            default:
+                return Interface.CALDAV;
+        }
     }
 
     @Override
@@ -221,7 +238,7 @@ public class DAVServlet extends OXServlet {
             return true;
         }
         Scope scope = oAuthAccess.getScope();
-        return scope.has("caldav") || scope.has("carddav");
+        return scope.has(DAVOAuthScope.CALDAV.getScope()) || scope.has(DAVOAuthScope.CARDDAV.getScope());
     }
 
 }

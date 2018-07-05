@@ -56,6 +56,7 @@ import java.util.Set;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.tools.id.IDMangler;
@@ -116,6 +117,8 @@ public final class ParsedFolder implements Folder {
     protected int bits;
 
     protected String newId;
+
+    protected FolderPath originPath;
 
     protected Map<String, Object> meta;
 
@@ -437,6 +440,16 @@ public final class ParsedFolder implements Folder {
     @Override
     public void setNewID(final String newId) {
         this.newId = newId;
+    }
+
+    @Override
+    public FolderPath getOriginPath() {
+        return originPath;
+    }
+
+    @Override
+    public void setOriginPath(FolderPath originPath) {
+        this.originPath = originPath;
     }
 
     @Override

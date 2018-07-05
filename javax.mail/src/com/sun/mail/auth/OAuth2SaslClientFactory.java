@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,11 +40,13 @@
 
 package com.sun.mail.auth;
 
-import java.util.*;
 import java.security.Provider;
 import java.security.Security;
-import javax.security.sasl.*;
-import javax.security.auth.callback.*;
+import java.util.Map;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.sasl.SaslClient;
+import javax.security.sasl.SaslClientFactory;
+import javax.security.sasl.SaslException;
 
 /**
  * JavaMail SASL client factory for OAUTH2.
@@ -65,7 +67,7 @@ public class OAuth2SaslClientFactory implements SaslClientFactory {
 	}
     }
 
-    //@Override
+    @Override
     public SaslClient createSaslClient(String[] mechanisms,
 				String authorizationId, String protocol,
 				String serverName, Map<String,?> props,
@@ -77,7 +79,7 @@ public class OAuth2SaslClientFactory implements SaslClientFactory {
 	return null;
     }
 
-    //@Override
+    @Override
     public String[] getMechanismNames(Map<String,?> props) {
 	return new String[] { "XOAUTH2" };
     }

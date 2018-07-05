@@ -68,7 +68,7 @@
           <propertyresource name="jar.filename"/>
           <filterchain>
             <tokenfilter>
-              <replaceregex pattern="\d\.\d\.\d\.jar$" replace="*"/>
+              <replaceregex pattern="\d+\.\d+\.\d+\.jar$" replace="*"/>
             </tokenfilter>
           </filterchain>
         </loadresource>

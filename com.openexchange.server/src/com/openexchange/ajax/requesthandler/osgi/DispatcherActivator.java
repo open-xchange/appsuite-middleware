@@ -114,6 +114,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.filestore.FileLocationHandler;
+import com.openexchange.imageconverter.api.IImageClient;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
@@ -417,6 +418,19 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             }
         });
 
+        track(IImageClient.class, new SimpleRegistryListener<IImageClient>() {
+
+            @Override
+            public void added(ServiceReference<IImageClient> ref, IImageClient thing) {
+                fileRenderer.setImageClient(thing);
+            }
+
+            @Override
+            public void removed(ServiceReference<IImageClient> ref, IImageClient thing) {
+                fileRenderer.setImageClient(null);
+            }
+        });
+
         openTrackers();
 
         registerService(Dispatcher.class, dispatcher);
@@ -465,6 +479,18 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
         return new Class<?>[] { DispatcherPrefixService.class };
+    }
+
+    /**
+     * Gets the classes of the optional services.
+     * <p>
+     * They appear when available in activator's service collection.
+     *
+     * @return The array of {@link Class} instances of optional services
+     */
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { IImageClient.class };
     }
 
     @Override

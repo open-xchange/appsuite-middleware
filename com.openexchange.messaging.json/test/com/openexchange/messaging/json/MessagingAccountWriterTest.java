@@ -60,10 +60,6 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.json.JSONAssertion;
 import com.openexchange.messaging.SimMessagingAccount;
 import com.openexchange.messaging.SimMessagingService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link MessagingAccountWriterTest}

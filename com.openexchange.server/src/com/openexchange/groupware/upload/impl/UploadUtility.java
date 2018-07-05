@@ -93,6 +93,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -360,7 +361,6 @@ public final class UploadUtility {
         // Create the upload event
         UploadEvent uploadEvent = new UploadEvent();
         uploadEvent.setAction(action);
-        uploadEvent.setAffiliationId(UploadEvent.MAIL_UPLOAD);
 
         boolean error = true;
         try {
@@ -395,9 +395,6 @@ public final class UploadUtility {
             }
             if (maxOverallSize > 0 && current > maxOverallSize) {
                 throwException(uuid, UploadSizeExceededException.create(current, maxOverallSize, true), session, listeners);
-            }
-            if (uploadEvent.getAffiliationId() < 0) {
-                throwException(uuid, UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action), session, listeners);
             }
 
             // Signal success
@@ -440,6 +437,9 @@ public final class UploadUtility {
                 throwException(uuid, UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true), session, listeners);
             }
             throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), session, listeners);
+        } catch (EOFException e) {
+            // Stream closed/ended unexpectedly
+            throwException(uuid, UploadException.UploadCode.UNEXPECTED_EOF.create(e, e.getMessage()), session, listeners);
         } catch (IOException e) {
             Throwable cause = e.getCause();
             if (cause instanceof java.util.concurrent.TimeoutException) {
@@ -455,6 +455,175 @@ public final class UploadUtility {
         }
 
         return null; // To keep compiler happy
+    }
+
+    /**
+     * (Statically) Processes specified request's upload for a simple binary upload.
+     *
+     * @param req The request whose upload shall be processed
+     * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
+     * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
+     * @param session The associated session or <code>null</code>
+     * @return The processed instance of {@link UploadEvent}
+     * @throws OXException Id processing the upload fails
+     */
+    public static UploadEvent processPutUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
+        if (!"PUT".equals(req.getMethod())) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
+        // Check action parameter existence
+        String action;
+        try {
+            action = AJAXServlet.getAction(req);
+        } catch (OXException e) {
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e);
+        }
+
+        // Get the currently available listeners
+        List<UploadFileListener> listeners = Collections.emptyList();
+        ServiceListing<UploadFileListener> listing = LISTENERS.get();
+        if (null != listing) {
+            listeners = new ArrayList<>(listing.getServiceList());
+        }
+
+        // Yield an ID
+        String uuid = UUIDs.getUnformattedStringFromRandom();
+
+        // Create the upload event
+        UploadEvent uploadEvent = new UploadEvent();
+        uploadEvent.setAction(action);
+
+        String contentType = req.getHeader("Content-type");
+        String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
+        String fileName = req.getParameter("filename");
+        boolean error = true;
+        try {
+            uploadEvent.addUploadFile(processUploadedFile(req.getInputStream(), contentType, uploadDir, fileName, maxFileSize, maxOverallSize, uuid, session, listeners));
+            error = false;
+        } catch (IOException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof java.util.concurrent.TimeoutException) {
+                throwException(uuid, UploadException.UploadCode.UNEXPECTED_TIMEOUT.create(e, new Object[0]), session, listeners);
+            }
+            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), session, listeners);
+        } catch (FileUploadException e) {
+            // Might wrap a size-limit-exceeded error
+            Throwable cause = e.getCause();
+            if (cause instanceof FileSizeLimitExceededException) {
+                FileSizeLimitExceededException exc = (FileSizeLimitExceededException) cause;
+                throwException(uuid, UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true), session, listeners);
+            }
+            if (cause instanceof SizeLimitExceededException) {
+                SizeLimitExceededException exc = (SizeLimitExceededException) cause;
+                throwException(uuid, UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true), session, listeners);
+            }
+            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), session, listeners);
+        } finally {
+            if (error) {
+                uploadEvent.cleanUp();
+            }
+        }
+
+        // Signal success
+        for (UploadFileListener listener : listeners) {
+            listener.onUploadSuceeded(uuid, uploadEvent, session);
+        }
+
+        return uploadEvent;
+    }
+
+    private static UploadFile processUploadedFile(InputStream stream, String contentType, String uploadDir, String fileName, long maxFileSize, long maxOverallSize, String uuid, Session session, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
+        UploadFile retval = new UploadFileImpl();
+        retval.setFileName(fileName);
+
+        // Deduce MIME type from passed file name
+        String mimeType = MimeType2ExtMap.getContentType(fileName, null);
+
+        // Set associated MIME type
+        {
+            // Check if we are forced to select the MIME type as signaled by file item
+            ContentType safeContentType = getContentTypeSafe(contentType);
+
+            if (null == safeContentType) {
+                retval.setContentType(null == mimeType ? contentType : mimeType);
+            } else {
+                retval.setContentType(safeContentType.getBaseType());
+            }
+        }
+
+        // Signal basic info prior to processing
+        for (UploadFileListener listener : listeners) {
+            listener.onBeforeUploadProcessed(uuid, fileName, retval.getFieldName(), retval.getContentType(), session);
+        }
+
+        // Track size
+        long size = 0;
+        // Create temporary file
+        File tmpFile = File.createTempFile(PREFIX, null, new File(uploadDir));
+        tmpFile.deleteOnExit();
+
+        // Start upload evicter (if not yet done)
+        startUploadEvicterIfNotYetDone();
+
+        // Write to temporary file
+        InputStream in = null;
+        OutputStream out = null;
+        boolean error = true;
+        try {
+            in = Streams.getNonEmpty(stream);
+            // Check if readable...
+            if (null == in) {
+                // Empty file item...
+                LOG.warn("Detected empty upload file {}.", retval.getFileName());
+            } else {
+                out = new FileOutputStream(tmpFile, false);
+                int buflen = 65536;
+                byte[] buf = new byte[buflen];
+                for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
+                    out.write(buf, 0, read);
+                    size += read;
+
+                    if (maxFileSize > 0) {
+                        if (size > maxFileSize) {
+                            // Close resources and count remaining bytes
+                            Streams.close(out);
+                            tmpFile.delete();
+                            size += Streams.countInputStream(in);
+                            throw new FileSizeLimitExceededException("File size exceeded", size, maxFileSize);
+                        }
+                    }
+                    if (maxOverallSize > 0) {
+                        if (size > maxOverallSize) {
+                            // Close resources and count remaining bytes
+                            Streams.close(out);
+                            tmpFile.delete();
+                            size += Streams.countInputStream(in);
+                            retval.setSize(size);
+                            return retval;
+                        }
+                    }
+                }
+                out.flush();
+            }
+
+            // Signal success after processing
+            for (UploadFileListener listener : listeners) {
+                listener.onAfterUploadProcessed(uuid, retval, session);
+            }
+
+            error = false;
+        } finally {
+            Streams.close(in, out);
+            if (error) {
+                tmpFile.delete();
+            }
+        }
+
+        // Apply temporary file and its size
+        retval.setSize(size);
+        retval.setTmpFile(tmpFile);
+        return retval;
     }
 
     private static void throwException(String uuid, OXException exception, Session session, List<UploadFileListener> listeners) throws OXException {
@@ -654,6 +823,9 @@ public final class UploadUtility {
                 Class<?> clazz = Class.forName("java.io.DeleteOnExitHook");
                 Field[] declaredFields = clazz.getDeclaredFields();
                 Field filesField = getFieldFrom("files", declaredFields);
+                if (filesField == null) {
+                    throw new IllegalStateException("Can't initialize. Are you running an incompatible java version?");
+                }
                 filesField.setAccessible(true);
                 LinkedHashSet<String> files = (LinkedHashSet<String>) filesField.get(null);
                 if (null == files) {
@@ -740,6 +912,10 @@ public final class UploadUtility {
                 // This is Java 6. Get patch level version.
                 // Assume JAVA_VERSION is 1.6.0_x
                 String javaVersion = getJavaVersionTrimmed();
+                if (javaVersion == null) {
+                    // Assume "yes"
+                    return true;
+                }
                 assert javaVersion.startsWith("1.6") : javaVersion;
                 String patchLevelStr = javaVersion.substring(javaVersion.indexOf('_') + 1);
                 return Integer.parseInt(patchLevelStr) > 20;

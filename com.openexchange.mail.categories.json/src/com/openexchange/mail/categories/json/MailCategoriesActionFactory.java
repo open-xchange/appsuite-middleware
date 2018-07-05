@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.categories.json;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableMap;
@@ -92,11 +91,6 @@ public class MailCategoriesActionFactory implements AJAXActionServiceFactory {
         actions.put("train", new TrainAction(services));
         actions.put("move", new MoveAction(services));
         this.actions = actions.build();
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

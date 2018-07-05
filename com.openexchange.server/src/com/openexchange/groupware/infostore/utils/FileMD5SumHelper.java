@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.infostore.utils;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
@@ -125,7 +126,7 @@ public class FileMD5SumHelper {
      */
     public Map<Integer, List<DocumentMetadata>> listMissingInDatabase(int databaseId) throws OXException {
         Map<Integer, List<DocumentMetadata>> documentsPerContext = new HashMap<Integer, List<DocumentMetadata>>();
-        for (int contextId : dbSerivce.listContexts(databaseId)) {
+        for (int contextId : dbSerivce.listContexts(databaseId, -1, -1)) {
             documentsPerContext.put(I(contextId), listMissingInContext(contextId));
         }
         return documentsPerContext;
@@ -138,15 +139,18 @@ public class FileMD5SumHelper {
      */
     public Map<Integer, List<DocumentMetadata>> listAllMissing() throws OXException {
         Collection<Integer> databaseIds;
-        Connection connection = dbSerivce.getReadOnly();
-        try {
-            databaseIds = dbSerivce.getAllSchemata(connection).values();
-        } finally {
-            dbSerivce.backReadOnly(connection);
+        {
+            Connection connection = dbSerivce.getReadOnly();
+            try {
+                databaseIds = dbSerivce.getAllSchemata(connection).values();
+            } finally {
+                dbSerivce.backReadOnly(connection);
+            }
         }
+
         Map<Integer, List<DocumentMetadata>> documentsPerContext = new HashMap<Integer, List<DocumentMetadata>>();
         for (Integer databaseId : databaseIds) {
-            for (int contextId : dbSerivce.listContexts(databaseId)) {
+            for (int contextId : dbSerivce.listContexts(databaseId.intValue(), -1, -1)) {
                 documentsPerContext.put(I(contextId), listMissingInContext(contextId));
             }
         }
@@ -218,7 +222,7 @@ public class FileMD5SumHelper {
      */
     public Map<Integer, List<DocumentMetadata>> calculateMissingInDatabase(int databaseId) throws OXException {
         Map<Integer, List<DocumentMetadata>> documentsPerContext = new HashMap<Integer, List<DocumentMetadata>>();
-        for (int contextId : dbSerivce.listContexts(databaseId)) {
+        for (int contextId : dbSerivce.listContexts(databaseId, -1, -1)) {
             documentsPerContext.put(I(contextId), calculateMissingInContext(contextId));
         }
         return documentsPerContext;
@@ -306,7 +310,7 @@ public class FileMD5SumHelper {
         Map<Integer, Integer> ownerPerFolder = getOwnerPerFolder(connection, contextId, documentsPerFolder.keySet());
         for (Entry<Integer, List<DocumentMetadata>> entry : documentsPerFolder.entrySet()) {
             Integer owner = ownerPerFolder.get(entry.getKey());
-            put(documentsPerOwner, owner, entry.getValue());
+            com.openexchange.tools.arrays.Collections.put(documentsPerOwner, owner, entry.getValue());
         }
         LOG.debug("Evaluated {} different folder owners for {} documents in context {}", I(documentsPerOwner.size()), I(documents.size()), I(contextId));
         return documentsPerOwner;
@@ -370,7 +374,7 @@ public class FileMD5SumHelper {
     private static Map<Integer, List<DocumentMetadata>> getDocumentsPerFolder(List<DocumentMetadata> documents) {
         Map<Integer, List<DocumentMetadata>> documentsPerFolder = new HashMap<Integer, List<DocumentMetadata>>();
         for (DocumentMetadata document : documents) {
-            put(documentsPerFolder, I((int) document.getFolderId()), document);
+            com.openexchange.tools.arrays.Collections.put(documentsPerFolder, I((int) document.getFolderId()), document);
         }
         return documentsPerFolder;
     }
@@ -390,24 +394,6 @@ public class FileMD5SumHelper {
         } catch (NoSuchAlgorithmException e) {
             throw new IOException(e);
         }
-    }
-
-    private static <K, V> boolean put(Map<K, List<V>> multiMap, K key, V value) {
-        List<V> values = multiMap.get(key);
-        if (null == values) {
-            values = new ArrayList<>();
-            multiMap.put(key, values);
-        }
-        return values.add(value);
-    }
-
-    private static <K, V> boolean put(Map<K, List<V>> multiMap, K key, Collection<? extends V> values) {
-        List<V> list = multiMap.get(key);
-        if (null == list) {
-            list = new ArrayList<>();
-            multiMap.put(key, list);
-        }
-        return list.addAll(values);
     }
 
     private static String toString(int contextId, DocumentMetadata document) {

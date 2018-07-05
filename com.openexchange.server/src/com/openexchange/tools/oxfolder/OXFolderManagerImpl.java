@@ -51,16 +51,6 @@ package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
-import gnu.trove.TIntCollection;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -77,11 +67,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.Databases;
@@ -92,16 +86,18 @@ import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FolderPath;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.internal.FolderDeleteListenerRegistry;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -120,6 +116,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.impl.ComparedOCLFolderPermissions;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -134,6 +131,16 @@ import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnUpdate;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link OXFolderManagerImpl} - The {@link OXFolderManager} implementation
@@ -197,25 +204,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private final List<OXException> warnings;
     private final Collection<UpdatedFolderHandler> handlers;
     private OXFolderAccess oxfolderAccess;
-    private AppointmentSQLInterface cSql;
-
-    /**
-     * Getter for testing purposes.
-     *
-     * @return
-     */
-    public AppointmentSQLInterface getCSql() {
-        return cSql;
-    }
-
-    /**
-     * Setter for testing purposes.
-     *
-     * @param sql
-     */
-    public void setCSql(final AppointmentSQLInterface sql) {
-        cSql = sql;
-    }
 
     /**
      * Constructor which only uses <code>Session</code>. Optional connections are going to be set to <code>null</code>.
@@ -278,12 +266,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         this.writeCon = writeCon;
         this.oxfolderAccess = oxfolderAccess;
         this.handlers = handlers;
-        final AppointmentSqlFactoryService factory = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
-        if (factory != null) {
-            this.cSql = factory.createAppointmentSql(session);
-        } else {
-            this.cSql = null;
-        }
         warnings = new LinkedList<>();
     }
 
@@ -572,6 +554,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
              * Fetch effective permission from storage
              */
             final EffectivePermission perm = getOXFolderAccess().getFolderPermission(fo.getObjectID(), user.getId(), userPerms);
+
+            if (!fo.containsType() && perm.getFolderType() == FolderObject.PUBLIC && perm.getFolderModule() != FolderObject.INFOSTORE && !userPerms.hasFullPublicFolderAccess()) {
+                throw OXFolderExceptionCode.NO_PUBLIC_FOLDER_WRITE_ACCESS.create(session.getUserId(), Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
+            }
+
             if (!perm.isFolderVisible() || !perm.getUnderlyingPermission().isFolderVisible()) {
                 throw OXFolderExceptionCode.NOT_VISIBLE.create(Integer.valueOf(fo.getObjectID()), session.getUserId(), Integer.valueOf(ctx.getContextId()));
             }
@@ -589,11 +576,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         FolderObject storageObject = originalFolder.clone();
 
         int optionz = options;
-        if (((optionz & OPTION_TRASHING) <= 0) && performMove) {
+        if (((optionz & OPTION_TRASHING) > 0) && performMove) {
             int newParentFolderID = fo.getParentFolderID();
             if (newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 if ((FolderObject.TRASH == getFolderTypeFromMaster(newParentFolderID)) && (FolderObject.TRASH != getFolderTypeFromMaster(storageObject.getParentFolderID()))) {
                     // Move to trash
+                    int defaultFolderId = oxfolderAccess.getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE, FolderObject.PUBLIC);
                     int folderId = fo.getObjectID();
                     String name = fo.containsFolderName() && !Strings.isEmpty(fo.getFolderName()) ? fo.getFolderName() : storageObject.getFolderName();
                     try {
@@ -602,6 +590,14 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                         }
                     } catch (SQLException e) {
                         throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                    }
+                    if (fo.getModule() == FolderObject.INFOSTORE) {
+                        try {
+                            FolderPathObject path = OXFolderSQL.generateFolderPathFor(folderId, defaultFolderId, readCon, ctx);
+                            fo.setOriginPath(path);
+                        } catch (SQLException e) {
+                            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                        }
                     }
                     /*
                      * remove any folder-dependent entities
@@ -622,7 +618,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
         Map<Integer, Integer> folderId2OldOwner = null;
         try {
-            if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
+            if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta() || fo.containsOriginPath()) {
                 int newParentFolderID = fo.getParentFolderID();
                 if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                     folderId2OldOwner = determineCurrentOwnerships(originalFolder);
@@ -819,6 +815,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 Connection wc = writeCon;
                 boolean create = (wc == null);
                 try {
+                    if (create) {
+                        wc = DBPool.pickupWriteable(ctx);
+                    }
                     for (Map<Integer,List<VersionControlResult>> resultMap : results) {
                         for (Map.Entry<Integer, List<VersionControlResult>> documentEntry : resultMap.entrySet()) {
                             Integer documentId = documentEntry.getKey();
@@ -1019,7 +1018,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (containsPermissions) {
                     final List<OCLPermission> permissions = fo.getPermissions();
                     if (permissions != null && !permissions.isEmpty()) {
-                        handDown(fo.getObjectID(), options, permissions, lastModified, alreadyCheckedParents, FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null);
+                        List<OCLPermission> origPermissions = storageObj.getPermissions();
+
+                        ComparedOCLFolderPermissions compPerm = new ComparedOCLFolderPermissions(permissions.toArray(new OCLPermission[permissions.size()]), origPermissions.toArray(new OCLPermission[origPermissions.size()]));
+                        handDown(fo.getObjectID(), options, compPerm, lastModified, alreadyCheckedParents, FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null);
                     }
                 }
             } catch (final DataTruncation e) {
@@ -1041,7 +1043,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    protected void handDown(final int folderId, final int options, final List<OCLPermission> permissions, final long lastModified, final TIntObjectMap<TIntSet> alreadyCheckedParents, final FolderCacheManager cacheManager) throws OXException, SQLException {
+    protected void handDown(final int folderId, final int options, final ComparedOCLFolderPermissions permission, final long lastModified, final TIntObjectMap<TIntSet> alreadyCheckedParents, final FolderCacheManager cacheManager) throws OXException, SQLException {
         final Context ctx = this.ctx;
         final TIntList subfolders = OXFolderSQL.getSubfolderIDs(folderId, writeCon, ctx);
         if (!subfolders.isEmpty()) {
@@ -1052,8 +1054,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 public boolean execute(final int subfolderId) {
                     try {
                         final FolderObject tmp = new FolderObject(subfolderId);
-                        tmp.setPermissions(permissions);
-                        doUpdate(tmp, options, getFolderFromMaster(subfolderId), lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
+                        FolderObject folderFromMaster = getFolderFromMaster(subfolderId);
+                        List<OCLPermission> tmpPermissions = adjustPermissions(permission, folderId);
+                        tmp.setPermissions(tmpPermissions);
+                        doUpdate(tmp, options, folderFromMaster, lastModified, true, alreadyCheckedParents);  // Calls handDown() for subfolder, as well
                         if (null != cacheManager) {
                             cacheManager.removeFolderObject(subfolderId, ctx);
                         }
@@ -1069,16 +1073,43 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
+
+    /**
+     * Merges old and new permissions for hand down
+     *
+     * @param permission The new permissions
+     * @param parentId The id of the parent folder
+     */
+    List<OCLPermission> adjustPermissions(ComparedOCLFolderPermissions permission, int parentId) {
+        List<OCLPermission> result = new ArrayList<>(permission.getNewPermissions().size());
+        for (OCLPermission perm : permission.getNewPermissions()) {
+            result.add(perm);
+        }
+        adjustTypeOfInheritedPermissions(result, parentId);
+        return result;
+    }
+
+    /**
+     * Ensures that {@link FolderPermissionType#LEGATOR} is handed down as {@link FolderPermissionType#INHERITED}
+     *
+     * @param permissions The new permissions
+     * @param parentId The id of the parent folder
+     */
+    void adjustTypeOfInheritedPermissions(List<OCLPermission> permissions, int parentId) {
+        for (OCLPermission perm : permissions) {
+            if (perm.getSystem() != 1 && perm.getType() == FolderPermissionType.LEGATOR) {
+                perm.setType(FolderPermissionType.INHERITED);
+                perm.setPermissionLegator(String.valueOf(parentId));
+            }
+        }
+    }
+
     private int getFolderTypeFromMaster(int folderId) throws OXException {
         return getFolderFromMaster(folderId, false, false).getType();
     }
 
     private int getFolderOwnerFromMaster(int folderId) throws OXException {
         return getFolderFromMaster(folderId, false, false).getCreatedBy();
-    }
-
-    private boolean hasSubfoldersFromMaster(int folderId) throws OXException {
-        return getFolderFromMaster(folderId, false, false).hasSubfolders();
     }
 
     protected FolderObject getFolderFromMaster(int folderId) throws OXException {
@@ -1110,20 +1141,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             final Tasks tasks = Tasks.getInstance();
             return readCon == null ? tasks.isFolderEmpty(ctx, folderId) : tasks.isFolderEmpty(ctx, readCon, folderId);
         } else if (module == FolderObject.CALENDAR) {
-            final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(
-                session);
-            if (readCon == null) {
-                try {
-                    return calSql.isFolderEmpty(user.getId(), folderId);
-                } catch (final SQLException e) {
-                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                }
-            }
-            try {
-                return calSql.isFolderEmpty(user.getId(), folderId, readCon);
-            } catch (final SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            }
+            CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
+            calendarSession.set(Connection.class.getName(), readCon);
+            return 0 == calendarSession.getCalendarService().getUtilities().countEvents(calendarSession, String.valueOf(folderId));
         } else if (module == FolderObject.CONTACT) {
             ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
             return contactService.isFolderEmpty(session, String.valueOf(folderId));
@@ -1515,7 +1535,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         final int module = fo.getModule();
         switch (module) {
             case FolderObject.CALENDAR:
-                deleteContainedAppointments(fo.getObjectID());
+                deleteContainedEvents(fo.getObjectID());
                 break;
             case FolderObject.TASK:
                 deleteContainedTasks(fo.getObjectID());
@@ -1529,7 +1549,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 deleteContainedDocuments(fo.getObjectID());
                 break;
             default:
-                throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
+                throw OXFolderExceptionCode.UNKNOWN_MODULE.create(I(module), I(ctx.getContextId()));
         }
         /*
          * delete subfolders, too, when clearing the trash folder
@@ -1558,7 +1578,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     @Override
-    public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified, boolean hardDelete) throws OXException {
+    public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified, boolean hardDelete, FolderPath originPath) throws OXException {
         final int folderId = fo.getObjectID();
         if (folderId <= 0) {
             throw OXFolderExceptionCode.INVALID_OBJECT_ID.create(Integer.valueOf(fo.getObjectID()));
@@ -2007,35 +2027,30 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private void deleteContainedItems(final int folderID) throws OXException {
         final int module = getOXFolderAccess().getFolderModule(folderID);
         switch (module) {
-        case FolderObject.CALENDAR:
-            deleteContainedAppointments(folderID);
-            break;
-        case FolderObject.TASK:
-            deleteContainedTasks(folderID);
-            break;
-        case FolderObject.CONTACT:
-            deleteContainedContacts(folderID);
-            break;
-        case FolderObject.UNBOUND:
-            break;
-        case FolderObject.INFOSTORE:
-            deleteContainedDocuments(folderID);
-            break;
-        default:
-            throw OXFolderExceptionCode.UNKNOWN_MODULE.create(Integer.valueOf(module), Integer.valueOf(ctx.getContextId()));
+            case FolderObject.CALENDAR:
+                deleteContainedEvents(folderID);
+                break;
+            case FolderObject.TASK:
+                deleteContainedTasks(folderID);
+                break;
+            case FolderObject.CONTACT:
+                deleteContainedContacts(folderID);
+                break;
+            case FolderObject.UNBOUND:
+                break;
+            case FolderObject.INFOSTORE:
+                deleteContainedDocuments(folderID);
+                break;
+            default:
+                throw OXFolderExceptionCode.UNKNOWN_MODULE.create(I(module), I(ctx.getContextId()));
         }
     }
 
-    private void deleteContainedAppointments(final int folderID) throws OXException {
-        try {
-            if (null == writeCon) {
-                cSql.deleteAppointmentsInFolder(folderID);
-            } else {
-                cSql.deleteAppointmentsInFolder(folderID, writeCon);
-            }
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        }
+    private void deleteContainedEvents(int folderId) throws OXException {
+        CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
+        calendarSession.set(Connection.class.getName(), writeCon);
+        calendarSession.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+        calendarSession.getCalendarService().clearEvents(calendarSession, String.valueOf(folderId), CalendarUtils.DISTANT_FUTURE);
     }
 
     private void deleteContainedTasks(final int folderID) throws OXException {
@@ -2250,7 +2265,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         fieldMapping.put("created_from", Integer.valueOf(DataObject.CREATED_BY));
         fieldMapping.put("changing_date", Integer.valueOf(DataObject.LAST_MODIFIED));
         fieldMapping.put("changed_from", Integer.valueOf(DataObject.MODIFIED_BY));
-        OXFolderManagerImpl.fieldMapping = Collections.unmodifiableMap(fieldMapping);
+        OXFolderManagerImpl.fieldMapping = ImmutableMap.copyOf(fieldMapping);
     }
 
     private static User getUser(Session session) throws OXException {

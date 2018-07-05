@@ -49,10 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,7 +58,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -89,9 +84,12 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         ProgressState progress = params.getProgressState();
-        Connection con = Database.getNoTimeout(params.getContextId(), true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            startTransaction(con);
+            Databases.startTransaction(con);
+            rollback = true;
+
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "user_attribute", "uuid")) {
                 throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create("uuid");
@@ -116,15 +114,16 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
             // Tools.createForeignKey(con, "user_attribute", new String[] {"cid", "id"}, "user", new String[] {"cid", "id"});
 
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            Database.backNoTimeout(params.getContextId(), true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 
@@ -178,6 +177,7 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = con.prepareStatement("SELECT cid, HEX(uuid) FROM user_attribute GROUP BY cid, uuid HAVING count(*) > 1");
             rs = stmt.executeQuery();
 
@@ -264,7 +264,7 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
                 rows += rs.getInt(1);
             }
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         return rows;
     }

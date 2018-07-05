@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
@@ -63,6 +61,8 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 
 /**
@@ -116,7 +116,9 @@ public class UserPermissionBits implements Serializable, Cloneable {
 
     /**
      * The permission bit for WebDAV/XML access.
+     * @deprecated
      */
+    @Deprecated
     public static final int WEBDAV_XML = 1 << 8;
 
     /**
@@ -212,6 +214,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
     /**
      * The permission bit for OLOX v2.0 access.
      */
+    @Deprecated
     public static final int OLOX20 = 1 << 27;
 
     /**
@@ -429,7 +432,9 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * Detects if user configuration allows WebDAV XML.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @deprecated
      */
+    @Deprecated
     public boolean hasWebDAVXML() {
         return hasPermission(WEBDAV_XML);
     }
@@ -438,7 +443,9 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * Enables/Disables WebDAV XML access in user configuration.
      *
      * @param enableWebDAVXML
+     * @deprecated
      */
+    @Deprecated
     public void setWebDAVXML(final boolean enableWebDAVXML) {
         setPermission(enableWebDAVXML, WEBDAV_XML);
     }
@@ -805,6 +812,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
     /**
      * Checks if this user configuration indicates that the user may use OLOX2.0.
      */
+    @Deprecated
     public boolean hasOLOX20() {
         return hasPermission(OLOX20);
     }
@@ -812,6 +820,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
     /**
      * Sets if this user is able to user OLOX2.0.
      */
+    @Deprecated
     public void setOLOX20(final boolean olox20) {
         setPermission(olox20, OLOX20);
     }

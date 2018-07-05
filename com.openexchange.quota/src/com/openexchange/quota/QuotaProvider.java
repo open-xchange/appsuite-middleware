@@ -84,11 +84,11 @@ public interface QuotaProvider {
      * Gets the quota and usage for a session-specific user and a given account.
      *
      * @param session The session, never <code>null</code>.
-     * @param account The id of a possible account for the user within this module,
+     * @param accountID The id of a possible account for the user within this module,
      *  never <code>null</code>.
      * @return The quota and usage, never <code>null</code>.
-     * @throws OXException If no account was found for the given id, {@link QuotaExceptionCodes.UNKNOWN_ACCOUNT}
-     * is thrown. Other exception codes denote ocurred errors while calculating quota and usage.
+     * @throws OXException If no account was found for the given id, {@link QuotaExceptionCodes#UNKNOWN_ACCOUNT}
+     * is thrown. Other exception codes denote occurred errors while calculating quota and usage.
      */
     AccountQuota getFor(Session session, String accountID) throws OXException;
 

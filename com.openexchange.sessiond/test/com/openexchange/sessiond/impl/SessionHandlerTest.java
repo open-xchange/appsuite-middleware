@@ -57,7 +57,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.EventAdmin;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
@@ -70,9 +73,11 @@ import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionFilter;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry.UserType;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplier;
 import com.openexchange.threadpool.SimFactory;
-
 
 /**
  * {@link SessionHandlerTest}
@@ -88,10 +93,16 @@ public class SessionHandlerTest {
 
     private static HazelcastInstance hz2;
 
+    @Mock
+    private UserTypeSessiondConfigRegistry registry;
+
+    private SessiondConfigInterface config;
+
     @BeforeClass
     public static void initHazelcast() throws Exception {
         Config config = new Config();
         config.getSerializationConfig().addPortableFactory(CustomPortable.FACTORY_ID, new PortableFactory() {
+
             @Override
             public Portable create(int classId) {
                 return new PortableSessionFilterApplier();
@@ -118,7 +129,23 @@ public class SessionHandlerTest {
 
     @Before
     public void initSessionHandler() throws Exception {
-        SessionHandler.init(new SessiondConfigInterface() {
+        MockitoAnnotations.initMocks(this);
+
+        UserTypeSessiondConfigInterface sessiondConfigInterface = new UserTypeSessiondConfigInterface() {
+
+            @Override
+            public int getMaxSessionsPerUserType() {
+                return 0;
+            }
+
+            @Override
+            public UserType getUserType() {
+                return UserType.USER;
+            }
+        };
+        Mockito.when(registry.getConfigFor(Matchers.anyInt(), Matchers.anyInt())).thenReturn(sessiondConfigInterface);
+        config = new SessiondConfigInterface() {
+
             @Override
             public boolean isAutoLogin() {
                 return false;
@@ -160,11 +187,6 @@ public class SessionHandlerTest {
             }
 
             @Override
-            public int getMaxSessionsPerUser() {
-                return 0;
-            }
-
-            @Override
             public int getMaxSessionsPerClient() {
                 return 0;
             }
@@ -183,7 +205,8 @@ public class SessionHandlerTest {
             public long getLifeTime() {
                 return 0;
             }
-        });
+        };
+        SessionHandler.init(config, registry);
     }
 
     @Before
@@ -197,16 +220,16 @@ public class SessionHandlerTest {
         SessionHandler.close();
     }
 
-     @Test
-     public void testSessionRotation() throws Exception {
+    @Test
+    public void testSessionRotation() throws Exception {
         SessionImpl session = addSession();
         Assert.assertNotNull(SessionHandler.getSession(session.getSessionID(), false));
-        Thread.sleep(SessionHandler.config.getNumberOfSessionContainers() * SessionHandler.config.getLifeTime() + SessionHandler.config.getNumberOfLongTermSessionContainers() * SessionHandler.config.getLongLifeTime() + 2000);
+        Thread.sleep(config.getNumberOfSessionContainers() * config.getLifeTime() + config.getNumberOfLongTermSessionContainers() * config.getLongLifeTime() + 2000);
         Assert.assertNull(SessionHandler.getSession(session.getSessionID(), false));
     }
 
-     @Test
-     public void testFindLocalSessions() throws Exception {
+    @Test
+    public void testFindLocalSessions() throws Exception {
         String v1 = "thevalue";
         String v2 = "othervalue";
         SessionImpl s1 = addSession(v1);
@@ -222,8 +245,8 @@ public class SessionHandlerTest {
         Assert.assertTrue(sessions.contains(s1.getSessionID()) && sessions.contains(s2.getSessionID()));
     }
 
-     @Test
-     public void testRemoveLocalSessions() throws Exception {
+    @Test
+    public void testRemoveLocalSessions() throws Exception {
         String v1 = "thevalue";
         String v2 = "othervalue";
         SessionImpl s1 = addSession(v1);
@@ -241,8 +264,8 @@ public class SessionHandlerTest {
         Assert.assertEquals(s2.getSessionID(), sessions.get(0));
     }
 
-     @Test
-     public void testFindRemoteSessions() throws Exception {
+    @Test
+    public void testFindRemoteSessions() throws Exception {
         String v1 = "thevalue";
         String v2 = "othervalue";
         SessionImpl s1 = addSession(v1);
@@ -264,17 +287,18 @@ public class SessionHandlerTest {
 
     private static SessionImpl addSession(final String... props) throws OXException {
         if (props == null) {
-            return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null);
+            return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null, "default-user-agent");
         }
 
         return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, new SessionEnhancement() {
+
             @Override
             public void enhanceSession(Session session) {
                 for (int i = 0; i < props.length; i++) {
                     session.setParameter(PROP_NAMES[i], props[i]);
                 }
             }
-        });
+        }, "default-user-agent");
     }
 
 }

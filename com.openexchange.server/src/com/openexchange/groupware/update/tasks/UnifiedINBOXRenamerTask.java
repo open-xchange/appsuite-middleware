@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -85,21 +85,29 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        /*
-         * Obtain connection
-         */
-        final Connection con = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
         try {
+            con.setAutoCommit(false);
+            rollback = true;
+
             stmt = con.prepareStatement("UPDATE user_mail_account SET name = ? WHERE user_mail_account.url LIKE 'unifiedinbox%'");
             stmt.setString(1, "Unified Mail");
             stmt.executeUpdate();
-        } catch (final SQLException e) {
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            Database.backNoTimeout(contextId, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 }

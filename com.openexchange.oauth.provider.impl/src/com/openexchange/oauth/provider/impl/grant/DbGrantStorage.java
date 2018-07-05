@@ -132,7 +132,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
             stmt.setLong(9, now);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
             dbService.backWritable(grant.getContextId(), con);
@@ -157,7 +157,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
             stmt.setInt(9, grant.getUserId());
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
             dbService.backWritable(grant.getContextId(), con);
@@ -177,7 +177,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
             int numRows = stmt.executeUpdate();
             return numRows > 0;
         } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
             dbService.backWritable(refreshToken.getContextId(), con);
@@ -197,7 +197,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
             int numRows = stmt.executeUpdate();
             return numRows > 0;
         } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
             dbService.backWritable(accessToken.getContextId(), con);
@@ -261,7 +261,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
 
             return null;
         } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             dbService.backReadOnly(contextId, con);
@@ -297,7 +297,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
 
             return null;
         } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             dbService.backReadOnly(contextId, con);
@@ -321,7 +321,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
 
             return 0;
         } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             dbService.backReadOnly(contextId, con);
@@ -355,7 +355,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
 
             return grants;
         } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             dbService.backReadOnly(contextId, con);
@@ -374,7 +374,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
             stmt.setInt(3, userId);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
             dbService.backWritable(contextId, con);
@@ -388,12 +388,13 @@ public class DbGrantStorage implements OAuthGrantStorage {
         ResultSet rs = null;
         try {
             stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT db_schema, write_db_pool_id FROM context_server2db_pool GROUP BY db_schema");
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
+            rs = stmt.executeQuery("SELECT db_schema,  MIN(write_db_pool_id) FROM context_server2db_pool GROUP BY db_schema");
             while (rs.next()) {
                 schemasAndWritePools.add(new SchemaAndWritePool(rs.getString(1), rs.getInt(2)));
             }
         } catch (SQLException e) {
-            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             dbService.backReadOnly(con);

@@ -98,6 +98,7 @@ public class Bug33242Test extends AbstractAJAXSession {
      * 2.) User B (member of group) deletes single occurrence.
      */
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -214,11 +215,11 @@ public class Bug33242Test extends AbstractAJAXSession {
         Appointment groupMemberAppointment = catm2.get(series);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getChangeException());
-        assertNotNull(groupMemberAppointment.getChangeException());
+        assertNotNull(groupMemberAppointment.getDeleteException());
         assertSame(creatorAppointment.getChangeException().length, 1);
-        assertSame(groupMemberAppointment.getChangeException().length, 1);
+        assertSame(groupMemberAppointment.getDeleteException().length, 1);
         assertNull(creatorAppointment.getDeleteException());
-        assertNull(groupMemberAppointment.getDeleteException());
+        assertNull(groupMemberAppointment.getChangeException());
 
         List<Appointment> checkAppointment = catm.getChangeExceptions(getClient().getValues().getPrivateAppointmentFolder(), series.getObjectID(), Appointment.ALL_COLUMNS);
         assertNotNull(checkAppointment);
@@ -256,6 +257,7 @@ public class Bug33242Test extends AbstractAJAXSession {
     @Test
     public void testDeleteByGroupMemberWithUpdate() throws Exception {
         exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        exception.removeNote(); // cannot change note as attendee
         catm2.update(exception);
 
         // This should fail if not possible
@@ -267,11 +269,11 @@ public class Bug33242Test extends AbstractAJAXSession {
         Appointment groupMemberAppointment = catm2.get(series);
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getChangeException());
-        assertNotNull(groupMemberAppointment.getChangeException());
+        assertNotNull(groupMemberAppointment.getDeleteException());
         assertSame(creatorAppointment.getChangeException().length, 1);
-        assertSame(groupMemberAppointment.getChangeException().length, 1);
+        assertSame(groupMemberAppointment.getDeleteException().length, 1);
         assertNull(creatorAppointment.getDeleteException());
-        assertNull(groupMemberAppointment.getDeleteException());
+        assertNull(groupMemberAppointment.getChangeException());
 
         Appointment copy = catm.createIdentifyingCopy(series);
         copy.setRecurrencePosition(2);

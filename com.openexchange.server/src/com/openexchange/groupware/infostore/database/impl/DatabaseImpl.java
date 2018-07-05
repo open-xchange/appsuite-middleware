@@ -60,11 +60,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.database.Databases;
@@ -709,6 +707,13 @@ public class DatabaseImpl extends DBService {
         }
     }
 
+    /**
+     * Get the document file store locations for the specified context
+     *
+     * @param ctx The context
+     * @return A sorted set of all document file store locations for the specified context
+     * @throws OXException
+     */
     public SortedSet<String> getDocumentFileStoreLocationsperContext(Context ctx) throws OXException {
         Connection con = getReadConnection(ctx);
         try {
@@ -727,21 +732,13 @@ public class DatabaseImpl extends DBService {
             stmt = con.prepareStatement("SELECT DISTINCT user.id FROM user WHERE user.cid=? AND user.filestore_id>0");
             stmt.setInt(1, contextId);
             result = stmt.executeQuery();
-            Set<Integer> userIds;
-            if (result.next()) {
-                userIds = new LinkedHashSet<Integer>(16, 0.9F);
-                do {
-                    userIds.add(Integer.valueOf(result.getInt(1)));
-                } while (result.next());
-            } else {
-                userIds = null;
-            }
+            boolean hasUserFileStores = result.next();
             close(stmt, result);
             result = null;
             stmt = null;
 
             SortedSet<String> fileStorageLocations;
-            if (null == userIds) {
+            if (false == hasUserFileStores) {
                 // There are no users in this context with a specific file storage. Just grab all from "infostore_document" table for given context.
                 stmt = con.prepareStatement("SELECT file_store_location FROM infostore_document WHERE infostore_document.cid=? AND file_store_location IS NOT NULL");
                 stmt.setInt(1, contextId);
@@ -765,22 +762,6 @@ public class DatabaseImpl extends DBService {
                 close(stmt, result);
                 result = null;
                 stmt = null;
-
-                // Iterate users with a specific file storage
-                for (Integer userId : userIds) {
-                    stmt = con.prepareStatement("SELECT d.file_store_location FROM infostore_document AS d JOIN infostore AS i ON d.cid=i.cid AND d.infostore_id=i.id WHERE d.cid=? AND d.file_store_location IS NOT NULL AND i.folder_id IN (SELECT t.fuid FROM oxfolder_tree AS t WHERE t.cid=? AND t.module=? AND t.created_from=?)");
-                    stmt.setInt(1, contextId);
-                    stmt.setInt(2, contextId);
-                    stmt.setInt(3, FolderObject.INFOSTORE);
-                    stmt.setInt(4, userId.intValue());
-                    result = stmt.executeQuery();
-                    while (result.next()) {
-                        fileStorageLocations.add(result.getString(1));
-                    }
-                    close(stmt, result);
-                    result = null;
-                    stmt = null;
-                }
             }
 
             return fileStorageLocations;
@@ -923,8 +904,6 @@ public class DatabaseImpl extends DBService {
     }
 
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean onlyOwnObjects, final Context ctx, final User user) throws OXException {
-        DeltaImpl<DocumentMetadata> retval = null;
-
         String onlyOwn = "";
         final StringBuilder ORDER = new StringBuilder();
         if (sort != null) {
@@ -945,6 +924,8 @@ public class DatabaseImpl extends DBService {
         ResultSet resultNew = null;
         ResultSet resultModified = null;
         ResultSet resultDeleted = null;
+
+        boolean error = true;
         try {
             con = getReadConnection(ctx);
             if (onlyOwnObjects) {
@@ -993,20 +974,21 @@ public class DatabaseImpl extends DBService {
             final SearchIterator<DocumentMetadata> isiModified = buildIterator(resultModified, stmtModified, dbColumns, this, ctx, con, false);
             final SearchIterator<DocumentMetadata> isiDeleted = buildIterator(resultDeleted, stmtDeleted, new int[] { INFOSTORE_id }, this, ctx, con, false);
 
-            retval = new DeltaImpl<DocumentMetadata>(isiNew, isiModified, isiDeleted, System.currentTimeMillis());
+            DeltaImpl<DocumentMetadata> retval = new DeltaImpl<DocumentMetadata>(isiNew, isiModified, isiDeleted, System.currentTimeMillis());
+            error = false;
+            return retval;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmtNew));
         } catch (final OXException e) {
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         } finally {
-            if (FETCH.equals(Fetch.PREFETCH)) {
+            if (error || FETCH.equals(Fetch.PREFETCH)) {
                 close(stmtNew, resultNew);
                 close(stmtModified, resultModified);
                 close(stmtDeleted, resultDeleted);
                 releaseReadConnection(ctx, con);
             }
         }
-        return retval;
     }
 
     public int countDocuments(final long folderId, final boolean onlyOwnObjects, final Context ctx, final User user) throws OXException {
@@ -1040,28 +1022,21 @@ public class DatabaseImpl extends DBService {
     }
 
     public int countDocumentsperContext(final Context ctx) throws OXException {
-        int retval = 0;
-
         final Connection con = getReadConnection(ctx);
-
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
-            final StringBuilder SQL = new StringBuilder("SELECT count(id) from infostore where infostore.cid=?");
-            final PreparedStatement stmt = con.prepareStatement(SQL.toString());
+            stmt = con.prepareStatement("SELECT count(id) from infostore where infostore.cid=?");
             stmt.setInt(1, ctx.getContextId());
-            final ResultSet result = stmt.executeQuery();
-            if (result.next()) {
-                retval = result.getInt(1);
-            }
-            result.close();
-            stmt.close();
+            result = stmt.executeQuery();
+            return result.next() ? result.getInt(1) : 0;
         } catch (final SQLException e) {
             LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
         } finally {
+            close(stmt, result);
             releaseReadConnection(ctx, con);
         }
-
-        return retval;
     }
 
     /**

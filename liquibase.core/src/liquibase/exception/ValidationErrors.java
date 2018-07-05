@@ -1,13 +1,12 @@
 package liquibase.exception;
 
-import liquibase.database.Database;
-import liquibase.changelog.ChangeSet;
-import liquibase.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import liquibase.changelog.ChangeSet;
+import liquibase.database.Database;
+import liquibase.util.StringUtils;
 
 public class ValidationErrors {
 

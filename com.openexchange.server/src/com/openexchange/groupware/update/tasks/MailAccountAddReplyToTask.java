@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.update.Tools.columnExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -89,10 +89,13 @@ public final class MailAccountAddReplyToTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
         try {
+            con.setAutoCommit(false);
+            rollback = true;
+
             if (!columnExists(con, "user_mail_account", "replyTo")) {
                 stmt =
                     con.prepareStatement("ALTER TABLE user_mail_account ADD COLUMN replyTo VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL");
@@ -107,11 +110,17 @@ public final class MailAccountAddReplyToTask extends UpdateTaskAdapter {
                 stmt.close();
                 stmt = null;
             }
+
+            con.commit();
+            rollback = false;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            Database.backNoTimeout(contextId, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 }

@@ -4,13 +4,24 @@ feature_description: |
 properties:
     - key: com.openexchange.pns.delayDuration
       description: |
-        The time in milliseconds a notification is queued in buffer to possible aggregate
-        with similar notifications that arrive during that time.
+        The base time in milliseconds a notification is queued in buffer to possible aggregate
+        with similar notifications that arrive during that time. Notifications with lower priority might be queued even longer.
       defaultValue: 1000
       version: 7.8.3
       reloadable: true
       configcascadeAware: false
-      related:
+      related: com.openexchange.pns.maxDelayDuration
+      file: pns.properties
+      packageName: open-xchange-pns-impl
+      tags: ["Push"]
+    - key: com.openexchange.pns.maxDelayDuration
+      description: |
+        The base maximum time in milliseconds a notification is queued in buffer when similar notifications are arriving during that time. Notifications with lower priority might be queued even longer.
+      defaultValue: 10000
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.pns.delayDuration
       file: pns.properties
       packageName: open-xchange-pns-impl
       tags: ["Push"]

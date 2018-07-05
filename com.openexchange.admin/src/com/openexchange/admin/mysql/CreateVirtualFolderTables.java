@@ -73,17 +73,17 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "user INT4 unsigned NOT NULL,"
         + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "parentId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "name VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "name VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "lastModified BIGINT(64) DEFAULT NULL,"
         + "modifiedBy INT4 unsigned DEFAULT NULL,"
-        + "shadow VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "shadow VARCHAR(192) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "sortNum INT4 unsigned DEFAULT NULL,"
         + "PRIMARY KEY (cid, tree, user, folderId),"
-        + "INDEX (cid, tree, user, parentId),"
-        + "INDEX (cid, tree, user, shadow),"
+        + "INDEX (cid, tree, user, parentId(191)),"
+        + "INDEX (cid, tree, user, shadow(191)),"
         + "INDEX (cid, user),"
         + "INDEX (cid, modifiedBy)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of virtualPermission table
@@ -106,8 +106,10 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "adminFlag tinyint(3) unsigned NOT NULL,"
         + "groupFlag tinyint(3) unsigned NOT NULL,"
         + "system tinyint(3) unsigned NOT NULL default '0',"
+        + "`type` INT4 UNSIGNED NOT NULL default '0',"
+        + "`sharedParentFolder` INT4 UNSIGNED,"
         + "PRIMARY KEY (cid, tree, user, folderId, entity)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of virtualSubscription table
@@ -124,7 +126,7 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "subscribed tinyint(3) unsigned NOT NULL,"
         + "PRIMARY KEY (cid, tree, user, folderId)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of virtualBackupTree table
@@ -140,17 +142,17 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "user INT4 unsigned NOT NULL,"
         + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "parentId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-        + "name VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+        + "name VARCHAR(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',"
         + "lastModified BIGINT(64) DEFAULT NULL,"
         + "modifiedBy INT4 unsigned DEFAULT NULL,"
-        + "shadow VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "shadow VARCHAR(192) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "sortNum INT4 unsigned DEFAULT NULL,"
         + "PRIMARY KEY (cid, tree, user, folderId),"
-        + "INDEX (cid, tree, user, parentId),"
-        + "INDEX (cid, tree, user, shadow),"
+        + "INDEX (cid, tree, user, parentId(191)),"
+        + "INDEX (cid, tree, user, shadow(191)),"
         + "INDEX (cid, user),"
         + "INDEX (cid, modifiedBy)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of virtualBackupPermission table
@@ -173,8 +175,10 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "adminFlag tinyint(3) unsigned NOT NULL,"
         + "groupFlag tinyint(3) unsigned NOT NULL,"
         + "system tinyint(3) unsigned NOT NULL default '0',"
+        + "`type` INT4 UNSIGNED NOT NULL default '0',"
+        + "`sharedParentFolder` INT4 UNSIGNED,"
         + "PRIMARY KEY (cid, tree, user, folderId, entity)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Table name of virtualBackupSubscription table
@@ -191,7 +195,7 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "folderId VARCHAR(192) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
         + "subscribed tinyint(3) unsigned NOT NULL,"
         + "PRIMARY KEY (cid, tree, user, folderId)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateVirtualFolderTables}.

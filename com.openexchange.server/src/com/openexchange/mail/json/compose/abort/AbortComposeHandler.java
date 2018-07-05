@@ -51,9 +51,9 @@ package com.openexchange.mail.json.compose.abort;
 
 import java.util.Collections;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.json.compose.AbstractComposeHandler;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.DelegatingComposedMailMessage;
+import com.openexchange.mail.json.compose.AbstractComposeHandler;
 import com.openexchange.mail.json.compose.ComposeDraftResult;
 import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.ComposeTransportResult;
@@ -115,7 +115,7 @@ public class AbortComposeHandler extends AbstractComposeHandler<AbortComposeCont
         ComposedMailMessage composeMessage = createRegularComposeMessage(context);
         DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
         transportMessage.setAppendToSentFolder(false);
-        return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage, true);
+        return DefaultComposeTransportResult.builder().withTransportMessages(Collections.<ComposedMailMessage> singletonList(transportMessage), true).withSentMessage(composeMessage).withTransportEqualToSent().build();
     }
 
     @Override

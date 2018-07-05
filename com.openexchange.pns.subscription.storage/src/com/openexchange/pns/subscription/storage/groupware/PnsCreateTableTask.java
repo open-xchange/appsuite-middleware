@@ -49,18 +49,16 @@
 
 package com.openexchange.pns.subscription.storage.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link PnsCreateTableTask} - Inserts necessary tables.
@@ -69,11 +67,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public class PnsCreateTableTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
-    public PnsCreateTableTask(ServiceLookup services) {
+    public PnsCreateTableTask() {
         super();
-        this.services = services;
     }
 
     @Override
@@ -83,37 +78,42 @@ public class PnsCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = services.getOptionalService(DatabaseService.class);
-        if (null == dbService) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
-        }
-
-        int contextId = params.getContextId();
-        Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
         try {
-            if (!tableExists(writeCon, "pns_subscription")) {
-                stmt = writeCon.prepareStatement(CreatePnsSubscriptionTable.getTableSubscription());
+            con.setAutoCommit(false);
+            rollback = true;
+
+            if (!tableExists(con, "pns_subscription")) {
+                stmt = con.prepareStatement(CreatePnsSubscriptionTable.getTableSubscription());
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
                 stmt = null;
             }
-            if (!tableExists(writeCon, "pns_subscription_topic_wildcard")) {
-                stmt = writeCon.prepareStatement(CreatePnsSubscriptionTable.getTableTopicWildcard());
+            if (!tableExists(con, "pns_subscription_topic_wildcard")) {
+                stmt = con.prepareStatement(CreatePnsSubscriptionTable.getTableTopicWildcard());
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
                 stmt = null;
             }
-            if (!tableExists(writeCon, "pns_subscription_topic_exact")) {
-                stmt = writeCon.prepareStatement(CreatePnsSubscriptionTable.getTableTopicExact());
+            if (!tableExists(con, "pns_subscription_topic_exact")) {
+                stmt = con.prepareStatement(CreatePnsSubscriptionTable.getTableTopicExact());
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
                 stmt = null;
             }
+
+            con.commit();
+            rollback = false;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            dbService.backForUpdateTask(contextId, writeCon);
+            closeSQLStuff(stmt);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 }

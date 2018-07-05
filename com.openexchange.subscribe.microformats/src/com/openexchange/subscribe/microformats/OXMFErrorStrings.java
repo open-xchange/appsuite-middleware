@@ -56,7 +56,7 @@ import com.openexchange.i18n.LocalizableStrings;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class OXMFErrorStrings implements LocalizableStrings{
+public class OXMFErrorStrings implements LocalizableStrings {
 
     // A parsing error occurred: %1$s.
     public static final String PARSE_EXCEPTION = "A parsing error occurred: %1$s.";
@@ -70,4 +70,7 @@ public class OXMFErrorStrings implements LocalizableStrings{
 
     // The string cannot be parsed to a valid URL.
     public static final String INVALID_URL = "You provided an invalid URL.";
+
+    // No URL was provided.
+    public static final String EMPTY_URL = "You provided no URL.";
 }

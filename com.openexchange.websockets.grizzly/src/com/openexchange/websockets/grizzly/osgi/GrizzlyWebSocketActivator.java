@@ -77,9 +77,9 @@ import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketEventHandler;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketSessionToucher;
 import com.openexchange.websockets.grizzly.auth.GrizzlyWebSocketAuthenticator;
+import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.impl.DefaultSessionBoundWebSocket;
 import com.openexchange.websockets.grizzly.impl.WebSocketServiceImpl;
-import com.openexchange.websockets.grizzly.impl.DefaultGrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.remote.HzRemoteWebSocketDistributor;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributorFactory;
 

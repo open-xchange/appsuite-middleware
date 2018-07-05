@@ -1,7 +1,15 @@
 package liquibase.diff.output.changelog.core;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import liquibase.change.Change;
-import liquibase.change.core.*;
+import liquibase.change.core.AddAutoIncrementChange;
+import liquibase.change.core.AddDefaultValueChange;
+import liquibase.change.core.AddNotNullConstraintChange;
+import liquibase.change.core.DropDefaultValueChange;
+import liquibase.change.core.DropNotNullConstraintChange;
+import liquibase.change.core.ModifyDataTypeChange;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
@@ -13,12 +21,12 @@ import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.util.ISODateFormat;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerator {
     @Override

@@ -1,0 +1,147 @@
+feature_name: SessionD 
+properties:
+  - key: com.openexchange.sessiond.maxSession
+    description: |
+      Maximum number of concurrent sessions, 0 stands for unlimited.
+    defaultValue: 50000
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session", "Limit"]
+  - key: com.openexchange.sessiond.maxSessionPerUser
+    description: |
+      Maximum number of concurrent sessions per user, a value less than or equal to zero means unlimited.
+    defaultValue: 100
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: com.openexchange.sessiond.maxSessionPerLink, com.openexchange.sessiond.maxSessionPerGuest
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session", "Limit"]
+  - key: com.openexchange.sessiond.maxSessionPerClient
+    description: |
+      Specify the number of sessions allowed per client (Web UI, EAS, WebDAV, ...) and user.
+      A value equal to or less than zero means unlimited.
+    defaultValue: 0
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session", "Limit"]
+  - key: com.openexchange.sessiond.sessionDefaultLifeTime
+    description: |
+      Life time (in milliseconds) of a session in the short term session containers. After this time the session is put into the long life time container and all
+      temporary session data is removed. This only applies if [[com.openexchange.sessiond.autologin]] is enabled.
+      Short term session containers are rotated every 6 minutes. Therefore this value should be a multiple of 6 minutes.
+    defaultValue: 3600000
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: com.openexchange.sessiond.autologin
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session"]
+  - key: com.openexchange.sessiond.sessionLongLifeTime
+    description: |
+      This amount of time a session can live without any interaction, if [[com.openexchange.sessiond.autologin]] is enabled. First the session lives
+      in the short term session container, see configuration option [[com.openexchange.sessiond.sessionDefaultLifeTime]]. Then the session is moved
+      into the long term session container. The session can be restored from here, but it won't have any temporary session data anymore.
+      Restoring temporary session data may cause some slower functionality and maybe temporary errors on image, proxy data or the like. The
+      overall time a session can live is defined by this option. The life time in the long term session container is the time configured here
+      subtracted by the time in the short term session container.
+      Can contain units of measurement: D(=days) W(=weeks) H(=hours) M(=minutes).
+      Long term session containers are rotated every hour. Therefore this value should be a multiple of 1 hour.
+    defaultValue: 1W
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: ["com.openexchange.sessiond.autologin","com.openexchange.sessiond.sessionDefaultLifeTime"]
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session"]
+  - key: com.openexchange.sessiond.randomTokenTimeout
+    description: |
+      The random token to access a newly created session is valid for this configured time.
+      Can contain units of measurement: D(=days) W(=weeks) H(=hours) M(=minutes).
+    defaultValue: 30000
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session"]
+  - key: com.openexchange.sessiond.autologin
+    description: |
+      Whether autologin is allowed or not.
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session"]
+  - key: com.openexchange.sessiond.encryptionKey
+    description: |
+      Key to encrypt passwords during transmission during session migration. Change this, and make sure it's the same in the entire cluster
+    defaultValue: "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn"
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session", "Security"]
+  - key: com.openexchange.sessiond.asyncPutToSessionStorage
+    description: |
+      Specifies if sessions shall be put asynchronously to session storage.
+    defaultValue: true
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session"]
+  - key: com.openexchange.sessiond.useDistributedTokenSessions
+    description: |
+      Defines if a distributed session container is supposed to be used for special token-login (login requests of kind "/ajax/login?action=tokenLogin").
+      A value of <code>false</code> means that pre-initialized sessions are only hold node-local.
+    defaultValue: false
+    version: 
+    reloadable: false
+    configcascadeAware: false
+    related: 
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session"]
+  - key: com.openexchange.sessiond.maxSessionPerLink
+    description: |
+      Maximum number of concurrent sessions per anonymous link, a value less than or equal to zero means unlimited.
+    defaultValue: 250
+    version: 7.10.0
+    reloadable: false
+    configcascadeAware: false
+    related: com.openexchange.sessiond.maxSessionPerUser, com.openexchange.sessiond.maxSessionPerGuest
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session", "Limit"]
+  - key: com.openexchange.sessiond.maxSessionPerGuest
+    description: |
+      Maximum number of concurrent sessions per guest, a value less than or equal to zero means unlimited.
+    defaultValue: 20
+    version: 7.10.0
+    reloadable: false
+    configcascadeAware: false
+    related: com.openexchange.sessiond.maxSessionPerLink, com.openexchange.sessiond.maxSessionPerUser
+    file: sessiond.properties
+    packageName: open-xchange-core
+    tags: ["Session", "Limit"]
+    

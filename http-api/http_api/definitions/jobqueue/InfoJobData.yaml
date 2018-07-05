@@ -1,0 +1,14 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The job identifier
+  action:
+    type: string
+    description: The action identifier
+  module:
+    type: string
+    description: The module identifier
+  done:
+    type: boolean
+    description: Signals whether job is already done or still in progress

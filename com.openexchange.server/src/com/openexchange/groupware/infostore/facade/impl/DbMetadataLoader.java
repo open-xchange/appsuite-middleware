@@ -53,10 +53,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DbMetadataLoader}
@@ -101,7 +101,7 @@ public abstract class DbMetadataLoader<T> extends MetadataLoader<T> {
             results = stmt.executeQuery();
             return processor.process(results);
         } finally {
-            DBUtils.closeSQLStuff(results, stmt);
+            Databases.closeSQLStuff(results, stmt);
             if (null != connection) {
                 provider.releaseReadConnection(context, connection);
             }

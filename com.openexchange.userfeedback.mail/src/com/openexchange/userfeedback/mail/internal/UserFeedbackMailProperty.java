@@ -120,11 +120,8 @@ public enum UserFeedbackMailProperty implements Property {
      * @return the default value of this property
      */
     @Override
-    public <T extends Object> T getDefaultValue(Class<T> cls) {
-        if (defaultValue.getClass().isAssignableFrom(cls)) {
-            return cls.cast(defaultValue);
-        }
-        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + cls.getCanonicalName() + "'");
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
 }

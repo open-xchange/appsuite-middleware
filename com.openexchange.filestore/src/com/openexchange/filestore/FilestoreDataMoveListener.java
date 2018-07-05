@@ -51,7 +51,6 @@ package com.openexchange.filestore;
 
 import java.net.URI;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.QuotaFileStorage;
 
 /**
  * {@link FilestoreDataMoveListener} - Receives call-backs for various file storage move operations.

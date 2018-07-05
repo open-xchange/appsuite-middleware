@@ -60,6 +60,7 @@ import java.util.List;
 import javax.activation.MailcapCommandMap;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
+import org.json.FileBackedJSONStringProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
@@ -81,6 +82,9 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.ResultConverterRegistry;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.auth.mbean.impl.AuthenticatorMBeanImpl;
@@ -91,9 +95,12 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.configuration.ServerConfig;
@@ -103,7 +110,6 @@ import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
-import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.counter.MailCounter;
 import com.openexchange.counter.MailIdleCounter;
@@ -145,16 +151,10 @@ import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.CachingAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarAdministrationService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
-import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
-import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupListener;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
-import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
@@ -172,6 +172,7 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.json.FileBackedJSONStringProviderImpl;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
@@ -188,10 +189,11 @@ import com.openexchange.mail.api.AuthenticationFailedHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.api.unified.UnifiedViewService;
 import com.openexchange.mail.attachment.AttachmentTokenService;
+import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
+import com.openexchange.mail.conversion.AttachmentMailPartDataSource;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
-import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
@@ -318,12 +320,12 @@ public final class ServerActivator extends HousekeepingActivator {
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
         ConfigurationService.class, DatabaseService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class,
-        JDOMParser.class, TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class,
-        AppointmentSqlFactoryService.class, CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class,
+        JDOMParser.class, TimerService.class, ThreadPoolService.class,
+        MessagingServiceRegistry.class, HtmlService.class,
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechFactory.class };
+        UserAgentParser.class, PasswordMechFactory.class, LeanConfigurationService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -460,6 +462,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(MessageGeneratorRegistry.class, new RegistryCustomizer<MessageGeneratorRegistry>(context, MessageGeneratorRegistry.class));
         track(AttachmentStorageRegistry.class, new RegistryCustomizer<AttachmentStorageRegistry>(context, AttachmentStorageRegistry.class));
         track(EnabledCheckerRegistry.class, new RegistryCustomizer<EnabledCheckerRegistry>(context, EnabledCheckerRegistry.class));
+        track(MailAuthenticityHandlerRegistry.class, new RegistryCustomizer<MailAuthenticityHandlerRegistry>(context, MailAuthenticityHandlerRegistry.class));
 
         // IP checker
         track(IPCheckService.class, new RegistryCustomizer<IPCheckService>(context, IPCheckService.class));
@@ -489,19 +492,8 @@ public final class ServerActivator extends HousekeepingActivator {
         // Reminder Service
         track(ReminderService.class, new RegistryCustomizer<>(context, ReminderService.class));
 
-
-
-        // ICal Parser
-        track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class) {
-
-            @Override
-            protected ICalParser customize(final ICalParser service) {
-                return new ExtraneousSeriesMasterRecoveryParser(service, ServerServiceRegistry.getInstance());
-            }
-
-        });
-
-        // ICal Emitter
+        // ICal Parser & Emitter
+        track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class));
         track(ICalEmitter.class, new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class));
 
         // vCard service & storage
@@ -672,6 +664,11 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
+        track(CalendarService.class, new RegistryCustomizer<CalendarService>(context, CalendarService.class));
+        track(ICalService.class, new RegistryCustomizer<ICalService>(context, ICalService.class));
+
+        CommonResultConverterRegistry resultConverterRegistry = new CommonResultConverterRegistry(context);
+        track(ResultConverter.class, resultConverterRegistry);
 
         // Start up server the usual way
         starter.start();
@@ -686,7 +683,9 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(Reloadable.class, ServerConfig.getInstance());
         registerService(Reloadable.class, SystemConfig.getInstance());
         registerService(Reloadable.class, GenericReloadable.getInstance());
+        registerService(Reloadable.class, ResponseWriter.getReloadable());
         registerService(CharsetProvider.class, new CustomCharsetProvider());
+        registerService(FileBackedJSONStringProvider.class, new FileBackedJSONStringProviderImpl());
         final GroupService groupService = new GroupServiceImpl();
         registerService(GroupService.class, groupService);
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
@@ -768,6 +767,11 @@ public final class ServerActivator extends HousekeepingActivator {
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+            props.put(STR_IDENTIFIER, "com.openexchange.mail.attachment");
+            registerService(DataSource.class, new AttachmentMailPartDataSource(), props);
+        }
+        {
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
             registerService(DataSource.class, new ContactDataSource(), props);
         }
@@ -792,24 +796,9 @@ public final class ServerActivator extends HousekeepingActivator {
         // registerService(DataSource.class, dataSource, props);
         // ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
         // }
-        /*
-         * Register data handlers
-         */
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.ical");
-            registerService(DataHandler.class, new ICalInsertDataHandler(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.ical.json");
-            registerService(DataHandler.class, new ICalJSONDataHandler(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
-            registerService(DataHandler.class, new VCardAttachMailDataHandler(), props);
-        }
+
+        registerService(ResultConverterRegistry.class, resultConverterRegistry);
+        ServerServiceRegistry.getInstance().addService(ResultConverterRegistry.class, resultConverterRegistry);
 
         // Register DBProvider
         registerService(DBProvider.class, new DBPoolProvider());
@@ -919,6 +908,7 @@ public final class ServerActivator extends HousekeepingActivator {
             }
             LoginServlet.setRampUpServices(null);
             UploadUtility.shutDown();
+            super.stopBundle();
         } finally {
             started.set(false);
             CONTEXT = null;
@@ -942,18 +932,9 @@ public final class ServerActivator extends HousekeepingActivator {
         http.registerServlet("/infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/files", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/drive", new com.openexchange.webdav.Infostore(), null, null);
-        http.registerServlet("/servlet/webdav.ical", new com.openexchange.webdav.ical(), null, null);
-        http.registerServlet("/servlet/webdav.vcard", new com.openexchange.webdav.vcard(), null, null);
-        http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);
-        http.registerServlet("/servlet/webdav.folders", new com.openexchange.webdav.folders(), null, null);
-        http.registerServlet("/servlet/webdav.calendar", new com.openexchange.webdav.calendar(), null, null);
-        http.registerServlet("/servlet/webdav.contacts", new com.openexchange.webdav.contacts(), null, null);
-        http.registerServlet("/servlet/webdav.tasks", new com.openexchange.webdav.tasks(), null, null);
-        http.registerServlet("/servlet/webdav.groupuser", new com.openexchange.webdav.groupuser(), null, null);
-        http.registerServlet("/servlet/webdav.attachments", new com.openexchange.webdav.attachments(), null, null);
         http.registerServlet("/servlet/webdav.infostore", new com.openexchange.webdav.Infostore(), null, null);
         http.registerServlet("/servlet/webdav.drive", new com.openexchange.webdav.Infostore(), null, null);
-        http.registerServlet("/servlet/webdav.freebusy", new com.openexchange.webdav.freebusy(), null, null);
+        http.registerServlet("/servlet/webdav.version", new com.openexchange.webdav.version(), null, null);
         // http.registerServlet(prefix+"tasks", new com.openexchange.ajax.Tasks(), null, null);
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
         // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);

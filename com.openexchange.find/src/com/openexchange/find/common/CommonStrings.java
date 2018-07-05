@@ -97,4 +97,8 @@ public final class CommonStrings implements LocalizableStrings {
     // Search mails from last year
     public static final String LAST_YEAR = "last year";
 
+
+    public static final String FACET_VALUE_TRUE = "true";
+
+    public static final String FACET_VALUE_FALSE = "false";
 }

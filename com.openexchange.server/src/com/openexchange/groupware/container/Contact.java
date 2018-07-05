@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.container;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -2944,7 +2945,7 @@ public class Contact extends CommonObject {
                 setBusinessCategory((String) value);
                 break;
             case CONTEXTID:
-                setContextId(((Integer) value).intValue());
+                setContextId(null == value ? 0 : ((Integer) value).intValue());
                 break;
             case STATE_OTHER:
                 setStateOther((String) value);

@@ -57,7 +57,6 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,6 +69,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.linkedin.osgi.Activator;
+import junit.framework.TestCase;
 
 /**
  * {@link LinkedInConnectionTest}

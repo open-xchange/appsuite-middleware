@@ -49,8 +49,8 @@
 
 package com.openexchange.preferences;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -448,52 +448,47 @@ public class ServerUserSetting {
     }
 
     private <T> T getAttribute(final int contextId, final int userId, final Attribute<T> attribute) throws OXException {
-        final Connection con;
-        if (connection == null) {
-            con = Database.get(contextId, false);
-        } else {
-            con = connection;
+        if (connection != null) {
+            return getAttribute(contextId, userId, attribute, connection);
         }
+
+        Connection con = Database.get(contextId, false);
         try {
             return getAttribute(contextId, userId, attribute, con);
         } finally {
-            if (null == connection) {
-                Database.back(contextId, false, con);
-            }
+            Database.back(contextId, false, con);
         }
     }
 
     private <T> void setAttribute(final int contextId, final int userId, final Attribute<T> attribute, final T value) throws OXException {
-        final Connection con;
-        if (connection == null) {
-            con = Database.get(contextId, true);
+        if (connection != null) {
+            doSetAttribute(contextId, userId, attribute, value, connection);
         } else {
-            con = connection;
-        }
-        try {
-            if (hasEntry(contextId, userId, con)) {
-                updateAttribute(contextId, userId, attribute, value, con);
-            } else {
-                insertAttribute(contextId, userId, attribute, value, con);
-            }
-        } finally {
-            if (null == connection) {
+            Connection con = Database.get(contextId, true);
+            try {
+                doSetAttribute(contextId, userId, attribute, value, con);
+            } finally {
                 Database.back(contextId, true, con);
             }
         }
     }
 
-    void deleteEntry(final int contextId, final int userId) throws OXException {
-        final Connection con;
-        if (connection == null) {
-            con = Database.get(contextId, true);
+    private <T> void doSetAttribute(int contextId, int userId, Attribute<T> attribute, T value, Connection con) throws OXException {
+        if (hasEntry(contextId, userId, con)) {
+            updateAttribute(contextId, userId, attribute, value, con);
         } else {
-            con = connection;
+            insertAttribute(contextId, userId, attribute, value, con);
         }
-        try {
-            deleteEntry(contextId, userId, con);
-        } finally {
-            if (null == connection) {
+    }
+
+    void deleteEntry(final int contextId, final int userId) throws OXException {
+        if (connection != null) {
+            deleteEntry(contextId, userId, connection);
+        } else {
+            Connection con = Database.get(contextId, true);
+            try {
+                deleteEntry(contextId, userId, con);
+            } finally {
                 Database.back(contextId, true, con);
             }
         }

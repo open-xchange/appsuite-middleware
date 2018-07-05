@@ -64,10 +64,11 @@ import com.openexchange.session.Session;
  */
 public class FileStorageEventHelper {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FileStorageEventHelper.class);
+
     public static final class EventProperty {
 
         private final String key;
-
         private final Object value;
 
         /**
@@ -107,28 +108,51 @@ public class FileStorageEventHelper {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             EventProperty other = (EventProperty) obj;
             if (key == null) {
-                if (other.key != null)
+                if (other.key != null) {
                     return false;
-            } else if (!key.equals(other.key))
+                }
+            } else if (!key.equals(other.key)) {
                 return false;
+            }
             if (value == null) {
-                if (other.value != null)
+                if (other.value != null) {
                     return false;
-            } else if (!value.equals(other.value))
+                }
+            } else if (!value.equals(other.value)) {
                 return false;
+            }
             return true;
         }
     }
 
+    static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super("tracked event creation");
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+    }
+
     public static Event buildUpdateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final String optFileName, final EventProperty... properties) {
+        if (null == folderId) {
+            // Trace invocation that do not pass a folder identifier
+            LOGGER.debug("Building a file storage update event w/o a folder identifier", new FastThrowable());
+        }
         return new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId, optFileName, properties));
     }
 

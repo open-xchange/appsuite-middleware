@@ -1,0 +1,15 @@
+/jobs?action=all:
+  get:
+    operationId: allJobs
+    tags:
+      - Jobqueue
+    summary: Get all user's jobs
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+      200:
+        description: |
+          An array of JSON objects each describing a job currently held in job queue. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/AllJobsResponse"

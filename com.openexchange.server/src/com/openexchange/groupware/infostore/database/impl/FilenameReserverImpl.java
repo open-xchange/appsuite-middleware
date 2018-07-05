@@ -63,18 +63,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import com.openexchange.database.DatabaseExceptionCodes;
 import com.openexchange.database.Databases;
+import com.openexchange.database.EmptyResultSet;
 import com.openexchange.database.IncorrectStringSQLException;
+import com.openexchange.database.StringLiteralSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.database.FilenameReservation;
 import com.openexchange.groupware.infostore.database.FilenameReserver;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FilenameReserverImpl}
@@ -172,9 +174,9 @@ public class FilenameReserverImpl implements FilenameReserver {
                             throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(fileName, documentMetadata.getFolderId(), documentMetadata.getId());
                         }
                         adjusted = true;
-                        int count = 0;
+                        NameBuilder nb = NameBuilder.nameBuilderFor(fileName);
                         do {
-                            fileName = FileStorageUtility.enhance(fileName, ++count);
+                            fileName = nb.advance().toString();
                         } while (usedNames.keySet().contains(fileName));
                     }
                     boolean sameTitle = null != document.getTitle() && document.getTitle().equals(document.getFileName());
@@ -199,8 +201,10 @@ public class FilenameReserverImpl implements FilenameReserver {
             }
         } catch (IncorrectStringSQLException e) {
             throw AbstractInfostoreAction.handleIncorrectStringError(e, null);
+        } catch (StringLiteralSQLException e) {
+            throw DatabaseExceptionCodes.STRING_LITERAL_ERROR.create(e, e.getMessage());
         } catch (SQLException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getMessage(), e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (startedTransaction) {
                 if (false == committed) {
@@ -370,7 +374,12 @@ public class FilenameReserverImpl implements FilenameReserver {
             for (String possibleWildcard : possibleWildcards) {
                 stmt.setString(++parameterIndex, possibleWildcard);
             }
-            result = stmt.executeQuery();
+            try {
+                result = stmt.executeQuery();
+            } catch (StringLiteralSQLException e) {
+                // No result possible
+                result = EmptyResultSet.getInstance();
+            }
             while (result.next()) {
                 DocumentMetadata document = new DocumentMetadataImpl();
                 String name = result.getString(1);
@@ -381,7 +390,7 @@ public class FilenameReserverImpl implements FilenameReserver {
                 conflictingFilenames.put(name, document);
             }
         } finally {
-            DBUtils.closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
         return conflictingFilenames;
     }
@@ -394,7 +403,7 @@ public class FilenameReserverImpl implements FilenameReserver {
             stmt.setLong(2, targetFolderID);
             return stmt.execute();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

@@ -57,12 +57,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.ImmutableJSlob;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobExceptionCodes;
 import com.openexchange.jslob.JSlobId;
@@ -211,14 +211,14 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     private void write2DB(DelayedStoreOp delayedStoreOp, Cache cache) throws OXException {
         Object obj = cache.getFromGroup(delayedStoreOp.id, delayedStoreOp.group);
         if (obj instanceof JSlobReference) {
-            JSlob t = ((JSlobReference) obj).jslob;
+            ImmutableJSlob t = ((JSlobReference) obj).jslob;
 
             if (null != t) {
                 // Write to store
                 delegate.store(delayedStoreOp.jSlobId, t);
 
                 // Propagate among remote caches
-                cache.putInGroup(delayedStoreOp.id, delayedStoreOp.group, new JSlobReference(t.setId(delayedStoreOp.jSlobId)), true);
+                cache.putInGroup(delayedStoreOp.id, delayedStoreOp.group, new JSlobReference(ImmutableJSlob.valueOf(delayedStoreOp.jSlobId, t)), true);
             }
         }
     }
@@ -237,8 +237,9 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
                 Object obj = cache.getFromGroup(delayedStoreOp.id, delayedStoreOp.group);
                 if (obj instanceof JSlobReference) {
                     JSlobReference jSlobReference = (JSlobReference) obj;
-                    if (null != jSlobReference.jslob) {
-                        jslobs.put(delayedStoreOp.jSlobId, jSlobReference.jslob);
+                    ImmutableJSlob jslob = jSlobReference.jslob;
+                    if (null != jslob) {
+                        jslobs.put(delayedStoreOp.jSlobId, jslob);
                     }
                 }
             }
@@ -248,9 +249,9 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         delegate.storeMultiple(jslobs);
 
         // Invalidate caches
-        for (Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
+        for (Map.Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
             JSlobId id = entry.getKey();
-            cache.putInGroup(id.getId(), groupName(id), new JSlobReference(entry.getValue().setId(id)), true);
+            cache.putInGroup(id.getId(), groupName(id), new JSlobReference(ImmutableJSlob.valueOf(id, entry.getValue())), true);
         }
 
         return leave;
@@ -384,11 +385,11 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         }
         Object object = cache.getFromGroup(id.getId(), groupName(id));
         if (object instanceof JSlobReference) {
-            JSlob jslob = ((JSlobReference) object).jslob;
+            ImmutableJSlob jslob = ((JSlobReference) object).jslob;
             if (null == jslob) {
                 throw JSlobExceptionCodes.NOT_FOUND_EXT.create(id.getServiceId(), Integer.valueOf(id.getUser()), Integer.valueOf(id.getContext()));
             }
-            return jslob;
+            return jslob.clone();
         }
         JSlob loaded = delegate.load(id);
         cache.putInGroup(id.getId(), groupName(id), new JSlobReference(loaded), false);
@@ -405,7 +406,7 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         {
             Object fromCache = cache.getFromGroup(id.getId(), groupName);
             if (fromCache instanceof JSlobReference) {
-                JSlob jslob = ((JSlobReference) fromCache).jslob;
+                ImmutableJSlob jslob = ((JSlobReference) fromCache).jslob;
                 return null == jslob ? null : jslob.clone();
             }
         }
@@ -434,7 +435,13 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
             JSlobId id = ids.get(i);
             Object object = cache.getFromGroup(id.getId(), groupName(id));
             if (object instanceof JSlobReference) {
-                map.put(id.getId(), ((JSlobReference) object).jslob);
+                ImmutableJSlob jslob = ((JSlobReference) object).jslob;
+                if (null == jslob) {
+                    cache.removeFromGroup(id, groupName(id));
+                    toLoad.add(id);
+                    continue;
+                }
+                map.put(id.getId(), jslob.clone());
             } else {
                 toLoad.add(id);
             }
@@ -496,11 +503,11 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
 
         private static final long serialVersionUID = 1129602965001367804L;
 
-        transient final JSlob jslob;
+        transient final ImmutableJSlob jslob;
 
         JSlobReference(JSlob jslob) {
             super();
-            this.jslob = jslob;
+            this.jslob = ImmutableJSlob.valueOf(jslob);
         }
     }
 

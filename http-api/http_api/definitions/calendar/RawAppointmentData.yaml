@@ -12,12 +12,14 @@ recurrence_date_position:
 change_exceptions:
   type: array
   description: An array of Dates, representing all change exceptions of a sequence.
+  readOnly: true
   items:
     type: integer
     format: int64
 delete_exceptions:
   type: array
   description: An array of Dates, representing all delete exceptions of a sequence.
+  readOnly: true
   items:
     type: integer
     format: int64

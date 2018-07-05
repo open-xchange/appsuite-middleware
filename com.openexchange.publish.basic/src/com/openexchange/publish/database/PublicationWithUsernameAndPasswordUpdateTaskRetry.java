@@ -49,13 +49,12 @@
 
 package com.openexchange.publish.database;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -68,8 +67,8 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
  */
 public class PublicationWithUsernameAndPasswordUpdateTaskRetry extends PublicationWithUsernameAndPasswordUpdateTask {
 
-    public PublicationWithUsernameAndPasswordUpdateTaskRetry(final DatabaseService dbService) {
-        super(dbService);
+    public PublicationWithUsernameAndPasswordUpdateTaskRetry() {
+        super();
     }
 
     @Override
@@ -79,19 +78,24 @@ public class PublicationWithUsernameAndPasswordUpdateTaskRetry extends Publicati
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection con = getDbService().getForUpdateTask(contextId);
+        final Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             innerPerform(con);
             fixExecutedTask(con);
+
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
-            getDbService().backForUpdateTask(contextId, con);
         }
     }
 

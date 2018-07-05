@@ -60,27 +60,26 @@ import com.openexchange.exception.OXException;
 public interface PushSubscriptionProvider {
 
     /**
-     * Gets all subscriptions interested in specified topic belonging to given user.
+     * Gets all subscriptions interested in specified topic belonging to certain users.
      *
-     * @param userId The user identifier
+     * @param userIds The user identifiers to get the subscriptions for
      * @param contextId The context identifier
      * @param topic The topic
      * @return All matching subscriptions for specified topic
      * @throws OXException If interested subscriptions cannot be returned
      */
-    Hits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException;
+    Hits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException;
 
     /**
-     * Gets all subscriptions interested in specified topic belonging to given client of specified user.
+     * Gets all subscriptions interested in specified topic belonging to certain users.
      *
-     * @param client The client identifier
-     * @param userId The user identifier
+     * @param userIds The user identifiers to get the subscriptions for
      * @param contextId The context identifier
      * @param topic The topic
      * @return All matching subscriptions for specified topic
      * @throws OXException If interested subscriptions cannot be returned
      */
-    Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException;
+    Hits getInterestedSubscriptions(int[] userIds, int contextId, String topic) throws OXException;
 
     // ------------------------------------------------------------------------------------------------------------------
 

@@ -49,8 +49,8 @@
 
 package com.openexchange.oauth.xing;
 
-import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.scope.OXScope;
 
 /**
  * {@link XingOAuthScope}

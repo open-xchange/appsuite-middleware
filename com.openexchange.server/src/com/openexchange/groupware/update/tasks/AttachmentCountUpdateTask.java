@@ -51,22 +51,18 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link AttachmentCountUpdateTask}
@@ -80,7 +76,8 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
     /**
      * Finds all appointments, where the field numberOfAttachments does not match the real amount of attachments.
      */
-    private static final String SELECT = "SELECT pd.cid, pd.intfield01 AS id, pd.intfield08 AS count, COUNT(pa.id) AS realCount " +
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
+    private static final String SELECT = "SELECT pd.cid, pd.intfield01 AS id, MIN(pd.intfield08) AS count, COUNT(pa.id) AS realCount " +
             "FROM prg_dates pd LEFT JOIN prg_attachment pa " +
             "ON pd.cid = pa.cid AND pd.intfield01 = pa.attached AND pa.module=1 " +
             "GROUP BY pd.cid,pd.intfield01 " +
@@ -95,14 +92,14 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        Connection con = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         PreparedStatement repairStmt = null;
         Statement stmt = null;
         ResultSet rs = null;
         try {
             con.setAutoCommit(false);
+            rollback = true;
 
             stmt = con.createStatement();
             rs = stmt.executeQuery(SELECT);
@@ -121,15 +118,18 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
                 LOG.info("Fixed appointment {}/{} (cid/id) old count: {} new count: {}", cid, id, count, realCount);
             }
             repairStmt.executeBatch();
+
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            DBUtils.closeSQLStuff(repairStmt);
-            DBUtils.closeSQLStuff(rs, stmt);
-            dbService.backForUpdateTask(contextId, con);
+            Databases.closeSQLStuff(repairStmt);
+            Databases.closeSQLStuff(rs, stmt);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
 
     }

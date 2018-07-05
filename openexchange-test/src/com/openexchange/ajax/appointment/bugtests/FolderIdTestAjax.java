@@ -71,12 +71,12 @@ public class FolderIdTestAjax extends AbstractAJAXSession {
 
     private FolderObject folderB;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         folderA = ftm.generateSharedFolder("folder A" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient2().getValues().getUserId() });
         ftm.insertFolderOnServer(folderA);
-
         folderB = ftm.generateSharedFolder("folder B" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), getClient().getValues().getPrivateAppointmentFolder(), new int[] { getClient().getValues().getUserId(), getClient2().getValues().getUserId() });
         ftm.insertFolderOnServer(folderB);
 

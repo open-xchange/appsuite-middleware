@@ -52,11 +52,11 @@ package com.openexchange.tools.oxfolder.deletelistener;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ObjectPermissionDeleteListener}
@@ -95,7 +95,7 @@ public final class ObjectPermissionDeleteListener implements DeleteListener {
                 stmt.setInt(pos, userId);
                 stmt.executeUpdate();
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
 
             try {
@@ -106,7 +106,7 @@ public final class ObjectPermissionDeleteListener implements DeleteListener {
                 stmt.setInt(pos, userId);
                 stmt.executeUpdate();
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
 
             /*
@@ -119,7 +119,7 @@ public final class ObjectPermissionDeleteListener implements DeleteListener {
                 stmt.setInt(pos, userId);
                 stmt.executeUpdate();
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
 
             try {
@@ -129,7 +129,7 @@ public final class ObjectPermissionDeleteListener implements DeleteListener {
                 stmt.setInt(pos, userId);
                 stmt.executeUpdate();
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());

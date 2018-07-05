@@ -53,7 +53,6 @@ import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
-import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -77,46 +76,43 @@ public class CreateDummyFileForAttachmentSolver extends CreateDummyFileSolver im
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        if (entity.getType().equals(EntityType.Context)) {
-            /*
-             * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
-             */
-            final int size = problems.size();
-            final Iterator<String> it = problems.iterator();
-            for (int k = 0; k < size; k++) {
+        /*
+         * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
+         */
+        final int size = problems.size();
+        final Iterator<String> it = problems.iterator();
+        for (int k = 0; k < size; k++) {
+            try {
+                final String identifier = createDummyFile(storage);
+                final String old_identifier = it.next();
+                attachments.setTransactional(true);
+                attachments.startTransaction();
+                final int changed = attachments.modifyAttachment(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", entity.getContext());
+                attachments.commit();
+                if (changed == 1) {
+                    LOG.info(MessageFormat.format("Created dummy entry for: {0}. New identifier is: {1}", old_identifier, identifier));
+                }
+            } catch (final OXException e) {
+                LOG.error("{}", e.getMessage(), e);
                 try {
-                    final String identifier = createDummyFile(storage);
-                    final String old_identifier = it.next();
-                    attachments.setTransactional(true);
-                    attachments.startTransaction();
-                    final int changed =
-                        attachments.modifyAttachment(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", entity.getContext());
-                    attachments.commit();
-                    if (changed == 1) {
-                        LOG.info(MessageFormat.format("Created dummy entry for: {0}. New identifier is: {1}", old_identifier, identifier));
-                    }
+                    attachments.rollback();
+                    return;
+                } catch (final OXException e1) {
+                    LOG.error("{}", e1.getMessage(), e1);
+                }
+            } catch (final RuntimeException e) {
+                LOG.error("{}", e.getMessage(), e);
+                try {
+                    attachments.rollback();
+                    return;
+                } catch (final OXException e1) {
+                    LOG.debug("{}", e1.getMessage(), e1);
+                }
+            } finally {
+                try {
+                    attachments.finish();
                 } catch (final OXException e) {
-                    LOG.error("", e);
-                    try {
-                        attachments.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG.error("", e1);
-                    }
-                } catch (final RuntimeException e) {
-                    LOG.error("", e);
-                    try {
-                        attachments.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG.debug("", e1);
-                    }
-                } finally {
-                    try {
-                        attachments.finish();
-                    } catch (final OXException e) {
-                        LOG.debug("", e);
-                    }
+                    LOG.debug("{}", e.getMessage(), e);
                 }
             }
         }

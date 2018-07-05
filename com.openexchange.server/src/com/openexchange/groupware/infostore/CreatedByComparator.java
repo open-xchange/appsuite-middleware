@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.infostore;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.text.Collator;
 import java.util.Collections;
 import java.util.Comparator;
@@ -63,6 +61,8 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Collators;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link CreatedByComparator} - Comparator for "created-by" field.

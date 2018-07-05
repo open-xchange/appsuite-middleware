@@ -57,6 +57,7 @@ import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.internal.ClusterLockServiceDatabaseImpl;
 import com.openexchange.cluster.lock.internal.ClusterLockServiceHazelcastImpl;
 import com.openexchange.cluster.lock.internal.Unregisterer;
+import com.openexchange.cluster.lock.internal.groupware.ClusterLockConvertUtf8ToUtf8mb4Task;
 import com.openexchange.cluster.lock.internal.groupware.ClusterLockCreateTableTask;
 import com.openexchange.cluster.lock.internal.groupware.CreateClusterLockTable;
 import com.openexchange.database.CreateTableService;
@@ -94,7 +95,7 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
         final boolean enabled = hzConfigService.isEnabled();
 
         if (false == enabled) {
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ClusterLockCreateTableTask(this)));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ClusterLockCreateTableTask(), new ClusterLockConvertUtf8ToUtf8mb4Task()));
             registerService(CreateTableService.class, new CreateClusterLockTable(), null);
             registerService(ClusterLockService.class, new ClusterLockServiceDatabaseImpl(this));
         } else {

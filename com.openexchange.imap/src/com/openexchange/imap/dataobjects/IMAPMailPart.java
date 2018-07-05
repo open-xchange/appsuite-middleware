@@ -66,6 +66,7 @@ import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.util.InputStreamProvider;
 import com.openexchange.imap.util.ThresholdInputStreamProvider;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -105,11 +106,16 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
      */
     public IMAPMailPart(final ByteArray byteArray, final BODYSTRUCTURE body, final String fullName) throws IOException {
         super();
-        final ThresholdInputStreamProvider inProvider = new ThresholdInputStreamProvider();
-        inProvider.write(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
-        this.inProvider = inProvider;
-        this.body = body;
-        this.fullName = fullName;
+        ThresholdInputStreamProvider inProvider = new ThresholdInputStreamProvider();
+        try {
+            inProvider.write(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
+            this.inProvider = inProvider;
+            inProvider = null;
+            this.body = body;
+            this.fullName = fullName;
+        } finally {
+            Streams.close(inProvider);
+        }
     }
 
     /**
@@ -125,8 +131,13 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
         super();
         if (loadContent) {
             ThresholdInputStreamProvider tisp = new ThresholdInputStreamProvider();
-            tisp.write(new IMAPInputStream(msg, sectionId, body.size, peek));
-            this.inProvider = tisp;
+            try {
+                tisp.write(new IMAPInputStream(msg, sectionId, body.size, peek));
+                this.inProvider = tisp;
+                tisp = null;
+            } finally {
+                Streams.close(tisp);
+            }
         } else {
             inProvider = new InputStreamProvider() {
 
@@ -149,14 +160,17 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
     public void loadContent() throws OXException {
         final InputStreamProvider inp = this.inProvider;
         if (!(inp instanceof ThresholdInputStreamProvider)) {
+            ThresholdInputStreamProvider tisp = new ThresholdInputStreamProvider();
             try {
-                final ThresholdInputStreamProvider tisp = new ThresholdInputStreamProvider();
                 tisp.write(inp.getInputStream());
                 this.inProvider = tisp;
+                tisp = null;
             } catch (com.sun.mail.util.MessageRemovedIOException e) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, e.getMessage());
             } catch (IOException e) {
                 throw MailExceptionCode.UNREADBALE_PART_CONTENT_SIMPLE.create(e, e.getMessage());
+            } finally {
+                Streams.close(tisp);
             }
         }
     }

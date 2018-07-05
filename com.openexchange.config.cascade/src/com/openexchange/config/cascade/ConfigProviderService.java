@@ -52,7 +52,6 @@ package com.openexchange.config.cascade;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import com.openexchange.exception.OXException;
 
 

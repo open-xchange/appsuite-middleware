@@ -1,9 +1,8 @@
 package liquibase.sql;
 
-import liquibase.structure.DatabaseObject;
-
 import java.util.Collection;
 import java.util.HashSet;
+import liquibase.structure.DatabaseObject;
 
 public class SingleLineComment implements Sql {
 

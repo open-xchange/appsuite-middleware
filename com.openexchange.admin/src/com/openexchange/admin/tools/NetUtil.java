@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.tools;
 
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -69,13 +70,13 @@ public class NetUtil {
         if (qdot.replaceAll("[0-9.]", "").length() > 0) {
             return false;
         }
-        final String []sddn = qdot.split("\\.");
+        final String[] sddn = qdot.split("\\.");
         if (sddn.length != 4) {
             return false;
         }
-        for(final String p : sddn) {
+        for (final String p : sddn) {
             final int ip = Integer.parseInt(p);
-            if( ip < 0 || ip > 255 ) {
+            if (ip < 0 || ip > 255) {
                 return false;
             }
         }
@@ -89,9 +90,9 @@ public class NetUtil {
      * @return
      */
     private final static int[] stringDDN2Int(final String ddn) {
-        int []ret = new int[4];
-        final String []ddnarr = ddn.split("\\.");
-        for(int i=0; i<4; i++) {
+        int[] ret = new int[4];
+        final String[] ddnarr = ddn.split("\\.");
+        for (int i = 0; i < 4; i++) {
             ret[i] = Integer.parseInt(ddnarr[i]);
         }
         return ret;
@@ -106,8 +107,8 @@ public class NetUtil {
     private final static long stringDDN2Long(final String ddn) {
         long ret = 0;
         int shift = 3;
-        for(final String part : ddn.split("\\.") ) {
-            long lpart = Long.parseLong(part) << (shift--*8);
+        for (final String part : ddn.split("\\.")) {
+            long lpart = Long.parseLong(part) << (shift-- * 8);
             ret |= lpart;
         }
         return ret;
@@ -123,20 +124,20 @@ public class NetUtil {
      * @return
      */
     public final static boolean isValidBroadcast(final String broadcast, final String net, final String mask) {
-        if( net == null || mask == null || broadcast == null) {
+        if (net == null || mask == null || broadcast == null) {
             return false;
         }
-        if( !isValidDDN(net) || !isValidDDN(mask) || !isValidDDN(broadcast) ) {
+        if (!isValidDDN(net) || !isValidDDN(mask) || !isValidDDN(broadcast)) {
             return false;
         }
 
-        long lmask  = stringDDN2Long(mask);
-        long lnet   = stringDDN2Long(net);
+        long lmask = stringDDN2Long(mask);
+        long lnet = stringDDN2Long(net);
         long lbcast = stringDDN2Long(broadcast);
 
         long invlmask = 0x00000000ffffff & ~lmask;
 
-        if( (lnet & lmask | invlmask) == lbcast ) {
+        if ((lnet & lmask | invlmask) == lbcast) {
             return true;
         }
 
@@ -153,19 +154,19 @@ public class NetUtil {
         if (mask == null) {
             return false;
         }
-        if( isValidDDN(mask) ) {
-            int []imask = stringDDN2Int(mask);
+        if (isValidDDN(mask)) {
+            int[] imask = stringDDN2Int(mask);
 
             // do the real check:
             // there must not follow a '1' after a '0' in a netmask
-            boolean foundZero=false;
-            for(int p=0; p<4; p++) {
-                for(int bs=7; bs>=0; bs--) {
+            boolean foundZero = false;
+            for (int p = 0; p < 4; p++) {
+                for (int bs = 7; bs >= 0; bs--) {
                     final int bit = 1 << bs;
                     final int erg = (imask[p] & bit);
-                    if( erg == 0) {
+                    if (erg == 0) {
                         foundZero = true;
-                    } else if( erg == bit && foundZero ) {
+                    } else if (erg == bit && foundZero) {
                         return false;
                     }
                 }
@@ -208,7 +209,7 @@ public class NetUtil {
         if (!isValidIPAddress(ip)) {
             return false;
         }
-        final String mask = pos < ipmask.length()-1 ? ipmask.substring(pos + 1) : "";
+        final String mask = pos < ipmask.length() - 1 ? ipmask.substring(pos + 1) : "";
         if (mask.indexOf('.') >= 0) {
             return isValidNetmask(mask);
         }
@@ -226,8 +227,8 @@ public class NetUtil {
      * @throws InvalidDataException
      */
     public final static void checkValidIPNetmask(final String ipmask) throws InvalidDataException {
-        if(!isValidIPNetmask(ipmask)) {
-            throw new InvalidDataException(ipmask+" is not a valid network definition");
+        if (!isValidIPNetmask(ipmask)) {
+            throw new InvalidDataException(ipmask + " is not a valid network definition");
         }
     }
 
@@ -240,7 +241,7 @@ public class NetUtil {
      */
     public final static String CIDR2Mask(final int cidr) {
         int mask = cidr;
-        String ret = "";
+        StringBuilder retBuilder = new StringBuilder();
         for (int p = 0; p < 4; p++) {
             int bitset = 0;
             for (int bs = 7; bs >= 0; bs--) {
@@ -249,8 +250,8 @@ public class NetUtil {
                     mask--;
                 }
             }
-            ret += bitset + (p < 3 ? "." : "");
+            retBuilder.append(bitset).append(p < 3 ? "." : "");
         }
-        return ret;
+        return retBuilder.toString();
     }
 }

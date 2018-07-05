@@ -97,7 +97,7 @@ public class LocalReportService extends AbstractReportService {
 
     /**
      * Cache has concurrency level 20 as 20 threads will be able to update the cache concurrently.
-     * 
+     *
      * 'Implementations of this interface are expected to be thread-safe, and can be safely accessed by multiple concurrent threads.' from http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/cache/Cache.html
      */
     private static final Cache<String, Map<String, Report>> reportCache = CacheBuilder.newBuilder().concurrencyLevel(ReportProperties.getMaxThreadPoolSize()).expireAfterWrite(180, TimeUnit.MINUTES).<String, Map<String, Report>> build();
@@ -168,7 +168,7 @@ public class LocalReportService extends AbstractReportService {
         // Run all applicable cumulators to add the context report results to the global report
         for (ContextReportCumulator cumulator : Services.getContextReportCumulators()) {
             if (cumulator.appliesTo(reportType)) {
-                Collection<Object> reportValues = ((Map<String, Object>) report.getNamespace(Report.MACDETAIL)).values();
+                Collection<Object> reportValues = report.getNamespace(Report.MACDETAIL).values();
                 if (reportValues.size() >= ReportProperties.getMaxChunkSize()) {
                     synchronized (report) {
                         cumulator.merge(contextReport, report);
@@ -252,11 +252,10 @@ public class LocalReportService extends AbstractReportService {
         // No, we have to set up a  new report
         String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
         LOG.debug("Report uuid is: " + uuid);
-        // Load all contextIds
-        List<Integer> allContextIds = new ArrayList<Integer>();
 
-        // Set up an AnalyzeContextBatch instance for every chunk of contextIds
-        allContextIds = Services.getService(ContextService.class).getAllContextIds();
+        // Load all contextIds & Set up an AnalyzeContextBatch instance for every chunk of contextIds
+        List<Integer> allContextIds = Services.getService(ContextService.class).getAllContextIds();
+
         // Set up the report instance
         Report report = new Report(uuid, System.currentTimeMillis(), reportConfig);
         report.setStorageFolderPath(ReportProperties.getStoragePath());
@@ -273,6 +272,7 @@ public class LocalReportService extends AbstractReportService {
         LOG.info("Setup context analyzer to prozess all contexts for report with uuid: " + report.getUUID());
         new Thread() {
 
+            @Override
             public void run() {
                 List<List<Integer>> contextsInSameSchema;
                 try {
@@ -293,7 +293,7 @@ public class LocalReportService extends AbstractReportService {
             while (!allContextIds.isEmpty()) {
                 List<Integer> currentSchemaIds;
                 int firstContextId = allContextIds.get(0).intValue();
-                
+
                 currentSchemaIds = dataloaderMySQL.getAllContextIdsInSameSchema(firstContextId);
                 if (currentSchemaIds.size() == 0) {
                     currentSchemaIds.add(firstContextId);

@@ -2,11 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Text-Extraction Bundle
 Bundle-SymbolicName: com.openexchange.textxtraction
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.textxtraction.osgi.TextXtractionActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.java,
@@ -34,6 +36,27 @@ Import-Package: com.openexchange.config,
  net.htmlparser.jericho.nodoc,
  org.apache.commons.io,
  org.apache.commons.logging,
+ org.apache.fontbox.afm;version="[2.0,3)",
+ org.apache.fontbox.ttf;version="[2.0,3)",
+ org.apache.pdfbox.cos;version="[2.0,3)",
+ org.apache.pdfbox.filter;version="[2.0,3)",
+ org.apache.pdfbox.io;version="[2.0,3)",
+ org.apache.pdfbox.pdfparser;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.common;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.common.filespecification;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.encryption;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.graphics;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.graphics.color;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.graphics.form;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.graphics.image;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.interactive.action;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.interactive.annotation;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.interactive.digitalsignature;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline;version="[2.0,3)",
+ org.apache.pdfbox.pdmodel.interactive.form;version="[2.0,3)",
+ org.apache.pdfbox.rendering;version="[2.0,3)",
+ org.apache.pdfbox.text;version="[2.0,3)",
  org.apache.tika,
  org.apache.tika.config,
  org.apache.tika.detect,
@@ -97,10 +120,8 @@ Import-Package: com.openexchange.config,
  org.xml.sax.ext,
  org.xml.sax.helpers
 Export-Package: com.openexchange.textxtraction
-Bundle-ClassPath: lib/pdfbox-1.7.0.jar,
- lib/poi-3.8.jar,
- lib/poi-contrib-3.6.jar,
- lib/poi-scratchpad-3.8.jar,
- lib/poi-ooxml-3.8.jar,
- lib/dom4j-1.6.1.jar,
+Bundle-ClassPath: lib/dom4j-1.6.1.jar,
+ lib/poi-3.17.jar,
+ lib/poi-ooxml-3.17.jar,
+ lib/poi-scratchpad-3.17.jar,
  .

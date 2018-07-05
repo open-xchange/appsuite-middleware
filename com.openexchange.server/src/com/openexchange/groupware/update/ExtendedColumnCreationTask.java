@@ -49,12 +49,9 @@
 
 package com.openexchange.groupware.update;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
@@ -66,27 +63,31 @@ import com.openexchange.tools.update.Tools;
  */
 public abstract class ExtendedColumnCreationTask extends UpdateTaskAdapter {
 
-    private final DatabaseService dbService;
-
-    protected ExtendedColumnCreationTask(DatabaseService dbService) {
+    protected ExtendedColumnCreationTask() {
         super();
-        this.dbService = dbService;
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        final Connection con = dbService.getForUpdateTask(cid);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             Tools.checkAndAddColumns(con, getTableName(), getColumns());
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            Database.backNoTimeout(cid, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 

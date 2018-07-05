@@ -49,8 +49,8 @@
 
 package com.openexchange.twitter.internal;
 
-import twitter4j.auth.AccessToken;
 import com.openexchange.twitter.TwitterAccessToken;
+import twitter4j.auth.AccessToken;
 
 /**
  * {@link TwitterAccessTokenImpl}

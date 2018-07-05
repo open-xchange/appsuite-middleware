@@ -130,8 +130,10 @@ class State {
         try {
             isr = new InputStreamReader(input, com.openexchange.java.Charsets.ISO_8859_1);
             reader = new BufferedReader(isr);
-            depth = Integer.parseInt(reader.readLine());
-            entries = Integer.parseInt(reader.readLine());
+            String readLine = reader.readLine();
+            depth = readLine == null ? 0 : Integer.parseInt(readLine);
+            readLine = reader.readLine();
+            entries = readLine == null ? 0 : Integer.parseInt(readLine);
             nextEntry = reader.readLine();
             unused = new HashSet<String>();
             String line = reader.readLine();

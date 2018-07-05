@@ -103,13 +103,11 @@ public class S3FileStorage implements FileStorage {
      */
     private static final String DELIMITER = "/";
 
-
     private final AmazonS3Client amazonS3;
     private final boolean encrypted;
     private final String bucketName;
     private final String prefix;
     private final long chunkSize;
-
 
     /**
      * Initializes a new {@link S3FileStorage}.
@@ -131,7 +129,6 @@ public class S3FileStorage implements FileStorage {
         this.bucketName = bucketName;
         this.prefix = prefix;
         this.chunkSize = chunkSize;
-        this.amazonS3.addRequestHandler(ETagCorrectionHandler.getInstance());
         LOG.info("S3 file storage initialized for \"{}/{}{}\"", bucketName, prefix, DELIMITER);
     }
 
@@ -191,7 +188,30 @@ public class S3FileStorage implements FileStorage {
 
     @Override
     public InputStream getFile(String name) throws OXException {
-        return getObject(addPrefix(name)).getObjectContent();
+        return new AbortIfNotFullyConsumedS3ObjectInputStreamWrapper(getObject(addPrefix(name)).getObjectContent());
+    }
+
+    @Override
+    public InputStream getFile(String name, long offset, long length) throws OXException {
+        long fileSize = getFileSize(name);
+        if (offset >= fileSize || length >= 0 && length > fileSize - offset) {
+            throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, fileSize);
+        }
+        String key = addPrefix(name);
+        GetObjectRequest request = new GetObjectRequest(bucketName, key);
+        if (-1 != length) {
+            request.setRange(offset, offset + length - 1);
+        } else {
+            request.setRange(offset, fileSize - 1);
+        }
+        try {
+            return new AbortIfNotFullyConsumedS3ObjectInputStreamWrapper(amazonS3.getObject(request).getObjectContent());
+        } catch (AmazonClientException e) {
+            if (AmazonServiceException.class.isInstance(e) && HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE == ((AmazonServiceException) e).getStatusCode()) {
+                throw FileStorageCodes.INVALID_RANGE.create(e, offset, length, name, fileSize);
+            }
+            throw wrap(e, key);
+        }
     }
 
     @Override
@@ -200,8 +220,7 @@ public class S3FileStorage implements FileStorage {
         /*
          * results may be paginated - repeat listing objects as long as result is truncated
          */
-        ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
-            .withBucketName(bucketName).withDelimiter(DELIMITER).withPrefix(prefix + DELIMITER);
+        ListObjectsRequest listObjectsRequest = new ListObjectsRequest().withBucketName(bucketName).withDelimiter(DELIMITER).withPrefix(prefix + DELIMITER);
         ObjectListing objectListing;
         do {
             objectListing = amazonS3.listObjects(listObjectsRequest);
@@ -300,9 +319,9 @@ public class S3FileStorage implements FileStorage {
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
         try {
             /*
-                 * TODO: This would be more efficient using the "CopyPartRequest", which is not yet supported by ceph
-                 * http://ceph.com/docs/next/radosgw/s3/#features-support
-                 */
+             * TODO: This would be more efficient using the "CopyPartRequest", which is not yet supported by ceph
+             * http://ceph.com/docs/next/radosgw/s3/#features-support
+             */
             /*
              * get existing object
              */
@@ -373,30 +392,6 @@ public class S3FileStorage implements FileStorage {
             } catch (AmazonClientException e) {
                 LOG.warn("Error cleaning up temporary file", e);
             }
-        }
-    }
-
-    @Override
-    public InputStream getFile(String name, long offset, long length) throws OXException {
-        long fileSize = getFileSize(name);
-        if (offset >= fileSize || length >= 0 && length > fileSize - offset) {
-            throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, fileSize);
-        }
-        String key = addPrefix(name);
-        GetObjectRequest request = new GetObjectRequest(bucketName, key);
-        if (-1 != length) {
-            request.setRange(offset, offset + length - 1);
-        } else {
-            request.setRange(offset, fileSize - 1);
-        }
-        try {
-            return amazonS3.getObject(request).getObjectContent();
-        } catch (AmazonClientException e) {
-            if (AmazonServiceException.class.isInstance(e) &&
-                HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE == ((AmazonServiceException) e).getStatusCode()) {
-                throw FileStorageCodes.INVALID_RANGE.create(e, offset, length, name, fileSize);
-            }
-            throw wrap(e, key);
         }
     }
 
@@ -524,10 +519,9 @@ public class S3FileStorage implements FileStorage {
      * @param lastPart <code>true</code> if this is the last part, <code>false</code>, otherwise
      * @return The put object result passed from the client
      */
-    private UploadPartResult uploadPart(String key, String uploadID, int partNumber, S3UploadChunk chunk, boolean lastPart) throws OXException  {
+    private UploadPartResult uploadPart(String key, String uploadID, int partNumber, S3UploadChunk chunk, boolean lastPart) throws OXException {
         try {
-            UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID)
-                .withInputStream(chunk.getData()).withPartSize(chunk.getSize()).withPartNumber(partNumber++).withLastPart(lastPart);
+            UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID).withInputStream(chunk.getData()).withPartSize(chunk.getSize()).withPartNumber(partNumber++).withLastPart(lastPart);
             String md5Digest = chunk.getMD5Digest();
             if (null != md5Digest) {
                 request.withMD5Digest(md5Digest);
@@ -537,5 +531,4 @@ public class S3FileStorage implements FileStorage {
             Streams.close(chunk);
         }
     }
-
 }

@@ -63,7 +63,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -71,6 +70,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
@@ -640,7 +640,7 @@ public final class Tools {
         if (null == req) {
             return Collections.emptyMap();
         }
-        final Map<String, List<String>> headers = new HashMap<String, List<String>>();
+        Map<String, List<String>> headers = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
         for (final Enumeration<?> e = req.getHeaderNames(); e.hasMoreElements();) {
             final String name = (String) e.nextElement();
             List<String> values = headers.get(name);
@@ -848,6 +848,11 @@ public final class Tools {
         // Explicitly requested by client
         if (AJAXRequestDataTools.parseBoolParameter(request.getParameter("plainJson"))) {
             return true;
+        }
+
+        // Explicitly not requested by client
+        if (AJAXRequestDataTools.parseBoolParameter(request.getParameter("binary"))) {
+            return false;
         }
 
         // E.g. "Accept: application/json, text/javascript, ..."

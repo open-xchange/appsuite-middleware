@@ -174,3 +174,30 @@ properties:
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.s3.[filestoreID].chunkSize
+      description: |
+        Defines the chunk size to use for multipart-uploads. Uploads larger than 
+        this size are splitted and uploaded into multiple requests. The value can be
+        specified with one of the units "B" (bytes), "kB" (kilobyte), "MB"
+        (Megabyte) or "GB" (Gigabyte), e.g. "10 MB". For AWS, the minimum size is 
+        5 MB.
+      defaultValue: 5 MB
+      version: 
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.s3.metricCollection
+      description: Enables metric collection for the S3 storage
+      defaultValue: false
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore", "Metrics"]

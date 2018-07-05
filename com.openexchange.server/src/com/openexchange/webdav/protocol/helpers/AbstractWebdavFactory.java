@@ -51,7 +51,6 @@ package com.openexchange.webdav.protocol.helpers;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -102,7 +101,7 @@ public abstract class AbstractWebdavFactory implements WebdavFactory {
     }
 
     public <T extends AbstractResource> T mixin(T thing) {
-        if (mixins != null) {
+        if (mixins != null && thing != null) {
             thing.includeProperties(mixins);
         }
         return thing;

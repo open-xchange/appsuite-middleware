@@ -1,13 +1,16 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.util.ArrayList;
+import java.util.List;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateExecutablePreparedStatement;
 import liquibase.statement.core.UpdateStatement;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @DatabaseChange(name = "update", description = "Updates data in an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class UpdateDataChange extends AbstractModifyDataChange implements ChangeWithColumns<ColumnConfig> {

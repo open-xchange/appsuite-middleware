@@ -56,6 +56,8 @@ import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.ShareLoginConfiguration;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
@@ -98,7 +100,7 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
      * @return <code>true</code> if share can be handled; otherwise <code>false</code>
      * @throws OXException If check fails for any reason
      */
-    protected abstract boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException;
+    protected abstract boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response);
 
     /**
      * Handles the given resolved share.
@@ -144,6 +146,23 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
         }
     }
 
+    @Override
+    public ShareHandlerReply handleNotFound(HttpServletRequest request, HttpServletResponse response, String status) throws IOException {
+        if (false == handles(new AccessShareRequest(null, null, null, true), request, response)) {
+            return ShareHandlerReply.NEUTRAL;
+        }
+        sendError(response, OXExceptions.notFound(""));
+        return ShareHandlerReply.ACCEPT;
+    }
+
+    protected static void sendError(HttpServletResponse response, OXException e) throws IOException {
+        if (null == response || response.isCommitted()) {
+            org.slf4j.LoggerFactory.getLogger(HttpAuthShareHandler.class).debug("Unable to send error response after exception", e);
+            return;
+        }
+        response.sendError(getStatusCode(e), e.getSoleMessage());
+    }
+
     protected static boolean indicatesDownload(HttpServletRequest request) {
         return "download".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) ||
             isTrue(AJAXUtility.sanitizeParam(request.getParameter("dl")));
@@ -151,6 +170,31 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
 
     protected static boolean isTrue(String value) {
         return "1".equals(value) || "yes".equalsIgnoreCase(value) || Boolean.valueOf(value).booleanValue();
+    }
+
+    protected static int getStatusCode(OXException e) {
+        if (e.isNotFound()) {
+            return HttpServletResponse.SC_NOT_FOUND;
+        }
+        if (e.isNoPermission() || OXExceptionCode.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
+            return HttpServletResponse.SC_FORBIDDEN;
+        }
+        if (OXExceptionCode.CATEGORY_SERVICE_DOWN.equals(e.getCategory())) {
+            return HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+        }
+        if (e.isConflict() || OXExceptionCode.CATEGORY_CONFLICT.equals(e.getCategory())) {
+            return HttpServletResponse.SC_CONFLICT;
+        }
+        switch (e.getErrorCode()) {
+            case "SHR-0002": // ShareExceptionCodes.UNKNOWN_SHARE
+            case "SHR-0003": // ShareExceptionCodes.INVALID_LINK
+            case "SHR-0015": // ShareExceptionCodes.UNKNOWN_GUEST
+            case "SHR-0016": // ShareExceptionCodes.INVALID_TOKEN
+            case "SHR-0023": // ShareExceptionCodes.INVALID_LINK_TARGET
+                return HttpServletResponse.SC_NOT_FOUND;
+            default:
+                return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+        }
     }
 
 }

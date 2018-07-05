@@ -49,22 +49,19 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderClearDelTablesTasks} - Removes obsolete data from the 'del_oxfolder_tree', and 'virtualBackupTree' tables.
@@ -94,10 +91,7 @@ public final class FolderClearDelTablesTasks extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextID = params.getContextId();
-        final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
-        final Connection connection = databaseService.getForUpdateTask(contextID);
+        Connection connection = params.getConnection();
         boolean rollback = false;
         try {
             connection.setAutoCommit(false);
@@ -122,7 +116,6 @@ public final class FolderClearDelTablesTasks extends UpdateTaskAdapter {
                 rollback(connection);
             }
             autocommit(connection);
-            Database.backNoTimeout(contextID, true, connection);
         }
     }
 
@@ -133,7 +126,7 @@ public final class FolderClearDelTablesTasks extends UpdateTaskAdapter {
             statement.setString(1, "");
             return statement.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -144,7 +137,7 @@ public final class FolderClearDelTablesTasks extends UpdateTaskAdapter {
             statement.setString(1, "");
             return statement.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 

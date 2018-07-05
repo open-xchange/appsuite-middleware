@@ -49,18 +49,17 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -80,9 +79,12 @@ public class MakeUUIDPrimaryForDListTables extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         ProgressState progress = params.getProgressState();
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
-            DBUtils.startTransaction(connection);
+            Databases.startTransaction(connection);
+            rollback = true;
+
             progress.setTotal(getTotalRows(connection));
             if (!Tools.columnExists(connection, TABLE, COLUMN)) {
                 throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create(COLUMN, TABLE);
@@ -98,13 +100,16 @@ public class MakeUUIDPrimaryForDListTables extends UpdateTaskAdapter {
             Tools.createPrimaryKeyIfAbsent(connection, TABLE, new String[] { COLUMN, "cid", "intfield01" });
             Tools.modifyColumns(connection, DEL_TABLE, new Column(COLUMN, "BINARY(16) NOT NULL"));
             Tools.createPrimaryKeyIfAbsent(connection, DEL_TABLE, new String[] { COLUMN, "cid", "intfield01" });
+
             connection.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
+            if (rollback) {
+                Databases.rollback(connection);
+            }
+            Databases.autocommit(connection);
         }
     }
 

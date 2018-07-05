@@ -51,6 +51,7 @@ package com.openexchange.server.impl;
 
 import java.io.Serializable;
 import java.security.acl.Permission;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.tools.OXCloneable;
 
@@ -111,6 +112,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
     private static final String STR_SYSTEM = "system";
 
+    private static final String STR_TYPE = "type";
+
     private static final long serialVersionUID = 3740098766897625419L;
 
     private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OCLPermission.class);
@@ -154,6 +157,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
     private int owp;
     private int odp;
     private int system;
+    private FolderPermissionType type;
+    private String legator;
 
     /**
      * This property defines if this permission declares the owner to be the
@@ -177,6 +182,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         orp = NO_PERMISSIONS;
         owp = NO_PERMISSIONS;
         odp = NO_PERMISSIONS;
+        type = FolderPermissionType.NORMAL;
+        legator = null;
     }
 
     /**
@@ -191,6 +198,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         orp = NO_PERMISSIONS;
         owp = NO_PERMISSIONS;
         odp = NO_PERMISSIONS;
+        type = FolderPermissionType.NORMAL;
+        legator = null;
         this.entity = entity;
         this.fuid = fuid;
     }
@@ -209,6 +218,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         folderAdmin = false;
         groupPermission = false;
         system = 0;
+        type = FolderPermissionType.NORMAL;
+        legator = null;
     }
 
     /**
@@ -218,6 +229,31 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
      */
     public void setSystem(final int system) {
         this.system = system;
+    }
+
+    /**
+     * Sets the folder's type
+     *
+     * @param type The folder's type
+     */
+    public void setType(final FolderPermissionType type) {
+        this.type = type;
+    }
+    
+    /**
+     * Retrieves the id of the permission legator
+     */
+    public String getPermissionLegator() {
+        return legator;
+    }
+
+    /**
+     * Sets the permission legator
+     * 
+     * @param legator The permission legator
+     */
+    public void setPermissionLegator(String legator) {
+        this.legator = legator;
     }
 
     /**
@@ -572,13 +608,22 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
     }
 
     /**
+     * Gets the folder's type.
+     *
+     * @return The folder's type
+     */
+    public FolderPermissionType getType() {
+        return type;
+    }
+
+    /**
      * Checks if this permission's system bit mask indicates the system flag
      *
      * @return <code>true</code> if system flag is set; otherwise
      *         <code>false</code>
      */
     public boolean isSystem() {
-        return (system & SYSTEM_SYSTEM) == SYSTEM_SYSTEM;
+        return system == SYSTEM_SYSTEM;
     }
 
     /**
@@ -609,7 +654,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         final OCLPermission op = (OCLPermission) other;
         return (entity == op.entity) && (fuid == op.fuid) && (fp == op.fp) && (orp == op.orp) && (owp == op.owp)
                 && (odp == op.odp) && (folderAdmin == op.folderAdmin) && (groupPermission == op.groupPermission)
-                && (system == op.system);
+                && (system == op.system) && (type == op.type)
+                && ((legator != null && legator.equals(op.legator)) || (legator == null && op.legator == null));
     }
 
     @Override
@@ -624,6 +670,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         hash = 31 * hash + (folderAdmin ? 1 : 0);
         hash = 31 * hash + (groupPermission ? 1 : 0);
         hash = 31 * hash + system;
+        hash = 31 * hash + type.getTypeNumber();
+        hash = 31 * hash + (legator == null ? 0 : legator.hashCode());
         return hash;
     }
 
@@ -632,7 +680,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         final StringBuffer sb = new StringBuffer(50);
         sb.append((folderAdmin ? STR_FOLDER_ADMIN : STR_EMPTY)).append((groupPermission ? STR_GROUP : STR_USER))
                 .append(entity).append('@').append(fp).append('.').append(orp).append('.').append(owp).append('.')
-                .append(odp).append(' ').append(STR_SYSTEM).append('=').append(system);
+                .append(odp).append(' ').append(STR_SYSTEM).append('=').append(system)
+                .append(' ').append(STR_TYPE).append('=').append(type);
         return sb.toString();
     }
 

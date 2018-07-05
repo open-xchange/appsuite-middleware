@@ -10,6 +10,7 @@ import com.openexchange.ajax.infostore.test.Bug27722Test;
 import com.openexchange.ajax.infostore.test.Bug32004Test;
 import com.openexchange.ajax.infostore.test.Bug40142Test;
 import com.openexchange.ajax.infostore.test.Bug44622Test;
+import com.openexchange.ajax.infostore.test.Bug54232Test;
 import com.openexchange.ajax.infostore.test.CheckNameActionTest;
 import com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest;
 import com.openexchange.ajax.infostore.test.CreateFileWithIllegalCharactersTest;
@@ -50,8 +51,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug44622Test.class,
     Bug44891Test.class,
     TryAddVersionTest.class,
-
+    Bug54232Test.class
 })
 public class InfostoreAJAXSuite  {
-
+    // empty
 }

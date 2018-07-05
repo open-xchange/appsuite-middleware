@@ -375,7 +375,7 @@ public class CSSMatcherTest {
         String convertedCss = cssBld.toString().trim();
         Assert.assertEquals("Processed CSS does not match.", content, convertedCss);
     }
-    
+
     @Test
     public void testDoCheckCss_bug57095() {
         FilterMaps.loadWhitelist();

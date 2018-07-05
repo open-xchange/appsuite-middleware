@@ -23,11 +23,11 @@
 
 package com.openexchange.socketio.server;
 
+import java.util.Collection;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
-import java.util.Collection;
 
 /**
  * Transport factory

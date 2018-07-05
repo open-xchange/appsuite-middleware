@@ -58,9 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;

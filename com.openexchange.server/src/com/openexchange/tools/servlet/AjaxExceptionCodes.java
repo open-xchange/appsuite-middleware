@@ -50,8 +50,8 @@
 package com.openexchange.tools.servlet;
 
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
-import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE_DENIED;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -77,7 +77,7 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Invalid parameter: %s
      */
-    IMVALID_PARAMETER("Invalid parameter: %s", MESSAGE, Category.CATEGORY_USER_INPUT, 4),
+    INVALID_PARAMETER("Invalid parameter: %s", MESSAGE, Category.CATEGORY_USER_INPUT, 4),
     /**
      * I/O error while writing to Writer object: %s
      */

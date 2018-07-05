@@ -411,7 +411,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         configuration.put(IMAP_PORT_FIELD, new Integer(configurations.imapConfig.port));
         configuration.put(IMAP_SECURE_FIELD, new Boolean(configurations.imapConfig.secure));
 
-        boolean needsAuthentication = false == configurations.smtpConfig.noAuthentication();
+        boolean needsAuthentication = configurations.smtpConfig.needsAuthentication;
         if (needsAuthentication) {
             configuration.put(SMTP_LOGIN_FIELD, configurations.smtpConfig.login);
             configuration.put(SMTP_SERVER_FIELD, configurations.smtpConfig.host);
@@ -514,7 +514,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         // -------------------------------------------------- OutgoingMailServer --------------------------------------------------------
 
         // Designates the authentication scheme for outgoing mail. Allowed values are EmailAuthPassword and EmailAuthNone.
-        boolean needsAuthentication = !Strings.isEmpty(configurations.smtpConfig.login) || !Strings.isEmpty(configurations.smtpConfig.password);
+        boolean needsAuthentication = configurations.smtpConfig.needsAuthentication;
         payloadContent.addStringValue("OutgoingMailServerAuthentication", needsAuthentication ? "EmailAuthPassword" : "EmailAuthNone");
 
         // Designates the outgoing mail server host name (or IP address).

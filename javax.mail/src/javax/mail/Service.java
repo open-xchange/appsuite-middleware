@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,11 +40,14 @@
 
 package javax.mail;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.EventListener;
+import java.util.Vector;
 import java.util.concurrent.Executor;
-import javax.mail.event.*;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.ConnectionListener;
+import javax.mail.event.MailEvent;
 
 /**
  * An abstract class that contains the functionality
@@ -59,7 +62,7 @@ import javax.mail.event.*;
  * @author Kanwar Oberoi
  */
 
-public abstract class Service {
+public abstract class Service implements AutoCloseable {
 
     /**
      * The session from which this service was created.
@@ -87,7 +90,7 @@ public abstract class Service {
      * deadlocks when notifying listeners.)
      */
     private final Vector<ConnectionListener> connectionListeners
-	    = new Vector<ConnectionListener>();
+	    = new Vector<>();
 
     /**
      * The queue of events to be delivered.
@@ -623,6 +626,7 @@ public abstract class Service {
      * Return <code>getURLName.toString()</code> if this service has a URLName,
      * otherwise it will return the default <code>toString</code>.
      */
+    @Override
     public String toString() {
 	URLName url = getURLName();
 	if (url != null)
@@ -637,8 +641,8 @@ public abstract class Service {
      * @param	event	the event
      * @param	vector	the vector of listeners
      */
-    @SuppressWarnings("rawtypes")
-    protected void queueEvent(MailEvent event, Vector vector) {
+    protected void queueEvent(MailEvent event,
+	    Vector<? extends EventListener> vector) {
 	/*
          * Copy the vector in order to freeze the state of the set
          * of EventListeners the event should be delivered to prior
@@ -655,6 +659,7 @@ public abstract class Service {
     /**
      * Stop the event dispatcher thread so the queue can be garbage collected.
      */
+    @Override
     protected void finalize() throws Throwable {
 	try {
 	    q.terminateQueue();

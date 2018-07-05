@@ -50,7 +50,8 @@
 package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Iterator;
 import org.junit.Before;

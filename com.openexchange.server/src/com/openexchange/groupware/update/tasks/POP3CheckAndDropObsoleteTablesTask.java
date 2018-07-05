@@ -49,16 +49,14 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -83,19 +81,14 @@ public class POP3CheckAndDropObsoleteTablesTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int cid = params.getContextId();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
-        boolean modified = false;
-        Connection con = null;
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            con = dbService.getForUpdateTask(cid);
             con.setAutoCommit(false);
             rollback = true;
 
             for (String table : new String[] { "user_pop3_user_flag", "user_pop3_data" }) {
-                modified |= dropTable(table, con);
+                dropTable(table, con);
             }
 
             con.commit();
@@ -109,11 +102,6 @@ public class POP3CheckAndDropObsoleteTablesTask extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            if (modified) {
-                dbService.backForUpdateTask(cid, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(cid, con);
-            }
         }
 
     }

@@ -79,6 +79,7 @@ public class ConfigDBUniqueIDTest {
         PROPS = new Properties();
         PROPS.put("user", "openexchange");
         PROPS.put("password", "secret");
+        PROPS.put("useSSL", "false");
         PROPS.put("useUnicode", "true");
         PROPS.put("characterEncoding", "UTF-8");
         PROPS.put("autoReconnect", "true");

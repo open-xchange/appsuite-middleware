@@ -84,7 +84,7 @@ public class DurationToJSONConverter extends AbstractGoodQualityConverter {
             durationObject.put("durationInSeconds", duration.getValueInS());
             return durationObject;
         } catch (Exception e) {
-            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(e, data.toString());
         }
     }
 

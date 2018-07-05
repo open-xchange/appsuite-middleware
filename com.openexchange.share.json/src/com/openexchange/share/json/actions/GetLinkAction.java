@@ -98,6 +98,7 @@ public class GetLinkAction extends AbstractShareAction {
                 jsonResult.put("expiry_date", getParser().addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData, session)));
             }
             jsonResult.putOpt("password", shareLink.getGuest().getPassword());
+            jsonResult.putOpt("includeSubfolders", shareLink.isIncludeSubfolders());
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }

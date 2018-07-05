@@ -66,5 +66,6 @@ public class ReportSerializationActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         Services.setServices(null);
         getServiceRegistry().clearRegistry();
+        super.stopBundle();
     }
 }

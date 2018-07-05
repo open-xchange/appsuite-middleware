@@ -51,14 +51,15 @@ package com.openexchange.groupware.update.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
+import com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask;
 import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.AddStartTLSColumnForMailAccountTablesTask;
+import com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask;
 import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
@@ -143,7 +144,7 @@ public final class InternalList {
      * Starts the internal list.
      */
     public void start() {
-        final DynamicList registry = DynamicList.getInstance();
+        final DynamicSet registry = DynamicSet.getInstance();
         TASKS = genTaskList();
         for (final UpdateTaskV2 task : TASKS) {
             if (!registry.addUpdateTask(task)) {
@@ -156,7 +157,7 @@ public final class InternalList {
      * Stops the internal list.
      */
     public void stop() {
-        final DynamicList registry = DynamicList.getInstance();
+        final DynamicSet registry = DynamicSet.getInstance();
         for (final UpdateTaskV2 task : TASKS) {
             registry.removeUpdateTask(task);
         }
@@ -645,6 +646,88 @@ public final class InternalList {
 
         // Extends uidl column of the pop3_storage_ids and pop3_storage_deleted tables
         list.add(new com.openexchange.groupware.update.tasks.POP3ExtendUidlTask());
+
+        // Adds the column "type" to the oxfolder_permissions table
+        list.add(new AddTypeToFolderPermissionTableUpdateTask());
+
+        // Adds the column "sharedParentFolder" to the oxfolder_permissions table
+        list.add(new AddSharedParentFolderToFolderPermissionTableUpdateTask());
+
+        // Drops rather needless foreign key from "object_use_count" table
+        list.add(new com.openexchange.groupware.update.tasks.DropForeignKeyFromObjectUseCountTable());
+
+        // Add origin column to "del_infostore" table to be able to restore deleted files to origin
+        list.add(new com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables());
+
+        // Drops aliases from non-existent users from database
+        list.add(new com.openexchange.groupware.update.tasks.DropAliasesFromNonExistentUsers());
+
+        // Removes any duplicate entries from the updateTask table
+        list.add(new com.openexchange.groupware.update.tasks.RemoveDuplicatesFromUpdateTaskTable());
+
+        // Converts mail account tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.MailAccountConvertUtf8ToUtf8mb4Task());
+
+        // Converts object_use_count and object_permission to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.ObjectUseCountPermissionTableUtf8Mb4UpdateTask());
+
+        // Converts task tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.TaskConvertUtf8ToUtf8mb4Task());
+
+        // Converts attachment tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.AttachmentConvertUtf8ToUtf8mb4Task());
+
+        // Converts the reminder table to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.ReminderTableUtf8Mb4UpdateTask());
+
+        // Converts folder tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.FolderConvertUtf8ToUtf8mb4Task());
+
+        // Converts login2user, updateTask, replicationMonitor, quota_context tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.AdminTablesUtf8Mb4UpdateTask());
+
+        // Converts sequence tables to uf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.SequenceTablesUtf8Mb4UpdateTask());
+
+        // Converts LDAP tables to uf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.LdapConvertUtf8ToUtf8mb4Task());
+
+        // Converts settings tables to uf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.SettingsConvertUtf8ToUtf8mb4Task());
+
+        // Converts misc. tables (prg_links, filestore_usage, etc.) to utf8mb4.
+        list.add(new com.openexchange.groupware.update.tasks.MiscConvertUtf8ToUtf8mb4Task());
+
+        // Converts "contextAttribute" to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.ContextAttributeConvertUtf8ToUtf8mb4Task());
+
+        // Converts prg_dlist, del_dlist, prg_contacts_linkage, prg_contacts_image, del_contacts_image, del_contacts, prg_contacts tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.ContactTablesUtf8Mb4UpdateTask());
+
+        // Converts infostore tables to utf8mb4.
+        list.add(new com.openexchange.groupware.update.tasks.InfostoreConvertUtf8ToUtf8mb4Task());
+
+        // Converts aggregated contacts
+        list.add(new com.openexchange.groupware.update.tasks.AggregatingContactsConvertUtf8ToUtf8mb4Task());
+
+        // Convert ID sequence table to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.IDConvertToUtf8mb4Task());
+
+        // Convert the resource and del_resource to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.ResourceTablesUtf8Mb4UpdateTask());
+
+        // Converts OAuth accessor tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.OAuthAccessorConvertToUtf8mb4());
+        list.add(new com.openexchange.groupware.update.tasks.IndexedFoldersConvertToUtf8mb4());
+
+        // Convert iCal/vCard tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.IcalVcardConvertToUtf8mb4());
+
+        // Convert legacy calendar tables to utf8mb4
+        list.add(new com.openexchange.groupware.update.tasks.LegacyCalendarTablesUtf8Mb4UpdateTask());
+
+        // Drops the unused "Shared address book" from database
+        list.add(new com.openexchange.groupware.update.tasks.DropUnusedSharedAddressBookFolder());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

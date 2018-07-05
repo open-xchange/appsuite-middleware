@@ -80,7 +80,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.TestInit;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ReplicationMonitorPerformanceTest}
@@ -127,13 +126,13 @@ public class ReplicationMonitorPerformanceTest {
         try {
             stmt = writeCon.createStatement();
             stmt.executeUpdate("DROP TABLE IF EXISTS replicationMonitorPerformanceTest;");
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = writeCon.createStatement();
             stmt.executeUpdate("CREATE TABLE `replicationMonitorPerformanceTest` (" + "`id` int(10) unsigned NOT NULL, " + "`key` varchar(128) COLLATE utf8_unicode_ci NOT NULL, " + "`value` varchar(128) COLLATE utf8_unicode_ci NOT NULL, " + "PRIMARY KEY (`id`)" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
         } catch (SQLException e) {
             LOG.error("", e);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             db.releaseWriteConnection(context, writeCon);
         }
     }
@@ -146,7 +145,7 @@ public class ReplicationMonitorPerformanceTest {
             stmt = writeCon.createStatement();
             stmt.executeUpdate("DROP TABLE replicationMonitorPerformanceTest;");
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             db.releaseWriteConnection(context, writeCon);
         }
     }
@@ -158,7 +157,7 @@ public class ReplicationMonitorPerformanceTest {
         stmt.setLong(1, 0L);
         stmt.setInt(2, context.getContextId());
         stmt.executeUpdate();
-        DBUtils.closeSQLStuff(stmt);
+        Databases.closeSQLStuff(stmt);
         db.releaseWriteConnection(context, writeCon);
 
         Method[] methods = getClass().getDeclaredMethods();
@@ -214,7 +213,7 @@ public class ReplicationMonitorPerformanceTest {
         while (rs.next()) {
             w.println(rs.getObject(1).toString() + "," + rs.getObject(2).toString());
         }
-        DBUtils.closeSQLStuff(rs, stmt);
+        Databases.closeSQLStuff(rs, stmt);
 
         PreparedStatement pstmt = con.prepareStatement("SELECT `transaction` FROM replicationMonitor WHERE `cid` = ?");
         pstmt.setInt(1, context.getContextId());
@@ -222,7 +221,7 @@ public class ReplicationMonitorPerformanceTest {
         if (rs.next()) {
             w.println("ReplicationMonitor," + rs.getLong(1));
         }
-        DBUtils.closeSQLStuff(rs, pstmt);
+        Databases.closeSQLStuff(rs, pstmt);
 
         w.flush();
         w.close();
@@ -355,7 +354,7 @@ public class ReplicationMonitorPerformanceTest {
         PreparedStatement rstmt = null;
         ResultSet rs = null;
         try {
-            DBUtils.startTransaction(con);
+            Databases.startTransaction(con);
             int id = NEXT_ID.getAndIncrement();
             String key = UUID.randomUUID().toString();
             String value = UUID.randomUUID().toString();
@@ -377,9 +376,9 @@ public class ReplicationMonitorPerformanceTest {
             e.printStackTrace();
             con.rollback();
         } finally {
-            DBUtils.closeSQLStuff(wstmt);
-            DBUtils.closeSQLStuff(rs, rstmt);
-            DBUtils.autocommit(con);
+            Databases.closeSQLStuff(wstmt);
+            Databases.closeSQLStuff(rs, rstmt);
+            Databases.autocommit(con);
             db.releaseWriteConnection(context, con);
         }
 
@@ -394,7 +393,7 @@ public class ReplicationMonitorPerformanceTest {
         PreparedStatement rstmt = null;
         ResultSet rs = null;
         try {
-            DBUtils.startTransaction(con);
+            Databases.startTransaction(con);
             wstmt = con.prepareStatement("INSERT INTO replicationMonitorPerformanceTest (`id`, `key`, `value`) VALUES (?, ?, ?)");
             Set<Integer> ids = new HashSet<Integer>(times);
             for (int i = 0; i < times; i++) {
@@ -433,9 +432,9 @@ public class ReplicationMonitorPerformanceTest {
             e.printStackTrace();
             con.rollback();
         } finally {
-            DBUtils.closeSQLStuff(wstmt);
-            DBUtils.closeSQLStuff(rs, rstmt);
-            DBUtils.autocommit(con);
+            Databases.closeSQLStuff(wstmt);
+            Databases.closeSQLStuff(rs, rstmt);
+            Databases.autocommit(con);
             db.releaseWriteConnection(context, con);
         }
 
@@ -468,8 +467,8 @@ public class ReplicationMonitorPerformanceTest {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            DBUtils.closeSQLStuff(wstmt);
-            DBUtils.closeSQLStuff(rs, rstmt);
+            Databases.closeSQLStuff(wstmt);
+            Databases.closeSQLStuff(rs, rstmt);
             db.releaseWriteConnection(context, con);
         }
 
@@ -489,7 +488,7 @@ public class ReplicationMonitorPerformanceTest {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            DBUtils.closeSQLStuff(rs, rstmt);
+            Databases.closeSQLStuff(rs, rstmt);
             db.releaseWriteConnection(context, con);
         }
 
@@ -509,7 +508,7 @@ public class ReplicationMonitorPerformanceTest {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            DBUtils.closeSQLStuff(rs, rstmt);
+            Databases.closeSQLStuff(rs, rstmt);
             db.releaseWriteConnectionAfterReading(context, con);
         }
 

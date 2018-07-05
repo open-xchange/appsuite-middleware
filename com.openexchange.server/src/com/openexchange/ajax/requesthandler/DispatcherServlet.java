@@ -238,7 +238,7 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * The default <code>AJAXRequestDataTools</code>.
      */
-    protected final AJAXRequestDataTools defaultRequestDataTools;
+    protected final transient AJAXRequestDataTools defaultRequestDataTools;
 
     /**
      * The line separator.
@@ -318,11 +318,11 @@ public class DispatcherServlet extends SessionServlet {
             try {
                 result = SessionUtility.getSession(req, resp, sessionId, sessiondService);
             } catch (OXException e) {
-                if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
+                if (!SessionExceptionCodes.SESSION_EXPIRED.equals(e)) {
                     throw e;
                 }
                 // Got a wrong or missing secret
-                String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
+                String wrongSecret = e.getProperty(SessionExceptionCodes.SESSION_EXPIRED.name());
                 if (!"null".equals(wrongSecret)) {
                     // No information available or a differing secret
                     throw e;
@@ -386,7 +386,7 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     /**
-     * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
+     * A set of those {@link OXExceptionCode}s that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
     private static final Set<OXExceptionCode> IGNOREES = ImmutableSet.<OXExceptionCode> of(
             OXFolderExceptionCode.NOT_EXISTS,
@@ -396,7 +396,6 @@ public class DispatcherServlet extends SessionServlet {
             MailExceptionCode.REFERENCED_MAIL_NOT_FOUND,
             MailExceptionCode.FOLDER_NOT_FOUND,
             SessionExceptionCodes.SESSION_EXPIRED,
-            SessionExceptionCodes.WRONG_SESSION_SECRET,
             UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
             UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED,
             AjaxExceptionCodes.CONNECTION_RESET
@@ -413,7 +412,7 @@ public class DispatcherServlet extends SessionServlet {
      * @param e The {@code OXException} instance to check
      * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
      */
-    protected static boolean ignore(OXException e) {
+    public static boolean ignore(OXException e) {
         if (e.isLightWeight()) {
             return true;
         }
@@ -549,6 +548,19 @@ public class DispatcherServlet extends SessionServlet {
 
     @Override
     protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
+            Object[] logArgs = e.getLogArgs();
+            Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
+            int sc = ((Integer) logArgs[0]).intValue();
+            sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), resp);
+            Throwable cause = e.getNonOXExceptionCause();
+            if (null == cause) {
+                logException(e, LogLevel.DEBUG, sc);
+            } else {
+                logException(e);
+            }
+            return;
+        }
         if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
             // E.g. "Accept: application/json, text/javascript, ..."
             if (isJsonResponseExpected(req, true)) {
@@ -563,19 +575,6 @@ public class DispatcherServlet extends SessionServlet {
         if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
             sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), resp);
             logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-        if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
-            Object[] logArgs = e.getLogArgs();
-            Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
-            int sc = ((Integer) logArgs[0]).intValue();
-            sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), resp);
-            Throwable cause = e.getNonOXExceptionCause();
-            if (null == cause) {
-                logException(e, LogLevel.DEBUG, sc);
-            } else {
-                logException(e);
-            }
             return;
         }
 
@@ -703,34 +702,46 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     protected void logException(@Nullable Exception e, @Nullable LogLevel logLevel, int statusCode) {
-        if (null == e) {
+        logException(e, LOG, statusCode, logLevel);
+    }
+
+    /**
+     * Logs specified exception according to specified arguments.
+     *
+     * @param e The exception to log or <code>null</code> to do nothing
+     * @param logger The logger instance to use
+     * @param optStatusCode The optional status code in case an HTTP error is about to be advertised to client; or less than/equal to <code>0</code> (zero) for no HTTP error
+     * @param optLogLevel The optional log level; if <code>null</code> then <code>ERROR</code> is used
+     */
+    public static void logException(@Nullable Exception e, org.slf4j.Logger logger, int optStatusCode, @Nullable LogLevel optLogLevel) {
+        if (null == e || null == logger) {
             return;
         }
 
-        String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
+        String msg = optStatusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(optStatusCode).toString() : "Error processing request.";
 
-        if (null == logLevel) {
-            LOG.error(msg, e);
+        if (null == optLogLevel) {
+            logger.error(msg, e);
             return;
         }
 
-        switch (logLevel) {
+        switch (optLogLevel) {
         case TRACE:
-            LOG.trace(msg, e);
+            logger.trace(msg, e);
             break;
         case DEBUG:
-            LOG.debug(msg, e);
+            logger.debug(msg, e);
             break;
         case INFO:
-            LOG.info(msg, e);
+            logger.info(msg, e);
             break;
         case WARNING:
-            LOG.warn(msg, e);
+            logger.warn(msg, e);
             break;
         case ERROR:
             // fall-through
         default:
-            LOG.error(msg, e);
+            logger.error(msg, e);
         }
     }
 

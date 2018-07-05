@@ -101,7 +101,7 @@ public final class TimeTools {
         return calendar;
     }
 
-    private static final String[] patterns = { "dd/MM/yyyy HH:mm", "dd.MM.yyyy HH:mm", "yyyy-MM-dd HH:mm" };
+    private static final String[] patterns = { "dd/MM/yyyy HH:mm", "dd.MM.yyyy HH:mm", "yyyy-MM-dd HH:mm", "yyyyMMdd'T'HHmmss" };
 
     public static Calendar createCalendar(TimeZone tz, int year, int month, int day, int hour) {
         Calendar calendar = new GregorianCalendar(tz);
@@ -165,4 +165,28 @@ public final class TimeTools {
         timestamp *= 1000;
         return new Date(timestamp);
     }
+
+    /**
+     * Create a <i>Date</i> object as defined in the low-level protocol of the HTTP API:
+     * <p/>
+     * <cite>
+     * Dates without time are transmitted as the number of milliseconds between 00:00 UTC on that date and 1970-01-01 00:00 UTC.
+     * Leap seconds are ignored, therefore this number is always an integer multiple of 8.64e7
+     * </cite>
+     *
+     * @param localtimeZone The local timezone of the client/user
+     * @param localDate The local date to get the API date for
+     * @param datesToAdd An optional number of days to add to the result, e.g. to prepare the "end" parameter of range queries
+     * @return The API date
+     */
+    public static Date getAPIDate(TimeZone localtimeZone, Date localDate, int datesToAdd) {
+        Calendar localCalendar = GregorianCalendar.getInstance(localtimeZone);
+        localCalendar.setTime(localDate);
+        localCalendar.add(Calendar.DAY_OF_YEAR, datesToAdd);
+        Calendar utcCalendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+        utcCalendar.set(localCalendar.get(Calendar.YEAR), localCalendar.get(Calendar.MONTH), localCalendar.get(Calendar.DATE), 0, 0, 0);
+        utcCalendar.set(Calendar.MILLISECOND, 0);
+        return utcCalendar.getTime();
+    }
+
 }

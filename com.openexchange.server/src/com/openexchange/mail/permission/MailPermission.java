@@ -66,9 +66,9 @@ import com.openexchange.server.impl.OCLPermission;
 public abstract class MailPermission extends OCLPermission {
 
     /**
-     * Serial version UID
+     * serialVersionUID
      */
-    private static final long serialVersionUID = 3074890171981933102L;
+    private static final long serialVersionUID = 1L;
 
     /**
      * Initializes a new {@link MailPermission}

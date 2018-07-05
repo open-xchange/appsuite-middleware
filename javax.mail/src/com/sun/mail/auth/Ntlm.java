@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2005-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -44,9 +44,7 @@
 
 package com.sun.mail.auth;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.io.PrintStream;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
@@ -56,7 +54,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
-
 import com.sun.mail.util.BASE64DecoderStream;
 import com.sun.mail.util.BASE64EncoderStream;
 import com.sun.mail.util.MailLogger;
@@ -359,7 +356,7 @@ public class Ntlm {
 	{ '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
 
     private static String toHex(byte[] b) {
-	StringBuffer sb = new StringBuffer(b.length * 3);
+    StringBuilder sb = new StringBuilder(b.length * 3);
 	for (int i = 0; i < b.length; i++)
 	    sb.append(hex[(b[i]>>4)&0xF]).append(hex[b[i]&0xF]).append(' ');
 	return sb.toString();

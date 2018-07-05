@@ -81,10 +81,10 @@ import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ReportingMBean}
@@ -217,6 +217,7 @@ public class ReportingMBean implements DynamicMBean {
                     rs.close();
                     stmt.close();
 
+                    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                     stmt = connection.prepareStatement("SELECT c.cid,COUNT(c.permissions),c.permissions,COUNT(IF(u.mailEnabled=0,1,null)) FROM user_configuration AS c JOIN user AS u ON u.cid=c.cid AND u.id=c.user WHERE u.guestCreatedBy=0 GROUP BY permissions,cid ORDER BY cid;");
                     rs = stmt.executeQuery();
                     while (rs.next()) {
@@ -249,7 +250,7 @@ public class ReportingMBean implements DynamicMBean {
                     LOG.error("", e);
                     throw new MBeanException(e, e.getMessage());
                 } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                     dbService.back(readPool, connection);
                 }
             }
@@ -320,6 +321,7 @@ public class ReportingMBean implements DynamicMBean {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
+                    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                     stmt = connection.prepareStatement("SELECT c.permissions,COUNT(c.permissions) AS count,COUNT(IF(c.user=2,1,null)) AS nradm,COUNT(IF(u.mailEnabled=0,1,null)) AS nrdisabled FROM user_configuration AS c JOIN user AS u ON u.cid=c.cid AND u.id=c.user WHERE u.guestCreatedBy=0 GROUP BY c.permissions");
                     rs = stmt.executeQuery();
                     while (rs.next()) {
@@ -349,7 +351,7 @@ public class ReportingMBean implements DynamicMBean {
                     LOG.error("", e);
                     throw new MBeanException(e, e.getMessage());
                 } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                     dbService.back(readPool, connection);
                 }
             }
@@ -462,27 +464,27 @@ public class ReportingMBean implements DynamicMBean {
     private final MBeanInfo buildMBeanInfo() {
         try {
             final String[] totalDescriptions = { "Number of contexts", "Number of users", "Number of guests", "Number of links" };
-            final OpenType[] totalTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
+            final OpenType<?>[] totalTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
             totalRow = new CompositeType("Total row", "A total row", totalNames, totalDescriptions, totalTypes);
             totalType = new TabularType("Total", "Total view", totalRow, totalNames);
 
             final String[] macsDescriptions = { "Access combination", "Count", "Admins", "Disabled" };
-            final OpenType[] macsTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
+            final OpenType<?>[] macsTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
             macsRow = new CompositeType("Macs row", "A macs row", macsNames, macsDescriptions, macsTypes);
             macsType = new TabularType("Macs", "Macs view", macsRow, macsNames);
 
             final String[] moduleAccessCombinationDescriptions = { "Integer value of the module access combination", "number of users configured with this module access combination", "inactive subset of useres configured with this module access combination" };
-            final OpenType[] moduleAccessCombinationTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
+            final OpenType<?>[] moduleAccessCombinationTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
             moduleAccessPermission = new CompositeType("Module access permission", "A module access combination and the number of users having it", moduleAccessCombinationNames, moduleAccessCombinationDescriptions, moduleAccessCombinationTypes);
             moduleAccessCombinationsType = new TabularType("Module access permission combinations", "The different access combinations used in this context", moduleAccessPermission, new String[] { "module access combination" });
 
             final String[] detailDescriptions = { "Context identifier", "Context admin permission", "Number of users", "Context age in days", "Date and time of context creation", "Module access permission combinations" };
-            final OpenType[] detailTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, moduleAccessCombinationsType };
+            final OpenType<?>[] detailTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, moduleAccessCombinationsType };
             detailRow = new CompositeType("Detail row", "A detail row", detailNames, detailDescriptions, detailTypes);
             detailType = new TabularType("Detail", "Detail view", detailRow, new String[] { "identifier" });
 
             final String[] configurationDescriptions = { "Property key", "Property value" };
-            final OpenType[] configurationTypes = { SimpleType.STRING, SimpleType.BOOLEAN };
+            final OpenType<?>[] configurationTypes = { SimpleType.STRING, SimpleType.BOOLEAN };
             configurationRow = new CompositeType("Configuration row", "A configuration row", configurationNames, configurationDescriptions, configurationTypes);
             configurationType = new TabularType("Configuration", "Configuration view", configurationRow, configurationNames);
 

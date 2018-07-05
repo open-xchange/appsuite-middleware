@@ -54,13 +54,13 @@ import java.util.LinkedList;
 import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,6 +82,7 @@ import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -110,11 +111,14 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
         ConfigViewFactory viewFactory = Services.getOptionalService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.onedrive.useOptimisticSubfolderDetection", true, view);
     }
 
-    private boolean hasSubfolders(String oneDriveFolderId, DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+    private boolean hasSubfolders(String oneDriveFolderId, HttpClient httpClient) throws OXException, JSONException, IOException {
         if (useOptimisticSubfolderDetection) {
             return true;
         }
@@ -141,11 +145,11 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         }
     }
 
-    protected OneDriveFolder parseFolder(String oneDriveFolderId, RestFolder restFolder, DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+    protected OneDriveFolder parseFolder(String oneDriveFolderId, RestFolder restFolder, HttpClient httpClient) throws OXException, JSONException, IOException {
         return new OneDriveFolder(userId).parseDirEntry(restFolder, getRootFolderId(), accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
     }
 
-    protected OneDriveFolder parseFolder(String oneDriveFolderId, JSONObject jFolder, DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+    protected OneDriveFolder parseFolder(String oneDriveFolderId, JSONObject jFolder, HttpClient httpClient) throws OXException, JSONException, IOException {
         return new OneDriveFolder(userId).parseDirEntry(jFolder, getRootFolderId(), accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
     }
 
@@ -154,7 +158,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         return perform(new OneDriveClosure<Boolean>() {
 
             @Override
-            protected Boolean doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected Boolean doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     HttpGet method = new HttpGet(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
@@ -181,7 +185,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         return perform(new OneDriveClosure<FileStorageFolder>() {
 
             @Override
-            protected FileStorageFolder doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected FileStorageFolder doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     String fid = toOneDriveFolderId(folderId);
@@ -224,7 +228,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         return perform(new OneDriveClosure<FileStorageFolder[]>() {
 
             @Override
-            protected FileStorageFolder[] doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected FileStorageFolder[] doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 HttpResponse httpResponse = null;
                 try {
@@ -291,7 +295,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
             return perform(new OneDriveClosure<String>() {
 
                 @Override
-                protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                     String parentId = toCreate.getParentId();
                     HttpPost request = null;
                     try {
@@ -324,7 +328,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                 return perform(new OneDriveClosure<String>() {
 
                     @Override
-                    protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                    protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                         HttpPost request = null;
                         try {
                             request = new HttpPost(buildUri(toOneDriveFolderId(parentId), initiateQueryString()));
@@ -386,7 +390,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                 String id = perform(new OneDriveClosure<String>() {
 
                     @Override
-                    protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                    protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                         String baseName = getFolder(folderId).getName();
 
                         String oneDriveFolderId = toOneDriveFolderId(folderId);
@@ -435,7 +439,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
             return perform(new OneDriveClosure<String>() {
 
                 @Override
-                protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+                protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                     HttpMove request = null;
                     try {
                         request = new HttpMove(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
@@ -462,7 +466,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         String id = perform(new OneDriveClosure<String>() {
 
             @Override
-            protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 String baseName = getFolder(folderId).getName();
 
                 String oneDriveFolderId = toOneDriveFolderId(folderId);
@@ -517,7 +521,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         return perform(new OneDriveClosure<String>() {
 
             @Override
-            protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 NextTry: while (true) {
                     HttpPut request = null;
                     HttpResponse httpResponse = null;
@@ -562,7 +566,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         return perform(new OneDriveClosure<String>() {
 
             @Override
-            protected String doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     HttpDelete method = new HttpDelete(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
@@ -592,7 +596,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         perform(new OneDriveClosure<Void>() {
 
             @Override
-            protected Void doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected Void doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     String fid = toOneDriveFolderId(folderId);
@@ -646,7 +650,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         return perform(new OneDriveClosure<FileStorageFolder[]>() {
 
             @Override
-            protected FileStorageFolder[] doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected FileStorageFolder[] doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
 
                 List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
 
@@ -670,7 +674,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         return perform(new OneDriveClosure<Quota>() {
 
             @Override
-            protected Quota doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected Quota doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpGet request = null;
                 try {
                     request = new HttpGet(buildUri("me/skydrive/quota", initiateQueryString()));

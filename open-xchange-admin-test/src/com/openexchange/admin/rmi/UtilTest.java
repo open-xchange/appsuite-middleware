@@ -92,7 +92,6 @@ public class UtilTest extends AbstractTest {
         client_db.setPoolInitial(2);
         client_db.setPoolMax(100);
         client_db.setUrl("jdbc:mysql://" + hostname + "/?useUnicode=true&characterEncoding=UTF-8&" + "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" + "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
-        client_db.setClusterWeight(100);
         client_db.setMasterId(0);
         return client_db;
     }
@@ -113,7 +112,7 @@ public class UtilTest extends AbstractTest {
             c_reasons.add(mr);
         }
 
-        // now fetch all reasons, and look if my added reasons are within this data set        
+        // now fetch all reasons, and look if my added reasons are within this data set
         int resp = 0;
         MaintenanceReason[] srv_reasons = oxu.listMaintenanceReason("*", ContextTest.DummyMasterCredentials());
         for (int c = 0; c < c_reasons.size(); c++) {
@@ -149,7 +148,7 @@ public class UtilTest extends AbstractTest {
             }
         }
         //        for(int a = 0;a<=srv_resp.length;a++){
-        //            
+        //
         //        }
         // resp muss 1 sein , ansonsten gibts 2 server mit selber id und name
         assertTrue("Expected 1 server", resp == 1);

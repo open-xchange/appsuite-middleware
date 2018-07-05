@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,9 +40,11 @@
 
 package com.sun.mail.handlers;
 
-import java.io.IOException;
 import java.awt.datatransfer.DataFlavor;
-import javax.activation.*;
+import java.io.IOException;
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataContentHandler;
+import javax.activation.DataSource;
 
 /**
  * Base class for other DataContentHandlers.
@@ -52,12 +54,19 @@ public abstract class handler_base implements DataContentHandler {
     /**
      * Return an array of ActivationDataFlavors that we support.
      * Usually there will be only one.
+     *
+     * @return  array of ActivationDataFlavors that we support
      */
     protected abstract ActivationDataFlavor[] getDataFlavors();
 
     /**
      * Given the flavor that matched, return the appropriate type of object.
      * Usually there's only one flavor so just call getContent.
+     *
+     * @param   aFlavor the ActivationDataFlavor
+     * @param   ds  DataSource containing the data
+     * @return  the object
+     * @exception   IOException for errors reading the data
      */
     protected Object getData(ActivationDataFlavor aFlavor, DataSource ds)
 				throws IOException {
@@ -69,6 +78,7 @@ public abstract class handler_base implements DataContentHandler {
      *
      * @return The DataFlavors
      */
+    @Override
     public DataFlavor[] getTransferDataFlavors() {
 	ActivationDataFlavor[] adf = getDataFlavors();
 	if (adf.length == 1)	// the common case
@@ -81,10 +91,12 @@ public abstract class handler_base implements DataContentHandler {
     /**
      * Return the Transfer Data of type DataFlavor from InputStream.
      *
-     * @param df The DataFlavor
-     * @param ds The DataSource corresponding to the data
-     * @return String object
+     * @param   df  The DataFlavor
+     * @param   ds  The DataSource corresponding to the data
+     * @return  the object
+     * @exception   IOException for errors reading the data
      */
+    @Override
     public Object getTransferData(DataFlavor df, DataSource ds) 
 			throws IOException {
 	ActivationDataFlavor[] adf = getDataFlavors();

@@ -1,15 +1,17 @@
 package liquibase.diff.output.report;
 
+import java.io.PrintStream;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import liquibase.diff.DiffResult;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
-import liquibase.structure.DatabaseObject;
-import liquibase.diff.DiffResult;
 import liquibase.diff.StringDiff;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
-
-import java.io.PrintStream;
-import java.util.*;
 
 public class DiffToReport {
 

@@ -84,4 +84,14 @@ public enum FileStorageFolderType {
 
     TEMPLATES_FOLDER
     ;
+
+    public static final String PICTURES = "<PICTURES>";
+
+    public static final String DOCUMENTS = "<DOCUMENTS>";
+
+    public static final String MUSIC = "<MUSIC>";
+
+    public static final String VIDEOS = "<VIDEOS>";
+
+    public static final String TEMPLATES = "<TEMPLATES>";
 }

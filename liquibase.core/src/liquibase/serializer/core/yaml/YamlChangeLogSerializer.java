@@ -1,15 +1,22 @@
 package liquibase.serializer.core.yaml;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.serializer.ChangeLogSerializer;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.introspector.FieldProperty;
 import org.yaml.snakeyaml.introspector.GenericProperty;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -18,14 +25,12 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
-
-import java.beans.IntrospectionException;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Type;
-import java.sql.Timestamp;
-import java.util.*;
+import liquibase.changelog.ChangeSet;
+import liquibase.serializer.ChangeLogSerializer;
+import liquibase.serializer.LiquibaseSerializable;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
 
 public class YamlChangeLogSerializer implements ChangeLogSerializer {
 
@@ -135,7 +140,7 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
 
 
         @Override
-        protected Set<Property> getProperties(Class<? extends Object> type) throws IntrospectionException {
+        protected Set<Property> getProperties(Class<? extends Object> type) {
             Set<Property> returnSet = new HashSet<Property>();
             LiquibaseSerializable serialzableType = null;
             try {
@@ -172,6 +177,16 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
             @Override
             public Object get(Object object) {
                 return ((LiquibaseSerializable) object).getSerializableFieldValue(getName());
+            }
+
+            @Override
+            public List<Annotation> getAnnotations() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
+                return null;
             }
         }
 

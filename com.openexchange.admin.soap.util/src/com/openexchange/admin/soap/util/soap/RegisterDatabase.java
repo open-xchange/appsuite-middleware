@@ -33,6 +33,8 @@ import com.openexchange.admin.soap.util.dataobjects.Database;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "db",
+    "createSchemas",
+    "optNumberOfSchemas",
     "auth"
 })
 @XmlRootElement(name = "registerDatabase")
@@ -40,6 +42,10 @@ public class RegisterDatabase {
 
     @XmlElement(nillable = true)
     protected Database db;
+    @XmlElement(nillable = true)
+    protected Boolean createSchemas;
+    @XmlElement(nillable = true)
+    protected Integer optNumberOfSchemas;
     @XmlElement(nillable = true)
     protected Credentials auth;
 
@@ -65,6 +71,42 @@ public class RegisterDatabase {
      */
     public void setDb(Database value) {
         this.db = value;
+    }
+
+    /**
+     * Gets the createSchemas
+     *
+     * @return The createSchemas
+     */
+    public Boolean getCreateSchemas() {
+        return createSchemas;
+    }
+
+    /**
+     * Sets the createSchemas
+     *
+     * @param createSchemas The createSchemas to set
+     */
+    public void setCreateSchemas(Boolean createSchemas) {
+        this.createSchemas = createSchemas;
+    }
+
+    /**
+     * Gets the optNumberOfSchemas
+     *
+     * @return The optNumberOfSchemas
+     */
+    public Integer getOptNumberOfSchemas() {
+        return optNumberOfSchemas;
+    }
+
+    /**
+     * Sets the optNumberOfSchemas
+     *
+     * @param optNumberOfSchemas The optNumberOfSchemas to set
+     */
+    public void setOptNumberOfSchemas(Integer optNumberOfSchemas) {
+        this.optNumberOfSchemas = optNumberOfSchemas;
     }
 
     /**

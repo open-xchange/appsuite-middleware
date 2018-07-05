@@ -49,9 +49,9 @@
 
 package com.openexchange.snippet.rdb;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.snippet.rdb.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.io.Closeable;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -105,7 +105,6 @@ import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.utils.SnippetUtils;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.procedure.TIntProcedure;
@@ -435,7 +434,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
              * Load attachments
              */
             if (supportsAttachments) {
-                stmt = con.prepareStatement("SELECT referenceId, fileName FROM snippetAttachment WHERE cid=? AND user=? AND id=?");
+                stmt = con.prepareStatement("SELECT referenceId, fileName, mimeType, disposition FROM snippetAttachment WHERE cid=? AND user=? AND id=?");
                 pos = 0;
                 stmt.setInt(++pos, contextId);
                 stmt.setInt(++pos, userId);
@@ -447,10 +446,20 @@ public final class RdbSnippetManagement implements SnippetManagement {
                         final String referenceId = rs.getString(1);
                         if (!rs.wasNull()) {
                             String filename = rs.getString(2);
+                            String mimeType = rs.getString(3);
+                            String disposition = rs.getString(4);
                             final DefaultAttachment attachment = new DefaultAttachment();
                             attachment.setId(referenceId);
-                            attachment.setContentType(MimeType2ExtMap.getContentType(filename));
-                            attachment.setContentDisposition("attachment; filename=\"" + filename + "\"");
+                            attachment.setContentType(null != mimeType ? mimeType : (null != filename ? MimeType2ExtMap.getContentType(filename) : "application/octet-stream"));
+                            if (null == disposition) {
+                                disposition = "attachment";
+                                if (null != filename) {
+                                    disposition += "; filename=\"" + filename + "\"";
+                                }
+                            } else if (null != filename && disposition.indexOf("filename=") < 0) {
+                                disposition += "; filename=\"" + filename + "\"";
+                            }
+                            attachment.setContentDisposition(disposition);
                             attachment.setStreamProvider(new BlobStreamProvider(referenceId, contextId));
                             attachments.add(attachment);
 
@@ -524,7 +533,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     stmt.setInt(3, id);
                     stmt.setString(4, content);
                     stmt.executeUpdate();
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     stmt = null;
                 }
             }
@@ -538,7 +547,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     stmt.setInt(3, id);
                     stmt.setString(4, misc.toString());
                     stmt.executeUpdate();
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     stmt = null;
                 }
             }
@@ -578,7 +587,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
              * Commit & return identifier
              */
             con.commit(); // COMMIT
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             rollback = false;
             return Integer.toString(id);
         } catch (final SQLException e) {
@@ -586,10 +595,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
         } finally {
             Streams.close(closeables);
             if (rollback) {
-                DBUtils.rollback(con);
-                DBUtils.autocommit(con);
+                Databases.rollback(con);
+                Databases.autocommit(con);
             }
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             databaseService.backReadOnly(contextId, con);
         }
     }
@@ -728,7 +737,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
              * Commit & return
              */
             con.commit(); // COMMIT
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             rollback = false;
             return identifier;
         } catch (final SQLException e) {
@@ -736,8 +745,8 @@ public final class RdbSnippetManagement implements SnippetManagement {
         } finally {
             Streams.close(closeables);
             if (rollback) {
-                DBUtils.rollback(con);
-                DBUtils.autocommit(con);
+                Databases.rollback(con);
+                Databases.autocommit(con);
             }
             closeSQLStuff(stmt);
             databaseService.backReadOnly(contextId, con);
@@ -806,7 +815,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     closeSQLStuff(stmt);
                     stmt = null;
 
-                    stmt = con.prepareStatement("INSERT INTO snippetAttachment (cid, user, id, referenceId, fileName) VALUES (?, ?, ?, ?, ?)");
+                    stmt = con.prepareStatement("INSERT INTO snippetAttachment (cid, user, id, referenceId, fileName, mimeType, disposition) VALUES (?, ?, ?, ?, ?, ?, ?)");
                     stmt.setInt(1, contextId);
                     stmt.setInt(2, userId);
                     stmt.setInt(3, id);
@@ -816,6 +825,18 @@ public final class RdbSnippetManagement implements SnippetManagement {
                         stmt.setNull(5, Types.VARCHAR);
                     } else {
                         stmt.setString(5, fileName);
+                    }
+                    String mimeType = attachment.getContentType();
+                    if (null == mimeType) {
+                        stmt.setNull(6, Types.VARCHAR);
+                    } else {
+                        stmt.setString(6, mimeType);
+                    }
+                    String disposition = attachment.getContentDisposition();
+                    if (null == disposition) {
+                        stmt.setNull(7, Types.VARCHAR);
+                    } else {
+                        stmt.setString(7, disposition);
                     }
                     stmt.executeUpdate();
                     closeSQLStuff(stmt);
@@ -884,9 +905,9 @@ public final class RdbSnippetManagement implements SnippetManagement {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             databaseService.backReadOnly(contextId, con);
         }
     }
@@ -904,36 +925,36 @@ public final class RdbSnippetManagement implements SnippetManagement {
             stmt = con.prepareStatement("DELETE FROM snippetAttachmentBinary WHERE cid=?");
             stmt.setLong(1, contextId);
             stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
 
             stmt = con.prepareStatement("DELETE FROM snippetAttachment WHERE cid=?");
             stmt.setLong(1, contextId);
             stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
 
             stmt = con.prepareStatement("DELETE FROM snippetContent WHERE cid=?");
             stmt.setLong(1, contextId);
             stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
 
             stmt = con.prepareStatement("DELETE FROM snippetMisc WHERE cid=?");
             stmt.setLong(1, contextId);
             stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
 
             stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=?");
             stmt.setLong(1, contextId);
             stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
         } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -964,7 +985,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                         do {
                             attachIds.add(rs.getString(1));
                         } while (rs.next());
-                        DBUtils.closeSQLStuff(rs, stmt);
+                        Databases.closeSQLStuff(rs, stmt);
                         rs = null;
                         stmt = null;
 
@@ -974,7 +995,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                             stmt.setLong(++pos, contextId);
                             stmt.setString(++pos, attachId);
                             stmt.executeUpdate();
-                            DBUtils.closeSQLStuff(stmt);
+                            Databases.closeSQLStuff(stmt);
                             stmt = null;
                         }
 
@@ -984,11 +1005,11 @@ public final class RdbSnippetManagement implements SnippetManagement {
                         stmt.setLong(++pos, userId);
                         stmt.setLong(++pos, id);
                         stmt.executeUpdate();
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                         stmt = null;
                     }
                 } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
 
@@ -999,7 +1020,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             stmt.setLong(++pos, userId);
             stmt.setLong(++pos, id);
             stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
 
             // Delete JSON object
@@ -1009,7 +1030,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             stmt.setLong(++pos, userId);
             stmt.setLong(++pos, id);
             stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
 
             // Delete unnamed properties
@@ -1042,12 +1063,12 @@ public final class RdbSnippetManagement implements SnippetManagement {
             stmt.setLong(++pos, userId);
             stmt.setString(++pos, Integer.toString(id));
             stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
         } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

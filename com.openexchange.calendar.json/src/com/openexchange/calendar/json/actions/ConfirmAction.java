@@ -53,22 +53,21 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.ParticipantParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.calendar.json.actions.chronos.EventConverter;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -79,65 +78,35 @@ import com.openexchange.tools.session.ServerSession;
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
 public final class ConfirmAction extends AppointmentAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfirmAction.class);
     /**
      * Initializes a new {@link ConfirmAction}.
-     * @param services
+     *
+     * @param services A service lookup reference
      */
     public ConfirmAction(final ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        // Get parameters
-        final int objectId = req.checkInt(DataFields.ID);
-        final int folderId = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        Date timestamp = null;
-        final int optOccurrenceId = req.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
-
-        // Get request body
-        final JSONObject jData = req.getData();
-
-        final ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jData);
-        final String confirmMessage = participant.getMessage();
-        final int confirmStatus = participant.getConfirm();
-
-        final ServerSession session = req.getSession();
-        int userId = session.getUserId();
-        if (jData.has(AJAXServlet.PARAMETER_ID)) {
-            userId = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
-        }
-
-        final AppointmentSqlFactoryService factoryService = getService();
-        if (null == factoryService) {
-            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
-        }
-        final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
-
-        boolean isUser = (participant.getType() == Participant.USER) || (participant.getType() == 0);
-        boolean isExternal = participant.getType() == Participant.EXTERNAL_USER;
-        boolean isOccurrenceChange = (optOccurrenceId != AppointmentAJAXRequest.NOT_FOUND) && (optOccurrenceId > 0);
-
-        if (isOccurrenceChange) {
-            if (isUser) {
-                timestamp = appointmentSql.setUserConfirmation(objectId, folderId, optOccurrenceId, userId, confirmStatus, confirmMessage).getLastModified();
-            } else if (isExternal) {
-                timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, optOccurrenceId, participant.getEmailAddress(), confirmStatus, confirmMessage).getLastModified();
-            } else {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
-            }
-            return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
-        }
-
-        if (isUser) {
-            timestamp = appointmentSql.setUserConfirmation(objectId, folderId, userId, confirmStatus, confirmMessage);
-        } else if (isExternal) {
-            timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, participant.getEmailAddress(), confirmStatus, confirmMessage);
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
+        int recurrencePosition = request.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
+        EventID eventID;
+        if (AppointmentAJAXRequest.NOT_FOUND == recurrencePosition) {
+            eventID = new EventID(folderId, objectId);
         } else {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
+            eventID = getEventConverter(session).getEventID(folderId, objectId, recurrencePosition);
         }
-
-        return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
+        long clientTimestamp = optClientTimestamp(request, CalendarUtils.DISTANT_FUTURE);
+        JSONObject jsonObject = request.getData();
+        ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jsonObject);
+        Attendee attendee = EventConverter.getAttendee(participant);
+        if ((0 == participant.getType() || Participant.USER == participant.getType()) && 0 == participant.getIdentifier()) {
+            attendee.setEntity(jsonObject.has(AJAXServlet.PARAMETER_ID) ? jsonObject.getInt(AJAXServlet.PARAMETER_ID) : session.getUserId());
+        }
+        CalendarResult result = session.getCalendarService().updateAttendee(session, eventID, attendee, null, clientTimestamp);
+        return new AJAXRequestResult(new JSONObject(0), new Date(result.getTimestamp()), "json");
     }
+
 }

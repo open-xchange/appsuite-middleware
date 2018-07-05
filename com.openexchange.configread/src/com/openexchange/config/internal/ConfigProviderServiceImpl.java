@@ -111,7 +111,6 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
             // Not yet available, create it...
             ServerProperty newBasicProperty = new ServerProperty();
             String value = configService.getProperty(property);
-            newBasicProperty.setDefined(value != null);
             newBasicProperty.set(value);
             basicProperty = properties.putIfAbsent(property, newBasicProperty);
             if (null == basicProperty) {
@@ -182,7 +181,6 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
             final ServerProperty serverProperty = get(namespace, -1, -1);
             serverProperty.set(PREFRENCE_PATH, namespace);
             serverProperty.set(subkeys.toString());
-            serverProperty.setDefined(true);
             if (serverProperty.get(PROTECTED) == null) {
                 serverProperty.set(PROTECTED, TRUE);
             }
@@ -219,7 +217,6 @@ public class ConfigProviderServiceImpl implements ReinitializableConfigProviderS
                     value = config.getProperty(propertyName);
                 }
                 basicProperty.set(value);
-                basicProperty.setDefined(value != null);
             }
         }
     }

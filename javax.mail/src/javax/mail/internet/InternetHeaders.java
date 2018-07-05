@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,9 +40,15 @@
 
 package javax.mail.internet;
 
-import java.io.*;
-import java.util.*;
-import javax.mail.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import javax.mail.Header;
+import javax.mail.MessagingException;
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.PropUtil;
 
@@ -145,6 +151,7 @@ public class InternetHeaders {
 	/**
 	 * Return the "value" part of the header line.
 	 */
+	@Override
 	public String getValue() {
 	    int i = line.indexOf(':');
 	    if (i < 0)
@@ -298,16 +305,14 @@ public class InternetHeaders {
      *
      * @since	JavaMail 1.4
      */
-    @SuppressWarnings("rawtypes")
-    protected List headers;
+    protected List<InternetHeader> headers;
 
     /**
      * Create an empty InternetHeaders object.  Placeholder entries
      * are inserted to indicate the preferred order of headers.
      */
-    @SuppressWarnings("unchecked")
     public InternetHeaders() { 
-   	headers = new ArrayList<InternetHeader>(40); 
+   	headers = new ArrayList<>(40); 
 	headers.add(new InternetHeader("Return-Path", null));
 	headers.add(new InternetHeader("Received", null));
 	headers.add(new InternetHeader("Resent-Date", null));
@@ -356,8 +361,30 @@ public class InternetHeaders {
      * @exception	MessagingException for any I/O error reading the stream
      */
     public InternetHeaders(InputStream is) throws MessagingException {
-   	headers = new ArrayList<InternetHeader>(40); 
-	load(is);
+	this(is, false);
+    }
+
+    /**
+     * Read and parse the given RFC822 message stream till the 
+     * blank line separating the header from the body. The input 
+     * stream is left positioned at the start of the body. The 
+     * header lines are stored internally. <p>
+     *
+     * For efficiency, wrap a BufferedInputStream around the actual
+     * input stream and pass it as the parameter. <p>
+     *
+     * No placeholder entries are inserted; the original order of
+     * the headers is preserved.
+     *
+     * @param	is 	RFC822 input stream
+     * @param	allowutf8 	if UTF-8 encoded headers are allowed
+     * @exception	MessagingException for any I/O error reading the stream
+     * @since		JavaMail 1.6
+     */
+    public InternetHeaders(InputStream is, boolean allowutf8)
+				throws MessagingException {
+   	headers = new ArrayList<>(40); 
+	load(is, allowutf8);
     }
 
     /**
@@ -375,13 +402,34 @@ public class InternetHeaders {
      * @exception	MessagingException for any I/O error reading the stream
      */
     public void load(InputStream is) throws MessagingException {
+	load(is, false);
+    }
+
+    /**
+     * Read and parse the given RFC822 message stream till the
+     * blank line separating the header from the body. Store the
+     * header lines inside this InternetHeaders object. The order
+     * of header lines is preserved. <p>
+     *
+     * Note that the header lines are added into this InternetHeaders
+     * object, so any existing headers in this object will not be
+     * affected.  Headers are added to the end of the existing list
+     * of headers, in order.
+     *
+     * @param	is 	RFC822 input stream
+     * @param	allowutf8 	if UTF-8 encoded headers are allowed
+     * @exception	MessagingException for any I/O error reading the stream
+     * @since		JavaMail 1.6
+     */
+    public void load(InputStream is, boolean allowutf8)
+				throws MessagingException {
 	// Read header lines until a blank line. It is valid
 	// to have BodyParts with no header lines.
 	String line;
-	LineInputStream lis = new LineInputStream(is);
+	LineInputStream lis = new LineInputStream(is, allowutf8);
 	String prevline = null;	// the previous header line, as a string
 	// a buffer to accumulate the header in, when we know it's needed
-	StringBuffer lineBuffer = new StringBuffer();
+	StringBuilder lineBuffer = new StringBuilder();
 
 	try {
 	    // if the first line being read is a continuation line,
@@ -440,10 +488,29 @@ public class InternetHeaders {
      * @exception   MessagingException for any I/O error reading the stream
      */
     public static java.util.List<Header> parse(InputStream is) throws MessagingException {
+        return parse(is, false);
+    }
+
+    /**
+     * Read and parse the given RFC822 message stream till the
+     * blank line separating the header from the body. Store the
+     * header lines inside this InternetHeaders object. The order
+     * of header lines is preserved. <p>
+     *
+     * Note that the header lines are added into this InternetHeaders
+     * object, so any existing headers in this object will not be
+     * affected.  Headers are added to the end of the existing list
+     * of headers, in order.
+     *
+     * @param   is  RFC822 input stream
+     * @return The list of parsed headers
+     * @exception   MessagingException for any I/O error reading the stream
+     */
+    public static java.util.List<Header> parse(InputStream is, boolean allowutf8) throws MessagingException {
         // Read header lines until a blank line. It is valid
         // to have BodyParts with no header lines.
         String line;
-        LineInputStream lis = new LineInputStream(is);
+        LineInputStream lis = new LineInputStream(is, allowutf8);
         String prevline = null;// the previous header line, as a string
         // a buffer to accumulate the header in, when we know it's needed
         StringBuilder lineBuffer = new StringBuilder();
@@ -506,10 +573,9 @@ public class InternetHeaders {
      * @return		array of header values, or null if none
      */
     public String[] getHeader(String name) {
-	@SuppressWarnings("unchecked")
 	Iterator<InternetHeader> e = headers.iterator();
 	// XXX - should we just step through in index order?
-	List<String> v = new ArrayList<String>(); // accumulate return values
+	List<String> v = new ArrayList<>(); // accumulate return values
 
 	while (e.hasNext()) {
 	    InternetHeader h = e.next();
@@ -546,12 +612,113 @@ public class InternetHeaders {
 	if ((s.length == 1) || delimiter == null)
 	    return s[0];
 	
-	StringBuffer r = new StringBuffer(s[0]);
+	StringBuilder r = new StringBuilder(s[0]);
 	for (int i = 1; i < s.length; i++) {
 	    r.append(delimiter);
 	    r.append(s[i]);
 	}
 	return r.toString();
+    }
+
+    /**
+     * Folds all header lines at linear whitespace so that each line is no
+     * longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     */
+    public void foldAllHeaderLines() {
+        foldHeaderLines(null, false);
+    }
+
+    /**
+     * Folds matching header header lines at linear whitespace so that each
+     * line is no longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     * 
+     * @param names The names of the headers to fold
+     */
+    public void foldMatchingHeaderLines(String[] names) {
+        foldHeaderLines(names, true);
+    }
+
+    /**
+     * Folds non-matching header header lines at linear whitespace so that
+     * each line is no longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     * 
+     * @param names The names of the headers not to fold
+     */
+    public void foldNonMatchingHeaderLines(String[] names) {
+        foldHeaderLines(names, false);
+    }
+
+    private void foldHeaderLines(String[] names, boolean matching) {
+    java.util.Set<String> optNames = lowerCaseSetFor(names);
+    for (int i = 0; i < headers.size(); i++) {
+        InternetHeader h = headers.get(i);
+        int colonPos;
+        if (h.line != null && (colonPos = h.line.indexOf(':')) >= 0) {
+            int length = h.line.length();
+            if (length > 76) {
+                String name = h.getName();
+                if (null == optNames || (matching ? optNames.contains(MimeUtility.asciiLowerCase(name)) : false == optNames.contains(MimeUtility.asciiLowerCase(name)))) {                    
+                    // Determine value. Skip whitespace after ':'
+                    int j;
+                    for (j = colonPos + 1; j < length; j++) {
+                        char c = h.line.charAt(j);
+                        if (!(c == ' ' || c == '\t' || c == '\r' || c == '\n'))
+                            break;
+                    }
+                    String value = h.line.substring(j);
+                    
+                    // Already used number if characters in the first line
+                    int used = name.length() + 2;
+                    if ((j = value.indexOf('\r', 0)) < 0 && (j = value.indexOf('\n', 0)) < 0) {
+                        // Not folded
+                        if (used + value.length() > 76) {
+                            value = MimeUtility.fold(used, value);
+                            h.line = h.line.substring(0, colonPos + 1) + ' ' + value;
+                        }
+                    } else {
+                        // Folded
+                        String[] lines = value.split("\r?\n", 0);
+                        boolean needsFolding = false;
+                        for (int k = lines.length; !needsFolding && k-- > 0;) {
+                            String line = lines[k];
+                            if ((0 == k ? (used + line.length()) : line.length()) > 76) {
+                                needsFolding = true;
+                            }
+                        }
+                        if (needsFolding) {
+                            // Unfold & re-fold
+                            value = MimeUtility.unfold(value);
+                            value = MimeUtility.fold(used, value);
+                            h.line = h.line.substring(0, colonPos + 1) + ' ' + value;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    }
+
+    private static java.util.Set<String> lowerCaseSetFor(String[] names) {
+        if (null == names || names.length == 0) {
+            return null;
+        }
+        
+        java.util.Set<String> set = new java.util.HashSet<>(names.length);
+        for (int i = names.length; i-- > 0;) {
+            String name = names[i];
+            if (null != name)
+                set.add(MimeUtility.asciiLowerCase(name));
+        }
+        return set;
     }
 
     /**
@@ -567,8 +734,8 @@ public class InternetHeaders {
     public void setHeader(String name, String value) {
 	boolean found = false;
 
-	for (int i = 0, k = headers.size(); k-- > 0; i++) {
-	    InternetHeader h = (InternetHeader)headers.get(i);
+	for (int i = 0; i < headers.size(); i++) {
+	    InternetHeader h = headers.get(i);
 	    if (name.equalsIgnoreCase(h.getName())) {
 		if (!found) {
 		    int j;
@@ -606,7 +773,6 @@ public class InternetHeaders {
      * @param	name	header name
      * @param	value	header value
      */ 
-    @SuppressWarnings("unchecked")
     public void addHeader(String name, String value) {
 	int pos = headers.size();
 	boolean addReverse =
@@ -615,7 +781,7 @@ public class InternetHeaders {
 	if (addReverse)
 	    pos = 0;
 	for (int i = headers.size() - 1; i >= 0; i--) {
-	    InternetHeader h = (InternetHeader)headers.get(i);
+	    InternetHeader h = headers.get(i);
 	    if (name.equalsIgnoreCase(h.getName())) {
 		if (addReverse) {
 		    pos = i;
@@ -637,7 +803,7 @@ public class InternetHeaders {
      */
     public void removeHeader(String name) { 
 	for (int i = 0, k = headers.size(); k-- > 0; i++) {
-	    InternetHeader h = (InternetHeader)headers.get(i);
+	    InternetHeader h = headers.get(i);
 	    if (name.equalsIgnoreCase(h.getName())) {
 		h.line = null;
 		//headers.remove(i);
@@ -652,8 +818,7 @@ public class InternetHeaders {
      *
      * @return	Enumeration of Header objects	
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public Enumeration getAllHeaders() {
+    public Enumeration<Header> getAllHeaders() {
 	return (new MatchHeaderEnum(headers, null, false));
     }
 
@@ -663,8 +828,7 @@ public class InternetHeaders {
      * @param	names	the headers to return
      * @return	Enumeration of matching Header objects	
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public Enumeration getMatchingHeaders(String[] names) {
+    public Enumeration<Header> getMatchingHeaders(String[] names) {
 	return (new MatchHeaderEnum(headers, names, true));
     }
 
@@ -674,8 +838,7 @@ public class InternetHeaders {
      * @param	names	the headers to not return
      * @return	Enumeration of non-matching Header objects	
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public Enumeration getNonMatchingHeaders(String[] names) {
+    public Enumeration<Header> getNonMatchingHeaders(String[] names) {
 	return (new MatchHeaderEnum(headers, names, false));
     }
 
@@ -689,13 +852,11 @@ public class InternetHeaders {
      *
      * @param	line	raw RFC822 header line
      */
-    @SuppressWarnings("unchecked")
     public void addHeaderLine(String line) {
 	try {
 	    char c = line.charAt(0);
 	    if (c == ' ' || c == '\t') {
-		InternetHeader h =
-		    (InternetHeader)headers.get(headers.size() - 1);
+		InternetHeader h = headers.get(headers.size() - 1);
 		h.line += "\r\n" + line;
 	    } else
 		headers.add(new InternetHeader(line));
@@ -712,8 +873,7 @@ public class InternetHeaders {
      *
      * @return	Enumeration of Strings of all header lines
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getAllHeaderLines() { 
+    public Enumeration<String> getAllHeaderLines() { 
 	return (getNonMatchingHeaderLines(null));
     }
 
@@ -723,8 +883,7 @@ public class InternetHeaders {
      * @param	names	the headers to return
      * @return	Enumeration of Strings of all matching header lines
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public Enumeration getMatchingHeaderLines(String[] names) {
+    public Enumeration<String> getMatchingHeaderLines(String[] names) {
 	return (new MatchStringEnum(headers, names, true));	
     }
 
@@ -734,8 +893,7 @@ public class InternetHeaders {
      * @param	names	the headers to not return
      * @return	Enumeration of Strings of all non-matching header lines
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public Enumeration getNonMatchingHeaderLines(String[] names) {
+    public Enumeration<String> getNonMatchingHeaderLines(String[] names) {
 	return (new MatchStringEnum(headers, names, false));
     }
 }

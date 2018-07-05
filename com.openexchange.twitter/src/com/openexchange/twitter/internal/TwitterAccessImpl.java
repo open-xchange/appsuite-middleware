@@ -52,14 +52,14 @@ package com.openexchange.twitter.internal;
 import static com.openexchange.twitter.internal.TwitterUtils.handleTwitterException;
 import java.util.ArrayList;
 import java.util.List;
-import twitter4j.OXTwitter;
-import twitter4j.StatusUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.twitter.DirectMessage;
 import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.Status;
 import com.openexchange.twitter.TwitterAccess;
 import com.openexchange.twitter.User;
+import twitter4j.OXTwitter;
+import twitter4j.StatusUpdate;
 
 /**
  * {@link TwitterAccessImpl} - The twitter access implementation based on <a

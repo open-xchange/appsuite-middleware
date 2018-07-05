@@ -46,12 +46,11 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
-
-
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -76,11 +75,12 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXTaskMgmtImpl.class);
 
     private void doAuth(final Credentials creds, final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException {
-        if( cache.isMasterAdmin(creds) ) {
-            new BasicAuthenticator().doAuthentication(creds);
+        BasicAuthenticator basicAuth = BasicAuthenticator.createNonPluginAwareAuthenticator();
+        if (cache.isMasterAdmin(creds)) {
+            basicAuth.doAuthentication(creds);
         } else {
             contextcheck(ctx);
-            new BasicAuthenticator().doAuthentication(creds, ctx);
+            basicAuth.doAuthentication(creds, ctx);
         }
     }
 
@@ -91,7 +91,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
             if (id < 0) {
                 throw new InvalidDataException("Job ID must be > 0.");
             }
-            if( cache.isMasterAdmin(cred) ) {
+            if (cache.isMasterAdmin(cred)) {
                 TaskManager.getInstance().deleteJob(id);
             } else {
                 contextcheck(ctx);
@@ -116,7 +116,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
     public void flush(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
         try {
             doAuth(cred, ctx);
-            if( cache.isMasterAdmin(cred) ) {
+            if (cache.isMasterAdmin(cred)) {
                 TaskManager.getInstance().flush();
             } else {
                 contextcheck(ctx);
@@ -141,7 +141,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
         try {
             doAuth(cred, ctx);
-            if( cache.isMasterAdmin(cred) ) {
+            if (cache.isMasterAdmin(cred)) {
                 return TaskManager.getInstance().getJobList();
             } else {
                 contextcheck(ctx);
@@ -163,7 +163,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
     public Object getTaskResults(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException {
         try {
             doAuth(cred, ctx);
-            if( cache.isMasterAdmin(cred) ) {
+            if (cache.isMasterAdmin(cred)) {
                 return getTaskResults(id, null);
             } else {
                 contextcheck(ctx);

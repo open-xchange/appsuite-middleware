@@ -49,7 +49,6 @@
 
 package com.openexchange.publish.database;
 
-import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.CreateIndexUpdateTask;
 
 /**
@@ -62,26 +61,16 @@ import com.openexchange.groupware.update.CreateIndexUpdateTask;
  */
 public class PublicationsAddEntityIndex extends CreateIndexUpdateTask {
 
-    private final DatabaseService databaseService;
-
     /**
      * Initializes a new {@link PublicationsAddEntityIndex}.
-     *
-     * @param databaseService A reference to the database service
      */
-    public PublicationsAddEntityIndex(DatabaseService databaseService) {
+    public PublicationsAddEntityIndex() {
         super("publications", "entity", "cid", "module", "entity");
-        this.databaseService = databaseService;
     }
 
     @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.publish.database.FixPublicationTablePrimaryKey" };
-    }
-
-    @Override
-    protected DatabaseService getDatabaseService() {
-        return databaseService;
     }
 
 }

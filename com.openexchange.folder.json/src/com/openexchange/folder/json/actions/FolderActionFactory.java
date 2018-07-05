@@ -49,7 +49,6 @@
 
 package com.openexchange.folder.json.actions;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -95,11 +94,6 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         return retval;
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
     private Map<String, AJAXActionService> initActions() {
         ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
         tmp.put(RootAction.ACTION, new RootAction());
@@ -115,6 +109,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         tmp.put(SubscribeAction.ACTION, new SubscribeAction());
         tmp.put(SharesAction.ACTION, new SharesAction());
         tmp.put(NotifyAction.ACTION, new NotifyAction());
+        tmp.put(RestoreAction.ACTION, new RestoreAction());
         return tmp.build();
     }
 

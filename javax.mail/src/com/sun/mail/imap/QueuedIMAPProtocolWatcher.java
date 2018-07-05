@@ -55,7 +55,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.mail.URLName;
-import org.slf4j.Logger;
 import com.sun.mail.imap.QueuingIMAPStore.CountingQueue;
 import com.sun.mail.imap.QueuingIMAPStore.ThreadTrace;
 

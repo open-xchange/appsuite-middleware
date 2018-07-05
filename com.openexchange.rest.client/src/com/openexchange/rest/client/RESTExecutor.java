@@ -92,7 +92,7 @@ import com.openexchange.rest.client.session.Session.ProxyInfo;
 
 /**
  * {@link RESTExecutor}. Used to create, execute and parse the responses of REST requests to any REST API.
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class RESTExecutor {
@@ -105,11 +105,11 @@ public class RESTExecutor {
     private RESTExecutor() {
         super();
     }
-    
+
     /**
      * Creates and sends a request to the REST API, and returns a {@link RequestAndResponse} containing the {@link HttpUriRequest} and
      * {@link HttpResponse}.
-     * 
+     *
      * @param restRequest The RESTRequest
      * @param expectResponseBody Flag to indicate whether or not to expect a response body
      * @return A {@link RESTResponse} encapsulating the status code, the {@link HttpResponse} and the optional response body as JSONObject
@@ -170,7 +170,7 @@ public class RESTExecutor {
 
     /**
      * Creates a URL for a REST request
-     * 
+     *
      * @param host The host on which resides the REST API
      * @param apiVersion The optional API version to use. Or <code>-1</code> to ignore
      * @param target The target path, starting with a '/'.
@@ -179,7 +179,7 @@ public class RESTExecutor {
      * @return A full URL for making a request.
      */
     private static String buildURL(final String host, final int apiVersion, final String target, final String[] params) {
-        String trgt = new String();
+        String trgt = "";
         if (Strings.isEmpty(target)) {
             if (params != null && params.length > 0) {
                 final StringBuilder sb = new StringBuilder(params.length << 4);
@@ -219,7 +219,7 @@ public class RESTExecutor {
 
     /**
      * Executes an {@link HttpUriRequest} with the given {@link Session} and returns an {@link HttpResponse}.
-     * 
+     *
      * @param session The {@link Session} to use for this request.
      * @param req The request to execute.
      * @param socketTimeoutOverrideMs If >= 0, the socket timeout to set on this request. Does nothing if set to a negative number.
@@ -243,8 +243,8 @@ public class RESTExecutor {
         try {
             HttpResponse response = null;
             for (int retries = 0; response == null && retries < 5; retries++) {
-                // Maybe we don't need that workaround anymore, since we are operating with HttpClient 4.2.1 
-                
+                // Maybe we don't need that workaround anymore, since we are operating with HttpClient 4.2.1
+
                 /*
                  * The try/catch is a workaround for a bug in the HttpClient libraries. It should be returning null instead when an error
                  * occurs. Fixed in HttpClient 4.1, but we're stuck with this for now. See:
@@ -279,14 +279,12 @@ public class RESTExecutor {
             throw RESTExceptionCodes.SSL_EXCEPTION.create(e.getMessage());
         } catch (final IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e.getMessage());
-        } catch (final OutOfMemoryError e) {
-            throw RESTExceptionCodes.OOM_EXCEPTION.create(e.getMessage());
         }
     }
 
     /**
      * Reads in content from an {@link HttpResponse} and parses it as JSON.
-     * 
+     *
      * @param response The {@link HttpResponse}.
      * @param expectedStatusCodes Contains the expected status code on successful response
      * @return a parsed JSON object, typically a Map or a JSONArray.
@@ -324,8 +322,6 @@ public class RESTExecutor {
                 throw RESTExceptionCodes.ERROR.create(response, result);
             }
             throw RESTExceptionCodes.PARSE_ERROR.create(body);
-        } catch (final OutOfMemoryError e) {
-            throw RESTExceptionCodes.OOM_EXCEPTION.create(e);
         } finally {
             Streams.close(bin);
         }
@@ -344,7 +340,7 @@ public class RESTExecutor {
     /**
      * Verifies whether the specified {@link HttpRequest} is repeatable. If the request contains an {@link HttpEntity } that can't be "reset"
      * (like an {@link InputStream}), hence it isn't repeatable.
-     * 
+     *
      * @param req The {@link HttpRequest}
      * @return true of the request is repeatable; false otherwise
      */
@@ -388,7 +384,7 @@ public class RESTExecutor {
 
     /**
      * Build an http(s) URL according to the prefix of the host.
-     * 
+     *
      * @param host The host
      * @param target The target path, starting with a '/'.
      * @return The http(s) URL
@@ -405,7 +401,7 @@ public class RESTExecutor {
 
     /**
      * URL encodes an array of parameters into a query string.
-     * 
+     *
      * @param params The parameters to encode
      * @return The encoded parameters as string
      */
@@ -435,7 +431,7 @@ public class RESTExecutor {
 
     /**
      * URL encodes given string.
-     * 
+     *
      * @param s A string to encode
      * @return The encoded string
      */

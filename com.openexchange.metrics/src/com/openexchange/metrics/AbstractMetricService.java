@@ -90,8 +90,23 @@ public abstract class AbstractMetricService implements MetricService {
         registerers = new ConcurrentHashMap<>();
         listeners = new ConcurrentLinkedQueue<>();
 
-        listenerNotifiersOnAdd = Collections.unmodifiableMap(initialiseAddNotifiers());
-        listenerNotifiersOnRemove = Collections.unmodifiableMap(initialiseRemoveNotifiers());
+        Map<MetricType, MetricServiceListenerNotifier> l = new HashMap<>();
+        l.put(MetricType.COUNTER, (listener, metric, descriptor) -> listener.onCounterAdded(descriptor, (Counter) metric));
+        l.put(MetricType.GAUGE, (listener, metric, descriptor) -> listener.onGaugeAdded(descriptor, (Gauge<?>) metric));
+        l.put(MetricType.HISTOGRAM, (listener, metric, descriptor) -> listener.onHistogramAdded(descriptor, (Histogram) metric));
+        l.put(MetricType.METER, (listener, metric, descriptor) -> listener.onMeterAdded(descriptor, (Meter) metric));
+        l.put(MetricType.TIMER, (listener, metric, descriptor) -> listener.onTimerAdded(descriptor, (Timer) metric));
+
+        listenerNotifiersOnAdd = Collections.unmodifiableMap(l);
+
+        l = new HashMap<>();
+        l.put(MetricType.COUNTER, (listener, metric, descriptor) -> listener.onCounterRemoved(descriptor.getFullName()));
+        l.put(MetricType.GAUGE, (listener, metric, descriptor) -> listener.onGaugeRemoved(descriptor.getFullName()));
+        l.put(MetricType.HISTOGRAM, (listener, metric, descriptor) -> listener.onHistogramRemoved(descriptor.getFullName()));
+        l.put(MetricType.METER, (listener, metric, descriptor) -> listener.onMeterRemoved(descriptor.getFullName()));
+        l.put(MetricType.TIMER, (listener, metric, descriptor) -> listener.onTimerRemoved(descriptor.getFullName()));
+
+        listenerNotifiersOnRemove = Collections.unmodifiableMap(l);
     }
 
     /**
@@ -217,96 +232,5 @@ public abstract class AbstractMetricService implements MetricService {
             return;
         }
         notifier.notify(listener, metric, descriptor);
-    }
-
-    /**
-     * Initialises all add listener notifiers
-     * 
-     * @return A {@link Map} with all add listener notifiers
-     */
-    private Map<MetricType, MetricServiceListenerNotifier> initialiseAddNotifiers() {
-        Map<MetricType, MetricServiceListenerNotifier> l = new HashMap<>();
-        l.put(MetricType.COUNTER, new MetricServiceListenerNotifier() {
-
-            @Override
-            public void notify(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-                listener.onCounterAdded(descriptor, (Counter) metric);
-            }
-        });
-        l.put(MetricType.GAUGE, new MetricServiceListenerNotifier() {
-
-            @Override
-            public void notify(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-                listener.onGaugeAdded(descriptor, (Gauge<?>) metric);
-            }
-        });
-        l.put(MetricType.HISTOGRAM, new MetricServiceListenerNotifier() {
-
-            @Override
-            public void notify(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-                listener.onHistogramAdded(descriptor, (Histogram) metric);
-            }
-        });
-        l.put(MetricType.METER, new MetricServiceListenerNotifier() {
-
-            @Override
-            public void notify(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-                listener.onMeterAdded(descriptor, (Meter) metric);
-            }
-        });
-        l.put(MetricType.TIMER, new MetricServiceListenerNotifier() {
-
-            @Override
-            public void notify(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-                listener.onTimerAdded(descriptor, (Timer) metric);
-            }
-        });
-        return l;
-    }
-
-    /**
-     * Initialises all remove listener notifiers
-     * 
-     * @return A {@link Map} with all remove listener notifiers
-     */
-    private Map<MetricType, MetricServiceListenerNotifier> initialiseRemoveNotifiers() {
-        Map<MetricType, MetricServiceListenerNotifier> l;
-        l = new HashMap<>();
-        l.put(MetricType.COUNTER, new MetricServiceListenerNotifier() {
-
-            @Override
-            public void notify(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-                listener.onCounterRemoved(descriptor.getFullName());
-            }
-        });
-        l.put(MetricType.GAUGE, new MetricServiceListenerNotifier() {
-
-            @Override
-            public void notify(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-                listener.onGaugeRemoved(descriptor.getFullName());
-            }
-        });
-        l.put(MetricType.HISTOGRAM, new MetricServiceListenerNotifier() {
-
-            @Override
-            public void notify(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-                listener.onHistogramRemoved(descriptor.getFullName());
-            }
-        });
-        l.put(MetricType.METER, new MetricServiceListenerNotifier() {
-
-            @Override
-            public void notify(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-                listener.onMeterRemoved(descriptor.getFullName());
-            }
-        });
-        l.put(MetricType.TIMER, new MetricServiceListenerNotifier() {
-
-            @Override
-            public void notify(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-                listener.onTimerRemoved(descriptor.getFullName());
-            }
-        });
-        return l;
     }
 }

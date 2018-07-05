@@ -49,12 +49,10 @@
 
 package com.openexchange.mail.mime;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ContentDispositionTest}
@@ -62,6 +60,7 @@ import static org.junit.Assert.*;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContentDispositionTest {
+
     /**
      * Initializes a new {@link ContentDispositionTest}.
      */
@@ -69,8 +68,8 @@ public class ContentDispositionTest {
         super();
     }
 
-         @Test
-     public void testFileNameParameterFromBogusHeaders() {
+    @Test
+    public void testFileNameParameterFromBogusHeaders() {
         try {
             String hdr = "attachment; filename=Jana's application 4 cell phone.rtf";
             String fileName = new com.openexchange.mail.mime.ContentDisposition(hdr).getFilenameParameter();
@@ -84,6 +83,17 @@ public class ContentDispositionTest {
             fileName = new com.openexchange.mail.mime.ContentDisposition(hdr).getFilenameParameter();
             assertEquals("Unpexpected \"filename\" parameter.", "Scan1852.pdf", fileName);
         } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testFileNameParameterFromRFC2231EncodedParameters() {
+        try {
+            ContentDisposition cd = new ContentDisposition("attachment; filename*0*=iso-2022-jp''%1B%24%42%23%38%37%6E%24%4E%4D%3C%34%29%25%33%25; filename*1*=%69%25%60%3C%42%40%53%1B%28%42%2E%64%6F%63%78");
+            assertEquals("Unpexpected \"filename\" parameter.", "\uff18\u6708\u306e\u5915\u520a\u30b3\u30e9\u30e0\u5b9f\u7e3e.docx", cd.getFilenameParameter());
+        } catch (OXException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }

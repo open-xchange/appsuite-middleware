@@ -49,7 +49,8 @@
 
 package com.openexchange.ajax.infostore.fileaccount.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;

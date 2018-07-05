@@ -53,9 +53,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -63,6 +65,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import com.openexchange.context.ContextService;
@@ -78,10 +81,10 @@ import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionResult;
 import com.openexchange.pns.subscription.storage.ClientAndTransport;
 import com.openexchange.pns.subscription.storage.MapBackedHits;
 import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryCache;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbPushSubscriptionRegistry}
@@ -158,7 +161,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             ResultSet rs = null;
             try {
                 stmt = con.prepareStatement(
-                    "SELECT p.id, p.token, p.client, p.transport, p.all_flag, w.topic AS prefix, e.topic FROM pns_subscription p"
+                    "SELECT p.id, p.token, p.client, p.transport, p.all_flag, p.expires, w.topic AS prefix, e.topic FROM pns_subscription p"
                         + " LEFT JOIN pns_subscription_topic_wildcard w ON p.id=w.id"
                         + " LEFT JOIN pns_subscription_topic_exact e ON p.id=e.id"
                         + " WHERE p.cid=? AND p.user=?");
@@ -187,6 +190,10 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                             if (rs.getInt(5) > 0) {
                                 topics.add(KnownTopic.ALL.getName());
                             }
+                            long expires = rs.getLong(6);
+                            if (false == rs.wasNull()) {
+                                builder.expires(new Date(expires));
+                            }
                             builderAndTopics = new BuilderAndTopics(builder, topics);
                             builders.put(uuid, builderAndTopics);
                         } else {
@@ -194,12 +201,12 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                             topics = builderAndTopics.topics;
                         }
                     }
-                    String prefix = rs.getString(6);
+                    String prefix = rs.getString(7);
                     if (null != prefix) {
                         // E.g. "ox:mail:*"
                         topics.add(prefix + (prefix.endsWith(":") ? "*" : ":*"));
                     }
-                    String topic = rs.getString(7);
+                    String topic = rs.getString(8);
                     if (null != topic) {
                         // E.g. "ox:mail:new"
                         topics.add(topic);
@@ -219,64 +226,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             builder.topics(builderAndTopics.topics);
             subscriptions.add(builder.build());
         }
-        return subscriptions;
-    }
-
-    /**
-     * Loads the subscription identified by given ID.
-     *
-     * @param id The ID
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param con The connection to use
-     * @return The subscription or <code>null</code>
-     * @throws OXException If load attempt fails
-     */
-    public static PushSubscription loadById(byte[] id, int userId, int contextId, Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement(
-                "SELECT p.token, p.client, p.transport, p.all_flag, w.topic AS prefix, e.topic FROM pns_subscription p"
-                    + " LEFT JOIN pns_subscription_topic_wildcard w ON p.id=w.id"
-                    + " LEFT JOIN pns_subscription_topic_exact e ON p.id=e.id"
-                    + " WHERE p.id=? AND p.cid=? AND p.user=?");
-            stmt.setBytes(1, id);
-            stmt.setInt(2, contextId);
-            stmt.setInt(3, userId);
-            rs = stmt.executeQuery();
-            if (false == rs.next()) {
-                return null;
-            }
-
-            List<String> topics = new LinkedList<>();
-            DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder();
-            builder.contextId(contextId).userId(userId);
-            builder.token(rs.getString(1));
-            builder.client(rs.getString(2));
-            builder.transportId(rs.getString(3));
-            if (rs.getInt(4) > 0) {
-                topics.add(KnownTopic.ALL.getName());
-            }
-            do {
-                String prefix = rs.getString(6);
-                if (null != prefix) {
-                    // E.g. "ox:mail:*"
-                    topics.add(prefix + (prefix.endsWith(":") ? "*" : ":*"));
-                }
-                String topic = rs.getString(7);
-                if (null != topic) {
-                    // E.g. "ox:mail:new"
-                    topics.add(topic);
-                }
-            } while (rs.next());
-            builder.topics(topics);
-            return builder.build();
-        } catch (SQLException e) {
-            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
+        return filterExpired(contextId, subscriptions);
     }
 
     @Override
@@ -343,24 +293,84 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     }
 
     @Override
-    public MapBackedHits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
-        return getInterestedSubscriptions(null, userId, contextId, topic);
+    public MapBackedHits getInterestedSubscriptions(int[] userIds, int contextId, String topic) throws OXException {
+        return getInterestedSubscriptions(null, userIds, contextId, topic);
     }
 
     @Override
-    public MapBackedHits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+    public MapBackedHits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException {
         // Check cache
         RdbPushSubscriptionRegistryCache cache = this.cache;
         if (null != cache) {
-            return cache.getCollectionFor(userId, contextId).getInterestedSubscriptions(client, topic);
+            HashMap<ClientAndTransport, List<PushMatch>> map = new HashMap<>();
+            for (int userId : userIds) {
+                MapBackedHits hits = cache.getCollectionFor(userId, contextId).getInterestedSubscriptions(client, topic);
+                if (null != hits && false == hits.isEmpty()) {
+                    map.putAll(hits.getMap());
+                }
+            }
+            return new MapBackedHits(map);
         }
 
+        Map<ClientAndTransport, List<PushMatch>> subscriptions;
         Connection con = databaseService.getReadOnly(contextId);
         try {
-            return getSubscriptions(client, userId, contextId, topic, con);
+            subscriptions = getSubscriptions(client, userIds, contextId, topic, con);
         } finally {
             databaseService.backReadOnly(contextId, con);
         }
+        subscriptions = filterExpired(contextId, subscriptions);
+        return null == subscriptions || subscriptions.isEmpty() ? MapBackedHits.EMPTY : new MapBackedHits(subscriptions);
+    }
+
+    private List<PushSubscription> filterExpired(int contextId, List<PushSubscription> subscriptions) {
+        if (null != subscriptions && 0 < subscriptions.size()) {
+            Date now = new Date();
+            List<PushSubscription> expiredSubscriptions = new ArrayList<PushSubscription>();
+            for (Iterator<PushSubscription> iterator = subscriptions.iterator(); iterator.hasNext();) {
+                PushSubscription subscription = iterator.next();
+                Date expires = subscription.getExpires();
+                if (null != expires && expires.before(now)) {
+                    expiredSubscriptions.add(subscription);
+                    iterator.remove();
+                }
+            }
+            try {
+                unregisterSubscriptions(contextId, expiredSubscriptions);
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(RdbPushSubscriptionRegistry.class).error("Error unregistering expired subscriptions", e);
+            }
+        }
+        return subscriptions;
+    }
+
+    private Map<ClientAndTransport, List<PushMatch>> filterExpired(int contextId, Map<ClientAndTransport, List<PushMatch>> subscriptions) {
+        if (null != subscriptions && 0 < subscriptions.size()) {
+            Date now = new Date();
+            List<PushSubscription> expiredSubscriptions = new ArrayList<PushSubscription>();
+            for (Iterator<Entry<ClientAndTransport, List<PushMatch>>> entryIterator = subscriptions.entrySet().iterator(); entryIterator.hasNext();) {
+                Entry<ClientAndTransport, List<PushMatch>> entry = entryIterator.next();
+                for (Iterator<PushMatch> iterator = entry.getValue().iterator(); iterator.hasNext();) {
+                    PushMatch match = iterator.next();
+                    if (RdbPushMatch.class.isInstance(match)) {
+                        Date expires = ((RdbPushMatch) match).getExpires();
+                        if (null != expires && expires.before(now)) {
+                            expiredSubscriptions.add(DefaultPushSubscription.instanceFor(match));
+                            iterator.remove();
+                        }
+                    }
+                }
+                if (entry.getValue().isEmpty()) {
+                    entryIterator.remove();
+                }
+            }
+            try {
+                unregisterSubscriptions(contextId, expiredSubscriptions);
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(RdbPushSubscriptionRegistry.class).error("Error unregistering expired subscriptions", e);
+            }
+        }
+        return subscriptions;
     }
 
     private void unregisterSubscriptions(int contextId, List<PushSubscription> subscriptions) throws OXException {
@@ -399,32 +409,52 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     }
 
     /**
-     * Gets all subscriptions interested in specified topic belonging to given user.
+     * Gets all subscriptions interested in specified topic belonging to certain users.
      *
      * @param optClient The optional client to filter by
-     * @param userId The user identifier
+     * @param userIds The user identifiers
      * @param contextId The context identifier
      * @param topic The topic
      * @param con The connection to use
      * @return All subscriptions for specified affiliation
      * @throws OXException If subscriptions cannot be returned
      */
-    public MapBackedHits getSubscriptions(String optClient, int userId, int contextId, String topic, Connection con) throws OXException {
+    private Map<ClientAndTransport, List<PushMatch>> getSubscriptions(String optClient, int[] userIds, int contextId, String topic, Connection con) throws OXException {
         if (null == con) {
-            return getInterestedSubscriptions(optClient, userId, contextId, topic);
+            return getInterestedSubscriptions(optClient, userIds, contextId, topic).getMap();
         }
+        if (null == userIds || 0 == userIds.length) {
+            return null;
+        }
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT s.id, s.user, s.token, s.client, s.transport, s.last_modified, s.expires, s.all_flag, twc.topic wildcard, te.topic FROM pns_subscription s")
+            .append(" LEFT JOIN pns_subscription_topic_wildcard twc ON s.id=twc.id")
+            .append(" LEFT JOIN pns_subscription_topic_exact te ON s.id=te.id")
+            .append(" WHERE s.cid=?")
+        ;
+        if (1 == userIds.length) {
+            stringBuilder.append(" AND s.user=?");
+        } else {
+            stringBuilder.append(" AND s.user IN (?");
+            for (int i = 1; i < userIds.length; i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(')');
+        }
+        if (null != optClient) {
+            stringBuilder.append(" AND s.client=?");
+        }
+        stringBuilder.append(" AND ((s.all_flag=1) OR (te.topic=?) OR (? LIKE CONCAT(twc.topic, '%')));");
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(
-                "SELECT s.id, s.token, s.client, s.transport, s.last_modified, s.all_flag, twc.topic wildcard, te.topic FROM pns_subscription s" +
-                " LEFT JOIN pns_subscription_topic_wildcard twc ON s.id=twc.id" +
-                " LEFT JOIN pns_subscription_topic_exact te ON s.id=te.id" +
-                " WHERE s.cid=? AND s.user=?" + (null == optClient ? "" : " AND s.client=?") + " AND ((s.all_flag=1) OR (te.topic=?) OR (? LIKE CONCAT(twc.topic, '%')));");
+            stmt = con.prepareStatement(stringBuilder.toString());
             int pos = 1;
             stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            for (int userId : userIds) {
+                stmt.setInt(pos++, userId);
+            }
             if (null != optClient) {
                 stmt.setString(pos++, optClient);
             }
@@ -433,7 +463,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             rs = stmt.executeQuery();
 
             if (false == rs.next()) {
-                return MapBackedHits.EMPTY;
+                return null;
             }
 
             Map<ClientAndTransport, List<PushMatch>> map = new LinkedHashMap<>(6);
@@ -443,19 +473,22 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
                 // Check if not yet processed
                 if (processed.add(id)) {
-                    String token = rs.getString(2);
-                    String client = rs.getString(3);
-                    String transportId = rs.getString(4);
-                    Date lastModified = new Date(rs.getLong(5));
+                    int userId = rs.getInt(2);
+                    String token = rs.getString(3);
+                    String client = rs.getString(4);
+                    String transportId = rs.getString(5);
+                    Date lastModified = new Date(rs.getLong(6));
+                    long expiresValue = rs.getLong(7);
+                    Date expires = rs.wasNull() ? null : new Date(expiresValue);
 
                     // Determine matching topic
                     String matchingTopic;
                     {
-                        boolean all = rs.getInt(6) > 0;
+                        boolean all = rs.getInt(8) > 0;
                         if (all) {
                             matchingTopic = KnownTopic.ALL.getName();
                         } else {
-                            matchingTopic = rs.getString(7);
+                            matchingTopic = rs.getString(9);
                             if (rs.wasNull()) {
                                 matchingTopic = null;
                             } else {
@@ -470,19 +503,19 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
                             if (null == matchingTopic) { // Last reason why that row is present in result set
                                 // E.g. "ox:mail:new"
-                                matchingTopic = rs.getString(8);
+                                matchingTopic = rs.getString(10);
                             }
                         }
                     }
 
                     // Add to appropriate list
-                    RdbPushMatch pushMatch = new RdbPushMatch(userId, contextId, client, transportId, token, matchingTopic, lastModified);
+                    RdbPushMatch pushMatch = new RdbPushMatch(userId, contextId, client, transportId, token, matchingTopic, lastModified, expires);
                     ClientAndTransport cat = new ClientAndTransport(client, transportId);
                     com.openexchange.tools.arrays.Collections.put(map, cat, pushMatch);
                 }
             } while (rs.next());
 
-            return new MapBackedHits(map);
+            return map;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -525,9 +558,9 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     }
 
     @Override
-    public void registerSubscription(PushSubscription subscription) throws OXException {
+    public PushSubscriptionResult registerSubscription(PushSubscription subscription) throws OXException {
         if (null == subscription) {
-            return;
+            return PushSubscriptionResult.builder().withError(OXException.general("subscription must not be null")).build();
         }
 
         int contextId = subscription.getContextId();
@@ -540,11 +573,14 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             autocommit = true;
             rollback = true;
 
-            registerSubscription(subscription, con);
-            modified = true;
+            PushSubscriptionResult result = registerSubscription(subscription, con);
+            if (PushSubscriptionResult.Status.OK == result.getStatus()) {
+                modified = true;
+            }
 
             con.commit();
             rollback = false;
+            return result;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -569,15 +605,33 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
      * @param con The connection to use
      * @throws OXException If registration fails
      */
-    public void registerSubscription(PushSubscription subscription, Connection con) throws OXException {
+    public PushSubscriptionResult registerSubscription(PushSubscription subscription, Connection con) throws OXException {
         if (null == con) {
-            registerSubscription(subscription);
-            return;
+            return registerSubscription(subscription);
         }
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            stmt = con.prepareStatement("SELECT cid, user FROM pns_subscription WHERE token=? AND transport=? AND client=?");
+            stmt.setString(1, subscription.getToken());
+            stmt.setString(2, subscription.getTransportId());
+            stmt.setString(3, subscription.getClient());
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                // Such a token has already been registered for given transport and client. Check to what user that token belongs.
+                int tokenUsingContextId = rs.getInt(1);
+                int tokenUsingUserId = rs.getInt(2);
+                if (tokenUsingContextId == subscription.getContextId() && tokenUsingUserId == subscription.getUserId()) {
+                    // Actually an update, but may force to invalidate some resources as new registration might ship with other topics. Therefore:
+                    return PushSubscriptionResult.builder().withConflictingUserId(tokenUsingUserId, tokenUsingContextId).build();
+                }
+                return PushSubscriptionResult.builder().withConflictingUserId(tokenUsingUserId, tokenUsingContextId).build();
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            stmt = null;
+            rs = null;
+
             List<String> prefixes = null;
             List<String> topics = null;
             boolean isAll = false;
@@ -611,9 +665,9 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             long lastModified = System.currentTimeMillis();
             byte[] id = UUIDs.toByteArray(UUID.randomUUID());
             stmt = con.prepareStatement(
-                "INSERT INTO pns_subscription (id,cid,user,token,client,transport,all_flag,last_modified) " +
-                "VALUES (?,?,?,?,?,?,?,?) " +
-                "ON DUPLICATE KEY UPDATE transport=?, all_flag=?, last_modified=?;"
+                "INSERT INTO pns_subscription (id,cid,user,token,client,transport,all_flag,last_modified,expires) " +
+                "VALUES (?,?,?,?,?,?,?,?,?) " +
+                "ON DUPLICATE KEY UPDATE transport=?, all_flag=?, last_modified=?, expires=?;"
             );
             stmt.setBytes(1, id);
             stmt.setInt(2, subscription.getContextId());
@@ -623,20 +677,47 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             stmt.setString(6, subscription.getTransportId());
             stmt.setInt(7, isAll ? 1 : 0);
             stmt.setLong(8, lastModified);
-            stmt.setString(9, subscription.getTransportId());
-            stmt.setInt(10, isAll ? 1 : 0);
-            stmt.setLong(11, lastModified);
-            int updated = stmt.executeUpdate();
+            if (null == subscription.getExpires()) {
+                stmt.setNull(9, Types.BIGINT);
+                stmt.setNull(13, Types.BIGINT);
+            } else {
+                long expiration = subscription.getExpires().getTime();
+                stmt.setLong(9, expiration);
+                stmt.setLong(13, expiration);
+            }
+            stmt.setString(10, subscription.getTransportId());
+            stmt.setInt(11, isAll ? 1 : 0);
+            stmt.setLong(12, lastModified);
+            int rowCount = stmt.executeUpdate();
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
-            if (1 != updated) {
+            boolean alreadyExists = (1 != rowCount);
+            if (alreadyExists) {
                 // Already exists, so take over existing subscription identifier
                 id = getSubscriptionId(subscription.getUserId(), subscription.getContextId(), subscription.getToken(), subscription.getClient(), con);
+                if (null == id) {
+                    return PushSubscriptionResult.builder().withError(OXException.general("Token registration failed")).build();
+                }
+            }
+
+            // Drop possibly existing entries
+            if (alreadyExists) {
+                stmt = con.prepareStatement("DELETE FROM pns_subscription_topic_exact WHERE id=?");
+                stmt.setBytes(1, id);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
+
+                stmt = con.prepareStatement("DELETE FROM pns_subscription_topic_wildcard WHERE id=?");
+                stmt.setBytes(1, id);
+                stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
             }
 
             // Insert individual topics / topic wild-cards (if subscription is not interested in all)
-            if (!isAll) {
+            if (false == isAll) {
                 if (null != prefixes) {
                     stmt = con.prepareStatement("INSERT IGNORE INTO pns_subscription_topic_wildcard (id, cid, topic) VALUES (?, ?, ?)");
                     stmt.setBytes(1, id);
@@ -669,6 +750,8 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             if (null != cache) {
                 cache.addAndInvalidateIfPresent(subscription);
             }
+
+            return PushSubscriptionResult.OK_RESULT;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -763,30 +846,34 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             rs = null;
             stmt = null;
 
-            stmt = con.prepareStatement("SELECT s.cid, s.user, s.token, s.client, s.transport, s.last_modified, s.all_flag, twc.topic wildcard, te.topic FROM pns_subscription s LEFT JOIN pns_subscription_topic_wildcard twc ON s.id=twc.id LEFT JOIN pns_subscription_topic_exact te ON s.id=te.id WHERE s.id=?");
+            stmt = con.prepareStatement("SELECT s.cid, s.user, s.token, s.client, s.transport, s.last_modified, s.expires, s.all_flag, twc.topic wildcard, te.topic FROM pns_subscription s LEFT JOIN pns_subscription_topic_wildcard twc ON s.id=twc.id LEFT JOIN pns_subscription_topic_exact te ON s.id=te.id WHERE s.id=?");
             stmt.setBytes(1, id);
             rs = stmt.executeQuery();
 
             // Select first row and build subscription instance
             rs.next();
             DefaultPushSubscription.Builder removedSubscription = DefaultPushSubscription.builder().contextId(rs.getInt(1)).userId(rs.getInt(2)).token(rs.getString(3)).client(rs.getString(4)).transportId(rs.getString(5));
+            long expires = rs.getLong(7); // expires
+            if (false == rs.wasNull()) {
+                removedSubscription.expires(new Date(expires));
+            }
 
             // Collect topics
             {
                 List<String> topics = new LinkedList<>();
-                if (rs.getInt(7) > 0) {
+                if (rs.getInt(8) > 0) {
                     topics.add(KnownTopic.ALL.getName());
                 }
 
                 Set<String> setTopics = new LinkedHashSet<>();
                 Set<String> setWildcards = new LinkedHashSet<>();
                 do {
-                    String wildcard = rs.getString(8); // wildcard
+                    String wildcard = rs.getString(9); // wildcard
                     if (false == rs.wasNull()) {
                         setWildcards.add(wildcard);
                     }
 
-                    String topic = rs.getString(9); // topic
+                    String topic = rs.getString(10); // topic
                     if (false == rs.wasNull()) {
                         setTopics.add(topic);
                     }
@@ -930,7 +1017,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

@@ -54,10 +54,8 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
@@ -83,10 +81,7 @@ public class AddFilestoreColumnsToUserTable extends UpdateTaskAdapter {
         Logger log = org.slf4j.LoggerFactory.getLogger(AddFilestoreColumnsToUserTable.class);
         log.info("Performing update task {}", AddFilestoreColumnsToUserTable.class.getSimpleName());
 
-        DatabaseService databaseService = Services.requireService(DatabaseService.class);
-
-        int ctxId = params.getContextId();
-        Connection con = databaseService.getForUpdateTask(ctxId);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             Databases.startTransaction(con);
@@ -117,7 +112,6 @@ public class AddFilestoreColumnsToUserTable extends UpdateTaskAdapter {
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
-            databaseService.backForUpdateTask(ctxId, con);
         }
 
         log.info("{} successfully performed.", AddFilestoreColumnsToUserTable.class.getSimpleName());

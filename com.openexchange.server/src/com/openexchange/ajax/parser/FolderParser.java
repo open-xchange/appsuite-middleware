@@ -60,7 +60,6 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;

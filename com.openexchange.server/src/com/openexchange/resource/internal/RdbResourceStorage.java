@@ -49,7 +49,7 @@
 
 package com.openexchange.resource.internal;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,6 +58,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
@@ -68,7 +69,6 @@ import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.ResourceGroup;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class implements the resource storage using a relational database.
@@ -490,7 +490,7 @@ public class RdbResourceStorage extends ResourceStorage {
         } catch (final SQLException e) {
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
-            DBUtils.closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
         }
     }
 
@@ -524,7 +524,7 @@ public class RdbResourceStorage extends ResourceStorage {
         } catch (final SQLException e) {
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
-            DBUtils.closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
         }
     }
 
@@ -542,7 +542,7 @@ public class RdbResourceStorage extends ResourceStorage {
         } catch (final SQLException e) {
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
-            DBUtils.closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
         }
     }
 }

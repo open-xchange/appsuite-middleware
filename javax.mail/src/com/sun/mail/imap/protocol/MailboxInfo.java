@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,12 +40,11 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.List;
 import java.util.ArrayList;
-
+import java.util.List;
 import javax.mail.Flags;
-
-import com.sun.mail.iap.*;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Response;
 
 /**
  * Information collected when opening a mailbox.
@@ -69,6 +68,8 @@ public class MailboxInfo {
     public long uidvalidity = -1;
     /** The next UID value to be assigned. */
     public long uidnext = -1;
+    /** UIDs are not sticky. */
+    public boolean uidNotSticky = false;	// RFC 4315
     /** The highest MODSEQ value. */
     public long highestmodseq = -1;	// RFC 4551 - CONDSTORE
     /** Folder.READ_WRITE or Folder.READ_ONLY, set by IMAPProtocol. */
@@ -101,12 +102,12 @@ public class MailboxInfo {
 		r[i] = null; // remove this response
 	    } else if (ir.keyEquals("VANISHED")) {
 		if (responses == null)
-		    responses = new ArrayList<IMAPResponse>();
+		    responses = new ArrayList<>();
 		responses.add(ir);
 		r[i] = null; // remove this response
 	    } else if (ir.keyEquals("FETCH")) {
 		if (responses == null)
-		    responses = new ArrayList<IMAPResponse>();
+		    responses = new ArrayList<>();
 		responses.add(ir);
 		r[i] = null; // remove this response
 	    } else if (ir.isUnTagged() && ir.isOK()) {
@@ -137,6 +138,29 @@ public class MailboxInfo {
 		    uidnext = ir.readLong();
 		else if (s.equalsIgnoreCase("HIGHESTMODSEQ"))
 		    highestmodseq = ir.readLong();
+		else
+		    handled = false;	// possibly an ALERT
+
+		if (handled)
+		    r[i] = null; // remove this response
+		else
+		    ir.reset();	// so ALERT can be read
+	    } else if (ir.isUnTagged() && ir.isNO()) {
+		/*
+		 * should be one of:
+		 * 	* NO [UIDNOTSTICKY]
+		 */
+		ir.skipSpaces();
+
+		if (ir.readByte() != '[') {	// huh ???
+		    ir.reset();
+		    continue;
+		}
+
+		boolean handled = true;
+		String s = ir.readAtom();
+		if (s.equalsIgnoreCase("UIDNOTSTICKY"))
+		    uidNotSticky = true;
 		else
 		    handled = false;	// possibly an ALERT
 

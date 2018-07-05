@@ -55,7 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -64,7 +64,6 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.snippet.db.Tables;
 import com.openexchange.snippet.mime.Services;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MimeSnippetCreateTableTask}
@@ -97,14 +96,7 @@ public final class MimeSnippetCreateTableTask extends AbstractCreateTableImpl im
 
     @Override
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
-        final int contextId = params.getContextId();
-        final DatabaseService ds = getService(DatabaseService.class);
-        final Connection writeCon = ds.getForUpdateTask(contextId);
-        try {
-            createTable(Tables.getSnippetName(), Tables.getSnippetTable(), writeCon);
-        } finally {
-            ds.backForUpdateTask(contextId, writeCon);
-        }
+        createTable(Tables.getSnippetName(), Tables.getSnippetTable(), params.getConnectionProvider().getConnection());
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MimeSnippetCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", MimeSnippetCreateTableTask.class.getSimpleName());
     }
@@ -120,21 +112,19 @@ public final class MimeSnippetCreateTableTask extends AbstractCreateTableImpl im
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
     private boolean tableExists(final Connection con, final String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
-        boolean retval = false;
         try {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+            return (rs.next() && rs.getString("TABLE_NAME").equals(table));
         } finally {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
-        return retval;
     }
 
     @Override

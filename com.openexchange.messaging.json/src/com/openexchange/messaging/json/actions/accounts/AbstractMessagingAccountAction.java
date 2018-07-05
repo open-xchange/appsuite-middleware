@@ -117,7 +117,7 @@ public abstract class AbstractMessagingAccountAction implements AJAXActionServic
                 if (oauthAccountId >= 0) {
                     final OAuthService oAuthService = Services.getService(OAuthService.class);
                     if (null != oAuthService) {
-                        final OAuthAccount oAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                        final OAuthAccount oAuthAccount = oAuthService.getAccount(session, oauthAccountId);
                         // Check OAuth service identifier against messaging service identifier
                         if (!equalServiceIdnetifiers(messagingService.getId(), oAuthAccount.getMetaData().getId())) {
                             throw MessagingExceptionCodes.INVALID_OAUTH_ACCOUNT.create(oAuthAccount.getMetaData().getId(), messagingService.getId());

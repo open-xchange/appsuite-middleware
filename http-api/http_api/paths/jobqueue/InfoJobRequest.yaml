@@ -1,0 +1,20 @@
+/jobs?action=info:
+  get:
+    operationId: infoJob
+    tags:
+      - Jobqueue
+    summary: Gets the informartion about a certain job held in job queue
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The identifier for the job
+        required: true
+    responses:
+      200:
+        description: |
+          An array of JSON objects each describing a job currently held in job queue. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/InfoJobResponse"

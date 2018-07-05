@@ -84,10 +84,16 @@ public class FolderID {
      * Initializes a new {@link FolderID}.
      *
      * @param uniqueID The composite identifier; e.g. <code>"com.openexchange.file.storage.custom://1234/MyFolder"</code>
+     * @throws IllegalArgumentException If given composite identifier is <code>null</code>
      */
     public FolderID(String uniqueID) {
-        final List<String> unmangled = IDMangler.unmangle(uniqueID);
-        final int size = unmangled.size();
+        super();
+        if (null == uniqueID) {
+            throw new IllegalArgumentException("uniqueID must not be null");
+        }
+
+        List<String> unmangled = IDMangler.unmangle(uniqueID);
+        int size = unmangled.size();
         if (size == 1) {
             service = INFOSTORE_SERVICE_ID;
             accountId = INFOSTORE_ACCOUNT_ID;

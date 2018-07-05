@@ -64,6 +64,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
+import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Streams;
+import com.openexchange.java.StringBuilderStringer;
+import com.openexchange.java.Stringer;
 import net.htmlparser.jericho.Attribute;
 import net.htmlparser.jericho.Attributes;
 import net.htmlparser.jericho.CharacterReference;
@@ -77,13 +84,6 @@ import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.Tag;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
-import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.java.AsciiReader;
-import com.openexchange.java.Streams;
-import com.openexchange.java.StringBuilderStringer;
-import com.openexchange.java.Stringer;
 
 /**
  * {@link HtmlWhitelistFilter}
@@ -361,7 +361,11 @@ public final class HtmlWhitelistFilter {
     }
 
     private static boolean isValidLITag(final Tag tag) {
-        final Element parentElement = tag.getElement().getParentElement();
+        Element element = tag.getElement();
+        if (element == null) {
+            return false;
+        }
+        final Element parentElement = element.getParentElement();
         if (parentElement == null) {
             return false; // ignore LI elements without a parent
         }

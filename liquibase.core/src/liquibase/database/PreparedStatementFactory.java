@@ -1,9 +1,8 @@
 package liquibase.database;
 
+import java.sql.PreparedStatement;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-
-import java.sql.PreparedStatement;
 
 /**
  * Factory for PreparedStatements

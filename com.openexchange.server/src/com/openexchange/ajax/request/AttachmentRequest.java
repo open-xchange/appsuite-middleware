@@ -92,6 +92,7 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -127,13 +128,6 @@ public class AttachmentRequest extends CommonRequest {
         this.session = session;
     }
 
-    private static Locale localeFrom(final ServerSession session) {
-        if (null == session) {
-            return Locale.US;
-        }
-        return session.getUser().getLocale();
-    }
-
     private static Locale localeFrom(final Session session) throws OXException {
         if (null == session) {
             return Locale.US;
@@ -153,6 +147,9 @@ public class AttachmentRequest extends CommonRequest {
         try {
             if (AJAXServlet.ACTION_ATTACH.equals(action)) {
                 final JSONObject object = (JSONObject) req.getBody();
+                if (null == object) {
+                    throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+                }
 
                 for (final AttachmentField required : Attachment.REQUIRED) {
                     if (!object.has(required.getName())) {
@@ -342,7 +339,9 @@ public class AttachmentRequest extends CommonRequest {
                 final int moduleId = requireNumber(req, AJAXServlet.PARAMETER_MODULE);
 
                 final JSONArray idsArray = (JSONArray) req.getBody();
-
+                if (idsArray == null) {
+                    throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+                }
                 final int[] ids = new int[idsArray.length()];
                 for (int i = 0; i < idsArray.length(); i++) {
                     try {

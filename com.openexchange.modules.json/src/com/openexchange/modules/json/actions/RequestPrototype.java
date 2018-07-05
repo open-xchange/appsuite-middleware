@@ -54,10 +54,10 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
 import com.openexchange.modules.json.ModelParser;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.Model;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

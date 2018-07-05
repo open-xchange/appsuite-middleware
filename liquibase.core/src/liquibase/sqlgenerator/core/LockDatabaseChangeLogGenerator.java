@@ -1,5 +1,7 @@
 package liquibase.sqlgenerator.core;
 
+import java.net.InetAddress;
+import java.sql.Timestamp;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -11,9 +13,6 @@ import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.NetUtil;
 
-import java.net.InetAddress;
-import java.sql.Timestamp;
-
 public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
 
     @Override
@@ -21,15 +20,20 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         return new ValidationErrors();
     }
 
-    protected static String hostname;
-    protected static String hostaddress;
+    protected final static String hostname;
+    protected final static String hostaddress;
 
     static {
         InetAddress localHost;
         try {
             localHost = NetUtil.getLocalHost();
-            hostname = localHost.getHostName();
-            hostaddress = localHost.getHostAddress();
+            if (null == localHost) {
+                hostname = "localHost";
+                hostaddress = "127.0.0.1";
+            } else {
+                hostname = localHost.getHostName();
+                hostaddress = localHost.getHostAddress();
+            }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

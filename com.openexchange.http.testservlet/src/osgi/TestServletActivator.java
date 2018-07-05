@@ -2,6 +2,7 @@
 package osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.diagnostics.DiagnosticService;
 import com.openexchange.http.testservlet.DiagnosticServlet;
 import com.openexchange.http.testservlet.PingServlet;
 import com.openexchange.http.testservlet.TestServlet;
@@ -9,14 +10,14 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
- * {@link TestServletActivator} - Registers <code>TestServlet</code> and <code>PingServlet</code>.
+ * {@link TestServletActivator} - Registers <code>TestServlet</code>, <code>PingServlet</code> and <code>DiagnosticServlet</code>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TestServletActivator extends HousekeepingActivator {
 
     /**
-     * Path to diagnostic
+     * Path to Diagnostic
      */
     private static final String STATS_DIAGNOSTIC = "/stats/diagnostic";
 
@@ -32,7 +33,7 @@ public class TestServletActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpService.class };
+        return new Class[] { HttpService.class, DiagnosticService.class };
     }
 
     @Override
@@ -43,7 +44,7 @@ public class TestServletActivator extends HousekeepingActivator {
         }
         service.registerServlet(SERVLET_TEST_SERVLET, new TestServlet(), null, null);
         service.registerServlet(SERVLET_PING, new PingServlet(), null, null);
-        service.registerServlet(STATS_DIAGNOSTIC, new DiagnosticServlet(), null, null);
+        service.registerServlet(STATS_DIAGNOSTIC, new DiagnosticServlet(this), null, null);
     }
 
     @Override

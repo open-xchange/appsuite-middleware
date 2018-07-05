@@ -60,7 +60,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.glassfish.jersey.client.ClientConfig;
 import org.json.JSONObject;
-import com.openexchange.cli.AbstractRestCLI;
 
 /**
  * {@link DeleteUserFeedback}
@@ -68,24 +67,7 @@ import com.openexchange.cli.AbstractRestCLI;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.4
  */
-public class DeleteUserFeedback extends AbstractRestCLI<Void> {
-
-    private static final String END_LONG = "end-time";
-    private static final String END_SHORT = "e";
-
-    private static final String START_LONG = "start-time";
-    private static final String START_SHORT = "s";
-
-    private static final String CONTEXT_GROUP_LONG = "context-group";
-    private static final String CONTEXT_GROUP_SHORT = "g";
-    private static final String CONTEXT_GROUP_DEFAULT = "default";
-
-    private static final String TYPE_LONG = "type";
-    private static final String TYPE_SHORT = "t";
-    private static final String TYPE_DEFAULT = "star-rating-v1";
-
-    private static final String ENDPOINT_LONG = "api-root";
-    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/";
+public class DeleteUserFeedback extends AbstractUserFeedback {
 
     /**
      * @param args
@@ -101,11 +83,8 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption(TYPE_SHORT, TYPE_LONG, true, "The feedback type to delete. Default: 'star-rating-v1'.");
-        options.addOption(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_LONG, true, "The context group identifying the global DB where the feedback is stored. Default: 'default'.");
-        options.addOption(START_SHORT, START_LONG, true, "Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is deleted. If not set, all feedback up to -e is deleted.");
-        options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is deleted. If not set, all feedback since -s is deleted.");
-        options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1'");
+        addGenericOptions(options);
+        options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1/'");
     }
 
     @Override
@@ -136,11 +115,6 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
     }
 
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    @Override
     protected Void invoke(Options option, CommandLine cmd, Builder context) throws Exception {
         context.accept(MediaType.APPLICATION_JSON_TYPE, MediaType.APPLICATION_OCTET_STREAM_TYPE, MediaType.TEXT_PLAIN_TYPE);
         String response = context.delete(String.class);
@@ -165,11 +139,11 @@ public class DeleteUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected String getName() {
-        return "deleteuserfeedback [OPTIONS]";
+        return "deleteuserfeedback -U myUser:myPassword [OPTIONS]";
     }
 
     @Override
     protected String getHeader() {
-        return "deleteuserfeedback [-t type] [-g ctx_grp] [-s time] [-e time]\n" + "deleteuserfeedback -s 1487348317";
+        return "deleteuserfeedback -U myUser:myPassword [-t type] [-g ctx_grp] [-s time] [-e time]\n" + "deleteuserfeedback -s 1487348317";
     }
 }

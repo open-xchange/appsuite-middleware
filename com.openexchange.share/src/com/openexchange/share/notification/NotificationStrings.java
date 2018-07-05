@@ -85,6 +85,12 @@ public class NotificationStrings implements LocalizableStrings {
     /** $username has shared $number folders with you. */
     public static final String SUBJECT_SHARED_FOLDERS = "%1$s has shared %2$d folders with you.";
 
+    /** $username has shared the calendar "$folder" with you. */
+    public static final String SUBJECT_SHARED_CALENDAR = "%1$s has shared the calendar \"%2$s\" with you.";
+
+    /** $username has shared $number calendars with you. */
+    public static final String SUBJECT_SHARED_CALENDARS = "%1$s has shared %2$d calendars with you.";
+
     /** $username has shared file "$filename" with the group "Sales Dept.". */
     public static final String SUBJECT_SHARED_FILE_GROUP = "%1$s has shared the file \"%2$s\" with the group \"%3$s\".";
 
@@ -109,6 +115,12 @@ public class NotificationStrings implements LocalizableStrings {
     /** $username has shared $number folders with the group "Sales Dept.". */
     public static final String SUBJECT_SHARED_FOLDERS_GROUP = "%1$s has shared %2$d folders with the group \"%3$s\".";
 
+    /** $username has shared calendar "$folder" with the group "Sales Dept.". */
+    public static final String SUBJECT_SHARED_CALENDAR_GROUP = "%1$s has shared the calendar \"%2$s\" with the group \"%3$s\".";
+
+    /** $username has shared $number calendars with the group "Sales Dept.". */
+    public static final String SUBJECT_SHARED_CALENDARS_GROUP = "%1$s has shared %2$d calendars with the group \"%3$s\".";
+
     // detailed body
     /** $username ($user_email) has shared file "$filename" with you. Please click the button below to view it. */
     public static final String HAS_SHARED_FILE_NO_MESSAGE = "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button below to view it.";
@@ -132,7 +144,13 @@ public class NotificationStrings implements LocalizableStrings {
     public static final String HAS_SHARED_FOLDER_NO_MESSAGE = "%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button below to view it.";
 
     /** $username ($user_email) has shared folder $number folders with you. Please click the button below to view them. */
-    public static final String HAS_SHARED_FOLDERS_NO_MESSAGE = "%1$s (%2$s) has shared %3$ folders with you. Please click the button below to view them.";
+    public static final String HAS_SHARED_FOLDERS_NO_MESSAGE = "%1$s (%2$s) has shared %3$d folders with you. Please click the button below to view them.";
+
+    /** $username ($user_email) has shared calendar $folder with you. Please click the button below to view it. */
+    public static final String HAS_SHARED_CALENDAR_NO_MESSAGE = "%1$s (%2$s) has shared the calendar \"%3$s\" with you. Please click the button below to view it.";
+
+    /** $username ($user_email) has shared $number calendars with you. Please click the button below to view them. */
+    public static final String HAS_SHARED_CALENDARS_NO_MESSAGE = "%1$s (%2$s) has shared %3$d calendars with you. Please click the button below to view them.";
 
     /** $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it. */
     public static final String HAS_SHARED_FILE_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please click the button below to view it.";
@@ -156,8 +174,13 @@ public class NotificationStrings implements LocalizableStrings {
     public static final String HAS_SHARED_FOLDER_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please click the button below to view it.";
 
     /** $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them. */
-    public static final String HAS_SHARED_FOLDERS_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the button below to view them.";
+    public static final String HAS_SHARED_FOLDERS_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared %3$d folders with the group \"%4$s\". Please click the button below to view them.";
 
+    /** $username ($user_email) has shared the calendar $folder with the group "Sales Dept.". Please click the button below to view it. */
+    public static final String HAS_SHARED_CALENDAR_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\". Please click the button below to view it.";
+
+    /** $username ($user_email) has shared $number calendars with the group "Sales Dept.". Please click the button below to view them. */
+    public static final String HAS_SHARED_CALENDARS_NO_MESSAGE_GROUP = "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\". Please click the button below to view them.";
 
     /** $username ($user_email) has shared file "$filename" with you and left you a message: */
     public static final String HAS_SHARED_FILE_AND_MESSAGE = "%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:";
@@ -174,6 +197,9 @@ public class NotificationStrings implements LocalizableStrings {
     /** $username ($user_email) has shared a folder with you and left you a message: */
     public static final String HAS_SHARED_FOLDER_AND_MESSAGE = "%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:";
 
+    /** $username ($user_email) has shared a calendar with you and left you a message: */
+    public static final String HAS_SHARED_CALENDAR_AND_MESSAGE = "%1$s (%2$s) has shared the calendar \"%3$s\" with you and left you a message:";
+
     /** $username ($user_email) has shared item "$filename" with you. */
     public static final String HAS_SHARED_ITEM_AND_MESSAGE = "%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:";
 
@@ -182,6 +208,9 @@ public class NotificationStrings implements LocalizableStrings {
 
     /** $username ($user_email) has shared $number_of_folder items with you. */
     public static final String HAS_SHARED_FOLDERS_AND_MESSAGE = "%1$s (%2$s) has shared %3$d folders with you and left you a message:";
+
+    /** $username ($user_email) has shared $number_of_folder calendars with you. */
+    public static final String HAS_SHARED_CALENDARS_AND_MESSAGE = "%1$s (%2$s) has shared %3$d calendars with you and left you a message:";
 
     /** $username ($user_email) has shared file "$filename" with the group "Sales Dept." and left a message: */
     public static final String HAS_SHARED_FILE_AND_MESSAGE_GROUP = "%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a message:";
@@ -198,6 +227,9 @@ public class NotificationStrings implements LocalizableStrings {
     /** $username ($user_email) has shared a folder with the group "Sales Dept." and left a message: */
     public static final String HAS_SHARED_FOLDER_AND_MESSAGE_GROUP = "%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left a message:";
 
+    /** $username ($user_email) has shared a calendar with the group "Sales Dept." and left a message: */
+    public static final String HAS_SHARED_CALENDAR_AND_MESSAGE_GROUP = "%1$s (%2$s) has shared the calendar \"%3$s\" with the group \"%4$s\" and left a message:";
+
     /** $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message: */
     public static final String HAS_SHARED_ITEM_AND_MESSAGE_GROUP = "%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a message:";
 
@@ -206,6 +238,9 @@ public class NotificationStrings implements LocalizableStrings {
 
     /** $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message: */
     public static final String HAS_SHARED_FOLDERS_AND_MESSAGE_GROUP = "%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a message:";
+
+    /** $username ($user_email) has shared $number_of_folder calendars with the group "Sales Dept." and left a message: */
+    public static final String HAS_SHARED_CALENDARS_AND_MESSAGE_GROUP = "%1$s (%2$s) has shared %3$d calendars with the group \"%4$s\" and left a message:";
 
     // button with label
     /** View image */
@@ -225,6 +260,12 @@ public class NotificationStrings implements LocalizableStrings {
 
     /** View folders */
     public static final String VIEW_FOLDERS = "View folders";
+
+    /** View calendar */
+    public static final String VIEW_CALENDAR = "View calendar";
+
+    /** View calendars */
+    public static final String VIEW_CALENDARS = "View calendars";
 
     /** View item */
     public static final String VIEW_ITEM = "View item";
@@ -263,13 +304,13 @@ public class NotificationStrings implements LocalizableStrings {
 
     // An error occurred for user 'unknown'
     public static final String UNKNOWN_USER_NAME = "unknown";
-    
+
     /*
      * Drive Mail notifications
      */
     /** and %1$d more files. */
     public static final String DRIVE_MAIL_MORE_FILES = "and %1$d more files.";
-    
+
     /** and 1 more file. */
     public static final String DRIVE_MAIL_ONE_MORE_FILE = "and 1 more file.";
 

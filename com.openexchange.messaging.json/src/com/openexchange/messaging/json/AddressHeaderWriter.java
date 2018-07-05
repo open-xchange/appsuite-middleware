@@ -49,15 +49,14 @@
 
 package com.openexchange.messaging.json;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAddressHeader;
 import com.openexchange.messaging.MessagingHeader;
@@ -72,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AddressHeaderWriter implements MessagingHeaderWriter {
 
-    private static final Set<String> WHITELIST = new HashSet<String>(Arrays.asList(
+    private static final Set<String> WHITELIST = ImmutableSet.of(
         "From".toLowerCase(Locale.US),
         "To".toLowerCase(Locale.US),
         "Cc".toLowerCase(Locale.US),
@@ -85,7 +84,7 @@ public class AddressHeaderWriter implements MessagingHeaderWriter {
         "Resent-Sender".toLowerCase(Locale.US),
         "Resent-To".toLowerCase(Locale.US),
         "Resent-Cc".toLowerCase(Locale.US),
-        "Resent-Bcc".toLowerCase(Locale.US)));
+        "Resent-Bcc".toLowerCase(Locale.US));
 
     @Override
     public int getRanking() {

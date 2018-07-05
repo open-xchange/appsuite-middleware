@@ -49,12 +49,13 @@
 
 package com.openexchange.share.servlet.utils;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
@@ -69,16 +70,7 @@ import com.openexchange.share.servlet.internal.ShareServiceLookup;
  */
 public class ShareRedirectUtils {
 
-    private static final Pattern P_UIWEBPATH = Pattern.compile("[uiwebpath]", Pattern.LITERAL);
-    private static final Pattern P_SESSION = Pattern.compile("[session]", Pattern.LITERAL);
-    private static final Pattern P_USER = Pattern.compile("[user]", Pattern.LITERAL);
-    private static final Pattern P_USER_ID = Pattern.compile("[user_id]", Pattern.LITERAL);
-    private static final Pattern P_CONTEXT_ID = Pattern.compile("[context_id]", Pattern.LITERAL);
-    private static final Pattern P_LANGUAGE = Pattern.compile("[language]", Pattern.LITERAL);
-    private static final Pattern P_MODULE = Pattern.compile("[module]", Pattern.LITERAL);
-    private static final Pattern P_FOLDER = Pattern.compile("[folder]", Pattern.LITERAL);
-    private static final Pattern P_ITEM = Pattern.compile("[item]", Pattern.LITERAL);
-    private static final Pattern P_STORE = Pattern.compile("[store]", Pattern.LITERAL);
+    private static final String S_UIWEBPATH = "[uiwebpath]";
 
     /**
      * Constructs the redirect URL pointing to the share in the web interface.
@@ -103,44 +95,41 @@ public class ShareRedirectUtils {
             item = target.getItem();
         }
         /*
-         * prepare url, appending placeholders for link destination parameters
+         * prepare url
          */
-        StringBuilder stringBuilder = new StringBuilder("[uiwebpath]#!&session=[session]&store=[store]&user=[user]&user_id=[user_id]&context_id=[context_id]");
-        if (module > 0) {
-            stringBuilder.append("&m=[module]");
-        }
-        if (null != folder) {
-            stringBuilder.append("&f=[folder]");
-        }
-        if (null != item) {
-            stringBuilder.append("&i=[item]");
-        }
-        /*
-         * replace templates & return redirect link
-         */
-        String redirectLink = stringBuilder.toString();
-        redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(getLoginLink()));
-        redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
-        redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
-        redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
-        redirectLink = P_CONTEXT_ID.matcher(redirectLink).replaceAll(String.valueOf(session.getContextId()));
-        redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));
+        StringBuilder stringBuilder = new StringBuilder(getLoginLink()).append("#!");
+        stringBuilder.append("&session=").append(session.getSessionID());
+        stringBuilder.append("&store=").append(loginConfig.isSessiondAutoLogin(host, session) ? true : false);
+        stringBuilder.append("&user=").append(urlEncode(user.getMail()));
+        stringBuilder.append("&user_id=").append(user.getId());
+        stringBuilder.append("&context_id=").append(session.getContextId());
         if (module > 0) {
             ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class);
             if (null == moduleSupport) {
                 throw ServiceExceptionCode.absentService(ModuleSupport.class);
             }
             String name = moduleSupport.getShareModule(module);
-            redirectLink = P_MODULE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(name));
+            stringBuilder.append("&m=").append(urlEncode(name));
         }
         if (null != folder) {
-            redirectLink = P_FOLDER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(folder));
+            stringBuilder.append("&f=").append(urlEncode(folder));
         }
         if (null != item) {
-            redirectLink = P_ITEM.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(item));
+            stringBuilder.append("&i=").append(urlEncode(item));
         }
-        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin(host, session) ? "true" : "false");
-        return redirectLink;
+        return stringBuilder.toString();
+    }
+
+    private static String urlEncode(String s) {
+        if (null == s) {
+            return s;
+        }
+
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return s;
+        }
     }
 
     /**
@@ -151,9 +140,14 @@ public class ShareRedirectUtils {
      */
     public static String getLoginLink() {
         ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
+        if (configService == null) {
+            // If config service is not available fall back to defaults
+            return "/appsuite/ui";
+        }
+
         String loginLink = configService.getProperty("com.openexchange.share.loginLink", "/[uiwebpath]/ui");
         String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite/");
-        return P_UIWEBPATH.matcher(loginLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
+        return Strings.replaceSequenceWith(loginLink, S_UIWEBPATH, trimSlashes(uiWebPath));
     }
 
     /**

@@ -119,7 +119,7 @@ public class SubscriptionCopyTest extends AbstractUserCopyTest {
             copyTask.copyUser(map);
             dstCon.commit();
         } catch (final OXException e) {
-            DBUtils.rollback(dstCon);
+            Databases.rollback(dstCon);
             e.printStackTrace();
             fail("A UserCopyException occurred.");
         } finally {
@@ -176,7 +176,7 @@ public class SubscriptionCopyTest extends AbstractUserCopyTest {
     @After
     public void tearDown()
  throws Exception {
-        DBUtils.autocommit(dstCon);
+        Databases.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools");
         super.tearDown();
     }   

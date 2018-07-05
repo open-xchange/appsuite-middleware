@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.mime;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.ByteArrayInputStream;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
@@ -58,10 +62,6 @@ import com.openexchange.mail.MailcapInitialization;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.structure.StructureMailMessageParser;
 import com.openexchange.mail.structure.handler.MIMEStructureHandler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

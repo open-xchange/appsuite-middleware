@@ -49,25 +49,28 @@
 
 package com.openexchange.calendar.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyTime;
+import com.openexchange.chronos.compat.Appointment2Event;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
-
 
 /**
  * {@link FreeBusyAction}
@@ -77,53 +80,60 @@ import com.openexchange.tools.iterator.SearchIterator;
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
 public final class FreeBusyAction extends AppointmentAction {
 
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END
+    );
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_TIMEZONE
+    );
+
     /**
      * Initializes a new {@link FreeBusyAction}.
-     * @param services
+     *
+     * @param services A service lookup reference
      */
-    public FreeBusyAction(final ServiceLookup services) {
+    public FreeBusyAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final int userId = req.checkInt(AJAXServlet.PARAMETER_ID);
-        final int type = req.checkInt("type");
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
+
+    @Override
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        Attendee attendee = new Attendee();
+        attendee.setEntity(request.checkInt(AJAXServlet.PARAMETER_ID));
+        attendee.setCuType(Appointment2Event.getCalendarUserType(request.checkInt("type")));
+        FreeBusyService freeBusyService = session.getFreeBusyService();
+        if (null == freeBusyService) {
+            throw ServiceExceptionCode.absentService(FreeBusyService.class);
         }
+        FreeBusyResult freeBusyResult = freeBusyService.getFreeBusy(session, Collections.singletonList(attendee), from, until, false).get(attendee);
+        return getAppointmentResultWithTimestamp(getEventConverter(session), extractEvents(freeBusyResult));
+    }
 
-        final Date start = req.checkTime(AJAXServlet.PARAMETER_START, timeZone);
-        final Date end = req.checkTime(AJAXServlet.PARAMETER_END, timeZone);
-
-
-        Date timestamp = new Date(0);
-
-        SearchIterator<Appointment> it = null;
-        try {
-            final List<Appointment> appointmentList = new ArrayList<Appointment>();
-            final AppointmentSqlFactoryService factoryService = getService();
-            if (null == factoryService) {
-                throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
-            }
-            final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(req.getSession());
-            it = appointmentsql.getFreeBusyInformation(userId, type, start, end);
-            while (it.hasNext()) {
-                final Appointment appointmentObj = it.next();
-                appointmentList.add(appointmentObj);
-
-                if (null != appointmentObj.getLastModified() && timestamp.before(appointmentObj.getLastModified())) {
-                    timestamp = appointmentObj.getLastModified();
-                }
-            }
-            return new AJAXRequestResult(appointmentList, timestamp, "appointment");
-        } finally {
-            if (it != null) {
-                it.close();
+    private static List<Event> extractEvents(FreeBusyResult freeBusyResult) {
+        if (null == freeBusyResult || null == freeBusyResult.getFreeBusyTimes()) {
+            return Collections.emptyList();
+        }
+        List<Event> events = new ArrayList<Event>(freeBusyResult.getFreeBusyTimes().size());
+        for (FreeBusyTime freeBusyTime : freeBusyResult.getFreeBusyTimes()) {
+            if (null != freeBusyTime.getEvent()) {
+                events.add(freeBusyTime.getEvent());
             }
         }
+        return events;
     }
 
 }

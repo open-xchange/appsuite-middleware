@@ -49,7 +49,6 @@
 
 package com.openexchange.dav.mixins;
 
-import com.openexchange.dav.CUType;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -78,7 +77,7 @@ public class CalendarUserType extends SingleXMLPropertyMixin {
      *
      * @param userType The user type
      */
-    public CalendarUserType(CUType type) {
+    public CalendarUserType(com.openexchange.chronos.CalendarUserType type) {
         this(type.toString());
     }
 

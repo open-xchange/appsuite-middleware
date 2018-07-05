@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.json.action;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -97,17 +96,15 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("emptyTrash", new EmptyTrashAction());
         actions.put("moveFile", new MoveFileAction());
         actions.put("moveFolder", new MoveFolderAction());
+        actions.put("trashContents", new TrashContentsAction());
+        actions.put("deleteFromTrash", new DeleteFromTrashAction());
+        actions.put("restoreFromTrash", new RestoreFromTrashAction());
         this.actions = actions.build();
     }
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
         return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

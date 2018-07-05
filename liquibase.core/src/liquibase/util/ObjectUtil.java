@@ -1,15 +1,14 @@
 package liquibase.util;
 
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
 
 public class ObjectUtil {
 

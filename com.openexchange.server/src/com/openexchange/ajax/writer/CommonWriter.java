@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -62,6 +60,8 @@ import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.session.Session;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link CommonWriter} - Writer for common fields

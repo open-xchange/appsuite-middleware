@@ -136,7 +136,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             throw invalidDataException;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         LOGGER.debug("{} - {}", ctx, admin_user);
 
@@ -188,9 +188,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             LOGGER.error("", e);
             throw e;
         } catch (StorageException e) {
-            LOGGER.error("", e);
-            // Eliminate nested root cause exceptions. These are mostly unknown to clients.
-            throw new StorageException(e.getMessage());
+            throw e;
         }
     }
 

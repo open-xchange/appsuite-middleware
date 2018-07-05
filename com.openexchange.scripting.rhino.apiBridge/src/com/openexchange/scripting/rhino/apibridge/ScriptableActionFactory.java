@@ -49,7 +49,6 @@
 
 package com.openexchange.scripting.rhino.apibridge;
 
-import java.util.Collection;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.Context;
@@ -90,11 +89,6 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 		}
 		return null;
 	}
-
-	@Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.emptyList();
-    }
 
 	public static AJAXRequestResult adapt(Object object) throws OXException {
 		if (object == Undefined.instance) {

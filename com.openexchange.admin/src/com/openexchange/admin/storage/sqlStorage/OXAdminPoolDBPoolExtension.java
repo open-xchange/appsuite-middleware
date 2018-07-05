@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
 import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
@@ -115,6 +116,15 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
     public String getSchemeForContextId(final int contextId) throws PoolException {
         try {
             return getService().getSchemaName(contextId);
+        } catch (OXException e) {
+            throw new PoolException("" + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public SchemaInfo getSchemaInfoForContextId(int context_id) throws PoolException {
+        try {
+            return getService().getSchemaInfo(context_id);
         } catch (OXException e) {
             throw new PoolException("" + e.getMessage(), e);
         }

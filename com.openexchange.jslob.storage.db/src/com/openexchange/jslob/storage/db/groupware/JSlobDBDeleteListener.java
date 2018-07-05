@@ -74,10 +74,11 @@ public final class JSlobDBDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_USER != event.getType()) {
-            return;
+        if (DeleteEvent.TYPE_USER == event.getType()) {
+            dbJSlobStorage.dropAllUserJSlobs(event.getId(), event.getContext().getContextId());
+        } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
+            dbJSlobStorage.dropAllUsersJSlobs(event.getUserIds(), event.getContext().getContextId());
         }
-        dbJSlobStorage.dropAllUserJSlobs(event.getId(), event.getContext().getContextId());
     }
 
 }

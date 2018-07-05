@@ -89,9 +89,9 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
 
     private final UserModuleAccess removeAccess;
 
-    private int filter;
-
     private String filterString;
+
+    private String accessCombinationName;
 
     public static void main(final String[] args) {
         new ChangeModuleAccessGlobal(args);
@@ -114,7 +114,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         try {
             setOptions(parser);
             parse(parser, args);
-            prepare(parser);
+            prepare();
             execute();
             printSuccessMessage();
         } catch (Exception e) {
@@ -159,7 +159,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         this.accessTasksOption = setLongOpt(admp, OPT_ACCESS_TASKS,"on/off","Tasks access (Default is off)", true, required, extended);
         this.accessVcardOption = setLongOpt(admp, OPT_ACCESS_VCARD,"on/off","Vcard access (Default is off)", true, required, extended);
         this.accessWebdavOption = setLongOpt(admp, OPT_ACCESS_WEBDAV,"on/off","Webdav access (Default is off)", true, required, extended);
-        this.accessWebdavXmlOption = setLongOpt(admp, OPT_ACCESS_WEBDAV_XML,"on/off","Webdav-Xml access (Default is off)", true, required, extended);
+        this.accessWebdavXmlOption = setLongOpt(admp, OPT_ACCESS_WEBDAV_XML,"on/off","Webdav-Xml access (Default is off) [DEPRECATED]", true, required, extended);
         this.accessWebmailOption = setLongOpt(admp, OPT_ACCESS_WEBMAIL,"on/off","Webmail access (Default is on)", true, required, extended);
         this.accessEditGroupOption = setLongOpt(admp, OPT_ACCESS_EDIT_GROUP,"on/off","Edit Group access (Default is off)", true, required, extended);
         this.accessEditResourceOption = setLongOpt(admp, OPT_ACCESS_EDIT_RESOURCE,"on/off","Edit Resource access (Default is off)", true, required, extended);
@@ -170,24 +170,23 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         this.accessPublication = setLongOpt(admp, OPT_ACCESS_PUBLICATION,"on/off","Publication access (Default is off)", true, required, extended);
         this.accessActiveSync = setLongOpt(admp, OPT_ACCESS_ACTIVE_SYNC, "on/off", "Exchange Active Sync access (Default is off)", true, required, extended);
         this.accessUSM = setLongOpt(admp, OPT_ACCESS_USM, "on/off", "Universal Sync access (Default is off)", true, required, extended);
-        this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off)", true, required, extended);
+        this.accessOLOX20 = setLongOpt(admp, OPT_ACCESS_OLOX20, "on/off", "OLOX v2.0 access (Default is off) [DEPRECATED]", true, required, extended);
         this.accessDeniedPortal = setLongOpt(admp, OPT_ACCESS_DENIED_PORTAL, "on/off", "Denies portal access (Default is off)", true, required, extended);
         this.accessPublicFolderEditable = setLongOpt(admp, OPT_ACCESS_PUBLIC_FOLDER_EDITABLE, "on/off", "Whether public folder(s) is/are editable (Default is off). Applies only to context admin user.", true, required, extended);
     }
 
-    private void prepare(AdminParser parser) throws MalformedURLException, RemoteException, NotBoundException, CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException {
+    private void prepare() throws MalformedURLException, RemoteException, NotBoundException  {
         oxusr = getUserInterface();
     }
 
     private void execute() throws InvalidCredentialsException, StorageException, RemoteException, InvalidDataException {
-        oxusr.changeModuleAccessGlobal(filterString, addAccess, removeAccess, auth);
-    }
+        UserModuleAccess add = new UserModuleAccess();
+        add.disableAll();
+        add.setGlobalAddressBookDisabled(false);
+        UserModuleAccess remove = new UserModuleAccess();
+        remove.disableAll();
+        remove.setGlobalAddressBookDisabled(false);
 
-    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException, RemoteException {
-        parser.ownparse(args);
-        auth = credentialsparsing(parser);
-
-        final String accessCombinationName = parseAndSetAccessCombinationName(parser);
         if (null != accessCombinationName) {
             final UserModuleAccess moduleAccess = oxusr.moduleAccessForName(accessCombinationName.trim());
 
@@ -199,12 +198,22 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
                 throw new InvalidDataException("Unable to set Global Address Book Permission.");
             }
 
-            moduleAccess.transferTo(addAccess, removeAccess);
-            addAccess.setGlobalAddressBookDisabled(false);
-            removeAccess.setGlobalAddressBookDisabled(false);
-
-
+            moduleAccess.transferTo(add, remove);
+            add.setGlobalAddressBookDisabled(false);
+            remove.setGlobalAddressBookDisabled(false);
         }
+
+        UserModuleAccess dummy = new UserModuleAccess();
+        addAccess.transferTo(add, dummy);
+        removeAccess.transferTo(remove, dummy);
+        oxusr.changeModuleAccessGlobal(filterString, add, remove, auth);
+    }
+
+    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException, RemoteException {
+        parser.ownparse(args);
+        auth = credentialsparsing(parser);
+
+        accessCombinationName = parseAndSetAccessCombinationName(parser);
 
         if (parser.getOptionValue(accessCalendarOption) != null) {
             if (accessOption2Boolean(parser, accessCalendarOption)) {

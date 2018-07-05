@@ -170,7 +170,7 @@ public abstract class MimeFileStoreMailPart extends MailPart {
                          * Duplicate document name, thus retry with a new name
                          */
                         hlp.setLength(0);
-                        final int pos = name.lastIndexOf('.');
+                        final int pos = name == null ? -1 : name.lastIndexOf('.');
                         final String newName;
                         if (pos >= 0) {
                             newName =

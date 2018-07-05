@@ -290,7 +290,11 @@ public class SimSessiondService implements SessiondService {
 
     @Override
     public boolean storeSession(String sessionId) throws OXException {
-        // Nothing to do.
+        return true;
+    }
+
+    @Override
+    public boolean storeSession(String sessionId, boolean addIfAbsent) throws OXException {
         return true;
     }
 

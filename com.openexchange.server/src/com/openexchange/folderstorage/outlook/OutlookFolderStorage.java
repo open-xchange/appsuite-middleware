@@ -80,6 +80,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -98,6 +99,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.RestoringFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -169,7 +171,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
@@ -178,7 +179,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OutlookFolderStorage implements FolderStorage, SubfolderListingFolderStorage {
+public final class OutlookFolderStorage implements FolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage {
 
     static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
@@ -874,7 +875,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 return publicMailFolderPath;
             } else if (TaskContentType.getInstance().equals(contentType)) {
                 return FolderStorage.PUBLIC_ID;
-            } else if (CalendarContentType.getInstance().equals(contentType)) {
+            } else if (CalendarContentType.getInstance().equals(contentType) || com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(contentType)) {
                 return FolderStorage.PUBLIC_ID;
             } else if (ContactContentType.getInstance().equals(contentType)) {
                 return FolderStorage.PUBLIC_ID;
@@ -1536,6 +1537,32 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
     @Override
     public StoragePriority getStoragePriority() {
         return StoragePriority.NORMAL;
+    }
+
+    @Override
+    public Map<String, String> restoreFromTrash(String treeId, List<String> folderIds, String defaultDestFolderId, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, defaultDestFolderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, defaultDestFolderId);
+        }
+
+        if (false == RestoringFolderStorage.class.isInstance(folderStorage)) {
+            throw FolderExceptionErrorMessage.NO_RESTORE_SUPPORT.create();
+        }
+
+        for (String folderId : folderIds) {
+            FolderStorage storage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+            if (null == storage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, defaultDestFolderId);
+            }
+
+            if (false == folderStorage.equals(storage)) {
+                throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(folderId);
+            }
+        }
+
+        RestoringFolderStorage restoringFolderStorage = (RestoringFolderStorage) folderStorage;
+        return restoringFolderStorage.restoreFromTrash(realTreeId, folderIds, defaultDestFolderId, storageParameters);
     }
 
     @Override
@@ -2492,16 +2519,16 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                     }
                     con.commit(); // COMMIT
                 } catch (final SQLException e) {
-                    DBUtils.rollback(con); // ROLLBACK
+                    Databases.rollback(con); // ROLLBACK
                     throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
                 } catch (final OXException e) {
-                    DBUtils.rollback(con); // ROLLBACK
+                    Databases.rollback(con); // ROLLBACK
                     throw e;
                 } catch (final Exception e) {
-                    DBUtils.rollback(con); // ROLLBACK
+                    Databases.rollback(con); // ROLLBACK
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 } finally {
-                    DBUtils.autocommit(con);
+                    Databases.autocommit(con);
                     databaseService.backWritable(contextId, con);
                 }
             } else {

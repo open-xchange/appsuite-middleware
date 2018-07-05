@@ -60,6 +60,7 @@ import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import com.openexchange.http.client.osgi.Services;
+import com.openexchange.java.Streams;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 public class TrustAdapter implements ProtocolSocketFactory {
@@ -90,38 +91,41 @@ public class TrustAdapter implements ProtocolSocketFactory {
 
     @Override
     public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
-        Socket socket;
-        int timeout = params.getConnectionTimeout();
-        if (timeout == 0) {
-            socket = createSocket(host, port, localAddress, localPort);
-        } else {
-            SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
-            if (null == factoryProvider) {
-                throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+        Socket socket = null;
+        try {
+            int timeout = params.getConnectionTimeout();
+            if (timeout != 0) {
+                SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
+                if (null == factoryProvider) {
+                    throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+                }
+                SSLSocketFactory delegate = factoryProvider.getDefault();
+                socket = delegate.createSocket();
+                SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
+                SocketAddress remoteaddr = new InetSocketAddress(host, port);
+                socket.bind(localaddr);
+                socket.connect(remoteaddr, timeout);
+
+                Socket retval = socket;
+                socket = null;
+                return retval;
             }
-            SSLSocketFactory delegate = factoryProvider.getDefault();
-            socket = delegate.createSocket();
-            SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
-            SocketAddress remoteaddr = new InetSocketAddress(host, port);
-            socket.bind(localaddr);
-            socket.connect(remoteaddr, timeout);
-            return socket;
+            
+            socket = createSocket(host, port, localAddress, localPort);
+            int linger = params.getLinger();
+            if (linger == 0) {
+                socket.setSoLinger(false, 0);
+            } else if (linger > 0) {
+                socket.setSoLinger(true, linger);
+            }
+            socket.setSoTimeout(params.getSoTimeout());
+            socket.setTcpNoDelay(params.getTcpNoDelay());
+
+            Socket retval = socket;
+            socket = null;
+            return retval;
+        } finally {
+            Streams.close(socket);
         }
-
-
-        int linger = params.getLinger();
-        if(linger == 0) {
-            socket.setSoLinger(false, 0);
-        } else if (linger > 0) {
-            socket.setSoLinger(true, linger);
-        }
-
-        socket.setSoTimeout(params.getSoTimeout());
-        socket.setTcpNoDelay(params.getTcpNoDelay());
-
-        return socket;
     }
-
-
 }
-

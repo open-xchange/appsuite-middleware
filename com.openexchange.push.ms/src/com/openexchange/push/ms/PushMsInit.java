@@ -111,7 +111,8 @@ public class PushMsInit {
      */
     public void init() throws OXException {
         Topic<Map<String, Object>> publishTopic = this.publishTopic;
-        if (null == publishTopic) {
+        DelayPushQueue delayPushQueue = this.delayPushQueue;
+        if (null == publishTopic || delayPushQueue == null) {
             synchronized (this) {
                 publishTopic = this.publishTopic;
                 if (null == publishTopic) {
@@ -129,11 +130,7 @@ public class PushMsInit {
                         throw MsExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 }
-            }
-        }
-        DelayPushQueue delayPushQueue = this.delayPushQueue;
-        if (delayPushQueue == null) {
-            synchronized (this) {
+
                 delayPushQueue = this.delayPushQueue;
                 if (delayPushQueue == null) {
                     ConfigurationService configService = Services.getService(ConfigurationService.class);

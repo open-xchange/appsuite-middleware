@@ -78,7 +78,7 @@ public class Bug20425_StructureTest extends AbstractMailTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        final String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
+        final String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
         final InputStream is = new FileInputStream(new File(testMailDir, "bug20425.eml"));
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         IOUtils.transfer(is, baos);

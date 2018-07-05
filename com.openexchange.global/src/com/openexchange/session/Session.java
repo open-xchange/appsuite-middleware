@@ -219,11 +219,43 @@ public interface Session {
     public static final String PARAM_OAUTH_REFRESH_TOKEN = "__session.oauth.refresh".intern();
 
     /**
+     * The parameter that holds when the Oauth token expires.
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE = "__session.oauth.access.expiry".intern();
+
+    /**
      * The parameter for optional host name associated with a session.
      *
      * @type <code>java.lang.String</code>
      */
     public static final String PARAM_HOST_NAME = "__session.hostname".intern();
+
+    /**
+     * The parameter for optional user agent associated with a session.
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_USER_AGENT = "__session.useragent".intern();
+
+    /**
+     * The parameter for optional login time associated with a session
+     *
+     * @type <code>java.lang.Long</code>
+     */
+    public static final String PARAM_LOGIN_TIME = "__session.logintime".intern();
+
+    /**
+     * The parameter for optional local last active time associated with a session
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: This parameter is not spread through cluster
+     * </div>
+     *
+     * @type <code>java.lang.Long</code>
+     */
+    public static final String PARAM_LOCAL_LAST_ACTIVE = "__session.locallastactive".intern();
 
     /**
      * The parameter for optional OAuth flag associated with a session.
@@ -238,14 +270,14 @@ public interface Session {
     /**
      * @return the context identifier.
      */
-    public int getContextId();
+    int getContextId();
 
     /**
      * IP address of the session client. Normally every request from the client using this session is verified to come from this IP address.
      *
      * @return The local IP address
      */
-    public String getLocalIp();
+    String getLocalIp();
 
     /**
      * Updates the local IP address.
@@ -254,14 +286,14 @@ public interface Session {
      * @deprecated Use {@link SessiondService#setLocalIp(String, String)} instead
      */
     @Deprecated
-    public void setLocalIp(String ip);
+    void setLocalIp(String ip);
 
     /**
      * Gets the login name
      *
      * @return The login name
      */
-    public String getLoginName();
+    String getLoginName();
 
     /**
      * Checks if there is a parameter bound to specified name.
@@ -269,7 +301,7 @@ public interface Session {
      * @param name The parameter name
      * @return <code>true</code> if there is a parameter bound to specified name; otherwise <code>false</code>
      */
-    public boolean containsParameter(String name);
+    boolean containsParameter(String name);
 
     /**
      * Gets the parameter bound to specified name or <code>null</code> if no such parameter is present
@@ -277,49 +309,49 @@ public interface Session {
      * @param name The parameter name
      * @return The parameter or <code>null</code>
      */
-    public Object getParameter(String name);
+    Object getParameter(String name);
 
     /**
      * Gets the password
      *
      * @return The password
      */
-    public String getPassword();
+    String getPassword();
 
     /**
      * Gets the random token
      *
      * @return The random token
      */
-    public String getRandomToken();
+    String getRandomToken();
 
     /**
      * Gets the secret
      *
      * @return
      */
-    public String getSecret();
+    String getSecret();
 
     /**
      * Gets the session ID
      *
      * @return The session ID
      */
-    public String getSessionID();
+    String getSessionID();
 
     /**
      * Gets the user ID
      *
      * @return The user ID
      */
-    public int getUserId();
+    int getUserId();
 
     /**
      * Gets the user login
      *
      * @return The user login
      */
-    public String getUserlogin();
+    String getUserlogin();
 
     /**
      * Gets the full login information including user and context information; e.g <code>firstname.lastname@domain.tld</code>. The user
@@ -334,19 +366,21 @@ public interface Session {
      *
      * @return The full login information if it is available, otherwise <code>null</code>.
      */
-    public String getLogin();
+    String getLogin();
 
     /**
      * Sets the parameter. Any existing parameters bound to specified name are replaced with given value.
      * <p>
      * A <code>null</code> value removes the parameter.
      * <p>
-     * <code>Note</code>: Parameters will not be considered on remote distribution.
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: Parameters will not be considered on remote distribution.
+     * </div>
      *
      * @param name The parameter name
      * @param value The parameter value
      */
-    public void setParameter(String name, Object value);
+    void setParameter(String name, Object value);
 
     /**
      * @return the authentication identifier that is used to trace the login request across different systems.

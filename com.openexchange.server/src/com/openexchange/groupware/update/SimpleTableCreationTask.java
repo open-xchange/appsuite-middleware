@@ -49,14 +49,11 @@
 
 package com.openexchange.groupware.update;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -66,11 +63,8 @@ import com.openexchange.tools.update.Tools;
  */
 public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
 
-    private final DatabaseService dbService;
-
-    public SimpleTableCreationTask(DatabaseService dbService) {
+    public SimpleTableCreationTask() {
         super();
-        this.dbService = dbService;
     }
 
     protected abstract String getStatement();
@@ -79,25 +73,25 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection con = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
+            innerPerform(con);
+
+            con.commit();
+            rollback = false;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        }
-        try {
-            innerPerform(con);
-            con.commit();
-        } catch (final SQLException e) {
-            rollback(con);
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final Exception e) {
-            rollback(con);
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 
@@ -110,11 +104,7 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
             stmt = con.createStatement();
             stmt.execute(getStatement());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
-    }
-
-    public DatabaseService getDbService() {
-        return dbService;
     }
 }

@@ -85,4 +85,11 @@ public class MailStrings implements LocalizableStrings {
 
     public static final String FACET_FILENAME_NAME = "in attachment file names";
 
+    // Has attachment
+    public static final String FACET_ATTACHMENT = "Attachments";
+
+    public static final String HAS_ATTACHMENT_TRUE = "Has attachment";
+
+    public static final String HAS_ATTACHMENT_FALSE = "Has no attachment";
+
 }

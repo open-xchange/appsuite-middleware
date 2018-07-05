@@ -49,28 +49,24 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
-import gnu.trove.procedure.TIntProcedure;
+import static com.openexchange.database.Databases.autocommit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
 
 /**
  * {@link ContactAddUIDValueTask} - Add UIDs to contacts if missing.
@@ -93,23 +89,26 @@ public final class ContactAddUIDValueTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int cid = params.getContextId();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection con = dbService.getForUpdateTask(cid);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             addUid("prg_contacts", con);
             addUid("del_contacts", con);
+
             con.commit();
-        } catch (final SQLException e) {
-            rollback(con);
+            rollback = false;
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            rollback(con);
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
             autocommit(con);
-            Database.backNoTimeout(cid, true, con);
         }
     }
 
@@ -129,7 +128,7 @@ public final class ContactAddUIDValueTask extends UpdateTaskAdapter {
                 }
                 ids.add(rs.getInt(1));
             }
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 
             final AtomicReference<SQLException> exceptionReference = new AtomicReference<SQLException>();
             map.forEachEntry(new TIntObjectProcedure<TIntList>() {
@@ -166,7 +165,7 @@ public final class ContactAddUIDValueTask extends UpdateTaskAdapter {
                         exceptionReference.set(e);
                         return false;
                     } finally {
-                        DBUtils.closeSQLStuff(innerStmt);
+                        Databases.closeSQLStuff(innerStmt);
                     }
                 }
             }); // end of for-each procedure
@@ -175,7 +174,7 @@ public final class ContactAddUIDValueTask extends UpdateTaskAdapter {
                 throw sqlException;
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

@@ -1,16 +1,10 @@
 
 package com.openexchange.push.dovecot.rest;
 
-import static com.openexchange.push.dovecot.locking.AbstractDovecotPushClusterLock.cancelFutureSafe;
-import static com.openexchange.push.dovecot.locking.AbstractDovecotPushClusterLock.getOtherMembers;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -22,9 +16,8 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -141,58 +134,33 @@ public class DovecotPushRESTService {
 
                     if (null == session) {
                         HazelcastInstance hzInstance = Services.optService(HazelcastInstance.class);
-                        ObfuscatorService obfuscatorService = Services.optService(ObfuscatorService.class);
+                        final ObfuscatorService obfuscatorService = Services.optService(ObfuscatorService.class);
                         if (null != hzInstance && null != obfuscatorService) {
-                            Cluster cluster = hzInstance.getCluster();
-
-                            // Get local member
-                            Member localMember = cluster.getLocalMember();
-
                             // Determine other cluster members
-                            Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
-
+                            Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hzInstance);
                             if (!otherMembers.isEmpty()) {
-                                IExecutorService executor = hzInstance.getExecutorService("default");
-                                Map<Member, Future<PortableSession>> futureMap = executor.submitToMembers(new PortableSessionRemoteLookUp(userId, contextId), otherMembers);
-                                for (Iterator<Entry<Member, Future<PortableSession>>> it = futureMap.entrySet().iterator(); null == session && it.hasNext();) {
-                                    Future<PortableSession> future = it.next().getValue();
-                                    // Check Future's return value
-                                    int retryCount = 3;
-                                    while (retryCount-- > 0) {
-                                        try {
-                                            PortableSession portableSession = future.get();
-                                            retryCount = 0;
-                                            if (null != portableSession) {
-                                                portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
-                                                session = portableSession;
-                                            }
-                                        } catch (InterruptedException e) {
-                                            // Interrupted - Keep interrupted state
-                                            Thread.currentThread().interrupt();
-                                        } catch (CancellationException e) {
-                                            // Canceled
-                                            retryCount = 0;
-                                        } catch (ExecutionException e) {
-                                            Throwable cause = e.getCause();
+                                Hazelcasts.Filter<PortableSession, PortableSession> filter = new Hazelcasts.Filter<PortableSession, PortableSession>() {
 
-                                            // Check for Hazelcast timeout
-                                            if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                                                if (cause instanceof RuntimeException) {
-                                                    throw ((RuntimeException) cause);
-                                                }
-                                                if (cause instanceof Error) {
-                                                    throw (Error) cause;
-                                                }
-                                                throw new IllegalStateException("Not unchecked", cause);
-                                            }
-
-                                            // Timeout while awaiting remote result
-                                            if (retryCount <= 0) {
-                                                // No further retry
-                                                cancelFutureSafe(future);
-                                            }
+                                    @Override
+                                    public PortableSession accept(PortableSession portableSession) {
+                                        if (null != portableSession) {
+                                            portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
+                                            return portableSession;
                                         }
+                                        return null;
                                     }
+                                };
+                                try {
+                                    session = Hazelcasts.executeByMembersAndFilter(new PortableSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
+                                } catch (ExecutionException e) {
+                                    Throwable cause = e.getCause();
+                                    if (cause instanceof RuntimeException) {
+                                        throw ((RuntimeException) cause);
+                                    }
+                                    if (cause instanceof Error) {
+                                        throw (Error) cause;
+                                    }
+                                    throw new IllegalStateException("Not unchecked", cause);
                                 }
                             }
                         }
@@ -278,8 +246,12 @@ public class DovecotPushRESTService {
 
     private MailMessage asMessage(long uid, String fullName, String from, String subject, int unread) throws MessagingException {
         MailMessage mailMessage = new IDMailMessage(Long.toString(uid), fullName);
-        mailMessage.addFrom(QuotedInternetAddress.parseHeader(from, true));
-        mailMessage.setSubject(null == subject ? null : MimeMessageUtility.decodeEnvelopeSubject(subject), true);
+        if (null != from) {
+            mailMessage.addFrom(QuotedInternetAddress.parseHeader(from, true));
+        }
+        if (null != subject) {
+            mailMessage.setSubject(MimeMessageUtility.decodeEnvelopeSubject(subject), true);
+        }
         if (unread >= 0) {
             mailMessage.setUnreadMessages(unread);
         }

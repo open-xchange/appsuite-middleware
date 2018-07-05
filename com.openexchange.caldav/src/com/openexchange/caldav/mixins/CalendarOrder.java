@@ -49,9 +49,7 @@
 
 package com.openexchange.caldav.mixins;
 
-import org.jdom2.Namespace;
-
-import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
@@ -62,19 +60,23 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class CalendarOrder extends SingleXMLPropertyMixin {
 
-    public static final String PROPERTY_NAME = "calendar-order";
-    public static final Namespace NAMESPACE = CaldavProtocol.APPLE_NS;
+    public static final int NO_ORDER = -1;
 
     private final int order;
 
-    public CalendarOrder(final int order) {
-        super(NAMESPACE.getURI(), PROPERTY_NAME);
+    /**
+     * Initializes a new {@link CalendarOrder}.
+     *
+     * @param order The numerical order
+     */
+    public CalendarOrder(int order) {
+        super(DAVProtocol.APPLE_NS.getURI(), "calendar-order");
         this.order = order;
     }
 
     @Override
     protected String getValue() {
-        return Integer.toString(this.order);
+        return NO_ORDER == order ? null : String.valueOf(order);
     }
 
 }

@@ -50,18 +50,12 @@
 package com.openexchange.mail.attachment.impl;
 
 import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.Member;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
@@ -220,96 +214,49 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
     }
 
     private AttachmentToken getFromRemote(String tokenId, boolean chunked, HazelcastInstance hzInstance) {
-        // Get local member
-        Cluster cluster = hzInstance.getCluster();
-        Member localMember = cluster.getLocalMember();
-
         // Determine other cluster members
-        Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
-
+        Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hzInstance);
         if (otherMembers.isEmpty()) {
             // No other cluster members
             return null;
         }
 
-        IExecutorService executor = hzInstance.getExecutorService("default");
-        Map<Member, Future<PortableAttachmentToken>> futureMap = executor.submitToMembers(new PortableCheckTokenExistence(tokenId, chunked), otherMembers);
-        for (Entry<Member, Future<PortableAttachmentToken>> entry : futureMap.entrySet()) {
-            Member member = entry.getKey();
-            Future<PortableAttachmentToken> future = entry.getValue();
-            // Check Future's return value
-            int retryCount = 3;
-            while (retryCount-- > 0) {
-                try {
-                    PortableAttachmentToken p = future.get();
-                    retryCount = 0;
-                    if (p.isValid()) {
-                        AttachmentToken token = new AttachmentToken(AttachmentTokenConstants.DEFAULT_TIMEOUT);
-                        token.setAccountId(p.getAccountId());
-                        token.setAttachmentId(p.getAttachmentId());
-                        token.setCheckIp(p.isCheckIp());
-                        token.setClient(p.getClient());
-                        token.setClientIp(p.getClientIp());
-                        token.setContextId(p.getContextId());
-                        token.setFolderPath(p.getFolderPath());
-                        token.setJsessionId(p.getJsessionId());
-                        token.setMailId(p.getMailId());
-                        token.setOneTime(p.isOneTime());
-                        token.setSessionId(p.getSessionId());
-                        token.setUserAgent(p.getUserAgent());
-                        token.setUserId(p.getUserId());
-                        return token;
-                    }
-                } catch (InterruptedException e) {
-                    // Interrupted - Keep interrupted state
-                    Thread.currentThread().interrupt();
-                    LOG.warn("Interrupted while performing remote look-up for attachment token {}", tokenId, e);
-                    return null;
-                } catch (CancellationException e) {
-                    // Canceled
-                    LOG.warn("Canceled while performing remote look-up for attachment token {}", tokenId, e);
-                    return null;
-                } catch (ExecutionException e) {
-                    Throwable cause = e.getCause();
+        Hazelcasts.Filter<PortableAttachmentToken, AttachmentToken> filter = new Hazelcasts.Filter<PortableAttachmentToken, AttachmentToken>() {
 
-                    // Check for Hazelcast timeout
-                    if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                        if (cause instanceof RuntimeException) {
-                            throw ((RuntimeException) cause);
-                        }
-                        if (cause instanceof Error) {
-                            throw (Error) cause;
-                        }
-                        throw new IllegalStateException("Not unchecked", cause);
-                    }
-
-                    // Timeout while awaiting remote result
-                    if (retryCount > 0) {
-                        LOG.info("Timeout while performing remote look-up for attachment token {} from cluster member \"{}\". Retry...", tokenId, member);
-                    } else {
-                        // No further retry
-                        LOG.info("Giving up remote look-up for attachment token {} from cluster member \"{}\".",tokenId, member);
-                        cancelFutureSafe(future);
-                    }
+            @Override
+            public AttachmentToken accept(PortableAttachmentToken p) {
+                if (!p.isValid()) {
+                    return null;
                 }
+
+                AttachmentToken token = new AttachmentToken(AttachmentTokenConstants.DEFAULT_TIMEOUT);
+                token.setAccountId(p.getAccountId());
+                token.setAttachmentId(p.getAttachmentId());
+                token.setCheckIp(p.isCheckIp());
+                token.setClient(p.getClient());
+                token.setClientIp(p.getClientIp());
+                token.setContextId(p.getContextId());
+                token.setFolderPath(p.getFolderPath());
+                token.setJsessionId(p.getJsessionId());
+                token.setMailId(p.getMailId());
+                token.setOneTime(p.isOneTime());
+                token.setSessionId(p.getSessionId());
+                token.setUserAgent(p.getUserAgent());
+                token.setUserId(p.getUserId());
+                return token;
             }
-        }
-
-
-        return null;
-    }
-
-    private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
-        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
-        if (!otherMembers.remove(localMember)) {
-            LOG.warn("Couldn't remove local member from cluster members.");
-        }
-        return otherMembers;
-    }
-
-    private <V> void cancelFutureSafe(Future<V> future) {
-        if (null != future) {
-            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
+        };
+        try {
+            return Hazelcasts.executeByMembersAndFilter(new PortableCheckTokenExistence(tokenId, chunked), otherMembers, hzInstance.getExecutorService("default"), filter);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw ((RuntimeException) cause);
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IllegalStateException("Not unchecked", cause);
         }
     }
 

@@ -1,0 +1,15 @@
+type: object
+description: The trash targets to restore or delete.
+properties:
+  files:
+    type: array
+    description: An array of file names.
+    items:
+      type: string
+      description: The name of a file.
+  folders:
+    type: array
+    description: An array of folder names.
+    items:
+      type: string
+      description: The name of a folder.

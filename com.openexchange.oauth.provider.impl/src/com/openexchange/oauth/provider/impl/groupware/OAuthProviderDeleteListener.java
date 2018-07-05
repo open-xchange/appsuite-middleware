@@ -52,12 +52,12 @@ package com.openexchange.oauth.provider.impl.groupware;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -85,14 +85,14 @@ public class OAuthProviderDeleteListener implements DeleteListener {
                 stmt = writeCon.prepareStatement("DELETE FROM authCode WHERE cid=?");
                 stmt.setInt(1, contextId);
                 stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
                 stmt = null;
             }
             if (Tools.tableExists(writeCon, "oauth_grant")) {
                 stmt = writeCon.prepareStatement("DELETE FROM oauth_grant WHERE cid=?");
                 stmt.setInt(1, contextId);
                 stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
                 stmt = null;
             }
         } catch (SQLException e) {
@@ -100,7 +100,7 @@ public class OAuthProviderDeleteListener implements DeleteListener {
         } catch (RuntimeException e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -125,7 +125,7 @@ public class OAuthProviderDeleteListener implements DeleteListener {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
                 stmt = null;
             }
             if (Tools.tableExists(writeCon, "oauth_grant")) {
@@ -133,7 +133,7 @@ public class OAuthProviderDeleteListener implements DeleteListener {
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
                 stmt = null;
             }
         } catch (SQLException e) {
@@ -141,7 +141,7 @@ public class OAuthProviderDeleteListener implements DeleteListener {
         } catch (RuntimeException e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

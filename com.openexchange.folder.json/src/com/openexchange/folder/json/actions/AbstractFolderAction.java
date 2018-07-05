@@ -49,6 +49,7 @@
 
 package com.openexchange.folder.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,6 +69,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
@@ -179,6 +181,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         Locale locale = LocaleTools.getLocale(sLocale);
         if (null == locale) {
             LOG.warn("Specified \"language\" parameter (\"{}\") cannot be parsed to a locale. Using user's locale instead.", sLocale);
+            return null;
         }
 
         return tryBestFitFor(locale);
@@ -279,53 +282,67 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      * @throws OXException If an invalid content type is denoted
      */
     protected static List<ContentType> collectAllowedContentTypes(final AJAXRequestData request) throws OXException {
-        final String tmp = request.getParameter("allowed_modules");
-        if (null == tmp) {
+        String allowedModules = request.getParameter("allowed_modules");
+        if (null == allowedModules) {
             return getDefaultAllowedModules(request);
         }
-        final String[] sa = PAT.split(tmp, 0);
-        final List<ContentType> ret = new ArrayList<ContentType>(sa.length);
         /*
-         * Get available content types
+         * Get available content types & prepeare oauth whitelist if applicable
          */
-        final Map<Integer, ContentType> availableContentTypes = ServiceRegistry.getInstance().getService(FolderService.class, true).getAvailableContentTypes();
-
-        Map<String, ContentType> tmpMap = null;
-        for (final String str : sa) {
-            final int module = getUnsignedInteger(str);
-            final ContentType contentType;
-            if (module < 0) {
-                /*
-                 * Not a number
-                 */
-                if (null == tmpMap) {
-                    tmpMap = new HashMap<String, ContentType>(availableContentTypes.size());
-                    for (final ContentType ct : availableContentTypes.values()) {
-                        tmpMap.put(ct.toString(), ct);
+        Map<Integer, List<ContentType>> availableContentTypes = ServiceRegistry.getInstance().getService(FolderService.class, true).getAvailableContentTypes();
+        Set<ContentType> oAuthWhitelist = isOAuthRequest(request) ? getReadableContentTypesForOAuthRequest(getOAuthAccess(request)) : null;
+        /*
+         * collect allowed content types matching supplied module strings
+         */
+        List<ContentType> allowedContentTypes = new ArrayList<ContentType>();
+        for (String module : PAT.split(allowedModules, 0)) {
+            List<ContentType> matchingContentTypes = getMatchingContentTypes(availableContentTypes, module);
+            if (null == matchingContentTypes || matchingContentTypes.isEmpty()) {
+                org.slf4j.LoggerFactory.getLogger(AbstractFolderAction.class).error("No content type for module: {}", module);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("allowed_modules", allowedModules);
+            }
+            if (null != oAuthWhitelist) {
+                for (ContentType matchingContentType : matchingContentTypes) {
+                    if (false == oAuthWhitelist.contains(matchingContentType)) {
+                        throw new OAuthInsufficientScopeException(OAuthContentTypes.readScopeForContentType(matchingContentType));
                     }
                 }
-                contentType = tmpMap.get(str);
-            } else {
-                final Integer key = Integer.valueOf(module);
-                contentType = availableContentTypes.get(key);
             }
-
-            if (null == contentType) {
-                org.slf4j.LoggerFactory.getLogger(AbstractFolderAction.class).error("No content type for module: {}", str);
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("allowed_modules", tmp);
-            }
-
-            Set<ContentType> oAuthWhitelist = null;
-            if (isOAuthRequest(request)) {
-                oAuthWhitelist = getReadableContentTypesForOAuthRequest(getOAuthAccess(request));
-            }
-            if (oAuthWhitelist != null && !oAuthWhitelist.contains(contentType)) {
-                throw new OAuthInsufficientScopeException(OAuthContentTypes.readScopeForContentType(contentType));
-            }
-
-            ret.add(contentType);
+            allowedContentTypes.addAll(matchingContentTypes);
         }
-        return ret;
+        return allowedContentTypes;
+    }
+
+    /**
+     * Gets all content types matching a specific module.
+     *
+     * @param availableContentTypes The availabale content types as fetched from folder service
+     * @param moduleString The module, either as numerical module identifier or module string
+     * @return The matching content types, or an empty list if there are none
+     */
+    private static List<ContentType> getMatchingContentTypes(Map<Integer, List<ContentType>> availableContentTypes, String moduleString) {
+        if (null == availableContentTypes || 0 == availableContentTypes.size() || Strings.isEmpty(moduleString)) {
+            return Collections.emptyList();
+        }
+        int module = getUnsignedInteger(moduleString);
+        if (-1 != module) {
+            /*
+             * get content types by module identifier
+             */
+            return availableContentTypes.get(I(module));
+        }
+        /*
+         * get content types by module name
+         */
+        List<ContentType> matchingContentTypes = new ArrayList<ContentType>();
+        for (List<ContentType> contentTypes : availableContentTypes.values()) {
+            for (ContentType contentType : contentTypes) {
+                if (moduleString.equals(contentType.toString())) {
+                    matchingContentTypes.add(contentType);
+                }
+            }
+        }
+        return matchingContentTypes;
     }
 
     protected static ContentType parseAndCheckContentTypeParameter(final String parameterName, final AJAXRequestData request) throws OXException {
@@ -352,32 +369,37 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
     static final class OAuthContentTypes {
 
-        static ContentType contentTypeForReadScope(String scope) {
+        static Set<ContentType> contentTypesForReadScope(String scope) {
             switch (scope) {
                 case ContactActionFactory.OAUTH_READ_SCOPE:
-                    return ContactContentType.getInstance();
+                    return Collections.singleton((ContentType) ContactContentType.getInstance());
 
-                case AppointmentActionFactory.OAUTH_READ_SCOPE:
-                    return CalendarContentType.getInstance();
-
+                case ChronosOAuthScope.OAUTH_READ_SCOPE:
+                    Set<ContentType> result = new HashSet<>(2);
+                    result.add(CalendarContentType.getInstance());
+                    result.add(com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance());
+                    return result;
                 case TaskActionFactory.OAUTH_READ_SCOPE:
-                    return TaskContentType.getInstance();
+                    return Collections.singleton((ContentType) TaskContentType.getInstance());
 
                 default:
                     return null;
             }
         }
 
-        static ContentType contentTypeForWriteScope(String scope) {
+        static Set<ContentType> contentTypesForWriteScope(String scope) {
             switch (scope) {
                 case ContactActionFactory.OAUTH_WRITE_SCOPE:
-                    return ContactContentType.getInstance();
+                    return Collections.singleton((ContentType) ContactContentType.getInstance());
 
-                case AppointmentActionFactory.OAUTH_WRITE_SCOPE:
-                    return CalendarContentType.getInstance();
+                case ChronosOAuthScope.OAUTH_WRITE_SCOPE:
+                    Set<ContentType> result = new HashSet<>(2);
+                    result.add(CalendarContentType.getInstance());
+                    result.add(com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance());
+                    return result;
 
                 case TaskActionFactory.OAUTH_WRITE_SCOPE:
-                    return TaskContentType.getInstance();
+                    return Collections.singleton((ContentType) TaskContentType.getInstance());
 
                 default:
                     return null;
@@ -389,6 +411,8 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 return ContactActionFactory.OAUTH_READ_SCOPE;
             } else if (contentType == CalendarContentType.getInstance()) {
                 return AppointmentActionFactory.OAUTH_READ_SCOPE;
+            } else if (contentType == com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance()) {
+                return ChronosOAuthScope.OAUTH_READ_SCOPE;
             } else if (contentType == TaskContentType.getInstance()) {
                 return TaskActionFactory.OAUTH_READ_SCOPE;
             }
@@ -401,6 +425,8 @@ public abstract class AbstractFolderAction implements AJAXActionService {
                 return ContactActionFactory.OAUTH_WRITE_SCOPE;
             } else if (contentType == CalendarContentType.getInstance()) {
                 return AppointmentActionFactory.OAUTH_WRITE_SCOPE;
+            } else if (contentType == com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance()) {
+                return ChronosOAuthScope.OAUTH_WRITE_SCOPE;
             } else if (contentType == TaskContentType.getInstance()) {
                 return TaskActionFactory.OAUTH_WRITE_SCOPE;
             }
@@ -476,9 +502,9 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         Set<ContentType> contentTypes = new HashSet<>();
         contentTypes.add(SystemContentType.getInstance());
         for (String scope : oauthAccess.getScope().get()) {
-            ContentType contentType = OAuthContentTypes.contentTypeForReadScope(scope);
-            if (contentType != null) {
-                contentTypes.add(contentType);
+            Set<ContentType> contentType = OAuthContentTypes.contentTypesForReadScope(scope);
+            if (contentType != null && !contentType.isEmpty()) {
+                contentTypes.addAll(contentType);
             }
         }
 

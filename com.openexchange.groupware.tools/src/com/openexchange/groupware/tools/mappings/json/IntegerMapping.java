@@ -51,7 +51,6 @@ package com.openexchange.groupware.tools.mappings.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 
 /**
@@ -62,7 +61,7 @@ import com.openexchange.exception.OXException;
  */
 public abstract class IntegerMapping<O> extends DefaultJsonMapping<Integer, O> {
 
-	public IntegerMapping(final String ajaxName, final int columnID) {
+    public IntegerMapping(final String ajaxName, final Integer columnID) {
 		super(ajaxName, columnID);
 	}
 

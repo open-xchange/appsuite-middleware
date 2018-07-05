@@ -1,11 +1,10 @@
 package liquibase.change;
 
-import liquibase.util.MD5Util;
-import liquibase.util.StringUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.Normalizer;
+import liquibase.util.MD5Util;
+import liquibase.util.StringUtils;
 
 /**
  * CheckSums are used by liquibase to determine if a Change has been modified since it was originally ran.

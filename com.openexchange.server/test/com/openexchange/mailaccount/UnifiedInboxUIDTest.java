@@ -52,10 +52,6 @@ package com.openexchange.mailaccount;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.mail.MailPath;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link UnifiedInboxUIDTest}

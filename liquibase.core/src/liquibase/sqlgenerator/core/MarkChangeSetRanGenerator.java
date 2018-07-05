@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core;
 
 import java.util.List;
-
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeSet;

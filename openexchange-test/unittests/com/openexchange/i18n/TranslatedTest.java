@@ -78,8 +78,6 @@ import com.openexchange.test.I18nTests;
 public class TranslatedTest {
 
     private static final Class<?>[] I18N_CLASSES = new Class<?>[] {
-        com.openexchange.calendar.itip.HRRStrings.class,
-        com.openexchange.calendar.itip.Messages.class,
         com.openexchange.calendar.printing.CalendarPrintingStrings.class,
         com.openexchange.groupware.i18n.FolderStrings.class,
         com.openexchange.groupware.i18n.Groups.class,
@@ -90,8 +88,7 @@ public class TranslatedTest {
         com.openexchange.publish.online.infostore.FormStrings.class,
         com.openexchange.publish.microformats.MicroformatStrings.class,
         com.openexchange.publish.microformats.FormStrings.class,
-        com.openexchange.subscribe.crawler.internal.FormStrings.class,
-        com.openexchange.subscribe.linkedin.FormStrings.class,
+//        com.openexchange.subscribe.linkedin.FormStrings.class,
         com.openexchange.subscribe.microformats.FormStrings.class,
         com.openexchange.unifiedinbox.NameStrings.class
     };

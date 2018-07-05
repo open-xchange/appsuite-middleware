@@ -122,11 +122,12 @@ public final class DatabaseFolderStorageUtility {
      * @return The extracted identifiers
      */
     public static SortableId[] extractIDs(List<FolderObject> folders) {
-        final SortableId[] ret = new SortableId[folders.size()];
-        for (int i = 0; i < ret.length; i++) {
-            final FolderObject folderObject = folders.get(i);
-            final String id = String.valueOf(folderObject.getObjectID());
-            ret[i] = new DatabaseId(id, i, folderObject.getFolderName());
+        int size = folders.size();
+        SortableId[] ret = new SortableId[size];
+        for (int k = size; k-- > 0;) {
+            FolderObject folderObject = folders.get(k);
+            String id = String.valueOf(folderObject.getObjectID());
+            ret[k] = new DatabaseId(id, k, folderObject.getFolderName());
         }
         return ret;
     }
@@ -144,31 +145,32 @@ public final class DatabaseFolderStorageUtility {
              * Check if folder is user's default folder and set locale-sensitive name
              */
             if (folderObject.isDefaultFolder()) {
-                final int module = folderObject.getModule();
-                if (FolderObject.CALENDAR == module) {
-                    {
+                int module = folderObject.getModule();
+                switch (module) {
+                    case FolderObject.CALENDAR: {
                         if (null == stringHelper) {
                             stringHelper = StringHelper.valueOf(locale);
                         }
                         folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
                     }
-                } else if (FolderObject.CONTACT == module) {
-                    {
+                        break;
+                    case FolderObject.CONTACT: {
                         if (null == stringHelper) {
                             stringHelper = StringHelper.valueOf(locale);
                         }
                         folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
                     }
-                } else if (FolderObject.TASK == module) {
-                    {
+                        break;
+                    case FolderObject.TASK: {
                         if (null == stringHelper) {
                             stringHelper = StringHelper.valueOf(locale);
                         }
                         folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                     }
+                        break;
                 }
             }
         }
-    }
+    } // End of 'localizeFolderNames' method
 
 }

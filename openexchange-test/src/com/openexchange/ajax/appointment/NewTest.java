@@ -49,22 +49,21 @@
 
 package com.openexchange.ajax.appointment;
 
-import static org.junit.Assert.*;
-import java.io.StringWriter;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.ajax.resource.ResourceTools;
-import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -102,7 +101,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSimple");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -131,7 +130,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -162,7 +161,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -205,7 +204,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime rounds down");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -254,7 +253,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testFullTime rounds down");
         appointmentObj.setStartDate(start);
         appointmentObj.setEndDate(end);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -311,13 +310,6 @@ public class NewTest extends AppointmentTest {
         UserParticipant userParticipant = new UserParticipant(userParticipantId);
         participants[1] = userParticipant;
         appointmentObj.setParticipants(participants);
-
-        final StringWriter stringWriter = new StringWriter();
-        final JSONObject jsonObj = new JSONObject();
-        final AppointmentWriter appointmentwriter = new AppointmentWriter(getClient().getValues().getTimeZone());
-        appointmentwriter.writeAppointment(appointmentObj, jsonObj);
-        stringWriter.write(jsonObj.toString());
-        stringWriter.flush();
 
         int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);
@@ -409,7 +401,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSpecialCharacters - \u00F6\u00E4\u00FC-:,;.#?!\u00A7$%&/()=\"<>");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
@@ -428,7 +420,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testPrivateFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
@@ -448,7 +440,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testPrivateFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
@@ -475,7 +467,8 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSharedFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient2().getValues().getDefaultAddress());
+        appointmentObj.setPrincipal(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
@@ -500,7 +493,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testDailyRecurrence");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
@@ -529,7 +522,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testWeeklyRecurrence");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.WEEKLY);
@@ -558,7 +551,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testMonthlyRecurrenceDayInMonth");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.MONTHLY);
@@ -587,7 +580,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testMonthlyRecurrenceDays");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.MONTHLY);
@@ -617,7 +610,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testYearlyRecurrenceDayInMonth");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.YEARLY);
@@ -647,7 +640,7 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testYearlyRecurrenceDays");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.YEARLY);

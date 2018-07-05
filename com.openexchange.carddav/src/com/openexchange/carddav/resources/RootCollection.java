@@ -103,7 +103,7 @@ public class RootCollection extends DAVRootCollection {
         return isUseAggregatedCollection() ? null : "ox:" + Interface.CARDDAV.toString().toLowerCase();
     }
 
-	@Override
+    @Override
 	public List<WebdavResource> getChildren() throws WebdavProtocolException {
 		List<WebdavResource> children = new ArrayList<WebdavResource>();
 		if (isUseAggregatedCollection()) {

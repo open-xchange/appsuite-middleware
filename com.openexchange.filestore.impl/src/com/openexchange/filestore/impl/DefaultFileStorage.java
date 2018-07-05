@@ -49,7 +49,6 @@
 
 package com.openexchange.filestore.impl;
 
-import it.geosolutions.imageio.stream.eraf.EnhancedRandomAccessFile;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.Streams;
+import it.geosolutions.imageio.stream.eraf.EnhancedRandomAccessFile;
 
 /**
  * {@link DefaultFileStorage}
@@ -154,7 +154,8 @@ public abstract class DefaultFileStorage implements FileStorage {
             boolean deleted = file.delete();
             if (deleted) {
                 File parent = file.getParentFile();
-                while (parent != null && !parent.equals(storage) && parent.list().length == 0 && deleted) {
+                String[] filesInDir;
+                while (deleted && parent != null && !parent.equals(storage) && (filesInDir = parent.list()) != null && filesInDir.length == 0) {
                     File newParent = parent.getParentFile();
                     deleted = parent.delete();
                     parent = newParent;

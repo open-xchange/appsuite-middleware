@@ -28,3 +28,6 @@ requests:
   - AutocompleteRequest.yaml
   - MoveDirectoryRequest.yaml
   - MoveFileRequest.yaml
+  - GetTrashContentRequest.yaml
+  - DeleteFromTrashRequest.yaml
+  - RestoreFromTrashRequest.yaml

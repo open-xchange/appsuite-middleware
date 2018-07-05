@@ -232,7 +232,7 @@ public final class MimeTypes {
         "application/vnd.ms-word",
         "application/odt",
         "application/x-pdf");
-    
+
     public static final Set<String> ATTACHMENTS = ImmutableSet.of(
         "message/rfc822");
 
@@ -340,10 +340,10 @@ public final class MimeTypes {
     public static String checkedMimeType(final String givenMimeType, final String fileName) {
         return checkedMimeType(givenMimeType, fileName, null);
     }
-    
+
     /**
      * Determines if the given mimetype is considered to be an attachment.
-     * 
+     *
      * @param mimeType, like <type>/<subtype>
      * @return true: if it is an attachment type, false: otherwise
      */
@@ -369,12 +369,16 @@ public final class MimeTypes {
         if (isEmpty(givenMimeType)) {
             return MimeType2ExtMap.getContentType(fileName);
         }
-        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName, null);
+        String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName, null);
         if ((null == contentTypeByFileName || equalPrimaryTypes(givenMimeType, contentTypeByFileName)) && !consideredAsInvalid(givenMimeType, invalids)) {
             // Unknown or MIME types do match
             return givenMimeType;
         }
         final String parameterList = getParameterList(givenMimeType);
+        if (contentTypeByFileName == null) {
+            // Fallback to application/octet-stream
+            contentTypeByFileName = "application/octet-stream";
+        }
         return isEmpty(parameterList) ? contentTypeByFileName : new StringBuilder(contentTypeByFileName).append(parameterList).toString();
     }
 

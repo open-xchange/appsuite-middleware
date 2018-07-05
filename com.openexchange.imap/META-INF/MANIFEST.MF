@@ -2,13 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange IMAP
 Bundle-SymbolicName: com.openexchange.imap
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
- com.googlecode.concurrentlinkedhashmap,
  com.openexchange.ajax.container,
  com.openexchange.ajax.customizer,
  com.openexchange.ajax.customizer.folder,
@@ -31,10 +30,13 @@ Import-Package: com.google.common.annotations,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.i18n,
  com.openexchange.groupware.ldap,
+ com.openexchange.groupware.settings,
+ com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
  com.openexchange.i18n.tools,
  com.openexchange.java,
  com.openexchange.java.util,
+ com.openexchange.jslob,
  com.openexchange.log,
  com.openexchange.log.audit,
  com.openexchange.login,
@@ -119,7 +121,7 @@ Import-Package: com.google.common.annotations,
  javax.security.auth,
  net.htmlparser.jericho,
  net.htmlparser.jericho.nodoc,
- org.apache.commons.io.output;version="2.2.0",
+ org.apache.commons.io.output,
  org.apache.commons.lang,
  org.apache.commons.logging,
  org.apache.commons.net,
@@ -143,10 +145,10 @@ Import-Package: com.google.common.annotations,
  org.apache.commons.net.util,
  org.apache.commons.net.whois,
  org.cliffc.high_scale_lib,
- org.eclipse.osgi.framework.console;version="1.1.0",
+ org.eclipse.osgi.framework.console,
+ org.fishwife.jrugged,
  org.json,
  org.jsoup,
- org.jsoup.examples,
  org.jsoup.helper,
  org.jsoup.nodes,
  org.jsoup.parser,
@@ -164,5 +166,5 @@ Export-Package: com.openexchange.imap,
  com.openexchange.imap.sort,
  com.openexchange.imap.util
 Bundle-Activator: com.openexchange.imap.osgi.IMAPActivator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .

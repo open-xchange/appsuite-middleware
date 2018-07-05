@@ -62,12 +62,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.json.Services;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.oauth.OAuthAPIRegistry;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.json.Services;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -164,7 +164,7 @@ public class OAuthProxyRequest {
 		if (req.isSet("id")) {
 			int id = req.getParameter("id", int.class);
 
-			return oauthService.getAccount(id, session, session.getUserId(), session.getContextId());
+			return oauthService.getAccount(session, id);
 		}
 
 		if (req.isSet("api")){

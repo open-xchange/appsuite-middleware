@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.mail.MessagingException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -89,8 +87,7 @@ public class SendDataAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
         try {
-            List<OXException> warnings = new ArrayList<OXException>();
-            return delegate.performWithoutUploads(req, warnings);
+            return delegate.performWithoutUploads(req);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {

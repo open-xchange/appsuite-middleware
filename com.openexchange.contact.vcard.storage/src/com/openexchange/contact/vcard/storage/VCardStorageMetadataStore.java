@@ -70,6 +70,16 @@ public interface VCardStorageMetadataStore {
     Set<String> loadRefIds(int contextId) throws OXException;
 
     /**
+     * Returns all persisted VCard references within the given context and user.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return {@link Set<String>} with VCard identifiers for the given context and user
+     * @throws OXException
+     */
+    Set<String> loadRefIds(int contextId, int userId) throws OXException;
+
+    /**
      * Removes all provided reference entries for the given context from the storage.
      *
      * @param contextId The context identifier

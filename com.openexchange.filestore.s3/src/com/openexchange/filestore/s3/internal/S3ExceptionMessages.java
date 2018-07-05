@@ -123,7 +123,7 @@ public final class S3ExceptionMessages implements LocalizableStrings {
 
     // The specified bucket does not exist.
     public static final String NoSuchBucket_MSG = "The specified bucket does not exist.";
-    
+
     public static final String NoSuchKey_MSG = "The specified key does not exist.";
 
     // Your account is not signed up for the Amazon S3 service.
@@ -152,6 +152,9 @@ public final class S3ExceptionMessages implements LocalizableStrings {
 
     // The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
     public static final String BadRequest_MSG = "The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.";
+
+    // Failed to create a bucket for name "%1$s" using region "%2$s"
+    public static final String BUCKET_CREATION_FAILED = "Failed to create a bucket for name \"%1$s\" using region \"%2$s\"";
 
     /**
      * Initializes a new {@link S3ExceptionMessages}.

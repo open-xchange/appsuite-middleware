@@ -85,6 +85,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -133,8 +134,6 @@ public class Bug12509Test extends AbstractAJAXSession {
         exception.setObjectID(appointment.getObjectID());
         exception.setParentFolderID(clientB.getValues().getPrivateAppointmentFolder());
         exception.setRecurrencePosition(2);
-        exception.setStartDate(D("11.07.2009 13:30"));
-        exception.setEndDate(D("11.07.2009 14:30"));
         exception.setLastModified(appointment.getLastModified());
         // The following two fields are responsible for the problem.
         exception.setParticipants(ParticipantTools.createParticipants(clientA.getValues().getUserId(), clientB.getValues().getUserId()));
@@ -153,6 +152,7 @@ public class Bug12509Test extends AbstractAJAXSession {
         clientA.execute(appointmentGetRequest);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

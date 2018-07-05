@@ -82,7 +82,7 @@ public final class ManagementActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
+    protected synchronized void handleAvailability(final Class<?> clazz) {
         LOG.info("Re-available service: {}", clazz.getName());
         getServiceRegistry().addService(clazz, getService(clazz));
         /*
@@ -97,7 +97,7 @@ public final class ManagementActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
+    protected synchronized void handleUnavailability(final Class<?> clazz) {
         LOG.info("Re-available service: {}", clazz.getName());
         /*
          * Just remove absent service from service registry but do not stop management bundle
@@ -106,7 +106,7 @@ public final class ManagementActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.management");
         /*
          * Fill service registry
@@ -126,8 +126,9 @@ public final class ManagementActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.management");
+        super.stopBundle();
         stopInternal();
         /*
          * Clear service registry
@@ -145,7 +146,6 @@ public final class ManagementActivator extends HousekeepingActivator {
     }
 
     private void stopInternal() throws OXException {
-        cleanUp();
         if (ManagementInit.getInstance().isStarted()) {
             ManagementInit.getInstance().stop();
         }

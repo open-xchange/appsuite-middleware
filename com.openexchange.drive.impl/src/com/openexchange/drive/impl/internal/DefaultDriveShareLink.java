@@ -104,4 +104,9 @@ public class DefaultDriveShareLink implements DriveShareLink {
         return shareLink.isNew();
     }
 
+    @Override
+    public boolean isIncludeSubfolders() {
+        return shareLink.isIncludeSubfolders();
+    }
+
 }

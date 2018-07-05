@@ -1,11 +1,10 @@
 package liquibase.structure.core;
 
+import java.util.ArrayList;
+import java.util.List;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class UniqueConstraint extends AbstractDatabaseObject {
 
@@ -118,12 +117,15 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 
     @Override
 	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
-		if (null == this.getColumnNames())
-			return false;
+		if (this == o) {
+            return true;
+        }
+		if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+		if (null == this.getColumnNames()) {
+            return false;
+        }
 		UniqueConstraint that = (UniqueConstraint) o;
 		boolean result = false;
 		result = !(getColumnNames() != null ? !getColumnNames()
@@ -150,7 +152,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 	}
 
 	@Override
-    public int compareTo(Object other) {
+    public int compareTo(DatabaseObject other) {
         UniqueConstraint o = (UniqueConstraint) other;
 		// Need check for nulls here due to NullPointerException using Postgres
 		String thisTableName;

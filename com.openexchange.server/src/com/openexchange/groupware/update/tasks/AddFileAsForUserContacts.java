@@ -49,22 +49,20 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Currently users contacts are created with the display name attribute filed. Outlook primarily uses the fileAs attribute. This task copies
@@ -90,9 +88,7 @@ public final class AddFileAsForUserContacts extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        final Connection con = dbService.getForUpdateTask(contextId);
+        final Connection con = params.getConnection();
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
@@ -105,7 +101,6 @@ public final class AddFileAsForUserContacts extends UpdateTaskAdapter {
         } finally {
             closeSQLStuff(stmt);
             autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
         }
     }
 }

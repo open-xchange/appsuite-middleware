@@ -227,11 +227,23 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      * The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.
      */
     INVALID_PERMISSIONS("The set permissions (%1$d) are invalid for entity (%2$d) on object %3$s.", Category.CATEGORY_PERMISSION_DENIED, 1039),
-
     /**
      * Folder name contains illegal characters: \"%1$s\"
      */
-    ILLEGAL_CHARACTERS("Folder name contains illegal characters: \"%1$s\"", Category.CATEGORY_USER_INPUT, 1040, FolderExceptionMessages.ILLEGAL_CHARACTERS_MSG)
+    ILLEGAL_CHARACTERS("Folder name contains illegal characters: \"%1$s\"", Category.CATEGORY_USER_INPUT, 1040, FolderExceptionMessages.ILLEGAL_CHARACTERS_MSG),
+    /**
+     * Invoked method is not supported.
+     */
+    UNSUPPORTED_OPERATION("Invoked method is not supported.", CATEGORY_ERROR, 1041),
+    /**
+     * Restore from trash is not supported.
+     */
+    NO_RESTORE_SUPPORT("Restore from trash is not supported.", Category.CATEGORY_ERROR, 1042, FolderExceptionMessages.NO_RESTORE_SUPPORT_MSG),
+    /**
+     * Process was interrupted. Please try again.
+     */
+    INTERRUPT_ERROR("Process was interrupted. Please try again.", CATEGORY_TRY_AGAIN, 1043, OXExceptionStrings.MESSAGE_RETRY),
+
     ;
 
     private static final String PREFIX = "FLD";
@@ -329,9 +341,12 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
     }
 
     private OXException specials(final OXException exc) {
-        switch(this) {
-        case NOT_FOUND:
-            exc.setGeneric(Generic.NOT_FOUND);
+        switch (this) {
+            case NOT_FOUND:
+                exc.setGeneric(Generic.NOT_FOUND);
+                break;
+            default:
+                break;
         }
 
         if (exc.getCategories().contains(Category.CATEGORY_CONFLICT)) {

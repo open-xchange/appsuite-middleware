@@ -62,8 +62,8 @@ import com.openexchange.html.AssertionHelper;
 public class Bug30357VulTest extends AbstractSanitizing {
      @Test
      public void testReplacingTagAttributesForIE9() {
-         String content = " <%tag onmouseover=\"alert(window.opener.ox.session)\" style=\"position:fixed;left:0;top:0;width:100%;height:100%;z-index:32767\" /> ";
-         AssertionHelper.assertSanitizedEquals(getHtmlService(), content, "&#60;%tag onmouseover=\"alert(window.opener.ox.session)\" style=\"position:fixed;left:0;top:0;width:100%;height:100%;z-index:32767\" /&#62;", false);
+        String content = " <%tag onmouseover=\"alert(window.opener.ox.session)\" style=\"position:fixed;left:0;top:0;width:100%;height:100%;z-index:32767\" /> ";
+        AssertionHelper.assertSanitizedEquals(getHtmlService(), content, "&lt;%tag onmouseover=\"alert(window.opener.ox.session)\" style=\"position:fixed;left:0;top:0;width:100%;height:100%;z-index:32767\" /&gt;", false);
     }
 
 }

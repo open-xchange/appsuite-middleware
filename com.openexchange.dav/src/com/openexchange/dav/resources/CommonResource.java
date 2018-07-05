@@ -62,13 +62,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.PreconditionException;
-import com.openexchange.dav.attachments.AttachmentUtils;
+import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.internal.Tools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.container.CommonObject;
@@ -78,7 +75,6 @@ import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
-import com.openexchange.tools.stream.CountingInputStream;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -87,14 +83,11 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class CommonResource<T extends CommonObject> extends DAVResource {
+public abstract class CommonResource<T extends CommonObject> extends DAVObjectResource<T> {
 
     protected static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CommonResource.class);
 
     protected final CommonFolderCollection<T> parent;
-    protected T object;
-    protected boolean exists;
-    protected int parentFolderID;
 
     /**
      * Initializes a new {@link CommonResource}.
@@ -104,52 +97,30 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
      * @param url The resource url
      */
     protected CommonResource(CommonFolderCollection<T> parent, T object, WebdavPath url) throws OXException {
-        super(parent.getFactory(), url);
+        super(parent, object, url);
         this.parent = parent;
-        this.object = object;
-        this.exists = null != object;
-        this.parentFolderID = Tools.parse(parent.getFolder().getID());
     }
-
-    protected abstract String getFileExtension();
 
     protected abstract void deserialize(InputStream inputStream) throws OXException, IOException;
 
     @Override
-    public Date getCreationDate() throws WebdavProtocolException {
+    protected Date getCreationDate(T object) {
         return null != object ? object.getCreationDate() : null;
     }
 
     @Override
-    public String getETag() throws WebdavProtocolException {
-        if (false == exists() || null == object || null == object.getLastModified()) {
-            return "";
-        }
-        return "http://www.open-xchange.com/etags/" + object.getObjectID() + '-' + object.getLastModified().getTime();
-    }
-
-    @Override
-    public boolean exists() throws WebdavProtocolException {
-        return exists;
-    }
-
-    @Override
-    public Date getLastModified() throws WebdavProtocolException {
+    protected Date getLastModified(T object) {
         return null != object ? object.getLastModified() : null;
     }
 
     @Override
-    public boolean hasBody() throws WebdavProtocolException {
-        return true;
+    protected int getId(T object) {
+        return null != object ? object.getObjectID() : 0;
     }
 
     @Override
-    public String getDisplayName() throws WebdavProtocolException {
-        return null;
-    }
-
-    @Override
-    public void setDisplayName(String displayName) throws WebdavProtocolException {
+    protected int getId(FolderCollection<T> collection) throws OXException {
+        return null != collection ? Tools.parse(collection.getFolder().getID()) : 0;
     }
 
     @Override
@@ -161,116 +132,6 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }
-    }
-
-    /**
-     * Adds an attachment to the underlying groupware object.
-     *
-     * @param inputStream The binary attachment data
-     * @param contentType The attachment's content type
-     * @param fileName The target filename
-     * @param size The attachment size
-     * @param recurrenceIDs The targeted recurrence ids, or <code>null</code> if not applicable or to apply to the master instance only
-     * @return Metadata of the managed attachments
-     */
-    public AttachmentMetadata[] addAttachment(InputStream inputStream, String contentType, String fileName, long size, String[] recurrenceIDs) throws OXException {
-        List<T> targetObjects = getTargetedObjects(recurrenceIDs);
-        if (null == targetObjects || 0 == targetObjects.size()) {
-            throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_NOT_FOUND);
-        }
-        AttachmentMetadata[] attachmentMetadata = new AttachmentMetadata[targetObjects.size()];
-        AttachmentBase attachments = Attachments.getInstance();
-        try {
-            attachments.startTransaction();
-            /*
-             * create first attachment
-             */
-            AttachmentMetadata metadata = addAttachment(attachments, inputStream, targetObjects.get(0), contentType, fileName, size);
-            attachmentMetadata[0] = metadata;
-            /*
-             * copy attachment to further targets
-             */
-            for (int i = 1; i < targetObjects.size(); i++) {
-                AttachmentMetadata furtherMetadata = copyAttachment(attachments, metadata, targetObjects.get(i));
-                attachmentMetadata[i] = furtherMetadata;
-            }
-            attachments.commit();
-        } catch (OXException e) {
-            attachments.rollback();
-            throw e;
-        } finally {
-            attachments.finish();
-        }
-        return attachmentMetadata;
-    }
-
-    /**
-     * Replaces an existing attachment with an updated one.
-     *
-     * @param attachmentId The identifier of the attachment to update
-     * @param inputStream The binary attachment data
-     * @param contentType The attachment's content type
-     * @param fileName The target filename
-     * @param size The attachment size
-     * @return Metadata of the (new) updated attachment
-     */
-    public AttachmentMetadata updateAttachment(int attachmentId, InputStream inputStream, String contentType, String fileName, long size) throws OXException {
-        AttachmentBase attachments = Attachments.getInstance();
-        try {
-            attachments.startTransaction();
-            /*
-             * store new attachment & remove previous attachment
-             */
-            AttachmentMetadata metadata = addAttachment(attachments, inputStream, object, contentType, fileName, size);
-            attachments.detachFromObject(object.getParentFolderID(), object.getObjectID(), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
-                new int[] { attachmentId }, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
-            attachments.commit();
-            return metadata;
-        } catch (OXException e) {
-            attachments.rollback();
-            throw e;
-        } finally {
-            attachments.finish();
-        }
-    }
-
-    /**
-     * Removes an attachment from the underlying groupware object.
-     *
-     * @param attachmentId The identifier of the attachment to remove
-     * @param recurrenceIDs The targeted recurrence ids, or <code>null</code> if not applicable or to apply to the master instance only
-     */
-    public void removeAttachment(int attachmentId, String[] recurrenceIDs) throws OXException {
-        List<T> targetObjects = getTargetedObjects(recurrenceIDs);
-        if (null == targetObjects || 0 == targetObjects.size()) {
-            throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_NOT_FOUND);
-        }
-        AttachmentBase attachments = Attachments.getInstance();
-        try {
-            attachments.startTransaction();
-            /*
-             * detach attachment
-             */
-            attachments.detachFromObject(object.getParentFolderID(), object.getObjectID(), AttachmentUtils.getModuleId(parent.getFolder().getContentType()),
-                new int[] { attachmentId }, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
-            attachments.commit();
-        } catch (OXException e) {
-            attachments.rollback();
-            throw e;
-        } finally {
-            attachments.finish();
-        }
-    }
-
-    /**
-     * Extracts a list of targeted objects based on the recurrence IDs as supplied by the client in the attachment action. <p/>
-     * This default implementation always sticks to the underlying groupware object of the resource.
-     *
-     * @param recurrenceIDs The recurrence IDs as supplied by the client
-     * @return The targeted objects
-     */
-    protected List<T> getTargetedObjects(String[] recurrenceIDs) throws OXException {
-        return Collections.singletonList(object);
     }
 
     /**
@@ -428,66 +289,6 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
             attachments.finish();
         }
         return timestamp;
-    }
-
-    protected String extractResourceName() {
-        return Tools.extractResourceName(url, getFileExtension());
-    }
-
-    /**
-     * Copies an existing attachment to another target object.
-     *
-     * @param attachments The attachment service instance to use for the operation
-     * @param originalMetadata The metadata of the attachment to copy
-     * @param targetObject The target groupware object for adding the attachment
-     * @return The copied attachment metadata; the last modification timestamp of the target object is updated accordingly
-     */
-    private AttachmentMetadata copyAttachment(AttachmentBase attachments, AttachmentMetadata originalMetadata, T targetObject) throws OXException {
-        AttachmentMetadata metadata = AttachmentUtils.newAttachmentMetadata(originalMetadata);
-        metadata.setId(0);
-        metadata.setAttachedId(targetObject.getObjectID());
-        metadata.setFolderId(targetObject.getParentFolderID());
-        InputStream inputStream = null;
-        try {
-            inputStream = attachments.getAttachedFile(factory.getSession(), originalMetadata.getFolderId(), originalMetadata.getAttachedId(),
-                originalMetadata.getModuleId(), originalMetadata.getId(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
-            long newTimestamp = attachments.attachToObject(metadata, inputStream, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
-            targetObject.setLastModified(new Date(newTimestamp));
-            return metadata;
-        } finally {
-            Streams.close(inputStream);
-        }
-    }
-
-    /**
-     * Adds a new attachment to a groupware object.
-     *
-     * @param attachments The attachment service instance to use for the operation
-     * @param inputStream The attachment data to store
-     * @param targetObject The target groupware object for adding the attachment
-     * @param contentType The content type of the attachment
-     * @param fileName The filename of the attachment
-     * @param size The indicated size in bytes of the attachment
-     * @return The added attachment's metadata; the last modification timestamp of the target object is updated accordingly
-     */
-    private AttachmentMetadata addAttachment(AttachmentBase attachments, InputStream inputStream, T targetObject, String contentType, String fileName, long size) throws OXException {
-        long maxSize = AttachmentConfig.getMaxUploadSize();
-        if (0 < maxSize) {
-            if (maxSize < size) {
-                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "max-attachment-size", getUrl(), HttpServletResponse.SC_FORBIDDEN);
-            }
-            inputStream = new CountingInputStream(inputStream, maxSize);
-        }
-        AttachmentMetadata metadata = AttachmentUtils.newAttachmentMetadata();
-        metadata.setAttachedId(targetObject.getObjectID());
-        metadata.setFileMIMEType(contentType);
-        metadata.setFilename(fileName);
-        metadata.setModuleId(AttachmentUtils.getModuleId(parent.getFolder().getContentType()));
-        metadata.setFilesize(size);
-        metadata.setFolderId(targetObject.getParentFolderID());
-        long newTimestamp = attachments.attachToObject(metadata, inputStream, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
-        targetObject.setLastModified(new Date(newTimestamp));
-        return metadata;
     }
 
     /**

@@ -68,14 +68,14 @@ public class FileCache {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileCache.class);
 
-    public interface Filter {
+    public static interface Filter {
 
         String resolve(String path);
 
         byte[] filter(ByteArrayOutputStream baos);
     }
 
-    private class CacheEntry {
+    private static class CacheEntry {
 
         private final File path;
 
@@ -129,6 +129,7 @@ public class FileCache {
     }
 
     public FileCache(File[] roots) throws IOException {
+        super();
         this.roots = roots;
         this.prefixes = new String[roots.length];
         int i = 0;

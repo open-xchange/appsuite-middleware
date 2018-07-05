@@ -60,6 +60,7 @@ import java.util.Map.Entry;
 import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -600,6 +601,11 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
+    public boolean isHasAttachment() {
+        return delegatee.isHasAttachment();
+    }
+
+    @Override
     public boolean hasEnclosedParts() throws OXException {
         return delegatee.hasEnclosedParts();
     }
@@ -992,6 +998,221 @@ public final class ThreadSortMailMessage extends MailMessage {
     @Override
     public void setRecentCount(final int recentCount) {
         delegatee.setRecentCount(recentCount);
+    }
+
+    @Override
+    public void addFrom(Collection<InternetAddress> addrs) {
+        delegatee.addFrom(addrs);
+    }
+
+    @Override
+    public void removeFromPersonals() {
+        delegatee.removeFromPersonals();
+    }
+
+    @Override
+    public void addTo(Collection<InternetAddress> addrs) {
+        delegatee.addTo(addrs);
+    }
+
+    @Override
+    public void removeToPersonals() {
+        delegatee.removeToPersonals();
+    }
+
+    @Override
+    public void addCc(Collection<InternetAddress> addrs) {
+        delegatee.addCc(addrs);
+    }
+
+    @Override
+    public void removeCcPersonals() {
+        delegatee.removeCcPersonals();
+    }
+
+    @Override
+    public void addBcc(Collection<InternetAddress> addrs) {
+        delegatee.addBcc(addrs);
+    }
+
+    @Override
+    public void removeBccPersonals() {
+        delegatee.removeBccPersonals();
+    }
+
+    @Override
+    public InternetAddress[] getAllRecipients() {
+        return delegatee.getAllRecipients();
+    }
+
+    @Override
+    public void addReplyTo(Collection<InternetAddress> addrs) {
+        delegatee.addReplyTo(addrs);
+    }
+
+    @Override
+    public boolean isSubjectDecoded() {
+        return delegatee.isSubjectDecoded();
+    }
+
+    @Override
+    public void addUserFlags(Collection<String> userFlags) {
+        delegatee.addUserFlags(userFlags);
+    }
+
+    @Override
+    public FullnameArgument getOriginalFolder() {
+        return delegatee.getOriginalFolder();
+    }
+
+    @Override
+    public boolean containsOriginalFolder() {
+        return delegatee.containsOriginalFolder();
+    }
+
+    @Override
+    public void removeOriginalFolder() {
+        delegatee.removeOriginalFolder();
+    }
+
+    @Override
+    public void setOriginalFolder(FullnameArgument originalFolder) {
+        delegatee.setOriginalFolder(originalFolder);
+    }
+
+    @Override
+    public String getTextPreview() {
+        return delegatee.getTextPreview();
+    }
+
+    @Override
+    public boolean containsTextPreview() {
+        return delegatee.containsTextPreview();
+    }
+
+    @Override
+    public void removeTextPreview() {
+        delegatee.removeTextPreview();
+    }
+
+    @Override
+    public void setTextPreview(String textPreview) {
+        delegatee.setTextPreview(textPreview);
+    }
+
+    @Override
+    public String getOriginalId() {
+        return delegatee.getOriginalId();
+    }
+
+    @Override
+    public boolean containsOriginalId() {
+        return delegatee.containsOriginalId();
+    }
+
+    @Override
+    public void removeOriginalId() {
+        delegatee.removeOriginalId();
+    }
+
+    @Override
+    public void setOriginalId(String originalId) {
+        delegatee.setOriginalId(originalId);
+    }
+
+    @Override
+    public String[] getReferencesOrInReplyTo() {
+        return delegatee.getReferencesOrInReplyTo();
+    }
+
+    @Override
+    public void setSecurityInfo(SecurityInfo securityInfo) {
+        delegatee.setSecurityInfo(securityInfo);
+    }
+
+    @Override
+    public SecurityInfo getSecurityInfo() {
+        return delegatee.getSecurityInfo();
+    }
+
+    @Override
+    public boolean containsSecurityInfo() {
+        return delegatee.containsSecurityInfo();
+    }
+
+    @Override
+    public void removeSecurityInfo() {
+        delegatee.removeSecurityInfo();
+    }
+
+    @Override
+    public void setSecurityResult(SecurityResult result) {
+        delegatee.setSecurityResult(result);
+    }
+
+    @Override
+    public SecurityResult getSecurityResult() {
+        return delegatee.getSecurityResult();
+    }
+
+    @Override
+    public boolean hasSecurityResult() {
+        return delegatee.hasSecurityResult();
+    }
+
+    @Override
+    public boolean containsSecurityResult() {
+        return delegatee.containsSecurityResult();
+    }
+
+    @Override
+    public void removeSecurityResult() {
+        delegatee.removeSecurityResult();
+    }
+
+    @Override
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        delegatee.setAuthenticityResult(authenticationResult);
+    }
+
+    @Override
+    public MailAuthenticityResult getAuthenticityResult() {
+        return delegatee.getAuthenticityResult();
+    }
+
+    @Override
+    public boolean hasAuthenticityResult() {
+        return delegatee.hasAuthenticityResult();
+    }
+
+    @Override
+    public boolean containsAuthenticityResult() {
+        return delegatee.containsAuthenticityResult();
+    }
+
+    @Override
+    public void removeAuthenticityResult() {
+        delegatee.removeAuthenticityResult();
+    }
+
+    @Override
+    public boolean isAlternativeHasAttachment() {
+        return delegatee.isAlternativeHasAttachment();
+    }
+
+    @Override
+    public boolean containsAlternativeHasAttachment() {
+        return delegatee.containsAlternativeHasAttachment();
+    }
+
+    @Override
+    public void removeAlternativeHasAttachment() {
+        delegatee.removeAlternativeHasAttachment();
+    }
+
+    @Override
+    public void setAlternativeHasAttachment(boolean hasAttachment) {
+        delegatee.setAlternativeHasAttachment(hasAttachment);
     }
 
     /**

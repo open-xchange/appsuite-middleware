@@ -70,6 +70,7 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
+import com.openexchange.find.basic.Services;
 import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.DisplayItem;
@@ -87,6 +88,7 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -188,7 +190,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
                 queries = extractMailAddessesFrom(c);
             }
 
-            participants.add(buildParticipantFacet(valueId, DisplayItems.convert(c), queries));
+            participants.add(buildParticipantFacet(valueId, DisplayItems.convert(c, session.getUser().getLocale(), Services.optionalService(I18nServiceRegistry.class)), queries));
         }
 
         //add field facets

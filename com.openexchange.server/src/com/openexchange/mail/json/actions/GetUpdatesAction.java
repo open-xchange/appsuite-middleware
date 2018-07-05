@@ -112,7 +112,6 @@ public final class GetUpdatesAction extends AbstractMailAction {
             if (!bIgnoreModified || !bIgnoreDelete) {
                 ColumnCollection columnCollection = req.checkColumnsAndHeaders();
                 int[] columns = columnCollection.getFields();
-                String[] headers = columnCollection.getHeaders();
                 int userId = session.getUserId();
                 int contextId = session.getContextId();
                 MailServletInterface mailInterface = getMailInterface(req);

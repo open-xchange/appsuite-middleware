@@ -63,12 +63,14 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link GoogleDriveActivator} - Activator for Google Drive bundle.
@@ -86,7 +88,7 @@ public final class GoogleDriveActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, OAuthAccessRegistryService.class, ConfigViewFactory.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, SessionHolder.class, MimeTypeMap.class, TimerService.class, OAuthService.class, OAuthAccountStorage.class, OAuthAccessRegistryService.class, ConfigViewFactory.class };
     }
 
     @Override

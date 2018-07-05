@@ -79,6 +79,7 @@ import com.openexchange.database.Heartbeat;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.ConnectionState;
 import com.openexchange.database.internal.Initialization;
+import com.openexchange.database.internal.MysqlUtils;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
 import com.openexchange.database.internal.StateAware;
@@ -91,6 +92,9 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class JDBC4ConnectionReturner implements Connection, StateAware, Heartbeat {
+
+    /** The logger constant */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JDBC4ConnectionReturner.class);
 
     private static final class HeartBeatHelper {
 
@@ -144,6 +148,7 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
                             try {
                                 statement = con.createStatement();
                                 rs = statement.executeQuery("SELECT 1 AS keep_alive_test");
+                                LOGGER.debug("Performed \"SELECT 1 AS keep_alive_test\" to keep connection alive");
                                 while (rs.next()) {
                                     // Discard
                                 }
@@ -233,6 +238,7 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
         }
 
         heartBeat.startHeartbeat(timer);
+        state.setHeartbeatEnabled(true);
         return true;
     }
 
@@ -561,16 +567,30 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
         touch();
     }
 
+    /**
+     * Checks if this connection has already been {@link #close() closed}.
+     *
+     * @throws SQLException If connection has already been closed
+     */
     protected void checkForAlreadyClosed() throws SQLException {
         if (closed.get()) {
             throw new SQLException("Connection was already closed.");
+        }
+
+        MysqlUtils.ClosedState closedState = MysqlUtils.isClosed(delegate, false);
+        if (MysqlUtils.ClosedState.OPEN != closedState) {
+            if (MysqlUtils.ClosedState.INTERNALLY_CLOSED == closedState) {
+                // Connection explicitly closed or lost its internal network resources, thus unusable
+                throw new SQLException("Connection is internally closed.");
+            }
+            throw new SQLException("Connection is closed.");
         }
 
         touch();
     }
 
     /**
-     * Touches this connection; updates its last-accessed time stanp
+     * Touches this connection; updates its last-accessed time stamp
      */
     public void touch() {
         HeartBeatHelper heartBeat = heartBeatReference.get();

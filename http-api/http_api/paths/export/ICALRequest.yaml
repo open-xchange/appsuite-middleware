@@ -1,0 +1,42 @@
+/export?action=ICAL:
+  get:
+    operationId: exportAsICal
+    tags:
+      - Export
+    summary: Exports appointment and task data to an iCalendar file.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: Object ID of the folder whose content shall be exported. This must be a calendar folder.
+        required: true
+    responses:
+      200:
+        description: An input stream containing the content of the iCal file with the MIME type `text/calendar`.
+        schema:
+          type: string
+  put:
+    operationId: exportAsICal
+    tags:
+      - Export
+    summary: Exports a batch of appointments and tasks data to a iCalendar file.
+    description: 
+      Exports a batch of appointments and tasks data to a iCalendar file. 
+    consumes:
+      - application/json
+    parameters:  
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON array of JSON objects with the id and folder_id.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/InfoItemExport"
+    responses:
+      200:
+        description: 'An input stream containing the content of the vCard file with the MIME type `text/calendar`.'
+        schema:
+          type: string

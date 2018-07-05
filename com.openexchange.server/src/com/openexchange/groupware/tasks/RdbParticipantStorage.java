@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -322,7 +323,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             stmt.setInt(counter++, ctx.getContextId());
             stmt.setInt(counter++, taskId);
             for (final String address : addresses) {
-                stmt.setString(counter++, address);
+                stmt.setString(counter++, Strings.replaceSurrogatePairs(address, '@'));
             }
             deleted = stmt.executeUpdate();
         } catch (final SQLException e) {
@@ -358,7 +359,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } catch (DataTruncation e) {
             throw parseTruncatedE(con, e, type, participants);
         } catch (IncorrectStringSQLException e) {
-            throw Tools.parseIncorrectString(e);
+            throw Tools.parseIncorrectStringFromExternalParticipants(e);
         } catch (SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         }

@@ -51,8 +51,8 @@ package com.openexchange.contact.vcard.storage.impl;
 
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
 
 /**

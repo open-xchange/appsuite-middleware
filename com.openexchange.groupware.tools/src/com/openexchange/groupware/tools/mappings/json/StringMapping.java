@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
  */
 public abstract class StringMapping<O> extends DefaultJsonMapping<String, O> {
 
-	public StringMapping(final String ajaxName, final int columnID) {
+    public StringMapping(final String ajaxName, final Integer columnID) {
 		super(ajaxName, columnID);
 	}
 

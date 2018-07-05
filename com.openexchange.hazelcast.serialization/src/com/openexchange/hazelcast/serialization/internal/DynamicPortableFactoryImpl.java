@@ -52,6 +52,7 @@ package com.openexchange.hazelcast.serialization.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.hazelcast.nio.serialization.ClassDefinition;
@@ -76,14 +77,14 @@ public class DynamicPortableFactoryImpl implements DynamicPortableFactory {
      */
     public DynamicPortableFactoryImpl() {
         super();
-        this.factories = new ConcurrentHashMap<Integer, CustomPortableFactory>();
+        this.factories = new ConcurrentHashMap<Integer, CustomPortableFactory>(128, 0.9F, 1);
     }
 
     @Override
     public Portable create(int classId) {
         CustomPortableFactory factory = factories.get(Integer.valueOf(classId));
         if (null == factory) {
-            LOG.warn("No portable factory found for class ID {}, unable to instantiate Portable", classId, new Throwable());
+            LOG.warn("No portable factory found for class ID {}, unable to instantiate Portable", Integer.valueOf(classId), new Throwable());
             return null; // will throw com.hazelcast.nio.serialization.HazelcastSerializationException afterwards
         }
         return factory.create();
@@ -96,12 +97,12 @@ public class DynamicPortableFactoryImpl implements DynamicPortableFactory {
      * @return The previously registered factory for the class ID, or <code>null</code> if there was no such factory registered before
      */
     public CustomPortableFactory register(CustomPortableFactory factory) {
-        CustomPortableFactory previousRegistration = factories.put(Integer.valueOf(factory.getClassId()), factory);
+        Integer classId = Integer.valueOf(factory.getClassId());
+        CustomPortableFactory previousRegistration = factories.put(classId, factory);
         if (null == previousRegistration) {
-            LOG.info("Registered custom portable factory for class ID {}: {}", factory.getClassId(), factory.getClass().getName());
+            LOG.info("Registered custom portable factory for class ID {}: {}", classId, factory.getClass().getName());
         } else {
-            LOG.warn("Replaced previously registered custom portable factory for class ID {} ({}) with new factory: {}",
-                factory.getClassId(), previousRegistration.getClass().getName(), factory.getClass().getName());
+            LOG.warn("Replaced previously registered custom portable factory for class ID {} ({}) with new factory: {}", classId, previousRegistration.getClass().getName(), factory.getClass().getName());
         }
         return previousRegistration;
     }
@@ -113,23 +114,23 @@ public class DynamicPortableFactoryImpl implements DynamicPortableFactory {
      * @return The previously registered factory for the class ID, or <code>null</code> if there was no such factory registered before
      */
     public CustomPortableFactory unregister(CustomPortableFactory factory) {
-         CustomPortableFactory removedRegistration = factories.remove(Integer.valueOf(factory.getClassId()));
-         if (null != removedRegistration) {
-             LOG.info("Unregistered custom portable factory for class ID {}: {}", factory.getClassId(), factory.getClass().getName());
-         } else {
-             LOG.warn("Unable to unregister not yet registered custom portable factory for class ID {}: {}",
-                 factory.getClassId(), factory.getClass().getName());
-         }
-         return removedRegistration;
+        Integer classId = Integer.valueOf(factory.getClassId());
+        CustomPortableFactory removedRegistration = factories.remove(classId);
+        if (null != removedRegistration) {
+            LOG.info("Unregistered custom portable factory for class ID {}: {}", classId, factory.getClass().getName());
+        } else {
+            LOG.warn("Unable to unregister not yet registered custom portable factory for class ID {}: {}", classId, factory.getClass().getName());
+        }
+        return removedRegistration;
     }
 
     @Override
     public Collection<ClassDefinition> getClassDefinitions() {
         Collection<CustomPortableFactory> registeredFactories = factories.values();
-        ArrayList<ClassDefinition> classDefinitions = new ArrayList<ClassDefinition>(registeredFactories.size());
+        List<ClassDefinition> classDefinitions = new ArrayList<ClassDefinition>(registeredFactories.size());
         for (CustomPortableFactory factory : registeredFactories) {
             ClassDefinition classDefinition = factory.getClassDefinition();
-            if(classDefinition != null) {
+            if (classDefinition != null) {
                 classDefinitions.add(classDefinition);
             }
         }

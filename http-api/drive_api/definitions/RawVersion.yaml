@@ -1,0 +1,9 @@
+name: 
+  type: string
+  description: The name of the file. Only set for file versions.
+checksum:
+  type: string
+  description: The checksum of the file or folder.
+path:
+  type: string
+  description: The path of the folder. Only set for folder versions.

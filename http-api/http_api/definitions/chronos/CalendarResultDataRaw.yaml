@@ -1,0 +1,20 @@
+created:
+  type: array
+  description: The created events.
+  items:
+    $ref: "#/definitions/EventData"
+updated:
+  type: array
+  description: The updated events.
+  items:
+    $ref: "#/definitions/EventData"
+deleted:
+  type: array
+  description: The deleted events.
+  items:
+    $ref: "#/definitions/EventData"
+conflicts:
+  type: array
+  description: An array of conflicts.
+  items:
+    $ref: "#/definitions/ChronosConflictDataRaw"

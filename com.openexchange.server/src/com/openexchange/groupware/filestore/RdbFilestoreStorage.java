@@ -56,9 +56,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.tools.sql.DBUtils;
 
 public class RdbFilestoreStorage extends FilestoreStorage {
 
@@ -104,7 +104,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
         } catch (final SQLException e) {
             throw FilestoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
     }
 
@@ -157,7 +157,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
         } catch (final SQLException e) {
             throw FilestoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
 
     }

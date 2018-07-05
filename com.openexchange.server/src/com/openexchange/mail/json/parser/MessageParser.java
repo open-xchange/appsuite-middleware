@@ -71,8 +71,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.net.QuotedPrintableCodec;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -93,7 +91,6 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HtmlService;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
@@ -844,24 +841,6 @@ public final class MessageParser {
                     throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(seqId, Long.valueOf(referencedMail.getMailId()), referencedMail.getFolder());
                 }
             }
-        }
-    }
-
-    private static MailPath prepareMsgref(MailPath msgref) throws OXException {
-        String mailID = msgref.getMailID();
-        if (mailID.startsWith("%64%65%66%61")) {
-            // Referenced by Unified Mail; e.g. "%64%65%66%61ult0%2FIN%42OX%2F%44r%61%66ts%2F2255"
-            return new MailPath(decodeQP(mailID));
-        }
-        return msgref;
-    }
-
-    private static final Pattern DECODE_PATTERN = Pattern.compile("%");
-    private static String decodeQP(String string) {
-        try {
-            return new String(QuotedPrintableCodec.decodeQuotedPrintable(Charsets.toAsciiBytes(DECODE_PATTERN.matcher(string).replaceAll("="))), com.openexchange.java.Charsets.UTF_8);
-        } catch (DecoderException e) {
-            throw new IllegalStateException(e);
         }
     }
 

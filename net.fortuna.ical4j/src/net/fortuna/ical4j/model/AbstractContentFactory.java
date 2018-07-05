@@ -33,7 +33,6 @@ package net.fortuna.ical4j.model;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import net.fortuna.ical4j.util.CompatibilityHints;
 
 /**

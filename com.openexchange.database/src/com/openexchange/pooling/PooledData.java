@@ -50,6 +50,7 @@
 package com.openexchange.pooling;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import com.openexchange.database.internal.MysqlUtils;
 
 /**
  * This class stores data about a pooled object.
@@ -73,13 +74,16 @@ public class PooledData<T> {
      */
     private final long createTime;
 
-    private long timestamp;
-
+    /**
+     * The pooled object.
+     */
     private final T pooled;
 
-    private Thread thread;
+    private volatile long timestamp;
 
-    private StackTraceElement[] trace;
+    private volatile Thread thread;
+
+    private volatile StackTraceElement[] trace;
 
     /**
      * Default constructor.
@@ -128,18 +132,31 @@ public class PooledData<T> {
     }
 
     /**
-     * @return the timestamp when this pooled object is last used.
+     * @return the time stamp when this pooled object is last used.
      */
     public long getTimestamp() {
         return timestamp;
     }
 
     /**
-     * @return the number of milli seconds since this pooled object was last
+     * @return the number of milliseconds since this pooled object was last
      * touched by the pool.
      */
     public long getTimeDiff() {
         return System.currentTimeMillis() - timestamp;
+    }
+
+    /**
+     * Gets the "last packet either received or sent" diff from pooled object (if available); otherwise fall-back to {@link #getTimeDiff()}.
+     *
+     * @return The "last packet either received or sent" diff or {@link #getTimeDiff()}
+     */
+    public long getLastPacketDiffFallbackToTimeDiff() {
+        Long lastPacketTime = MysqlUtils.getOLastPacketTime(pooled);
+        if (null == lastPacketTime) {
+            return getTimeDiff();
+        }
+        return System.currentTimeMillis() - lastPacketTime.longValue();
     }
 
     /**

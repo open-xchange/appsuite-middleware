@@ -50,8 +50,6 @@
 package com.openexchange.cache.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -67,6 +65,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
@@ -77,7 +76,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link FolderCacheManager} - Holds a cache for instances of {@link FolderObject}
@@ -235,7 +235,7 @@ public final class FolderCacheManager {
                     while (rs.next()) {
                         folderIds.add(rs.getInt(1));
                     }
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                     stmt = con.prepareStatement("SELECT fuid FROM del_oxfolder_tree WHERE cid=?");
                     stmt.setInt(1, contextId);
                     rs = stmt.executeQuery();
@@ -243,7 +243,7 @@ public final class FolderCacheManager {
                         folderIds.add(rs.getInt(1));
                     }
                     // Release resources
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                     rs = null;
                     stmt = null;
                     Database.back(contextId, false, con);
@@ -253,7 +253,7 @@ public final class FolderCacheManager {
                 } catch (final Exception x) {
                     // Ignore
                 } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                     if (null != con) {
                         Database.back(contextId, false, con);
                     }

@@ -110,7 +110,7 @@ public class MaxMailSizeTest extends AbstractMailTest {
         mail.setBody("Test Mail");
         mail.sanitize();
 
-        TestMail inSentBox = manager.send(mail, new FooInputStream(3500000L)); // Results in approx. 4800000 Byte Mail Size
+        TestMail inSentBox = manager.send(mail, new FooInputStream(3500000L), "text/plain"); // Results in approx. 4800000 Byte Mail Size
         assertFalse("Sending resulted in error.", manager.getLastResponse().hasError());
         assertEquals("Mail went into inbox", values.getSentFolder(), inSentBox.getFolder());
 
@@ -124,7 +124,7 @@ public class MaxMailSizeTest extends AbstractMailTest {
         mail.sanitize();
 
         manager.setFailOnError(false);
-        manager.send(mail, new FooInputStream(3800000L)); // Results in > 5000000 Byte Mail Size
+        manager.send(mail, new FooInputStream(3800000L), "text/plain"); // Results in > 5000000 Byte Mail Size
         assertTrue("Should not pass", manager.getLastResponse().hasError());
         OXException exception = manager.getLastResponse().getException();
         assertEquals("Wrong exception.", MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.getNumber(), exception.getCode());

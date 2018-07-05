@@ -49,17 +49,15 @@
 
 package com.openexchange.cluster.lock.internal.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ClusterLockCreateTableTask}
@@ -68,53 +66,33 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ClusterLockCreateTableTask extends UpdateTaskAdapter {
 
-    private ServiceLookup services;
-
     /**
      * Initialises a new {@link ClusterLockCreateTableTask}.
      */
-    public ClusterLockCreateTableTask(ServiceLookup services) {
+    public ClusterLockCreateTableTask() {
         super();
-        this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        final int contextId = params.getContextId();
-        final Connection writeCon;
-        try {
-            writeCon = dbService.getForUpdateTask(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Connection con = params.getConnection();
         PreparedStatement stmt = null;
         try {
             try {
-                if (tableExists(writeCon, CreateClusterLockTable.TABLE_NAME)) {
+                if (tableExists(con, CreateClusterLockTable.TABLE_NAME)) {
                     return;
                 }
-                stmt = writeCon.prepareStatement(CreateClusterLockTable.CREATE_TABLE_STATEMENT);
+
+                stmt = con.prepareStatement(CreateClusterLockTable.CREATE_TABLE_STATEMENT);
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
             }
         } finally {
-            closeSQLStuff(null, stmt);
-            dbService.backForUpdateTask(contextId, writeCon);
+            closeSQLStuff(stmt);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[] {};

@@ -50,12 +50,12 @@
 package com.openexchange.authentication.ldap;
 
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.InvalidNameException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
@@ -64,6 +64,7 @@ import javax.naming.ldap.LdapContext;
 import javax.security.auth.login.LoginException;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.ContextAndUserInfo;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
@@ -71,6 +72,7 @@ import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -81,24 +83,27 @@ import com.openexchange.server.ServiceLookup;
  */
 public class LDAPAuthentication implements AuthenticationService, Reloadable {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LDAPAuthentication.class);
+
     private static final class AuthenticatedImpl implements Authenticated {
 
-        private final String returnstring;
-        private final String[] splitted;
+        private final String userInfo;
+        private final String contextInfo;
 
-        protected AuthenticatedImpl(String returnstring, String[] splitted) {
-            this.returnstring = returnstring;
-            this.splitted = splitted;
+        AuthenticatedImpl(String userInfo, String contextInfo) {
+            super();
+            this.userInfo = userInfo;
+            this.contextInfo = contextInfo;
         }
 
         @Override
         public String getContextInfo() {
-            return splitted[0];
+            return contextInfo;
         }
 
         @Override
         public String getUserInfo() {
-            return null == returnstring ? splitted[1] : returnstring;
+            return userInfo;
         }
     }
 
@@ -117,29 +122,20 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
         REFERRAL("referral"),
         USE_FULL_LOGIN_INFO("useFullLoginInfo");
 
-        public String name;
+        public final String name;
 
         private PropertyNames(String name) {
             this.name = name;
         }
     }
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LDAPAuthentication.class);
+    // ------------------------------------------------------------------------------------------------------------------------
 
     /** The OSGi service look-up */
     private final ServiceLookup services;
 
-    /** Properties for the JNDI context. */
-    private Properties props;
-
-    /** Attribute name and base DN. */
-    private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword, proxyUser, proxyDelimiter, referral, ldapScope;
-
-    private boolean bindOnly, useFullLoginInfo;
-
-    private boolean adsbind;
-
-    private int searchScope = SearchControls.SUBTREE_SCOPE;
+    /** Reference to the properties for the JNDI context as well as the configuration for LDAP authentication */
+    private final AtomicReference<PropertiesAndConfig> propsAndConfigReference;
 
     /**
      * Default constructor.
@@ -147,9 +143,8 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
      */
     public LDAPAuthentication(Properties props, ServiceLookup services) throws OXException {
         super();
-        this.props = props;
         this.services = services;
-        init();
+        this.propsAndConfigReference = new AtomicReference<PropertiesAndConfig>(init(props));
     }
 
     /**
@@ -157,17 +152,21 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
      */
     @Override
     public Authenticated handleLoginInfo(LoginInfo loginInfo) throws OXException {
-        final String[] splitted = split(loginInfo.getUsername());
-        final String uid = splitted[1];
-        final String password = loginInfo.getPassword();
-        final String returnstring;
-        if ("".equals(uid) || "".equals(password)) {
+        ContextAndUserInfo cau = split(loginInfo.getUsername());
+        String uid = cau.getUserInfo();
+        String password = loginInfo.getPassword();
+        if (uid.length() == 0 || password.length() == 0) {
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
         }
+
+        PropertiesAndConfig propertiesAndConfig = propsAndConfigReference.get();
+        Properties props = propertiesAndConfig.props;
+        Config config = propertiesAndConfig.config;
+
         LOG.debug("Using full login info: {}", loginInfo.getUsername());
-        returnstring = bind(useFullLoginInfo ? loginInfo.getUsername() : uid, password);
-        LOG.info("User {} successfully authenticated.", useFullLoginInfo ? loginInfo.getUsername() : uid);
-        return new AuthenticatedImpl(returnstring, splitted);
+        String userInfoFromLdap = bind(config.useFullLoginInfo ? loginInfo.getUsername() : uid, password, props, config);
+        LOG.info("User {} successfully authenticated.", config.useFullLoginInfo ? loginInfo.getUsername() : uid);
+        return new AuthenticatedImpl(null == userInfoFromLdap ? cau.getUserInfo() : userInfoFromLdap, cau.getContextInfo());
     }
 
     @Override
@@ -181,167 +180,174 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
      * @param password password.
      * @throws LoginException if some problem occurs.
      */
-    private String bind(String uid, String password) throws OXException {
-        LdapContext context = null;
-        String dn = null;
+    private String bind(String uid, String password, Properties props, Config config) throws OXException {
         String proxyAs = null;
-        if( proxyUser != null && proxyDelimiter != null && uid.contains(proxyDelimiter)) {
-            proxyAs = uid.substring(uid.indexOf(proxyDelimiter)+proxyDelimiter.length(), uid.length());
-            uid = uid.substring(0, uid.indexOf(proxyDelimiter));
+        String uidToUse = uid;
+        if (config.proxyUser != null && config.proxyDelimiter != null && uidToUse.contains(config.proxyDelimiter)) {
+            proxyAs = uidToUse.substring(uidToUse.indexOf(config.proxyDelimiter) + config.proxyDelimiter.length(), uidToUse.length());
+            uidToUse = uidToUse.substring(0, uidToUse.indexOf(config.proxyDelimiter));
             boolean foundProxy = false;
-            for(final String pu : proxyUser.split(",")) {
-                if( pu.trim().equalsIgnoreCase(uid) ) {
+            for (String pu : Strings.splitByComma(config.proxyUser)) {
+                if (pu.trim().equalsIgnoreCase(uidToUse)) {
                     foundProxy = true;
                 }
             }
-            if( ! foundProxy ) {
+            if (!foundProxy) {
                 LOG.error("none of the proxy user is matching");
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
         }
+
+        LdapContext context = null;
+        String dn = null;
         try {
+            String baseDN = config.baseDN;
+            String uidAttribute = config.uidAttribute;
+
             String samAccountName = null;
-            if (!bindOnly) {
+            if (config.bindOnly) {
+                // Whether or not to use the samAccountName search
+                if (config.adsbind) {
+                    int index = uidToUse.indexOf("\\");
+                    if (index >= 0) {
+                        samAccountName = uidToUse.substring(index + 1);
+                    }
+                    dn = uidToUse;
+                } else {
+                    dn = uidAttribute + '=' + uidToUse + ',' + baseDN;
+                }
+            } else {
                 // get user dn from user
-                final Properties aprops = (Properties)props.clone();
+                final Properties aprops = (Properties) props.clone();
                 aprops.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-                if( bindDN != null && bindDN.length() > 0 ) {
+                String bindDN = config.bindDN;
+                if (bindDN != null && bindDN.length() > 0) {
                     LOG.debug("Using bindDN={}", bindDN);
                     aprops.put(Context.SECURITY_PRINCIPAL, bindDN);
-                    aprops.put(Context.SECURITY_CREDENTIALS, bindDNPassword);
+                    aprops.put(Context.SECURITY_CREDENTIALS, config.bindDNPassword);
                 } else {
                     aprops.put(Context.SECURITY_AUTHENTICATION, "none");
                 }
                 context = new InitialLdapContext(aprops, null);
-                final String filter = "(&" + searchFilter + "(" + uidAttribute + "=" + uid + "))";
+                final String filter = "(&" + config.searchFilter + "(" + uidAttribute + "=" + uidToUse + "))";
                 LOG.debug("Using filter={}", filter);
                 LOG.debug("BaseDN      ={}", baseDN);
                 SearchControls cons = new SearchControls();
-                cons.setSearchScope(searchScope);
+                cons.setSearchScope(config.searchScope);
                 cons.setCountLimit(0);
-                cons.setReturningAttributes(new String[]{"dn"});
+                cons.setReturningAttributes(new String[] { "dn" });
                 NamingEnumeration<SearchResult> res = null;
                 try {
                     res = context.search(baseDN, filter, cons);
-                    if( res.hasMoreElements() ) {
-                        dn = res.nextElement().getNameInNamespace();
-                        if( res.hasMoreElements() ) {
-                            final String errortext = "Found more then one user with " + uidAttribute + "=" + uid;
-                            LOG.error(errortext);
-                            throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-                        }
-                    } else {
-                        final String errortext = "No user found with " + uidAttribute + "=" + uid;
+                    if (!res.hasMoreElements()) {
+                        final String errortext = "No user found with " + uidAttribute + "=" + uidToUse;
                         LOG.error(errortext);
-                        throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uidToUse);
+                    }
+
+                    dn = res.nextElement().getNameInNamespace();
+                    if (res.hasMoreElements()) {
+                        final String errortext = "Found more than one user with " + uidAttribute + "=" + uidToUse;
+                        LOG.error(errortext);
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                     }
                 } finally {
                     close(res);
                 }
                 context.close();
-            } else {
-                // Whether or not to use the samAccountName search
-                if (this.adsbind) {
-                    int index = uid.indexOf("\\");
-                    if (-1 != index) {
-                        samAccountName = uid.substring(index + 1);
-                    } else {
-                        samAccountName = null;
-                    }
-                    dn = uid;
-                } else {
-                    dn = uidAttribute + "=" + uid + "," + baseDN;
-                    samAccountName = null;
-                }
-
             }
+
             context = new InitialLdapContext(props, null);
-            context.addToEnvironment(Context.REFERRAL, referral);
+            context.addToEnvironment(Context.REFERRAL, config.referral);
             context.addToEnvironment(Context.SECURITY_PRINCIPAL, dn);
             context.addToEnvironment(Context.SECURITY_CREDENTIALS, password);
             context.reconnect(null);
-            if (null != ldapReturnField && ldapReturnField.length() > 0) {
-                final Attributes userDnAttributes;
-                String puser = null;
-                if (this.adsbind) {
-                    final SearchControls searchControls = new SearchControls();
-                    searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-                    searchControls.setCountLimit(0);
-                    searchControls.setReturningAttributes(new String[]{ldapReturnField});
-                    NamingEnumeration<SearchResult> search = null;
-                    NamingEnumeration<SearchResult> searchProxy = null;
-                    try {
-                        if (null == samAccountName) {
-                            if( proxyAs != null ) {
-                                search = context.search(this.baseDN, "(displayName=" + uid + ")", searchControls);
-                                searchProxy = context.search(this.baseDN, "(displayName=" + proxyAs + ")", searchControls);
-                            } else {
-                                search = context.search(this.baseDN, "(displayName=" + uid + ")", searchControls);
-                            }
-                        } else {
-                            search = context.search(this.baseDN, "(sAMAccountName=" + samAccountName + ")", searchControls);
-                        }
-                        if (null != search && search.hasMoreElements()) {
-                            final SearchResult next = search.next();
-                            userDnAttributes = next.getAttributes();
-                            if( proxyAs != null && searchProxy != null ) {
-                                puser = (String)searchProxy.next().getAttributes().get(ldapReturnField).get();
-                            }
-                        } else {
-                            LOG.error("No user with displayname {} found.", uid);
-                            throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uid);
-                        }
-                    } finally {
-                        close(search);
-                        close(searchProxy);
-                    }
-                } else {
-                    userDnAttributes = context.getAttributes(dn);
-                }
-                final Attribute attribute = userDnAttributes.get(ldapReturnField);
-                if( proxyAs != null ) {
-                    return (String) attribute.get()+proxyDelimiter+puser;
-                } else {
-                    return (String) attribute.get();
-                }
+
+            String ldapReturnField = config.ldapReturnField;
+            if (null == ldapReturnField || ldapReturnField.length() <= 0) {
+                return null;
             }
-            return null;
+
+            Attributes userDnAttributes;
+            String puser = null;
+            if (config.adsbind) {
+                final SearchControls searchControls = new SearchControls();
+                searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+                searchControls.setCountLimit(0);
+                searchControls.setReturningAttributes(new String[] { ldapReturnField });
+                NamingEnumeration<SearchResult> search = null;
+                NamingEnumeration<SearchResult> searchProxy = null;
+                try {
+                    if (null == samAccountName) {
+                        if (proxyAs != null) {
+                            search = context.search(baseDN, "(displayName=" + uidToUse + ")", searchControls);
+                            searchProxy = context.search(baseDN, "(displayName=" + proxyAs + ")", searchControls);
+                        } else {
+                            search = context.search(baseDN, "(displayName=" + uidToUse + ")", searchControls);
+                        }
+                    } else {
+                        search = context.search(baseDN, "(sAMAccountName=" + samAccountName + ")", searchControls);
+                    }
+                    if (null == search || !search.hasMoreElements()) {
+                        LOG.error("No user with displayname {} found.", uidToUse);
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(uidToUse);
+                    }
+
+                    SearchResult next = search.next();
+                    userDnAttributes = next.getAttributes();
+                    if (proxyAs != null && searchProxy != null) {
+                        puser = (String) searchProxy.next().getAttributes().get(ldapReturnField).get();
+                    }
+                } finally {
+                    close(search);
+                    close(searchProxy);
+                }
+            } else {
+                userDnAttributes = context.getAttributes(dn);
+            }
+            String attribute = (String) userDnAttributes.get(ldapReturnField).get();
+            return proxyAs == null ? attribute : attribute + config.proxyDelimiter + puser;
         } catch (InvalidNameException e) {
-            LOG.debug("Login failed for dn {}:", dn,e);
+            LOG.debug("Login failed for dn {}:", dn, e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (AuthenticationException e) {
-            LOG.debug("Login failed for dn {}:", dn,e);
+            LOG.debug("Login failed for dn {}:", dn, e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
         } catch (NamingException e) {
             LOG.error("", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } finally {
-            try {
-                if( context != null ) {
+            if (context != null) {
+                try {
                     context.close();
+                } catch (NamingException e) {
+                    LOG.error("", e);
                 }
-            } catch (NamingException e) {
-                LOG.error("", e);
             }
         }
     }
 
     /**
-     * Initializes the properties for the ldap authentication.
-     * @throws LoginException if configuration fails.
+     * Initializes the properties and configuration for the ldap authentication.
+     *
+     * @return The properties for the JNDI context as well as the configuration for LDAP authentication to use
+     * @throws LoginException If configuration fails.
      */
-    private void init() throws OXException {
+    private PropertiesAndConfig init(Properties props) throws OXException {
         props.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        Config.Builder configBuilder = Config.builder();
 
         if (!props.containsKey(PropertyNames.UID_ATTRIBUTE.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.UID_ATTRIBUTE.name);
         }
-        uidAttribute = props.getProperty(PropertyNames.UID_ATTRIBUTE.name);
+        String uidAttribute = props.getProperty(PropertyNames.UID_ATTRIBUTE.name);
+        configBuilder.withUidAttribute(uidAttribute);
 
         if (!props.containsKey(PropertyNames.BASE_DN.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.BASE_DN.name);
         }
-        baseDN = props.getProperty(PropertyNames.BASE_DN.name);
+        String baseDN = props.getProperty(PropertyNames.BASE_DN.name);
+        configBuilder.withBaseDN(baseDN);
 
         final String url = props.getProperty(Context.PROVIDER_URL);
         if (null == url) {
@@ -354,90 +360,86 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
             props.put("java.naming.ldap.factory.socket", factoryProvider.getDefault().getClass().getName());
         }
 
-        this.ldapReturnField = props.getProperty(PropertyNames.LDAP_RETURN_FIELD.name);
+        String ldapReturnField = props.getProperty(PropertyNames.LDAP_RETURN_FIELD.name);
+        configBuilder.withLdapReturnField(ldapReturnField);
 
-        this.adsbind = Boolean.parseBoolean(props.getProperty(PropertyNames.ADS_NAME_BIND.name));
+        boolean adsbind = Boolean.parseBoolean(props.getProperty(PropertyNames.ADS_NAME_BIND.name));
+        configBuilder.withAdsbind(adsbind);
 
         if (!props.containsKey(PropertyNames.BIND_ONLY.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.BIND_ONLY.name);
         }
-        bindOnly = Boolean.parseBoolean(props.getProperty(PropertyNames.BIND_ONLY.name));
+        boolean bindOnly = Boolean.parseBoolean(props.getProperty(PropertyNames.BIND_ONLY.name));
+        configBuilder.withBindOnly(bindOnly);
 
         if (!props.containsKey(PropertyNames.LDAP_SCOPE.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.LDAP_SCOPE.name);
         }
-        ldapScope = props.getProperty(PropertyNames.LDAP_SCOPE.name);
-        if( "subtree".equals(ldapScope) ) {
+        String ldapScope = props.getProperty(PropertyNames.LDAP_SCOPE.name);
+        configBuilder.withLdapScope(ldapScope);
+
+        int searchScope = SearchControls.SUBTREE_SCOPE;
+        if ("subtree".equals(ldapScope)) {
             searchScope = SearchControls.SUBTREE_SCOPE;
-        } else if( "onelevel".equals(ldapScope) ) {
+        } else if ("onelevel".equals(ldapScope)) {
             searchScope = SearchControls.ONELEVEL_SCOPE;
-        } else if( "base".equals(ldapScope) ) {
+        } else if ("base".equals(ldapScope)) {
             searchScope = SearchControls.OBJECT_SCOPE;
         } else {
             throw LoginExceptionCodes.UNKNOWN.create(PropertyNames.LDAP_SCOPE.name + " must be one of subtree, onelevel or base");
         }
+        configBuilder.withSearchScope(searchScope);
 
         if (!props.containsKey(PropertyNames.SEARCH_FILTER.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.SEARCH_FILTER.name);
         }
-        searchFilter = props.getProperty(PropertyNames.SEARCH_FILTER.name);
+        String searchFilter = props.getProperty(PropertyNames.SEARCH_FILTER.name);
+        configBuilder.withSearchFilter(searchFilter);
 
-        bindDN = props.getProperty(PropertyNames.BIND_DN.name);
-        bindDNPassword = props.getProperty(PropertyNames.BIND_DN_PASSWORD.name);
+        String bindDN = props.getProperty(PropertyNames.BIND_DN.name);
+        configBuilder.withBindDN(bindDN);
+        String bindDNPassword = props.getProperty(PropertyNames.BIND_DN_PASSWORD.name);
+        configBuilder.withBindDNPassword(bindDNPassword);
 
         if (props.containsKey(PropertyNames.PROXY_USER.name)) {
-            proxyUser = props.getProperty(PropertyNames.PROXY_USER.name);
+            String proxyUser = props.getProperty(PropertyNames.PROXY_USER.name);
+            configBuilder.withProxyUser(proxyUser);
         }
 
         if (props.containsKey(PropertyNames.PROXY_DELIMITER.name)) {
-            proxyDelimiter = props.getProperty(PropertyNames.PROXY_DELIMITER.name);
+            String proxyDelimiter = props.getProperty(PropertyNames.PROXY_DELIMITER.name);
+            configBuilder.withProxyDelimiter(proxyDelimiter);
         }
 
         if (!props.containsKey(PropertyNames.REFERRAL.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.REFERRAL.name);
         }
-        referral = props.getProperty(PropertyNames.REFERRAL.name);
+        String referral = props.getProperty(PropertyNames.REFERRAL.name);
+        configBuilder.withReferral(referral);
 
-        useFullLoginInfo = Boolean.parseBoolean(props.getProperty(PropertyNames.USE_FULL_LOGIN_INFO.name));
+        boolean useFullLoginInfo = Boolean.parseBoolean(props.getProperty(PropertyNames.USE_FULL_LOGIN_INFO.name));
+        configBuilder.withUseFullLoginInfo(useFullLoginInfo);
 
+        return new PropertiesAndConfig(props, configBuilder.build());
     }
 
     /**
      * Splits user name and context.
-     * @param loginInfo combined information separated by an @ sign.
-     * @return a string array with context and user name (in this order).
+     *
+     * @param loginInfo combined information separated by an <code>"@"</code> sign.
+     * @return The context and user name.
      * @throws LoginException if no separator is found.
      */
-    private String[] split(String loginInfo) {
-        return split(loginInfo, '@');
-    }
-
-    /**
-     * Splits user name and context.
-     * @param loginInfo combined information separated by an @ sign.
-     * @param character for splitting user name and context.
-     * @return a string array with context and user name (in this order).
-     * @throws LoginException if no separator is found.
-     */
-    private String[] split(String loginInfo, char separator) {
-        final int pos = loginInfo.lastIndexOf(separator);
-        final String[] splitted = new String[2];
-        if (-1 == pos) {
-            splitted[1] = loginInfo;
-            splitted[0] = "defaultcontext";
-        } else {
-            splitted[1] = loginInfo.substring(0, pos);
-            splitted[0] = loginInfo.substring(pos + 1);
-        }
-        return splitted;
+    private ContextAndUserInfo split(String loginInfo) {
+        int pos = loginInfo.lastIndexOf('@');
+        return pos < 0 ? new ContextAndUserInfo(loginInfo) : new ContextAndUserInfo(loginInfo.substring(0, pos), loginInfo.substring(pos + 1));
     }
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         Properties properties = configService.getFile("ldapauth.properties");
-        this.props = properties;
         try {
-            init();
+            propsAndConfigReference.set(init(properties));
         } catch (OXException e) {
             LOG.error("Error reloading configuration for bundle com.openexchange.authentication.ldap: {}", e);
         }

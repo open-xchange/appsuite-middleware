@@ -58,10 +58,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.json.SnippetRequest;
 
 /**
  * {@link ListAction}

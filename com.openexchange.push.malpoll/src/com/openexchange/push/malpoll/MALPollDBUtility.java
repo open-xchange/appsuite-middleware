@@ -322,6 +322,46 @@ public final class MALPollDBUtility {
     }
 
     /**
+     * Drops the context data.
+     *
+     * @param cid The context ID
+     * @throws OXException If a database resource could not be acquired
+     */
+    public static void deleteContextData(final int cid) throws OXException {
+        final DatabaseService databaseService = getDBService();
+        final Connection con = databaseService.getForUpdateTask(cid);
+        boolean rollback = true;
+        try {
+            con.setAutoCommit(false);
+            deleteContextData(cid, con);
+            con.commit(); // COMMIT
+            rollback = false;
+        } catch (final Exception e) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            databaseService.backForUpdateTask(cid, con);
+        }
+    }
+
+    private static void deleteContextData(final int cid, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            /*
+             * Delete all context data
+             */
+            stmt = con.prepareStatement("DELETE FROM malPollHash WHERE cid = ?");
+            stmt.setInt(1, cid);
+            stmt.executeUpdate();
+        } finally {
+            MALPollDBUtility.closeSQLStuff(stmt);
+        }
+    }
+
+    /**
      * Gets all mail IDs associated with specified hash.
      *
      * @param hash The hash

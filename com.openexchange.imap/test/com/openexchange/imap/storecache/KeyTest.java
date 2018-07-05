@@ -49,12 +49,9 @@
 
 package com.openexchange.imap.storecache;
 
+import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import com.openexchange.imap.storecache.IMAPStoreCache.Key;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

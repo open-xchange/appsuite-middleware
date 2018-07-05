@@ -61,7 +61,6 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.kata.IdentitySource;
 import com.openexchange.ajax.mail.contenttypes.AlternativeStrategy;
 import com.openexchange.ajax.mail.contenttypes.FallbackStrategy;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
@@ -79,7 +78,7 @@ import com.openexchange.mail.utils.DateUtils;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class TestMail implements IdentitySource<TestMail> {
+public class TestMail {
 
     private String from;
 
@@ -665,28 +664,6 @@ public class TestMail implements IdentitySource<TestMail> {
         bob.append("\nContent:\n");
         bob.append(getBody());
         return bob.toString();
-    }
-
-    @Override
-    public void assumeIdentity(final TestMail entry) {
-        entry.setId(getId());
-        entry.setFolder(getFolder());
-    }
-
-    @Override
-    public void forgetIdentity(final TestMail entry) {
-
-    }
-
-    @Override
-    public Class<TestMail> getType() {
-        return TestMail.class;
-    }
-
-    @Override
-    public void rememberIdentityValues(final TestMail entry) {
-        setId(entry.getId());
-        setFolder(entry.getFolder());
     }
 
     @Override

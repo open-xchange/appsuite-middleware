@@ -32,7 +32,6 @@
 package net.fortuna.ical4j.filter;
 
 import java.util.Iterator;
-
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;

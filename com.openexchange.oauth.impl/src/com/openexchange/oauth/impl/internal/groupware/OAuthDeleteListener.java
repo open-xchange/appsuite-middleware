@@ -52,11 +52,11 @@ package com.openexchange.oauth.impl.internal.groupware;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OAuthDeleteListener}
@@ -74,30 +74,50 @@ public final class OAuthDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_USER != event.getType()) {
-            return;
-        }
-        /*
-         * Writable connection
-         */
-        final int contextId = event.getContext().getContextId();
-        PreparedStatement stmt = null;
-        try {
-            final int userId = event.getId();
+        if (DeleteEvent.TYPE_USER == event.getType()) {
             /*
-             * Delete account data
+             * Writable connection
              */
-            stmt = writeCon.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ? AND user = ?");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
-            throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
+            final int contextId = event.getContext().getContextId();
+            PreparedStatement stmt = null;
+            try {
+                final int userId = event.getId();
+                /*
+                 * Delete account data
+                 */
+                stmt = writeCon.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ? AND user = ?");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, userId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (final Exception e) {
+                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
+        } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
+            /*
+             * Writable connection
+             */
+            final int contextId = event.getContext().getContextId();
+            PreparedStatement stmt = null;
+            try {
+                /*
+                 * Delete account data
+                 */
+                stmt = writeCon.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ?");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (final Exception e) {
+                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
         }
     }
 

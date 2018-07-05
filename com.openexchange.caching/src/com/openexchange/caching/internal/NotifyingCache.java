@@ -60,9 +60,12 @@ import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheStatistics;
 import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.ThreadLocalConditionHolder;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
+import com.openexchange.caching.events.Condition;
+import com.openexchange.caching.events.ConditionalCacheEvent;
 import com.openexchange.exception.OXException;
 
 /**
@@ -97,7 +100,7 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
         this.eventService = eventService;
         this.notifyOnLocalOperations = notifyOnLocalOperations;
         if (null != eventService && (notifyOnLocalOperations || false == isLocal())) {
-            this.eventService.addListener(region, this);
+            eventService.addListener(region, this);
         }
     }
 
@@ -322,7 +325,7 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     @Override
     public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (fromRemote && sender != this && null != cacheEvent) {
-            LOG.debug("onEvent: {}", cacheEvent);
+            LOG.debug("Received remote cache event: {}", cacheEvent);
             try {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:
@@ -348,10 +351,13 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     }
 
     private void fireInvalidateGroup(String groupName) {
-        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            CacheEvent event = CacheEvent.INVALIDATE_GROUP(region, groupName);
-            LOG.debug("fireInvalidateGroup: {}", event);
-            eventService.notify(this, event, false);
+        if (notifyOnLocalOperations || false == isLocal()) {
+            CacheEventService eventService = this.eventService;
+            if (null != eventService) {
+                CacheEvent event = CacheEvent.INVALIDATE_GROUP(region, groupName);
+                LOG.debug("fireInvalidateGroup: {}", event);
+                notify(event, eventService);
+            }
         }
     }
 
@@ -364,27 +370,41 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     }
 
     private void fireInvalidate(Serializable key, String groupName) {
-        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
-            LOG.debug("fireInvalidate: {}", event);
-            eventService.notify(this, event, false);
+        if (notifyOnLocalOperations || false == isLocal()) {
+            CacheEventService eventService = this.eventService;
+            if (null != eventService) {
+                CacheEvent event = CacheEvent.INVALIDATE(region, groupName, key);
+                LOG.debug("fireInvalidate: {}", event);
+                notify(event, eventService);
+            }
         }
     }
 
     private void fireInvalidate(List<Serializable> keys, String groupName) {
-        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            CacheEvent event = CacheEvent.INVALIDATE(region, groupName, keys);
-            LOG.debug("fireInvalidate: {}", event);
-            eventService.notify(this, event, false);
+        if (notifyOnLocalOperations || false == isLocal()) {
+            CacheEventService eventService = this.eventService;
+            if (null != eventService) {
+                CacheEvent event = CacheEvent.INVALIDATE(region, groupName, keys);
+                LOG.debug("fireInvalidate: {}", event);
+                notify(event, eventService);
+            }
         }
     }
 
     private void fireClear() {
-        if ((notifyOnLocalOperations || false == isLocal()) && null != eventService) {
-            CacheEvent event = CacheEvent.CLEAR(region);
-            LOG.debug("fireClear: {}", event);
-            eventService.notify(this, event, false);
+        if (notifyOnLocalOperations || false == isLocal()) {
+            CacheEventService eventService = this.eventService;
+            if (null != eventService) {
+                CacheEvent event = CacheEvent.CLEAR(region);
+                LOG.debug("fireClear: {}", event);
+                notify(event, eventService);
+            }
         }
+    }
+
+    private void notify(CacheEvent event, CacheEventService eventService) {
+        Condition condition = ThreadLocalConditionHolder.getInstance().getCondition();
+        eventService.notify(this, null == condition ? event : new ConditionalCacheEvent(event, condition), false);
     }
 
     @Override

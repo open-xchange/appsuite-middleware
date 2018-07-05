@@ -36,6 +36,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.helpers.FileBackedJSON;
 import org.json.helpers.UnsynchronizedStringReader;
 import org.json.helpers.UnsynchronizedStringWriter;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -114,36 +115,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
      * @throws JSONException If there is a syntax error.
      */
     public JSONArray(final JSONTokener x) throws JSONException {
-        this();
-        if (x.nextClean() != '[') {
-            throw x.syntaxError("A JSONArray text must start with '['");
-        }
-        if (x.nextClean() == ']') {
-            return;
-        }
-        x.back();
-        for (;;) {
-            if (x.nextClean() == ',') {
-                x.back();
-                this.myArrayList.add(null);
-            } else {
-                x.back();
-                this.myArrayList.add(x.nextValue());
-            }
-            switch (x.nextClean()) {
-            case ';':
-            case ',':
-                if (x.nextClean() == ']') {
-                    return;
-                }
-                x.back();
-                break;
-            case ']':
-                return;
-            default:
-                throw x.syntaxError("Expected a ',' or ']'");
-            }
-        }
+        this(x.getSource());
     }
 
     /**
@@ -176,46 +148,6 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
         if (!"[]".equals(string)) {
             parse(new UnsynchronizedStringReader(string), this);
         }
-    }
-
-    private static String checkString(final String string) throws JSONException {
-        if (null == string) {
-            throw new JSONException("String must not be null.");
-        }
-        if (isEmpty(string)) {
-            throw new JSONException("A JSONArray text must start with '['");
-        }
-        if (string.indexOf(']') <= 0) {
-            throw new JSONException("A JSONArray text must start with '[' and must end with ']'");
-        }
-        return string;
-    }
-
-    private static boolean isEmpty(final String string) {
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            switch (string.charAt(i)) {
-            case 9: // 'unicode: 0009
-            case 10: // 'unicode: 000A'
-            case 11: // 'unicode: 000B'
-            case 12: // 'unicode: 000C'
-            case 13: // 'unicode: 000D'
-            case 28: // 'unicode: 001C'
-            case 29: // 'unicode: 001D'
-            case 30: // 'unicode: 001E'
-            case 31: // 'unicode: 001F'
-            case ' ': // Space
-                // case Character.SPACE_SEPARATOR:
-                // case Character.LINE_SEPARATOR:
-            case Character.PARAGRAPH_SEPARATOR:
-                isWhitespace = true;
-                break;
-            default:
-                isWhitespace = false;
-            }
-        }
-        return isWhitespace;
     }
 
     /**
@@ -913,7 +845,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
         if (index < 0) {
             throw new JSONException("JSONArray[" + index + "] not found.");
         }
-        if (index < length()) {
+        if (index < myArrayList.size()) {
             try {
                 this.myArrayList.remove(index);
             } catch (final RuntimeException e) {
@@ -1150,7 +1082,29 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                     ja.put(true);
                     break;
                 case VALUE_STRING:
-                    ja.put(jParser.getText());
+                    {
+                        int textLength = jParser.getTextLength();
+                        if (textLength > JSONObject.IN_MEMORY_TEXT_THRESHOLD) {
+                            FileBackedJSONStringProvider provider = FileBackedJSON.getFileBackedJSONStringProvider();
+                            if (null == provider) {
+                                ja.put(jParser.getText());
+                            } else {
+                                // Avoid construction of a String object
+                                FileBackedJSONString jsonString = provider.createFileBackedJSONString();
+                                try {
+                                    char[] textCharacters = jParser.getTextCharacters();
+                                    int textOffset = jParser.getTextOffset();
+                                    jsonString.write(textCharacters, textOffset, textLength);
+                                    jsonString.flush();
+                                    ja.put(jsonString);
+                                } finally {
+                                    jsonString.close();
+                                }
+                            }
+                        } else {
+                            ja.put(jParser.getText());
+                        }
+                    }
                     break;
                 default:
                     // Ignore

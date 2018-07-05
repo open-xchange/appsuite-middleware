@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.contact.helpers;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Comparator;
 import java.util.Locale;
 import com.openexchange.groupware.container.Contact;
@@ -87,52 +86,87 @@ public class DefaultContactComparator implements Comparator<Contact>{
         }
     };
 
-    private static final TIntObjectHashMap<ComparatorProvider> SPECIAL_COMPARATORS = new TIntObjectHashMap<ComparatorProvider>() {{
-        put(Contact.SPECIAL_SORTING, SPECIAL_COMPARATOR_PROVIDER);
-        put(Contact.USE_COUNT_GLOBAL_FIRST, USE_COUNT_COMPARATOR_PROVIDER);
-    }};
+    private static final Comparator<Contact> NOOP_COMPARATOR = new Comparator<Contact>() {
 
-    private final int field;
-    private final Order order;
-    private final Locale locale;
+        @Override
+        public int compare(Contact o1, Contact o2) {
+            return 0;
+        }
+    };
 
-    public DefaultContactComparator(final int field, final Order order, final Locale locale) {
+    private static final class ContactFieldComparator implements Comparator<Contact> {
+
+        private final int field;
+
+        ContactFieldComparator(int field) {
+            super();
+            this.field = field;
+        }
+
+        @Override
+        public int compare(Contact o1, Contact o2) {
+            final Object v1 = o1.get(field);
+            final Object v2 = o2.get(field);
+            return internalCompare(v1, v2);
+        }
+
+        private int internalCompare(Object v1, Object v2) {
+            if (v1 == v2) {
+                return 0;
+            }
+            if (v1 == null) {
+                return v2 != null ? -1 : 0;
+            }
+            if (v2 == null) {
+                return 1;
+            }
+            if (Comparable.class.isInstance(v1)) {
+                return ((Comparable) v1).compareTo(v2);
+            }
+            throw new UnsupportedOperationException("Don't know how to compare two values of class " + v1.getClass().getName());
+        }
+    }
+
+    private static final class NegatingComparator implements Comparator<Contact> {
+
+        private final Comparator<Contact> c;
+
+        NegatingComparator(Comparator<Contact> c) {
+            super();
+            this.c = c;
+        }
+
+        @Override
+        public int compare(Contact o1, Contact o2) {
+            return -(c.compare(o1, o2));
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
+    private final Comparator<Contact> effectiveComparator;
+
+    public DefaultContactComparator(int field, Order order, Locale locale) {
         super();
-        this.field = field;
-        this.order = order;
-
-        this.locale = null == locale ? Locale.US : locale;
+        if (field <= 0 || Order.NO_ORDER.equals(order)) {
+            effectiveComparator = NOOP_COMPARATOR;
+        } else {
+            if (field == Contact.SPECIAL_SORTING) {
+                Comparator<Contact> specialComparator = SPECIAL_COMPARATOR_PROVIDER.getComparator(null == locale ? Locale.US : locale);
+                effectiveComparator = Order.DESCENDING.equals(order) ? new NegatingComparator(specialComparator) : specialComparator;
+            } else if (field == Contact.USE_COUNT_GLOBAL_FIRST) {
+                Comparator<Contact> specialComparator = USE_COUNT_COMPARATOR_PROVIDER.getComparator(null == locale ? Locale.US : locale);
+                effectiveComparator = Order.DESCENDING.equals(order) ? new NegatingComparator(specialComparator) : specialComparator;
+            } else {
+                ContactFieldComparator fieldComparator = new ContactFieldComparator(field);
+                effectiveComparator = Order.DESCENDING.equals(order) ? new NegatingComparator(fieldComparator) : fieldComparator;
+            }
+        }
     }
 
     @Override
     public int compare(final Contact o1, final Contact o2) {
-        if (field <= 0 || Order.NO_ORDER.equals(order)) {
-            return 0;
-        }
-        final ComparatorProvider provider = SPECIAL_COMPARATORS.get(field);
-        if (null != provider) {
-            final Comparator<Contact> specialComparator = provider.getComparator(locale);
-            return Order.DESCENDING.equals(order) ? -1 * specialComparator.compare(o1, o2) : specialComparator.compare(o1, o2);
-        }
-        final Object v1 = o1.get(field);
-        final Object v2 = o2.get(field);
-        return Order.DESCENDING.equals(order) ? -1 * internalCompare(v1, v2) : internalCompare(v1, v2);
-    }
-
-    private int internalCompare(final Object v1, final Object v2) {
-        if(v1 == v2) {
-            return 0;
-        }
-        if(v1 == null && v2 != null) {
-            return -1;
-        }
-        if(v2 == null) {
-            return 1;
-        }
-        if(Comparable.class.isInstance(v1)) {
-            return ((Comparable)v1).compareTo(v2);
-        }
-        throw new UnsupportedOperationException("Don't know how to compare two values of class "+v1.getClass().getName());
+        return effectiveComparator.compare(o1, o2);
     }
 
 }

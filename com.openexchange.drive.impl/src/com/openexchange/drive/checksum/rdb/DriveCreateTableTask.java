@@ -49,20 +49,17 @@
 
 package com.openexchange.drive.checksum.rdb;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DriveCreateTableTask}
@@ -80,16 +77,12 @@ public class DriveCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
-        boolean transactional = false;
+        Connection writeCon = params.getConnection();
+        boolean rollback = false;
         try {
             writeCon.setAutoCommit(false); // BEGIN
-            transactional = true;
+            rollback = true;
+
             final String[] tableNames = DriveCreateTableService.getTablesToCreate();
             final String[] createStmts = DriveCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
@@ -106,22 +99,20 @@ public class DriveCreateTableTask extends UpdateTaskAdapter {
                     closeSQLStuff(statement);
                 }
             }
+
             writeCon.commit(); // COMMIT
+            rollback = false;
         } catch (final OXException e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
             throw e;
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final Exception e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            if (transactional) {
-                DBUtils.autocommit(writeCon);
+            if (rollback) {
+                Databases.rollback(writeCon);
             }
-            dbService.backForUpdateTask(contextId, writeCon);
+            Databases.autocommit(writeCon);
         }
     }
 

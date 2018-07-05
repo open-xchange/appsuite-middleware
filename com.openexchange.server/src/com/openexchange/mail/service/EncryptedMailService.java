@@ -70,5 +70,16 @@ public interface EncryptedMailService {
      * @return a ComposedMailMessage containing the encrypted message
      * @throws OXException
      */
-    public ComposedMailMessage encryptDraftEmail (ComposedMailMessage draft, Session session, String cryptoAuthentication) throws OXException;
+    public ComposedMailMessage encryptDraftEmail(ComposedMailMessage draft, Session session, String cryptoAuthentication) throws OXException;
+
+    /**
+     * Encrypts a {@link MailMessage} for autosave a draft
+     *
+     * @param message The message to encrypt
+     * @param session The session The session of the user
+     * @param securitySettings The settings used for encryption/signing
+     * @return The encrypted {@link MailMessage}
+     * @throws OXException
+     */
+    public MailMessage encryptAutosaveDraftEmail(MailMessage message, Session session, SecuritySettings securitySettings) throws OXException;
 }

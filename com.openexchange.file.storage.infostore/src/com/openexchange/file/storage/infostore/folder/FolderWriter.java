@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
@@ -98,12 +99,12 @@ public final class FolderWriter {
     public static FileStorageFolder[] writeFolders(UserizedFolder[] folders) throws OXException {
         return writeFolders(folders, true);
     }
-    
+
     /**
      * Converts an array of userized folders into their file storage folder equivalents.
      *
      * @param folders The userized folders to convert
-     * @param infostoreOnly <code>true</code> to exclude folders from other modules, <code>false</code>, otherwise 
+     * @param infostoreOnly <code>true</code> to exclude folders from other modules, <code>false</code>, otherwise
      * @return The file storage folders
      */
     public static FileStorageFolder[] writeFolders(UserizedFolder[] folders, boolean infostoreOnly) throws OXException {
@@ -120,8 +121,8 @@ public final class FolderWriter {
     }
 
     /**
-     * Gets a value indicating whether the supplied folder is no infostore or system folder. 
-     * 
+     * Gets a value indicating whether the supplied folder is no infostore or system folder.
+     *
      * @param folder The folder to check
      * @return <code>true</code> if the folder is no infostore-, file- or system-folder, <code>false</code>, otherwise
      */
@@ -135,11 +136,11 @@ public final class FolderWriter {
                 }
                 if (FolderObject.SYSTEM_MODULE == module) {
                     try {
-                        int numericalID = Integer.parseInt(folder.getID());
-                        if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == numericalID || FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == numericalID || 
+                        int numericalID = Utils.parseUnsignedInt(folder.getID());
+                        if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == numericalID || FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == numericalID ||
                             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == numericalID) {
                             return false;
-                        }   
+                        }
                     } catch (NumberFormatException e) {
                         // no numerical identifier
                     }

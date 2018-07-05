@@ -71,7 +71,7 @@ public class Login extends AbstractLoginRequestHandler {
     /**
      *
      */
-    private final LoginConfiguration conf;
+    final LoginConfiguration conf;
 
     /**
      * Initializes a new {@link Login}.

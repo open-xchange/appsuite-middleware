@@ -127,7 +127,7 @@ public class ContactHaloImpl implements ContactHalo {
         if (!dataSource.isAvailable(session)) {
             throw HaloExceptionCodes.UNAVAILABLE_PROVIDER.create(provider);
         }
-        if (!(contact.getInternalUserId() > 0) && !contact.containsEmail1() & !contact.containsEmail2() & !contact.containsEmail3()) {
+        if (!(contact.getInternalUserId() > 0) && !contact.containsEmail1() && !contact.containsEmail2() && !contact.containsEmail3()) {
             throw HaloExceptionCodes.INVALID_CONTACT.create();
         }
         return dataSource.investigate(buildQuery(contact, session, true), req, session);
@@ -196,11 +196,11 @@ public class ContactHaloImpl implements ContactHalo {
         }
     }
 
-    private HaloContactQuery createQuery(final Contact contact, final ServerSession session, final boolean withBytes) throws OXException {
+    HaloContactQuery createQuery(final Contact contact, final ServerSession session, final boolean withBytes) throws OXException {
         final UserService userService = services.getService(UserService.class);
         final UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
         final ContactService contactService = services.getService(ContactService.class);
-        final HaloContactQuery contactQuery = new HaloContactQuery();
+        final HaloContactQuery.Builder contactQueryBuilder = HaloContactQuery.builder();
         final ContactField[] fields = withBytes ? null : new ContactField[] { ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.FOLDER_ID };
 
         Contact resultContact = contact;
@@ -222,9 +222,8 @@ public class ContactHaloImpl implements ContactHalo {
             if (null == user) {
                 if (resultContact.getObjectID() > 0 && resultContact.getParentFolderID() > 0) {
                     Contact loaded = contactService.getContact(session, Integer.toString(resultContact.getParentFolderID()), Integer.toString(resultContact.getObjectID()), fields);
-                    contactQuery.setContact(loaded);
-                    contactQuery.setMergedContacts(Arrays.asList(loaded));
-                    return contactQuery;
+                    contactQueryBuilder.withContact(loaded).withMergedContacts(Arrays.asList(loaded));
+                    return contactQueryBuilder.build();
                 }
             }
 
@@ -254,7 +253,7 @@ public class ContactHaloImpl implements ContactHalo {
             }
         }
 
-        contactQuery.setUser(user);
+        contactQueryBuilder.withUser(user);
         List<Contact> contactsToMerge = new ArrayList<Contact>(4);
         if (user != null) {
             // Load the associated contact
@@ -282,7 +281,7 @@ public class ContactHaloImpl implements ContactHalo {
                 SearchIterators.close(iterator);
             }
         }
-        contactQuery.setMergedContacts(contactsToMerge);
+        contactQueryBuilder.withMergedContacts(contactsToMerge);
 
         int contactsToMergeSize = contactsToMerge.size();
         if (1 == contactsToMergeSize) {
@@ -305,8 +304,8 @@ public class ContactHaloImpl implements ContactHalo {
             false == resultContact.containsNickname() && false == resultContact.containsCompany()) {
             new ParsedDisplayName(resultContact.getDisplayName()).applyTo(resultContact);
         }
-        contactQuery.setContact(resultContact);
-        return contactQuery;
+        contactQueryBuilder.withContact(resultContact);
+        return contactQueryBuilder.build();
     }
 
     private boolean checkEmails(Contact c, String email1) {

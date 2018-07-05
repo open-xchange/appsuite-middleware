@@ -50,9 +50,9 @@
 package com.openexchange.find.basic.tasks;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link Constants}
@@ -78,14 +78,6 @@ public class Constants {
 
     public final static List<String> PARTICIPANTS = Collections.singletonList(FIELD_PARTICIPANT);
 
-    public static final Set<String> QUERY_FIELDS = createStringSet(FIELD_TITLE, FIELD_DESCRIPTION, FIELD_ATTACHMENT_NAME);
-
-    private static Set<String> createStringSet(String... args) {
-        Set<String> set = new HashSet<String>(args.length);
-        for (String str : args) {
-            set.add(str);
-        }
-        return Collections.unmodifiableSet(set);
-    }
+    public static final Set<String> QUERY_FIELDS = ImmutableSet.of(FIELD_TITLE, FIELD_DESCRIPTION, FIELD_ATTACHMENT_NAME);
 
 }

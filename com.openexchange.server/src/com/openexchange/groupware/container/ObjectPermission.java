@@ -50,7 +50,7 @@
 package com.openexchange.groupware.container;
 
 import java.io.Serializable;
-import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 
@@ -200,7 +200,7 @@ public class ObjectPermission implements java.security.acl.Permission, Serializa
      * @return The folder permission bit mask
      */
     public static int toFolderPermissionBits(ObjectPermission permission) {
-        DefaultPermission fp = new DefaultPermission();
+        BasicPermission fp = new BasicPermission();
         fp.setEntity(permission.entity);
         fp.setGroup(false);
         fp.setAdmin(false);

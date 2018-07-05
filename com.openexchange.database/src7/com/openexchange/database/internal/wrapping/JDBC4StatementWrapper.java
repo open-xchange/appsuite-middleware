@@ -54,12 +54,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.database.Databases;
-import com.openexchange.database.IncorrectStringSQLException;
+import com.openexchange.database.SpecificSQLException;
 
 /**
  * The method {@link #getConnection()} must be overwritten to return the {@link JDBC4ConnectionReturner}.
@@ -72,7 +70,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
 
     private static final String SQL_STATE_ABSENT_TABLE = "42S02";
 
-    private static final Set<String> IGNORABLE_SQL_STATES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(SQL_STATE_ABSENT_TABLE)));
+    private static final Set<String> IGNORABLE_SQL_STATES = ImmutableSet.of(SQL_STATE_ABSENT_TABLE);
 
     /**
      * Logs the given syntax error (if appropriate)
@@ -204,9 +202,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
@@ -223,9 +221,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
@@ -242,9 +240,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
@@ -261,9 +259,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
@@ -280,9 +278,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
             logSyntaxError(syntaxError, delegate, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
@@ -299,9 +297,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
@@ -318,9 +316,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
@@ -337,9 +335,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
@@ -356,9 +354,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;
@@ -375,9 +373,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
             logSyntaxError(syntaxError, delegate, sql, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, delegate, sql, con);
             throw sqlException;

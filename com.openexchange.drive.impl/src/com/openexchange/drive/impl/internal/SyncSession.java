@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import jonelo.jacksum.algorithm.MD;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -79,6 +78,7 @@ import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.tools.session.ServerSession;
+import jonelo.jacksum.algorithm.MD;
 
 /**
  * {@link SyncSession}

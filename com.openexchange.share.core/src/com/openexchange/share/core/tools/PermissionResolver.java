@@ -67,11 +67,13 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.util.Pair;
@@ -266,7 +268,11 @@ public class PermissionResolver {
                 user = services.getService(UserService.class).getUser(userID, session.getContext());
                 knownUsers.put(key, user);
             } catch (OXException e) {
-                LOGGER.error("Error getting user {}", key, e);
+                if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                    LOGGER.debug("Error getting user {}.", key, e);
+                } else {
+                    LOGGER.error("Error getting user {}.", key, e);
+                }
             }
         }
         return user;
@@ -286,7 +292,7 @@ public class PermissionResolver {
                 userContact = services.getService(ContactService.class).getUser(session, userID, CONTACT_FIELDS);
                 knownUserContacts.put(key, userContact);
             } catch (OXException e) {
-                if ("CON-0125".equals(e.getErrorCode())) {
+                if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
                     LOGGER.debug("Error getting user contact {}", key, e);
                 } else {
                     LOGGER.error("Error getting user contact {}", key, e);

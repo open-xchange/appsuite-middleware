@@ -11,18 +11,22 @@ color:${color};
 background:${background};
 border-color:${borderColor};
 
-padding:10px 15px;
-font-size:14px;
-line-height:1.5;
-border: 1px solid;
-border-radius:3px;
-
-text-align:center;
-text-decoration:none;
-vertical-align:middle;
+display: inline-block;
+height: 30px;
+min-width: 80px;
+padding: 4px 12px;
+font-size: 14px;
+line-height: 1.4;
+border: 1px solid transparent;
+border-radius: 3px;
+-webkit-box-sizing: border-box;
+-moz-box-sizing: border-box;
+box-sizing: border-box;
+text-align: center;
+text-decoration: none;
+vertical-align: middle;
 
 ">
     <span><#nested></span>
   </a>
 </#macro>
-

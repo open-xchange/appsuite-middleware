@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -170,12 +171,20 @@ public class SimpleICal {
             this.setProperty("DTSTART", ICalUtils.formatAsUTC(start));
         }
 
+        public void setDTStart(Date start, String timeZoneId) throws ParseException {
+            this.setProperty("DTSTART", ICalUtils.format(start, timeZoneId), Collections.singletonMap("TZID", timeZoneId));
+        }
+
         public Date getDTEnd() throws ParseException {
             return ICalUtils.parseDate(this.getProperty("DTEND"));
         }
 
-        public void setDTEnd(Date start) throws ParseException {
-            this.setProperty("DTEND", ICalUtils.formatAsUTC(start));
+        public void setDTEnd(Date end) throws ParseException {
+            this.setProperty("DTEND", ICalUtils.formatAsUTC(end));
+        }
+
+        public void setDTEnd(Date end, String timeZoneId) throws ParseException {
+            this.setProperty("DTEND", ICalUtils.format(end, timeZoneId), Collections.singletonMap("TZID", timeZoneId));
         }
 
         public String getLocation() {

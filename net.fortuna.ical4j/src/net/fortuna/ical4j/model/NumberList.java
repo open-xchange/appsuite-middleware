@@ -35,26 +35,25 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.StringTokenizer;
-
 import net.fortuna.ical4j.util.Numbers;
 
 /**
  * $Id$ [29-May-2004]
  *
  * Defines a list of numbers.
- * 
+ *
  * @author Ben Fortuna
  */
 public class NumberList extends ArrayList implements Serializable {
-    
+
     private static final long serialVersionUID = -1667481795613729889L;
 
     private final int minValue;
-    
+
     private final int maxValue;
 
     private final boolean allowsNegativeValues;
-    
+
     /**
      * Default constructor.
      */
@@ -81,7 +80,7 @@ public class NumberList extends ArrayList implements Serializable {
     public NumberList(final String aString) {
     	this(aString, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
     }
-    
+
     /**
      * @param aString a string representation of a number list
      * @param minValue the minimum allowable value
@@ -89,11 +88,10 @@ public class NumberList extends ArrayList implements Serializable {
      * @param allowsNegativeValues indicates whether negative values are allowed
      */
     public NumberList(final String aString, int minValue, int maxValue, boolean allowsNegativeValues) {
-    	this(minValue, maxValue, allowsNegativeValues);
-        final StringTokenizer t = new StringTokenizer(aString, ",");
-        while (t.hasMoreTokens()) {
-        	final int value = Numbers.parseInt(t.nextToken());
-            add(new Integer(value));
+        this(minValue, maxValue, allowsNegativeValues);
+        for (StringTokenizer t = new StringTokenizer(aString, ","); t.hasMoreTokens();) {
+            final int value = Numbers.parseInt(t.nextToken());
+            add(Integer.valueOf(value));
         }
     }
 
@@ -115,7 +113,7 @@ public class NumberList extends ArrayList implements Serializable {
     	}
         return add((Object) aNumber);
     }
-    
+
     /**
      * Overrides superclass to throw an <code>IllegalArgumentException</code>
      * where argument is not a <code>java.lang.Integer</code>.
@@ -123,6 +121,7 @@ public class NumberList extends ArrayList implements Serializable {
      * @return true if the object was added, otherwise false
      * @see java.util.List#add(Object)
      */
+    @Override
     public final boolean add(final Object arg0) {
         if (!(arg0 instanceof Integer)) {
             throw new IllegalArgumentException("Argument not a " + Integer.class.getName());
@@ -141,6 +140,7 @@ public class NumberList extends ArrayList implements Serializable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final String toString() {
         final StringBuffer b = new StringBuffer();
         for (final Iterator i = iterator(); i.hasNext();) {

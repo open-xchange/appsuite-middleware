@@ -50,18 +50,16 @@
 package com.openexchange.ajax.mail;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
-import com.openexchange.ajax.mail.actions.ClearRequest;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.exception.OXException;
 
@@ -78,6 +76,7 @@ public class ClearTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -89,6 +88,7 @@ public class ClearTest extends AbstractMailTest {
         clearFolder(getTrashFolder());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -104,7 +104,7 @@ public class ClearTest extends AbstractMailTest {
     }
 
     @Test
-    public void testClearingOneFolder() throws OXException, IOException, SAXException, JSONException, AddressException, OXException {
+    public void testClearingOneFolder() throws OXException, IOException, JSONException, AddressException {
         /*
          * Insert <numOfMails> mails through a send request
          */
@@ -118,21 +118,17 @@ public class ClearTest extends AbstractMailTest {
 
         // Assert that there are 5 Mails in the folder
         AllResponse allR = Executor.execute(getSession(), new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
-        if (allR.hasError()) {
-            fail(allR.getException().toString());
-        }
+
+        assertFalse("Didn't excpect exception in request.", allR.hasError());
         assertEquals("There should be 5 messages in the folder", allR.getMailMessages(COLUMNS_DEFAULT_LIST).length, 5);
 
         // Send the clear request
-        String[] array = { getInboxFolder() };
-        getClient().execute(new ClearRequest(array));
+        clearFolder(getInboxFolder());
 
         // Assert there are no messages in the folder
         allR = Executor.execute(getSession(), new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null, true));
-        if (allR.hasError()) {
-            fail(allR.getException().toString());
-        }
-        assertEquals("There should be no messages in the folder", allR.getMailMessages(COLUMNS_DEFAULT_LIST).length, 0);
+        assertFalse("Didn't excpect exception in request.", allR.hasError());
+        assertEquals("There should be no messages in the folder", 0, allR.getMailMessages(COLUMNS_DEFAULT_LIST).length);
     }
 
 }

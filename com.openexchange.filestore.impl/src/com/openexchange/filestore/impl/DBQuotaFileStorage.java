@@ -172,13 +172,14 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             return 0;
         }
 
-        if (ownerInfo.getOwnerId() <= 0) {
+        int ownerId = ownerInfo.getOwnerId();
+        if (ownerId <= 0) {
             LOGGER.debug("Not considering another quota backend service for file storage '{}' since not user-associated, but context-associated ({}).", uri, Integer.valueOf(contextId));
             return 0;
         }
 
-        LOGGER.debug("Considering another quota backend service for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(ownerInfo.getOwnerId()), Integer.valueOf(contextId));
-        return ownerInfo.getOwnerId();
+        LOGGER.debug("Considering another quota backend service for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(ownerId), Integer.valueOf(contextId));
+        return ownerId;
     }
 
     private DatabaseService getDatabaseService() throws OXException {

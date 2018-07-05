@@ -49,12 +49,11 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -84,22 +83,27 @@ public final class EnlargeCalendarUid extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EnlargeCalendarUid.class);
         log.info("Performing update task {}", EnlargeCalendarUid.class.getSimpleName());
-        final Connection con = Database.getNoTimeout(params.getContextId(), true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             for (final String table : new String[] { "prg_dates", "del_dates" }) {
                 checkAndModifyColumns(con, table, new Column("uid", "VARCHAR(1024)"));
             }
+
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final Exception e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
             autocommit(con);
-            Database.backNoTimeout(params.getContextId(), true, con);
         }
         log.info("{} successfully performed.", EnlargeCalendarUid.class.getSimpleName());
     }

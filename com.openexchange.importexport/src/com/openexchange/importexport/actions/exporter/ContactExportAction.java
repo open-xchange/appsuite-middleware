@@ -59,16 +59,17 @@ import com.openexchange.importexport.json.ExportRequest;
  */
 public abstract class ContactExportAction extends AbstractExportAction {
 
+    /** The parameter identifier whether distribution lists are supposed to be exported as well */
     public static final String PARAMETER_EXPORT_DLISTS = "export_dlists";
 
 	@Override
 	protected Map<String, Object> getOptionalParams(ExportRequest req) {
 	    Map<String, Object> params = super.getOptionalParams(req);
 	    if (params == null) {
-	        params = new HashMap<String, Object>();
+	        params = new HashMap<String, Object>(2);
 	    }
 
-	    final String exportDlistsParam = req.getRequest().getParameter(PARAMETER_EXPORT_DLISTS);
+	    String exportDlistsParam = req.getRequest().getParameter(PARAMETER_EXPORT_DLISTS);
 	    if (exportDlistsParam != null) {
 	        params.put(PARAMETER_EXPORT_DLISTS, exportDlistsParam);
 	    }

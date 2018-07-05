@@ -4,9 +4,9 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.precondition.Precondition;
 
 public class ErrorPrecondition {
-    private Throwable cause;
-    private Precondition precondition;
-    private DatabaseChangeLog changeLog;
+    private final Throwable cause;
+    private final Precondition precondition;
+    private final DatabaseChangeLog changeLog;
 
 
     public ErrorPrecondition(Throwable exception, DatabaseChangeLog changeLog, Precondition precondition) {
@@ -28,8 +28,8 @@ public class ErrorPrecondition {
     @Override
     public String toString() {
         Throwable cause = this.cause;
-        while (cause.getCause() != null) {
-            cause = cause.getCause();
+        for (Throwable t; (t = cause.getCause()) != null;) {
+            cause = t;
         }
 
         String causeMessage = cause.getMessage();

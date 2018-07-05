@@ -51,6 +51,8 @@ package com.openexchange.oauth.yahoo.access;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.net.ssl.SSLHandshakeException;
@@ -116,7 +118,10 @@ public class YahooClient {
         } catch (org.scribe.exceptions.OAuthException e) {
             // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
             if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
-                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, "social.yahooapis.com");
+                List<Object> displayArgs = new ArrayList<>(2);
+                displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                displayArgs.add("social.yahooapis.com");
+                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
             }
 
             Throwable cause = e.getCause();
@@ -202,6 +207,7 @@ public class YahooClient {
 
     /**
      * Get the account's display name
+     * 
      * @return the account's display name
      */
     public String getDisplayName() {

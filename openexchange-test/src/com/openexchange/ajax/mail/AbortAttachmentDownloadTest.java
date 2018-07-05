@@ -121,7 +121,7 @@ public class AbortAttachmentDownloadTest extends AbstractMailTest {
     public void testAbortedAttachmentDownload() throws OXException, IOException, JSONException {
         JSONArray json;
         {
-            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "bug31855.eml")), "UTF-8");
+            InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "bug31855.eml")), "UTF-8");
             char[] buf = new char[512];
             int length;
             StringBuilder sb = new StringBuilder();

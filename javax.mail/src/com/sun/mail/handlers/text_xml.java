@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -42,15 +42,14 @@ package com.sun.mail.handlers;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
 import javax.activation.ActivationDataFlavor;
 import javax.activation.DataSource;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
@@ -69,10 +68,12 @@ public class text_xml extends text_plain {
 	new ActivationDataFlavor(StreamSource.class, "application/xml", "XML")
     };
 
+    @Override
     protected ActivationDataFlavor[] getDataFlavors() {
 	return flavors;
     }
 
+    @Override
     protected Object getData(ActivationDataFlavor aFlavor, DataSource ds)
 				throws IOException {
 	if (aFlavor.getRepresentationClass() == String.class)
@@ -85,6 +86,7 @@ public class text_xml extends text_plain {
 
     /**
      */
+    @Override
     public void writeTo(Object obj, String mimeType, OutputStream os)
 				    throws IOException {
 	if (!isXmlType(mimeType))

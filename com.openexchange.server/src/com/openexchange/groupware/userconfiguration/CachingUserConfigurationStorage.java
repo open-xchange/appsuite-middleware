@@ -49,10 +49,6 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
@@ -65,6 +61,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link CachingUserConfigurationStorage} - A cache-based implementation of {@link UserConfigurationStorage} with a fallback to
@@ -149,6 +150,14 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         return cache.newCacheKey(ctx.getContextId(), String.valueOf(userId), String.valueOf(extendedPermissions));
     }
 
+    private final static CacheKey getKey(final int userId, final int contextId, final Cache cache) {
+        return cache.newCacheKey(contextId, userId);
+    }
+
+    private static final CacheKey getKey(Cache cache, final int contextId, int userId, boolean extendedPermissions) {
+        return cache.newCacheKey(contextId, String.valueOf(userId), String.valueOf(extendedPermissions));
+    }
+
     /**
      * Initializes cache reference
      *
@@ -187,6 +196,22 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         } finally {
             this.cache = null;
         }
+    }
+
+    @Override
+    public UserConfiguration getUserConfiguration(Session session) throws OXException {
+        return getUserConfiguration(session, null);
+    }
+
+    @Override
+    public UserConfiguration getUserConfiguration(Session session, int[] groups) throws OXException {
+        int[] grps = null != groups && 0 != groups.length ? groups : UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getGroups();
+        Cache cache = this.cache;
+        if (cache == null) {
+            return getFallback().getUserConfiguration(session, grps);
+        }
+
+        return getUserConfiguration(cache, session, grps);
     }
 
     @Override
@@ -253,6 +278,16 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         return map;
     }
 
+    private static UserConfiguration getCachedUserConfiguration(Cache cache, Session session, boolean extendedPermissions) {
+        CacheKey key;
+        if (extendedPermissions) {
+            key = getKey(session.getUserId(), session.getContextId(), cache);
+        } else {
+            key = getKey(cache, session.getContextId(), session.getUserId(), false);
+        }
+        return (UserConfiguration) cache.get(key);
+    }
+
     private static UserConfiguration[] convert(TIntObjectMap<UserConfiguration> map, int[] userIds) {
         List<UserConfiguration> retval = new ArrayList<UserConfiguration>(map.size());
         for (int userId : userIds) {
@@ -262,6 +297,25 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             }
         }
         return retval.toArray(new UserConfiguration[map.size()]);
+    }
+
+    /**
+     * Loads a {@link UserConfiguration} without initializing the extended permissions. Initialization of extended permissions needs the
+     * ConfigCascade which itself needs again a {@link UserConfiguration} without extended permissions.
+     * This method should cache those {@link UserConfiguration}s without extended permissions otherwise loading the {@link UserConfiguration}
+     * with extended permissions does not scale well. See https://bugs.open-xchange.com/show_bug.cgi?id=25162#c4.
+     */
+    private UserConfiguration getUserConfiguration(Cache cache, Session session, int[] groups) throws OXException {
+        UserConfiguration userConfiguration = getCachedUserConfiguration(cache, session, false);
+        if (null == userConfiguration) {
+            userConfiguration = delegateStorage.getUserConfiguration(session, groups);
+            try {
+                cache.put(getKey(cache, session.getContextId(), session.getUserId(), false), userConfiguration, false);
+            } catch (RuntimeException e) {
+                LOG.warn("Failed to add user configuration for context {} and user {} to cache.", Integer.valueOf(session.getContextId()), Integer.valueOf(session.getUserId()), e);
+            }
+        }
+        return userConfiguration.clone();
     }
 
     /**

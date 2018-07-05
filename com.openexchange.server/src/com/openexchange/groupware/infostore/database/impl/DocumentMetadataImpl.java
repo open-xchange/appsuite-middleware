@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -122,12 +123,19 @@ public class DocumentMetadataImpl extends DefaultDocumentMetadata {
 
 	@Override
     public long getSequenceNumber() {
-	    return null == lastModified ? 0 : lastModified.getTime();
+	    if (null != sequenceNumber) {
+            return sequenceNumber;
+        }
+        Date lastModDate = getLastModified();
+        if (null != lastModDate) {
+            return lastModDate.getTime();
+        }
+        return 0;
 	}
 
 	@Override
     public void setSequenceNumber(final long sequenceNumber) {
-	    // Nothing to do, yet
+	    this.sequenceNumber = sequenceNumber;
 	}
 
     @Override

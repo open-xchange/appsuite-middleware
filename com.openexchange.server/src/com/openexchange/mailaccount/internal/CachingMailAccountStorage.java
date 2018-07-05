@@ -49,9 +49,9 @@
 
 package com.openexchange.mailaccount.internal;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -253,19 +253,25 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException {
-        delegate.setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId);
-        invalidateMailAccount(id, userId, contextId);
+    public boolean setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException {
+        boolean modified = delegate.setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId);
+        if (modified) {
+            invalidateMailAccount(id, userId, contextId);
+            postChangedDefaultFolders(id, indexes, fullNames, true, true, userId, contextId);
+        }
 
-        postChangedDefaultFolders(id, indexes, fullNames, true, true, userId, contextId);
+        return modified;
     }
 
     @Override
-    public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
-        delegate.setNamesForMailAccount(id, indexes, names, userId, contextId);
-        invalidateMailAccount(id, userId, contextId);
+    public boolean setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
+        boolean modified = delegate.setNamesForMailAccount(id, indexes, names, userId, contextId);
+        if (modified) {
+            invalidateMailAccount(id, userId, contextId);
+            postChangedDefaultFolders(id, indexes, names, false, true, userId, contextId);
+        }
 
-        postChangedDefaultFolders(id, indexes, names, false, true, userId, contextId);
+        return modified;
     }
 
     @Override

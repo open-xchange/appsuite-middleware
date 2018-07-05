@@ -74,7 +74,7 @@ public class TimeTest extends AbstractPasswordchangehistoryTest {
     @Test
     public void testTime() throws Exception {
 
-        String retval = pwdhapi.passwdChanges(contextID, userID, 0l, ORDER_NEWEST);
+        String retval = pwdhapi.passwdChanges(contextID, userID, new Long(0), "date");
         JSONArray array = new JSONArray(retval);
 
         for (int i = 0; i < array.length(); i++) {

@@ -54,7 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -180,13 +180,13 @@ public class EnhancedTaskOrAppointment {
 			return undecided;
 		}
 		switch (status) {
-		case Appointment.ACCEPT:
+		case CalendarObject.ACCEPT:
 			list = accepted;
 			break;
-		case Appointment.TENTATIVE:
+		case CalendarObject.TENTATIVE:
 			list = tentative;
 			break;
-		case Appointment.DECLINE:
+		case CalendarObject.DECLINE:
 			list = declined;
 			break;
 		}

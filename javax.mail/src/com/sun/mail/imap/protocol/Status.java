@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,11 +40,11 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Locale;
-
-import com.sun.mail.iap.*;
+import java.util.Map;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Response;
 
 /**
  * STATUS response.
@@ -68,11 +68,13 @@ public class Status {
 
     public Status(Response r) throws ParsingException {
 	// mailbox := astring
-	mbox = BASE64MailboxDecoder.decode(r.readAtomString());
+	mbox = r.readAtomString();
+	if (!r.supportsUtf8())
+	    mbox = BASE64MailboxDecoder.decode(mbox);
 
 	// Workaround buggy IMAP servers that don't quote folder names
 	// with spaces.
-	final StringBuffer buffer = new StringBuffer();
+	StringBuilder buffer = new StringBuilder();
 	boolean onlySpaces = true;
 
 	while (r.peekByte() != '(' && r.peekByte() != 0) {
@@ -94,6 +96,8 @@ public class Status {
 	
 	do {
 	    String attr = r.readAtom();
+	    if (attr == null)
+		throw new ParsingException("parse error in STATUS");
 	    if (attr.equalsIgnoreCase("MESSAGES"))
 		total = r.readNumber();
 	    else if (attr.equalsIgnoreCase("RECENT"))
@@ -108,11 +112,11 @@ public class Status {
 		highestmodseq = r.readLong();
 	    else {
 		if (items == null)
-		    items = new HashMap<String,Long>();
+		    items = new HashMap<>();
 		items.put(attr.toUpperCase(Locale.ENGLISH),
 			    Long.valueOf(r.readLong()));
 	    }
-	} while (r.readByte() != ')');
+	} while (!r.isNextNonSpace(')'));
     }
 
     /**

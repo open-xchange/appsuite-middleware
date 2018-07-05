@@ -1,11 +1,10 @@
 package liquibase.change;
 
+import java.util.Set;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.util.StringUtils;
-
-import java.util.Set;
 
 /**
  * The standard configuration used by Change classes to represent a constraints on a column.

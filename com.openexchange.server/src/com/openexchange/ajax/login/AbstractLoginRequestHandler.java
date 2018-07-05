@@ -447,25 +447,28 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
     protected void performRampUp(HttpServletRequest req, JSONObject json, ServerSession session, boolean force) throws OXException, IOException {
         if (null != session && (force || Boolean.parseBoolean(req.getParameter("rampup")))) {
             final Set<LoginRampUpService> rampUpServices = this.rampUpServices;
-            if (rampUpServices != null) {
-                try {
-                    String client = session.getClient();
-                    {
-                        String clientOverride = req.getParameter("rampUpFor");
-                        if (clientOverride != null) {
-                        	client = clientOverride;
-                        }
+            if (rampUpServices == null) {
+                LOG.warn("Missing ramp-up services. Seems that there were issues during login servlet registration.");
+                return;
+            }
+
+            try {
+                String client = session.getClient();
+                {
+                    String clientOverride = req.getParameter("rampUpFor");
+                    if (clientOverride != null) {
+                        client = clientOverride;
                     }
-                    for (LoginRampUpService rampUpService : rampUpServices) {
-                        if (rampUpService.contributesTo(client)) {
-                            JSONObject contribution = rampUpService.getContribution(session, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, session, ""));
-                            json.put("rampup", contribution);
-                            return;
-                        }
-                    }
-                } catch (JSONException e) {
-                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                 }
+                for (LoginRampUpService rampUpService : rampUpServices) {
+                    if (rampUpService.contributesTo(client)) {
+                        JSONObject contribution = rampUpService.getContribution(session, AJAXRequestDataTools.getInstance().parseRequest(req, false, false, session, ""));
+                        json.put("rampup", contribution);
+                        return;
+                    }
+                }
+            } catch (JSONException e) {
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
             }
         }
     }

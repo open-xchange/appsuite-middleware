@@ -51,8 +51,8 @@ package com.openexchange.oauth.provider.tools;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 
 /**
@@ -63,12 +63,7 @@ import java.util.Set;
  */
 public class URIValidator {
 
-    private static final Set<String> URI_LOCALHOSTS = new HashSet<>();
-    static  {
-        URI_LOCALHOSTS.add("localhost");
-        URI_LOCALHOSTS.add("127.0.0.1");
-        URI_LOCALHOSTS.add("[::1]");
-    }
+    private static final Set<String> URI_LOCALHOSTS = ImmutableSet.of("localhost", "127.0.0.1", "[::1]");
 
     /**
      * Checks whether a given String is a valid redirect URI in terms of http://tools.ietf.org/html/rfc6749#section-3.1.2.

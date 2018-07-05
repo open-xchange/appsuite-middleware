@@ -50,9 +50,7 @@
 package com.openexchange.scripting.rhino.osgi;
 
 import java.net.URL;
-
 import org.osgi.framework.Bundle;
-
 import com.openexchange.scripting.rhino.require.JSBundle;
 
 public class BundleJSBundle implements JSBundle {

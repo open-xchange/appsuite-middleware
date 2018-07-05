@@ -118,7 +118,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
 
         itm = new InfostoreTestManager(getClient());
         itm.setFailOnError(true);
-        java.io.File upload = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "contact_image.png");
+        java.io.File upload = new java.io.File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "contact_image.png");
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
             boolean shared = false;

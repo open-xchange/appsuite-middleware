@@ -49,19 +49,18 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Drops duplicate entry from updateTask table.
@@ -76,7 +75,7 @@ public class DropDuplicateEntryFromUpdateTaskTable extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Connection con = Database.getNoTimeout(params.getContextId(), true);
+        Connection con = params.getConnection();
         boolean rb = false;
         try {
             startTransaction(con);
@@ -95,7 +94,6 @@ public class DropDuplicateEntryFromUpdateTaskTable extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            Database.backNoTimeout(params.getContextId(), true, con);
         }
     }
 
@@ -106,14 +104,14 @@ public class DropDuplicateEntryFromUpdateTaskTable extends UpdateTaskAdapter {
             stmt = con.createStatement();
             rs = stmt.executeQuery("SELECT 1 FROM updateTask WHERE BINARY taskName='com.openexchange.groupware.update.tasks.UnifiedInboxRenamerTask'");
             final boolean wrongEntryExists = rs.next();
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
             stmt = con.createStatement();
             rs = stmt.executeQuery("SELECT 1 FROM updateTask WHERE BINARY taskName='com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask'");
             final boolean correctEntryExists = rs.next();
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
@@ -122,7 +120,7 @@ public class DropDuplicateEntryFromUpdateTaskTable extends UpdateTaskAdapter {
                     // Duplicate entry
                     stmt = con.createStatement();
                     stmt.execute("DELETE FROM updateTask WHERE BINARY taskName='com.openexchange.groupware.update.tasks.UnifiedInboxRenamerTask'");
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     stmt = null;
                 }
             } else {
@@ -130,13 +128,13 @@ public class DropDuplicateEntryFromUpdateTaskTable extends UpdateTaskAdapter {
                     // Needs to be renamed to actual update task name
                     stmt = con.createStatement();
                     stmt.execute("UPDATE updateTask SET taskName='com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask' WHERE BINARY taskName='com.openexchange.groupware.update.tasks.UnifiedInboxRenamerTask'");
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     stmt = null;
                 }
             }
 
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

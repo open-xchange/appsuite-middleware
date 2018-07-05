@@ -64,6 +64,7 @@ import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
 import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
+import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
 import org.bouncycastle.openpgp.PGPSignature;
@@ -83,11 +84,12 @@ import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
  * {@link PGPEncrypter} - Wrapper for providing stream based PGP encryption
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public class PGPEncrypter {
 
     private static final int BUFFERSIZE = 256;
+    private boolean withIntegrityPacket = true;
 
     /**
      * Encrypts data
@@ -107,6 +109,17 @@ public class PGPEncrypter {
             (PGPSecretKey) null /* do not sign */,
             null /* no signing password required */,
             recipientsKeys);
+    }
+
+    /**
+     * Enables or disabled adding MDC for integrity validation
+     *
+     * @param withIntegrityPacket true, to add a MDC packet, false otherwise
+     * @return this
+     */
+    PGPEncrypter setWithIntegrityPacket(boolean withIntegrityPacket) {
+        this.withIntegrityPacket = withIntegrityPacket;
+        return this;
     }
 
     /**
@@ -133,7 +146,11 @@ public class PGPEncrypter {
             signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(algorithm, PGPUtil.SHA512).setProvider("BC"));
             try {
                 PBESecretKeyDecryptor extractor = new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(password);
-                signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, signingKey.extractPrivateKey(extractor));
+                PGPPrivateKey extractedPrivateKey = signingKey.extractPrivateKey(extractor);
+                if (null == extractedPrivateKey) {
+                    throw new IllegalArgumentException("Could not extract private PGP key from specified signing key.");
+                }
+                signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, extractedPrivateKey);
             }
             catch(Exception e) {
                 if (armored) {
@@ -152,7 +169,7 @@ public class PGPEncrypter {
         //Initialize encrypting
         BcPGPDataEncryptorBuilder builder = new BcPGPDataEncryptorBuilder(PGPEncryptedData.AES_256);
         builder.setSecureRandom(new SecureRandom());
-        builder.setWithIntegrityPacket(true);
+        builder.setWithIntegrityPacket(withIntegrityPacket);
 
         //Adding recipients
         PGPEncryptedDataGenerator encryptedDataGenerator = new PGPEncryptedDataGenerator(builder);

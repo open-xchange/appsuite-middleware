@@ -253,7 +253,7 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
         IExecutorService executor = hazelcastInstance.getExecutorService("default");
         Callable<String> remoteTask = size == 1 ? new PortableCallbackRegistryFetch(tokens.get(0)) : new PortableMultipleCallbackRegistryFetch(tokens.toArray(new String[size]));
         try {
-            return Hazelcasts.executeByMembersAndFilter(remoteTask, otherMembers, executor, filter, threadPool.getExecutor());
+            return Hazelcasts.executeByMembersAndFilter(remoteTask, otherMembers, executor, filter, null == threadPool ? null : threadPool.getExecutor());
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RuntimeException) {

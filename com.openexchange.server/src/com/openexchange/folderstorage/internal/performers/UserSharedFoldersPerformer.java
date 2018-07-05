@@ -50,8 +50,6 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import static com.openexchange.server.services.ServerServiceRegistry.getInstance;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -79,8 +77,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link UserSharedFoldersPerformer}
@@ -156,7 +155,8 @@ public class UserSharedFoldersPerformer extends AbstractUserizedFolderPerformer 
         try {
             final List<SortableId> allFolderIds;
             try {
-                allFolderIds = Arrays.asList(folderStorage.getUserSharedFolders(treeId, contentType, storageParameters));
+                SortableId[] userSharedFolders = folderStorage.getUserSharedFolders(treeId, contentType, storageParameters);
+                allFolderIds = null != userSharedFolders ? Arrays.asList(userSharedFolders) : Collections.emptyList();
             } catch (UnsupportedOperationException e) {
                 LOG.warn("Operation is not supported for folder storage {} (content-type={})", folderStorage.getClass().getSimpleName(), contentType, e);
                 return new UserizedFolder[0];
@@ -303,7 +303,7 @@ public class UserSharedFoldersPerformer extends AbstractUserizedFolderPerformer 
             /*
              * Wait for completion
              */
-            ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
+            callAndWait(completionService, taskCount);
             final UserizedFolder[] ret = trimArray(subfolders);
             /*
              * Commit
@@ -316,6 +316,10 @@ public class UserSharedFoldersPerformer extends AbstractUserizedFolderPerformer 
             if (started) {
                 folderStorage.rollback(storageParameters);
             }
+            if (FolderExceptionErrorMessage.INTERRUPT_ERROR.equals(e)) {
+                Thread.currentThread().interrupt();
+                return new UserizedFolder[0];
+            }
             throw e;
         } catch (final RuntimeException e) {
             if (started) {
@@ -324,5 +328,4 @@ public class UserSharedFoldersPerformer extends AbstractUserizedFolderPerformer 
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-
 }

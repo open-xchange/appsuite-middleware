@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rest.passwordchange.history.api;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -165,14 +166,14 @@ public class PasswordChangeHistoryREST {
                 // No fall back. Resource for the user not available. In other terms the user can not see the feature.
                 return Response.status(Response.Status.NOT_FOUND).build();
             }
-            LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", userId, contextId, e);
+            LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", I(userId), I(contextId), e);
             return Response.serverError().build();
         } catch (BadRequestException e) {
             // SortField unknown; 400
             return Response.status(Response.Status.BAD_REQUEST).build();
         } catch (Exception e) {
             //Unknown error; 500
-            LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", userId, contextId, e);
+            LOG.error("Error while listing password change history for user {} in context {}. Reason: {}", I(userId), I(contextId), e);
             return Response.serverError().build();
         }
     }
@@ -181,7 +182,6 @@ public class PasswordChangeHistoryREST {
      * Matches REST field names to data field names for sorting
      *
      * @param sort The unparsed field names
-     * @param fieldNames The field names to sort by
      * @return A set of data field. Can be empty
      */
     private Map<SortField, SortOrder> getFields(String sort) {
@@ -213,7 +213,7 @@ public class PasswordChangeHistoryREST {
     }
 
     /**
-     * Get a specific service and throws {@link ServiceExceptionCode.SERVICE_UNAVAILABLE} if it can't be loaded
+     * Get a specific service and throws {@link ServiceExceptionCode#SERVICE_UNAVAILABLE} if it can't be loaded
      *
      * @param clazz The service to load
      * @return The service instance
@@ -229,7 +229,7 @@ public class PasswordChangeHistoryREST {
      * @param userId The identifier of the user
      * @return <code>null</code> if both IDs are valid. A {@link Response} to be returned to the client
      *         in case one of the IDs is invalid.
-     * @throws OXException
+     * @throws OXException If services can't be obtained or context or user are unknown
      */
     private Response checkUserAndContext(int contextId, int userId) throws OXException {
         ContextService contextService = getService(ContextService.class);
@@ -245,7 +245,6 @@ public class PasswordChangeHistoryREST {
             } else if (ContextExceptionCodes.NOT_FOUND.equals(e) || UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 return Response.status(Status.NOT_FOUND).build();
             }
-
             throw e;
         }
     }
@@ -281,7 +280,7 @@ public class PasswordChangeHistoryREST {
             }
             ConfigurationService configService = services.getOptionalService(ConfigurationService.class);
             if (null != configService) {
-                Boolean masertAccountOverride = configService.getBoolProperty("MASTER_ACCOUNT_OVERRIDE", false);
+                boolean masertAccountOverride = configService.getBoolProperty("MASTER_ACCOUNT_OVERRIDE", false);
                 if (authenticator.isMasterAuthenticationDisabled() && masertAccountOverride) {
                     LOG.warn("Granting access to password change history without basicAuth! 'MASTER_AUTHENTICATION_DISABLED' and 'MASTER_ACCOUNT_OVERRIDE' are set to 'true' ");
                     return null;
@@ -298,13 +297,12 @@ public class PasswordChangeHistoryREST {
      *
      * @param data The {@link JSONObject} to put the data in
      * @param convertee The identifier that might be known
-     * @throws JSONException
+     * @throws JSONException See {@link JSONObject#put(String, Object)}
      */
     private void putOptionalReadable(JSONObject data, String convertee) throws JSONException {
         PasswordChangeClients client = PasswordChangeClients.match(convertee);
         if (null != client) {
             data.put("client_name", client.getDisplayName());
-            return;
         }
     }
 }

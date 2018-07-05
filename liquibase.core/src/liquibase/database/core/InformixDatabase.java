@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 import liquibase.CatalogAndSchema;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
@@ -35,9 +34,7 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 public class InformixDatabase extends AbstractJdbcDatabase {

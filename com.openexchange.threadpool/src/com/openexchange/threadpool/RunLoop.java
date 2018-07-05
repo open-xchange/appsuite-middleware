@@ -58,7 +58,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.osgi.ExceptionUtils;
 
-
 /**
  * {@link RunLoop}
  *
@@ -99,7 +98,7 @@ public abstract class RunLoop<E> implements Runnable {
     @Override
     public void run() {
         Thread.currentThread().setName(name);
-        isRunning=true;
+        isRunning = true;
         while (isRunning) {
             /*
              * Get the current element from the queue. blocking, so this must be done outside the handleLock
@@ -115,29 +114,32 @@ public abstract class RunLoop<E> implements Runnable {
             /*
              * Try to handle the element if the RunLoop isn't paused
              */
+            handleLock.lock();
             try {
-                handleLock.lock();
-                while(isPaused.get()) {
-                    proceedCondition.await();
+                try {
+                    while (isPaused.get()) {
+                        proceedCondition.await();
+                    }
+                    /*
+                     * Element could have been removed while RunLoop was paused
+                     */
+                    E currentElement = currentElementReference.get();
+                    if (null != currentElement) {
+                        handle(currentElement);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    LOG.info("Returning from RunLoop due to interruption");
+                    isRunning = false;
+                    return;
+                } catch (Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
+                    LOG.error("", t);
+                } finally {
+                    // Do not prevent GC for last handled element
+                    currentElementReference.set(null);
                 }
-                /*
-                 * Element could have been removed while RunLoop was paused
-                 */
-                E currentElement = this.currentElementReference.get();
-                if(null != currentElement) {
-                    handle(currentElement);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                LOG.info("Returning from RunLoop due to interruption");
-                isRunning=false;
-                return;
-            } catch (Throwable t) {
-                ExceptionUtils.handleThrowable(t);
-                LOG.error("", t);
             } finally {
-                // Do not prevent GC of last handled element
-                currentElementReference.set(null);
                 handleLock.unlock();
             }
         }
@@ -147,6 +149,7 @@ public abstract class RunLoop<E> implements Runnable {
 
     /**
      * Offer an element to this RunLoop.
+     * 
      * @param element The element to offer
      * @return false if the Runloop was paused or is out of capacity
      */
@@ -165,20 +168,22 @@ public abstract class RunLoop<E> implements Runnable {
 
     /**
      * Causes the Runloop to continue handling offered Elements after {@link RunLoop#pauseHandling()} was called.
+     * 
      * @throws InterruptedException
      */
     protected void continueHandling() {
-          try {
-              handleLock.lock();
-              isPaused.set(false);
-              proceedCondition.signalAll();
-          } finally {
-              handleLock.unlock();
-          }
+        handleLock.lock();
+        try {
+            isPaused.set(false);
+            proceedCondition.signalAll();
+        } finally {
+            handleLock.unlock();
+        }
     }
 
     /**
      * Check if the RunLoop is running
+     * 
      * @return true if the RunLoop is running, else false
      */
     public boolean isRunning() {
@@ -195,6 +200,7 @@ public abstract class RunLoop<E> implements Runnable {
 
     /**
      * Get the name of this RunLoop
+     * 
      * @return the name of this RunLoop
      */
     public String getName() {
@@ -202,13 +208,19 @@ public abstract class RunLoop<E> implements Runnable {
     }
 
     /**
-     * Get the number of Elements being enqueued in this {@link RunLoop}.
+     * Get the current number of Elements being enqueued in this {@link RunLoop}.
+     * 
      * @return the number of Elements that are currently enqueued.
      */
     public int getQueueSize() {
         return queue.size();
     }
 
+    /**
+     * Handles specified element.
+     *
+     * @param element The element to handle
+     */
     protected abstract void handle(E element);
 
     /**

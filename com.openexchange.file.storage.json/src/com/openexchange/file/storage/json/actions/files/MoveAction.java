@@ -60,7 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionServices;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -150,7 +150,8 @@ public class MoveAction extends AbstractWriteAction {
         try {
             List<String> conflicting = new ArrayList<String>(pairs.size());
             for (IdVersionPair pair : pairs) {
-                if (pair.getIdentifier() == null) {
+                String fileId = pair.getIdentifier();
+                if (fileId == null) {
                     // Resource denotes a folder
                     String folderId = pair.getFolderId();
                     FileStorageFolder srcFolder = folderAccess.getFolder(new FolderID(folderId));
@@ -185,8 +186,7 @@ public class MoveAction extends AbstractWriteAction {
                     deleteableFolders.addLast(folderId);
                 } else {
                     // Resource denotes a file
-                    String id = pair.getIdentifier();
-                    oldFiles.add(id);
+                    oldFiles.add(fileId);
                 }
             }
 
@@ -284,7 +284,7 @@ public class MoveAction extends AbstractWriteAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-        return EnqueuableAJAXActionServices.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
     }
 
     private Result isEnqueueable(InfostoreRequest request, List<IdVersionPair> pairs) throws OXException {
@@ -315,7 +315,7 @@ public class MoveAction extends AbstractWriteAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-        return EnqueuableAJAXActionServices.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
     }
 
 }

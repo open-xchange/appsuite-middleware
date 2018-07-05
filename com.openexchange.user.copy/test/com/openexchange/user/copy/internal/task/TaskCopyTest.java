@@ -118,7 +118,7 @@ public class TaskCopyTest extends AbstractUserCopyTest {
     @After
     public void tearDown()
  throws Exception {
-        DBUtils.autocommit(dstCon);
+        Databases.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtx.getContextId(), "cid", dstCon, "task", "task_eparticipant", "task_folder", "task_participant", "task_removedparticipant");
         super.tearDown();
     }
@@ -139,7 +139,7 @@ public class TaskCopyTest extends AbstractUserCopyTest {
             e.printStackTrace();
             fail("A UserCopyException occurred.");
         } finally {
-            DBUtils.autocommit(dstCon);
+            Databases.autocommit(dstCon);
         }
         final List<Task> target = loadTasksFromDB(dstCtx, dstCon, dstUser, 1337);
         checkTasks(srcTasks, target, mapping);

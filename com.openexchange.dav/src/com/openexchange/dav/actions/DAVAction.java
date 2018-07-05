@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.actions;
 
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
@@ -324,6 +325,30 @@ public abstract class DAVAction extends AbstractAction {
         }
     }
 
+    /**
+     * Prepares an XML element ready to be used as root element for a multistatus response, containing any additionally defined
+     * namespace declarations of the underlying protocol.
+     *
+     * @return A new multistatus element
+     */
+    protected Element prepareMultistatusElement() {
+        Element multistatusElement = new Element("multistatus", DAV_NS);
+        for (Namespace namespace : protocol.getAdditionalNamespaces()) {
+            multistatusElement.addNamespaceDeclaration(namespace);
+        }
+        return multistatusElement;
+    }
+
+    /**
+     * Sends a multistatus response.
+     *
+     * @param response The WebDAV response to write to
+     * @param multistatusElement The root element for the multistatus response
+     */
+    protected void sendMultistatusResponse(WebdavResponse response, Element multistatusElement) {
+        sendXMLResponse(response, new Document(multistatusElement), Protocol.SC_MULTISTATUS);
+    }
+
     protected HostData getHostData(WebdavRequest request) throws WebdavProtocolException {
         /*
          * get host data from request context or session parameter
@@ -343,6 +368,19 @@ public abstract class DAVAction extends AbstractAction {
             }
         }
         throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Optionally sets a response header if the supplied value reference is not <code>null</code>.
+     *
+     * @param header The name of the header name to set
+     * @param value The value to set, or <code>null</code> to do nothing
+     * @param response The response to set the header in
+     */
+    protected void setHeaderOpt(String header, Object value, WebdavResponse response) {
+        if (null != value) {
+            response.setHeader(header, value.toString());
+        }
     }
 
 }

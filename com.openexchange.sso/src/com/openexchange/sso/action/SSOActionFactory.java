@@ -49,7 +49,6 @@
 
 package com.openexchange.sso.action;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -103,11 +102,6 @@ public final class SSOActionFactory implements AJAXActionServiceFactory {
         final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(4);
         tmp.put(GetAction.ACTION, new GetAction());
         return Collections.unmodifiableMap(tmp);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

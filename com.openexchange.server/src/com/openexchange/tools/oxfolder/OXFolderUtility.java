@@ -50,11 +50,6 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.linked.TIntLinkedList;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -73,6 +68,7 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -102,6 +98,11 @@ import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link OXFolderUtility} - Provides utility methods for folder operations.
@@ -202,13 +203,14 @@ public final class OXFolderUtility {
                  */
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName, Integer.valueOf(ctx.getContextId()), folderName);
             }
+            /*-
+             *  // finally dropped
             if (!OXFolderProperties.isIgnoreSharedAddressbook() && FolderObject.getFolderString(FolderObject.SYSTEM_GLOBAL_FOLDER_ID, locale).equalsIgnoreCase(folderName)) {
                 final String parentFolderName = new StringBuilder(FolderObject.getFolderString(parentFolderId, locale)).append(" (").append(parentFolderId).append(')').toString();
-                /*
-                 * A duplicate folder exists
-                 */
+                // A duplicate folder exists
                 throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(parentFolderName, Integer.valueOf(ctx.getContextId()), folderName);
             }
+            */
         }
     }
 
@@ -306,14 +308,14 @@ public final class OXFolderUtility {
         set.add(permissions[0].getEntity());
         for (int i = 1; i < permissions.length; i++) {
             final OCLPermission permission = permissions[i];
-            final int key = permission.getEntity();
-            if (set.contains(key)) {
+            final int entityId = permission.getEntity();
+            if (false == set.add(entityId)) {
+                // TIntSet instance did not change through add
                 if (permission.isGroupPermission()) {
-                    throw OXFolderExceptionCode.DUPLICATE_GROUP_PERMISSION.create(Integer.valueOf(permission.getEntity()));
+                    throw OXFolderExceptionCode.DUPLICATE_GROUP_PERMISSION.create(Integer.valueOf(entityId));
                 }
-                throw OXFolderExceptionCode.DUPLICATE_USER_PERMISSION.create(Integer.valueOf(permission.getEntity()));
+                throw OXFolderExceptionCode.DUPLICATE_USER_PERMISSION.create(Integer.valueOf(entityId));
             }
-            set.add(key);
         }
     }
 
@@ -492,7 +494,7 @@ public final class OXFolderUtility {
                     /*
                      * added link, check link target, assigned permissions & "share_links" capability
                      */
-                    if (false == matches(guestInfo.getLinkTarget(), folder)) {
+                    if (permission.getType() == FolderPermissionType.NORMAL && false == matches(guestInfo.getLinkTarget(), folder)) {
                         throw ShareExceptionCodes.NO_MULTIPLE_TARGETS_LINK.create();
                     }
                     if (null == capabilities || false == capabilities.contains("share_links")) {

@@ -50,11 +50,11 @@
 package com.openexchange.database.migration;
 
 import java.util.List;
+import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
+import com.openexchange.exception.OXException;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
 import liquibase.resource.ResourceAccessor;
-import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
-import com.openexchange.exception.OXException;
 
 /**
  * Interface that defines the execution of database migration tasks based on {@link Liquibase}.

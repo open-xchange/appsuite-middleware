@@ -98,6 +98,7 @@ public class MessageWriterParams {
         private int maxContentSize;
         private int maxNestedMessageLevels;
         private boolean includePlainText;
+        private boolean sanitize;
 
         Builder(int accountId, MailMessage mail, Session session) {
             super();
@@ -106,6 +107,7 @@ public class MessageWriterParams {
             this.session = session;
             asMarkup = true;
             sizePolicy = SizePolicy.NONE;
+            sanitize = true;
         }
 
         /**
@@ -125,6 +127,16 @@ public class MessageWriterParams {
          */
         public Builder setEmbedded(boolean embedded) {
             this.embedded = embedded;
+            return this;
+        }
+
+        /**
+         * Sets the sanitize
+         * @param sanitize The sanitize to set
+         * @return This builder
+         */
+        public Builder setSanitize(boolean sanitize) {
+            this.sanitize = sanitize;
             return this;
         }
 
@@ -244,7 +256,7 @@ public class MessageWriterParams {
          * @return The <code>MessageWriterParams</code> instance
          */
         public MessageWriterParams build() {
-            return new MessageWriterParams(accountId, mail, displayMode, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, optTimeZone, sizePolicy, maxContentSize, maxNestedMessageLevels, includePlainText);
+            return new MessageWriterParams(accountId, mail, displayMode, sanitize, embedded, asMarkup, session, settings, warnings, token, tokenTimeout, mimeFilter, optTimeZone, sizePolicy, maxContentSize, maxNestedMessageLevels, includePlainText);
         }
     }
 
@@ -266,15 +278,17 @@ public class MessageWriterParams {
     private final int maxContentSize;
     private final int maxNestedMessageLevels;
     private final boolean includePlaintext;
+    private final boolean sanitize;
 
     /**
      * Initializes a new {@link MessageWriterParams}.
      */
-    MessageWriterParams(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, SizePolicy sizePolicy, int maxContentSize, int maxNestedMessageLevels, boolean includePlaintext) {
+    MessageWriterParams(int accountId, MailMessage mail, DisplayMode displayMode, boolean sanitize, boolean embedded, boolean asMarkup, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, SizePolicy sizePolicy, int maxContentSize, int maxNestedMessageLevels, boolean includePlaintext) {
         super();
         this.accountId = accountId;
         this.mail = mail;
         this.displayMode = displayMode;
+        this.sanitize = sanitize;
         this.embedded = embedded;
         this.asMarkup = asMarkup;
         this.session = session;
@@ -324,6 +338,15 @@ public class MessageWriterParams {
      */
     public boolean isEmbedded() {
         return embedded;
+    }
+
+    /**
+     * Checks whether HTML/CSS content is supposed to be sanitized (against white-list)
+     *
+     * @return <code>true</code> to sanitize; otherwise <code>false</code>
+     */
+    public boolean isSanitize() {
+        return sanitize;
     }
 
     /**

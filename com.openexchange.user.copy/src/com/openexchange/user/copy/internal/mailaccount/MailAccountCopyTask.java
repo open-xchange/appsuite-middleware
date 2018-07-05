@@ -49,18 +49,16 @@
 
 package com.openexchange.user.copy.internal.mailaccount;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
@@ -68,6 +66,8 @@ import com.openexchange.user.copy.internal.CopyTools;
 import com.openexchange.user.copy.internal.connection.ConnectionFetcherTask;
 import com.openexchange.user.copy.internal.context.ContextLoadTask;
 import com.openexchange.user.copy.internal.user.UserCopyTask;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 
 /**
@@ -192,7 +192,7 @@ public class MailAccountCopyTask implements CopyUserTaskService {
              *
              */
             if (null != optData) {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
                 stmt = con.prepareStatement("INSERT INTO user_transport_account " +
                         "(id, cid, user, name, url, login, password, send_addr, default_flag, " +
                         "unified_inbox, " +
@@ -218,7 +218,7 @@ public class MailAccountCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -281,7 +281,7 @@ public class MailAccountCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -319,7 +319,7 @@ public class MailAccountCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

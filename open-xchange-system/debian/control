@@ -2,13 +2,12 @@ Source: open-xchange-system
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), lsb-release, ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk | java7-sdk
-Standards-Version: 3.8.4
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), lsb-release, ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, coreutils
+Standards-Version: 3.9.8
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-system
 Architecture: all
-Depends: ${misc:Depends}, adduser, sed
-Breaks: open-xchange-core (<< 7.6.1)
-Replaces: open-xchange-core (<< 7.6.1)
+Depends: ${misc:Depends}, adduser, sed, coreutils
+Conflicts: open-xchange-core (<< 7.10.0)
 Description: system integration specific infrastructure

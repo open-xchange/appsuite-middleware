@@ -53,12 +53,12 @@ import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import jonelo.jacksum.util.Service;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.openexchange.tx.AbstractUndoable;
 import com.openexchange.tx.UndoableAction;
+import jonelo.jacksum.util.Service;
 
 /**
  * {@link FileStreamAction}

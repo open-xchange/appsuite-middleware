@@ -54,6 +54,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.push.apn.DAVApnOptionsProvider;
 import com.openexchange.dav.push.gcm.DavPushGateway;
 import com.openexchange.dav.push.gcm.PushTransportOptions;
@@ -135,16 +136,15 @@ public class PushSubscribeFactory extends DAVFactory {
         if (1 == path.size()) {
             return mixin(new RootPushSubscribeCollection(this).getChild(url.name()));
         }
-        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
+        throw DAVProtocol.protocolException(url, HttpServletResponse.SC_NOT_FOUND);
     }
 
     @Override
     public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
-        WebdavPath path = sanitize(url);
-        if (isRoot(path)) {
+        if (isRoot(sanitize(url))) {
             return mixin(new RootPushSubscribeCollection(this));
         }
-        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
+        throw DAVProtocol.protocolException(url, HttpServletResponse.SC_NOT_FOUND);
     }
 
     @Override

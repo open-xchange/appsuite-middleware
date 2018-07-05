@@ -51,13 +51,11 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -78,12 +76,12 @@ public class AllowNullValuesForStandardFolderNamesUpdateTask extends UpdateTaskA
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        Connection con = null;
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con = dbService.getForUpdateTask(contextId);
             con.setAutoCommit(false);
+            rollback = true;
+
             Column[] columns = new Column[14];
             columns[0] = new Column("trash", "varchar(64)");
             columns[1] = new Column("sent", "varchar(64)");
@@ -100,16 +98,18 @@ public class AllowNullValuesForStandardFolderNamesUpdateTask extends UpdateTaskA
             columns[12] = new Column("confirmed_ham_fullname", "varchar(256)");
             columns[13] = new Column("archive_fullname", "varchar(256)");
             Tools.modifyColumns(con, "user_mail_account", false, columns);
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
 
     }

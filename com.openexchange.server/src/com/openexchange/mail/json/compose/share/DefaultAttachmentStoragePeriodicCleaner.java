@@ -231,6 +231,9 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
                 int fuid = rs.getInt(2);
                 int owner = rs.getInt(3);
                 Map<String, Object> meta = parseMeta(rs, fuid, contextId);
+                if (null == meta) {
+                    continue;
+                }
                 Long millis = parseExpirationMillis(meta);
                 if ((null != millis) && (millis.longValue() < threshold)) {
                     Map<Integer, List<ExpiredFolder>> userExpiredFolders = expiredFoldersInSchema.get(I(contextId));

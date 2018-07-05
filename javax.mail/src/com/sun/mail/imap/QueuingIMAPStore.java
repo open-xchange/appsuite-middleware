@@ -271,7 +271,7 @@ public class QueuingIMAPStore extends IMAPStore {
      */
     public QueuingIMAPStore(final Session session, final URLName url, final String name, final boolean isSSL) {
         super(session, url, name, isSSL);
-        enableSASL = PropUtil.getBooleanSessionProperty(session, "mail.imap.sasl.enable", false);
+        enableSASL = PropUtil.getBooleanProperty(session.getProperties(), "mail.imap.sasl.enable", false);
         if (enableSASL) {
             // Kerberos subject
             kerberosSubject = (Subject) session.getProperties().get("mail.imap.sasl.kerberosSubject");
@@ -319,13 +319,13 @@ public class QueuingIMAPStore extends IMAPStore {
     @Override
     protected IMAPProtocol newIMAPProtocol(final String host, final int port, final String user, final String password) throws IOException, ProtocolException {
         try {
-            if (PropUtil.getBooleanSessionProperty(session, "mail.imap.forceAuthenticated", false)) {
+            if (PropUtil.getBooleanProperty(session.getProperties(), "mail.imap.forceAuthenticated", false)) {
                 // Forced -- delegate to super implementation
                 return super.newIMAPProtocol(host, port, user, password);
             }
             while (true) {
                 try {
-                    final CountingQueue q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), PropUtil.getIntSessionProperty(session, "mail.imap.maxNumAuthenticated", 0), logger);
+                    final CountingQueue q = initQueue(new URLName("imap", host, port, /* Integer.toString(accountId) */null, user, password), PropUtil.getIntProperty(session.getProperties(), "mail.imap.maxNumAuthenticated", 0), logger);
                     final boolean debug = logger.isLoggable(Level.FINE) || LOG.isDebugEnabled();
                     if (debug) {
                         final String msg = "QueueingIMAPStore.newIMAPProtocol(): " + Thread.currentThread().getName() + " is trying to create/fetch for user '" + user + "@" + host + "'. Pending threads " + q.trackedThreads();

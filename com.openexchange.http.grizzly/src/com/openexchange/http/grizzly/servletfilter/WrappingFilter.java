@@ -52,6 +52,8 @@ package com.openexchange.http.grizzly.servletfilter;
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTPS_SCHEME;
 import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
@@ -68,10 +70,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
-import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.IPRange;
+import com.openexchange.net.IPTools;
+import com.openexchange.version.Version;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
@@ -90,8 +93,20 @@ public class WrappingFilter implements Filter {
         return PATTERN_CRLF.matcher(s).replaceAll("");
     }
 
+    private static final String LOCAL_HOST;
+    static {
+        String fbHost;
+        try {
+            fbHost = InetAddress.getLocalHost().getHostAddress();
+        } catch (final UnknownHostException e) {
+            fbHost = "127.0.0.1";
+        }
+        LOCAL_HOST = fbHost;
+    }
+
     // ----------------------------------------------------------------------------------------------------------------------------------
 
+    private final String version;
     private final AtomicLong counter;
     private final int serverId;
     private final String forHeader;
@@ -111,6 +126,7 @@ public class WrappingFilter implements Filter {
      */
     public WrappingFilter(GrizzlyConfig config) {
         super();
+        version = Version.getInstance().getVersionString();
         serverId = Math.abs(OXException.getServerId());
         counter = new AtomicLong(serverId >> 1);
         this.forHeader = config.getForHeader();
@@ -183,6 +199,8 @@ public class WrappingFilter implements Filter {
             Thread currentThread = Thread.currentThread();
             LogProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, currentThread.getName());
             LogProperties.put(LogProperties.Name.THREAD_ID, Long.toString(currentThread.getId()));
+            LogProperties.put(LogProperties.Name.LOCALHOST_IP_ADDRESS, LOCAL_HOST);
+            LogProperties.put(LogProperties.Name.LOCALHOST_VERSION, version);
             LogProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpRequest.getServerName());
             {
                 String userAgent = httpRequest.getHeader("User-Agent");

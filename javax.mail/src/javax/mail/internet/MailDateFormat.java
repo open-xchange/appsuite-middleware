@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -43,17 +43,17 @@ package javax.mail.internet;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
-import java.util.Date;
+import java.text.DateFormatSymbols;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Level;
-import java.text.SimpleDateFormat;
-import java.text.NumberFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
-import java.text.ParseException;
-
 import com.sun.mail.util.MailLogger;
 
 /**
@@ -197,11 +197,12 @@ public class MailDateFormat extends SimpleDateFormat {
      * Overrides Cloneable.
      *
      * @return a clone of this instance
+     * @since JavaMail 1.6
      */
-//    @Override
-//    public MailDateFormat clone() {
-//        return (MailDateFormat) super.clone();
-//    }
+    @Override
+    public MailDateFormat clone() {
+        return (MailDateFormat) super.clone();
+    }
 
     /**
      * Formats the given date in the format specified by 
@@ -279,24 +280,26 @@ public class MailDateFormat extends SimpleDateFormat {
      * be used because RFC 2822 mandates a specific pattern.
      *
      * @throws UnsupportedOperationException if this method is invoked
+     * @since JavaMail 1.6
      */
-//    @Override
-//    public void applyLocalizedPattern(String pattern) {
-//        throw new UnsupportedOperationException("Method "
-//                + "applyLocalizedPattern() shouldn't be called");
-//    }
+    @Override
+    public void applyLocalizedPattern(String pattern) {
+        throw new UnsupportedOperationException("Method "
+                + "applyLocalizedPattern() shouldn't be called");
+    }
 
     /**
      * This method always throws an UnsupportedOperationException and should not
      * be used because RFC 2822 mandates a specific pattern.
      *
      * @throws UnsupportedOperationException if this method is invoked
+     * @since JavaMail 1.6
      */
-//    @Override
-//    public void applyPattern(String pattern) {
-//        throw new UnsupportedOperationException("Method "
-//                + "applyPattern() shouldn't be called");
-//    }
+    @Override
+    public void applyPattern(String pattern) {
+        throw new UnsupportedOperationException("Method "
+                + "applyPattern() shouldn't be called");
+    }
 
     /**
      * This method allows serialization to change the pattern.
@@ -313,12 +316,13 @@ public class MailDateFormat extends SimpleDateFormat {
      * @return the start of the 100-year period into which two digit years are
      * parsed
      * @throws UnsupportedOperationException if this method is invoked
+     * @since JavaMail 1.6
      */
-//    @Override
-//    public Date get2DigitYearStart() {
-//        throw new UnsupportedOperationException("Method "
-//                + "get2DigitYearStart() shouldn't be called");
-//    }
+    @Override
+    public Date get2DigitYearStart() {
+        throw new UnsupportedOperationException("Method "
+                + "get2DigitYearStart() shouldn't be called");
+    }
 
     /**
      * This method always throws an UnsupportedOperationException and should not
@@ -326,24 +330,26 @@ public class MailDateFormat extends SimpleDateFormat {
      * 2-digits years.
      *
      * @throws UnsupportedOperationException if this method is invoked
+     * @since JavaMail 1.6
      */
-//    @Override
-//    public void set2DigitYearStart(Date startDate) {
-//        throw new UnsupportedOperationException("Method "
-//                + "set2DigitYearStart() shouldn't be called");
-//    }
+    @Override
+    public void set2DigitYearStart(Date startDate) {
+        throw new UnsupportedOperationException("Method "
+                + "set2DigitYearStart() shouldn't be called");
+    }
 
     /**
      * This method always throws an UnsupportedOperationException and should not
      * be used because RFC 2822 mandates specific date format symbols.
      *
      * @throws UnsupportedOperationException if this method is invoked
+     * @since JavaMail 1.6
      */
-//    @Override
-//    public void setDateFormatSymbols(DateFormatSymbols newFormatSymbols) {
-//        throw new UnsupportedOperationException("Method "
-//                + "setDateFormatSymbols() shouldn't be called");
-//    }
+    @Override
+    public void setDateFormatSymbols(DateFormatSymbols newFormatSymbols) {
+        throw new UnsupportedOperationException("Method "
+                + "setDateFormatSymbols() shouldn't be called");
+    }
 
     /**
      * Returns the date, as specified by the parameters.
@@ -420,8 +426,7 @@ public class MailDateFormat extends SimpleDateFormat {
                     LOGGER.log(Level.FINE, "Bad date: '" + text + "'", e);
                 }
                 pos.setErrorIndex(pos.getIndex());
-                // to prevent DateFormat::parse from throwing ParseException:
-                pos.setIndex(startPosition + 1);
+                pos.setIndex(startPosition);
                 return null;
             }
         }

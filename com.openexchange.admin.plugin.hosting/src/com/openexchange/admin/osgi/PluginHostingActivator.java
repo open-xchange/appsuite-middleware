@@ -67,6 +67,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -92,6 +93,20 @@ public class PluginHostingActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         AdminCache.compareAndSetBundleContext(null, context);
         final ConfigurationService configurationService = getService(ConfigurationService.class);
+        {
+            String property = configurationService.getProperty("CREATE_CONTEXT_USE_UNIT");
+            if (null != property) {
+                property = property.trim();
+                if ("context".equalsIgnoreCase(property)) {
+                    String sep = Strings.getLineSeparator();
+                    LOG.warn("{}{}\tDetected usage of deprecated property \"CREATE_CONTEXT_USE_UNIT\". Please remove that property from '/opt/open-xchange/etc/hosting.properties' file.{}", sep, sep, sep);
+                } else {
+                    String sep = Strings.getLineSeparator();
+                    LOG.warn("{}{}\tDetected usage of deprecated property \"CREATE_CONTEXT_USE_UNIT\", which specifies an unsupported(!) value {}. Please remove that property from '/opt/open-xchange/etc/hosting.properties' file.{}", sep, sep, property, sep);
+                }
+            }
+        }
+
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
         final ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);

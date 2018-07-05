@@ -66,7 +66,6 @@ import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
-
 /**
  * A{@link ResourceCacheMetadataStore} manages stored metadata for cached resources.
  * Resources are tracked via database records. A record is identified by an instance
@@ -167,6 +166,7 @@ public class ResourceCacheMetadataStore {
 
     /**
      * Convenience method to re-use an existing writable database connection.
+     * 
      * @see ResourceCacheMetadataStore#update(ResourceCacheMetadata).
      * @throws SQLException
      */
@@ -226,6 +226,7 @@ public class ResourceCacheMetadataStore {
 
     /**
      * Convenience method to re-use an existing database connection.
+     * 
      * @see ResourceCacheMetadataStore#load(int, int, String)
      */
     public ResourceCacheMetadata load(Connection con, int contextId, int userId, String resourceId) throws SQLException {
@@ -376,7 +377,40 @@ public class ResourceCacheMetadataStore {
     }
 
     /**
+     * Loads all filestore references for the given context and user.
+     *
+     * @param contextId The context id.
+     * @param userId The user id.
+     * @return A set containing all found reference ids.
+     * @throws OXException
+     */
+    public Set<String> loadRefIds(int contextId, int userId) throws OXException {
+        Set<String> refIds = new HashSet<String>();
+        DatabaseService dbService = getDBService();
+        Connection con = dbService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT refId FROM preview WHERE cid=? AND user=? AND refId IS NOT NULL");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                refIds.add(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            dbService.backReadOnly(contextId, con);
+        }
+
+        return refIds;
+    }
+
+    /**
      * Convenience method to re-use an existing database connection.
+     * 
      * @throws SQLException
      * @see ResourceCacheMetadataStore#load(String)
      */
@@ -430,6 +464,7 @@ public class ResourceCacheMetadataStore {
 
     /**
      * Convenience method to re-use an existing database connection.
+     * 
      * @see {@link ResourceCacheMetadataStore#remove(int, int, String)}
      */
     public boolean remove(Connection con, int contextId, int userId, String resourceId) throws SQLException {
@@ -487,6 +522,7 @@ public class ResourceCacheMetadataStore {
 
     /**
      * Convenience method to re-use an existing database connection.
+     * 
      * @param con The writable database connection in a transactional state.
      * @throws SQLException
      * @see {@link ResourceCacheMetadataStore#removeAll(int, int, String)}
@@ -610,6 +646,7 @@ public class ResourceCacheMetadataStore {
 
     /**
      * Convenience method to re-use an existing database connection.
+     * 
      * @param con The writable database connection in a transactional state.
      * @throws SQLException
      * @see {@link ResourceCacheMetadataStore#removeAll(int, int)}
@@ -744,6 +781,7 @@ public class ResourceCacheMetadataStore {
 
     /**
      * Convenience method to re-use an existing database connection.
+     * 
      * @param con The writable database connection in a transactional state.
      * @throws SQLException
      * @see {@link ResourceCacheMetadataStore#removeByRefId(int, Set)}

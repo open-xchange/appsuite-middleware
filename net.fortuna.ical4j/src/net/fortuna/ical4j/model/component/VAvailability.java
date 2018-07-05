@@ -32,7 +32,6 @@
 package net.fortuna.ical4j.model.component;
 
 import java.util.Iterator;
-
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Parameter;

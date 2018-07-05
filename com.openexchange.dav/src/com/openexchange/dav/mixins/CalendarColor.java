@@ -49,13 +49,16 @@
 
 package com.openexchange.dav.mixins;
 
+import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
+import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.Strings;
@@ -73,14 +76,14 @@ public class CalendarColor extends SingleXMLPropertyMixin {
     public static final Namespace NAMESPACE = DAVProtocol.APPLE_NS;
     public static final String SYMBOLIC_COLOR = "symbolic-color";
 
-    private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
 
     /**
      * Initializes a new {@link CalendarColor}.
      *
      * @param collection The underlying collection
      */
-    public CalendarColor(CommonFolderCollection<?> collection) {
+    public CalendarColor(FolderCollection<?> collection) {
         super(NAMESPACE.getURI(), NAME);
         this.collection = collection;
     }
@@ -101,6 +104,16 @@ public class CalendarColor extends SingleXMLPropertyMixin {
     }
 
     private static String getValue(UserizedFolder folder) {
+        if (null != folder) {
+            Object value = optPropertyValue(CalendarFolderConverter.getExtendedProperties(folder), COLOR_LITERAL);
+            if (null != value && String.class.isInstance(value)) {
+                return (String) value;
+            }
+        }
+        return getValueFromMeta(folder);
+    }
+
+    private static String getValueFromMeta(UserizedFolder folder) {
         if (null != folder && PrivateType.getInstance().equals(folder.getType())) {
             Map<String, Object> meta = folder.getMeta();
             if (null != meta) {
@@ -241,18 +254,25 @@ public class CalendarColor extends SingleXMLPropertyMixin {
     private static String getSymbolicColor(String hexColor) {
         switch (hexColor.toUpperCase()) {
             case "#FB0055FF":
+            case "RED":
                 return "red";
             case "#FD8208FF":
+            case "ORANGE":
                 return "orange";
             case "#FEC309FF":
+            case "YELLOW":
                 return "yellow";
             case "#56D72BFF":
+            case "GREEN":
                 return "green";
             case "#1D9BF6FF":
+            case "BLUE":
                 return "blue";
             case "#90714CFF":
+            case "BROWN":
                 return "brown";
             case "#BF57DAFF":
+            case "PURPLE":
                 return "purple";
             default:
                 return "custom";

@@ -63,11 +63,12 @@ import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.custom.parallels.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.java.Strings;
 import com.openexchange.user.UserService;
 
 
@@ -131,10 +132,9 @@ public class ParallelsOXAuthentication implements AuthenticationService {
 
 
 
-            if ("".equals(gui_loginstring.trim()) || "".equals(gui_password.trim())) {
+            if ("".equals(gui_loginstring.trim()) || "".equals(gui_password.trim()) || Strings.containsSurrogatePairs(gui_loginstring)) {
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
-
 
             LOG.debug("Now trying to resolve ox-username and ox-context...");
 
@@ -247,7 +247,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
         } finally {
 
             // close resultset and statement before releasing connection back to pool
-            DBUtils.closeSQLStuff(rs, prep);
+            Databases.closeSQLStuff(rs, prep);
 
             // return configdb connection back to pool
             Database.back(false, configdb_read);

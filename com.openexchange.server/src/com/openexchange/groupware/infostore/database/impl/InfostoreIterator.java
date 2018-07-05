@@ -61,11 +61,13 @@ import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.FieldChooser;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -74,7 +76,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.sql.DBUtils;
 
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
@@ -219,7 +220,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         }
 
         try {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             provider.releaseReadConnection(ctx, con);
         } finally {
             con = null;
@@ -293,7 +294,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             this.con = con;
         } catch (final SQLException x) {
             if(stmt != null) {
-                DBUtils.closeSQLStuff(null, stmt);
+                Databases.closeSQLStuff(null, stmt);
             }
             if(con != null) {
                 provider.releaseReadConnection(ctx, con);
@@ -303,7 +304,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             this.exception =e;
         } finally {
             if (close) {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
                 provider.releaseReadConnection(ctx, con);
             }
         }
@@ -355,12 +356,20 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                         try {
                             set.setValue(new JSONObject(new AsciiReader(jsonBlobStream)).asMap());
                         } catch (final JSONException e) {
-                            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                            LOG.warn("Failed to read metadata from document {} in folder {}", dm.getId(), dm.getFolderId(), e);
+                            set.setValue(null);
                         } finally {
                             Streams.close(jsonBlobStream);
                         }
                     } else {
                         set.setValue(null);
+                    }
+                } else if (m == Metadata.ORIGIN_LITERAL) {
+                    String sFolderPath = rs.getString(column);
+                    if (rs.wasNull()) {
+                        set.setValue(null);
+                    } else {
+                        set.setValue(InfostoreFolderPath.parseFrom(sFolderPath));
                     }
                 } else {
                     set.setValue(process(m, rs.getObject(column)));

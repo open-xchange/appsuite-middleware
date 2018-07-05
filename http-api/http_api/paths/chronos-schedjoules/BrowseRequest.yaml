@@ -1,0 +1,29 @@
+/chronos/schedjoules?action=browse:
+  get:
+    operationId: browse
+    tags:
+      - Chronos
+    summary: Browses a specific page of the SchedJoules calendars catalog. If no 'id' is provided, then the root page is returned.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: integer
+        description: The identifier of the page.
+        required: false
+      - $ref: "#/parameters/QueryParamChronosSchedJoulesLanguage"
+      - in: query
+        name: country
+        type: string
+        description: |
+          The country/location for which to fetch the available catalog pages from the SchedJoules. If none is provided then 
+          the country of the user's session will be used. If that one is not available then falls back to 'us'. The 'country' 
+          parameter is only used for the root page. Otherwise it has no effect.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing the result of the browse operation. The structure of the returned JSON object can be found
+          here (https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md)
+        schema:
+          $ref: "#/definitions/BrowseResponse"

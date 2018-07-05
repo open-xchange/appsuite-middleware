@@ -50,6 +50,10 @@
 package com.openexchange.importexport.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -58,14 +62,13 @@ import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.server.ServiceLookup;
 
 public class ImportExportServices {
 
-    public static final AtomicReference<ServiceLookup> LOOKUP = new AtomicReference<ServiceLookup>();
+    public static final AtomicReference<ServiceLookup> LOOKUP = new AtomicReference<>();
 
     public static ContactService getContactService() {
         return LOOKUP.get().getService(ContactService.class);
@@ -77,14 +80,6 @@ public class ImportExportServices {
 
     public static ICalParser getIcalParser() {
         return LOOKUP.get().getService(ICalParser.class);
-    }
-
-    public static AppointmentSqlFactoryService getAppointmentFactoryService() {
-        return LOOKUP.get().getService(AppointmentSqlFactoryService.class);
-    }
-
-    public static CalendarCollectionService getCalendarCollectionService() {
-        return LOOKUP.get().getService(CalendarCollectionService.class);
     }
 
     public static ConfigurationService getConfigurationService() {
@@ -106,4 +101,25 @@ public class ImportExportServices {
         }
         return null;
     }
+
+    public static FolderService getFolderService() {
+        return LOOKUP.get().getService(FolderService.class);
+    }
+
+    public static ICalService getICalService() {
+        return LOOKUP.get().getService(ICalService.class);
+    }
+
+    public static IDBasedCalendarAccessFactory getIDBasedCalendarAccessFactory() {
+        return LOOKUP.get().getService(IDBasedCalendarAccessFactory.class);
+    }
+
+    public static CalendarService getCalendarService() {
+        return LOOKUP.get().getService(CalendarService.class);
+    }
+
+    public static CalendarUtilities getCalendarUtilities() {
+        return LOOKUP.get().getService(CalendarUtilities.class);
+    }
+
 }

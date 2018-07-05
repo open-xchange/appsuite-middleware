@@ -49,7 +49,10 @@
 
 package com.openexchange.drive.checksum.rdb;
 
-import static com.openexchange.drive.checksum.rdb.SQL.*;
+import static com.openexchange.drive.checksum.rdb.SQL.escapeFile;
+import static com.openexchange.drive.checksum.rdb.SQL.escapeFolder;
+import static com.openexchange.drive.checksum.rdb.SQL.unescapeFile;
+import static com.openexchange.drive.checksum.rdb.SQL.unescapeFolder;
 import static com.openexchange.java.Strings.reverse;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -62,6 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.impl.checksum.ChecksumStore;
 import com.openexchange.drive.impl.checksum.DirectoryChecksum;
@@ -71,7 +75,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbChecksumStore}
@@ -574,7 +577,7 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(7, fileChecksum.getChecksum());
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -594,7 +597,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -611,7 +614,7 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setInt(7, cid);
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -624,7 +627,7 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(3, escapeFolder(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -638,7 +641,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -652,7 +655,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -667,7 +670,7 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setLong(5, sequence);
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -680,7 +683,7 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(3, escapeFile(file));
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -706,7 +709,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 return null;
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -728,7 +731,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 fileChecksums.add(fileChecksum);
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         return fileChecksums;
     }
@@ -760,7 +763,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 matchingChecksums.add(fileChecksum);
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         return fileChecksums;
     }
@@ -784,7 +787,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -801,7 +804,7 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(7, directoryChecksum.getUuid());
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -815,7 +818,7 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(4, escapeFolder(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -829,7 +832,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -858,7 +861,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 directoryChecksums.add(directoryChecksum);
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         return directoryChecksums;
     }
@@ -874,7 +877,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -898,7 +901,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 directoryChecksums.add(directoryChecksum);
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         return directoryChecksums;
     }
@@ -926,7 +929,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 directoryChecksums.add(directoryChecksum);
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         return directoryChecksums;
     }
@@ -941,7 +944,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

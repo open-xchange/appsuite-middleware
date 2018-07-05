@@ -137,4 +137,9 @@ public class DefaultAPI implements API {
         return builder.toString();
     }
 
+    @Override
+    public String getShortName() {
+        return name;
+    }
+
 }

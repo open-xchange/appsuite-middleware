@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -65,6 +64,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.session.Session;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link CalendarWriter} - Writer for calendar objects
@@ -240,7 +240,7 @@ public abstract class CalendarWriter extends CommonWriter {
         }
         private JSONArray createConfirmationArray(final CalendarObject obj, final Session session) throws JSONException {
             final JSONArray confirmations = new JSONArray();
-            if (obj.containsConfirmations()) {
+            if (obj.containsConfirmations() && null != obj.getConfirmations()) {
                 final ParticipantWriter writer = new ParticipantWriter();
                 for (final ConfirmableParticipant participant : obj.getConfirmations()) {
                     final JSONObject jParticipant = new JSONObject();

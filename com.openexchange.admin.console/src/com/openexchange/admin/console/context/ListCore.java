@@ -104,18 +104,20 @@ public abstract class ListCore extends ContextAbstraction {
             printErrors(null, null, e, parser);
         }
 
-        try {
-            if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(ctxs, parser);
-            } else {
-                sysoutOutput(ctxs, parser);
+        if (null != ctxs) {
+            try {
+                if (null != parser.getOptionValue(this.csvOutputOption)) {
+                    precsvinfos(ctxs, parser);
+                } else {
+                    sysoutOutput(ctxs, parser);
+                }
+            } catch (final InvalidDataException e) {
+                printError(null, null, "Invalid data : " + e.getMessage(), parser);
+                sysexit(1);
+            } catch (final RuntimeException e) {
+                printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
+                sysexit(1);
             }
-        } catch (final InvalidDataException e) {
-            printError(null, null, "Invalid data : " + e.getMessage(), parser);
-            sysexit(1);
-        } catch (final RuntimeException e) {
-            printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-            sysexit(1);
         }
 
         sysexit(0);

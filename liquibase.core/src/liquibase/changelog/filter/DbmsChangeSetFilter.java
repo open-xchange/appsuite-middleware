@@ -1,12 +1,11 @@
 package liquibase.changelog.filter;
 
+import java.util.ArrayList;
+import java.util.List;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.sql.visitor.SqlVisitor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DbmsChangeSetFilter implements ChangeSetFilter {
 

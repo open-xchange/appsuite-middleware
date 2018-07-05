@@ -1,0 +1,380 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.chronos.ical.ical4j;
+
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.java.UnsynchronizedStringReader;
+import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.data.ParserException;
+
+/**
+ * {@link ParserTools}
+ *
+ * copied from com.openexchange.data.conversion.ical.ical4j.ICal4JParser
+ *
+ * @since v7.10.0
+ */
+public class ICal4JParser {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICal4JParser.class);
+
+    public net.fortuna.ical4j.model.Calendar parse(CalendarBuilder builder, InputStream iCalFile) throws IOException, ParserException {
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(iCalFile, Charsets.UTF_8));
+            return parse(builder, reader);
+        } finally {
+            Streams.close(reader);
+        }
+    }
+
+    public net.fortuna.ical4j.model.Calendar parse(CalendarBuilder builder, final BufferedReader reader) throws IOException, ParserException {
+        final StringBuilder chunk = new StringBuilder();
+        boolean read = false;
+        boolean timezoneStarted = false; //hack to fix bug 11958
+        boolean timezoneEnded = false; //hack to fix bug 11958
+        boolean timezoneRead = false; //hack to fix bug 11958
+        final StringBuilder timezoneInfo = new StringBuilder(); //hack to fix bug 11958
+        // Copy until we find an END:VCALENDAR
+        boolean beginFound = false;
+        for (String line; (line = reader.readLine()) != null;) {
+            if(!beginFound && line.endsWith("BEGIN:VCALENDAR")){
+                line = removeByteOrderMarks(line);
+            }
+            if(line.startsWith("BEGIN:VCALENDAR")) {
+                beginFound = true;
+            } else if ( !beginFound && !"".equals(line)) {
+                continue; // ignore bad lines between "VCALENDAR" Tags.
+            }
+            if(!line.startsWith("END:VCALENDAR")){ //hack to fix bug 11958
+                if(line.matches("^\\s*BEGIN:VTIMEZONE")){
+                    timezoneStarted = true;
+                }
+                if(!line.matches("\\s*")) {
+                    read = true;
+                    if(timezoneStarted && !timezoneEnded){ //hack to fix bug 11958
+                        timezoneInfo.append(line).append('\n');
+                    } else {
+                        chunk.append(line).append('\n');
+                    }
+                }
+                if(line.matches("^\\s*END:VTIMEZONE")){ //hack to fix bug 11958
+                    timezoneEnded = true;
+                    timezoneRead = true && timezoneStarted;
+                }
+            } else {
+                break;
+            }
+        }
+        if(!read) {  return null; }
+        chunk.append("END:VCALENDAR\n");
+        if(timezoneRead){
+            int locationForInsertion = chunk.indexOf("BEGIN:");
+            if(locationForInsertion > -1){
+                locationForInsertion = chunk.indexOf("BEGIN:", locationForInsertion + 1);
+                if(locationForInsertion > -1){
+                    chunk.insert(locationForInsertion, timezoneInfo);
+                }
+            }
+        }
+        final UnsynchronizedStringReader chunkedReader = new UnsynchronizedStringReader(
+            workaroundFor19463(
+            workaroundFor16895(
+            workaroundFor16613(
+            workaroundFor16367(
+            workaroundFor17492(
+            workaroundFor17963(
+            workaroundFor20453(
+            workaroundFor27706And28942(
+            workaroundFor29282(
+            workaroundFor30027(
+            removeAnnoyingWhitespaces(chunk.toString()
+            )))))))))))
+        ); // FIXME: Encoding?
+        return builder.build(chunkedReader);
+    }
+
+    private String workaroundFor17963(final String input) {
+        return input.replaceAll("EXDATE:(\\d+)([\\n\\r])", "EXDATE:$1T000000$2");
+    }
+
+    private String workaroundFor17492(final String input) {
+        return input.replaceAll(";SCHEDULE-AGENT=", ";X-CALDAV-SCHEDULE-AGENT=");
+    }
+
+    private String workaroundFor19463(final String input) {
+        return input
+            .replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$1")
+            .replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)",   "TZOFFSETTO:+$1")
+            ;
+    }
+
+    private String workaroundFor20453(final String input) {
+        return input
+            .replaceAll("DTEND;\\s*\n", "")
+            ;
+    }
+
+    private String workaroundFor29282(final String input) {
+        return input.replaceAll("0000([0-9]{4}T[0-9]{6}Z)", "1970$1");
+    }
+
+    private String workaroundFor27706And28942(final String input) {
+        Matcher m = Pattern.compile("DTSTAMP;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(input);
+        final StringBuffer sb = new StringBuffer(input.length());
+        while (m.find()) {
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("DTSTAMP:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+        m.appendTail(sb);
+
+        // -------------------------------------------------------------------------------------------------- //
+
+        m = Pattern.compile("COMPLETED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
+        while (m.find()) {
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("COMPLETED:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+        m.appendTail(sb);
+
+        // -------------------------------------------------------------------------------------------------- //
+
+        m = Pattern.compile("LAST-MODIFIED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
+        while (m.find()) {
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("LAST-MODIFIED:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+        m.appendTail(sb);
+
+        // -------------------------------------------------------------------------------------------------- //
+
+        m = Pattern.compile("CREATED;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
+        while (m.find()) {
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("CREATED:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+        m.appendTail(sb);
+
+        // -------------------------------------------------------------------------------------------------- //
+
+        m = Pattern.compile("TRIGGER;TZID=([^:]+):\\s*([0-9]{8}T[0-9]{6})").matcher(sb.toString());
+        sb.setLength(0);
+        while (m.find()) {
+            final TimeZone tz = getTimeZone(m.group(1));
+            m.appendReplacement(sb, Strings.quoteReplacement("TRIGGER:" + getUtcPropertyFrom(m.group(2), tz)));
+        }
+        m.appendTail(sb);
+
+        return sb.toString();
+    }
+
+    private static final SimpleDateFormat UTC_PROPERTY;
+
+    static {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+        sdf.setTimeZone(getTimeZone("UTC"));
+        UTC_PROPERTY = sdf;
+    }
+
+    private String getUtcPropertyFrom(final String s, final TimeZone tz) {
+        try {
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+            sdf.setTimeZone(tz);
+            final Date d = sdf.parse(s);
+            synchronized (UTC_PROPERTY) {
+                return UTC_PROPERTY.format(d);
+            }
+        } catch (final ParseException e) {
+            return s;
+        }
+    }
+
+    private String workaroundFor30027(final String input) {
+        final Matcher m = Pattern.compile(":\\s{2,}([0-9]{8}T[0-9]{6}Z?)[ \\t]*").matcher(input);
+        final StringBuffer sb = new StringBuffer(input.length());
+        while (m.find()) {
+            m.appendReplacement(sb, ": $1");
+        }
+        m.appendTail(sb);
+
+        return sb.toString();
+    }
+
+    /**
+     * Method written out of laziness: Because you can spread iCal attributes
+     * over several lines with newlines followed by a white space while a normal
+     * newline means a new attribute starts, one would need to parse the whole file
+     * (with a lookahead) before fixing errors. That means no regular expressions
+     * allowed. Since spreading just makes it nicer to read for humans, this method
+     * strips those newline+whitespace elements so we can use simple regexps.
+     */
+    private String removeAnnoyingWhitespaces(final String input) {
+        /*
+         * [http://www.ietf.org/rfc/rfc2445.txt]
+         *
+         * Long content lines SHOULD be split into a multiple line
+         * representations using a line "folding" technique. That is, a long
+         * line can be split between any two characters by inserting a CRLF
+         * immediately followed by a single linear white space character (i.e.,
+         * SPACE, US-ASCII decimal 32 or HTAB, US-ASCII decimal 9). Any sequence
+         * of CRLF followed immediately by a single linear white space character
+         * is ignored (i.e., removed) when processing the content type.
+         */
+        return input.replaceAll("(?:\\r\\n?|\\n)[ \t]", "");
+    }
+
+    private String workaroundFor16895(final String input) {
+        /* Bug in Zimbra: They like to use an EMAIL element for the
+         * ATTENDEE property, though there is none.
+         */
+        return input.replaceAll("ATTENDEE([^\n]*?);EMAIL=", "ATTENDEE$1;X-ZIMBRA-EMAIL=");
+    }
+
+    private String workaroundFor16367(final String input) {
+        /* Bug in MS Exchange: If you use a CN element, it must have a value.
+         * MS Exchange has an empty value, which we now replace properly.
+         */
+        return input.replaceAll("CN=:", "CN=\"\":");
+    }
+
+    private String workaroundFor16613(final String input) {
+        /*
+         * Bug in Groupwise: There is no attribute ID for ATTACH. Experimental
+         * ones are allowed, but they would start with X-GW for Groupwise.
+         * We ignore those.
+         */
+        return input.replaceAll("\nATTACH(.*?);ID=(.+?)([:;])" , "\nATTACH$1$3");
+    }
+
+    private String removeByteOrderMarks(String line){
+        char[] buf = line.toCharArray();
+        int length = buf.length;
+
+        final char first = buf[0];
+        if(length > 3) {
+            if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
+                if(Character.getType(first) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
+                    return new String(Arrays.copyOfRange(buf, 3, length));
+                }
+                if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
+                    return new String(Arrays.copyOfRange(buf, 3, length));
+                }
+            }
+        }
+        if(length > 1) {
+            if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0) {
+                if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28) {
+                    return new String(Arrays.copyOfRange(buf, 2, length));
+                }
+            }
+        }
+        if(length > 0) {
+            if(Character.getNumericValue(first) < 0) {
+                if(Character.getType(first) == 16) {
+                    return new String(Arrays.copyOfRange(buf, 1, length));
+                }
+            }
+        }
+        return line;
+    }
+
+    private String composeErrorMessage(Exception e, String ical) {
+        final StringBuilder sb = new StringBuilder(ical.length() + 256);
+        sb.append("Parsing of iCal content failed: ");
+        sb.append(e.getMessage());
+        if (LOG.isDebugEnabled()) {
+            sb.append(". Affected iCal content:").append('\n');
+            dumpIcal(ical, sb);
+        }
+        return sb.toString();
+    }
+
+    private void dumpIcal(String ical, StringBuilder sb) {
+        String[] lines = Strings.splitByCRLF(ical);
+        DecimalFormat df = new DecimalFormat("0000");
+        int count = 1;
+        for (final String line : lines) {
+            sb.append(df.format(count++)).append(' ').append(line).append('\n');
+        }
+        OutputStreamWriter writer = null;
+        try {
+            File file = File.createTempFile("parsefailed", ".ics", new File(System.getProperty("java.io.tmpdir")));
+            writer = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8);
+            writer.write(ical);
+            writer.flush();
+        } catch (IOException e) {
+            LOG.error("Problem writing not parsable iCal to tmp directory.", e);
+        } finally {
+            Streams.close(writer);
+        }
+    }
+
+}

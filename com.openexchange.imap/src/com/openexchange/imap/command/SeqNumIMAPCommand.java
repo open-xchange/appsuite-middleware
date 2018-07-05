@@ -49,13 +49,13 @@
 
 package com.openexchange.imap.command;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import javax.mail.MessagingException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.UID;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link SeqNumIMAPCommand}

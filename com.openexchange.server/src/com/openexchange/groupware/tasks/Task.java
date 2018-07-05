@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.tasks.mapping.Alarm;
+import com.openexchange.groupware.tasks.mapping.Participants;
 
 /**
  * This class defines the data container for tasks.
@@ -537,6 +538,7 @@ public class Task extends CalendarObject {
     private static Collection<Mapper<?>> ALL_MAPPERS = new ArrayList<Mapper<?>>(Mapping.getAllFieldMappers());
     static {
         ALL_MAPPERS.add(new Alarm());
+        ALL_MAPPERS.add(new Participants());
     }
 
     private static Map<Integer, Mapper<?>> MAPPER_LOOKUP = new HashMap<Integer, Mapper<?>>();

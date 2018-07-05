@@ -50,12 +50,16 @@
 package com.openexchange.config.cascade.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
@@ -73,71 +77,129 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class ConfigCascade implements ConfigViewFactory {
 
-    ConcurrentHashMap<String, ConfigProviderService> providers = new ConcurrentHashMap<String, ConfigProviderService>();
+    private static final class SearchPath {
 
-    String[] searchPath = null;
+        private final ConcurrentMap<String, ConfigProviderService> providers;
+        private final AtomicReference<String[]> searchPath;
+        private final AtomicReference<List<ConfigProviderService>> path;
 
-    private List<ConfigProviderService> path;
+        SearchPath(ConcurrentMap<String, ConfigProviderService> providers) {
+            super();
+            this.providers = providers;
+            searchPath = new AtomicReference<String[]>(null);
+            List<ConfigProviderService> path = Collections.emptyList();
+            this.path = new AtomicReference<List<ConfigProviderService>>(path);
+        }
 
-    StringParser stringParser;
+        void setSearchPath(String... searchPath) {
+            this.searchPath.set(searchPath);
+            this.path.set(null); // Enforce re-initialization
+        }
+
+        String[] getSearchPath() {
+            return searchPath.get();
+        }
+
+        List<ConfigProviderService> getConfigProviders() {
+            List<ConfigProviderService> path = this.path.get();
+            if (null == path) {
+                synchronized (this) {
+                    path = this.path.get();
+                    if (null == path) {
+                        path = computePathFrom(searchPath.get(), providers);
+                        this.path.set(path);
+                    }
+                }
+            }
+            return path;
+        }
+
+        private List<ConfigProviderService> computePathFrom(String[] searchPath, ConcurrentMap<String, ConfigProviderService> providers) {
+            if (null == searchPath) {
+                return Collections.emptyList();
+            }
+
+            ImmutableList.Builder<ConfigProviderService> p = ImmutableList.builder();
+            for (String scope : searchPath) {
+                ConfigProviderService configProvider = providers.get(scope);
+                if (null == configProvider) {
+                    throw new IllegalStateException("No such config provider for scope: " + scope);
+                }
+                p.add(configProvider);
+            }
+            return p.build();
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------
+
+    final ConcurrentMap<String, ConfigProviderService> providers;
+    final SearchPath searchPath;
+    final AtomicReference<StringParser> stringParser;
+
+    /**
+     * Initializes a new {@link ConfigCascade}.
+     */
+    public ConfigCascade() {
+        super();
+        ConcurrentMap<String, ConfigProviderService> providers = new ConcurrentHashMap<String, ConfigProviderService>(8, 0.9F, 1);
+        this.providers = providers;
+        searchPath = new SearchPath(providers);
+        stringParser = new AtomicReference<StringParser>(null);
+    }
 
     public void setProvider(final String scope, final ConfigProviderService configProvider) {
         providers.put(scope, configProvider);
     }
 
     @Override
-    public ConfigView getView(final int user, final int context) {
-        if (user <= 0) {
-            if (context <= 0) {
-                return getView();
-            }
-            return new View(-1, context);
-        }
-        return new View(user, context);
+    public ConfigView getView(int userId, int contextId) {
+        int user = userId <= 0 ? -1 : userId;
+        int context = contextId <= 0 ? -1 : contextId;
+        return new View(user, context, providers, searchPath.getSearchPath(), getConfigProviders(), stringParser.get());
     }
 
     @Override
     public ConfigView getView() {
-        return new View(-1, -1);
+        return new View(-1, -1, providers, searchPath.getSearchPath(), getConfigProviders(), stringParser.get());
     }
 
     public void setSearchPath(final String... searchPath) {
-        this.searchPath = searchPath;
-        this.path = null;
+        this.searchPath.setSearchPath(searchPath);
     }
 
     @Override
     public String[] getSearchPath() {
-        return searchPath;
+        return searchPath.getSearchPath();
     }
 
     protected List<ConfigProviderService> getConfigProviders() {
-        if (path != null) {
-            return path;
-        }
-
-        final List<ConfigProviderService> p = new ArrayList<ConfigProviderService>();
-        if (null != searchPath) {
-            for (final String scope : searchPath) {
-                p.add(providers.get(scope));
-            }
-        }
-        return path = p;
+        return searchPath.getConfigProviders();
     }
 
     public void setStringParser(final StringParser stringParser) {
-        this.stringParser = stringParser;
+        this.stringParser.set(stringParser);
     }
 
-    private final class View implements ConfigView {
+    // ------------------------------------------------------------------------------------------
+
+    private static final class View implements ConfigView {
 
         final int context;
         final int user;
+        final String[] searchPath;
+        final ConcurrentMap<String, ConfigProviderService> providers;
+        final StringParser stringParser;
+        final List<ConfigProviderService> configProviders;
 
-        View(int user, int context) {
+        View(int user, int context, ConcurrentMap<String, ConfigProviderService> providers, String[] searchPath, List<ConfigProviderService> configProviders, StringParser stringParser) {
             super();
             this.user = user;
             this.context = context;
+            this.providers = providers;
+            this.searchPath = searchPath;
+            this.configProviders = configProviders;
+            this.stringParser = stringParser;
         }
 
         @Override
@@ -165,7 +227,7 @@ public class ConfigCascade implements ConfigViewFactory {
         public <T> ComposedConfigProperty<T> property(final String property, final Class<T> coerceTo) {
             return new CoercingComposedConfigProperty<T>(coerceTo, new ComposedConfigProperty<String>() {
 
-                private String[] overriddenStrings;
+                private final AtomicReference<String[]> overriddenStrings = new AtomicReference<String[]>(null);
 
                 @Override
                 public String get() throws OXException {
@@ -246,12 +308,13 @@ public class ConfigCascade implements ConfigViewFactory {
 
                 @Override
                 public ComposedConfigProperty<String> precedence(final String... scopes) throws OXException {
-                    overriddenStrings = scopes;
+                    overriddenStrings.set(scopes);
                     return this;
                 }
 
                 private List<ConfigProviderService> getConfigProviders(final String finalScope) {
-                    final String[] s = (overriddenStrings != null) ? overriddenStrings : searchPath;
+                    String[] overriddenStrings = this.overriddenStrings.get();
+                    final String[] s = (overriddenStrings == null) ? searchPath : overriddenStrings;
 
                     final List<ConfigProviderService> p = new ArrayList<ConfigProviderService>();
                     boolean collect = false;
@@ -289,7 +352,7 @@ public class ConfigCascade implements ConfigViewFactory {
         @Override
         public Map<String, ComposedConfigProperty<String>> all() throws OXException {
             final Set<String> names = new HashSet<String>();
-            for (final ConfigProviderService provider : getConfigProviders()) {
+            for (final ConfigProviderService provider : configProviders) {
                 names.addAll(provider.getAllPropertyNames(context, user));
             }
 

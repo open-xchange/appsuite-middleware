@@ -49,7 +49,8 @@
 
 package com.openexchange.tools.webdav;
 
-import static com.openexchange.tools.servlet.http.Tools.*;
+import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
+import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -106,7 +107,7 @@ public abstract class OXServlet extends WebDavServlet {
     /**
      * Simple {@link LoginRequest} implementation.
      */
-    private static final class LoginRequestImpl implements LoginRequest {
+    protected static final class LoginRequestImpl implements LoginRequest {
 
         private final String login;
         private final HttpServletRequest req;
@@ -118,14 +119,19 @@ public abstract class OXServlet extends WebDavServlet {
         private final String version;
 
         public LoginRequestImpl(final String login, final String pass, final Interface interfaze, final HttpServletRequest req) {
+            this(req, login, pass, interfaze, AJAXUtility.sanitizeParam(req.getParameter(LoginFields.CLIENT_PARAM)), 
+                AJAXUtility.sanitizeParam(req.getParameter(LoginFields.VERSION_PARAM)), AJAXUtility.sanitizeParam(req.getParameter("agent")));
+        }
+
+        public LoginRequestImpl(HttpServletRequest request, String login, String password, Interface interfaze, String client, String version, String userAgent) {
             super();
-            this.client = AJAXUtility.sanitizeParam(req.getParameter(LoginFields.CLIENT_PARAM));
-            version = AJAXUtility.sanitizeParam(req.getParameter(LoginFields.VERSION_PARAM));
-            userAgent = AJAXUtility.sanitizeParam(req.getParameter("agent"));
             this.login = login;
-            this.req = req;
-            this.pass = pass;
+            this.pass = password;
             this.interfaze = interfaze;
+            this.client = client;
+            this.version = version;
+            this.userAgent = userAgent;
+            this.req = request;
         }
 
         @Override
@@ -320,10 +326,6 @@ public abstract class OXServlet extends WebDavServlet {
         }
     }
 
-    protected LoginCustomizer getLoginCustomizer() {
-        return null;
-    }
-
     /**
      * Tries to authenticate the user via any of the supported HTTP auth schemes.
      *
@@ -418,20 +420,19 @@ public abstract class OXServlet extends WebDavServlet {
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return null;
             }
-
-            return performWebDAVLogin(new LoginRequestImpl(creds.getLogin(), creds.getPassword(), getInterface(), req), req, resp);
+            LoginRequest loginRequest = parseLoginRequest(creds, req);
+            return performWebDAVLogin(loginRequest, req, resp);
         } catch (OXException e) {
             handleFailedWebDAVLogin(e, req, resp);
             return null;
         }
     }
 
-    private Session performWebDAVLogin(LoginRequest loginRequest, HttpServletRequest req, HttpServletResponse resp) throws OXException {
-        LoginCustomizer customizer = getLoginCustomizer();
-        if (customizer != null) {
-            loginRequest = customizer.modifyLogin(loginRequest);
-        }
+    protected LoginRequest parseLoginRequest(Credentials credentials, HttpServletRequest request) {
+        return new LoginRequestImpl(credentials.getLogin(), credentials.getPassword(), getInterface(), request);
+    }
 
+    private Session performWebDAVLogin(LoginRequest loginRequest, HttpServletRequest req, HttpServletResponse resp) throws OXException {
         if (false == useCookies()) {
             /*
              * try to get session indirectly from store

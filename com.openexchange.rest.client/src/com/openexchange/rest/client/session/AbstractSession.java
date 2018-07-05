@@ -50,10 +50,6 @@
 package com.openexchange.rest.client.session;
 
 import java.util.concurrent.atomic.AtomicReference;
-import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
-import oauth.signpost.exception.OAuthCommunicationException;
-import oauth.signpost.exception.OAuthExpectationFailedException;
-import oauth.signpost.exception.OAuthMessageSignerException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -64,6 +60,10 @@ import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.session.pair.AccessTokenPair;
 import com.openexchange.rest.client.session.pair.AppKeyPair;
 import com.openexchange.rest.client.session.pair.ConsumerPair;
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
+import oauth.signpost.exception.OAuthMessageSignerException;
 
 /**
  * {@link AbstractSession}
@@ -203,7 +203,7 @@ public abstract class AbstractSession implements Session {
 
     @Override
     public void setRequestTimeout(HttpUriRequest request) {
-        HttpClients.setDefaultRequestTimeout(request);
+        HttpClients.setDefaultRequestTimeout((HttpRequestBase) request);
     }
 
     /**

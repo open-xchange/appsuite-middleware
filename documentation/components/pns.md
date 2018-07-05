@@ -15,7 +15,7 @@ Although designed to fit a general purpose approach, at first routing "new mail"
 2. Install the "open-xchange-pns-impl" as well as "open-xchange-pns-transport-websockets" package
 3. Enable the `com.openexchange.pns.transport.websocket.enabled` property.
    That property is responsive to [config-cascade](http://oxpedia.org/wiki/index.php?title=ConfigCascade). Hence it can be specified for user, context, context-set or server scope.
-   For instance, create file `pns.properties` in Open-Xchange configuration directory (`/opt/open-xchange/etc`) and add line `com.openexchange.pns.transport.websocket.enabled=true=true` to globally enable Push via Web Sockets
+   For instance, create file `pns.properties` in Open-Xchange configuration directory (`/opt/open-xchange/etc`) and add line `com.openexchange.pns.transport.websocket.enabled=true` to globally enable Push via Web Sockets
 
 ## Configuration
 
@@ -23,16 +23,16 @@ Although designed to fit a general purpose approach, at first routing "new mail"
 
 The following settings control buffering and queueing as well as processing of push notification messages that are supposed to be transported via a concrete channel (Web Sockets, APNS, GCM, etc.)
 
-* [com.openexchange.pns.delayDuration](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.delayDuration)  
+* [com.openexchange.pns.delayDuration](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.delayDuration)  
  The time in milliseconds a notification is queued in buffer to possible aggregate with similar notifications that arrive during that time.  
  Default is 1000 milliseconds.
-* [com.openexchange.pns.timerFrequency](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.timerFrequency)  
+* [com.openexchange.pns.timerFrequency](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.timerFrequency)  
  The frequency/delay in milliseconds when the buffering queue will be checked for due notifications (the ones exceeding delayDuration in queue).  
  Default is 500 milliseconds.
-* [com.openexchange.pns.numProcessorThreads](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.numProcessorThreads)  
+* [com.openexchange.pns.numProcessorThreads](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.numProcessorThreads)  
  Specifies the number of threads that concurrently handle due notifications that were transferred from buffering queue to processing queue.  
  Default is 10.
-* [com.openexchange.pns.maxProcessorTasks](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.maxProcessorTasks)  
+* [com.openexchange.pns.maxProcessorTasks](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.maxProcessorTasks)  
  Specifies the buffer size for due notifications that were transferred from buffering queue to processing queue.  
  Default is 65536.
 
@@ -40,7 +40,7 @@ The following settings control buffering and queueing as well as processing of p
 
 The following setting controls whether a push notification message is allowed to be transported to associated user using Web Socket transport
 
-* [com.openexchange.pns.transport.websocket.enabled](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.websocket.enabled)  
+* [com.openexchange.pns.transport.websocket.enabled](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.websocket.enabled)  
  Specifies whether the Web Socket transport is enabled. That property is responsive to config-cascade and reloadable as well.
 
 Moreover, an even finer-grained decision is possible to be configured as a certain transport is checked for availability providing user, context, client and topic.
@@ -59,7 +59,7 @@ via Web Socket, but not for "new appointment".
 
 The following setting controls whether a push notification message is allowed to be transported to associated user using APNS transport
 
-* [com.openexchange.pns.transport.apn.ios.enabled](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.apn.ios.enabled)  
+* [com.openexchange.pns.transport.apn.ios.enabled](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.apn.ios.enabled)  
  Specifies whether the APNS transport is enabled. That property is responsive to config-cascade and reloadable as well.
 
 Moreover, an even finer-grained decision is possible to be configured as a certain transport is checked for availability providing user, context, client and topic.
@@ -73,7 +73,7 @@ com.openexchange.pns.transport.apn.ios.enabled.open-xchange-appsuite.ox:calendar
 ```
 That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
 via APNS, but not for "new appointment".
-* [com.openexchange.pns.transport.apn.ios.feedbackQueryInterval](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.apn.ios.feedbackQueryInterval)  
+* [com.openexchange.pns.transport.apn.ios.feedbackQueryInterval](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.apn.ios.feedbackQueryInterval)  
  Specifies the frequency in milliseconds when to query the Apple feedback service to check for expired and/or invalid tokens.  
  Default is 3600000 (1 hour).
 
@@ -104,7 +104,7 @@ In this example, ``myiosclient`` is the identifier of the client, to which the p
 
 The following setting controls whether a push notification message is allowed to be transported to associated user using GCM transport
 
-* [com.openexchange.pns.transport.gcm.enabled](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.gcm.enabled)  
+* [com.openexchange.pns.transport.gcm.enabled](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.gcm.enabled)  
  Specifies whether the GCM transport is enabled. That property is responsive to config-cascade and reloadable as well.
 
 Moreover, an even finer-grained decision is possible to be configured as a certain transport is checked for availability providing user, context, client and topic.
@@ -140,7 +140,7 @@ In this example, ``mygoogleclient`` is the identifier of the client, to which th
 
 The following setting controls whether a push notification message is allowed to be transported to associated user using WNS transport
 
-* [com.openexchange.pns.transport.wns.enabled](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.wns.enabled)  
+* [com.openexchange.pns.transport.wns.enabled](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.pns.transport.wns.enabled)  
  Specifies whether the WNS transport is enabled. That property is responsive to config-cascade and reloadable as well.<br><br>
 
 Moreover, an even finer-grained decision is possible to be configured as a certain transport is checked for availability providing user, context, client and topic.

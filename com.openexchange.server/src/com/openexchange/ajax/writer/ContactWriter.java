@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -69,6 +67,8 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link ContactWriter} - The writer for contacts

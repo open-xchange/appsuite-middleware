@@ -125,6 +125,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
     public void setText(final String mailBody) {
         if (null == mailBody) {
             this.mailBody = null;
+            return;
         }
         if (null == this.mailBody) {
             this.mailBody = new StringBuilder(mailBody);

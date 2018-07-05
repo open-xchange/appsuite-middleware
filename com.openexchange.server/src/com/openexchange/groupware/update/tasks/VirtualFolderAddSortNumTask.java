@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.update.Tools.columnExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

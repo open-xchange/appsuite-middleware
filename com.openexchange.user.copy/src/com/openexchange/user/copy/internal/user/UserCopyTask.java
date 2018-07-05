@@ -64,7 +64,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -209,7 +208,7 @@ public class UserCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

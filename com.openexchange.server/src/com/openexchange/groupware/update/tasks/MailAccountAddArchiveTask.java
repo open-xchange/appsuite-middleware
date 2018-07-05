@@ -49,13 +49,12 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.update.Tools.columnExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -87,13 +86,13 @@ public final class MailAccountAddArchiveTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
         PreparedStatement stmt = null;
         boolean doRollback = false;
         try {
             Databases.startTransaction(con);
             doRollback = true;
+
             if (!columnExists(con, "user_mail_account", "archive")) {
                 stmt = con.prepareStatement("ALTER TABLE user_mail_account ADD COLUMN archive VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT ''");
                 stmt.executeUpdate();
@@ -106,6 +105,7 @@ public final class MailAccountAddArchiveTask extends UpdateTaskAdapter {
                 stmt.close();
                 stmt = null;
             }
+
             con.commit();
             doRollback = false;
         } catch (final SQLException e) {
@@ -115,7 +115,6 @@ public final class MailAccountAddArchiveTask extends UpdateTaskAdapter {
                 Databases.rollback(con);
             }
             closeSQLStuff(stmt);
-            Database.backNoTimeout(contextId, true, con);
         }
     }
 }

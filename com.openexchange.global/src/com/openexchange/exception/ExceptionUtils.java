@@ -53,6 +53,7 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -259,6 +260,28 @@ public class ExceptionUtils {
      */
     public static boolean isEitherOf(Throwable e, Class<? extends Exception>... classes) {
         if (null == e || null == classes || 0 == classes.length) {
+            return false;
+        }
+
+        for (Class<? extends Exception> clazz : classes) {
+            if (clazz.isInstance(e)) {
+                return true;
+            }
+        }
+
+        Throwable next = e.getCause();
+        return null == next ? false : isEitherOf(next, classes);
+    }
+
+    /**
+     * Checks if any of specified exception (classes) occurs in exception chain of given {@link Throwable} instance.
+     *
+     * @param e The {@link Throwable} instance whose exception chain is supposed to be checked
+     * @param classes The exception classes
+     * @return <code>true</code> if any of specified exception (classes) occurs in exception chain; otherwise <code>false</code>
+     */
+    public static boolean isEitherOf(Throwable e, Collection<Class<? extends Exception>> classes) {
+        if (null == e || null == classes || classes.isEmpty()) {
             return false;
         }
 

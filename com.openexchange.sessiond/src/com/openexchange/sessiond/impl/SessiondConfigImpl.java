@@ -52,9 +52,10 @@ package com.openexchange.sessiond.impl;
 import static com.openexchange.sessiond.SessiondProperty.SESSIOND_AUTOLOGIN;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
 
 /**
- * {@link SessiondConfigImpl} - The default {@link SessiondConfigInterface} implementation.
+ * {@link SessiondConfigImpl} - The default {@link UserTypeSessiondConfigInterface} implementation.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -67,7 +68,6 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private static final long LONG_CONTAINER_LIFE_TIME = 60L * 60L * 1000L; // 1 hour
 
     private int maxSession = 50000;
-    private int maxSessionsPerUser = 100;
     private int maxSessionsPerClient = 0;
     private long sessionShortLifeTime = 60L * 60L * 1000L;
     private long randomTokenTimeout = 30000L;
@@ -85,9 +85,6 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         super();
         maxSession = conf.getIntProperty("com.openexchange.sessiond.maxSession", maxSession);
         LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession={}", maxSession);
-
-        maxSessionsPerUser = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerUser", maxSessionsPerUser);
-        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerUser={}", maxSessionsPerUser);
 
         maxSessionsPerClient = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerClient", maxSessionsPerClient);
         LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerClient={}", maxSessionsPerClient);
@@ -141,11 +138,6 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     }
 
     @Override
-    public int getMaxSessionsPerUser() {
-        return maxSessionsPerUser;
-    }
-
-    @Override
     public int getMaxSessionsPerClient() {
         return maxSessionsPerClient;
     }
@@ -185,5 +177,4 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     public String getObfuscationKey() {
         return obfuscationKey;
     }
-
 }

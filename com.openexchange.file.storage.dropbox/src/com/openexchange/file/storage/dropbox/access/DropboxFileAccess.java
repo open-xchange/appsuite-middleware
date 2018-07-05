@@ -101,8 +101,8 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.groupware.results.Delta;
@@ -201,7 +201,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return dropboxFile;
         } catch (GetMetadataErrorException e) {
-            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, id);
+            throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId == null ? "" : folderId, id);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
@@ -283,15 +283,15 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
         checkFolderExistence(destFolder);
         String path = toPath(source.getFolder(), source.getId());
-        String destName = null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId();
+        NameBuilder destName = NameBuilder.nameBuilderFor(null != update && null != modifiedFields && modifiedFields.contains(Field.FILENAME) ? update.getFileName() : source.getId());
 
         // Ensure filename uniqueness in target folder
-        for (int i = 1; exists(destFolder, destName, CURRENT_VERSION); i++) {
-            destName = FileStorageUtility.enhance(destName, i);
+        while (exists(destFolder, destName.toString(), CURRENT_VERSION)) {
+            destName.advance();
         }
 
         try {
-            String destPath = toPath(destFolder, destName);
+            String destPath = toPath(destFolder, destName.toString());
 
             // Copy
             Metadata metadata = client.files().copy(path, destPath);
@@ -421,7 +421,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException {
         try {
-            final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
+            final List<IDTuple> ret = new ArrayList<>(ids.size());
             for (IDTuple id : ids) {
                 String path = toPath(id.getFolder(), id.getId());
                 try {
@@ -494,7 +494,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             ListFolderResult listFolder = client.files().listFolder(folderId);
             Iterator<Metadata> iterator = listFolder.getEntries().iterator();
-            final List<File> files = new ArrayList<File>(listFolder.getEntries().size());
+            final List<File> files = new ArrayList<>(listFolder.getEntries().size());
             while (iterator.hasNext()) {
                 Metadata next = iterator.next();
                 if (next instanceof FileMetadata) {
@@ -615,7 +615,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
         // Range (if needed)
         results = range(results, start, end);
-        return new SearchIteratorAdapter<File>(results.iterator(), results.size());
+        return new SearchIteratorAdapter<>(results.iterator(), results.size());
     }
 
     /*
@@ -792,15 +792,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
         }
 
-        long fileSize = file.getFileSize();
-        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data) : singleUpload(file, data);
+        DropboxFile dbxFile = initiateUpload(file, data);
         file.copyFrom(dbxFile, copyFields);
         return dbxFile.getIDTuple();
     }
 
-    private void checkFolderExistence(String folderId) throws OXException{
+    private void checkFolderExistence(String folderId) throws OXException {
         try {
-            if(Strings.isEmpty(folderId) || folderId.equals("/")){
+            if (Strings.isEmpty(folderId) || folderId.equals("/")) {
                 return; // The root folder is always present
             }
             getFolderMetadata(folderId);
@@ -816,48 +815,30 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     /**
-     * Uploads the specified file in chunks
+     * Initiates the file upload and decides whether to do a single upload or a chunk-wise upload.
      *
      * @param file The {@link File} to upload
      * @param data The {@link InputStream} containing the actual data
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException If an error is occurred
      */
-    private DropboxFile sessionUpload(File file, InputStream data) throws OXException {
+    private DropboxFile initiateUpload(File file, InputStream data) throws OXException {
+        if (data instanceof SizeKnowingInputStream) {
+            try {
+                long length = ((SizeKnowingInputStream) data).getSize();
+                return length > CHUNK_SIZE ? doSessionUploadUsing(file, data, length) : singleUpload(file, data);
+            } finally {
+                Streams.close(data);
+            }
+        }
+
+        // Otherwise we need to flush the stream to an instance of ThresholdFileHolder to know its size precisely
         ThresholdFileHolder sink = null;
         try {
             sink = new ThresholdFileHolder();
             sink.write(data);
-
-            // Work with local stream
-            InputStream stream = sink.getStream();
-
-            // Start an upload session and get the session id
-            UploadSessionStartUploader uploadSession = client.files().uploadSessionStart();
-            UploadSessionStartResult result = uploadSession.uploadAndFinish(stream, CHUNK_SIZE);
-            String sessionId = result.getSessionId();
-            long offset = CHUNK_SIZE;
-
-            // Start uploading chunks of data
-            UploadSessionCursor cursor = new UploadSessionCursor(sessionId, offset);
-            while (sink.getCount() - offset > CHUNK_SIZE) {
-                client.files().uploadSessionAppendV2(cursor).uploadAndFinish(stream, CHUNK_SIZE);
-                offset += CHUNK_SIZE;
-                cursor = new UploadSessionCursor(sessionId, offset);
-            }
-
-            // Upload the remaining chunk
-            long remaining = sink.getCount() - offset;
-            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.OVERWRITE, false, file.getLastModified(), false);
-            UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
-            FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
-
-            // Return
-            return new DropboxFile(metadata, userId);
-        } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            long length = sink.getCount();
+            return length > CHUNK_SIZE ? doSessionUploadUsing(file, sink.getStream(), length) : singleUpload(file, sink.getStream());
         } finally {
             Streams.close(sink);
         }
@@ -873,9 +854,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     private DropboxFile singleUpload(File file, InputStream data) throws OXException {
         String name = file.getFileName();
-        if(name==null){
+        if (name == null) {
             name = file.getId();
         }
+
         String path = new StringBuilder(file.getFolderId()).append('/').append(name).toString();
         try {
             UploadBuilder builder = client.files().uploadBuilder(path).withMode(WriteMode.OVERWRITE).withAutorename(false);
@@ -891,17 +873,57 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     /**
+     * Uploads the specified file chunk-wise
+     *
+     * @param file The {@link File} to upload
+     * @param stream The {@link InputStream} containing the actual data
+     * @param length The length of the data
+     * @return The {@link IDTuple} of the uploaded file
+     * @throws OXException if an error is occurred
+     */
+    private DropboxFile doSessionUploadUsing(File file, InputStream stream, long length) throws OXException {
+        try {
+            // Start an upload session and get the session id
+            UploadSessionStartUploader uploadSession = client.files().uploadSessionStart();
+            UploadSessionStartResult result = uploadSession.uploadAndFinish(stream, CHUNK_SIZE);
+            String sessionId = result.getSessionId();
+            long offset = CHUNK_SIZE;
+
+            // Start uploading chunks of data
+            UploadSessionCursor cursor = new UploadSessionCursor(sessionId, offset);
+            while (length - offset > CHUNK_SIZE) {
+                client.files().uploadSessionAppendV2(cursor).uploadAndFinish(stream, CHUNK_SIZE);
+                offset += CHUNK_SIZE;
+                cursor = new UploadSessionCursor(sessionId, offset);
+            }
+
+            // Upload the remaining chunk
+            long remaining = length - offset;
+            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.OVERWRITE, false, file.getLastModified(), false);
+            UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
+            FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
+
+            // Return
+            return new DropboxFile(metadata, userId);
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+        } catch (IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
      * Maps the file identifiers of the supplied ID tuples to their parent folder identifiers.
      *
      * @param ids The ID tuples to map
      * @return The mapped identifiers
      */
     private Map<String, List<String>> getFilesPerFolder(List<IDTuple> ids) {
-        Map<String, List<String>> filesPerFolder = new HashMap<String, List<String>>();
+        Map<String, List<String>> filesPerFolder = new HashMap<>();
         for (IDTuple id : ids) {
             List<String> files = filesPerFolder.get(id.getFolder());
             if (null == files) {
-                files = new ArrayList<String>();
+                files = new ArrayList<>();
                 filesPerFolder.put(id.getFolder(), files);
             }
             files.add(id.getId());
@@ -946,7 +968,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @throws DbxException if a generic Dropbox error is occurred
      */
     private List<File> getAllFiles(String folderId, boolean recursive) throws ListFolderErrorException, DbxException {
-        List<File> results = new ArrayList<File>();
+        List<File> results = new ArrayList<>();
         ListFolderResult listFolderResult = client.files().listFolderBuilder(folderId).withRecursive(recursive).start();
         boolean hasMore = false;
         do {
@@ -980,7 +1002,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     private List<File> fireSearch(String folderId, String pattern, boolean includeSubfolders) throws SearchErrorException, DbxException {
         SearchResult searchResult = client.files().searchBuilder(folderId, pattern).start();
 
-        List<File> results = new ArrayList<File>();
+        List<File> results = new ArrayList<>();
         boolean hasMore = false;
         do {
             hasMore = searchResult.getMore();
@@ -1021,4 +1043,5 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
         return files.subList(startIndex, endIndex);
     }
+
 }

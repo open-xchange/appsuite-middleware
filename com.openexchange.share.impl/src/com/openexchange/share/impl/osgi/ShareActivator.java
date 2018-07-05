@@ -68,20 +68,28 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.group.GroupService;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceSet;
 import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.core.ModuleAdjuster;
+import com.openexchange.share.core.ModuleHandler;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.SharePasswordMech;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
+import com.openexchange.share.impl.groupware.FileStorageHandler;
+import com.openexchange.share.impl.groupware.MailModuleAdjuster;
+import com.openexchange.share.impl.groupware.ModuleExtensionRegistry;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.quota.InviteGuestsQuotaProvider;
@@ -116,7 +124,7 @@ public class ShareActivator extends HousekeepingActivator {
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
             QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechFactory.class, SessiondService.class };
+            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechFactory.class, UserAliasStorage.class, SessiondService.class };
     }
 
     @Override
@@ -163,12 +171,24 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
-        FolderHandlerModuleExtensionTracker folderTracker = new FolderHandlerModuleExtensionTracker(context);
-        rememberTracker(folderTracker);
         AccessibleModulesExtensionTracker accessibleModulesTracker = new AccessibleModulesExtensionTracker(context);
         rememberTracker(accessibleModulesTracker);
+        /*
+         * track module handlers and -adjusters & register default implementations
+         */
+        ServiceSet<ModuleHandler> moduleHandlers = new ServiceSet<ModuleHandler>();
+        ModuleExtensionRegistry<ModuleHandler> handlerRegistry = new ModuleExtensionRegistry<ModuleHandler>(moduleHandlers);
+        track(ModuleHandler.class, moduleHandlers);
+        ServiceSet<ModuleAdjuster> moduleAdjusters = new ServiceSet<ModuleAdjuster>();
+        ModuleExtensionRegistry<ModuleAdjuster> adjusterRegistry = new ModuleExtensionRegistry<ModuleAdjuster>(moduleAdjusters);
+        track(ModuleAdjuster.class, moduleAdjusters);
+        ServiceSet<FolderHandlerModuleExtension> folderModuleHandlers = new ServiceSet<FolderHandlerModuleExtension>();
+        ModuleExtensionRegistry<FolderHandlerModuleExtension> folderHandlerRegistry = new ModuleExtensionRegistry<FolderHandlerModuleExtension>(folderModuleHandlers);
+        track(FolderHandlerModuleExtension.class, folderModuleHandlers);
+        registerService(ModuleHandler.class, new FileStorageHandler(this));
+        registerService(ModuleAdjuster.class, new MailModuleAdjuster(this));
 
-        registerService(ModuleSupport.class, new ModuleSupportImpl(this, folderTracker, accessibleModulesTracker));
+        registerService(ModuleSupport.class, new ModuleSupportImpl(this, folderHandlerRegistry, accessibleModulesTracker, handlerRegistry, adjusterRegistry));
         registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
         registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
 

@@ -59,8 +59,14 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.Document;
@@ -71,6 +77,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.InMemoryFileStorageFileAccess;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 
@@ -79,6 +86,8 @@ import com.openexchange.session.SimSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ com.openexchange.file.storage.composition.internal.Services.class })
 public class FileEventTest {
 
     private static final String SERVICE = "http://inmemoryfilestorage.ox";
@@ -87,9 +96,16 @@ public class FileEventTest {
 
     private InMemoryAccess fileAccess;
 
+    @Mock
+    private ServiceLookup serviceLookup;
+
     @Before
     public void setUp() throws Exception {
         fileAccess = new InMemoryAccess();
+
+        MockitoAnnotations.initMocks(this);
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.getServiceLookup()).thenReturn(serviceLookup);
     }
 
     @Test
@@ -247,7 +263,7 @@ public class FileEventTest {
                 String folderId = FileStorageEventHelper.extractFolderId(event);
                 String objectId = FileStorageEventHelper.extractObjectId(event);
                 assertEquals("Wrong folder.", folderID, folderId);
-                assertEquals("Wrong id.", folderID + "/" + file.getId(), objectId);
+                assertEquals("Wrong id.", file.getId(), objectId);
             }
         });
         fileAccess.saveFileMetadata(file, 0);

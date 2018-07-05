@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import com.openexchange.database.Databases;
 
 /**
  * {@link DatabaseQuery}
@@ -71,7 +72,7 @@ public class DatabaseQuery {
 
     /**
      * Initializes a new {@link DatabaseQuery}.
-     * 
+     *
      * @param query The SQL query
      * @param values The values for the prepared statement
      * @param wantsResultSet True if the query expects a ResultSet; false otherwise
@@ -86,25 +87,31 @@ public class DatabaseQuery {
 
     /**
      * Create a {@link PreparedStatement} for the specified {@link Connection}
-     * 
+     *
      * @param con The connection to prepare the statement for
      * @return The PreparedStatemnt
      * @throws SQLException if the preparation of the statement fails
      */
     public PreparedStatement prepareFor(Connection con) throws SQLException {
-        PreparedStatement stmt = wantsGeneratedKeys ? con.prepareStatement(getQuery(), Statement.RETURN_GENERATED_KEYS) : con.prepareStatement(getQuery());
-        if (values == null) {
-            return stmt;
+        PreparedStatement stmt = null;
+        try {
+            stmt = wantsGeneratedKeys ? con.prepareStatement(getQuery(), Statement.RETURN_GENERATED_KEYS) : con.prepareStatement(getQuery());
+            if (values != null) {
+                for (int i = 0, size = values.size(); i < size; i++) {
+                    stmt.setObject(i + 1, values.get(i));
+                }
+            }
+            PreparedStatement retval = stmt;
+            stmt = null;
+            return retval;
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
-        for (int i = 0, size = values.size(); i < size; i++) {
-            stmt.setObject(i + 1, values.get(i));
-        }
-        return stmt;
     }
 
     /**
      * Get the wantsGeneratedKeys
-     * 
+     *
      * @return the wantsGeneratedKeys
      */
     public boolean wantsGeneratedKeys() {
@@ -113,7 +120,7 @@ public class DatabaseQuery {
 
     /**
      * Get the wantsResultsSet
-     * 
+     *
      * @return the wantsResultSets
      */
     public boolean wantsResultSet() {

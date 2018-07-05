@@ -57,13 +57,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -83,27 +81,31 @@ public class GenconfAttributesStringsAddPrimaryKey extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        Connection con = Database.getNoTimeout(cid, true);
-        Column column = new Column("uuid", "BINARY(16) NOT NULL");
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
+            Column column = new Column("uuid", "BINARY(16) NOT NULL");
             setUUID(con);
             Tools.modifyColumns(con, "genconf_attributes_strings", column);
 
             dropDuplicates(con);
 
             Tools.createPrimaryKeyIfAbsent(con, "genconf_attributes_strings", new String[] { "cid", "id", column.name });
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
-            Database.backNoTimeout(cid, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 
@@ -116,6 +118,7 @@ public class GenconfAttributesStringsAddPrimaryKey extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = con.prepareStatement("SELECT cid, id, HEX(uuid) FROM genconf_attributes_strings GROUP BY cid, id, uuid HAVING count(*) > 1");
             rs = stmt.executeQuery();
             if (!rs.next()) {
@@ -242,11 +245,11 @@ public class GenconfAttributesStringsAddPrimaryKey extends UpdateTaskAdapter {
                     stmt2.setString(newPos++, value);
                     stmt2.execute();
                 } finally {
-                    DBUtils.closeSQLStuff(stmt2);
+                    Databases.closeSQLStuff(stmt2);
                 }
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

@@ -116,6 +116,8 @@ public abstract class AbstractFolder implements Folder, Serializable {
 
     protected int defaultType;
 
+    protected FolderPath originPath;
+
     protected Set<String> supportedCapabilities;
 
     protected Map<String, Object> meta = new HashMap<String, Object>();
@@ -431,6 +433,16 @@ public abstract class AbstractFolder implements Folder, Serializable {
     @Override
     public int getCapabilities() {
         return capabilities;
+    }
+
+    @Override
+    public FolderPath getOriginPath() {
+        return originPath;
+    }
+
+    @Override
+    public void setOriginPath(FolderPath originPath) {
+        this.originPath = originPath;
     }
 
     @Override

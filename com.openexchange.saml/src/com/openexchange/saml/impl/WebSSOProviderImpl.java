@@ -56,6 +56,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -119,6 +120,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.OpenSAML;
@@ -880,7 +882,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
     }
 
     private static String deflateAndEncode(String xml) throws OXException {
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        ByteArrayOutputStream bytesOut = Streams.newByteArrayOutputStream();
         Deflater deflater = new Deflater(Deflater.DEFLATED, true);
         DeflaterOutputStream deflaterStream = new DeflaterOutputStream(bytesOut, deflater);
         try {
@@ -1092,7 +1094,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         }
 
         try {
-            Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(responseXML.getBytes())).getDocumentElement();
+            Element responseElement = openSAML.getParserPool().parse(new ByteArrayInputStream(responseXML.getBytes(StandardCharsets.UTF_8))).getDocumentElement();
             XMLObject unmarshalledResponse = openSAML.getUnmarshallerFactory().getUnmarshaller(responseElement).unmarshall(responseElement);
             if (!(unmarshalledResponse instanceof Response)) {
                 throw SAMLExceptionCode.UNMARSHALLING_ERROR.create("XML was not a valid Response element");

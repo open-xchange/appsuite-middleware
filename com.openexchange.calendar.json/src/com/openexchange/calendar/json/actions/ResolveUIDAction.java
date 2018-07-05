@@ -52,14 +52,13 @@ package com.openexchange.calendar.json.actions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -73,27 +72,20 @@ public final class ResolveUIDAction extends AppointmentAction {
     /**
      * Initializes a new {@link ResolveUIDAction}.
      *
-     * @param services
+     * @param services A service lookup reference
      */
-    public ResolveUIDAction(final ServiceLookup services) {
+    public ResolveUIDAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final AppointmentSqlFactoryService service = getService();
-        if (null == service) {
-            throw ServiceExceptionCode.serviceUnavailable(AppointmentSqlFactoryService.class);
-        }
-        final AppointmentSQLInterface appointmentSql = service.createAppointmentSql(req.getSession());
-        final JSONObject json = new JSONObject();
-        final String uid = req.getParameter(AJAXServlet.PARAMETER_UID);
-        final int id = appointmentSql.resolveUid(uid);
-        if (id == 0) {
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        String uid = request.checkParameter(AJAXServlet.PARAMETER_UID);
+        String objectID = session.getCalendarService().getUtilities().resolveByUID(session, uid);
+        if (null == objectID) {
             throw OXException.notFound("");
         }
-        json.put("id", id);
-        return new AJAXRequestResult(json, "json");
+        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, objectID), "json");
     }
 
 }

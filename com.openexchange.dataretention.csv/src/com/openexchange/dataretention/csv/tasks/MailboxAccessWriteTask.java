@@ -50,10 +50,10 @@
 package com.openexchange.dataretention.csv.tasks;
 
 import java.util.Date;
-import com.openexchange.exception.OXException;
 import com.openexchange.dataretention.RetentionData;
 import com.openexchange.dataretention.csv.CSVFile;
 import com.openexchange.dataretention.csv.CSVWriter.TransactionType;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link MailboxAccessWriteTask} - The write task for mailbox access event.

@@ -54,15 +54,15 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import com.openexchange.dav.CUType;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.Privilege;
+import com.openexchange.dav.internal.FolderUpdate;
 import com.openexchange.dav.mixins.PrincipalURL;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -94,10 +94,10 @@ public class ACLAction extends DAVAction {
          * check if applicable for resource
          */
         WebdavResource resource = request.getResource();
-        if (null == resource || false == resource.isCollection() || false == CommonFolderCollection.class.isInstance(resource)) {
+        if (null == resource || false == resource.isCollection() || false == FolderCollection.class.isInstance(resource)) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "no-ace-conflict", request.getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
-        CommonFolderCollection<?> folderCollection = (CommonFolderCollection<?>) resource;
+        FolderCollection<?> folderCollection = (FolderCollection<?>) resource;
         UserizedFolder folder = folderCollection.getFolder();
         if (false == folder.getOwnPermission().isAdmin()) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "no-ace-conflict", request.getUrl(), HttpServletResponse.SC_FORBIDDEN);
@@ -117,15 +117,7 @@ public class ACLAction extends DAVAction {
         /*
          * perform the folder update
          */
-        AbstractFolder updatableFolder = new AbstractFolder() {
-
-            private static final long serialVersionUID = 9014282914929095490L;
-
-            @Override
-            public boolean isGlobalID() {
-                return false;
-            }
-        };
+        FolderUpdate updatableFolder = new FolderUpdate();
         updatableFolder.setID(folder.getID());
         updatableFolder.setTreeID(folder.getTreeID());
         updatableFolder.setType(folder.getType());
@@ -189,11 +181,11 @@ public class ACLAction extends DAVAction {
         if (null == principalURL) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "recognized-principal", HttpServletResponse.SC_FORBIDDEN);
         }
-        if (false == CUType.INDIVIDUAL.equals(principalURL.getType()) && false == CUType.GROUP.equals(principalURL.getType())) {
+        if (false == CalendarUserType.INDIVIDUAL.equals(principalURL.getType()) && false == CalendarUserType.GROUP.equals(principalURL.getType())) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "allowed-principal", HttpServletResponse.SC_FORBIDDEN);
         }
         permission.setEntity(principalURL.getPrincipalID());
-        permission.setGroup(CUType.GROUP.equals(principalURL.getType()));
+        permission.setGroup(CalendarUserType.GROUP.equals(principalURL.getType()));
         return permission;
     }
 

@@ -51,7 +51,6 @@ package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,22 +112,5 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest {
 
         CSVImportResponse importResponse = getClient().execute(new CSVImportRequest(folderID, new ByteArrayInputStream(insertedCSV.getBytes()), false));
         assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-0804", importResponse.getException().getErrorCode());
-    }
-
-    @Test
-    public void testEmptyFileUploaded() throws Exception {
-        final InputStream is = new ByteArrayInputStream("Given name,Email 1, Display name".getBytes());
-        CSVImportResponse importResponse = getClient().execute(new CSVImportRequest(folderID, is, false));
-        assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-1315", importResponse.getException().getErrorCode());
-    }
-
-    public void notestDoubleImport() throws Exception {
-        getClient().execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
-        getClient().execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
-        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(folderID));
-
-        CSVParser parser = new CSVParser();
-        List<List<String>> expected = parser.parse(CSV);
-        assertEquals(3, expected.size());
     }
 }

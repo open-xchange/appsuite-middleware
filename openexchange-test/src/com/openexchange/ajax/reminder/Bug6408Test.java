@@ -24,7 +24,7 @@ public class Bug6408Test extends ReminderTest {
 
         final Calendar c = Calendar.getInstance();
         c.setTimeZone(timeZone);
-        c.add(Calendar.DAY_OF_MONTH, +2);
+        c.add(Calendar.WEEK_OF_YEAR, +6);
 
         c.set(Calendar.HOUR_OF_DAY, 8);
         c.set(Calendar.MINUTE, 0);

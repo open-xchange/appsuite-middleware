@@ -1,0 +1,5 @@
+requests:
+  - AllJobsRequest.yaml
+  - GetJobRequest.yaml
+  - InfoJobRequest.yaml
+  - CancelJobRequest.yaml

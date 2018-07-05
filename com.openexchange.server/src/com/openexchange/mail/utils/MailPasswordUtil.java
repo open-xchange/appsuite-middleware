@@ -61,6 +61,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -76,7 +77,6 @@ import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.secret.SecretExceptionCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MailPasswordUtil} - Utility class to encrypt/decrypt passwords with a key aka <b>p</b>assword <b>b</b>ased <b>e</b>ncryption
@@ -109,18 +109,24 @@ public final class MailPasswordUtil {
         public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
             final int contextId = customizationNote.session.getContextId();
             final Connection con = Database.get(contextId, true);
+            boolean rollback = false;
             try {
                 con.setAutoCommit(false);
+                rollback = true;
+
                 update0(recrypted, customizationNote, con);
+
                 con.commit();
+                rollback = false;
             } catch (final SQLException e) {
-                DBUtils.rollback(con);
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } catch (final RuntimeException e) {
-                DBUtils.rollback(con);
                 throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.autocommit(con);
+                if (rollback) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
                 Database.back(contextId, true, con);
             }
         }
@@ -147,7 +153,7 @@ public final class MailPasswordUtil {
                             stmt.setInt(3, session.getUserId());
                             stmt.setInt(4, customizationNote.accountId);
                             stmt.executeUpdate();
-                            DBUtils.closeSQLStuff(stmt);
+                            Databases.closeSQLStuff(stmt);
                         }
 
                         if (customizationNote.server.equals(mailAccount.getTransportServer())) {
@@ -159,7 +165,7 @@ public final class MailPasswordUtil {
                             stmt.executeUpdate();
                         }
                     } finally {
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
 
                     try {

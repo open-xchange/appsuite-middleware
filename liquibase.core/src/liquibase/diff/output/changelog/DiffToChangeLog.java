@@ -1,6 +1,24 @@
 package liquibase.diff.output.changelog;
 
-import liquibase.CatalogAndSchema;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -8,7 +26,6 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.ChangeLogSerializer;
@@ -16,12 +33,7 @@ import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectComparator;
-import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.util.*;
 
 public class DiffToChangeLog {
 
@@ -30,11 +42,11 @@ public class DiffToChangeLog {
 
     private String changeSetContext;
     private String changeSetAuthor;
-    private DiffResult diffResult;
-    private DiffOutputControl diffOutputControl;
+    private final DiffResult diffResult;
+    private final DiffOutputControl diffOutputControl;
 
 
-    private static Set<Class> loggedOrderFor = new HashSet<Class>();
+    private static Set<Class<?>> loggedOrderFor = new HashSet<Class<?>>();
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
@@ -45,16 +57,16 @@ public class DiffToChangeLog {
         this.changeSetContext = changeSetContext;
     }
 
-    public void print(String changeLogFile) throws ParserConfigurationException, IOException, DatabaseException {
+    public void print(String changeLogFile) throws IOException {
         ChangeLogSerializer changeLogSerializer = ChangeLogSerializerFactory.getInstance().getSerializer(changeLogFile);
         this.print(changeLogFile, changeLogSerializer);
     }
 
-    public void print(PrintStream out) throws ParserConfigurationException, IOException, DatabaseException {
+    public void print(PrintStream out) throws IOException {
         this.print(out, new XMLChangeLogSerializer());
     }
 
-    public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
+    public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws IOException {
         File file = new File(changeLogFile);
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
@@ -76,39 +88,36 @@ public class DiffToChangeLog {
             }
 
             String lineSeparator = System.getProperty("line.separator");
-            BufferedReader fileReader = new BufferedReader(new FileReader(file));
-            String line;
             long offset = 0;
-            while ((line = fileReader.readLine()) != null) {
-                int index = line.indexOf("</databaseChangeLog>");
-                if (index >= 0) {
-                    offset += index;
-                } else {
-                    offset += line.getBytes().length;
-                    offset += lineSeparator.getBytes().length;
+            BufferedReader fileReader = new BufferedReader(new FileReader(file));
+            try {
+                for (String line; (line = fileReader.readLine()) != null;) {
+                    int index = line.indexOf("</databaseChangeLog>");
+                    if (index >= 0) {
+                        offset += index;
+                    } else {
+                        offset += line.getBytes().length;
+                        offset += lineSeparator.getBytes().length;
+                    }
                 }
+                fileReader.close();
+
+                fileReader = new BufferedReader(new FileReader(file));
+                fileReader.skip(offset);
+            } finally {
+                fileReader.close();
             }
-            fileReader.close();
-
-            fileReader = new BufferedReader(new FileReader(file));
-            fileReader.skip(offset);
-
-            fileReader.close();
-
-            // System.out.println("resulting XML: " + xml.trim());
 
             RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-            randomAccessFile.seek(offset);
-            randomAccessFile.writeBytes("    ");
-            randomAccessFile.write(xml.getBytes());
-            randomAccessFile.writeBytes(lineSeparator);
-            randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
-            randomAccessFile.close();
-
-            // BufferedWriter fileWriter = new BufferedWriter(new
-            // FileWriter(file));
-            // fileWriter.append(xml);
-            // fileWriter.close();
+            try {
+                randomAccessFile.seek(offset);
+                randomAccessFile.writeBytes("    ");
+                randomAccessFile.write(xml.getBytes());
+                randomAccessFile.writeBytes(lineSeparator);
+                randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
+            } finally {
+                randomAccessFile.close();
+            }
         }
     }
 
@@ -116,12 +125,9 @@ public class DiffToChangeLog {
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
      */
-    public void print(PrintStream out, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
-
+    public void print(PrintStream out, ChangeLogSerializer changeLogSerializer) throws IOException {
         List<ChangeSet> changeSets = generateChangeSets();
-
         changeLogSerializer.write(changeSets, out);
-
         out.flush();
     }
 
@@ -178,11 +184,12 @@ public class DiffToChangeLog {
         List<Class<? extends DatabaseObject>> types = graph.sort(comparisonDatabase, generatorType);
 
         if (!loggedOrderFor.contains(generatorType)) {
-            String log = generatorType.getSimpleName()+" type order: ";
+            StringBuilder logBuilder = new StringBuilder(generatorType.getSimpleName());
+            logBuilder.append(" type order: ");
             for (Class<? extends DatabaseObject> type : types) {
-                log += "    " + type.getName();
+                logBuilder.append("    ").append(type.getName());
             }
-            LogFactory.getLogger().debug(log);
+            LogFactory.getLogger().debug(logBuilder.toString());
             loggedOrderFor.add(generatorType);
         }
 
@@ -231,9 +238,16 @@ public class DiffToChangeLog {
 
     private static class DependencyGraph {
 
-        private Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<Class<? extends DatabaseObject>, Node>();
+        private final Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<Class<? extends DatabaseObject>, Node>();
 
-        private void addType(Class<? extends DatabaseObject> type) {
+        /**
+         * Initializes a new {@link DependencyGraph}.
+         */
+        public DependencyGraph() {
+            super();
+        }
+
+        void addType(Class<? extends DatabaseObject> type) {
             allNodes.put(type, new Node(type));
         }
 
@@ -286,7 +300,8 @@ public class DiffToChangeLog {
             //Check to see if all edges are removed
             for (Node n : allNodes.values()) {
                 if (!n.inEdges.isEmpty()) {
-                    String message = "Could not resolve " + generatorType.getSimpleName() + " dependencies due to dependency cycle. Dependencies: \n";
+                    StringBuilder messageBuilder = new StringBuilder("Could not resolve ");
+                    messageBuilder.append(generatorType.getSimpleName()).append(" dependencies due to dependency cycle. Dependencies: \n");
                     for (Node node : allNodes.values()) {
                         SortedSet<String> fromTypes = new TreeSet<String>();
                         SortedSet<String> toTypes = new TreeSet<String>();
@@ -298,10 +313,11 @@ public class DiffToChangeLog {
                         }
                         String from = StringUtils.join(fromTypes, ",");
                         String to = StringUtils.join(toTypes, ",");
-                        message += "    ["+ from +"] -> "+ node.type.getSimpleName()+" -> [" + to +"]\n";
+                        messageBuilder.append("    [").append(from).append("] -> ");
+                        messageBuilder.append(node.type.getSimpleName()).append(" -> [").append(to).append("]\n");
                     }
 
-                    throw new UnexpectedLiquibaseException(message);
+                    throw new UnexpectedLiquibaseException(messageBuilder.toString());
                 }
             }
             List<Class<? extends DatabaseObject>> returnList = new ArrayList<Class<? extends DatabaseObject>>();
@@ -355,10 +371,23 @@ public class DiffToChangeLog {
             }
 
             @Override
+            public int hashCode() {
+                final int prime = 31;
+                int result = 1;
+                result = prime * result + ((from == null) ? 0 : from.hashCode());
+                result = prime * result + ((to == null) ? 0 : to.hashCode());
+                return result;
+            }
+
+            @Override
             public boolean equals(Object obj) {
+                if (!(obj instanceof Edge)) {
+                    return false;
+                }
                 Edge e = (Edge) obj;
                 return e.from == from && e.to == to;
             }
+
         }
     }
 }

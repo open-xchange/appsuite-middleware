@@ -50,9 +50,6 @@
 package com.openexchange.mail.api;
 
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -99,6 +96,9 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link MailConfig} - The user-specific mail properties; e.g. containing user's login data.
@@ -472,7 +472,8 @@ public abstract class MailConfig {
         }
 
         MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        return new UrlInfo(storage.getMailAccount(accountId, userId, contextId).generateMailServerURL(), storage.getMailAccount(accountId, userId, contextId).isMailStartTls());
+        MailAccount mailAccount = storage.getMailAccount(accountId, userId, contextId);
+        return new UrlInfo(mailAccount.generateMailServerURL(), mailAccount.isMailStartTls());
     }
 
     private static final class UserID {
@@ -818,7 +819,11 @@ public abstract class MailConfig {
                 // Apparently, OAuth is supposed to be used
                 Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
                 if (obj == null) {
-                    throw MailExceptionCode.MISSING_CONNECT_PARAM.create("The session contains no OAuth token.");
+                    if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                        obj = "";
+                    } else {
+                        throw MailExceptionCode.MISSING_CONNECT_PARAM.create("The session contains no OAuth token.");
+                    }
                 }
                 mailConfig.password = obj.toString();
                 mailConfig.authType = configuredAuthType;
@@ -826,15 +831,23 @@ public abstract class MailConfig {
                 // Common handling based on configuration
                 PasswordSource cur = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
                 if (PasswordSource.GLOBAL.equals(cur)) {
-                    final String masterPw = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
+                    String masterPw = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
                     if (masterPw == null) {
-                        throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
+                        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                            masterPw = "";
+                        } else {
+                            throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
+                        }
                     }
                     mailConfig.password = masterPw;
                 } else {
                     String sessionPassword = session.getPassword();
                     if (null == sessionPassword) {
-                        throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                            sessionPassword = "";
+                        } else {
+                            throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                        }
                     }
                     mailConfig.password = sessionPassword;
                 }

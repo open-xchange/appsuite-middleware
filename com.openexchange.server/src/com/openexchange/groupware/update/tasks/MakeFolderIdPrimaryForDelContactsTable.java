@@ -52,17 +52,16 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.lang.Validate;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
  * Adds the column fid to the primary key of table del_contacts.
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -92,11 +91,11 @@ public class MakeFolderIdPrimaryForDelContactsTable extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         Validate.notNull(params);
 
-        int cid = params.getContextId();
-        Connection con = Database.getNoTimeout(cid, true);
-
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
 
             if (Tools.hasPrimaryKey(con, DEL_CONTACTS)) {
                 Tools.dropPrimaryKey(con, DEL_CONTACTS);
@@ -109,16 +108,16 @@ public class MakeFolderIdPrimaryForDelContactsTable extends UpdateTaskAdapter {
             Tools.createPrimaryKey(con, PRG_CONTACTS, new String[] { "cid", "intfield01", "fid" });
 
             con.commit();
-
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
-            Database.backNoTimeout(cid, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 

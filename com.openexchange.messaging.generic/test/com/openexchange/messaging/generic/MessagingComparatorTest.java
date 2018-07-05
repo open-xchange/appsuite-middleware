@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.generic;
 
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Locale;
 import javax.mail.internet.MailDateFormat;
@@ -58,10 +59,6 @@ import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.SimpleMessagingMessage;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

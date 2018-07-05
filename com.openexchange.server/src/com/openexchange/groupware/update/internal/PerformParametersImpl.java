@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.sql.Connection;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.ConnectionProvider;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.Schema;
@@ -57,26 +60,44 @@ import com.openexchange.groupware.update.Schema;
  * {@link PerformParametersImpl}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PerformParametersImpl implements PerformParameters {
 
     private final Schema schema;
-    private final int contextId;
+    private final int optContextId;
     private final ProgressState logger;
+    private final ConnectionProvider connectionProvider;
 
     /**
      * Initializes a new {@link PerformParametersImpl}.
      */
-    public PerformParametersImpl(Schema schema, int contextId, ProgressState logger) {
+    public PerformParametersImpl(Schema schema, ConnectionProvider connectionProvider, int optContextId, ProgressState logger) {
         super();
         this.schema = schema;
-        this.contextId = contextId;
+        this.optContextId = optContextId;
         this.logger = logger;
+        this.connectionProvider = connectionProvider;
     }
 
     @Override
-    public int getContextId() {
-        return contextId;
+    public Connection getConnection() throws OXException {
+        return connectionProvider.getConnection();
+    }
+
+    @Override
+    public ConnectionProvider getConnectionProvider() {
+        return connectionProvider;
+    }
+
+    @Override
+    public int optContextId() {
+        return optContextId;
+    }
+
+    @Override
+    public int[] getContextsInSameSchema() throws OXException {
+        return connectionProvider.getContextsInSameSchema();
     }
 
     @Override
@@ -88,4 +109,5 @@ public class PerformParametersImpl implements PerformParameters {
     public Schema getSchema() {
         return schema;
     }
+
 }

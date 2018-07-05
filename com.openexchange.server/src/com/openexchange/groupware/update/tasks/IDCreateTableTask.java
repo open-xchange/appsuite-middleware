@@ -49,13 +49,12 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -68,7 +67,12 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  */
 public class IDCreateTableTask extends UpdateTaskAdapter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IDCreateTableTask.class);
+    /**
+     * Initializes a new {@link IDCreateTableTask}.
+     */
+    public IDCreateTableTask() {
+        super();
+    }
 
     @Override
     public String[] getDependencies() {
@@ -78,36 +82,31 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
     private static final String getCreate() {
         return "CREATE TABLE sequenceIds ("
         + "cid INT4 UNSIGNED NOT NULL,"
-        + "type VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
+        + "type VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,"
         + "id INT4 UNSIGNED NOT NULL,"
         + "PRIMARY KEY (cid, type)"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        createTable("sequenceIds", getCreate(), params.getContextId());
-        if (LOG.isInfoEnabled()) {
-            LOG.info("UpdateTask 'IDCreateTableTask' successfully performed!");
-        }
+        createTable("sequenceIds", getCreate(), params.getConnectionProvider().getConnection());
     }
 
-    private static void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final Connection writeCon = Database.get(contextId, true);
+    private static void createTable(String tablename, String sqlCreate, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             try {
-                if (tableExists(tablename, writeCon.getMetaData())) {
+                if (tableExists(tablename, con.getMetaData())) {
                     return;
                 }
-                stmt = writeCon.prepareStatement(sqlCreate);
+                stmt = con.prepareStatement(sqlCreate);
                 stmt.executeUpdate();
             } catch (final SQLException e) {
                 throw createSQLError(e);
             }
         } finally {
             closeSQLStuff(null, stmt);
-            Database.back(contextId, true, writeCon);
         }
     }
 

@@ -50,10 +50,10 @@
 package com.openexchange.oauth.provider.impl.client;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -61,8 +61,8 @@ import com.openexchange.oauth.provider.authorizationserver.client.Client;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientData;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException;
-import com.openexchange.oauth.provider.authorizationserver.client.Icon;
 import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException.Reason;
+import com.openexchange.oauth.provider.authorizationserver.client.Icon;
 import com.openexchange.oauth.provider.impl.ScopeProviderRegistry;
 import com.openexchange.oauth.provider.impl.client.storage.OAuthClientStorage;
 import com.openexchange.oauth.provider.impl.grant.OAuthGrantStorage;
@@ -82,12 +82,7 @@ public class ClientManagementImpl implements ClientManagement {
 
     private static final int MAX_ICON_SIZE = 0x40000;
 
-    private static final Set<String> SUPPORTED_ICON_MIME_TYPES = new HashSet<>(2, 1.0f);
-    static {
-        SUPPORTED_ICON_MIME_TYPES.add("image/png");
-        SUPPORTED_ICON_MIME_TYPES.add("image/jpg");
-        SUPPORTED_ICON_MIME_TYPES.add("image/jpeg");
-    }
+    private static final Set<String> SUPPORTED_ICON_MIME_TYPES = ImmutableSet.of("image/png", "image/jpg", "image/jpeg");
 
     private final OAuthClientStorage clientStorage;
 

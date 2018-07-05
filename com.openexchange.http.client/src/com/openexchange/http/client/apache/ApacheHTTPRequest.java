@@ -51,6 +51,7 @@ package com.openexchange.http.client.apache;
 
 import java.io.IOException;
 import java.util.Map;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethodBase;
@@ -62,18 +63,18 @@ import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public class ApacheHTTPRequest implements HTTPRequest {
 
-	private Map<String, String> headers;
-	private Map<String, String> parameters;
+	private final Map<String, String> headers;
+	private final Map<String, String> parameters;
 
-	private HttpMethodBase method;
-	private HttpClient client;
-	private ApacheClientRequestBuilder coreBuilder;
-	private CommonApacheHTTPRequest reqBuilder;
+	private final HttpMethodBase method;
+	private final HttpClient client;
+	private final ApacheClientRequestBuilder coreBuilder;
+    private final CommonApacheHTTPRequest<?> reqBuilder;
 
 
 
 	public ApacheHTTPRequest(Map<String, String> headers, Map<String, String> parameters,
-			HttpMethodBase method, HttpClient client, ApacheClientRequestBuilder coreBuilder, CommonApacheHTTPRequest builder) {
+        HttpMethodBase method, HttpClient client, ApacheClientRequestBuilder coreBuilder, CommonApacheHTTPRequest<?> builder) {
 		super();
 		this.headers = headers;
 		this.parameters = parameters;
@@ -94,15 +95,19 @@ public class ApacheHTTPRequest implements HTTPRequest {
 			}
 			int status = client.executeMethod(method);
 			if (status == 302) {
-				String location = method.getResponseHeader("Location").getValue();
+                Header header = method.getResponseHeader("Location");
+                if (header == null) {
+                    throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create("Missing 'Location' header.");
+                }
+                String location = header.getValue();
 				reqBuilder.url(location);
 				return reqBuilder.build().execute();
 			}
 			return new ApacheHTTPResponse(method, client, coreBuilder, status);
 		} catch (HttpException e) {
-			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		} catch (IOException e) {
-			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		} finally {
 			reqBuilder.done();
 		}

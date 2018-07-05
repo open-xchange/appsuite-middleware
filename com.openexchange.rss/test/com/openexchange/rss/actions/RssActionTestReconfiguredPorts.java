@@ -64,7 +64,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.rss.util.RssProperties;
-import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
+import com.openexchange.rss.util.TimeoutHttpURLFeedFetcher;
 import com.openexchange.test.mock.MockUtils;
 import com.sun.syndication.feed.synd.SyndFeed;
 
@@ -92,7 +92,7 @@ public class RssActionTestReconfiguredPorts {
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
 
         RssAction newAction = new RssAction();
-        MockUtils.injectValueIntoPrivateField(newAction, "fetcher", Mockito.mock(TimoutHttpURLFeedFetcher.class));
+        MockUtils.injectValueIntoPrivateField(newAction, "fetcher", Mockito.mock(TimeoutHttpURLFeedFetcher.class));
 
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn("");
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn(RssProperties.HOST_BLACKLIST_DEFAULT);

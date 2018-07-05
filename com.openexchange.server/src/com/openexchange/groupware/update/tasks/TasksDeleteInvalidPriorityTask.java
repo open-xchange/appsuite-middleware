@@ -50,20 +50,16 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import static com.openexchange.tools.update.Tools.exec;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link TasksDeleteInvalidPriorityTask} removed invalid priority values from task and del_task tables.
@@ -89,23 +85,26 @@ public class TasksDeleteInvalidPriorityTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection con = dbService.getForUpdateTask(contextID);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            startTransaction(con);
+            con.setAutoCommit(false);
+            rollback = true;
+
             exec(con, "UPDATE task SET priority=null WHERE priority NOT IN (1,2,3)");
             exec(con, "UPDATE del_task SET priority=null WHERE priority NOT IN (1,2,3)");
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            dbService.backForUpdateTask(contextID, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 }

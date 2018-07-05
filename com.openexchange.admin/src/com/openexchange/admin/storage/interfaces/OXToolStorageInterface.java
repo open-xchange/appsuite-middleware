@@ -63,6 +63,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
@@ -347,6 +348,19 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsContextName(Context ctx) throws StorageException;
 
     /**
+     * Checks context existence and if there is no other context with the same name
+     * <p>
+     * Should be used in change method!
+     *
+     * @param ctx The context
+     * @return <code>true</code> if denoted context currently holds a different name, otherwise <code>false</code> if name is equal
+     * @throws NoSuchContextException If such a context does not exist
+     * @throws InvalidDataException If another context already holds such a name
+     * @throws StorageException If existence check fails
+     */
+    public abstract boolean checkContextName(Context ctx) throws NoSuchContextException, InvalidDataException, StorageException;
+
+    /**
      * Checks if given context name already exists!
      * <p>
      * Should be used in create method!
@@ -476,6 +490,8 @@ public abstract class OXToolStorageInterface {
     public abstract boolean isUserSettingMailBitSet(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
 
     public abstract boolean poolInUse(final int pool_id) throws StorageException;
+
+    public abstract boolean schemaInUse(int pool_id, String schemaName) throws StorageException;
 
     public abstract void primaryMailExists(Context ctx, String mail) throws StorageException, InvalidDataException;
 

@@ -96,7 +96,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     CreateExceptionWithBadDate.class,
     RecurrenceTestSuite.class,
     AppointmentBugTestSuite.class,
-    NewAppointmentHttpApiTestSuite.class
+    NewAppointmentHttpApiTestSuite.class,
+    RangeQueryTest.class
 
 })
 public class AppointmentAJAXSuite  {

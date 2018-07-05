@@ -305,9 +305,10 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         catm.createDeleteException(folder.getObjectID(), series.getObjectID(), recurrencePos);
         assertTrue("Should get exception when trying to get create delete exception on top of change exception", catm.hasLastException());
 
-        OXException expected = new OXException(11);
+        OXException expected1 = new OXException(11);
+        OXException expected2 = OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create();
         OXException actual = (OXException) catm.getLastException();
-        assertTrue("Expecting " + expected + ", but got " + actual, expected.similarTo(actual));
+        assertTrue("Expecting " + expected1 + " or " + expected2 + ", but got " + actual, expected1.similarTo(actual) || expected2.similarTo(actual));
     }
 
     @Test
@@ -332,7 +333,6 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
     public void testShouldSilentlyIgnoreNumberOfAttachmentsOnExceptionCreation() throws OXException {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
-
         catm.insert(app);
 
         Appointment changeEx = catm.createIdentifyingCopy(app);
@@ -343,7 +343,6 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         catm.update(changeEx);
 
         Appointment loaded = catm.get(changeEx);
-
         assertEquals(0, loaded.getNumberOfAttachments());
     }
 

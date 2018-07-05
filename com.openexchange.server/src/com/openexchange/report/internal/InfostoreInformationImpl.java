@@ -111,6 +111,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                 ResultSet sqlResult = null;
                 try {
                     String whereQuery = buildWhereClause(usersInContext, "created_by");
+                    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                     stmt = connection.prepareStatement("SELECT file_mimetype, count(file_mimetype) FROM infostore_document" + whereQuery + " AND version_number > 0 GROUP BY file_mimetype;");
                     sqlResult = stmt.executeQuery();
                     Map<String, Integer> queryMap = new LinkedHashMap<>();
@@ -136,6 +137,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, "created_by");
         for (Map.Entry<Integer, String> singleSchemaQuery : whereQueries.entrySet()) {
             String whereQuery = singleSchemaQuery.getValue();
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             String query = "SELECT min(roundup.sum), max(roundup.sum), avg(roundup.sum), sum(roundup.sum), count(*) FROM " + "(SELECT cid, created_by, sum(file_size) AS sum FROM infostore_document" + whereQuery + "GROUP BY cid, created_by) AS roundup;";
             whereQueries.put(singleSchemaQuery.getKey(), query);
         }
@@ -147,6 +149,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, "created_by");
         for (Map.Entry<Integer, String> singleSchemaQuery : whereQueries.entrySet()) {
             String whereQuery = singleSchemaQuery.getValue();
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             String query = "SELECT min(roundup.count), max(roundup.count), avg(roundup.count), sum(roundup.count), count(DISTINCT roundup.created_by) FROM " + "(SELECT cid, created_by, count(version_number) AS count FROM infostore_document " + whereQuery + " AND version_number > 0 GROUP BY cid, created_by) AS roundup;";
             whereQueries.put(singleSchemaQuery.getKey(), query);
         }
@@ -158,6 +161,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, "created_by");
         for (Map.Entry<Integer, String> singleSchemaQuery : whereQueries.entrySet()) {
             String whereQuery = singleSchemaQuery.getValue();
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             String query = "SELECT min(roundup.count), max(roundup.count), avg(roundup.count), sum(roundup.count), count(*) FROM " + "(SELECT cid, created_by, count(version_number) AS count FROM infostore_document " + whereQuery + " AND creating_date > ? AND creating_date < ? AND version_number > 0 " + "GROUP BY cid, created_by) AS roundup;";
             whereQueries.put(singleSchemaQuery.getKey(), query);
         }
@@ -169,6 +173,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, "user");
         for (Map.Entry<Integer, String> singleSchemaQuery : whereQueries.entrySet()) {
             String whereQuery = singleSchemaQuery.getValue();
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             String query = "SELECT min(roundup.sum), max(roundup.sum), avg(roundup.sum), sum(roundup.sum), sum(roundup.users) FROM " + "(SELECT cid, user, count(id) AS sum, count(DISTINCT user) AS users FROM oauthAccounts" + whereQuery + " GROUP BY cid, user) AS roundup;";
             whereQueries.put(singleSchemaQuery.getKey(), query);
         }
@@ -255,19 +260,19 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
      * @return a where query with all contextIds/userIds like in the example
      */
     private String buildWhereClause(Map<Integer, List<Integer>> usersInContext, String userIdColumn) {
-        String whereQuery = " WHERE (";
+        StringBuilder whereQuery = new StringBuilder(" WHERE (");
         boolean isFirst = true;
         for (Map.Entry<Integer, List<Integer>> currentContext : usersInContext.entrySet()) {
             String contextUserQuery = buildWhereQueryCtxsUsrs(currentContext.getKey(), currentContext.getValue(), userIdColumn);
             if (isFirst) {
-                whereQuery += contextUserQuery;
+                whereQuery.append(contextUserQuery);
                 isFirst = false;
             } else {
-                whereQuery += " OR " + contextUserQuery;
+                whereQuery.append(" OR ").append(contextUserQuery);
             }
         }
-        whereQuery += ")";
-        return whereQuery;
+        whereQuery.append(")");
+        return whereQuery.toString();
     }
 
     private Map<Integer, String> buildMultipleWhereClause(Map<PoolAndSchema, Map<Integer,List<Integer>>> dbContextToUserBash, String userIdColumn) {

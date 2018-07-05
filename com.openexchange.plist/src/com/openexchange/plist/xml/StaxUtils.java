@@ -102,11 +102,6 @@ public final class StaxUtils {
     private static final BlockingQueue<XMLOutputFactory> OUTPUT_FACTORY_POOL;
     private static final XMLOutputFactory SAFE_OUTPUT_FACTORY;
 
-    private static final String XML_NS = "http://www.w3.org/2000/xmlns/";
-    private static final String DEF_PREFIXES[] = new String[] {
-        "ns1".intern(), "ns2".intern(), "ns3".intern(), "ns4".intern(), "ns5".intern(), "ns6".intern(), "ns7".intern(), "ns8".intern(),
-        "ns9".intern() };
-
     private static int getInteger(final String prop, final int def) {
         try {
             final String s = System.getProperty(prop);
@@ -707,7 +702,7 @@ public final class StaxUtils {
 
         if (uri != null) {
             writeElementNS = true;
-            final Iterator<String> it = writer.getNamespaceContext().getPrefixes(uri);
+            @SuppressWarnings("unchecked") final Iterator<String> it = writer.getNamespaceContext().getPrefixes(uri);
             while (it != null && it.hasNext()) {
                 String s = it.next();
                 if (s == null) {
@@ -772,7 +767,7 @@ public final class StaxUtils {
             } else if (nsPrefix == null || nsPrefix.length() == 0) {
                 writer.writeAttribute(reader.getAttributeNamespace(i), reader.getAttributeLocalName(i), reader.getAttributeValue(i));
             } else {
-                final Iterator<String> it = writer.getNamespaceContext().getPrefixes(ns);
+                @SuppressWarnings("unchecked") final Iterator<String> it = writer.getNamespaceContext().getPrefixes(ns);
                 boolean writeNs = true;
                 while (it != null && it.hasNext()) {
                     String s = it.next();

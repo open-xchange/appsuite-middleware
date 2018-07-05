@@ -1,21 +1,30 @@
 package liquibase.change;
 
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.structure.DatabaseObject;
-import liquibase.exception.*;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
-
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Method;
 
 /**
  * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is purely for convenience but recommended.

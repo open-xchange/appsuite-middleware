@@ -50,7 +50,6 @@
 package com.openexchange.admin.storage.utils;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,6 +61,8 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.database.Databases;
+import com.openexchange.java.Strings;
 
 /**
  * {@link PoolAndSchema} - A simple helper class to hold the pool identifier and name of the associated database schema.
@@ -96,7 +97,7 @@ public class PoolAndSchema {
         } catch (SQLException e) {
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
         }
@@ -112,12 +113,11 @@ public class PoolAndSchema {
      * @return The available schemas
      * @throws StorageException If schemas cannot be returned
      */
-    public static List<Database> listAllSchemas(int serverId, Connection configDbCon) throws StorageException {
+    public static List<Database> listAllSchemas(Connection configDbCon) throws StorageException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = configDbCon.prepareStatement("SELECT DISTINCT c2db.write_db_pool_id,c2db.db_schema,db.url,db.driver,db.login,db.password,db.name,dbc.read_db_pool_id,dbc.weight,dbc.max_units FROM context_server2db_pool c2db JOIN db_pool db ON db.db_pool_id=c2db.write_db_pool_id JOIN db_cluster dbc ON dbc.write_db_pool_id=c2db.write_db_pool_id WHERE server_id=?");
-            stmt.setInt(1, serverId);
+            stmt = configDbCon.prepareStatement("SELECT c.write_db_pool_id,s.schemaname,db.url,db.driver,db.login,db.password,db.name,c.read_db_pool_id,c.max_units FROM db_cluster AS c LEFT JOIN contexts_per_dbschema AS s ON c.write_db_pool_id=s.db_pool_id JOIN db_pool AS db ON db.db_pool_id = c.write_db_pool_id");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return Collections.emptyList();
@@ -127,28 +127,30 @@ public class PoolAndSchema {
             int pos;
             do {
                 pos = 1;
-                Database db = new Database();
-                db.setId(I(rs.getInt(pos++)));
+                int poolId = rs.getInt(pos++);
                 String schema = rs.getString(pos++);
-                db.setUrl(rs.getString(pos++));
-                db.setDriver(rs.getString(pos++));
-                db.setLogin(rs.getString(pos++));
-                db.setPassword(rs.getString(pos++));
-                db.setName(rs.getString(pos++));
-                final int slaveId = rs.getInt(pos++);
-                if (slaveId > 0) {
-                    db.setRead_id(I(slaveId));
+                if (Strings.isNotEmpty(schema)) {
+                    Database db = new Database();
+                    db.setId(I(poolId));
+                    db.setUrl(rs.getString(pos++));
+                    db.setDriver(rs.getString(pos++));
+                    db.setLogin(rs.getString(pos++));
+                    db.setPassword(rs.getString(pos++));
+                    db.setName(rs.getString(pos++));
+                    final int slaveId = rs.getInt(pos++);
+                    if (slaveId > 0) {
+                        db.setRead_id(I(slaveId));
+                    }
+                    db.setMaxUnits(I(rs.getInt(pos++)));
+                    db.setScheme(schema);
+                    databases.add(db);
                 }
-                db.setClusterWeight(I(rs.getInt(pos++)));
-                db.setMaxUnits(I(rs.getInt(pos++)));
-                db.setScheme(schema);
-                databases.add(db);
             } while (rs.next());
             return databases;
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -161,13 +163,12 @@ public class PoolAndSchema {
      * @return The available schemas
      * @throws StorageException If schemas cannot be returned
      */
-    public static List<Database> listDatabaseSchemas(int databaseId, int serverId, Connection configDbCon) throws StorageException {
+    public static List<Database> listDatabaseSchemas(int databaseId, Connection configDbCon) throws StorageException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = configDbCon.prepareStatement("SELECT DISTINCT c2db.db_schema,db.url,db.driver,db.login,db.password,db.name,dbc.read_db_pool_id,dbc.weight,dbc.max_units FROM context_server2db_pool c2db JOIN db_pool db ON db.db_pool_id=c2db.write_db_pool_id JOIN db_cluster dbc ON dbc.write_db_pool_id=c2db.write_db_pool_id WHERE c2db.write_db_pool_id=? AND server_id=?");
+            stmt = configDbCon.prepareStatement("SELECT s.schemaname,db.url,db.driver,db.login,db.password,db.name,c.read_db_pool_id,c.max_units FROM db_cluster AS c LEFT JOIN contexts_per_dbschema AS s ON c.write_db_pool_id=s.db_pool_id JOIN db_pool AS db ON db.db_pool_id = c.write_db_pool_id WHERE c.write_db_pool_id=?");
             stmt.setInt(1, databaseId);
-            stmt.setInt(2, serverId);
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return Collections.emptyList();
@@ -177,28 +178,29 @@ public class PoolAndSchema {
             int pos;
             do {
                 pos = 1;
-                Database db = new Database();
-                db.setId(I(databaseId));
                 String schema = rs.getString(pos++);
-                db.setUrl(rs.getString(pos++));
-                db.setDriver(rs.getString(pos++));
-                db.setLogin(rs.getString(pos++));
-                db.setPassword(rs.getString(pos++));
-                db.setName(rs.getString(pos++));
-                final int slaveId = rs.getInt(pos++);
-                if (slaveId > 0) {
-                    db.setRead_id(I(slaveId));
+                if (Strings.isNotEmpty(schema)) {
+                    Database db = new Database();
+                    db.setId(I(databaseId));
+                    db.setUrl(rs.getString(pos++));
+                    db.setDriver(rs.getString(pos++));
+                    db.setLogin(rs.getString(pos++));
+                    db.setPassword(rs.getString(pos++));
+                    db.setName(rs.getString(pos++));
+                    final int slaveId = rs.getInt(pos++);
+                    if (slaveId > 0) {
+                        db.setRead_id(I(slaveId));
+                    }
+                    db.setMaxUnits(I(rs.getInt(pos++)));
+                    db.setScheme(schema);
+                    databases.add(db);
                 }
-                db.setClusterWeight(I(rs.getInt(pos++)));
-                db.setMaxUnits(I(rs.getInt(pos++)));
-                db.setScheme(schema);
-                databases.add(db);
             } while (rs.next());
             return databases;
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

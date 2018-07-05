@@ -1,7 +1,5 @@
 package liquibase.util;
 
-import liquibase.database.Database;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -134,12 +132,15 @@ public class StringUtils {
     }
 
     public static String repeat(String string, int times) {
-        String returnString = "";
-        for (int i=0; i<times; i++) {
-            returnString += string;
+        if (string == null) {
+            return "";
+        }
+        StringBuilder retBuilder = new StringBuilder(times * string.length());
+        for (int i = 0; i < times; i++) {
+            retBuilder.append(string);
         }
 
-        return returnString;
+        return retBuilder.toString();
     }
 
     public static String join(Integer[] array, String delimiter) {

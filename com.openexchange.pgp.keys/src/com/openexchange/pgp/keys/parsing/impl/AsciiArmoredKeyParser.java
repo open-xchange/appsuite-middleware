@@ -16,8 +16,8 @@ import com.openexchange.tools.io.IOUtils;
  */
 public class AsciiArmoredKeyParser implements KeyParser {
 
-    private final String REGEX_PUBLIC_ASC = "(-----BEGIN PGP PUBLIC KEY BLOCK-----.*?-----END PGP PUBLIC KEY BLOCK-----)";
-    private final String REGEX_PRIVATE_ASC = "(-----BEGIN PGP PRIVATE KEY BLOCK-----.*?-----END PGP PRIVATE KEY BLOCK-----)";
+    private final static String REGEX_PUBLIC_ASC = "(-----BEGIN PGP PUBLIC KEY BLOCK-----.*?-----END PGP PUBLIC KEY BLOCK-----)";
+    private final static String REGEX_PRIVATE_ASC = "(-----BEGIN PGP PRIVATE KEY BLOCK-----.*?-----END PGP PRIVATE KEY BLOCK-----)";
 
     private List<String> getPublicKeysFromString(String s) {
         ArrayList<String> ret = new ArrayList<String>();
@@ -46,15 +46,20 @@ public class AsciiArmoredKeyParser implements KeyParser {
             //Getting the data from the stream
             IOUtils.transfer(inputStream, out);
             String data = new String(out.toByteArray());
+            return parse (data);
 
-            if (data != null && !data.isEmpty()) {
-                //Parsing
-                return new KeyRingParserResult(getPublicKeysFromString(data), getPrivateKeysFromString(data));
-            }
-            return null;
         } finally {
             out.close();
             inputStream.close();
         }
+    }
+
+    @Override
+    public KeyRingParserResult parse(String data) throws IOException {
+        if (data != null && !data.isEmpty()) {
+            //Parsing
+            return new KeyRingParserResult(getPublicKeysFromString(data), getPrivateKeysFromString(data));
+        }
+        return null;
     }
 }

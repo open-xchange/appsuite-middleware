@@ -49,23 +49,22 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -80,18 +79,19 @@ public class AddUUIDForInfostoreReservedPaths extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.getContextId();
         ProgressState progress = params.getProgressState();
-        Connection con = Database.getNoTimeout(ctxId, true);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             startTransaction(con);
             rollback = true;
+
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, TABLE, "uuid")) {
                 Tools.addColumns(con, TABLE, new Column("uuid", "BINARY(16) DEFAULT NULL"));
                 fillUUIDs(con, TABLE, progress);
             }
+
             con.commit();
             rollback = true;
         } catch (SQLException e) {
@@ -102,8 +102,7 @@ public class AddUUIDForInfostoreReservedPaths extends UpdateTaskAdapter {
             if (rollback) {
                 rollback(con);
             }
-            DBUtils.autocommit(con);
-            Database.backNoTimeout(ctxId, true, con);
+            Databases.autocommit(con);
         }
     }
 

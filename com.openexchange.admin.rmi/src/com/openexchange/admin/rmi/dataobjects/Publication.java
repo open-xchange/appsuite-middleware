@@ -199,26 +199,22 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
 
     @Override
     public String[] getMandatoryMembersCreate() {
-        // TODO Auto-generated method stub
-        return null;
+        return new String[0];
     }
 
     @Override
     public String[] getMandatoryMembersChange() {
-        // TODO Auto-generated method stub
-        return null;
+        return new String[0];
     }
 
     @Override
     public String[] getMandatoryMembersDelete() {
-        // TODO Auto-generated method stub
-        return null;
+        return new String[0];
     }
 
     @Override
     public String[] getMandatoryMembersRegister() {
-        // TODO Auto-generated method stub
-        return null;
+        return new String[0];
     }
 
     /**
@@ -382,7 +378,7 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
     @Override

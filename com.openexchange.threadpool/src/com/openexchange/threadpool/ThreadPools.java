@@ -273,7 +273,7 @@ public final class ThreadPools {
      * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
      * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
      * @throws Error If cause is an unchecked {@link Error}
-     * @see #launderThrowable(ExecutionException, Class)
+     * @see #launderThrowable(ExecutionException, ExpectedExceptionFactory)
      */
     public static <R, E extends Exception> java.util.List<R> pollCompletionService(final CompletionService<R> completionService, final int size, final long timeoutMillis, final ExpectedExceptionFactory<E> factory) throws E {
         /*
@@ -286,7 +286,7 @@ public final class ThreadPools {
                 if (null != f) {
                     ret.add(f.get());
                 } else {
-                    LOG.warn("Completion service's task elapsed time-out of {}msec", timeoutMillis);
+                    LOG.warn("Completion service's task elapsed time-out of {}msec", Long.valueOf(timeoutMillis));
                 }
             }
             return ret;
@@ -294,7 +294,7 @@ public final class ThreadPools {
             Thread.currentThread().interrupt();
             throw factory.newUnexpectedError(e);
         } catch (final ExecutionException e) {
-            throw launderThrowable(e, factory.getType());
+            throw launderThrowable(e, factory);
         }
     }
 
@@ -326,7 +326,7 @@ public final class ThreadPools {
      * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
      * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
      * @throws Error If cause is an unchecked {@link Error}
-     * @see #launderThrowable(ExecutionException, Class)
+     * @see #launderThrowable(ExecutionException, ExpectedExceptionFactory)
      * @see #DEFAULT_EXCEPTION_FACTORY
      */
     public static <R> java.util.List<R> takeCompletionService(final CompletionService<R> completionService, final int size) throws OXException {
@@ -346,7 +346,7 @@ public final class ThreadPools {
      * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
      * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
      * @throws Error If cause is an unchecked {@link Error}
-     * @see #launderThrowable(ExecutionException, Class)
+     * @see #launderThrowable(ExecutionException, ExpectedExceptionFactory)
      * @see #DEFAULT_EXCEPTION_FACTORY
      */
     public static <R, E extends Exception> java.util.List<R> takeCompletionService(final CompletionService<R> completionService, final int size, final ExpectedExceptionFactory<E> factory) throws E {
@@ -363,7 +363,7 @@ public final class ThreadPools {
             Thread.currentThread().interrupt();
             throw factory.newUnexpectedError(e);
         } catch (final ExecutionException e) {
-            throw launderThrowable(e, factory.getType());
+            throw launderThrowable(e, factory);
         }
     }
 
@@ -377,7 +377,7 @@ public final class ThreadPools {
      * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
      * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
      * @throws Error If cause is an unchecked {@link Error}
-     * @see #launderThrowable(ExecutionException, Class)
+     * @see #launderThrowable(ExecutionException, ExpectedExceptionFactory)
      * @see #DEFAULT_EXCEPTION_FACTORY
      */
     public static <R> void awaitCompletionService(final CompletionService<R> completionService, final int size) throws OXException {
@@ -396,7 +396,7 @@ public final class ThreadPools {
      * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
      * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
      * @throws Error If cause is an unchecked {@link Error}
-     * @see #launderThrowable(ExecutionException, Class)
+     * @see #launderThrowable(ExecutionException, ExpectedExceptionFactory)
      * @see #DEFAULT_EXCEPTION_FACTORY
      */
     public static <R, E extends Exception> void awaitCompletionService(final CompletionService<R> completionService, final int size, final ExpectedExceptionFactory<E> factory) throws E {
@@ -411,7 +411,31 @@ public final class ThreadPools {
             Thread.currentThread().interrupt();
             throw factory.newUnexpectedError(e);
         } catch (final ExecutionException e) {
-            throw launderThrowable(e, factory.getType());
+            throw launderThrowable(e, factory);
+        }
+    }
+
+    /**
+     * Handles given {@link Throwable} in a safe way.
+     *
+     * @param e The execution exception thrown by an asynchronous computation
+     * @param factory The exception factory to launder given {@link ExecutionException}
+     * @return The laundered exception
+     * @throws IllegalStateException If cause is neither a {@link RuntimeException} nor an {@link Error} but a checked exception
+     * @throws RuntimeException If cause is an unchecked {@link RuntimeException}
+     * @throws Error If cause is an unchecked {@link Error}
+     */
+    public static <E extends Exception> E launderThrowable(final ExecutionException e, final ExpectedExceptionFactory<E> factory) {
+        final Throwable t = e.getCause();
+        if (factory.getType().isInstance(t)) {
+            return factory.getType().cast(t);
+        }
+        if (t instanceof RuntimeException) {
+            return factory.newUnexpectedError(t);
+        } else if (t instanceof Error) {
+            throw (Error) t;
+        } else {
+            return factory.newUnexpectedError(t);
         }
     }
 
@@ -514,7 +538,7 @@ public final class ThreadPools {
             f.cancel(true);
             throw fac.newUnexpectedError(e);
         } catch (ExecutionException e) {
-            throw launderThrowable(e, fac.getType());
+            throw launderThrowable(e, fac);
         }
     }
 
@@ -619,7 +643,7 @@ public final class ThreadPools {
         if (task == null) {
             throw new NullPointerException();
         }
-        return new TaskAdapter<T>(task);
+        return task instanceof Task ? (Task<T>) task : new TaskAdapter<T>(task);
     }
 
     /**

@@ -50,7 +50,6 @@
 package com.openexchange.xing.access.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
-
 import com.openexchange.server.ServiceLookup;
 
 /**

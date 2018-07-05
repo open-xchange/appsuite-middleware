@@ -279,7 +279,7 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
         }
     }
 
-    private final class IdFolderPair implements Comparable<IdFolderPair> {
+    private static final class IdFolderPair implements Comparable<IdFolderPair> {
 
         final String identifier;
         final String folderId;

@@ -53,12 +53,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
@@ -223,7 +221,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
             try {
                 final String imp = getHeader(MessageHeaders.HDR_IMPORTANCE, null);
                 if (null != imp) {
-                    priority = MimeMessageConverter.parseImportance(imp);
+                    priority = MimeMessageUtility.parseImportance(imp);
                 } else {
                     priority = parsePriority(getHeader(MessageHeaders.HDR_X_PRIORITY, null));
                 }

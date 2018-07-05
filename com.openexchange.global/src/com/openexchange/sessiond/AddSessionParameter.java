@@ -141,4 +141,12 @@ public interface AddSessionParameter {
      * @return a callback for modifying the session after its creation or <code>null</code> if no modification should take place.
      */
     SessionEnhancement getEnhancement();
+
+    /**
+     * Gets the identifier of the user-agent using the session.
+     *
+     * @return The user-agent
+     */
+    String getUserAgent();
+
 }

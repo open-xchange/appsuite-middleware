@@ -113,11 +113,11 @@ public abstract class AbstractDateMapping<T extends DateOrTimeProperty> extends 
         }
     }
 
-    private static long addTimeZoneOffset(long date, TimeZone timeZone) {
+    protected static long addTimeZoneOffset(long date, TimeZone timeZone) {
         return null == timeZone ? date : date + timeZone.getOffset(date);
     }
 
-    private static long subtractTimeZoneOffset(long date, TimeZone timeZone) {
+    protected static long subtractTimeZoneOffset(long date, TimeZone timeZone) {
         return null == timeZone ? date : date - timeZone.getOffset(date);
     }
 

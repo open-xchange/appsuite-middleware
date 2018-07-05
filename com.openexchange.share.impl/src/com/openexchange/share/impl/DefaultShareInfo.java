@@ -79,9 +79,10 @@ public class DefaultShareInfo extends AbstractShareInfo {
      * @param srcTarget The share target from the sharing users point of view
      * @param dstTarget The share target from the recipients point of view
      * @param targetPath The target path
+     * @param includeSubfolders Whether sub-folders should be included in case the target is a infostore folder
      */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, ShareTarget srcTarget, ShareTarget dstTarget, ShareTargetPath targetPath) throws OXException {
-        super(srcTarget, dstTarget);
+    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, ShareTarget srcTarget, ShareTarget dstTarget, ShareTargetPath targetPath, boolean includeSubfolders) throws OXException {
+        super(srcTarget, dstTarget, includeSubfolders);
         if (ShareTool.isAnonymousGuest(guestUser)) {
             this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, srcTarget);
         } else {

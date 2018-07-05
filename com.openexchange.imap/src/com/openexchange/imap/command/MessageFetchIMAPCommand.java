@@ -707,7 +707,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
 
         @Override
         public void handleItem(final Item item, final ExtendedMimeMessage msg, final org.slf4j.Logger logger) {
-            msg.setSize(((RFC822SIZE) item).size);
+            msg.setSize((int) ((RFC822SIZE) item).size);
         }
     };
 

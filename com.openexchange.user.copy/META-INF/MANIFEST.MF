@@ -2,12 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core implementation for copying users between contexts
 Bundle-SymbolicName: com.openexchange.user.copy
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.user.copy.osgi.Activator
 Bundle-Vendor: Open-Xchange
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.context,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.common,
+ com.openexchange.chronos.provider,
+ com.openexchange.chronos.service,
+ com.openexchange.chronos.storage,
+ com.openexchange.context,
  com.openexchange.database,
+ com.openexchange.database.provider,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.filestore,
@@ -39,6 +45,9 @@ Import-Package: com.openexchange.context,
  com.openexchange.mail.usersetting,
  com.openexchange.mailaccount,
  com.openexchange.osgi,
+ com.openexchange.search,
+ com.openexchange.search.internal.operands,
+ com.openexchange.server,
  com.openexchange.sql.tools,
  com.openexchange.tools.arrays,
  com.openexchange.tools.file,
@@ -51,7 +60,9 @@ Import-Package: com.openexchange.context,
  gnu.trove.map,
  gnu.trove.map.hash,
  org.apache.commons.logging,
+ org.dmfs.rfc5545,
  org.eclipse.osgi.framework.console,
+ org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

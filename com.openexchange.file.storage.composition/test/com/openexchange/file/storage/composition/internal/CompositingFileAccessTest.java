@@ -55,12 +55,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -78,7 +75,6 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -216,35 +212,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
     }
 
      @Test
-     @Ignore("always failing test - obsolete, wrong behavior, unfixable or whatever")
-     public void testGetDocuments4() throws OXException {
-        final DefaultFile defaultFile = new DefaultFile();
-        defaultFile.setLastModified(new Date());
-        defaultFile.setId(fileId.getFileId());
-        defaultFile.setFolderId(fileId.getFolderId());
-
-
-        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
-        final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
-
-        fileAccess.expectCall("hashCode").andReturn(1);// Look if it's there
-        //      fileAccess.expectCall("hashCode").andReturn(1); // Store it (uncomment this line if running in eclipse.
-        // There is an optimization when running on jenkins, as there is no second hash needed
-        fileAccess.expectCall("hashCode").andReturn(1);
-        fileAccess.expectCall("getDocuments", Arrays.asList(tuple,tuple2), Arrays.asList(
-            File.Field.TITLE));
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
-
-        getDocuments(Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID()), Arrays.asList(File.Field.TITLE));
-
-        verifyAccount();
-        verifyAccount2();
-
-        fileAccess.assertAllWereCalled();
-    }
-
-     @Test
      public void testGetFileMetadata() throws OXException {
         final DefaultFile file = new DefaultFile();
         file.setId(fileId.getFileId());
@@ -340,37 +307,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         fileAccess.assertAllWereCalled();
     }
 
-    // Somewhat brittle test
-     @Test
-    @Ignore("always failing test - obsolete, wrong behavior, unfixable or whatever")
-     public void testRemoveDocuments() throws OXException {
-        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
-        final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
-        fileAccess.expectCall("hashCode").andReturn(1); // Look if it's there
-//        fileAccess.expectCall("hashCode").andReturn(1); // Store it (uncomment this line if running in eclipse.
-        // There is an optimization when running on jenkins, as there is no second hash needed for storing)
-        fileAccess.expectCall("hashCode").andReturn(1);
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", Arrays.asList(tuple, tuple2), 12L, false).andReturn(Arrays.asList(tuple));
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
-        fileAccess.expectCall("getAccountAccess").andReturn(this);
-
-
-        final List<String> ids = Arrays.asList(fileId.toUniqueID(), fileId2.toUniqueID());
-        final List<String> conflicted = removeDocument(ids, 12);
-
-        assertEquals(Arrays.asList(new FileID(getId(), getAccountId(), fileId.getFolderId(), fileId.getFileId()).toUniqueID()), conflicted);
-
-        verifyAccount();
-        verifyAccount2();
-
-        fileAccess.assertAllWereCalled();
-    }
-
      @Test
      public void testRemoveVersions() throws OXException {
         final String[] versions = new String[] { "1", "2", "3" };
@@ -414,169 +350,6 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
         search("query", Arrays.asList(File.Field.TITLE), FileStorageFileAccess.ALL_FOLDERS, File.Field.TITLE, SortDirection.DESC, 10, 20);
 
         fileAccess.assertAllWereCalled();
-    }
-
-    // create file
-     @Test
-     public void testCreateDocument1() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(FileStorageFileAccess.NEW);
-        file.setFolderId(folderId.toUniqueID());
-        IDTuple tuple = new IDTuple(folderId.getFolderId(), fileId.getFileId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER).andReturn(tuple);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
-
-        verifyAccount();
-        fileAccess.assertAllWereCalled();
-
-        assertEquals(file.getId(), fileId.toUniqueID());
-    }
-
-     @Test
-     public void testCreateDocument2() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(FileStorageFileAccess.NEW);
-        file.setFolderId(folderId.toUniqueID());
-        IDTuple tuple = new IDTuple(folderId.getFolderId(), fileId.getFileId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE)).andReturn(tuple);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
-
-        verifyAccount();
-        fileAccess.assertAllWereCalled();
-
-        assertEquals(file.getId(), fileId.toUniqueID());
-    }
-
-     @Test
-     public void testCreateMetadata1() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(FileStorageFileAccess.NEW);
-        file.setFolderId(folderId.toUniqueID());
-        IDTuple tuple = new IDTuple(folderId.getFolderId(), fileId.getFileId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE)).andReturn(tuple);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
-
-        verifyAccount();
-        fileAccess.assertAllWereCalled();
-
-        assertEquals(file.getId(), fileId.toUniqueID());
-    }
-
-     @Test
-     public void testCreateMetadata2() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(FileStorageFileAccess.NEW);
-        file.setFolderId(folderId.toUniqueID());
-        IDTuple tuple = new IDTuple(folderId.getFolderId(), fileId.getFileId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE)).andReturn(tuple);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
-
-        verifyAccount();
-        fileAccess.assertAllWereCalled();
-
-        assertEquals(file.getId(), fileId.toUniqueID());
-    }
-
-    // update file
-
-     @Test
-     public void testUpdateDocument1() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(fileId.toUniqueID());
-        file.setFolderId(folderId.toUniqueID());
-        IDTuple tuple = new IDTuple(folderId.getFolderId(), fileId.getFileId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Collections.<File.Field>emptyList()).andReturn(tuple);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Collections.<File.Field>emptyList());
-
-        verifyAccount();
-        fileAccess.assertAllWereCalled();
-
-        assertEquals(file.getId(), fileId.getFileId());
-    }
-
-     @Test
-     public void testUpdateDocument2() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(fileId.toUniqueID());
-        file.setFolderId(folderId.toUniqueID());
-        IDTuple tuple = new IDTuple(folderId.getFolderId(), fileId.getFileId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE)).andReturn(tuple);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
-
-        verifyAccount();
-        fileAccess.assertAllWereCalled();
-
-        assertEquals(file.getId(), fileId.getFileId());
-    }
-
-     @Test
-     public void testUpdateMetadata1() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(fileId.toUniqueID());
-        file.setFolderId(folderId.toUniqueID());
-        IDTuple tuple = new IDTuple(folderId.getFolderId(), fileId.getFileId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE)).andReturn(tuple);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
-
-        verifyAccount();
-        fileAccess.assertAllWereCalled();
-
-        assertEquals(file.getId(), fileId.getFileId());
-    }
-
-     @Test
-     public void testUpdateMetadata2() throws OXException {
-        final File file = new DefaultFile();
-        file.setId(fileId.toUniqueID());
-        file.setFolderId(folderId.toUniqueID());
-        IDTuple tuple = new IDTuple(folderId.getFolderId(), fileId.getFileId());
-
-        fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE)).andReturn(tuple);
-        fileAccess.expectCall("commit");
-        fileAccess.expectCall("finish");
-
-        saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
-
-        verifyAccount();
-        fileAccess.assertAllWereCalled();
-
-        assertEquals(file.getId(), fileId.getFileId());
     }
 
     private void verifyAccount() {

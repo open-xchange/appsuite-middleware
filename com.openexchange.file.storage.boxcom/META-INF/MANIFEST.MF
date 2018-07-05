@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Box.com file storage bundle
 Bundle-SymbolicName: com.openexchange.file.storage.boxcom
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.annotation,
  com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
@@ -19,7 +19,6 @@ Import-Package: com.fasterxml.jackson.annotation,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.cluster.lock,
- com.openexchange.cluster.lock.policies,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.datatypes.genericonf,
@@ -38,10 +37,12 @@ Import-Package: com.fasterxml.jackson.annotation,
  com.openexchange.oauth.access,
  com.openexchange.oauth.association,
  com.openexchange.oauth.association.spi,
+ com.openexchange.oauth.boxcom,
  com.openexchange.oauth.impl,
  com.openexchange.oauth.impl.access.impl,
  com.openexchange.oauth.scope,
  com.openexchange.osgi,
+ com.openexchange.policy.retry,
  com.openexchange.rest.client.httpclient,
  com.openexchange.server,
  com.openexchange.session,

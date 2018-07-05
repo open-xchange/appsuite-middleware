@@ -150,7 +150,11 @@ public class SearchTermParser {
         } else if (operand.hasAndNotNull(SearchTermFields.HEADER)) {
             return new HeaderOperand(operand.optString(SearchTermFields.HEADER));
         } else {
-            return new AttachmentOperand(AttachmentOperandType.valueOf(operand.optString(SearchTermFields.ATTACHMENT)));
+            AttachmentOperandType type = AttachmentOperandType.getByName(operand.optString(SearchTermFields.ATTACHMENT));
+            if (type == null) {
+                throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create();
+            }
+            return new AttachmentOperand(type);
         }
     }
 

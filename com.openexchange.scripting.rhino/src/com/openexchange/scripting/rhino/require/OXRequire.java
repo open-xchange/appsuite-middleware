@@ -57,7 +57,10 @@ import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
 
 public class OXRequire extends ScriptableObject implements Function {
-	private final DependencyResolver resolver;
+
+    private static final long serialVersionUID = 6715542845823053264L;
+
+    private final transient DependencyResolver resolver;
 
 	public OXRequire(DependencyResolver resolver) {
 		super();

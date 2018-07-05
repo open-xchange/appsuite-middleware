@@ -49,8 +49,6 @@
 
 package com.openexchange.data.conversion.ical;
 
-import com.openexchange.data.conversion.ical.itip.ITipMethod;
-
 /**
  * Defines the possible parameters of the iCal conversion.
  *
@@ -70,6 +68,6 @@ public interface Mode {
      *
      * @return The method, or <code>null</code> if no certain method should be declared
      */
-    ITipMethod getMethod();
+    String getMethod();
 
 }

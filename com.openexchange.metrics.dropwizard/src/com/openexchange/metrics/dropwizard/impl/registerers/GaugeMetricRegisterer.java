@@ -49,7 +49,6 @@
 
 package com.openexchange.metrics.dropwizard.impl.registerers;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricRegisterer;
@@ -79,21 +78,9 @@ public class GaugeMetricRegisterer implements MetricRegisterer {
      * @see com.openexchange.metrics.MetricRegisterer#register(com.openexchange.metrics.MetricDescriptor)
      */
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Metric register(final MetricDescriptor descriptor) {
-        return new DropwizardGauge(registry.gauge(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()), new MetricRegistry.MetricSupplier<Gauge>() {
-
-            @Override
-            public Gauge<Object> newMetric() {
-                return new Gauge() {
-
-                    @Override
-                    public Object getValue() {
-                        return descriptor.getMetricSupplier().get();
-                    }
-                };
-            }
-        }));
+    @SuppressWarnings("unchecked")
+    public Metric register(MetricDescriptor descriptor) {
+        return new DropwizardGauge(registry.gauge(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()), () -> () -> descriptor.getMetricSupplier().get()));
     }
 
     /*

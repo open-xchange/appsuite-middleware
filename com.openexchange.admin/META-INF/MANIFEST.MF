@@ -2,11 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Administration
 Bundle-SymbolicName: com.openexchange.admin
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.admin.osgi.AdminActivator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.damienmiller,
+ com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
  com.mysql.jdbc,
  com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
@@ -72,6 +75,14 @@ Import-Package: com.damienmiller,
  com.openexchange.tools.sql,
  com.openexchange.user,
  com.openexchange.version,
+ gnu.trove,
+ gnu.trove.iterator,
+ gnu.trove.iterator.hash,
+ gnu.trove.map,
+ gnu.trove.map.hash,
+ gnu.trove.procedure,
+ gnu.trove.set,
+ gnu.trove.set.hash,
  javax.mail,
  javax.mail.internet,
  javax.mail.internet.idn,
@@ -98,8 +109,6 @@ Export-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.plugins,
  com.openexchange.admin.properties,
  com.openexchange.admin.rmi.impl,
- com.openexchange.admin.schemacache,
- com.openexchange.admin.schemacache.inmemory,
  com.openexchange.admin.storage.interfaces,
  com.openexchange.admin.storage.mysqlStorage,
  com.openexchange.admin.storage.sqlStorage,

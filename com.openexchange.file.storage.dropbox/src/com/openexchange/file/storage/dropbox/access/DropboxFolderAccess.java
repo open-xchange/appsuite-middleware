@@ -88,6 +88,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -114,6 +115,9 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
         ConfigViewFactory viewFactory = DropboxServices.getOptionalService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.dropbox.useOptimisticSubfolderDetection", true, view);
     }

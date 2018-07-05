@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenID Connect
+Bundle-SymbolicName: com.openexchange.oidc
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: .
+Export-Package: com.openexchange.oidc,
+ com.openexchange.oidc.state
+Import-Package: com.nimbusds.jose,
+ com.nimbusds.jwt,
+ com.nimbusds.oauth2.sdk,
+ com.nimbusds.oauth2.sdk.auth,
+ com.nimbusds.oauth2.sdk.http,
+ com.nimbusds.oauth2.sdk.token,
+ com.nimbusds.openid.connect.sdk,
+ com.nimbusds.openid.connect.sdk.claims,
+ com.openexchange.ajax.login,
+ com.openexchange.authentication,
+ com.openexchange.config.lean,
+ com.openexchange.exception,
+ com.openexchange.login,
+ com.openexchange.session,
+ javax.servlet.http;version="3.1.0",
+ org.json

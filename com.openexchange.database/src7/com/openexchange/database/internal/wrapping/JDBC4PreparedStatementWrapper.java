@@ -70,7 +70,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import com.openexchange.database.Databases;
-import com.openexchange.database.IncorrectStringSQLException;
+import com.openexchange.database.SpecificSQLException;
 
 /**
  * {@link JDBC4PreparedStatementWrapper}
@@ -117,9 +117,9 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
             logSyntaxError(syntaxError, preparedStatementDelegate, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, preparedStatementDelegate, con);
             throw sqlException;
@@ -139,9 +139,9 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
             logSyntaxError(syntaxError, preparedStatementDelegate, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, preparedStatementDelegate, con);
             throw sqlException;
@@ -161,9 +161,9 @@ public abstract class JDBC4PreparedStatementWrapper extends JDBC4StatementWrappe
             logSyntaxError(syntaxError, preparedStatementDelegate, con);
             throw syntaxError;
         } catch (java.sql.SQLException sqlException) {
-            IncorrectStringSQLException incorrectStringError = IncorrectStringSQLException.instanceFor(sqlException);
-            if (null != incorrectStringError) {
-                throw incorrectStringError;
+            SQLException specific = SpecificSQLException.getSpecificSQLExceptionFor(sqlException);
+            if (null != specific) {
+                throw specific;
             }
             logReadTimeoutError(sqlException, preparedStatementDelegate, con);
             throw sqlException;

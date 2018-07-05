@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,7 +40,10 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 /**
  * This class implements a UUEncoder. It is implemented as
@@ -103,15 +106,18 @@ public class UUEncoderStream extends FilterOutputStream {
 	this.mode = mode;
     }
 
+    @Override
     public void write(byte[] b, int off, int len) throws IOException {
 	for (int i = 0; i < len; i++)
 	    write(b[off + i]);
     }
 
+    @Override
     public void write(byte[] data) throws IOException {
 	write(data, 0, data.length);
     }
 
+    @Override
     public void write(int c) throws IOException {
 	/* buffer up characters till we get a line's worth, then encode
 	 * and write them out. Max number of characters allowed per 
@@ -125,6 +131,7 @@ public class UUEncoderStream extends FilterOutputStream {
 	}
     }
 
+    @Override
     public void flush() throws IOException {
 	if (bufsize > 0) { // If there's unencoded characters in the buffer
 	    writePrefix();
@@ -135,6 +142,7 @@ public class UUEncoderStream extends FilterOutputStream {
 	out.flush();
     }
 
+    @Override
     public void close() throws IOException {
 	flush();
 	out.close();

@@ -60,7 +60,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
-import com.openexchange.imap.IMAPClientParameters;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mailaccount.MailAccount;

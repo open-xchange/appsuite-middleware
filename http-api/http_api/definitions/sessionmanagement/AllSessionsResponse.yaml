@@ -1,0 +1,7 @@
+type: object
+properties:
+  data:
+    type: array
+    description: An array of active sessions and information about those sessions.
+    items:
+      $ref: "#/definitions/SessionManagementData" 

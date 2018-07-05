@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,7 +40,11 @@
 
 package com.sun.mail.pop3;
 
-import javax.mail.*;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
 
 /**
  * The POP3 DefaultFolder.  Only contains the "INBOX" folder.
@@ -53,43 +57,53 @@ public class DefaultFolder extends Folder {
 	super(store);
     }
 
+    @Override
     public String getName() {
 	return "";
     }
 
+    @Override
     public String getFullName() {
 	return "";
     }
 
+    @Override
     public Folder getParent() {
 	return null;
     }
 
+    @Override
     public boolean exists() {
 	return true;
     }
 
+    @Override
     public Folder[] list(String pattern) throws MessagingException {
 	Folder[] f = { getInbox() };
 	return f;
     }
 
+    @Override
     public char getSeparator() {
 	return '/';
     }
 
+    @Override
     public int getType() {
 	return HOLDS_FOLDERS;
     }
 
+    @Override
     public boolean create(int type) throws MessagingException {
 	return false;
     }
 
+    @Override
     public boolean hasNewMessages() throws MessagingException {
 	return false;
     }
 
+    @Override
     public Folder getFolder(String name) throws MessagingException {
 	if (!name.equalsIgnoreCase("INBOX")) {
 	    throw new MessagingException("only INBOX supported");
@@ -103,42 +117,52 @@ public class DefaultFolder extends Folder {
     }
     
 
+    @Override
     public boolean delete(boolean recurse) throws MessagingException {
 	throw new MethodNotSupportedException("delete");
     }
 
+    @Override
     public boolean renameTo(Folder f) throws MessagingException {
 	throw new MethodNotSupportedException("renameTo");
     }
 
+    @Override
     public void open(int mode) throws MessagingException {
 	throw new MethodNotSupportedException("open");
     }
 
+    @Override
     public void close(boolean expunge) throws MessagingException {
 	throw new MethodNotSupportedException("close");
     }
 
+    @Override
     public boolean isOpen() {
 	return false;
     }
 
+    @Override
     public Flags getPermanentFlags() {
 	return new Flags(); // empty flags object
     }
 
+    @Override
     public int getMessageCount() throws MessagingException {
 	return 0;
     }
 
+    @Override
     public Message getMessage(int msgno) throws MessagingException {
 	throw new MethodNotSupportedException("getMessage");
     }
 
+    @Override
     public void appendMessages(Message[] msgs) throws MessagingException {
 	throw new MethodNotSupportedException("Append not supported");	
     }
 
+    @Override
     public Message[] expunge() throws MessagingException {
 	throw new MethodNotSupportedException("expunge");	
     }

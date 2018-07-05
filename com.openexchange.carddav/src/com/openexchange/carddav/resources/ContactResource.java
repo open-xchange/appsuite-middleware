@@ -233,7 +233,8 @@ public class ContactResource extends CommonResource<Contact> {
     @Override
     public void delete() throws WebdavProtocolException {
         boolean deleted = false;
-        String vCardID = null != object ? object.getVCardId() : null;
+        Contact object = this.object;
+        String vCardID = null == object ? null : object.getVCardId();
         Session session = factory.getSession();
         try {
             if (false == exists()) {
@@ -242,16 +243,18 @@ public class ContactResource extends CommonResource<Contact> {
             /*
              * delete contact, trying again in case of recoverable errors
              */
-            for (int i = 0; i < MAX_RETRIES && false == deleted; i++) {
-                try {
-                    factory.requireService(ContactService.class).deleteContact(session,
-                        Integer.toString(object.getParentFolderID()), Integer.toString(object.getObjectID()), object.getLastModified());
-                    LOG.debug("{}: deleted.", getUrl());
-                    deleted = true;
-                    object = null;
-                } catch (OXException e) {
-                    if (false == handle(e)) {
-                        break;
+            if (null != object) {
+                for (int i = 0; i < MAX_RETRIES && false == deleted; i++) {
+                    try {
+                        factory.requireService(ContactService.class).deleteContact(session,
+                            Integer.toString(object.getParentFolderID()), Integer.toString(object.getObjectID()), object.getLastModified());
+                        LOG.debug("{}: deleted.", getUrl());
+                        deleted = true;
+                        this.object = null;
+                    } catch (OXException e) {
+                        if (false == handle(e)) {
+                            break;
+                        }
                     }
                 }
             }
@@ -295,7 +298,7 @@ public class ContactResource extends CommonResource<Contact> {
              * set initial parent folder to the default contacts folder in case of an iOS client
              */
             contact.setContextId(session.getContextId());
-            String parentFolderID = DAVUserAgent.IOS.equals(getUserAgent()) ? factory.getState().getDefaultFolder().getID() : String.valueOf(this.parentFolderID);
+            String parentFolderID = DAVUserAgent.IOS.equals(getUserAgent()) ? factory.getState().getDefaultFolder().getID() : String.valueOf(getId(parent));
             if (contact.getMarkAsDistribtuionlist()) {
                 /*
                  * insert & delete not supported contact group (next sync cleans up the client)
@@ -365,23 +368,24 @@ public class ContactResource extends CommonResource<Contact> {
             if (null == contactService) {
                 throw ServiceExceptionCode.absentService(ContactService.class);
             }
-            Contact contact = contactService.getContact(
-                factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()));
-            String uid = contact.getUid();
-            int parentFolderID = contact.getParentFolderID();
-            int contextID = contact.getContextId();
-            Date lastModified = contact.getLastModified();
-            int objectID = contact.getObjectID();
-            String vCardID = contact.getVCardId();
-            contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(getHostData(), contact));
-            contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());
-            vCardImport = factory.requireService(VCardService.class).importVCard(inputStream, contact, parameters);
-            vCardImport.getContact().setUid(uid);
-            vCardImport.getContact().setParentFolderID(parentFolderID);;
-            vCardImport.getContact().setContextId(contextID);;
-            vCardImport.getContact().setLastModified(lastModified);
-            vCardImport.getContact().setObjectID(objectID);
-            vCardImport.getContact().setVCardId(vCardID);
+            Contact contact = contactService.getContact(factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()));
+            if (null != contact) {
+                String uid = contact.getUid();
+                int parentFolderID = contact.getParentFolderID();
+                int contextID = contact.getContextId();
+                Date lastModified = contact.getLastModified();
+                int objectID = contact.getObjectID();
+                String vCardID = contact.getVCardId();
+                contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(getHostData(), contact));
+                contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());
+                vCardImport = factory.requireService(VCardService.class).importVCard(inputStream, contact, parameters);
+                vCardImport.getContact().setUid(uid);
+                vCardImport.getContact().setParentFolderID(parentFolderID);;
+                vCardImport.getContact().setContextId(contextID);;
+                vCardImport.getContact().setLastModified(lastModified);
+                vCardImport.getContact().setObjectID(objectID);
+                vCardImport.getContact().setVCardId(vCardID);
+            }
         }
         if (null == vCardImport || null == vCardImport.getContact()) {
             throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);

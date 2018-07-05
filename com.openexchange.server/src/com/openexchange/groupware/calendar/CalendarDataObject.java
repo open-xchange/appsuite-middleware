@@ -49,17 +49,23 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Differ;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.java.Strings;
 
 /**
  * CalendarDataObject
+ *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class CalendarDataObject extends Appointment {
@@ -89,8 +95,48 @@ public class CalendarDataObject extends Appointment {
     private boolean externalOrganizer;
 
 
-    private CalendarCollectionService getCalendarCollectionService(){
-    	return ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+    /**
+     * Checks if specified UTC date increases day in month if adding given time
+     * zone's offset.
+     *
+     * @param millis
+     *            The time millis
+     * @param timeZoneID
+     *            The time zone ID
+     * @return <code>true</code> if specified date in increases day in month if
+     *         adding given time zone's offset; otherwise <code>false</code>
+     */
+    private static boolean exceedsHourOfDay(final long millis, final String timeZoneID) {
+        return exceedsHourOfDay(millis, getTimeZone(timeZoneID));
+    }
+
+    private static final Map<String, TimeZone> zoneCache = new ConcurrentHashMap<String, TimeZone>();
+
+    private static TimeZone getTimeZone(final String ID) {
+        TimeZone zone = zoneCache.get(ID);
+        if (zone == null) {
+            zone = TimeZone.getTimeZone(ID);
+            zoneCache.put(ID, zone);
+        }
+        return zone;
+    }
+
+    /**
+     * Checks if specified UTC date increases day in month if adding given time
+     * zone's offset.
+     *
+     * @param millis
+     *            The time millis
+     * @param zone
+     *            The time zone
+     * @return <code>true</code> if specified date in increases day in month if
+     *         adding given time zone's offset; otherwise <code>false</code>
+     */
+    private static boolean exceedsHourOfDay(final long millis, final TimeZone zone) {
+        final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        cal.setTimeInMillis(millis);
+        final long hours = cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / Constants.MILLI_HOUR);
+        return hours >= 24 || hours < 0;
     }
 
     @Override
@@ -98,12 +144,15 @@ public class CalendarDataObject extends Appointment {
         if (until != null) {
             final long mod = until.getTime() % Constants.MILLI_DAY;
             if (mod != 0) {
-                if (getCalendarCollectionService().exceedsHourOfDay(until.getTime(), getTimezoneFallbackUTC())) {
+                String tzn = getTimezone();
+                if(tzn == null) {
+                    tzn = "UTC";
+                }
+                if (exceedsHourOfDay(until.getTime(), tzn)) {
                     until.setTime((((until.getTime() - mod) + Constants.MILLI_DAY)));
                 } else {
                     until.setTime(until.getTime() - mod);
                 }
-//                until = new Date(((until.getTime()-mod)+CalendarRecurringCollection.MILLI_DAY));
             }
             super.setUntil(until);
         } else {
@@ -167,7 +216,7 @@ public class CalendarDataObject extends Appointment {
         } else if (getActionFolder() != 0) {
             return getActionFolder();
         } else {
-            /*System.out.println("FIX ME AND PROVIDE A FOLDER  :"+StringCollection.getStackAsString());*/ // TODO: Remove me
+            /* System.out.println("FIX ME AND PROVIDE A FOLDER  :"+StringCollection.getStackAsString()); */ // TODO: Remove me
             return 0;
         }
     }
@@ -207,40 +256,64 @@ public class CalendarDataObject extends Appointment {
 
     public final void setDelExceptions(final String delete_execptions) {
         if (delete_execptions != null) {
-            super.setDeleteExceptions(getCalendarCollectionService().convertString2Dates(delete_execptions));
+            super.setDeleteExceptions(convertString2Dates(delete_execptions));
         } else {
-            setDeleteExceptions((Date[])null);
+            setDeleteExceptions((Date[]) null);
         }
     }
 
     public final String getDelExceptions() {
         if (containsDeleteExceptions()) {
-            return getCalendarCollectionService().convertDates2String(getDeleteException());
+            return convertDates2String(getDeleteException());
         }
         return null;
     }
 
+    private Date[] convertString2Dates(final String s) {
+        if (s == null) {
+            return null;
+        } else if (s.length() == 0) {
+            return new Date[0];
+        }
+        final String[] sa = Strings.splitByComma(s);
+        final Date dates[] = new Date[sa.length];
+        for (int i = 0; i < dates.length; i++) {
+            dates[i] = new Date(Long.parseLong(sa[i]));
+        }
+        return dates;
+    }
+
+    private String convertDates2String(final Date[] d) {
+        if (d == null || d.length == 0) {
+            return null;
+        }
+        final StringBuilder sb = new StringBuilder(d.length << 4);
+        Arrays.sort(d);
+        sb.append(d[0].getTime());
+        for (int i = 1; i < d.length; i++) {
+            sb.append(',').append(d[i].getTime());
+        }
+        return sb.toString();
+    }
+
     public final void setExceptions(final String changeExceptions) {
         if (changeExceptions != null) {
-            final CalendarCollectionService collectionService = getCalendarCollectionService();
-            if (null != collectionService) {
-                super.setChangeExceptions(collectionService.convertString2Dates(changeExceptions));
-            }
+            super.setChangeExceptions(convertString2Dates(changeExceptions));
         } else {
-            setChangeExceptions((Date[])null);
+            setChangeExceptions((Date[]) null);
         }
     }
 
     public final String getExceptions() {
         if (containsChangeExceptions()) {
-            return getCalendarCollectionService().convertDates2String(getChangeException());
+            return convertDates2String(getChangeException());
         }
         return null;
     }
 
     public final boolean calculateRecurrence() throws OXException {
         if (isSequence()) {
-            return getCalendarCollectionService().fillDAO(this);
+            return CalendarCollectionUtils.fillDAO(this);
         }
         return false;
     }
@@ -251,7 +324,7 @@ public class CalendarDataObject extends Appointment {
             /*
              * Determine max. end date
              */
-            return getCalendarCollectionService().getMaxUntilDate(this);
+            return CalendarCollectionUtils.getMaxUntilDate(this);
         }
         return super.getUntil();
     }
@@ -305,11 +378,11 @@ public class CalendarDataObject extends Appointment {
         is_hard_conflict = true;
     }
 
-     public void setFillParticipants() {
+    public void setFillParticipants() {
         fill_participants = true;
     }
 
-     public boolean fillParticipants() {
+    public boolean fillParticipants() {
         return fill_participants;
     }
 
@@ -321,18 +394,19 @@ public class CalendarDataObject extends Appointment {
         return fillConfirmations;
     }
 
-     public void setFillUserParticipants() {
+    public void setFillUserParticipants() {
         fill_user_participants = true;
     }
 
-     public boolean fillUserParticipants() {
+    public boolean fillUserParticipants() {
         return fill_user_participants;
     }
-     public void setFillFolderID() {
+
+    public void setFillFolderID() {
         fill_folder_id = true;
     }
 
-     public boolean fillFolderID() {
+    public boolean fillFolderID() {
         return fill_folder_id;
     }
 
@@ -456,18 +530,16 @@ public class CalendarDataObject extends Appointment {
         clone.setFolderMove(getFolderMove());
         clone.setSharedFolderOwner(getSharedFolderOwner());
 
-
         return clone;
     }
 
     public boolean isExternalOrganizer() {
-		return externalOrganizer;
-	}
+        return externalOrganizer;
+    }
 
-	public void setExternalOrganizer(boolean externalOrganizer) {
-		this.externalOrganizer = externalOrganizer;
-	}
-
+    public void setExternalOrganizer(boolean externalOrganizer) {
+        this.externalOrganizer = externalOrganizer;
+    }
 
     private static final Date[] copy(final Date[] copyMe) {
         if (copyMe == null) {

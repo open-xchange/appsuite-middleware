@@ -1,8 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="test"/>
-	<classpathentry exported="true" kind="lib" path="lib/tika-app-1.4.jar" sourcepath="lib/source/tika-1.4-src.zip"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry exported="true" kind="lib" path="lib/jai-imageio-jpeg2000-1.3.0.jar" sourcepath="lib/source/jai-imageio-jpeg2000-1.3.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ctakes-core-4.0.0.jar" sourcepath="lib/source/ctakes-core-4.0.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/uimaj-core-3.0.0.jar" sourcepath="lib/source/uimaj-core-3.0.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cdm-4.5.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/curvesapi-1.04.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/geoapi-3.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grib-4.5.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/httpservices-4.5.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/isoparser-1.1.18.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackcess-2.1.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/java-libpst-0.8.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jcip-annotations-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jempbox-1.8.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jhighlight-1.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jmatio-1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/junrar-0.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netcdf4-4.5.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/opennlp-tools-1.8.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/pdfbox-tools-2.0.9.jar" sourcepath="lib/source/pdfbox-tools-2.0.9-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/poi-3.17.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml-3.17.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml-schemas-3.17.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/poi-scratchpad-3.17.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/rome-1.5.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/rome-utils-1.5.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sentiment-analysis-parser-0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sis-metadata-0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sis-netcdf-0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sis-storage-0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/sis-utility-0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tagsoup-1.2.1.jar" sourcepath="lib/source/tagsoup-1.2.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/unit-api-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/vorbis-java-core-0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/vorbis-java-tika-0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xz-1.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tika-core-1.18.jar" sourcepath="lib/source/tika-core-1.18-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tika-parsers-1.18.jar" sourcepath="lib/source/tika-parsers-1.18-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="output" path="build"/>

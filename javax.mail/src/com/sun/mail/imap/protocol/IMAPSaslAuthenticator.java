@@ -40,15 +40,13 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
-import javax.security.sasl.*;
-import javax.security.auth.callback.*;
-
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.*;
-import com.sun.mail.util.*;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
@@ -223,7 +221,8 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	    	if (r.isContinuation()) {
 		    byte[] ba = null;
 		    if (!sc.isComplete()) {
-			ba = r.readByteArray().getNewBytes();
+			ByteArray readByteArray = r.readByteArray();
+            ba = null == readByteArray ? new byte[0] : readByteArray.getNewBytes();
 			if (ba.length > 0)
 			    ba = BASE64DecoderStream.decode(ba);
 			if (logger.isLoggable(Level.FINE))
@@ -277,32 +276,25 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	    }
 	}
 
+	Response[] responses = v.toArray(new Response[v.size()]);
+
+    // handle an illegal but not uncommon untagged CAPABILTY response
+    boolean hasCaps = pr.handleCapabilityResponse(responses, pr.overwritePreLoginCapabilitiesAfterLogin);
+    if (hasCaps) {
+        pr.getCapabilities().remove("__PRELOGIN__");
+    }
+
 	/* Dispatch untagged responses.
 	 * NOTE: in our current upper level IMAP classes, we add the
 	 * responseHandler to the Protocol object only *after* the 
 	 * connection has been authenticated. So, for now, the below
 	 * code really ends up being just a no-op.
 	 */
-	Response[] responses = v.toArray(new Response[v.size()]);
 	pr.notifyResponseHandlers(responses);
 
 	// Handle the final OK, NO, BAD or BYE response
 	pr.handleLoginResult(r);
-	boolean hasCaps = pr.setCapabilities(r);
-    if (hasCaps) {
-        pr.getCapabilities().remove("__PRELOGIN__");
-    } else {
-        // Check for any unsolicited response that might provide capabilities
-        if (responses.length > 0) {
-            for (int i = responses.length; !hasCaps && i-- > 0;) {
-                Response unsolicited = responses[i];
-                hasCaps = pr.setCapabilities(unsolicited);
-                if (hasCaps) {
-                    pr.getCapabilities().remove("__PRELOGIN__");
-                }
-            }
-        }
-    }
+	pr.setCapabilities(r, false);
 
 	/*
 	 * If we're using the Novell Groupwise XGWTRUSTEDAPP mechanism

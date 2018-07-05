@@ -58,7 +58,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
@@ -153,14 +152,6 @@ public final class EventQueue {
     private static int delay = 180000;
 
     private static volatile boolean isEnabled;
-
-    /*
-     * +++++++++++++++ Appointment Event Lists +++++++++++++++
-     */
-
-    private static final List<AppointmentEventInterface> appointmentEventList = new CopyOnWriteArrayList<AppointmentEventInterface>();
-
-    private static final List<AppointmentEventInterface> noDelayAppointmentEventList = new CopyOnWriteArrayList<AppointmentEventInterface>();
 
     /*
      * +++++++++++++++ Task Event Lists +++++++++++++++
@@ -317,7 +308,7 @@ public final class EventQueue {
         final int module = eventObj.getModule();
         switch (module) {
         case Types.APPOINTMENT:
-            appointment(eventObj, noDelay ? noDelayAppointmentEventList : appointmentEventList);
+            LOG.error("invalid module: {}", module);
             break;
         case Types.CONTACT:
             contact(eventObj, noDelay ? noDelayContactEventList : contactEventList);
@@ -333,73 +324,6 @@ public final class EventQueue {
 //            break;
         default:
             LOG.error("invalid module: {}", module);
-        }
-    }
-
-    static void appointment(final EventObject eventObj, final List<AppointmentEventInterface> appointmentEventList) {
-        if (appointmentEventList.isEmpty()) {
-            return;
-        }
-        final Appointment appointment = (Appointment) eventObj.getObject();
-        final Session session = eventObj.getSessionObject();
-        final int action = eventObj.getAction();
-        switch (action) {
-        case EventClient.CREATED:
-            for (final AppointmentEventInterface next : appointmentEventList) {
-                try {
-                    next.appointmentCreated(appointment, session);
-                } catch (final Exception t) {
-                    LOG.error("", t);
-                }
-            }
-            break;
-        case EventClient.CHANGED:
-            for (final AppointmentEventInterface next : appointmentEventList) {
-                try {
-                    next.appointmentModified(appointment, session);
-                } catch (final Exception t) {
-                    LOG.error("", t);
-                }
-            }
-            break;
-        case EventClient.DELETED:
-            for (final AppointmentEventInterface next : appointmentEventList) {
-                try {
-                    next.appointmentDeleted(appointment, session);
-                } catch (final Exception t) {
-                    LOG.error("", t);
-                }
-            }
-            break;
-        case EventClient.CONFIRM_ACCEPTED:
-            for (final AppointmentEventInterface next : appointmentEventList) {
-                try {
-                    next.appointmentAccepted(appointment, session);
-                } catch (final Exception t) {
-                    LOG.error("", t);
-                }
-            }
-            break;
-        case EventClient.CONFIRM_DECLINED:
-            for (final AppointmentEventInterface next : appointmentEventList) {
-                try {
-                    next.appointmentDeclined(appointment, session);
-                } catch (final Exception t) {
-                    LOG.error("", t);
-                }
-            }
-            break;
-        case EventClient.CONFIRM_TENTATIVE:
-            for (final AppointmentEventInterface next : appointmentEventList) {
-                try {
-                    next.appointmentTentativelyAccepted(appointment, session);
-                } catch (final Exception t) {
-                    LOG.error("", t);
-                }
-            }
-            break;
-        default:
-            LOG.error("invalid action for appointment: {}", action);
         }
     }
 
@@ -590,14 +514,6 @@ public final class EventQueue {
 //        }
 //    }
 
-    public static void addAppointmentEvent(final AppointmentEventInterface event) {
-        if (NoDelayEventInterface.class.isInstance(event)) {
-            noDelayAppointmentEventList.add(event);
-        } else {
-            appointmentEventList.add(event);
-        }
-    }
-
     public static void addTaskEvent(final TaskEventInterface event) {
         if (NoDelayEventInterface.class.isInstance(event)) {
             noDelayTaskEventList.add(event);
@@ -622,14 +538,6 @@ public final class EventQueue {
         }
     }
 
-    public static void removeAppointmentEvent(final AppointmentEventInterface event) {
-        if (NoDelayEventInterface.class.isInstance(event)) {
-            noDelayAppointmentEventList.remove(event);
-        } else {
-            appointmentEventList.remove(event);
-        }
-    }
-
     public static void removeTaskEvent(final TaskEventInterface event) {
         if (NoDelayEventInterface.class.isInstance(event)) {
             noDelayTaskEventList.remove(event);
@@ -649,11 +557,6 @@ public final class EventQueue {
     public static void removeFolderEvent(final FolderEventInterface event) {
         List<FolderEventInterface> toRemoveFrom = NoDelayEventInterface.class.isInstance(event) ? noDelayFolderEventList : folderEventList;
         toRemoveFrom.remove(event);
-    }
-
-    public static void addModernListener(final AppointmentEventInterface listener) {
-        checkEventDispatcher();
-        newEventDispatcher.addListener(listener);
     }
 
     public static void addModernListener(final TaskEventInterface listener) {
@@ -712,7 +615,6 @@ public final class EventQueue {
     }
 
     public static void clearAllListeners() {
-        appointmentEventList.clear();
         taskEventList.clear();
         contactEventList.clear();
         folderEventList.clear();

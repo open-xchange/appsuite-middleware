@@ -49,7 +49,6 @@
 
 package com.openexchange.filemanagement.json;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -79,11 +78,6 @@ public class ManagedFileActionFactory implements AJAXActionServiceFactory {
         actions.put("new", new com.openexchange.filemanagement.json.actions.NewAction());
         actions.put("range", new com.openexchange.filemanagement.json.actions.RangeAction());
         this.actions = actions.build();
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

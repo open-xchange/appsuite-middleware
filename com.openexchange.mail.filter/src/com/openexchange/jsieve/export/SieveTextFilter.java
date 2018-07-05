@@ -98,7 +98,7 @@ public final class SieveTextFilter {
      * @author d7
      *
      */
-    public class ClientRulesAndRequire {
+    public static class ClientRulesAndRequire {
 
         private Map<String, List<Rule>> flaggedRules;
 
@@ -145,7 +145,7 @@ public final class SieveTextFilter {
         }
     }
 
-    public class RuleListAndNextUid {
+    public static class RuleListAndNextUid {
 
         private final ArrayList<Rule> rulelist;
 
@@ -184,10 +184,9 @@ public final class SieveTextFilter {
 
     }
 
-    public class NextUidAndError {
+    public static class NextUidAndError {
 
         private final int nextuid;
-
         private final boolean error;
 
         /**
@@ -254,7 +253,7 @@ public final class SieveTextFilter {
     /**
      * Reads the sieve script from the specified string and parses it to a {@link RuleListAndNextUid} object
      * which contains a {@link List} of {@link Rule}s and the next unique identifier for a future {@link Rule}
-     * 
+     *
      * @param readFileToString the sieve script to parse
      * @return a {@link RuleListAndNextUid} object
      *         which contains a {@link List} of {@link Rule}s and the next unique identifier for a future {@link Rule}
@@ -708,7 +707,7 @@ public final class SieveTextFilter {
      * Writes the {@link Rule}s as a multi-line {@link String}. The non commented and commented outputs contain
      * all correctly parsed sieve scripts. The rules {@link List} contains all the {@link Rule}s (also the ones
      * with syntax errors).
-     * 
+     *
      * @param nonCommentedOutput The non commented rules
      * @param commentedOutput The commented rules
      * @param rules All the rules

@@ -92,6 +92,8 @@ public class UserModuleAccess implements Serializable, Cloneable {
 
     private boolean Webdav = true;
 
+    /** @deprecated */
+    @Deprecated
     private boolean WebdavXml = true;
 
     private boolean Webmail = true;
@@ -114,6 +116,7 @@ public class UserModuleAccess implements Serializable, Cloneable {
 
     private boolean USM = true;
 
+    @Deprecated
     private boolean OLOX20 = true;
 
     private boolean GlobalAddressBookDisabled = false;
@@ -424,10 +427,14 @@ public class UserModuleAccess implements Serializable, Cloneable {
         this.Webdav = val;
     }
 
+    /** @deprecated */
+    @Deprecated
     public boolean getWebdavXml() {
         return WebdavXml;
     }
 
+    /** @deprecated */
+    @Deprecated
     public void setWebdavXml(final boolean val) {
         this.WebdavXml = val;
     }
@@ -456,10 +463,12 @@ public class UserModuleAccess implements Serializable, Cloneable {
         this.USM = val;
     }
 
+    @Deprecated
     public boolean isOLOX20() {
         return OLOX20;
     }
 
+    @Deprecated
     public void setOLOX20(final boolean val) {
         this.OLOX20 = val;
     }

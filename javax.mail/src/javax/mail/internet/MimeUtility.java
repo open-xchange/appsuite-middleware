@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,13 +40,38 @@
 
 package javax.mail.internet;
 
-import javax.mail.MessagingException;
-import javax.mail.EncodingAware;
-import javax.activation.*;
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import com.sun.mail.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.mail.EncodingAware;
+import javax.mail.MessagingException;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.BEncoderStream;
+import com.sun.mail.util.LineInputStream;
+import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.QDecoderStream;
+import com.sun.mail.util.QEncoderStream;
+import com.sun.mail.util.QPDecoderStream;
+import com.sun.mail.util.QPEncoderStream;
+import com.sun.mail.util.UUDecoderStream;
+import com.sun.mail.util.UUEncoderStream;
 
 /**
  * This is a utility class that provides various MIME related
@@ -150,7 +175,7 @@ public class MimeUtility {
     // cached map of whether a charset is compatible with ASCII
     // Map<String,Boolean>
     private static final Map<String, Boolean> nonAsciiCharsetMap
-	    = new HashMap<String, Boolean>();
+	    = new HashMap<>();
 
     private static final boolean decodeStrict =
 	PropUtil.getBooleanSystemProperty("mail.mime.decodetext.strict", true);
@@ -159,6 +184,8 @@ public class MimeUtility {
     private static final boolean ignoreUnknownEncoding =
 	PropUtil.getBooleanSystemProperty(
 	    "mail.mime.ignoreunknownencoding", false);
+    private static final boolean allowUtf8 =
+	PropUtil.getBooleanSystemProperty("mail.mime.allowutf8", false);
     /*
      * The following two properties allow disabling the fold()
      * and unfold() methods and reverting to the previous behavior.
@@ -927,7 +954,7 @@ public class MimeUtility {
 	    throw uex;
 	} catch (IOException ioex) {
 	    // Shouldn't happen.
-	    throw new ParseException(ioex.toString());
+	    throw new ParseException(ioex.toString(), ioex);
 	} catch (IllegalArgumentException iex) {
 	    /* An unknown charset of the form ISO-XXX-XXX, will cause
 	     * the JDK to throw an IllegalArgumentException ... Since the
@@ -1162,40 +1189,35 @@ public class MimeUtility {
 	int i;
 	while ((i = indexOfAny(s, "\r\n")) >= 0) {
 	    int start = i;
-	    int l = s.length();
+	    int slen = s.length();
 	    i++;		// skip CR or NL
-	    if (i < l && s.charAt(i - 1) == '\r' && s.charAt(i) == '\n')
+	    if (i < slen && s.charAt(i - 1) == '\r' && s.charAt(i) == '\n')
 		i++;	// skip LF
-	    if (start == 0 || s.charAt(start - 1) != '\\') {
-		char c;
-		// if next line starts with whitespace, skip all of it
-		// XXX - always has to be true?
-		if (i < l && ((c = s.charAt(i)) == ' ' || c == '\t')) {
-		    i++;	// skip whitespace
-		    while (i < l && ((c = s.charAt(i)) == ' ' || c == '\t'))
-			i++;
-		    if (sb == null)
-			sb = new StringBuilder(s.length());
-		    if (start != 0) {
-			sb.append(s.substring(0, start));
-			sb.append(' ');
-		    }
-		    s = s.substring(i);
-		    continue;
-		}
-		// it's not a continuation line, just leave it in
-		if (sb == null)
-		    sb = new StringBuilder(s.length());
-		sb.append(s.substring(0, i));
-		s = s.substring(i);
-	    } else {
-		// there's a backslash at "start - 1"
+	    if (start > 0 && s.charAt(start - 1) == '\\') {
+		// there's a backslash before the line break
 		// strip it out, but leave in the line break
 		if (sb == null)
 		    sb = new StringBuilder(s.length());
 		sb.append(s.substring(0, start - 1));
 		sb.append(s.substring(start, i));
 		s = s.substring(i);
+	    } else {
+		char c;
+		// if next line starts with whitespace,
+		// or at the end of the string, remove the line break
+		// XXX - next line should always start with whitespace
+		if (i >= slen || (c = s.charAt(i)) == ' ' || c == '\t') {
+		    if (sb == null)
+			sb = new StringBuilder(s.length());
+		    sb.append(s.substring(0, start));
+		    s = s.substring(i);
+		} else {
+		    // it's not a continuation line, just leave in the newline
+		    if (sb == null)
+			sb = new StringBuilder(s.length());
+		    sb.append(s.substring(0, i));
+		    s = s.substring(i);
+		}
 	    }
 	}
 	if (sb != null) {
@@ -1228,6 +1250,52 @@ public class MimeUtility {
 	}
     }
 
+    private static char[] lowercases = {
+        '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
+        '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
+        '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
+        '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
+        '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
+        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137',
+        '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
+        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
+
+    /**
+     * Fast lower-case conversion.
+     *
+     * @param s The string
+     * @return The lower-case string
+     */
+    public static String asciiLowerCase(String s) {
+        if (null == s) {
+            return null;
+        }
+
+        char[] c = null;
+        int i = s.length();
+
+        // look for first conversion
+        while (i-- > 0) {
+            char c1 = s.charAt(i);
+            if (c1 <= 127) {
+                char c2 = lowercases[c1];
+                if (c1 != c2) {
+                    c = s.toCharArray();
+                    c[i] = c2;
+                    break;
+                }
+            }
+        }
+
+        while (i-- > 0) {
+            if (c[i] <= 127) {
+                c[i] = lowercases[c[i]];
+            }
+        }
+
+        return c == null ? s : new String(c);
+    }
+
     /**
      * Convert a MIME charset name into a valid Java charset name. <p>
      *
@@ -1241,6 +1309,14 @@ public class MimeUtility {
 	    return charset;
 
 	String alias = mime2java.get(charset.toLowerCase(Locale.ENGLISH));
+	if (alias != null) {
+	    // verify that the mapped name is valid before trying to use it
+	    try {
+		Charset.forName(alias);
+	    } catch (Exception ex) {
+		alias = null;	// charset alias not valid, use original name
+	    }
+	}
 	return alias == null ? charset : alias;
     }
 
@@ -1318,6 +1394,7 @@ public class MimeUtility {
 	    } catch (SecurityException sex) {
 		
 		class NullInputStream extends InputStream {
+		    @Override
 		    public int read() {
 			return 0;
 		    }
@@ -1353,8 +1430,8 @@ public class MimeUtility {
     private static Map<String, String> java2mime;
 
     static {
-	java2mime = new HashMap<String, String>(40);
-	mime2java = new HashMap<String, String>(10);
+	java2mime = new HashMap<>(40);
+	mime2java = new HashMap<>(14);
 
 	try {
 	    // Use this class's classloader to load the mapping file
@@ -1442,6 +1519,10 @@ public class MimeUtility {
 	    mime2java.put("euckr", "KSC5601");
 	    mime2java.put("us-ascii", "ISO-8859-1");
 	    mime2java.put("x-us-ascii", "ISO-8859-1");
+	    mime2java.put("gb2312", "GB18030");
+	    mime2java.put("cp936", "GB18030");
+	    mime2java.put("ms936", "GB18030");
+	    mime2java.put("gbk", "GB18030");
 	}
     }
 
@@ -1661,14 +1742,17 @@ class AsciiOutputStream extends OutputStream {
 	checkEOL = encodeEolStrict && breakOnNonAscii;
     }
 
+    @Override
     public void write(int b) throws IOException {
 	check(b);
     }
 
+    @Override
     public void write(byte b[]) throws IOException {
 	write(b, 0, b.length);
     }
 
+    @Override
     public void write(byte b[], int off, int len) throws IOException {
 	len += off;
 	for (int i = off; i < len ; i++)

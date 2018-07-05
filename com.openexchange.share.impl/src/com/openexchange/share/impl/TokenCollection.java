@@ -56,6 +56,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
@@ -65,6 +68,8 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.SubfolderAwareTargetPermission;
+import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.user.UserService;
 
@@ -157,7 +162,7 @@ public class TokenCollection {
                 ShareTargetPath targetPath = proxy.getTargetPath();
                 ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
                 ShareTarget dstTarget = proxy.getTarget();
-                shares.add(new DefaultShareInfo(services, contextID, guestUser, srcTarget, dstTarget, targetPath));
+                shares.add(new DefaultShareInfo(services, contextID, guestUser, srcTarget, dstTarget, targetPath, checkForLegatorPermission(proxy.getPermissions(), guestUser.getId())));
             }
         }
         /*
@@ -172,12 +177,29 @@ public class TokenCollection {
                     if (proxy != null) {
                         ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
                         ShareTarget dstTarget = proxy.getTarget();
-                        shares.add(new DefaultShareInfo(services, contextID, guestUser, srcTarget, dstTarget, targetPath));
+                        shares.add(new DefaultShareInfo(services, contextID, guestUser, srcTarget, dstTarget, targetPath, checkForLegatorPermission(proxy.getPermissions(), guestUser.getId())));
                     }
                 }
             }
         }
         return shares;
+    }
+
+    /** The default permission bits to use for anonymous link shares */
+    private static final int LINK_PERMISSION_BITS = Permissions.createPermissionBits(
+        Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
+
+    private boolean checkForLegatorPermission(List<TargetPermission> permissions, int guestId){
+        for(TargetPermission perm: permissions) {
+            if(perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
+                if(perm instanceof SubfolderAwareTargetPermission) {
+                    return ((SubfolderAwareTargetPermission) perm).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     /**

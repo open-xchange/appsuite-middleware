@@ -132,9 +132,13 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
                             ConfigProviderService provider = context.getService(reference);
                             if (isServerProvider(reference)) {
                                 String scopes = getScopes(provider);
-                                configure(scopes, configCascade);
-                                configCascade.setProvider("server", provider);
-                                registerService(ConfigViewFactory.class, configCascade);
+                                try {
+                                    configure(scopes, configCascade);
+                                    configCascade.setProvider("server", provider);
+                                    registerService(ConfigViewFactory.class, configCascade);
+                                } catch (OXException e) {
+                                    logger.error("", e);
+                                }
                             }
                             return provider;
                         }
@@ -200,7 +204,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
         return null;
     }
 
-    synchronized void configure(String scopes, ConfigCascade cascade) {
+    synchronized void configure(String scopes, ConfigCascade cascade) throws OXException {
         if (configured) {
             return;
         }
@@ -208,8 +212,6 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
         configured = true;
 
         String[] searchPath = scops.split("\\s*,\\s*");
-        cascade.setSearchPath(searchPath);
-
         for (String scope : searchPath) {
             if ("server".equals(scope)) {
                 continue;
@@ -220,6 +222,8 @@ public class ConfigCascadeActivator extends HousekeepingActivator {
             cascade.setProvider(scope, trackingProvider);
             trackingProvider.open();
         }
+
+        cascade.setSearchPath(searchPath);
     }
 
 }

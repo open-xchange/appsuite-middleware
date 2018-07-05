@@ -52,14 +52,13 @@ package com.openexchange.oauth.yahoo.internal.groupware;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OAuthYahooDropTokensTask}
@@ -68,59 +67,33 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class OAuthYahooDropTokensTask extends UpdateTaskAdapter {
 
-    private final DatabaseService databaseService;
-
     /**
      * Initialises a new {@link OAuthDropboxDropTokensTask}.
      */
-    public OAuthYahooDropTokensTask(DatabaseService databaseService) {
+    public OAuthYahooDropTokensTask() {
         super();
-        this.databaseService = databaseService;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-
-        // Get the writeable connection
-        Connection writeConnection = null;
-        try {
-            writeConnection = databaseService.getForUpdateTask(contextId);
-        } catch (OXException e) {
-            throw e;
-        }
-
-        // Perform the task
+        Connection writeConnection = params.getConnection();
         PreparedStatement statement = null;
         try {
-            String dropTokensSQL = "UPDATE oauthAccounts SET accessToken = ? AND accessSecret = ? WHERE cid = ? AND serviceId = ?";
-            statement = writeConnection.prepareStatement(dropTokensSQL);
+            statement = writeConnection.prepareStatement("UPDATE oauthAccounts SET accessToken = ? AND accessSecret = ? WHERE serviceId = ?");
 
             int parameterIndex = 1;
             statement.setString(parameterIndex++, "");
             statement.setString(parameterIndex++, "");
-            statement.setInt(parameterIndex++, contextId);
             statement.setString(parameterIndex++, KnownApi.YAHOO.getFullName());
 
             statement.execute();
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(statement);
-            databaseService.backForUpdateTask(writeConnection);
+            Databases.closeSQLStuff(statement);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[] { OAuthCreateTableTask2.class.getName() };

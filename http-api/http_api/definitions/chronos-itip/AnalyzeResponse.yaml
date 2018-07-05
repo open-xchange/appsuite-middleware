@@ -1,0 +1,48 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    title: Analysis
+    description: An analysis array.
+    items:
+      type: object
+      title: Analysis
+      description: A single analysis.
+      properties:
+        actions:
+          type: array
+          description: Possible actions to be performed based on this analysis.
+          items:
+            type: string
+            title: Types
+            description: The change type.
+            enum:
+              - ACCEPT
+              - DECLINE
+              - TENTATIVE
+              - DELEGATE
+              - COUNTER
+              - ACCEPT_AND_IGNORE_CONFLICTS
+              - DELETE
+              - IGNORE
+              - ACCEPT_AND_REPLACE
+              - REFRESH
+              - SEND_APPOINTMENT
+              - ACCEPT_PARTY_CRASHER
+              - UPDATE
+              - DECLINECOUNTER
+              - CREATE
+        annotations:
+          type: array
+          description: Annotations to be displayed to the user.
+          items:
+            type: string
+            title: Annotations
+            description: An array of annotations.
+        changes:
+          type: array
+          title: Changes
+          description: An array of changes.
+          items:
+            $ref: "#/definitions/AnalysisChange"

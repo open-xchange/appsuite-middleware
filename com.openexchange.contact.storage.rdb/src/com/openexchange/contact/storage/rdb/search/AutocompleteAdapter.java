@@ -81,7 +81,8 @@ import com.openexchange.tools.StringCollection;
 public class AutocompleteAdapter extends DefaultSearchAdapter {
 
     private static final int MAX_PATTERNS = 5;
-	private final StringBuilder stringBuilder;
+    private final StringBuilder stringBuilder;
+    private boolean usesGroupBy = false;
     private final AutocompleteParameters autoCompleteParameters;
     private static final String AUTOCOMPLETE_CONFIGURATION = "com.openexchange.contact.autocomplete.fields";
     private static final Logger LOG = LoggerFactory.getLogger(AutocompleteAdapter.class);
@@ -142,49 +143,52 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
         }
     }
 
-	@Override
-	public StringBuilder getClause() {
-		return Strings.trim(stringBuilder);
-	}
+    @Override
+    public StringBuilder getClause() {
+        return Strings.trim(stringBuilder);
+    }
 
-	private void appendAutocomplete(List<String> patterns, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
+    public boolean isUsingGroupBy() {
+        return usesGroupBy;
+    }
+
+    private void appendAutocomplete(List<String> patterns, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
         boolean requireEmail = parameters.getBoolean(AutocompleteParameters.REQUIRE_EMAIL, true);
         boolean ignoreDistributionLists = parameters.getBoolean(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, false);
         boolean ignoreNonWebmailUsers = false; // TODO: Maybe for future use
         int forUser = parameters.getInteger(AutocompleteParameters.USER_ID, -1);
-		if (null == patterns || 0 == patterns.size()) {
-            stringBuilder.append(getSelectClause(fields, forUser)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ")
-                .append(getFolderIDsClause(folderIDs));
-	        if (requireEmail) {
-	            stringBuilder.append(" AND (").append(getEMailAutoCompleteClause(ignoreDistributionLists)).append(')');
-	        } else if (ignoreDistributionLists) {
-	        	stringBuilder.append(" AND (").append(getIgnoreDistributionListsClause()).append(')');
-	        }
-	    } else if (1 == patterns.size()) {
+        if (null == patterns || 0 == patterns.size()) {
+            stringBuilder.append(getSelectClause(fields, forUser)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ").append(getFolderIDsClause(folderIDs));
+            if (requireEmail) {
+                stringBuilder.append(" AND (").append(getEMailAutoCompleteClause(ignoreDistributionLists)).append(')');
+            } else if (ignoreDistributionLists) {
+                stringBuilder.append(" AND (").append(getIgnoreDistributionListsClause()).append(')');
+            }
+        } else if (1 == patterns.size()) {
             appendAutocompletePattern(patterns.get(0), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields, forUser);
-	    } else {
-	        stringBuilder.append("SELECT ");
-	        stringBuilder.append("o.").append(Mappers.CONTACT.get(fields[0]).getColumnLabel());
-	        for (int i = 1; i < fields.length; i++) {
-	            stringBuilder.append(",o.").append(Mappers.CONTACT.get(fields[i]).getColumnLabel());
-	        }
-            stringBuilder.append(",").append(Table.OBJECT_USE_COUNT).append(".value");
-	        stringBuilder.append(" FROM (");
+        } else {
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
+            stringBuilder.append("SELECT ");
+            String columnLabel = Mappers.CONTACT.get(fields[0]).getColumnLabel();
+            stringBuilder.append("min(o.").append(columnLabel).append(") AS ").append(columnLabel);
+            for (int i = 1; i < fields.length; i++) {
+                columnLabel = Mappers.CONTACT.get(fields[i]).getColumnLabel();
+                stringBuilder.append(",min(o.").append(columnLabel).append(") AS ").append(columnLabel);
+            }
+            stringBuilder.append(", min(").append(Table.OBJECT_USE_COUNT).append(".value) AS value");
+            stringBuilder.append(" FROM (");
             appendAutocompletePattern("i0", patterns.get(0), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields, forUser);
-	        for (int i = 1; i < patterns.size(); i++) {
-	            stringBuilder.append(" UNION ALL (");
+            for (int i = 1; i < patterns.size(); i++) {
+                stringBuilder.append(" UNION ALL (");
                 appendAutocompletePattern('i' + String.valueOf(i), patterns.get(i), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields);
                 stringBuilder.append(')');
-	        }
+            }
             stringBuilder.append(") AS o");
-            stringBuilder.append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append("o.cid=").append(Table.OBJECT_USE_COUNT)
-                .append(".cid AND ").append(autoCompleteParameters.getInteger(AutocompleteParameters.USER_ID, -1)).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
-                .append("o.fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
-                .append("o.intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ");
-            stringBuilder.append("GROUP BY ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel())
-	            .append(" HAVING COUNT(*) >= ").append(patterns.size());
-	    }
-   }
+            stringBuilder.append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append("o.cid=").append(Table.OBJECT_USE_COUNT).append(".cid AND ").append(autoCompleteParameters.getInteger(AutocompleteParameters.USER_ID, -1)).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ").append("o.fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ").append("o.intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ");
+            stringBuilder.append("GROUP BY ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append(" HAVING COUNT(*) >= ").append(patterns.size());
+            usesGroupBy = true;
+        }
+    }
 
     private void appendAutocompletePattern(String pattern, boolean requireEmail, boolean ignoreDistributionLists, boolean ignoreNonWebmailUsers, int[] folderIDs, int contextID, ContactField[] fields, int forUser) throws OXException {
         String contextIDClause = getContextIDClause(contextID);
@@ -268,7 +272,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
         if (needsEMail) {
             stringBuilder.append(" AND (").append(getEMailAutoCompleteClause(ignoreDistributionLists)).append(')');
         } else if (ignoreDistributionLists) {
-        	stringBuilder.append(" AND (").append(getIgnoreDistributionListsClause()).append(')');
+            stringBuilder.append(" AND (").append(getIgnoreDistributionListsClause()).append(')');
         }
         stringBuilder.append(')');
     }

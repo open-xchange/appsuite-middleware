@@ -71,6 +71,15 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class InMemoryFileStorage extends LocalFileStorage implements com.openexchange.filestore.QuotaFileStorage {
 
+    /**
+     * Initializes a new {@link InMemoryFileStorage}.
+     *
+     * @throws IOException
+     */
+    public InMemoryFileStorage() throws IOException {
+        super();
+    }
+
     private final Map<Context, Map<String, byte[]>> data = new HashMap<Context, Map<String, byte[]>>();
 
     private final Map<Context, List<String>> deletions = new HashMap<Context, List<String>>();
@@ -201,7 +210,7 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.filestore.QuotaFileStorage#getUri()
      */
     @Override
@@ -212,7 +221,7 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.filestore.QuotaFileStorage#getQuota()
      */
     @Override
@@ -223,7 +232,7 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.filestore.QuotaFileStorage#getUsage()
      */
     @Override
@@ -234,7 +243,7 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.filestore.QuotaFileStorage#recalculateUsage()
      */
     @Override
@@ -245,7 +254,7 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.filestore.QuotaFileStorage#recalculateUsage(java.util.Set)
      */
     @Override
@@ -256,7 +265,7 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.filestore.QuotaFileStorage#saveNewFile(java.io.InputStream, long)
      */
     @Override
@@ -267,7 +276,7 @@ public class InMemoryFileStorage extends LocalFileStorage implements com.openexc
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.filestore.QuotaFileStorage#appendToFile(java.io.InputStream, java.lang.String, long, long)
      */
     @Override

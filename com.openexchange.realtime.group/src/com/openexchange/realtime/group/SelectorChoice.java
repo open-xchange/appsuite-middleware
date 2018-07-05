@@ -51,6 +51,7 @@ package com.openexchange.realtime.group;
 
 import org.apache.commons.lang.Validate;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
  * {@link SelectorChoice} - When joining a {@link GroupDispatcher} clients have to choose a selector to associate with the joined

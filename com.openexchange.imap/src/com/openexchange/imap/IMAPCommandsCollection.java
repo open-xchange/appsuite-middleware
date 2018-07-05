@@ -96,6 +96,7 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -809,16 +810,12 @@ public final class IMAPCommandsCollection {
                             return new int[0];
                         }
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new BadCommandException(response);
                     } else if (response.isNO()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new CommandFailedException(response);
                     } else {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         protocol.handleResult(response);
@@ -1084,9 +1081,12 @@ public final class IMAPCommandsCollection {
      * @return The total/unread message count
      * @throws MessagingException If determining counts fails
      */
-    public static int[] getTotalAndUnread(final IMAPStore imapStore, final String fullName) throws MessagingException {
-        // TODO: Main method for acquiring STATUS information
+    public static int[] getTotalAndUnread(final IMAPStore imapStore, final String fullName, final boolean excludeDeleted) throws MessagingException {
         final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
+        return excludeDeleted ? getTotalAndUnreadBySearch(defaultFolder, fullName) : getTotalAndUnreadByStatus(defaultFolder, fullName);
+    }
+
+    private static int[] getTotalAndUnreadByStatus(DefaultFolder defaultFolder, String fullName) throws MessagingException{
         return ((int[]) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -1106,7 +1106,7 @@ public final class IMAPCommandsCollection {
                  * Item arguments
                  */
                 final Argument itemArgs = new Argument();
-                final String[] items = { "MESSAGES", "UNSEEN"};
+                final String[] items = { "MESSAGES", "UNSEEN" };
                 for (int i = 0, len = items.length; i < len; i++) {
                     itemArgs.writeAtom(items[i]);
                 }
@@ -1138,6 +1138,99 @@ public final class IMAPCommandsCollection {
                 protocol.handleResult(response);
                 return ret;
             }
+        }));
+    }
+
+    private static int[] getTotalAndUnreadBySearch(DefaultFolder defaultFolder, final String fullName) throws MessagingException{
+       return ((int[]) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                Integer total = null;
+                {
+                    // Encode the mbox as per RFC2060
+                    final Argument args = new Argument();
+                    args.writeString(BASE64MailboxEncoder.encode(fullName));
+
+                    // Perform command
+                    Response[] r = performCommand(protocol, "EXAMINE", args);
+                    Response response = r[r.length - 1];
+                    if (response.isOK()) {
+                        for (int i = 0, len = r.length - 1; null == total && i < len; i++) {
+                            if (r[i] instanceof IMAPResponse) {
+                                IMAPResponse imapResponse = (IMAPResponse) r[i];
+                                if (imapResponse.keyEquals("EXISTS")) {
+                                    total = Integer.valueOf(imapResponse.getNumber());
+                                }
+                            } else {
+                                r[i] = null;
+                            }
+                        }
+                        notifyResponseHandlers(r, protocol);
+                    } else if (response.isBAD()) {
+                        if (ImapUtility.isInvalidMessageset(response)) {
+                            total = Integer.valueOf(0);
+                        } else {
+                            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging("EXAMINE " + fullName));
+                            LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, defaultFolder.getFullName());
+                            throw new BadCommandException(response);
+                        }
+                    } else if (response.isNO()) {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging("EXAMINE " + fullName));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, defaultFolder.getFullName());
+                        throw new CommandFailedException(response);
+                    } else {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging("EXAMINE " + fullName));
+                        protocol.handleResult(response);
+                    }
+                }
+
+                String command = COMMAND_SEARCH_UNSEEN_NOT_DELETED;
+                Response[] r = performCommand(protocol, command);
+                int unread = handleSearchResponses(r, protocol, command);
+                int result[] = new int[] { null == total ? 0 : total.intValue(), unread };
+                result[result.length - 1] = unread;
+                return result;
+            }
+
+            private int handleSearchResponses(final Response[] r, final IMAPProtocol protocol, String command) throws ProtocolException {
+                int result = 0;
+                Response response = r[r.length - 1];
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length - 1; i < len; i++) {
+                        if (r[i] instanceof IMAPResponse) {
+                            IMAPResponse ir = (IMAPResponse) r[i];
+                            /*
+                             * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
+                             * messages that match the searching criteria.
+                             */
+                            if (ir.keyEquals(COMMAND_SEARCH)) {
+                                while (ir.readAtomString() != null) {
+                                    result++;
+                                }
+                            }
+                        }
+                        r[i] = null;
+                    }
+                    notifyResponseHandlers(r, protocol);
+                } else if (response.isBAD()) {
+                    if (ImapUtility.isInvalidMessageset(response)) {
+                        return 0;
+                    }
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, defaultFolder.getFullName());
+                    throw new BadCommandException(response);
+                } else if (response.isNO()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, defaultFolder.getFullName());
+                    throw new CommandFailedException(response);
+                } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    protocol.handleResult(response);
+                }
+                return result;
+            } // End of handleSearchResponses()
+
         }));
     }
 
@@ -1584,19 +1677,15 @@ public final class IMAPCommandsCollection {
                     return Boolean.TRUE;
                 } else if (response.isBAD()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), newFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, newFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     if (response.toString().toLowerCase(Locale.US).indexOf("already exists") > 0) {
                         return Boolean.TRUE;
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), newFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, newFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);
@@ -1675,16 +1764,12 @@ public final class IMAPCommandsCollection {
                     return Boolean.TRUE;
                 } else if (response.isBAD()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);
@@ -1768,16 +1853,12 @@ public final class IMAPCommandsCollection {
                         continue Next;
                     } else if (response.isBAD()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new BadCommandException(response);
                     } else if (response.isNO()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new CommandFailedException(response);
                     } else {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         p.handleResult(response);
@@ -1830,16 +1911,12 @@ public final class IMAPCommandsCollection {
                         continue Next;
                     } else if (response.isBAD()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new BadCommandException(response);
                     } else if (response.isNO()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new CommandFailedException(response);
                     } else {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         p.handleResult(response);
@@ -1893,16 +1970,12 @@ public final class IMAPCommandsCollection {
                         continue Next;
                     } else if (response.isBAD()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new BadCommandException(response);
                     } else if (response.isNO()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new CommandFailedException(response);
                     } else {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         p.handleResult(response);
@@ -2146,16 +2219,12 @@ public final class IMAPCommandsCollection {
                     notifyResponseHandlers(r, p);
                 } else if (response.isBAD()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
@@ -2183,8 +2252,8 @@ public final class IMAPCommandsCollection {
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(IMAPFolder folder, MailField[] fields, MailSortField sortField, OrderDirection orderDir, boolean fastFetch, int limit, IMAPServerInfo serverInfo, Session session) throws MessagingException {
-        return getUnreadMessages(folder, fields, sortField, orderDir, fastFetch, limit, false, serverInfo, session);
+    public static Message[] getUnreadMessages(IMAPFolder folder, MailField[] fields, MailSortField sortField, OrderDirection orderDir, boolean fastFetch, int limit, IMAPServerInfo serverInfo, Session session, MailConfig mailConfig) throws MessagingException {
+        return getUnreadMessages(folder, fields, sortField, orderDir, fastFetch, limit, false, serverInfo, session, mailConfig);
     }
 
     /**
@@ -2200,7 +2269,7 @@ public final class IMAPCommandsCollection {
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit, final boolean ignoreDeleted, final IMAPServerInfo serverInfo, final Session session) throws MessagingException {
+    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit, final boolean ignoreDeleted, final IMAPServerInfo serverInfo, final Session session, MailConfig mailConfig) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -2276,7 +2345,7 @@ public final class IMAPCommandsCollection {
                     final MailFields set = new MailFields(fields);
                     final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
                     final MailField sort = MailField.toField((sortField == null ? MailSortField.RECEIVED_DATE : sortField).getListField());
-                    final FetchProfile fp = null == sort ? getFetchProfile(fields, fastFetch) : getFetchProfile(fields, sort, fastFetch);
+                    final FetchProfile fp = getFetchProfile(fields, sort, fastFetch, mailConfig.getCapabilities().hasAttachmentMarker());
                     newMsgs = new MessageFetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, serverInfo, false, false, body).doCommand();
                 } catch (final MessagingException e) {
                     throw wrapException(e, null);
@@ -2316,16 +2385,12 @@ public final class IMAPCommandsCollection {
                         return new int[0];
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        COMMAND_SEARCH_UNSEEN,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        COMMAND_SEARCH_UNSEEN,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
@@ -2365,10 +2430,12 @@ public final class IMAPCommandsCollection {
                     return Boolean.TRUE;
                 } else if (response.isBAD()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
@@ -2627,16 +2694,12 @@ public final class IMAPCommandsCollection {
                     }
                 } else if (response.isBAD()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
@@ -2702,16 +2765,12 @@ public final class IMAPCommandsCollection {
                             return new long[0];
                         }
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new BadCommandException(response);
                     } else if (response.isNO()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new CommandFailedException(response);
                     } else {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         p.handleResult(response);
@@ -2788,16 +2847,12 @@ public final class IMAPCommandsCollection {
                         return new long[0];
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
@@ -2839,10 +2894,12 @@ public final class IMAPCommandsCollection {
                     return Boolean.valueOf(len > 0);
                 } else if (response.isBAD()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
@@ -2917,16 +2974,12 @@ public final class IMAPCommandsCollection {
                             return new int[0];
                         }
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new BadCommandException(response);
                     } else if (response.isNO()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new CommandFailedException(response);
                     } else {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         p.handleResult(response);
@@ -2997,16 +3050,12 @@ public final class IMAPCommandsCollection {
                             return new TLongIntHashMap(0);
                         }
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new BadCommandException(response);
                     } else if (response.isNO()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new CommandFailedException(response);
                     } else {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         p.handleResult(response);
@@ -3066,10 +3115,12 @@ public final class IMAPCommandsCollection {
                         return new long[0];
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
@@ -3132,16 +3183,12 @@ public final class IMAPCommandsCollection {
                         return new IMAPUpdateableData[0];
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
@@ -3622,16 +3669,12 @@ public final class IMAPCommandsCollection {
                         continue Next;
                     } else if (response.isBAD()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new BadCommandException(response);
                     } else if (response.isNO()) {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                        LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                        throw new CommandFailedException(response);
                     } else {
                         LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         p.handleResult(response);
@@ -3674,16 +3717,12 @@ public final class IMAPCommandsCollection {
                     notifyResponseHandlers(r, p);
                 } else if (response.isBAD()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
@@ -3885,16 +3924,12 @@ public final class IMAPCommandsCollection {
                         return new long[0];
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);

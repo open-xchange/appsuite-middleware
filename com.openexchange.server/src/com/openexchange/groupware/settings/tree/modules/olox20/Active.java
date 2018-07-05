@@ -57,6 +57,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Deprecated
 public class Active extends AbstractModules {
 
     public Active() {

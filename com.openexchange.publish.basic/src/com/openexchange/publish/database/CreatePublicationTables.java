@@ -60,15 +60,15 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
 
     public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT =
         "CREATE TABLE publication_users (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "name VARCHAR(255) NOT NULL," +
+        "cid INT4 UNSIGNED NOT NULL," +
+        "id INT4 UNSIGNED NOT NULL," +
+        "name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         	"password VARCHAR(255) NOT NULL," +
         	"created INT8 NOT NULL DEFAULT 0," +
         	"lastModified INT8 NOT NULL DEFAULT 0," +
         	"PRIMARY KEY (cid,id,name)," +
         	"FOREIGN KEY (cid,id) REFERENCES publications(cid,id)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     @Override
     public String[] getCreateStatements() {
@@ -86,14 +86,14 @@ public class CreatePublicationTables extends AbstractCreateTableImpl {
             + "lastModified INT8 NOT NULL DEFAULT 0,"
             + "PRIMARY KEY (cid,id),"
             + "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id),"
-            + "KEY (cid,module,entity)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+            + "KEY `entity` (cid,module(191),entity)"
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
             "CREATE TABLE sequence_publications ("
             + "cid INT4 UNSIGNED NOT NULL,"
             + "id INT4 UNSIGNED NOT NULL,"
             + "PRIMARY KEY (cid)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
 
             CREATE_USER_AND_PASSWORD_CREATE_STATEMENT
         };

@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,13 +40,27 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
-import java.util.StringTokenizer;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.activation.*;
-import javax.mail.*;
-import javax.mail.internet.*;
+import java.util.StringTokenizer;
+import javax.activation.DataHandler;
+import javax.mail.Address;
+import javax.mail.Flags;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.Session;
 import javax.mail.event.MessageChangedEvent;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimePartDataSource;
+import com.sun.mail.util.LineInputStream;
 
 /**
  * This class represents an RFC822 style email message that resides in a file.
@@ -83,7 +97,7 @@ public class MboxMessage extends MimeMessage {
 	    bis = (BufferedInputStream)is;
 	else
 	    bis = new BufferedInputStream(is);
-	DataInputStream dis = new DataInputStream(bis);
+	LineInputStream dis = new LineInputStream(bis);
 	bis.mark(1024);
 	String line = dis.readLine();
 	if (line != null && line.startsWith("From "))
@@ -155,12 +169,36 @@ public class MboxMessage extends MimeMessage {
 		(InternetAddress)unix_from_user.clone() : null;
     }
 
+    private String getUnixFromLine() {
+	if (unix_from != null)
+	    return unix_from;
+	String from = "unknown";
+	try {
+	    Address[] froma = getFrom();
+	    if (froma != null && froma.length > 0 &&
+		    froma[0] instanceof InternetAddress)
+		from = ((InternetAddress)froma[0]).getAddress();
+	} catch (MessagingException ex) { }
+	Date d = null;
+	try {
+	    d = getSentDate();
+	} catch (MessagingException ex) {
+	    // ignore
+	}
+	if (d == null)
+	    d = new Date();
+	// From shannon Mon Jun 10 12:06:52 2002
+	SimpleDateFormat fmt = new SimpleDateFormat("EEE LLL dd HH:mm:ss yyyy");
+	return "From " + from + " " + fmt.format(d);
+    }
+
     /**
      * Get the date this message was received, from the UNIX From line.
      *
      * @return          the date this message was received
      * @exception       MessagingException
      */
+    @SuppressWarnings("deprecation")    // for Date constructor
     public Date getReceivedDate() throws MessagingException {
 	if (rcvDate == null && unix_from != null) {
 	    int i;
@@ -362,7 +400,7 @@ public class MboxMessage extends MimeMessage {
     static void setHeadersFromFlags(MimeMessage msg) {
 	try {
 	    Flags flags = msg.getFlags();
-	    StringBuffer status = new StringBuffer();
+	    StringBuilder status = new StringBuilder();
 	    if (flags.contains(Flags.Flag.SEEN))
 		status.append('R');
 	    if (!flags.contains(Flags.Flag.RECENT))
@@ -482,12 +520,11 @@ public class MboxMessage extends MimeMessage {
 		// setContentSize((int)cos.getSize());
 	    }
 
-	    os = new NewlineOutputStream(os);
+	    os = new NewlineOutputStream(os, true);
 	    PrintStream pos = new PrintStream(os, false, "iso-8859-1");
 
-	    pos.println(unix_from);
+	    pos.println(getUnixFromLine());
 	    super.writeTo(pos, null);
-	    pos.println();	// make sure there's a blank line at the end
 	    pos.flush();
 	} catch (MessagingException e) {
 	    throw new IOException("unexpected exception " + e);

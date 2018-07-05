@@ -55,8 +55,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.webdav.xml.fields.CommonFields;
 
 /**
  * {@link NewMailRequest} - The request for <code>/ajax/mail?action=new</code>.

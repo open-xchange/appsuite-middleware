@@ -50,16 +50,12 @@
 package com.openexchange.advertisement.json;
 
 import org.json.JSONValue;
-
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.json.osgi.Services;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -70,9 +66,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-@Action(method = RequestMethod.GET, name = "get", description = "Get a advertisement configuration.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-}, responseDescription = "A JSON object containing the advertisement configuration.")
 public class GetConfigAction implements AJAXActionService {
 
     static final String ACTION = "get";

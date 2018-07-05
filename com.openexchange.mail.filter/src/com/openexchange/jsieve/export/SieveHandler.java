@@ -150,6 +150,13 @@ public class SieveHandler {
     protected static final int NO = 1;
 
     /**
+     * {@link WelcomeKeyword} - The server welcome keywords
+     */
+    private static enum WelcomeKeyword {
+        STARTTLS, IMPLEMENTATION, SIEVE, SASL, MAXREDIRECTS
+    }
+
+    /**
      * Remembers timed out servers for 10 seconds. Any further attempts to connect to such
      * a server-port-pair will throw an appropriate exception.
      */
@@ -519,7 +526,7 @@ public class SieveHandler {
             if (temp.startsWith(SIEVE_NO)) {
                 throw new OXSieveHandlerException("Unable to retrieve sieve capability", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
             }
-            parseCAPA(temp);
+            parseCapabilities(temp);
         }
     }
 
@@ -980,7 +987,7 @@ public class SieveHandler {
                 AUTH = false;
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, parseSIEVEResponse(test, null));
             } else {
-                parseCAPA(test);
+                parseCapabilities(test);
             }
         }
     }
@@ -1106,8 +1113,8 @@ public class SieveHandler {
                         if (temp.startsWith("{")) {
                             int cnt = Integer.parseInt(temp.substring(1, temp.length() - 1));
                             char[] buf = new char[cnt];
-                            bis_sieve.read(buf, 0, cnt);
-                            cont = com.openexchange.tools.encoding.Base64.decode(new String(buf));
+                            int read = bis_sieve.read(buf, 0, cnt);
+                            cont = com.openexchange.tools.encoding.Base64.decode(new String(buf, 0, read));
                         } else {
                             // dovecot managesieve sends quoted strings
                             cont = com.openexchange.tools.encoding.Base64.decode(temp.replaceAll("\"", ""));
@@ -1271,7 +1278,7 @@ public class SieveHandler {
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
     protected SieveResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
-        if (!useSIEVEResponseCodes) {
+        if (!useSIEVEResponseCodes || null == resp) {
             return null;
         }
 
@@ -1411,51 +1418,71 @@ public class SieveHandler {
         }
     }
 
-    private void parseCAPA(final String line) {
-        final String starttls = "\"STARTTLS\"";
-        final String implementation = "\"IMPLEMENTATION\"";
-        final String sieve = "\"SIEVE\"";
-        final String sasl = "\"SASL\"";
-        final String maxredirects = "\"MAXREDIRECTS\"";
+    /**
+     * Parses the server capabilities
+     *
+     * @param line The server line
+     */
+    private void parseCapabilities(String line) {
+        int index = line.indexOf(' ');
+        if (index < 0) {
+            index = line.length();
+        }
+        String key = line.substring(0, index).trim();
+        String value = line.substring(index).trim();
+        String token = Strings.unquote(key);
+        if (null == token) {
+            return;
+        }
+        WelcomeKeyword keyword;
+        try {
+            keyword = WelcomeKeyword.valueOf(token);
+        } catch (IllegalArgumentException e) {
+            log.debug("Unknown keyword '{}'", token);
+            return;
+        }
 
-        String temp = line;
+        parseWelcomeKeyword(keyword, value);
+    }
 
-        if (temp.startsWith(starttls)) {
-            temp = temp.substring(starttls.length());
-            capa.setStarttls(Boolean.TRUE);
-        } else if (temp.startsWith(implementation)) {
-            temp = temp.substring(implementation.length());
-            temp = temp.substring(temp.indexOf('\"') + 1);
-            temp = temp.substring(0, temp.indexOf('\"'));
-
-            capa.setImplementation(temp);
-        } else if (temp.startsWith(sieve)) {
-            temp = temp.substring(sieve.length());
-            temp = temp.substring(temp.indexOf("\"") + 1);
-            temp = temp.substring(0, temp.indexOf("\""));
-
-            final StringTokenizer st = new StringTokenizer(temp);
-            while (st.hasMoreTokens()) {
-                capa.addSieve(st.nextToken());
+    /**
+     * Parses the {@link WelcomeKeyword} and the specified value
+     *
+     * @param keyword The {@link WelcomeKeyword} to parse
+     * @param value The optional value of the keyword
+     */
+    private void parseWelcomeKeyword(WelcomeKeyword keyword, String value) {
+        String unquoted = Strings.unquote(value);
+        switch (keyword) {
+            case IMPLEMENTATION:
+                capa.setImplementation(unquoted);
+                return;
+            case MAXREDIRECTS:
+                try {
+                    capa.addExtendedProperty(keyword.name(), Integer.valueOf(unquoted));
+                } catch (NumberFormatException ex) {
+                    log.error("Unable to parse '{}' capability value: {}", keyword, unquoted);
+                }
+                return;
+            case SASL: {
+                StringTokenizer st = new StringTokenizer(unquoted);
+                while (st.hasMoreTokens()) {
+                    capa.addSasl(st.nextToken().toUpperCase());
+                }
+                return;
             }
-        } else if (temp.startsWith(sasl)) {
-            temp = temp.substring(sasl.length());
-            temp = temp.substring(temp.indexOf("\"") + 1);
-            temp = temp.substring(0, temp.indexOf("\""));
-
-            final StringTokenizer st = new StringTokenizer(temp);
-            while (st.hasMoreTokens()) {
-                capa.addSasl(st.nextToken().toUpperCase());
+            case SIEVE: {
+                StringTokenizer st = new StringTokenizer(unquoted);
+                while (st.hasMoreTokens()) {
+                    capa.addSieve(st.nextToken());
+                }
+                return;
             }
-        } else if (temp.startsWith(maxredirects)) {
-            temp = temp.substring(maxredirects.length());
-            temp = temp.substring(temp.indexOf("\"") + 1);
-            temp = temp.substring(0, temp.indexOf("\""));
-            try {
-                capa.addExtendedProperty("MAXREDIRECTS", Integer.valueOf(temp));
-            } catch(NumberFormatException ex){
-                log.error("Unable to parse MAXREDIRECTS capability value: "+temp);
-            }
+            case STARTTLS:
+                capa.setStarttls(Boolean.TRUE);
+                return;
+            default:
+                return;
         }
     }
 
@@ -1599,13 +1626,15 @@ public class SieveHandler {
     private static final Pattern PAT_LIT_LEN = Pattern.compile("\\{([0-9]+)(\\+?)\\}");
 
     private static int parseLiteralLength(final String respLen) {
-        final Matcher matcher = PAT_LIT_LEN.matcher(respLen);
-        if (matcher.matches()) {
-            try {
-                return Integer.parseInt(matcher.group(1));
-            } catch (final NumberFormatException e) {
-                log.error("", e);
-                return -1;
+        if (null != respLen) {
+            final Matcher matcher = PAT_LIT_LEN.matcher(respLen);
+            if (matcher.matches()) {
+                try {
+                    return Integer.parseInt(matcher.group(1));
+                } catch (final NumberFormatException e) {
+                    log.error("", e);
+                    return -1;
+                }
             }
         }
         return -1;

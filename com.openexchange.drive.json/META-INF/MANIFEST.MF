@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive JSON Bundle
 Bundle-SymbolicName: com.openexchange.drive.json
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.drive.json.osgi.DriveJsonActivator
 Bundle-ClassPath: .
 Import-Package: com.fasterxml.jackson.core,
@@ -32,8 +32,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.configuration,
  com.openexchange.database,
  com.openexchange.dispatcher,
- com.openexchange.documentation,
- com.openexchange.documentation.annotations,
  com.openexchange.drive,
  com.openexchange.drive.events,
  com.openexchange.drive.events.subscribe,

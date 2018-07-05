@@ -33,13 +33,11 @@ package net.fortuna.ical4j.util;
 
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
-
-import net.fortuna.ical4j.model.parameter.Encoding;
-
 import org.apache.commons.codec.BinaryEncoder;
 import org.apache.commons.codec.StringEncoder;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import net.fortuna.ical4j.model.parameter.Encoding;
 
 /**
  * Default encoder factory implementation.

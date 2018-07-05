@@ -58,6 +58,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
@@ -354,5 +355,8 @@ public abstract class AbstractDelegatingIDBasedFileAccess implements DelegatingI
     public Map<String, String> getETags(List<String> folderIds) throws OXException {
         return fileAccess.getETags(folderIds);
     }
-
+    @Override
+    public Map<FileID, FileStorageFolder[]> restore(List<String> fileIds, String defaultDestFolderId) throws OXException {
+        return fileAccess.restore(fileIds, defaultDestFolderId);
+    }
 }

@@ -49,12 +49,10 @@
 
 package com.openexchange.snippet;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link Snippet} - Represents arbitrary (textual) content.
@@ -106,7 +104,7 @@ public interface Snippet {
     /**
      * The set of named properties.
      */
-    public static final Set<String> NAMED_PROPERTIES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    public static final Set<String> NAMED_PROPERTIES = ImmutableSet.of(
         PROP_ACCOUNT_ID,
         PROP_CREATED_BY,
         PROP_DISPLAY_NAME,
@@ -114,7 +112,7 @@ public interface Snippet {
         PROP_MISC,
         PROP_MODULE,
         PROP_SHARED,
-        PROP_TYPE)));
+        PROP_TYPE);
 
     /**
      * Gets the identifier.

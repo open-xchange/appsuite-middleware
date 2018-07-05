@@ -1,9 +1,9 @@
 package com.openexchange.rss.preprocessors;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.rss.RssResult;
-import static org.junit.Assert.*;
 
 public class PreprocessorChainingTest {
 	class Pre1 extends AbstractPreprocessor {

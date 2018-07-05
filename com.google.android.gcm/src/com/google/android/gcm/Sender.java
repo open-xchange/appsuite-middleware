@@ -15,14 +15,13 @@
  */
 package com.google.android.gcm;
 
-import static com.google.android.gcm.Constants.GCM_SEND_ENDPOINT;
 import static com.google.android.gcm.Constants.JSON_CANONICAL_IDS;
 import static com.google.android.gcm.Constants.JSON_ERROR;
 import static com.google.android.gcm.Constants.JSON_FAILURE;
 import static com.google.android.gcm.Constants.JSON_MESSAGE_ID;
 import static com.google.android.gcm.Constants.JSON_MULTICAST_ID;
-import static com.google.android.gcm.Constants.JSON_NOTIFICATION_BADGE;
 import static com.google.android.gcm.Constants.JSON_NOTIFICATION;
+import static com.google.android.gcm.Constants.JSON_NOTIFICATION_BADGE;
 import static com.google.android.gcm.Constants.JSON_NOTIFICATION_BODY;
 import static com.google.android.gcm.Constants.JSON_NOTIFICATION_BODY_LOC_ARGS;
 import static com.google.android.gcm.Constants.JSON_NOTIFICATION_BODY_LOC_KEY;
@@ -36,25 +35,18 @@ import static com.google.android.gcm.Constants.JSON_NOTIFICATION_TITLE_LOC_ARGS;
 import static com.google.android.gcm.Constants.JSON_NOTIFICATION_TITLE_LOC_KEY;
 import static com.google.android.gcm.Constants.JSON_PAYLOAD;
 import static com.google.android.gcm.Constants.JSON_REGISTRATION_IDS;
-import static com.google.android.gcm.Constants.JSON_TO;
 import static com.google.android.gcm.Constants.JSON_RESULTS;
 import static com.google.android.gcm.Constants.JSON_SUCCESS;
+import static com.google.android.gcm.Constants.JSON_TO;
 import static com.google.android.gcm.Constants.PARAM_COLLAPSE_KEY;
+import static com.google.android.gcm.Constants.PARAM_CONTENT_AVAILABLE;
 import static com.google.android.gcm.Constants.PARAM_DELAY_WHILE_IDLE;
 import static com.google.android.gcm.Constants.PARAM_DRY_RUN;
 import static com.google.android.gcm.Constants.PARAM_PRIORITY;
-import static com.google.android.gcm.Constants.PARAM_CONTENT_AVAILABLE;
 import static com.google.android.gcm.Constants.PARAM_RESTRICTED_PACKAGE_NAME;
 import static com.google.android.gcm.Constants.PARAM_TIME_TO_LIVE;
 import static com.google.android.gcm.Constants.TOKEN_CANONICAL_REG_ID;
 import static com.google.android.gcm.Constants.TOPIC_PREFIX;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
@@ -70,6 +62,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * Helper class to send messages to the GCM service using an API Key.
@@ -563,7 +560,10 @@ public class Sender {
     return (Number) value;
   }
 
-  class CustomParserException extends RuntimeException {
+  static class CustomParserException extends RuntimeException {
+
+    private static final long serialVersionUID = -1048457366720136244L;
+
     CustomParserException(String message) {
       super(message);
     }

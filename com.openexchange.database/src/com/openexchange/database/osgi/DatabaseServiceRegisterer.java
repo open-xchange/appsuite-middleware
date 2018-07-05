@@ -49,8 +49,6 @@
 
 package com.openexchange.database.osgi;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -74,7 +72,6 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseServiceRegisterer.class);
 
     private final BundleContext context;
-    private final Lock lock = new ReentrantLock();
 
     private ConfigurationService configService;
     private ConfigViewFactory configViewFactory;
@@ -82,30 +79,30 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
 
     private ServiceRegistration<DatabaseService> serviceRegistration;
 
+    /**
+     * Initializes a new {@link DatabaseServiceRegisterer}.
+     *
+     * @param context The bundle context
+     */
     public DatabaseServiceRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(final ServiceReference<Object> reference) {
+    public synchronized Object addingService(final ServiceReference<Object> reference) {
         final Object obj = context.getService(reference);
-        final boolean needsRegistration;
-        lock.lock();
-        try {
-            if (obj instanceof ConfigurationService) {
-                configService = (ConfigurationService) obj;
-            }
-            if (obj instanceof ConfigViewFactory) {
-                configViewFactory = (ConfigViewFactory) obj;
-            }
-            if (obj instanceof DBMigrationExecutorService) {
-                migrationService = (DBMigrationExecutorService) obj;
-            }
-            needsRegistration = null != configService && null != configViewFactory && null != migrationService;
-        } finally {
-            lock.unlock();
+        if (obj instanceof ConfigurationService) {
+            configService = (ConfigurationService) obj;
         }
+        if (obj instanceof ConfigViewFactory) {
+            configViewFactory = (ConfigViewFactory) obj;
+        }
+        if (obj instanceof DBMigrationExecutorService) {
+            migrationService = (DBMigrationExecutorService) obj;
+        }
+        boolean needsRegistration = null != configService && null != configViewFactory && null != migrationService;
+
         if (needsRegistration && !Initialization.getInstance().isStarted()) {
             DatabaseServiceImpl databaseService = null;
             try {
@@ -138,11 +135,12 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
     }
 
     @Override
-    public void removedService(final ServiceReference<Object> reference, final Object service) {
+    public synchronized void removedService(final ServiceReference<Object> reference, final Object service) {
+        ServiceRegistration<DatabaseService> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
             LOG.info("Unpublishing DatabaseService.");
+            this.serviceRegistration = null;
             serviceRegistration.unregister();
-            serviceRegistration = null;
             Initialization.getInstance().stop();
             Initialization.setConfigurationService(null);
         }

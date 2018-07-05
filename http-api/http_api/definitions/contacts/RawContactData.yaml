@@ -91,6 +91,7 @@ country_business:
 user_id:
   type: integer
   description: The internal user id.
+  readOnly: true
 number_of_employees:
   type: string
   description: The number of employees.

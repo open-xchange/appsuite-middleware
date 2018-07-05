@@ -4,17 +4,21 @@ id:
 created_by:
   type: string
   description: User ID of the user who created this object.
+  readOnly: true
 modified_by:
   type: string
   description: User ID of the user who last modified this object.
+  readOnly: true
 creation_date:
   type: integer
   format: int64
   description: Date and time of creation.
+  readOnly: true
 last_modified:
   type: integer
   format: int64
   description: Date and time of the last modification.
+  readOnly: true
 folder_id:
   type: string
   description: Object ID of the parent folder.

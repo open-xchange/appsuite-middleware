@@ -65,6 +65,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -101,7 +102,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     }
 
     private void initCache() throws OXException {
-        m_cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
+        m_cache = ServerServiceRegistry.getInstance().getService(CacheService.class, true).getCache(CACHE_REGION_NAME);
     }
 
     private void releaseCache() throws OXException {
@@ -141,27 +142,28 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
             Connection writeCon = writeConArg;
             boolean closeCon = false;
             PreparedStatement stmt = null;
-            ResultSet rs = null;
-            boolean insert = false;
-            Connection tmpCon = null;
-            try {
-                tmpCon = DBPool.pickup(ctx);
-                stmt = tmpCon.prepareStatement("SELECT 1 FROM user_setting_mail WHERE cid = ? AND user = ?");
-                stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, user);
-                rs = stmt.executeQuery();
-                insert = (!rs.next());
-            } finally {
-                closeResources(rs, stmt, tmpCon, true, ctx);
-                rs = null;
-                stmt = null;
-                tmpCon = null;
-            }
             try {
                 if (writeCon == null) {
                     writeCon = DBPool.pickupWriteable(ctx);
                     closeCon = true;
                 }
+
+                boolean insert;
+                {
+                    ResultSet rs = null;
+                    try {
+                        stmt = writeCon.prepareStatement("SELECT 1 FROM user_setting_mail WHERE cid = ? AND user = ?");
+                        stmt.setInt(1, ctx.getContextId());
+                        stmt.setInt(2, user);
+                        rs = stmt.executeQuery();
+                        insert = (!rs.next());
+                    } finally {
+                        closeResources(rs, stmt, null, true, ctx);
+                        rs = null;
+                        stmt = null;
+                    }
+                }
+
                 if (insert) {
                     stmt = getInsertStmt(usm, user, ctx, writeCon);
                 } else {
@@ -170,7 +172,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                 stmt.executeUpdate();
                 saveSignatures(usm, user, ctx, writeCon);
             } finally {
-                closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
+                closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
             }
             usm.setModifiedDuringSession(false);
 
@@ -466,68 +468,86 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     }
 
     private static PreparedStatement getUpdateStmt(final UserSettingMail usm, final int user, final Context ctx, final Connection writeCon) throws SQLException {
-        PreparedStatement stmt;
-        stmt = writeCon.prepareStatement(SQL_UPDATE);
-        stmt.setInt(1, usm.getBitsValue());
-        stmt.setString(2, usm.getSendAddr() == null ? "" : usm.getSendAddr());
-        stmt.setString(3, usm.getReplyToAddr() == null ? "" : usm.getReplyToAddr());
-        stmt.setInt(4, usm.getMsgFormat());
-        String s = getDisplayMsgHeadersString(usm);
-        if (s == null) {
-            stmt.setNull(5, Types.VARCHAR);
-        } else {
-            stmt.setString(5, s);
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_UPDATE);
+            stmt.setInt(1, usm.getBitsValue());
+            stmt.setString(2, usm.getSendAddr() == null ? "" : usm.getSendAddr());
+            stmt.setString(3, usm.getReplyToAddr() == null ? "" : usm.getReplyToAddr());
+            stmt.setInt(4, usm.getMsgFormat());
+            String s = getDisplayMsgHeadersString(usm);
+            if (s == null) {
+                stmt.setNull(5, Types.VARCHAR);
+            } else {
+                stmt.setString(5, s);
+            }
+            s = null;
+            stmt.setInt(6, usm.getAutoLinebreak());
+            stmt.setString(7, usm.getStdTrashName() == null ? MailStrings.TRASH : usm.getStdTrashName());
+            stmt.setString(8, usm.getStdSentName() == null ? MailStrings.SENT : usm.getStdSentName());
+            stmt.setString(9, usm.getStdDraftsName() == null ? MailStrings.DRAFTS : usm.getStdDraftsName());
+            stmt.setString(10, usm.getStdSpamName() == null ? MailStrings.SPAM : usm.getStdSpamName());
+            stmt.setLong(11, usm.getUploadQuota());
+            stmt.setLong(12, usm.getUploadQuotaPerFile());
+            stmt.setString(13, usm.getConfirmedSpam() == null ? MailStrings.CONFIRMED_SPAM : usm.getConfirmedSpam());
+            stmt.setString(14, usm.getConfirmedHam() == null ? MailStrings.CONFIRMED_HAM : usm.getConfirmedHam());
+            stmt.setInt(15, ctx.getContextId());
+            stmt.setInt(16, user);
+            PreparedStatement retval = stmt;
+            stmt = null;
+            return retval;
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
-        s = null;
-        stmt.setInt(6, usm.getAutoLinebreak());
-        stmt.setString(7, usm.getStdTrashName() == null ? MailStrings.TRASH : usm.getStdTrashName());
-        stmt.setString(8, usm.getStdSentName() == null ? MailStrings.SENT : usm.getStdSentName());
-        stmt.setString(9, usm.getStdDraftsName() == null ? MailStrings.DRAFTS : usm.getStdDraftsName());
-        stmt.setString(10, usm.getStdSpamName() == null ? MailStrings.SPAM : usm.getStdSpamName());
-        stmt.setLong(11, usm.getUploadQuota());
-        stmt.setLong(12, usm.getUploadQuotaPerFile());
-        stmt.setString(13, usm.getConfirmedSpam() == null ? MailStrings.CONFIRMED_SPAM : usm.getConfirmedSpam());
-        stmt.setString(14, usm.getConfirmedHam() == null ? MailStrings.CONFIRMED_HAM : usm.getConfirmedHam());
-        stmt.setInt(15, ctx.getContextId());
-        stmt.setInt(16, user);
-        return stmt;
     }
 
     private static PreparedStatement getUpdateStmtBits(final UserSettingMail usm, final int user, final Context ctx, final Connection writeCon) throws SQLException {
-        PreparedStatement stmt;
-        stmt = writeCon.prepareStatement(SQL_UPDATE_BITS);
-        stmt.setInt(1, usm.getBitsValue());
-        stmt.setInt(2, ctx.getContextId());
-        stmt.setInt(3, user);
-        return stmt;
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_UPDATE_BITS);
+            stmt.setInt(1, usm.getBitsValue());
+            stmt.setInt(2, ctx.getContextId());
+            stmt.setInt(3, user);
+            PreparedStatement retval = stmt;
+            stmt = null;
+            return retval;
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
     private static PreparedStatement getInsertStmt(final UserSettingMail usm, final int user, final Context ctx, final Connection writeCon) throws SQLException {
-        PreparedStatement stmt;
-        stmt = writeCon.prepareStatement(SQL_INSERT);
-        stmt.setInt(1, ctx.getContextId());
-        stmt.setInt(2, user);
-        stmt.setInt(3, usm.getBitsValue());
-        stmt.setString(4, usm.getSendAddr() == null ? "" : usm.getSendAddr());
-        stmt.setString(5, usm.getReplyToAddr() == null ? "" : usm.getReplyToAddr());
-        stmt.setInt(6, usm.getMsgFormat());
-        String s = getDisplayMsgHeadersString(usm);
-        if (s == null) {
-            stmt.setNull(7, Types.VARCHAR);
-        } else {
-            stmt.setString(7, s);
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_INSERT);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, user);
+            stmt.setInt(3, usm.getBitsValue());
+            stmt.setString(4, usm.getSendAddr() == null ? "" : usm.getSendAddr());
+            stmt.setString(5, usm.getReplyToAddr() == null ? "" : usm.getReplyToAddr());
+            stmt.setInt(6, usm.getMsgFormat());
+            String s = getDisplayMsgHeadersString(usm);
+            if (s == null) {
+                stmt.setNull(7, Types.VARCHAR);
+            } else {
+                stmt.setString(7, s);
+            }
+            s = null;
+            stmt.setInt(8, usm.getAutoLinebreak());
+            stmt.setString(9, usm.getStdTrashName() == null ? MailStrings.TRASH : usm.getStdTrashName());
+            stmt.setString(10, usm.getStdSentName() == null ? MailStrings.SENT : usm.getStdSentName());
+            stmt.setString(11, usm.getStdDraftsName() == null ? MailStrings.DRAFTS : usm.getStdDraftsName());
+            stmt.setString(12, usm.getStdSpamName() == null ? MailStrings.SPAM : usm.getStdSpamName());
+            stmt.setLong(13, usm.getUploadQuota());
+            stmt.setLong(14, usm.getUploadQuotaPerFile());
+            stmt.setString(15, usm.getConfirmedSpam() == null ? MailStrings.CONFIRMED_SPAM : usm.getConfirmedSpam());
+            stmt.setString(16, usm.getConfirmedHam() == null ? MailStrings.CONFIRMED_HAM : usm.getConfirmedHam());
+            PreparedStatement retval = stmt;
+            stmt = null;
+            return retval;
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
-        s = null;
-        stmt.setInt(8, usm.getAutoLinebreak());
-        stmt.setString(9, usm.getStdTrashName() == null ? MailStrings.TRASH : usm.getStdTrashName());
-        stmt.setString(10, usm.getStdSentName() == null ? MailStrings.SENT : usm.getStdSentName());
-        stmt.setString(11, usm.getStdDraftsName() == null ? MailStrings.DRAFTS : usm.getStdDraftsName());
-        stmt.setString(12, usm.getStdSpamName() == null ? MailStrings.SPAM : usm.getStdSpamName());
-        stmt.setLong(13, usm.getUploadQuota());
-        stmt.setLong(14, usm.getUploadQuotaPerFile());
-        stmt.setString(15, usm.getConfirmedSpam() == null ? MailStrings.CONFIRMED_SPAM : usm.getConfirmedSpam());
-        stmt.setString(16, usm.getConfirmedHam() == null ? MailStrings.CONFIRMED_HAM : usm.getConfirmedHam());
-        return stmt;
     }
 
     private static final String SQL_INSERT_SIGNATURE = "INSERT INTO user_setting_mail_signature (cid, user, id, signature) VALUES (?, ?, ?, ?)";

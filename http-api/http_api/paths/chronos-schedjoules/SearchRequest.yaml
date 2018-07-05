@@ -1,0 +1,27 @@
+/chronos/schedjoules?action=search:
+  get:
+    operationId: search
+    tags:
+      - Chronos
+    summary: Performs a full text search with the specified query.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: query
+        type: string
+        description: The query
+        required: true
+      - $ref: "#/parameters/QueryParamChronosSchedJoulesLanguage"
+      - in: query
+        name: maxRows
+        type: integer
+        description: |
+          Specifies the maximum amount of results to return. If not specified, then it will fall back to '20'
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing the result of the browse operation. The structure of the returned JSON object can be found
+          here (https://github.com/schedjoules/calendar-store-api/blob/master/details/pages.md)
+        schema:
+          $ref: "#/definitions/SearchResponse"

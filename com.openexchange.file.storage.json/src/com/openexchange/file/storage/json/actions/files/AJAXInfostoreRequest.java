@@ -86,13 +86,15 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.crypto.CryptographyMode;
 import com.openexchange.file.storage.json.FileMetadataParser;
+import com.openexchange.file.storage.json.FileFieldCollector;
+import com.openexchange.file.storage.json.ParameterBasedFileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
-import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.FileKnowingInputStream;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.mime.ContentType;
@@ -138,7 +140,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private boolean notifyPermissionEntities;
     private Transport notificationTransport;
     private String notificationMessage;
-	protected AJAXRequestData data;
+    protected AJAXRequestData data;
 
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
         super();
@@ -165,7 +167,6 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public int getAttachment() {
         return getInt(Param.ATTACHMENT);
     }
-
 
     @Override
     public AttachmentBase getAttachmentBase() {
@@ -243,13 +244,13 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
         String cryptoAction = data != null ? data.getParameter("cryptoAction") : null;
-        if(cryptoAction != null && !cryptoAction.isEmpty()) {
+        if (cryptoAction != null && !cryptoAction.isEmpty()) {
 
             //Parsing authentication from the request. Might be null since not all crypto-actions require authentication.
             String authentication = null;
             CryptographicServiceAuthenticationFactory encryptionAuthenticationFactory = Services.getCryptographicServiceAuthenticationFactory();
-            if(encryptionAuthenticationFactory != null) {
-                if(data.optHttpServletRequest() != null) {
+            if (encryptionAuthenticationFactory != null) {
+                if (data.optHttpServletRequest() != null) {
                     authentication = encryptionAuthenticationFactory.createAuthenticationFrom(data.optHttpServletRequest());
                 }
             }
@@ -261,7 +262,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 if (cryptMode.size() > 0) {
                     return fileAccess = encryptionAwareFileAccessFactory.createAccess(Services.getFileAccessFactory().createAccess(session), cryptMode, session, authentication);
                 } else {
-                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("cryptoAction",cryptoAction);
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("cryptoAction", cryptoAction);
                 }
             } else {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CryptographicAwareIDBasedFileAccessFactory.class.getSimpleName());
@@ -302,7 +303,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getFolderId() throws OXException {
-    	final String parameter = data.getParameter(PARAM_FOLDER_ID);
+        final String parameter = data.getParameter(PARAM_FOLDER_ID);
         if (parameter == null || parameter.equals("null") || parameter.equals("undefined")) {
             return FileStorageFileAccess.ALL_FOLDERS;
         }
@@ -377,7 +378,12 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public int getModule() {
-        return getInt(Param.MODULE);
+        String value = data.getParameter(Param.ATTACHMENT_MODULE.getName());
+        if (null == value) {
+            return getInt(Param.MODULE);
+        }
+
+        return Integer.parseInt(value.trim());
     }
 
     /**
@@ -400,7 +406,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     @Override
     public String getSearchQuery() throws OXException {
         Object data2 = data.getData();
-        if(data2 == null) {
+        if (data2 == null) {
             return "";
         }
         final JSONObject queryObject = (JSONObject) data2;
@@ -408,7 +414,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         try {
             return queryObject.getString("pattern");
         } catch (final JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( x.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
     }
 
@@ -436,7 +442,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
         Field field = sortingField = Field.get(sort);
         if (field == null) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( PARAM_SORT, sort);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_SORT, sort);
         }
 
         return field;
@@ -446,7 +452,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public SortDirection getSortingOrder() throws OXException {
         SortDirection sortDirection = SortDirection.get(data.getParameter(PARAM_ORDER));
         if (sortDirection == null) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( PARAM_ORDER, sortDirection);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_ORDER, sortDirection);
         }
         return sortDirection;
     }
@@ -536,7 +542,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 versions[i] = body.getString(i);
             }
         } catch (final JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( x.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
         return versions;
     }
@@ -553,7 +559,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public boolean isForSpecificVersion() {
-    	return getVersion() != FileStorageFileAccess.CURRENT_VERSION;
+        return getVersion() != FileStorageFileAccess.CURRENT_VERSION;
     }
 
     @Override
@@ -564,7 +570,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
         final List<String> missingParameters = data.getMissingParameters(names);
         if (!missingParameters.isEmpty()) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( missingParameters.toString());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(missingParameters.toString());
         }
         return this;
     }
@@ -574,7 +580,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (data.getData() == null) {
             long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
             if (!data.hasUploads(-1, maxSize > 0 ? maxSize : -1L) && data.getParameter("json") == null) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("data");
             }
         }
         return this;
@@ -716,7 +722,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             this.versionMapping = versionMapping;
             return true;
         } catch (final JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( x.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
         }
 
     }
@@ -750,7 +756,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     protected void parseNotification() throws OXException {
-        if (null == notificationTransport) {
+        if (null == notificationTransport && (data.isMultipartContent() || !data.hasUploadStreamProvider())) {
             JSONObject object = getBodyAsJSONObject();
             JSONObject jNotification = object.optJSONObject("notification");
             if (jNotification != null) {
@@ -791,41 +797,115 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (file != null) {
             return;
         }
-        requireFileMetadata();
 
-        JSONObject jFile;
-        JSONObject object = getBodyAsJSONObject();
+        if (data.isMultipartContent() || !data.hasUploadStreamProvider()) {
+            JSONObject jFile;
+            requireFileMetadata();
+            JSONObject object = getBodyAsJSONObject();
 
-        if (object.hasAndNotNull("file")) {
-            try {
-                jFile = object.getJSONObject("file");
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+            if (object.hasAndNotNull("file")) {
+                try {
+                    jFile = object.getJSONObject("file");
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+                }
+            } else {
+                jFile = object;
             }
-        } else {
-            jFile = object;
-        }
 
-        // Disallow to manually set weird MIME type
-        {
-            Object mimeType = jFile.opt(File.Field.FILE_MIMETYPE.getName());
-            if (null != mimeType) {
-                String cts = mimeType.toString();
-                if (Strings.isEmpty(cts)) {
-                    jFile.remove(File.Field.FILE_MIMETYPE.getName());
-                } else {
-                    try {
-                        ContentType contentType = new ContentType(cts, true);
-                        if (contentType.contains("multipart/") || contentType.containsBoundaryParameter()) {
-                            // deny weird MIME types
-                            throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
+            // Disallow to manually set weird MIME type
+            {
+                Object mimeType = jFile.opt(File.Field.FILE_MIMETYPE.getName());
+                if (null != mimeType) {
+                    String cts = mimeType.toString();
+                    if (Strings.isEmpty(cts)) {
+                        jFile.remove(File.Field.FILE_MIMETYPE.getName());
+                    } else {
+                        try {
+                            ContentType contentType = new ContentType(cts, true);
+                            if (contentType.contains("multipart/") || contentType.containsBoundaryParameter()) {
+                                // deny weird MIME types
+                                throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
+                            }
+                        } catch (Exception e) {
+                            // MIME type could not be safely parsed
+                            throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create(e, e.getMessage());
                         }
-                    } catch (Exception e) {
-                        // MIME type could not be safely parsed
-                        throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create(e, e.getMessage());
                     }
                 }
             }
+
+            UploadFile uploadFile = null;
+            {
+                long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+                if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
+                    uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
+                }
+            }
+
+            if (data.getUploadEvent() != null) {
+                final List<UploadFile> list = data.getUploadEvent().getUploadFilesByFieldName("file");
+                if (list != null && !list.isEmpty()) {
+                    uploadFile = list.get(0);
+                }
+            }
+
+            FileMetadataParser parser = FileMetadataParser.getInstance();
+            file = parser.parse(jFile);
+            fields = parser.getFields(jFile);
+            if (uploadFile != null) {
+                if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
+                    file.setFileName(uploadFile.getPreparedFileName());
+                    fields.add(File.Field.FILENAME);
+                }
+
+                if (!fields.contains(File.Field.FILE_MIMETYPE)) {
+                    file.setFileMIMEType(uploadFile.getContentType());
+                    fields.add(File.Field.FILE_MIMETYPE);
+                }
+
+                file.setFileSize(uploadFile.getSize());
+                fields.add(File.Field.FILE_SIZE);
+                // TODO: Guess Content-Type
+            }
+
+            final String fileDisplay = data.getParameter("filedisplay");
+            if (fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
+                file.setFileName(fileDisplay);
+                fields.add(File.Field.FILENAME);
+            }
+
+            if (has("id") && !fields.contains(File.Field.ID)) {
+                file.setId(getId());
+                fields.add(File.Field.ID);
+            }
+
+            if (jFile.has("content")) {
+                try {
+                    contentData = jFile.opt("content").toString().getBytes("UTF-8");
+
+                    file.setFileSize(contentData.length);
+                    fields.add(File.Field.FILE_SIZE);
+                } catch (UnsupportedEncodingException e) {
+                    // IGNORE;
+                }
+            }
+        } else {
+            parsePutUpload();
+        }
+    }
+
+    private void parsePutUpload() throws OXException {
+
+        if (contentData != null) {
+            return;
+        }
+        String method = data.optHttpServletRequest().getMethod();
+        if (!"PUT".equals(method)) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+        if (!data.hasUploadStreamProvider()) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 
         UploadFile uploadFile = null;
@@ -836,52 +916,35 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
         }
 
-        if (data.getUploadEvent() != null) {
-            final List<UploadFile> list = data.getUploadEvent().getUploadFilesByFieldName("file");
-            if (list != null && !list.isEmpty()) {
-                uploadFile = list.get(0);
+
+
+        file = ParameterBasedFileMetadataParser.getInstance().parse(data);
+        fields = ParameterBasedFileMetadataParser.getInstance().getFields(data);
+        if (file != null) {
+
+            if (uploadFile != null) {
+                if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
+                    file.setFileName(uploadFile.getPreparedFileName());
+                    fields.add(File.Field.FILENAME);
+                }
+
+                if (!fields.contains(File.Field.FILE_MIMETYPE)) {
+                    file.setFileMIMEType(uploadFile.getContentType());
+                    fields.add(File.Field.FILE_MIMETYPE);
+                }
+
+                file.setFileSize(uploadFile.getSize());
+                fields.add(File.Field.FILE_SIZE);
             }
-        }
 
-
-        FileMetadataParser parser = FileMetadataParser.getInstance();
-        file = parser.parse(jFile);
-        fields = parser.getFields(jFile);
-        if (uploadFile != null) {
-            if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
-                file.setFileName(uploadFile.getPreparedFileName());
+            if (!fields.contains(File.Field.FILENAME) && file.getFileName() != null && file.getFileName().trim().length() != 0) {
                 fields.add(File.Field.FILENAME);
             }
-
-            if (!fields.contains(File.Field.FILE_MIMETYPE)) {
-                file.setFileMIMEType(uploadFile.getContentType());
+            if (!fields.contains(File.Field.FILE_MIMETYPE) && file.getFileMIMEType() != null && file.getFileMIMEType().trim().length() != 0) {
                 fields.add(File.Field.FILE_MIMETYPE);
             }
-
-            file.setFileSize(uploadFile.getSize());
-            fields.add(File.Field.FILE_SIZE);
-            // TODO: Guess Content-Type
-        }
-
-        final String fileDisplay = data.getParameter("filedisplay");
-        if (fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
-            file.setFileName(fileDisplay);
-            fields.add(File.Field.FILENAME);
-        }
-
-        if (has("id") && !fields.contains(File.Field.ID)) {
-            file.setId(getId());
-            fields.add(File.Field.ID);
-        }
-
-        if (jFile.has("content")) {
-            try {
-                contentData = jFile.opt("content").toString().getBytes("UTF-8");
-
-                file.setFileSize(contentData.length);
+            if (!fields.contains(File.Field.FILE_SIZE)) {
                 fields.add(File.Field.FILE_SIZE);
-            } catch (UnsupportedEncodingException e) {
-                // IGNORE;
             }
         }
     }
@@ -909,6 +972,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             String[] columns = Strings.splitByComma(columnsParameter);
             fieldsToLoad = new ArrayList<Field>(columns.length);
             requestedColumns = new int[columns.length];
+            Reference<FileFieldCollector> fieldCollectorRef = null;
             for (int i = 0; i < columns.length; i++) {
                 /*
                  * try regular file field first
@@ -917,28 +981,31 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 if (null != field) {
                     fieldsToLoad.add(field);
                     requestedColumns[i] = field.getNumber();
-                    continue;
-                }
-
+                } else {
                 /*
                  * check additionally registered file fields
                  */
-                FileFieldCollector fieldCollector = Services.getFieldCollector();
-                if (null != fieldCollector) {
-                    AdditionalFileField additionalField = fieldCollector.getField(columns[i]);
+                    FileFieldCollector fieldCollector;
+                    if (null == fieldCollectorRef) {
+                        fieldCollector = Services.getFieldCollector();
+                        fieldCollectorRef = new Reference<FileFieldCollector>(fieldCollector);
+                    } else {
+                        fieldCollector = fieldCollectorRef.getValue();
+                    }
+                    AdditionalFileField additionalField = null == fieldCollector ? null : fieldCollector.getField(columns[i]);
                     if (null != additionalField) {
                         Field[] requiredFields = additionalField.getRequiredFields();
                         if (null != requiredFields && 0 < requiredFields.length) {
                             fieldsToLoad.addAll(Arrays.asList(requiredFields));
                         }
                         requestedColumns[i] = additionalField.getColumnID();
-                        continue;
-                    }
-                }
+                    } else {
                 /*
                  * unknown column
                  */
                 unknownColumns.add(columns[i]);
+            }
+                }
             }
             if (0 < unknownColumns.size()) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_COLUMNS, unknownColumns.toString());

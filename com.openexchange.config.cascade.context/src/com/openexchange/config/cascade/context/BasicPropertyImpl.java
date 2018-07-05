@@ -60,6 +60,7 @@ import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.ConvertUtils;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -124,6 +125,8 @@ final class BasicPropertyImpl implements BasicProperty {
             throw ConfigCascadeExceptionCodes.UNEXPECTED_ERROR.create("New value is null");
         }
 
+        newValue = ConvertUtils.saveConvert(newValue, false, true);
+
         // Require service
         ContextService contextService = services.getOptionalService(ContextService.class);
         if (null == contextService) {
@@ -180,61 +183,53 @@ final class BasicPropertyImpl implements BasicProperty {
     }
 
     private void forceLoad(Context context) {
-        boolean error = false;
-        try {
-            List<String> values = context.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString());
-            if (values == null || values.isEmpty()) {
-                // No such property
-                this.value = null;
-                metadata = Collections.emptyMap();
-                return;
-            }
+        List<String> values = context.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString());
+        if (values == null || values.isEmpty()) {
+            // No such property
+            this.value = null;
+            metadata = Collections.emptyMap();
+            loaded = true;
+            return;
+        }
 
-            String value = values.get(0);
-            int pos = value.indexOf(';');
-            if (pos < 0) {
-                this.value = value.replaceAll("%3B", ";").replace("%25", "%");
-                // Assume "protected=true" by default
-                metadata = new HashMap<String, String>(2);
-                metadata.put("protected", "true");
-                return;
-            }
+        String value = values.get(0);
+        int pos = value.indexOf(';');
+        if (pos < 0) {
+            value = value.replaceAll("%3B", ";").replace("%25", "%");
+            this.value = ConvertUtils.loadConvert(value);
+            // Assume "protected=true" by default
+            metadata = new HashMap<String, String>(2);
+            metadata.put("protected", "true");
+            loaded = true;
+            return;
+        }
 
-            // Parameters available
-            String params = value.substring(pos).trim();
-            this.value = value.substring(0, pos).trim().replaceAll("%3B", ";").replace("%25", "%");
-            metadata = new LinkedHashMap<String, String>(2);
-            pos = 0;
-            while (pos >= 0 && pos < params.length()) {
-                int nextPos = params.indexOf(';', pos + 1);
-                String param;
-                if (nextPos > 0) {
-                    param = params.substring(pos+1, nextPos);
-                    pos = nextPos;
-                } else {
-                    param = params.substring(pos+1);
-                    pos = -1;
-                }
-                int eq = param.indexOf('=');
-                if (eq > 0) {
-                    String mName = param.substring(0, eq).trim();
-                    String mValue = param.substring(eq + 1).trim();
-                    metadata.put(mName, mValue);
-                } else {
-                    metadata.put(param.trim(), "true");
-                }
+        // Parameters available
+        String params = value.substring(pos).trim();
+        value = value.substring(0, pos).trim().replaceAll("%3B", ";").replace("%25", "%");
+        this.value = ConvertUtils.loadConvert(value);
+        metadata = new LinkedHashMap<String, String>(2);
+        pos = 0;
+        while (pos >= 0 && pos < params.length()) {
+            int nextPos = params.indexOf(';', pos + 1);
+            String param;
+            if (nextPos > 0) {
+                param = params.substring(pos+1, nextPos);
+                pos = nextPos;
+            } else {
+                param = params.substring(pos+1);
+                pos = -1;
             }
-        } catch (RuntimeException x) {
-            error = true;
-            throw x;
-        } catch (Error x) {
-            error = true;
-            throw x;
-        } finally {
-            if (!error) {
-                loaded = true;
+            int eq = param.indexOf('=');
+            if (eq > 0) {
+                String mName = param.substring(0, eq).trim();
+                String mValue = param.substring(eq + 1).trim();
+                metadata.put(mName, mValue);
+            } else {
+                metadata.put(param.trim(), "true");
             }
         }
+        loaded = true;
     }
 
     private void unload() {

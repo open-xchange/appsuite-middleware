@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-14 13:53+0000\n"
-"PO-Revision-Date: 2017-07-24 07:53+0000\n"
-"Last-Translator: Anonymous Pootle User\n"
+"POT-Creation-Date: 2018-05-09 10:17+0000\n"
+"PO-Revision-Date: 2017-04-12 05:35+0000\n"
+"Last-Translator: marko <marko.toom@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: et_EE\n"
 "MIME-Version: 1.0\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1500882789.000000\n"
+"X-POOTLE-MTIME: 1491975334.000000\n"
 
 # Drive Application
 msgid "Drive Application"
-msgstr "Rakendus Failid"
+msgstr "Rakendus Drive"
 
 # Synchronize your files with our Drive application.
 msgid "Synchronize your files with our Drive application."
-msgstr "Sünkroniseerige oma faile meie rakenduse Failid abil."
+msgstr "Sünkroniseerige oma faile meie rakenduse Drive abil."
 
 # Mail + Calendar + Address Book
 msgid "Mail + Calendar + Address Book"
@@ -41,19 +41,19 @@ msgstr ""
 
 # Drive App
 msgid "Drive App"
-msgstr "Rakendus Failid"
+msgstr "Rakendus Drive"
 
 # Synchronize your files with our Drive App.
 msgid "Synchronize your files with our Drive App."
-msgstr "Sünkroniseerige oma failid meie rakenduse Failid abil."
+msgstr "Sünkroniseerige oma failid meie rakenduse Drive abil."
 
 # Mail App
 msgid "Mail App"
-msgstr "Rakendus E-post"
+msgstr "Rakendus Mail"
 
 # Synchronize your Mail with our Mail App.
 msgid "Synchronize your Mail with our Mail App."
-msgstr "Sünkroniseerige oma e-post meie rakenduse E-post abil."
+msgstr "Sünkroniseerige oma e-post meie rakenduse Mail abil."
 
 # Calendar + Address Book
 msgid "Calendar + Address Book"
@@ -78,34 +78,6 @@ msgid ""
 msgstr ""
 "Kasutage järgnevat teavet oma kalendri ja aadressiraamatu kontode käsitsi "
 "seadistamiseks."
-
-# Updater
-msgid "Updater"
-msgstr "Värskendaja"
-
-# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
-msgid ""
-"When executing the downloaded file, an installation wizard will be launched. "
-"Follow the instructions and install the updater. Installs latest versions of "
-"Windows® client software. The Updater automatically informs about new "
-"updates. You can download the updates from within the Updater."
-msgstr ""
-"Allalaetud faili täitmisel käivitatakse paigaldusnõustaja. Järgige juhiseid "
-"ja paigaldage värskendaja. Paigaldab Windows®-i klienditarkvara uusimad "
-"versioonid. Värskendaja annab automaatselt teada uutest värskendustest. "
-"Värskendusi saab alla laadida värskendaja seest."
-
-# Connector for Microsoft Outlook®
-msgid "Connector for Microsoft Outlook®"
-msgstr "Sidestaja Microsoft Outlook®-i jaoks"
-
-# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
-msgid ""
-"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
-"Shared and System Folders to Microsoft Outlook® clients."
-msgstr ""
-"E-posti, kalendri, kontaktide ja ülesannete sünkroniseerimine koos avalike-, "
-"jagatud- ning süsteemikaustadega Microsoft Outlook®-i klientide korral."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
 msgid ""
@@ -133,3 +105,31 @@ msgstr "Sünkroniseerige oma e-post rakendusega Apple Mail."
 msgid ""
 "To manually setup your Mail account, please use the following information"
 msgstr "Kasutage järgnevat teavet oma e-posti konto käsitsi seadistamiseks"
+
+# Updater
+#~ msgid "Updater"
+#~ msgstr "Värskendaja"
+
+# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
+#~ msgid ""
+#~ "When executing the downloaded file, an installation wizard will be launched. "
+#~ "Follow the instructions and install the updater. Installs latest versions of "
+#~ "Windows® client software. The Updater automatically informs about new "
+#~ "updates. You can download the updates from within the Updater."
+#~ msgstr ""
+#~ "Allalaetud faili täitmisel käivitatakse paigaldusnõustaja. Järgige juhiseid "
+#~ "ja paigaldage värskendaja. Paigaldab Windows®-i klienditarkvara uusimad "
+#~ "versioonid. Värskendaja annab automaatselt teada uutest värskendustest. "
+#~ "Värskendusi saab alla laadida värskendaja seest."
+
+# Connector for Microsoft Outlook®
+#~ msgid "Connector for Microsoft Outlook®"
+#~ msgstr "Sidestaja Microsoft Outlook®-i jaoks"
+
+# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
+#~ msgid ""
+#~ "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
+#~ "Shared and System Folders to Microsoft Outlook® clients."
+#~ msgstr ""
+#~ "E-posti, kalendri, kontaktide ja ülesannete sünkroniseerimine koos avalike-, "
+#~ "jagatud- ning süsteemikaustadega Microsoft Outlook®-i klientide korral."

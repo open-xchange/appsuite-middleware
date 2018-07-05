@@ -66,8 +66,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -95,6 +95,7 @@ import com.openexchange.filestore.swift.impl.token.TokenStorage;
 import com.openexchange.filestore.swift.impl.token.TokenStorageImpl;
 import com.openexchange.filestore.utils.DefaultDatabaseAccess;
 import com.openexchange.filestore.utils.PropertyNameBuilder;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
@@ -374,7 +375,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         int heartbeatInterval = optIntProperty(filestoreID, "heartbeatInterval", 60000, nameBuilder, config);
 
         // Create the HTTP client
-        HttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
+        CloseableHttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
             .setMaxTotalConnections(maxConnections)
             .setMaxConnectionsPerRoute(maxConnectionsPerHost)
             .setConnectionTimeout(connectionTimeout)
@@ -472,7 +473,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             httpClient = null;
             return swiftConfig;
         } finally {
-            HttpClients.shutDown(httpClient);
+            Streams.close(httpClient);
         }
     }
 

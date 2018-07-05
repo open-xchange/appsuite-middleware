@@ -484,12 +484,7 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
-            if (containsNoUnknown(retval)) {
-                return retval;
-            }
-            // MS932
-            return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
+            return readShiftJis(bytes, charset);
         }
         if (isISO2022JP(charset)) {
             /*
@@ -574,17 +569,32 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
-            if (containsNoUnknown(retval)) {
-                return retval;
-            }
-            // MS932
-            return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
+            return readShiftJis(bytes, charset);
         }
         if (isISO2022JP(charset)) {
             return readIso2022JpBytes(getBytesFrom(inStream, maxSize));
         }
         return readStream0(inStream, charset, errorOnNoContent, maxSize);
+    }
+
+    /**
+     * Reads the SHIFT-JIS string from specified bytes.
+     *
+     * @param bytes The bytes to read from
+     * @param charset The indicated charset
+     * @return The SHIFT-JIS string
+     */
+    private static String readShiftJis(byte[] bytes, String charset) {
+        if (null == bytes) {
+            return null;
+        }
+
+        String retval = new String(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
+        if (containsNoUnknown(retval)) {
+            return retval;
+        }
+        // MS932
+        return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
     }
 
     private static String readGB18030Bytes(final byte[] bytes) throws Error {

@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.config;
 
-import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mailaccount.MailAccount;
 
@@ -62,35 +61,25 @@ public class MailAccountProperties extends AbstractMailAccountProperties impleme
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountProperties.class);
 
-    /** The mail server URL */
-    protected final String url;
-
     /**
      * Initializes a new {@link MailAccountProperties}.
      *
      * @param mailAccount The mail account
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
     public MailAccountProperties(MailAccount mailAccount, int userId, int contextId) {
         super(mailAccount, userId, contextId);
-        if (null == mailAccount) {
-            throw new IllegalArgumentException("mail account is null.");
-        }
-        String tmp;
-        try {
-            tmp = mailAccount.generateMailServerURL();
-        } catch (final Exception e) {
-            LOG.warn("Failed to generate mail server URL from account {} of user {} in contrext {}.", I(mailAccount.getId()), I(userId), I(contextId), e);
-            tmp = null;
-        }
-        url = tmp;
     }
 
     @Override
     public int getMailFetchLimit() {
         return lookUpIntProperty("com.openexchange.mail.mailFetchLimit", MailProperties.getInstance().getMailFetchLimit());
+    }
+
+    @Override
+    public boolean hideInlineImages() {
+        return lookUpBoolProperty("com.openexchange.mail.hideInlineImages", MailProperties.getInstance().hideInlineImages());
     }
 
     @Override

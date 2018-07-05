@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.crawler"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.google"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.microformats"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.mslive"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.yahoo"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.xing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.google"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.ical"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.schedjoules"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.schedjoules"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.schedjoules.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.dav"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.dav.gmx.de"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.dav.web.de"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.microformats"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.mslive"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.yahoo"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.xing"/>
 </provider>
 </psf>

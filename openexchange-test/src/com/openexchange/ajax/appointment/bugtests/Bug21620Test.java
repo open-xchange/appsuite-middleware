@@ -51,8 +51,6 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,8 +62,10 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link Bug21620Test}
@@ -75,78 +75,79 @@ import com.openexchange.groupware.container.UserParticipant;
 public class Bug21620Test extends AbstractAJAXSession {
 
     private Appointment appointment;
-
     private AJAXClient clientA;
-
     private AJAXClient clientB;
-
     private AJAXClient clientC;
-
-    public Bug21620Test() {
-        super();
-    }
 
     @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
+        /*
+         * prepare clients
+         */
         clientA = getClient();
         clientB = getClient2();
         clientC = new AJAXClient(testContext.acquireUser());
-
-        List<UserParticipant> users = new ArrayList<UserParticipant>();
-        UserParticipant userB = new UserParticipant(clientB.getValues().getUserId());
-        userB.setConfirm(1);
-        users.add(userB);
-
-        List<Participant> participants = new ArrayList<Participant>();
-        Participant participantB = new UserParticipant(clientB.getValues().getUserId());
-        Participant participantC = new UserParticipant(clientC.getValues().getUserId());
-        participants.add(participantB);
-        participants.add(participantC);
-
+        /*
+         * as user A, share a calendar folder to user B
+         */
+        catm.resetDefaultFolderPermissions();
+        FolderObject sharedFolder = ftm.insertFolderOnServer(ftm.generateSharedFolder(
+            UUIDs.getUnformattedStringFromRandom(), FolderObject.CALENDAR, clientA.getValues().getPrivateAppointmentFolder(), clientA.getValues().getUserId(), clientB.getValues().getUserId()));
+        /*
+         * prepare appointment with organizer set to user B ("acting user") and principal to user A ("folder owner")
+         */
         appointment = new Appointment();
-        appointment.setParentFolderID(clientA.getValues().getPrivateAppointmentFolder());
+        appointment.setParentFolderID(sharedFolder.getObjectID());
         appointment.setIgnoreConflicts(true);
         appointment.setTitle("Bug 21620");
-        appointment.setStartDate(D("14.04.2012 04:00"));
-        appointment.setEndDate(D("14.04.2012 04:30"));
-        appointment.setUid("040000008200e00074c5b7101a82e00800000000f023f7ac3313cd01000000000000000010000000ae46597c7c3cd64c9ed652087a48887d");
-        appointment.setNumberOfAttachments(0);
-        appointment.setModifiedBy(clientA.getValues().getUserId());
-        appointment.setCreatedBy(clientA.getValues().getUserId());
-        appointment.setFullTime(false);
-        appointment.setPrivateFlag(false);
-        appointment.setTimezone("Europe/Berlin");
-
-        appointment.setOrganizer(clientA.getValues().getDefaultAddress());
-        appointment.setOrganizerId(clientA.getValues().getUserId());
-        appointment.setPrincipal(clientB.getValues().getDefaultAddress());
-        appointment.setPrincipalId(clientB.getValues().getUserId());
-
-        appointment.setUsers(users);
-        appointment.setParticipants(participants);
+        appointment.setStartDate(D("next week at 13:00"));
+        appointment.setEndDate(D("next week at 13:30"));
+        UserParticipant userParticipantB = new UserParticipant(clientB.getValues().getUserId());
+        userParticipantB.setConfirm(1);
+        appointment.setUsers(new UserParticipant[] { userParticipantB });
+        appointment.setParticipants(new Participant[] {
+            new UserParticipant(clientA.getValues().getUserId()),
+            new UserParticipant(clientC.getValues().getUserId()),
+        });
+        appointment.setModifiedBy(clientB.getValues().getUserId());
+        appointment.setCreatedBy(clientB.getValues().getUserId());
+        appointment.setOrganizer(clientB.getValues().getDefaultAddress());
+        appointment.setOrganizerId(clientB.getValues().getUserId());
+        appointment.setPrincipal(clientA.getValues().getDefaultAddress());
+        appointment.setPrincipalId(clientA.getValues().getUserId());
     }
 
     @Test
     public void testBug21620() throws Exception {
-        InsertRequest insertRequest = new InsertRequest(appointment, clientA.getValues().getTimeZone());
-        AppointmentInsertResponse insertResponse = clientA.execute(insertRequest);
+        /*
+         * as user B, insert the appointment in user A's calendar
+         */
+        AppointmentInsertResponse insertResponse = clientB.execute(new InsertRequest(appointment, clientB.getValues().getTimeZone()));
         insertResponse.fillObject(appointment);
-
-        GetRequest getRequest = new GetRequest(appointment);
-        GetResponse getResponse = clientA.execute(getRequest);
-        Appointment loadedAppointment = getResponse.getAppointment(clientA.getValues().getTimeZone());
-
-        assertEquals("Wrong organizer ID", clientA.getValues().getUserId(), loadedAppointment.getOrganizerId());
+        /*
+         * as user B, check principal / organizer in created appointment
+         */
+        GetResponse getResponse = clientB.execute(new GetRequest(appointment));
+        Appointment loadedAppointment = getResponse.getAppointment(clientB.getValues().getTimeZone());
+        assertEquals("Wrong organizer ID", clientB.getValues().getUserId(), loadedAppointment.getOrganizerId());
+        assertEquals("Wrong principal ID", clientA.getValues().getUserId(), loadedAppointment.getPrincipalId());
+        /*
+         * as user A, also load & check appointment
+         */
+        loadedAppointment = catm.get(appointment);
+        assertEquals("Wrong organizer ID", clientB.getValues().getUserId(), loadedAppointment.getOrganizerId());
+        assertEquals("Wrong principal ID", clientA.getValues().getUserId(), loadedAppointment.getPrincipalId());
     }
 
     @Override
     @After
     public void tearDown() throws Exception {
         try {
-            clientA.execute(new DeleteRequest(appointment));
+            if (null != appointment && 0 < appointment.getObjectID()) {
+                clientB.execute(new DeleteRequest(appointment));
+            }
         } finally {
             super.tearDown();
         }

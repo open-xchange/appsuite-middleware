@@ -159,7 +159,7 @@ public final class LoginTools {
         return parseParameter(req, APPSECRET);
     }
 
-    public static String parseRedirectUrl(HttpServletRequest req) throws OXException {
+    public static String parseRedirectUrl(HttpServletRequest req) {
         return parseParameter(req, REDIRECT_URL, "");
     }
 
@@ -338,11 +338,15 @@ public final class LoginTools {
         if (null == shareService) {
             return null;
         }
-
+        String [] result = new String[0];
         GuestInfo guest = shareService.resolveGuest(token);
-        int contextId = guest.getContextID();
-        int guestId = guest.getGuestID();
-        return new String[] { String.valueOf(contextId), String.valueOf(guestId) };
+        if (null != guest) {
+            int contextId = guest.getContextID();
+            int guestId = guest.getGuestID();
+            result = new String[] { String.valueOf(contextId), String.valueOf(guestId) };
+        }
+        LOG.warn("No guest could be determined for share token: {}", token);
+        return result;
     }
 
 }

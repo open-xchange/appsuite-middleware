@@ -52,7 +52,6 @@ package com.openexchange.ajax.contact;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.json.JSONArray;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.AllRequest;

@@ -78,9 +78,9 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.api.MailConfig.ServerSource;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.ConfiguredServer;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.Attribute;
@@ -395,9 +395,9 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         // Set marker
         session.setParameter("mail-account.request", "validate");
         MailConfig mailConfig = null;
+        MailAccess<?, ?> mailAccess = null;
         try {
             // Create a mail access instance
-            MailAccess<?, ?> mailAccess;
             {
                 int accountId = accountDescription.getId();
                 mailAccess = accountId >= 0 ? mailProvider.createNewMailAccess(session, accountId) : mailProvider.createNewMailAccess(session);
@@ -443,6 +443,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                 warnings.add(e);
             }
         } finally {
+            MailAccess.closeInstance(mailAccess);
             // Unset marker
             session.setParameter("mail-account.request", null);
         }

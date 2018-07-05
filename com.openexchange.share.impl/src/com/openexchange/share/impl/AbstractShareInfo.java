@@ -51,8 +51,8 @@ package com.openexchange.share.impl;
 
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.SubfolderAwareShareInfo;
 
 /**
  * {@link AbstractShareInfo}
@@ -60,21 +60,24 @@ import com.openexchange.share.ShareTarget;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public abstract class AbstractShareInfo implements ShareInfo {
+public abstract class AbstractShareInfo implements SubfolderAwareShareInfo {
 
     private final ShareTarget srcTarget;
     private final ShareTarget dstTarget;
+    private final boolean includeSubfolders;
 
     /**
      * Initializes a new {@link AbstractShareInfo}.
      *
      * @param srcTarget The share target from the sharing users point of view
      * @param dstTarget The share target from the recipients point of view
+     * @param includeSubfolders Whether sub-folders should be included in case the target is a infostore folder
      */
-    protected AbstractShareInfo(ShareTarget srcTarget, ShareTarget dstTarget) {
+    protected AbstractShareInfo(ShareTarget srcTarget, ShareTarget dstTarget, boolean includeSubfolders) {
         super();
         this.srcTarget = srcTarget;
         this.dstTarget = dstTarget;
+        this.includeSubfolders = includeSubfolders;
     }
 
     @Override
@@ -116,6 +119,11 @@ public abstract class AbstractShareInfo implements ShareInfo {
             stringBuilder.append(']');
         }
         return stringBuilder.toString();
+    }
+
+    @Override
+    public boolean isIncludeSubfolders() {
+        return includeSubfolders;
     }
 
 }

@@ -54,6 +54,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
@@ -266,7 +267,7 @@ public final class EffectivePermission implements Permission {
         return userPermissionBits;
     }
 
-    private int getType() {
+    private int getFolderType() {
         return null != type ? type.getType() : -1;
     }
 
@@ -281,14 +282,14 @@ public final class EffectivePermission implements Permission {
         }
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
-        } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
+        } else if ((FolderObject.PUBLIC == getFolderType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
             if ((getModule() != FolderObject.INFOSTORE) && !getUserPermissionBits().hasFullPublicFolderAccess()) {
                 return NO_PERMISSIONS;
                 /*
                  * return super.getDeletePermission() > DELETE_ALL_OBJECTS ? DELETE_ALL_OBJECTS : super .getDeletePermission();
                  */
             }
-        } else if (!getUserPermissionBits().hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
+        } else if (!getUserPermissionBits().hasFullSharedFolderAccess() && (FolderObject.SHARED == getFolderType())) {
             return NO_PERMISSIONS;
         }
         return underlyingPerm.getDeletePermission();
@@ -306,12 +307,12 @@ public final class EffectivePermission implements Permission {
         }
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
-        } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
+        } else if ((FolderObject.PUBLIC == getFolderType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
             if ((getModule() != FolderObject.INFOSTORE) && !getUserPermissionBits().hasFullPublicFolderAccess()) {
                 final int folderPermission = underlyingPerm.getFolderPermission();
                 return folderPermission > READ_FOLDER ? READ_FOLDER : folderPermission;
             }
-        } else if (!getUserPermissionBits().hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
+        } else if (!getUserPermissionBits().hasFullSharedFolderAccess() && (FolderObject.SHARED == getFolderType())) {
             return NO_PERMISSIONS;
         }
         return underlyingPerm.getFolderPermission();
@@ -324,12 +325,12 @@ public final class EffectivePermission implements Permission {
         }
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
-        } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
+        } else if ((FolderObject.PUBLIC == getFolderType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
             if ((getModule() != FolderObject.INFOSTORE) && !getUserPermissionBits().hasFullPublicFolderAccess()) {
                 final int readPermission = underlyingPerm.getReadPermission();
                 return readPermission > READ_ALL_OBJECTS ? READ_ALL_OBJECTS : readPermission;
             }
-        } else if (!getUserPermissionBits().hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
+        } else if (!getUserPermissionBits().hasFullSharedFolderAccess() && (FolderObject.SHARED == getFolderType())) {
             return NO_PERMISSIONS;
         }
         return underlyingPerm.getReadPermission();
@@ -351,11 +352,11 @@ public final class EffectivePermission implements Permission {
 
         if (!hasModuleAccess()) {
             return NO_PERMISSIONS;
-        } else if ((FolderObject.PUBLIC == getType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
+        } else if ((FolderObject.PUBLIC == getFolderType()) || String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID).equals(folderId)) {
             if ((getModule() != FolderObject.INFOSTORE) && !getUserPermissionBits().hasFullPublicFolderAccess()) {
                 return NO_PERMISSIONS;
             }
-        } else if (!getUserPermissionBits().hasFullSharedFolderAccess() && (FolderObject.SHARED == getType())) {
+        } else if (!getUserPermissionBits().hasFullSharedFolderAccess() && (FolderObject.SHARED == getFolderType())) {
             return NO_PERMISSIONS;
         }
         return underlyingPerm.getWritePermission();
@@ -368,7 +369,7 @@ public final class EffectivePermission implements Permission {
         }
         if (!hasModuleAccess()) {
             return false;
-        } else if ((FolderObject.PUBLIC == getType()) && (getModule() != FolderObject.INFOSTORE) && !getUserPermissionBits().hasFullPublicFolderAccess()) {
+        } else if ((FolderObject.PUBLIC == getFolderType()) && (getModule() != FolderObject.INFOSTORE) && !getUserPermissionBits().hasFullPublicFolderAccess()) {
             return false;
         }
         return underlyingPerm.isAdmin();
@@ -446,6 +447,26 @@ public final class EffectivePermission implements Permission {
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
+    }
+
+    @Override
+    public FolderPermissionType getType() {
+        return underlyingPerm.getType();
+    }
+
+    @Override
+    public void setType(FolderPermissionType type) {
+        throw new UnsupportedOperationException("EffectivePermission.setType()");
+    }
+
+    @Override
+    public String getPermissionLegator() {
+        return underlyingPerm.getPermissionLegator();
+    }
+
+    @Override
+    public void setPermissionLegator(String legator) {
+        throw new UnsupportedOperationException("EffectivePermission.setPermissionLegator()");
     }
 
 }

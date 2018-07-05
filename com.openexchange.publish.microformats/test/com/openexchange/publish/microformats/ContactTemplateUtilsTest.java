@@ -49,15 +49,12 @@
 
 package com.openexchange.publish.microformats;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

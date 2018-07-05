@@ -62,7 +62,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -74,6 +73,7 @@ import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
@@ -428,18 +428,8 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 return false;
             }
 
-            // Get local member
-            Cluster cluster = cluster(hzInstance);
-
-            if (null == cluster) {
-                LOGGER.warn("Missing Hazelcast cluster (Hazelcast inactive?). Failed to check for open remote Web Sockets for user {} in context {}", I(userId), I(contextId));
-                return false;
-            }
-
-            Member localMember = cluster.getLocalMember();
-
             // Determine other cluster members
-            Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+            Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hzInstance);
 
             // Iterate other members & check for a matching open Web Socket
             for (Iterator<Member> it = otherMembers.iterator(); it.hasNext();) {
@@ -547,17 +537,8 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     return;
                 }
 
-                // Get local member
-                Cluster cluster = cluster(hzInstance);
-                if (null == cluster) {
-                    LOGGER.warn("Missing Hazelcast cluster (Hazelcast inactive?). Failed to remotely distribute notifications");
-                    return;
-                }
-
-                Member localMember = cluster.getLocalMember();
-
                 // Determine other cluster members
-                Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+                Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hzInstance);
 
                 for (Map.Entry<DistributionKey, Set<String>> userMessages : sortyByUser(remoteMessages).entrySet()) {
                     DistributionKey key = userMessages.getKey();
@@ -625,32 +606,6 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             userMessages.addAll(remoteMessage.getPayloads());
         }
         return map;
-    }
-
-    /**
-     * Gets the other cluster members
-     *
-     * @param allMembers All known members
-     * @param localMember The local member
-     * @return Other cluster members
-     */
-    private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
-        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
-        if (!otherMembers.remove(localMember)) {
-            LOGGER.warn("Couldn't remove local member from cluster members.");
-        }
-        return otherMembers;
-    }
-
-    /**
-     * Cancels given {@link Future} safely
-     *
-     * @param future The {@code Future} to cancel
-     */
-    private <V> void cancelFutureSafe(Future<V> future) {
-        if (null != future) {
-            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
-        }
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------

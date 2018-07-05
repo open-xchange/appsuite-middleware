@@ -1,7 +1,9 @@
 
 package com.openexchange.ajax.contact;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;
@@ -47,6 +49,8 @@ public class Bug4409Test extends AbstractContactTest {
          */
         getResponse = getClient().execute(new GetRequest(contact, tz));
         assertNull(getResponse.getImageUrl());
+
+        Thread.sleep(2000); // give some time for the resource cache invalidation
         /*
          * try to access previous image location
          */

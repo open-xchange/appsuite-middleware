@@ -54,9 +54,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;

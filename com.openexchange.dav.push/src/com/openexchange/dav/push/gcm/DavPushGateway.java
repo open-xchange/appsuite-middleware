@@ -57,16 +57,17 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,6 +81,8 @@ import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -92,7 +95,7 @@ public class DavPushGateway implements PushNotificationTransport {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DavPushGateway.class);
 
-    private final HttpClient httpClient;
+    private final CloseableHttpClient httpClient;
     private final PushTransportOptions transportOptions;
     private final PushSubscribeFactory factory;
 
@@ -105,8 +108,30 @@ public class DavPushGateway implements PushNotificationTransport {
     public DavPushGateway(PushSubscribeFactory factory, PushTransportOptions transportOptions) {
         super();
         this.factory = factory;
-        this.httpClient = HttpClients.createDefault();
+        this.httpClient = initClient();
         this.transportOptions = transportOptions;
+    }
+
+    /**
+     * Gets a value indicating whether a specific transport URI is supported by the gateway or not.
+     *
+     * @param transportUri The transport URI to check
+     * @return <code>true</code> if the transport URI is supported, <code>false</code>, ohterwise
+     */
+    public boolean supports(String transportUri) {
+        try {
+            List<PushTransport> pushTransports = getPushTransports();
+            if (null != pushTransports && 0 < pushTransports.size()) {
+                for (PushTransport pushTransport : pushTransports) {
+                    if (pushTransport.getTransportUri().equals(transportUri)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (OXException e) {
+            LOG.error("Error checking if push transport is supported", e);
+        }
+        return false;
     }
 
     @Override
@@ -125,6 +150,36 @@ public class DavPushGateway implements PushNotificationTransport {
     }
 
     @Override
+    public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
+        if (null == notifications || 0 == notifications.size()) {
+            return;
+        }
+        try {
+            /*
+             * create JSON representation for push messages
+             */
+            List<JSONObject> jsonMessages = new ArrayList<JSONObject>();
+            for (Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
+                jsonMessages.addAll(createPushMessageData(entry.getKey().getMessageData(), entry.getValue()));
+            }
+            /*
+             * transport to gateway in chunks & handle each response
+             */
+            int transportChunkSize = transportOptions.getTransportChunkSize();
+            String uri = transportOptions.getGatewayUrl() + transportOptions.getApplicationID();
+            for (int i = 0; i < jsonMessages.size(); i += transportChunkSize) {
+                int length = Math.min(jsonMessages.size(), i + transportChunkSize) - i;
+                JSONObject responseObject = doPost(uri, createPushData(jsonMessages.subList(i, i + length)));
+                if (null != responseObject) {
+                    handlePushResponse(responseObject);
+                }
+            }
+        } catch (JSONException e) {
+            throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
         JSONObject pushData = createPushData(notification, matches);
         if (null != pushData) {
@@ -133,6 +188,21 @@ public class DavPushGateway implements PushNotificationTransport {
                 handlePushResponse(responseObject);
             }
         }
+    }
+
+    /**
+     * Gets a list of available push transports on the geateway.
+     *
+     * @return The push transports
+     */
+    public List<PushTransport> getPushTransports() throws OXException {
+        JSONObject data;
+        try {
+            data = new JSONObject().put("push-transports", new JSONArray(0));
+        } catch (JSONException e) {
+            throw PushExceptionCodes.JSON_ERROR.create(e);
+        }
+        return parsePushTransportsResponse(doPost(transportOptions.getGatewayUrl(), data));
     }
 
     /**
@@ -175,6 +245,25 @@ public class DavPushGateway implements PushNotificationTransport {
     public String unsubscribe(Object clientData) throws OXException {
         //TODO necessary?
         return transportOptions.getApplicationID(); //TODO: extract from or use response's "push-url"?
+    }
+
+    private List<PushTransport> parsePushTransportsResponse(JSONObject responseObject) throws OXException {
+        if (null == responseObject) {
+            return null;
+        }
+        JSONArray pushTransportsArray = responseObject.optJSONArray("push-transports");
+        if (null == pushTransportsArray || 0 == pushTransportsArray.length()) {
+            return null;
+        }
+        List<PushTransport> pushTransports = new ArrayList<PushTransport>(pushTransportsArray.length());
+        for (int i = 0; i < pushTransportsArray.length(); i++) {
+            try {
+                pushTransports.add(parsePushTransport(pushTransportsArray.getJSONObject(i)));
+            } catch (Exception e) {
+                LOG.warn("Error parsing push transports response", e);
+            }
+        }
+        return pushTransports;
     }
 
     private void handlePushResponse(JSONObject responseObject) throws OXException {
@@ -226,35 +315,56 @@ public class DavPushGateway implements PushNotificationTransport {
             subscribeData.put("push-subscribe", pushSubscribeObject);
             return subscribeData;
         } catch (JSONException e) {
-            throw OXException.general("", e);
+            throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static JSONObject createPushData(List<JSONObject> jsonMessages) throws OXException {
+        try {
+            JSONObject pushObject = new JSONObject();
+            pushObject.put("messages", jsonMessages);
+            return new JSONObject().put("push", pushObject);
+        } catch (JSONException e) {
+            throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static PushTransport parsePushTransport(JSONObject pushTransportObject) throws JSONException {
+        JSONObject transportObject = pushTransportObject.getJSONObject("transport");
+        String transportUri = transportObject.getString("transport-uri");
+        int refreshInterval = transportObject.getInt("refresh-interval");
+        String transportData = transportObject.getString("transport-data");
+        return new PushTransport(transportUri, refreshInterval, transportData);
     }
 
     private static JSONObject createPushData(PushNotification notification, Collection<PushMatch> matches) throws OXException {
         if (null == matches || 0 == matches.size()) {
             return null;
         }
-        Map<String, Object> messageData = notification.getMessageData();
         try {
             JSONObject pushData = new JSONObject();
             JSONObject pushObject = new JSONObject();
             pushData.put("push", pushObject);
-            JSONArray jsonMessages = new JSONArray(matches.size());
-            for (PushMatch match : matches) {
-                JSONObject messageObject = new JSONObject();
-                messageObject.put("topic", DAVPushUtility.getPushKey(match.getTopic(), match.getContextId(), match.getUserId()));
-                Integer priority = (Integer) messageData.get(DAVPushUtility.PARAMETER_PRIORITY);
-                messageObject.put("priority", null == priority ? 50 : priority.intValue());
-                Long timestamp = (Long) messageData.get(DAVPushUtility.PARAMETER_TIMESTAMP);
-                messageObject.put("timestamp", DAVPushUtility.UTC_DATE_FORMAT.get().format(null != timestamp ? new Date(timestamp.longValue()) : new Date()));
-                messageObject.putOpt("client-id", messageData.get(DAVPushUtility.PARAMETER_CLIENTTOKEN));
-                jsonMessages.put(messageObject);
-            }
-            pushObject.put("messages", jsonMessages);
+            pushObject.put("messages", createPushMessageData(notification.getMessageData(), matches));
             return pushData;
         } catch (JSONException e) {
-            throw PushExceptionCodes.JSON_ERROR.create(e);
+            throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static List<JSONObject> createPushMessageData(Map<String, Object> messageData, Collection<PushMatch> matches) throws JSONException {
+        List<JSONObject> jsonMessages = new ArrayList<JSONObject>(matches.size());
+        for (PushMatch match : matches) {
+            JSONObject messageObject = new JSONObject();
+            messageObject.put("topic", DAVPushUtility.getPushKey(match.getTopic(), match.getContextId(), match.getUserId()));
+            Integer priority = (Integer) messageData.get(DAVPushUtility.PARAMETER_PRIORITY);
+            messageObject.put("priority", null == priority ? 50 : priority.intValue());
+            Long timestamp = (Long) messageData.get(DAVPushUtility.PARAMETER_TIMESTAMP);
+            messageObject.put("timestamp", DAVPushUtility.UTC_DATE_FORMAT.get().format(null != timestamp ? new Date(timestamp.longValue()) : new Date()));
+            messageObject.putOpt("client-id", messageData.get(DAVPushUtility.PARAMETER_CLIENTTOKEN));
+            jsonMessages.add(messageObject);
+        }
+        return jsonMessages;
     }
 
     /**
@@ -266,7 +376,7 @@ public class DavPushGateway implements PushNotificationTransport {
      */
     private JSONObject doPost(String uri, JSONObject body) throws OXException {
         HttpPost post = null;
-        HttpResponse response = null;
+        CloseableHttpResponse response = null;
         try {
             post = new HttpPost(uri);
             post.setEntity(new StringEntity(body.toString(), ContentType.APPLICATION_JSON));
@@ -280,9 +390,10 @@ public class DavPushGateway implements PushNotificationTransport {
             }
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(String.valueOf(statusLine));
         } catch (IOException e) {
-            throw PushExceptionCodes.IO_ERROR.create(e);
+            throw PushExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             close(post, response);
+            Streams.close(response);
         }
     }
 
@@ -295,9 +406,9 @@ public class DavPushGateway implements PushNotificationTransport {
                     return new JSONObject(reader);
                 }
             } catch (UnsupportedOperationException | IOException e) {
-                throw PushExceptionCodes.IO_ERROR.create(e);
+                throw PushExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (JSONException e) {
-                throw PushExceptionCodes.JSON_ERROR.create(e);
+                throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(inputStream);
             }
@@ -329,6 +440,20 @@ public class DavPushGateway implements PushNotificationTransport {
                 LOG.debug("Error resetting HTTP request", e);
             }
         }
+    }
+
+    private static CloseableHttpClient initClient() {
+        String versionString = com.openexchange.version.Version.getInstance().optVersionString();
+        if (null == versionString) {
+            versionString = "<unknown version>";
+        }
+        return HttpClients.getHttpClient(ClientConfig.newInstance()
+            .setUserAgent("OX DAV-Push Gateway Client v" + versionString)
+            .setMaxTotalConnections(100)
+            .setMaxConnectionsPerRoute(100)
+            .setConnectionTimeout(5000)
+            .setSocketReadTimeout(30000)
+        );
     }
 
 }

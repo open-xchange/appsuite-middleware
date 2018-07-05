@@ -69,6 +69,9 @@ public interface DbMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	@Override
 	DbMapping<? extends Object, O> get(E field) throws OXException;
 
+    @Override
+    DbMapping<? extends Object, O> opt(E field);
+
 	/**
 	 * Gets the field whose mapping denotes the supplied column label.
 	 *
@@ -126,6 +129,18 @@ public interface DbMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @throws OXException
 	 */
 	void setParameters(PreparedStatement stmt, O object, E[] fields) throws SQLException, OXException;
+
+    /**
+     * Sets all parameters of the supplied fields in the statement to the
+     * values found in the object, beginning with a specific parameter index.
+     *
+     * @param stmt The statement to set the parameters for
+     * @param parameterIndex The parameter index to start with
+     * @param object The object to read the values from
+     * @param fields The fields to be set
+     * @return The parameter index, incremented by the number of set parameters
+     */
+    int setParameters(PreparedStatement stmt, int parameterIndex, O object, E[] fields) throws SQLException, OXException;
 
 	/**
 	 * Constructs a string containing parameterized assignments of the supplied

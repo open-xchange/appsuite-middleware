@@ -49,7 +49,8 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.jackrabbit.webdav.DavConstants;

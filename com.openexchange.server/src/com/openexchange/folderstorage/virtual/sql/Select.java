@@ -64,17 +64,18 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.virtual.VirtualFolder;
-import com.openexchange.folderstorage.virtual.VirtualPermission;
 import com.openexchange.folderstorage.virtual.osgi.Services;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Select} - SQL to load a virtual folder or its subfolder identifiers.
@@ -108,22 +109,16 @@ public final class Select {
         "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
     private static final String SQL_SELECT_PERMS =
-        "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+        "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system, type, sharedParentFolder FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT_PERMS_BCK =
-        "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system FROM virtualBackupPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+        "SELECT entity, groupFlag, fp, orp, owp, odp, adminFlag, system, type, sharedParentFolder FROM virtualBackupPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT_SUBSCRIPTION =
         "SELECT subscribed FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
 
     private static final String SQL_SELECT_SUBSCRIPTION_BCK =
         "SELECT subscribed FROM virtualBackupSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
-
-    private static final String SQL_SELECT2_SUBF =
-        "SELECT folderId, name FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
-
-    private static final String SQL_SELECT2_SUBF_BCK =
-        "SELECT folderId, name FROM virtualBackupTree WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?";
 
     /**
      * Checks if the specified virtual tree contains a folder denoted by given folder identifier.
@@ -156,7 +151,7 @@ public final class Select {
             } catch (final SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
         } finally {
             databaseService.backReadOnly(cid, con);
@@ -226,7 +221,7 @@ public final class Select {
                 }
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
             stmt = null;
             // Select subfolders
@@ -246,7 +241,7 @@ public final class Select {
                 rs = stmt.executeQuery();
                 final List<Permission> permissions = new ArrayList<Permission>();
                 while (rs.next()) {
-                    final Permission p = new VirtualPermission();
+                    final Permission p = new BasicPermission();
                     pos = 1;
                     p.setEntity(rs.getInt(pos++));
                     p.setGroup(rs.getInt(pos++) > 0);
@@ -256,6 +251,9 @@ public final class Select {
                     p.setDeletePermission(rs.getInt(pos++));
                     p.setAdmin(rs.getInt(pos++) > 0);
                     p.setSystem(rs.getInt(pos++));
+                    p.setType(FolderPermissionType.getType(rs.getInt(pos++)));
+                    int legator = rs.getInt(pos++);
+                    p.setPermissionLegator(legator > 0 ? String.valueOf(legator) : null);
                     permissions.add(p);
                 }
                 if (permissions.isEmpty()) {
@@ -273,7 +271,7 @@ public final class Select {
                 }
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
             stmt = null;
             // Select subscription
@@ -301,7 +299,7 @@ public final class Select {
                 }
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
         } finally {
             databaseService.backReadOnly(cid, con);
@@ -397,7 +395,7 @@ public final class Select {
             }
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

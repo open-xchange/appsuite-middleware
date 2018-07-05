@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Subscribe Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.subscribe.osgi.Activator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -14,10 +14,10 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.google.common.collect,
  com.openexchange.ajax.customizer.folder,
  com.openexchange.ajax.requesthandler,
  com.openexchange.api2,
- com.openexchange.calendar,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.contact,
@@ -54,6 +54,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.groupware.tools.mappings,
  com.openexchange.groupware.update,
  com.openexchange.groupware.userconfiguration,
+ com.openexchange.http.client.apache,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.log,

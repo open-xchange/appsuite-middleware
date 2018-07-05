@@ -57,7 +57,7 @@ import org.bouncycastle.openpgp.PGPPublicKey;
  * {@link PGPKeyRetrievalStrategy} - A strategy for retrieving PGP keys by their PGP ID
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public interface PGPKeyRetrievalStrategy {
 

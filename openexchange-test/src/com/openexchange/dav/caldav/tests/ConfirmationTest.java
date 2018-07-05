@@ -83,6 +83,7 @@ public class ConfirmationTest extends CalDAVTest {
 
     private CalendarTestManager manager2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -90,6 +91,7 @@ public class ConfirmationTest extends CalDAVTest {
         manager2.setFailOnError(true);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -210,11 +212,12 @@ public class ConfirmationTest extends CalDAVTest {
         /*
          * accept series on server
          */
+        appointment = getAppointment(uid);
         getManager().confirm(appointment, Appointment.ACCEPT, "ok");
         /*
          * verify appointment on server
          */
-        appointment = super.getAppointment(uid);
+        appointment = getAppointment(uid);
         assertNotNull("appointment not found on server", appointment);
         assertNotNull("no users found in apointment", appointment.getUsers());
         UserParticipant user = null;
@@ -293,8 +296,8 @@ public class ConfirmationTest extends CalDAVTest {
         Date exceptionEndDate = calendar.getTime();
         exception.getProperties().add(new Property("RECURRENCE-ID;TZID=" + appointment.getTimezone() + ":" + format(exceptionStartDate, appointment.getTimezone())));
         iCalResource.addComponent(exception);
-        exception.setDTStart(exceptionStartDate);
-        exception.setDTEnd(exceptionEndDate);
+        exception.setDTStart(exceptionStartDate, exception.getProperty("DTSTART").getAttribute("TZID"));
+        exception.setDTEnd(exceptionEndDate, exception.getProperty("DTEND").getAttribute("TZID"));
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         /*
          * verify appointment on server

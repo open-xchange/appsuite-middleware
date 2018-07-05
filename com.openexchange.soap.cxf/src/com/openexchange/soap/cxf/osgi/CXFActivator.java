@@ -59,7 +59,6 @@ import org.apache.cxf.BusFactory;
 import org.apache.cxf.common.logging.LogUtils;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.cxf.transport.http.HttpDestinationFactory;
-import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.apache.cxf.transport.servlet.ServletDestinationFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -69,6 +68,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.soap.cxf.custom.CXFOsgiServlet;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
 
 /**
@@ -151,7 +151,7 @@ public class CXFActivator extends HousekeepingActivator {
                         try {
                             System.setProperty(StaxUtils.ALLOW_INSECURE_PARSER, "true");
                             // System.setProperty("org.apache.cxf.servlet.base-address", "http://localhost/foo/");
-                            final CXFNonSpringServlet cxfServlet = new CXFNonSpringServlet();
+                            final CXFOsgiServlet cxfServlet = new CXFOsgiServlet();
                             /*
                              * Register CXF Servlet
                              */
@@ -222,7 +222,6 @@ public class CXFActivator extends HousekeepingActivator {
                             /*
                              * Initialize Webservice collector
                              */
-                            baseAddress = null;
                             final WebserviceCollector collector = new WebserviceCollector(baseAddress, context);
                             context.addServiceListener(collector);
                             collector.open();

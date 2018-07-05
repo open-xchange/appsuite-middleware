@@ -1,8 +1,7 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
-
 import java.math.BigInteger;
+import liquibase.statement.AbstractSqlStatement;
 
 public class AlterSequenceStatement extends AbstractSqlStatement {
 

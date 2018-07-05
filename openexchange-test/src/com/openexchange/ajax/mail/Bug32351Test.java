@@ -111,7 +111,7 @@ public class Bug32351Test extends AbstractMailTest {
         {
             InputStreamReader streamReader = null;
             try {
-                streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), "mail010.eml")), "UTF-8");
+                streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "mail010.eml")), "UTF-8");
                 char[] buf = new char[2048];
                 for (int read; (read = streamReader.read(buf, 0, 2048)) > 0;) {
                     sb.append(buf, 0, read);

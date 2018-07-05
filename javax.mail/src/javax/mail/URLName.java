@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,12 +40,14 @@
 
 package javax.mail;
 
-import java.net.*;
-
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.BitSet;
 import java.util.Locale;
 
@@ -189,6 +191,7 @@ public class URLName {
     /**
      * Constructs a string representation of this URLName.
      */
+    @Override
     public String toString() {
 	if (fullURL == null) {
 	    // add the "protocol:"
@@ -433,6 +436,7 @@ public class URLName {
      * Note also that the password field is not included in the comparison,
      * nor is any reference field appended to the filename.
      */
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof URLName))
 	    return false;
@@ -485,6 +489,7 @@ public class URLName {
     /**
      * Compute the hash code for this URLName.
      */
+    @Override
     public int hashCode() {
 	if (hashCode != 0)
 	    return hashCode;

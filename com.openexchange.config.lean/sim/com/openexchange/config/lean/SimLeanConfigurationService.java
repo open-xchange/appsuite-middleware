@@ -49,6 +49,7 @@
 
 package com.openexchange.config.lean;
 
+import java.util.Map;
 import com.openexchange.config.SimConfigurationService;
 
 /**
@@ -165,6 +166,56 @@ public class SimLeanConfigurationService implements LeanConfigurationService {
      */
     @Override
     public long getLongProperty(int userId, int contextId, Property property) {
+        return Long.parseLong(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
+    }
+
+    @Override
+    public String getProperty(Property property, Map<String, String> optionals) {
+        return delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class));
+    }
+
+    @Override
+    public int getIntProperty(Property property, Map<String, String> optionals) {
+        return delegateConfigurationService.getIntProperty(property.getFQPropertyName(), property.getDefaultValue(Integer.class).intValue());
+    }
+
+    @Override
+    public boolean getBooleanProperty(Property property, Map<String, String> optionals) {
+        return delegateConfigurationService.getBoolProperty(property.getFQPropertyName(), property.getDefaultValue(Boolean.class).booleanValue());
+    }
+
+    @Override
+    public float getFloatProperty(Property property, Map<String, String> optionals) {
+        return Float.parseFloat(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
+    }
+
+    @Override
+    public long getLongProperty(Property property, Map<String, String> optionals) {
+        return Long.parseLong(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
+    }
+
+    @Override
+    public String getProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+        return delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class));
+    }
+
+    @Override
+    public int getIntProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+        return delegateConfigurationService.getIntProperty(property.getFQPropertyName(), property.getDefaultValue(Integer.class).intValue());
+    }
+
+    @Override
+    public boolean getBooleanProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+        return delegateConfigurationService.getBoolProperty(property.getFQPropertyName(), property.getDefaultValue(Boolean.class).booleanValue());
+    }
+
+    @Override
+    public float getFloatProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+        return Float.parseFloat(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
+    }
+
+    @Override
+    public long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
         return Long.parseLong(delegateConfigurationService.getProperty(property.getFQPropertyName(), property.getDefaultValue(String.class)));
     }
 

@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
 

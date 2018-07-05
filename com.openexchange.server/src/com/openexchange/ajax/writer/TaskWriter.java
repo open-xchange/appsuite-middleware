@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -63,6 +61,8 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.session.Session;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * JSON writer for tasks.

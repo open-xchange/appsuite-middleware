@@ -67,7 +67,7 @@ public class InfostoreTimedResult extends AbstractTimedResult<DocumentMetadata> 
 
     @Override
     protected long extractTimestamp(DocumentMetadata object) {
-        return object.getLastModified().getTime();
+        return object.getSequenceNumber();
     }
 
 }

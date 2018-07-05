@@ -37,10 +37,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-
 import edu.emory.mathcs.backport.java.util.concurrent.CopyOnWriteArrayList;
 
 /**

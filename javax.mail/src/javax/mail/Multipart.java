@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,11 +40,9 @@
 
 package javax.mail;
 
-import java.util.Vector;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.IOException;
-import javax.activation.DataSource;
+import java.io.OutputStream;
+import java.util.Vector;
 
 /**
  * Multipart is a container that holds multiple body parts. Multipart
@@ -69,8 +67,7 @@ public abstract class Multipart {
     /**
      * Vector of BodyPart objects.
      */
-    @SuppressWarnings("rawtypes")
-    protected Vector parts = new Vector(); // Holds BodyParts
+    protected Vector<BodyPart> parts = new Vector<>(); // Holds BodyParts
 
     /**
      * This field specifies the content-type of this multipart
@@ -156,7 +153,7 @@ public abstract class Multipart {
 	if (parts == null)
 	    throw new IndexOutOfBoundsException("No such BodyPart");
 
-	return (BodyPart)parts.elementAt(index);
+	return parts.elementAt(index);
     }
 
     /**
@@ -197,7 +194,7 @@ public abstract class Multipart {
 	if (parts == null)
 	    throw new IndexOutOfBoundsException("No such BodyPart");
 
-	BodyPart part = (BodyPart)parts.elementAt(index);
+	BodyPart part = parts.elementAt(index);
 	parts.removeElementAt(index);
 	part.setParent(null);
     }
@@ -212,11 +209,10 @@ public abstract class Multipart {
      *			of existing values
      * @exception       MessagingException for other failures
      */
-    @SuppressWarnings("unchecked")
     public synchronized void addBodyPart(BodyPart part) 
 		throws MessagingException {
 	if (parts == null)
-	    parts = new Vector<BodyPart>();
+	    parts = new Vector<>();
 
 	parts.addElement(part);
 	part.setParent(this);
@@ -236,11 +232,10 @@ public abstract class Multipart {
      *			of existing values
      * @exception       MessagingException for other failures
      */
-    @SuppressWarnings("unchecked")
     public synchronized void addBodyPart(BodyPart part, int index) 
 				throws MessagingException {
 	if (parts == null)
-	    parts = new Vector<BodyPart>();
+	    parts = new Vector<>();
 
 	parts.insertElementAt(part, index);
 	part.setParent(this);

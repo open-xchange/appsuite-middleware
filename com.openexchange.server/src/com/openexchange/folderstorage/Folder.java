@@ -484,6 +484,18 @@ public interface Folder extends Serializable, Cloneable {
     void setSupportedCapabilities(Set<String> capabilities);
 
     /**
+     * Gets the folder's origin path
+     */
+    FolderPath getOriginPath();
+
+    /**
+     * Sets the folder's origin path
+     *
+     * @param originPath The origin path to set
+     */
+    void setOriginPath(FolderPath originPath);
+
+    /**
      * Creates and returns a copy of this object.
      *
      * @return A clone of this instance.

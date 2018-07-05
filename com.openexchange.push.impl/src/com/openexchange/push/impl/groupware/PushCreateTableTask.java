@@ -49,17 +49,15 @@
 
 package com.openexchange.push.impl.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.push.impl.osgi.Services;
 
 /**
  * {@link PushCreateTableTask} - Inserts necessary tables.
@@ -79,9 +77,7 @@ public class PushCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = Services.requireService(DatabaseService.class);
-        int contextId = params.getContextId();
-        Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection writeCon = params.getConnection();
         PreparedStatement stmt = null;
         try {
             if (tableExists(writeCon, "registeredPush")) {
@@ -93,7 +89,6 @@ public class PushCreateTableTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 

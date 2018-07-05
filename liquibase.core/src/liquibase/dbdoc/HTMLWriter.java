@@ -1,5 +1,11 @@
 package liquibase.dbdoc;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.List;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -7,14 +13,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.List;
 
 public abstract class HTMLWriter {
     protected File outputDir;
@@ -145,7 +143,10 @@ public abstract class HTMLWriter {
                     } else if (runStatus.equals(ChangeSet.RunStatus.INVALID_MD5SUM)) {
                         writeTD(fileWriter, "INVALID MD5SUM");
                     } else if (runStatus.equals(ChangeSet.RunStatus.ALREADY_RAN)) {
-                        writeTD(fileWriter, "Executed "+ DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(database.getRanDate(change.getChangeSet())));
+                        Date ranDate = database.getRanDate(change.getChangeSet());
+                        if (null != ranDate) {
+                            writeTD(fileWriter, "Executed "+ DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(ranDate));
+                        }
                     } else if (runStatus.equals(ChangeSet.RunStatus.RUN_AGAIN)) {
                         writeTD(fileWriter, "Executed, WILL RUN AGAIN");
                     } else {
@@ -166,7 +167,7 @@ public abstract class HTMLWriter {
         }
 
         fileWriter.append("</TABLE>");
-        fileWriter.append("&nbsp;</P>");        
+        fileWriter.append("&nbsp;</P>");
 
     }
 }

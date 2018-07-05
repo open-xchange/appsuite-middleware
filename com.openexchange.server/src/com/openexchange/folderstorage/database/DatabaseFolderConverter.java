@@ -49,9 +49,6 @@
 
 package com.openexchange.folderstorage.database;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -85,6 +82,9 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import gnu.trove.list.TIntList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link DatabaseFolderConverter}
@@ -156,6 +156,8 @@ public final class DatabaseFolderConverter {
                 return retval;
             }
         });
+        /*-
+         *  // finally dropped
         m.put(FolderObject.SYSTEM_GLOBAL_FOLDER_ID, new FolderConverter() {
 
             @Override
@@ -166,6 +168,7 @@ public final class DatabaseFolderConverter {
                 return retval;
             }
         });
+        */
         CONVERTERS = m;
     }
 

@@ -2,20 +2,22 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: iCal4j implementation of iCal data conversion services
 Bundle-SymbolicName: com.openexchange.data.conversion.ical.ical4j
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.data.conversion.ical.ical4j.osgi.Activator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.io;version="18.0.0",
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.google.common.io,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.api2,
+ com.openexchange.chronos,
  com.openexchange.config,
  com.openexchange.data.conversion.ical,
- com.openexchange.data.conversion.ical.itip,
  com.openexchange.databaseold,
  com.openexchange.exception,
- com.openexchange.freebusy,
  com.openexchange.group,
  com.openexchange.groupware,
  com.openexchange.groupware.attach,

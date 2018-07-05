@@ -36,7 +36,7 @@ properties:
         </ul>
 
       defaultValue: context
-      version: 7.8.4
+      version: 7.10.0
       reloadable: false
       configcascadeAware: false
       related: com.openexchange.snippet.filestore.quota.perUserLimit
@@ -49,7 +49,7 @@ properties:
         Supported units are: B, KB, MB, GB, and TB 
         Only active in case [[com.openexchange.snippet.filestore.quota.mode]] is set to <code>dedicated</code>.
       defaultValue: 5242880
-      version: 7.8.4
+      version: 7.10.0
       reloadable: true
       configcascadeAware: true
       related: com.openexchange.snippet.filestore.quota.mode

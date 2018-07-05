@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Session Management Implementation Bundle
+Bundle-SymbolicName: com.openexchange.session.management.impl
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.hazelcast.core,
+ com.openexchange.config,
+ com.openexchange.config.lean,
+ com.openexchange.exception,
+ com.openexchange.geolocation,
+ com.openexchange.groupware.ldap,
+ com.openexchange.hazelcast.serialization,
+ com.openexchange.i18n,
+ com.openexchange.i18n.tools,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.session.inspector,
+ com.openexchange.session.management,
+ com.openexchange.sessiond,
+ com.openexchange.sessionstorage,
+ com.openexchange.sessionstorage.hazelcast.serialization,
+ com.openexchange.threadpool,
+ com.openexchange.user,
+ javax.servlet.http;version="4.0.0",
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.session.management.impl.osgi.SessionManagementActivator

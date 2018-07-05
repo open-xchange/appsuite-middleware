@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,11 +40,15 @@
 
 package com.sun.mail.iap;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import com.sun.mail.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import com.sun.mail.util.ASCIIUtility;
 
 /**
  * @author  John Mani
@@ -58,7 +62,7 @@ public class Argument {
      * Constructor
      */
     public Argument() {
-	items = new ArrayList<Object>(1);
+	items = new ArrayList<>(1);
     }
 
     /**
@@ -110,13 +114,18 @@ public class Argument {
     /**
      * Convert the given string into bytes in the specified
      * charset, and write the bytes out as an ASTRING
+     *
+     * @param	s	String to write out
+     * @param	charset	the charset
+     * @return		this
+     * @since	JavaMail 1.6.0
      */
     public Argument writeString(String s, Charset charset) {
-    if (charset == null) // convenience
-        writeString(s);
-    else
-        items.add(new AString(s.getBytes(charset)));
-    return this;
+	if (charset == null) // convenience
+	    writeString(s);
+	else
+	    items.add(new AString(s.getBytes(charset)));
+	return this;
     }
 
     /**
@@ -161,16 +170,19 @@ public class Argument {
      * Convert the given string into bytes in the specified
      * charset, and write the bytes out as an NSTRING
      *
-     * @since   JavaMail 1.5.1
+     * @param	s	String to write out
+     * @param	charset	the charset
+     * @return		this
+     * @since	JavaMail 1.6.0
      */
     public Argument writeNString(String s, Charset charset) {
-    if (s == null)
-        items.add(new NString(null));
-    else if (charset == null) // convenience
-        writeString(s);
-    else
-        items.add(new NString(s.getBytes(charset)));
-    return this;
+	if (s == null)
+	    items.add(new NString(null));
+	else if (charset == null) // convenience
+	    writeString(s);
+	else
+	    items.add(new NString(s.getBytes(charset)));
+	return this;
     }
 
     /**
@@ -318,17 +330,20 @@ public class Argument {
         // if 0 length, send as quoted-string
         boolean quote = len == 0 ? true : doQuote;
 	boolean escape = false;
- 	
+	boolean utf8 = protocol.supportsUtf8();
+
 	byte b;
 	for (int i = 0; i < len; i++) {
 	    b = bytes[i];
-	    if (b == '\0' || b == '\r' || b == '\n' || ((b & 0xff) > 0177)) {
+	    if (b == '\0' || b == '\r' || b == '\n' ||
+		    (!utf8 && ((b & 0xff) > 0177))) {
 		// NUL, CR or LF means the bytes need to be sent as literals
 		literal(bytes, protocol);
 		return;
 	    }
 	    if (b == '*' || b == '%' || b == '(' || b == ')' || b == '{' ||
-		b == '"' || b == '\\' || ((b & 0xff) <= ' ')) {
+		    b == '"' || b == '\\' ||
+		    ((b & 0xff) <= ' ') || ((b & 0xff) > 0177)) {
 		quote = true;
 		if (b == '"' || b == '\\') // need to escape these characters
 		    escape = true;

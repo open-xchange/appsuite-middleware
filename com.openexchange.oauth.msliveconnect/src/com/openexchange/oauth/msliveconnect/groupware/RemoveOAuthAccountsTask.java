@@ -52,7 +52,6 @@ package com.openexchange.oauth.msliveconnect.groupware;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -61,7 +60,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.oauth.msliveconnect.osgi.Services;
 
 /**
  * {@link RemoveOAuthAccountsTask}
@@ -74,9 +72,7 @@ public class RemoveOAuthAccountsTask implements UpdateTaskV2 {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        final DatabaseService ds = Services.getService(DatabaseService.class);
-        final Connection con = ds.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
         PreparedStatement stmt = null;
         try {
             if (!Databases.tablesExist(con, "oauthAccounts")) {
@@ -90,9 +86,6 @@ public class RemoveOAuthAccountsTask implements UpdateTaskV2 {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (con != null) {
-                ds.backForUpdateTask(contextId, con);
-            }
         }
     }
 

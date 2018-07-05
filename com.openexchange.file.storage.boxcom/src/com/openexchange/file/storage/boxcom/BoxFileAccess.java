@@ -708,7 +708,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             protected TimedResult<File> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
 
-                List<File> files = new LinkedList<File>();
+                List<File> files = new LinkedList<>();
                 for (IDTuple id : ids) {
                     com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id.getId());
                     Info info = boxFile.getInfo();
@@ -744,12 +744,15 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             @Override
             protected SearchIterator<File> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
-                List<File> files = new LinkedList<File>();
+                List<File> files = new LinkedList<>();
 
                 BoxSearchParameters bsp = new BoxSearchParameters(pattern == null ? "*" : pattern);
                 bsp.setType("file");
+
+                String fid = null;
                 if (folderId != null) {
-                    bsp.setAncestorFolderIds(Collections.singletonList(toBoxFolderId(folderId)));
+                    fid = Strings.isEmpty(folderId) ? "0" : folderId;
+                    bsp.setAncestorFolderIds(Collections.singletonList(toBoxFolderId(fid)));
                 }
 
                 // TODO: play with start and end parameters
@@ -766,12 +769,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 BoxSearch boxSearch = new BoxSearch(apiConnection);
                 PartialCollection<com.box.sdk.BoxItem.Info> searchRange = boxSearch.searchRange(s, limit, bsp);
                 for (BoxItem.Info info : searchRange) {
-                    if (info instanceof com.box.sdk.BoxFile.Info) {
-                        com.box.sdk.BoxFile.Info i = (Info) info;
-                        String parentFolderId = i.getParent().getID();
-                        if (null != folderId && false == includeSubfolders && false == folderId.equals(parentFolderId)) {
-                            continue;
-                        }
+                    if (!(info instanceof com.box.sdk.BoxFile.Info)) {
+                        continue;
+                    }
+                    com.box.sdk.BoxFile.Info i = (Info) info;
+                    String parentFolderId = i.getParent().getID();
+                    if (includeSubfolders) {
+                        files.add(new BoxFile(parentFolderId, i.getID(), userId, rootFolderId).parseBoxFile(i));
+                    } else if (fid != null && fid.equals(parentFolderId)) {
                         files.add(new BoxFile(parentFolderId, i.getID(), userId, rootFolderId).parseBoxFile(i));
                     }
                 }
@@ -796,7 +801,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     files = files.subList(start, toIndex);
                 }
 
-                return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+                return new SearchIteratorAdapter<>(files.iterator(), files.size());
             }
 
         });
@@ -878,7 +883,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
 
         String[] bxFields = (fields == null || fields.isEmpty()) ? BoxFileField.getAllFields() : BoxFileField.parseFields(fields);
-        List<File> files = new LinkedList<File>();
+        List<File> files = new LinkedList<>();
         Iterable<com.box.sdk.BoxItem.Info> children = boxFolder.getChildren(bxFields);
         for (com.box.sdk.BoxItem.Info info : children) {
             if (info instanceof Info) {
@@ -937,7 +942,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
         static {
             BoxFileField[] boxFileFields = BoxFileField.values();
-            String[] allFields = new String[boxFileFields.length];
+            allFields = new String[boxFileFields.length];
             int index = 0;
             for (BoxFileField bxField : boxFileFields) {
                 allFields[index++] = bxField.getBoxField();
@@ -989,7 +994,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
          */
         public static String[] parseFields(List<Field> fields) {
             //String[] parsedFields = new String[fields.size()];
-            List<String> parsedFields = new ArrayList<String>(fields.size());
+            List<String> parsedFields = new ArrayList<>(fields.size());
             for (Field f : fields) {
                 try {
                     BoxFileField bff = BoxFileField.valueOf(f.name());
@@ -1013,7 +1018,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             int dot = fileName.lastIndexOf('.');
             if (dot >= 0) {
                 base = fileName.substring(0, dot);
-                extension = fileName.substring(dot+1);
+                extension = fileName.substring(dot + 1);
             } else {
                 base = fileName;
                 extension = null;
@@ -1034,4 +1039,5 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             return null == extension ? base : base + "." + extension;
         }
     }
+
 }

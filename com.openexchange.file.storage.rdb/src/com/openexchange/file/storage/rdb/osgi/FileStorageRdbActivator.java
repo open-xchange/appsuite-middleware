@@ -58,12 +58,15 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.file.storage.FileStorageAccountDeleteListener;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.Services;
+import com.openexchange.file.storage.rdb.groupware.FileStorageConvertUtf8ToUtf8mb4Task;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbCreateTableTask;
 import com.openexchange.file.storage.rdb.groupware.FileStorageRdbDeleteListener;
 import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
+import com.openexchange.file.storage.rdb.internal.DeleteListenerRegistry;
 import com.openexchange.file.storage.rdb.internal.RdbFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.rdb.secret.RdbFileStorageSecretHandling;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -108,6 +111,8 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             Services.setServices(this);
+            DeleteListenerRegistry.initInstance();
+            track(FileStorageAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
             /*
              * Feed cache with additional cache configuration for file storage account cache
              */
@@ -147,7 +152,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
              * The update task/create table service
              */
             final FileStorageRdbCreateTableTask createTableTask = new FileStorageRdbCreateTableTask();
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(createTableTask));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(createTableTask, new FileStorageConvertUtf8ToUtf8mb4Task()));
             registerService(CreateTableService.class, createTableTask);
             /*
              * The delete listener
@@ -177,7 +182,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            cleanUp();
+            super.stopBundle();
             /*
              * Clear service registry
              */
@@ -187,6 +192,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
                 secretService.close();
                 this.secretService = null;
             }
+            DeleteListenerRegistry.releaseInstance();
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(FileStorageRdbActivator.class).error("", e);
             throw e;

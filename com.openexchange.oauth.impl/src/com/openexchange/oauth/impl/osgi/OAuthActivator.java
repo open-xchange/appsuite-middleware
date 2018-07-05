@@ -49,9 +49,14 @@
 
 package com.openexchange.oauth.impl.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -72,6 +77,7 @@ import com.openexchange.oauth.OAuthAPIRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthAccountReauthorizedListener;
+import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -84,6 +90,7 @@ import com.openexchange.oauth.impl.httpclient.impl.scribe.ScribeHTTPClientFactor
 import com.openexchange.oauth.impl.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.impl.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.impl.internal.InvalidationListenerRegistry;
+import com.openexchange.oauth.impl.internal.OAuthAccountStorageSQLImpl;
 import com.openexchange.oauth.impl.internal.OAuthServiceImpl;
 import com.openexchange.oauth.impl.internal.ReauthorizeListenerRegistry;
 import com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch;
@@ -97,6 +104,7 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -124,8 +132,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class, CryptoService.class, ConfigViewFactory.class,
-            TimerService.class, DispatcherPrefixService.class, UserService.class, SSLSocketFactoryProvider.class, ThreadPoolService.class };
+        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class, CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class, UserService.class, SSLSocketFactoryProvider.class, ThreadPoolService.class };
     }
 
     @Override
@@ -147,7 +154,8 @@ public final class OAuthActivator extends HousekeepingActivator {
             final BundleContext context = this.context;
             registry.start(context);
 
-            OAuthAccessRegistryService accessRegistryService = new OAuthAccessRegistryServiceImpl();
+            final OAuthAccessRegistryServiceImpl accessRegistryService = new OAuthAccessRegistryServiceImpl();
+            this.accessRegistryService = accessRegistryService;
             registerService(OAuthAccessRegistryService.class, accessRegistryService);
             trackService(OAuthAccessRegistryService.class);
 
@@ -203,20 +211,45 @@ public final class OAuthActivator extends HousekeepingActivator {
             delegateServices.put(IDGeneratorService.class, new OSGiIDGeneratorService().start(context));
             delegateServices.startAll(context);
 
-            final OAuthServiceImpl oauthService = new OAuthServiceImpl(delegateServices.get(DBProvider.class), delegateServices.get(IDGeneratorService.class), registry, delegateServices.get(ContextService.class), cbRegistry);
+            final OAuthAccountStorageSQLImpl oauthAccountStorage = new OAuthAccountStorageSQLImpl(delegateServices.get(DBProvider.class), delegateServices.get(IDGeneratorService.class), registry, delegateServices.get(ContextService.class));
+            final OAuthServiceImpl oauthService = new OAuthServiceImpl(registry, oauthAccountStorage, cbRegistry);
 
             registerService(CallbackRegistry.class, cbRegistry);
             registerService(CustomRedirectURLDetermination.class, cbRegistry);
             registerService(OAuthService.class, oauthService);
+            registerService(OAuthAccountStorage.class, oauthAccountStorage);
             registerService(OAuthServiceMetaDataRegistry.class, registry);
             registerService(OAuthAccountAssociationService.class, associationService);
-            registerService(EncryptedItemDetectorService.class, oauthService);
-            registerService(SecretMigrator.class, oauthService);
-            registerService(EncryptedItemCleanUpService.class, oauthService);
+            registerService(EncryptedItemDetectorService.class, oauthAccountStorage);
+            registerService(SecretMigrator.class, oauthAccountStorage);
+            registerService(EncryptedItemCleanUpService.class, oauthAccountStorage);
             registerService(OAuthAPIRegistry.class, OAuthAPIRegistryImpl.getInstance());
 
             final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
             registerService(OAuthHTTPClientFactory.class, oauthFactory);
+
+            {
+                EventHandler eventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(Event event) {
+                        String topic = event.getTopic();
+                        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                            Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                            if (null != contextId) {
+                                Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                                if (null != userId) {
+                                    accessRegistryService.userInactive(userId.intValue(), contextId.intValue());
+
+                                }
+                            }
+                        }
+                    }
+                };
+                Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
+                registerService(EventHandler.class, eventHandler, dict);
+            }
 
             SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
 

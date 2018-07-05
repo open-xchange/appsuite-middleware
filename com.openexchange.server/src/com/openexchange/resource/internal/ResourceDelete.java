@@ -56,6 +56,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -69,7 +70,6 @@ import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.resource.storage.ResourceStorage.StorageType;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ResourceDelete} - Performs update of a {@link Resource resource}.
@@ -212,7 +212,7 @@ public final class ResourceDelete {
             delete(con);
             con.commit();
         } catch (final SQLException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             try {
@@ -228,7 +228,7 @@ public final class ResourceDelete {
         /*
          * Delete all references to resource
          */
-        final DeleteEvent event = new DeleteEvent(getOrig(), resource.getIdentifier(), DeleteEvent.TYPE_RESOURCE, ctx);
+        final DeleteEvent event = DeleteEvent.createDeleteEventForResourceDeletion(getOrig(), resource.getIdentifier(), ctx);
         DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
     }
 

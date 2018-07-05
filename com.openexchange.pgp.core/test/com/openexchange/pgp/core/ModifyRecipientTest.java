@@ -49,6 +49,8 @@
 
 package com.openexchange.pgp.core;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -57,11 +59,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static org.mockito.Mockito.*;
-import org.mockito.Matchers;
 import org.bouncycastle.openpgp.PGPKeyRingGenerator;
-import org.bouncycastle.openpgp.PGPPublicKey;
-import org.bouncycastle.openpgp.PGPSecretKey;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -70,16 +68,18 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.Matchers;
 import com.openexchange.exception.OXException;
 import com.openexchange.pgp.core.packethandling.AddRecipientPacketProcessorHandler;
 import com.openexchange.pgp.core.packethandling.PacketProcessor;
+import com.openexchange.pgp.core.packethandling.RelaceAllRecipientsPacketProcessorHandler;
 import com.openexchange.pgp.core.packethandling.RemoveRecipientPacketProcessorHandler;
 
 /**
  * {@link ModifyRecipientTest}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 @RunWith(value = Parameterized.class)
 public class ModifyRecipientTest extends AbstractPGPTest {
@@ -89,73 +89,9 @@ public class ModifyRecipientTest extends AbstractPGPTest {
     private PGPKeyRetrievalStrategy keyRetrievalStrategy;
     private Identity identity;
     private Identity identity2;
+    private Identity identity3;
 
-    /**
-     *
-     * {@link Identity} Represents a Identity containing one PGP Key useful for testing purpose.
-     *
-     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
-     * @since v2.4.2
-     */
-    private class Identity {
-
-        private final String identity;
-        private final PGPPublicKey publicKey;
-        private final PGPSecretKey secretKey;
-        private final char[] password;
-
-        /**
-         * Initializes a new {@link Identity}.
-         *
-         * @param identity The name of the identity
-         * @param publicKey The public key of the identity
-         * @param secretKey The secret key of the identity
-         * @param password The password for accessing the private key
-         */
-        public Identity(String identity, PGPPublicKey publicKey, PGPSecretKey secretKey, char[] password) {
-            super();
-            this.identity = identity;
-            this.publicKey = publicKey;
-            this.secretKey = secretKey;
-            this.password = password;
-        }
-
-        /**
-         * Gets the identity
-         *
-         * @return The identity
-         */
-        public String getIdentity() {
-            return identity;
-        }
-
-        /**
-         * Gets the publicKey
-         *
-         * @return The publicKey
-         */
-        public PGPPublicKey getPublicKey() {
-            return publicKey;
-        }
-
-        /**
-         * Gets the secretKey
-         *
-         * @return The secretKey
-         */
-        public PGPSecretKey getSecretKey() {
-            return secretKey;
-        }
-
-        /**
-         * Gets the password
-         *
-         * @return The password
-         */
-        public char[] getPassword() {
-            return password;
-        }
-    }
+    private static final int TEST_DATA_LENGTH = 4096;
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -187,33 +123,25 @@ public class ModifyRecipientTest extends AbstractPGPTest {
     public void setup() throws Exception {
         //Setting up a keypair for the first identity
         PGPKeyRingGenerator keyGenerator = createPGPKeyPairGenerator();
-        identity = new Identity(TEST_IDENTITY, getPublicKeyFromGenerator(keyGenerator), getSecretKeyFromGenerator(keyGenerator), TEST_PASSWORD);
+        identity = new Identity(TEST_IDENTITY_NAME, getPublicKeyFromGenerator(keyGenerator), getSecretKeyFromGenerator(keyGenerator), TEST_IDENTITY_PASSWORD);
 
         //Setup an additional key pair for the 2nd identity
         final String TEST_IDENTITY_2 = "user2";
         final char[] TEST_PASSWORD_2 = "secret".toCharArray();
         PGPKeyRingGenerator keyGenerator2 = createPGPKeyPairGenerator(TEST_IDENTITY_2, TEST_PASSWORD_2);
         identity2 = new Identity(TEST_IDENTITY_2, getPublicKeyFromGenerator(keyGenerator2), getSecretKeyFromGenerator(keyGenerator2), TEST_PASSWORD_2);
-
+        //Setup user for 3rd identity
+        final String TEST_IDENTITY_3 = "user3";
+        final char[] TEST_PASSWORD_3 = "secret".toCharArray();
+        PGPKeyRingGenerator keyGenerator3 = createPGPKeyPairGenerator(TEST_IDENTITY_3, TEST_PASSWORD_3);
+        identity3 = new Identity(TEST_IDENTITY_3, getPublicKeyFromGenerator(keyGenerator3), getSecretKeyFromGenerator(keyGenerator3), TEST_PASSWORD_3);
         //Setting up a strategy for key retrieving, this is used when decrypting data
         keyRetrievalStrategy = mock(PGPKeyRetrievalStrategy.class);
         when(keyRetrievalStrategy.getSecretKey(Matchers.eq(identity.getSecretKey().getKeyID()), Matchers.eq(identity.getIdentity()), Matchers.eq(identity.getPassword()))).thenReturn(decodePrivateKey(identity.getSecretKey(), identity.getPassword()));
         when(keyRetrievalStrategy.getSecretKey(Matchers.eq(identity2.getSecretKey().getKeyID()), Matchers.eq(identity2.getIdentity()), Matchers.eq(identity2.getPassword()))).thenReturn(decodePrivateKey(identity2.getSecretKey(), identity2.getPassword()));
+        when(keyRetrievalStrategy.getSecretKey(Matchers.eq(identity3.getSecretKey().getKeyID()), Matchers.eq(identity3.getIdentity()), Matchers.eq(identity3.getPassword()))).thenReturn(decodePrivateKey(identity3.getSecretKey(), identity3.getPassword()));
     }
 
-    /**
-     * A helper method for getting all Public Keys from a group of identities
-     *
-     * @param identities The identities to get the keys for
-     * @return A set of Public Keys for the given identities
-     */
-    private PGPPublicKey[] getPublicKeysFor(List<Identity> identities) {
-        PGPPublicKey[] ret = new PGPPublicKey[(identities.size())];
-        for (int i = 0; i < identities.size(); i++) {
-            ret[i] = identities.get(i).getPublicKey();
-        }
-        return ret;
-    }
 
     /**
      * final String TEST_IDENTITY_2 = "user2";
@@ -232,15 +160,6 @@ public class ModifyRecipientTest extends AbstractPGPTest {
             return ret;
         }
         return null;
-    }
-
-    /**
-     * A helper method for creating clear text test data which can be used for encryption
-     *
-     * @return A bunch of test data
-     */
-    private byte[] generateTestData() {
-        return "test".getBytes();
     }
 
     /**
@@ -288,12 +207,12 @@ public class ModifyRecipientTest extends AbstractPGPTest {
         //Decrypting the data for each recipient
         for (Identity encryptingIdentity : decryptFor) {
             ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-            List<PGPSignatureVerificationResult> verifyResults =
-                new PGPDecrypter(keyRetrievalStrategy).decrypt(
+                PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(
                     new ByteArrayInputStream(modifiedEncryptedData.toByteArray()),
                     decryptedData,
                     encryptingIdentity.getIdentity(),
                     encryptingIdentity.getPassword());
+            List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
             Assert.assertTrue("Verification results should be empty for non signed data", verifyResults.isEmpty());
             Assert.assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), data);
         }
@@ -323,18 +242,81 @@ public class ModifyRecipientTest extends AbstractPGPTest {
         //Decrypting the data for each recipient
         for (Identity encryptingIdentity : decryptFor) {
             ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
-            List<PGPSignatureVerificationResult> verifyResults =
-                new PGPDecrypter(keyRetrievalStrategy).decrypt(
+                PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(
                     new ByteArrayInputStream(modifiedEncryptedData.toByteArray()),
                     decryptedData,
                     encryptingIdentity.getIdentity(),
                     encryptingIdentity.getPassword());
+            List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
 
             Assert.assertTrue("Verification results should be empty for non signed data", verifyResults.isEmpty());
             Assert.assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), data);
         }
     }
 
+    private void encryptThenReplaceThenDecrypt(byte[] data, List<Identity> encryptFor, List<Identity> replace, List<Identity> decryptFor, List<Identity> verifyFail) throws Exception {
+        ByteArrayInputStream plainTextData = new ByteArrayInputStream(data);
+
+        //Encrypting the data
+        ByteArrayOutputStream encryptedData = new ByteArrayOutputStream();
+        new PGPEncrypter().encrypt(plainTextData, encryptedData, this.armored, getPublicKeysFor(encryptFor));
+
+        //Adding a new recipient to the encrypted data
+        ByteArrayOutputStream modifiedEncryptedData = new ByteArrayOutputStream();
+        PacketProcessor processor = new PacketProcessor();
+        Identity adder = encryptFor.iterator().next();
+        processor.process(new ByteArrayInputStream(encryptedData.toByteArray()),
+            modifiedEncryptedData,
+            new RelaceAllRecipientsPacketProcessorHandler(decodePrivateKey(adder.getSecretKey(), adder.getPassword()), getPublicKeysFor(replace)),
+            this.armored);
+
+        if (this.armored) {
+            Assert.assertTrue("The modified encrypted data should be ASCII-Armored",
+                isAsciiArmored(new String(modifiedEncryptedData.toByteArray(), StandardCharsets.UTF_8)));
+        }
+
+        //Decrypting the data for each recipient
+        for (Identity encryptingIdentity : decryptFor) {
+            ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
+                PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(
+                    new ByteArrayInputStream(modifiedEncryptedData.toByteArray()),
+                    decryptedData,
+                    encryptingIdentity.getIdentity(),
+                    encryptingIdentity.getPassword());
+            List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
+
+            Assert.assertTrue("Verification results should be empty for non signed data", verifyResults.isEmpty());
+            Assert.assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), data);
+        }
+
+        //Make sure removed
+        for (Identity encryptingIdentity : verifyFail) {
+            ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
+            List<PGPSignatureVerificationResult> verifyResults = null;
+            boolean failed = false;
+            try {
+                PGPDecryptionResult result = new PGPDecrypter(keyRetrievalStrategy).decrypt(
+                    new ByteArrayInputStream(modifiedEncryptedData.toByteArray()),
+                    decryptedData,
+                    encryptingIdentity.getIdentity(),
+                    encryptingIdentity.getPassword());
+                verifyResults = result.getSignatureVerificationResults();
+            } catch (Exception ex) {
+                failed = true;
+            }
+
+            Assert.assertTrue("Decryption should fail for removed user", failed);
+        }
+    }
+
+    /**
+     * Test that replacing all Recipients is still decryptable with inteded recipients
+     * @throws Exception
+     */
+    @Test
+    public void testReplacingRecipientsShouldBeDecryptable() throws Exception {
+        encryptThenReplaceThenDecrypt(generateTestData(TEST_DATA_LENGTH), Arrays.asList(identity, identity2), Arrays.asList(identity, identity3), Arrays.asList(identity, identity3), Arrays.asList(identity2));
+    }
     /**
      * Test that removing a recipient from a PGP message does not affect the possibility for other recipients to decrypt the message
      *
@@ -342,7 +324,7 @@ public class ModifyRecipientTest extends AbstractPGPTest {
      */
     @Test
     public void testRemovingRecipientShouldNotAffectDecryptionForOtherRecipient() throws Exception {
-        encryptThenRemoveThenDecrypt(generateTestData(), Arrays.asList(identity, identity2), Arrays.asList(identity2), Arrays.asList(identity));
+        encryptThenRemoveThenDecrypt(generateTestData(TEST_DATA_LENGTH), Arrays.asList(identity, identity2), Arrays.asList(identity2), Arrays.asList(identity));
     }
 
     /**
@@ -352,7 +334,7 @@ public class ModifyRecipientTest extends AbstractPGPTest {
      */
     @Test
     public void testNotRemovingAnyRecipientsShouldNotAffectDecryption() throws Exception {
-        encryptThenRemoveThenDecrypt(generateTestData(), Arrays.asList(identity, identity2), null, Arrays.asList(identity, identity2));
+        encryptThenRemoveThenDecrypt(generateTestData(TEST_DATA_LENGTH), Arrays.asList(identity, identity2), null, Arrays.asList(identity, identity2));
     }
 
     /**
@@ -364,7 +346,7 @@ public class ModifyRecipientTest extends AbstractPGPTest {
     public void testRemovingRecipientShouldResultInAnErrorWhenDecrypting() throws Exception {
         thrown.expect(OXException.class);
         thrown.expectMessage("The private key for the identity" /* expected error message substring */);
-        encryptThenRemoveThenDecrypt(generateTestData(), Arrays.asList(identity, identity2), Arrays.asList(identity), Arrays.asList(identity));
+        encryptThenRemoveThenDecrypt(generateTestData(TEST_DATA_LENGTH), Arrays.asList(identity, identity2), Arrays.asList(identity), Arrays.asList(identity));
     }
 
     /**
@@ -374,6 +356,6 @@ public class ModifyRecipientTest extends AbstractPGPTest {
      */
     @Test
     public void testAddedRecipientShouldBeAbleToDecrypt() throws Exception {
-        encryptThenAddThenDecrypt(generateTestData(), Arrays.asList(identity), Arrays.asList(identity2), Arrays.asList(identity, identity2));
+        encryptThenAddThenDecrypt(generateTestData(TEST_DATA_LENGTH), Arrays.asList(identity), Arrays.asList(identity2), Arrays.asList(identity, identity2));
     }
 }

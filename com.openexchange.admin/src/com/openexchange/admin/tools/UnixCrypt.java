@@ -472,7 +472,7 @@ public class UnixCrypt {
 
      private static int [] des_set_key(byte key[])
      {
-        int schedule[] = new int[ITERATIONS * 2];
+        int schedule[] = new int[ITERATIONS << 1];
 
         int c = fourBytesToInt(key, 0);
         int d = fourBytesToInt(key, 4);
@@ -626,9 +626,11 @@ public class UnixCrypt {
      */
      public static final String crypt(String salt, String original) throws UnsupportedEncodingException
      {
-        while(salt.length() < 2) {
-            salt += "A";
+        StringBuilder saltBuilder = new StringBuilder(salt);
+        while (salt.length() < 2) {
+            saltBuilder.append('A');
         }
+        salt = saltBuilder.toString();
 
         StringBuffer buffer = new StringBuffer("             ");
 

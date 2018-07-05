@@ -49,9 +49,9 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -165,7 +165,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         return contexts.values();
     }
 
-    private class PoolIdTuple {
+    private static class PoolIdTuple {
         private final int writePoolId, readPoolId;
         PoolIdTuple(int writePoolId, int readPoolId) {
             super();

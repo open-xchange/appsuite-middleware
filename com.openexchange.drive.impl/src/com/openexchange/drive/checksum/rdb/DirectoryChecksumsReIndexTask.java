@@ -49,12 +49,10 @@
 
 package com.openexchange.drive.checksum.rdb;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -78,12 +76,11 @@ public class DirectoryChecksumsReIndexTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
-        Connection connection = dbService.getForUpdateTask(contextID);
-        boolean committed = false;
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
             connection.setAutoCommit(false);
+            rollback = true;
             /*
              * remove obsolete indices as needed
              */
@@ -104,20 +101,16 @@ public class DirectoryChecksumsReIndexTask extends UpdateTaskAdapter {
              * commit
              */
             connection.commit();
-            committed = true;
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connection);
-            if (committed) {
-                dbService.backForUpdateTask(contextID, connection);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextID, connection);
+            if (rollback) {
+                rollback(connection);
             }
+            autocommit(connection);
         }
     }
 

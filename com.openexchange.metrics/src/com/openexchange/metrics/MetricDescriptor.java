@@ -50,6 +50,7 @@
 package com.openexchange.metrics;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * 
@@ -64,7 +65,7 @@ public class MetricDescriptor {
     private String unit;
     private MetricType metricType;
     private TimeUnit rate;
-    private MetricSupplier<?> metricSupplier;
+    private Supplier<?> metricSupplier;
     private String fullName;
     private String description;
 
@@ -121,11 +122,11 @@ public class MetricDescriptor {
     }
 
     /**
-     * Gets the metric {@link MetricSupplier} or <code>null</code> if none is specified
+     * Gets the metric {@link Supplier} or <code>null</code> if none is specified
      *
-     * @return The metric {@link MetricSupplier} or <code>null</code> if none is specified
+     * @return The metric {@link Supplier} or <code>null</code> if none is specified
      */
-    public MetricSupplier<?> getMetricSupplier() {
+    public Supplier<?> getMetricSupplier() {
         return metricSupplier;
     }
 
@@ -279,7 +280,7 @@ public class MetricDescriptor {
      *
      * @param metricSupplier The metricSupplier to set
      */
-    void setMetricSupplier(final MetricSupplier<?> metricSupplier) {
+    void setMetricSupplier(final Supplier<?> metricSupplier) {
         this.metricSupplier = metricSupplier;
     }
 
@@ -327,7 +328,7 @@ public class MetricDescriptor {
         protected final MetricType metricType;
         private TimeUnit rate = TimeUnit.SECONDS;
         private String unit = "events";
-        private MetricSupplier<?> supplier;
+        private Supplier<?> supplier;
         private String description;
 
         /**
@@ -367,12 +368,12 @@ public class MetricDescriptor {
         }
 
         /**
-         * Set the {@link MetricSupplier}
+         * Set the {@link Supplier}
          * 
-         * @param supplier The {@link MetricSupplier} to set
+         * @param supplier The {@link Supplier} to set
          * @return the {@link MetricBuilder} for chained calls
          */
-        public MetricBuilder withMetricSupplier(final MetricSupplier<?> supplier) {
+        public MetricBuilder withMetricSupplier(final Supplier<?> supplier) {
             this.supplier = supplier;
             return this;
         }

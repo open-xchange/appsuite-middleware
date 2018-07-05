@@ -49,7 +49,12 @@
 
 package com.openexchange.contact.vcard.impl.mapping;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Birthday;
@@ -61,6 +66,8 @@ import ezvcard.property.Birthday;
  */
 public class BirthdayMapping extends AbstractDateMapping<Birthday> {
 
+    private static final String OMMIT_YEAR = "X-APPLE-OMIT-YEAR";
+
     /**
      * Initializes a new {@link BirthdayMapping}.
      */
@@ -71,6 +78,40 @@ public class BirthdayMapping extends AbstractDateMapping<Birthday> {
     @Override
     protected Birthday newProperty() {
         return new Birthday((Date) null);
+    }
+
+    @Override
+    protected void exportProperty(Contact contact, Birthday property, List<OXException> warnings) {
+        Object value = contact.get(field);
+        if (null != value && Date.class.isInstance(value)) {
+            /*
+             * adjust date for serialization through ez-vcard (that uses local timezone)
+             */
+            Date adjustedDate = new Date(subtractTimeZoneOffset(((Date) value).getTime(), TimeZone.getDefault()));
+            adjustedDate = adjustForNoYear(adjustedDate, property);
+            property.setDate(adjustedDate, false);
+        } else {
+            property.setDate(null, false);
+        }
+    }
+
+    /**
+     * Maps the years 1 (legacy OX implementation) and 1604 (the apple way) to 1604 and adds the "X-APPLE-OMIT-YEAR" parameter.
+     * 
+     * @param adjustedDate
+     * @param property
+     * @return
+     */
+    private Date adjustForNoYear(Date adjustedDate, Birthday property) {
+        Calendar calendar = GregorianCalendar.getInstance();
+        calendar.setTime(adjustedDate);
+        if (calendar.get(Calendar.YEAR) == 1 || calendar.get(Calendar.YEAR) == 1604) {
+            property.addParameter(OMMIT_YEAR, "1604");
+            calendar.set(Calendar.YEAR, 1604);
+            return new Date(calendar.getTimeInMillis());
+        } else {
+            return adjustedDate;
+        }
     }
 
 }

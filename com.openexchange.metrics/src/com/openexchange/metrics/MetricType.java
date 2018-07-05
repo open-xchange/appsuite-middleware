@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics;
 
+import java.util.function.Supplier;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
 import com.openexchange.metrics.types.Histogram;
@@ -79,7 +80,7 @@ public enum MetricType {
      * example, the component has a value which is maintained by a third-party
      * library, it easily be exposed by registering a Gauge instance which
      * returns that value.</p>
-     * <p>{@link Gauge} is the only metric that requires a {@link MetricSupplier}
+     * <p>{@link Gauge} is the only metric that requires a {@link Supplier}
      * to be passed along with the {@link MetricMetadata}.</p>
      */
     GAUGE,

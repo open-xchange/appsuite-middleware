@@ -98,7 +98,7 @@ public final class DetachAction extends AbstractAttachmentAction {
                     try {
                         ids[i] = Integer.parseInt(string);
                     } catch (final NumberFormatException e1) {
-                        throw AjaxExceptionCodes.IMVALID_PARAMETER.create(string);
+                        throw AjaxExceptionCodes.INVALID_PARAMETER.create(string);
                     }
                 }
             }

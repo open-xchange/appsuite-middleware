@@ -51,11 +51,10 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -70,18 +69,24 @@ public class MakeUUIDPrimaryForDListTablesV2 extends MakeUUIDPrimaryForDListTabl
     @Override
     public void perform(PerformParameters params) throws OXException {
         super.perform(params);
-        
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            DBUtils.startTransaction(connection);
-            Tools.modifyColumns(connection, TABLE, new Column("cid", "INT4 NOT NULL"));
-            connection.commit();
+            Databases.startTransaction(con);
+            rollback = true;
+
+            Tools.modifyColumns(con, TABLE, new Column("cid", "INT4 NOT NULL"));
+
+            con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 }

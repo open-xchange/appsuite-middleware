@@ -51,7 +51,7 @@ package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.dav.mixins.PrincipalURL;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
@@ -65,7 +65,7 @@ public class Organizer extends SingleXMLPropertyMixin {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Organizer.class);
 
-    private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
 
     /**
      * Initializes a new {@link Organizer}.
@@ -73,7 +73,7 @@ public class Organizer extends SingleXMLPropertyMixin {
      * @param collection The collection to get the owner from.
      * @throws OXException
      */
-    public Organizer(CommonFolderCollection<?> collection) throws OXException {
+    public Organizer(FolderCollection<?> collection) throws OXException {
         super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "organizer");
         this.collection = collection;
     }

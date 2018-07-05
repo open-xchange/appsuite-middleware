@@ -60,7 +60,7 @@ import com.hazelcast.nio.serialization.Portable;
 public interface CustomPortable extends Portable {
 
     /**
-     * The identifier of the dynamic portable factory.<p/>
+     * The identifier (<code>873</code>) of the dynamic portable factory.<p/>
      *
      * Make sure to supply this identifier in the {@link #getFactoryId()} method.
      */
@@ -84,14 +84,24 @@ public interface CustomPortable extends Portable {
     public static final int PORTABLE_SESSIONS_FILTER_APPLIER_CLASS_ID = 25;
 
     /**
-     * Unique id for PortableAuthnRequestInfo
+     * Unique id for SAML PortableAuthnRequestInfo
      */
     public static final int PORTABLE_SAML_AUTHN_REQUEST_INFO = 300;
 
     /**
-     * Unique id for PortableLogoutRequestInfo
+     * Unique id for SAML PortableLogoutRequestInfo
      */
     public static final int PORTABLE_SAML_LOGOUT_REQUEST_INFO = 301;
+
+    /**
+     * Unique id for OpenId authentication request
+     */
+    public static final int PORTABLE_OIDC_AUTHN_REQUEST_INFO = 310;
+
+    /**
+     * Unique id for OpenId logout request
+     */
+    public static final int PORTABLE_OIDC_LOGOUT_REQUEST_INFO = 311;
 
     /**
      * Gets the ID of the dynamic portable factory.<p/>
@@ -157,6 +167,8 @@ public interface CustomPortable extends Portable {
      *   &bull; 208 --> com.openexchange.office.hazelcast.serialization.document.PortableMemberPredicate
      *   &bull; 300 --> com.openexchange.saml.impl.hz.PortableAuthnRequestInfo
      *   &bull; 301 --> com.openexchange.saml.impl.hz.PortableLogoutRequestInfo
+     *   &bull; 310 --> com.openexchange.oidc.hz.PortableAuthenticationRequest
+     *   &bull; 311 --> com.openexchange.oidc.hz.PortableLogoutRequest
      *   &bull; 400 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck
      *   &bull; 401 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp
      *   &bull; 402 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp

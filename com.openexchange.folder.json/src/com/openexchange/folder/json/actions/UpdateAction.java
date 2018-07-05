@@ -61,7 +61,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
-import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionServices;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.ParsedFolder;
@@ -109,7 +108,7 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
 
         String newParent = jFolder.optString(FOLDER_ID.getName(), null);
         if (null == newParent) {
-            return EnqueuableAJAXActionServices.resultFor(false);
+            return EnqueuableAJAXActionService.resultFor(false);
         }
 
         String id = request.getParameter("id");
@@ -124,7 +123,7 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
             jKeyDesc.put("id", id);
             jKeyDesc.put("parent", newParent);
 
-            return EnqueuableAJAXActionServices.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+            return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

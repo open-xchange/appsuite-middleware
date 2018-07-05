@@ -203,6 +203,7 @@ public class SnippetImageDataSource implements ImageDataSource {
                 String contentId = attachment.getContentId();
                 if (MimeMessageUtility.equalsCID(cid, contentId) || MimeMessageUtility.equalsCID(cid, attachment.getId())) {
                     ThresholdFileHolder sink = null;
+                    boolean closeSink = true;
                     try {
                         Reference<FileType> fileTypeRef = new Reference<>();
                         ContentType contentType = determineContentType(attachment, fileTypeRef);
@@ -219,12 +220,14 @@ public class SnippetImageDataSource implements ImageDataSource {
                         }
 
                         InputStream in = sink.getClosingStream();
-                        sink = null; // Avoid premature closing
+                        closeSink = false;
                         return new SimpleData<D>((D) (in), properties);
                     } catch (IOException e) {
                         throw DataExceptionCodes.IO_ERROR.create(e, e.getMessage());
                     } finally {
-                        Streams.close(sink);
+                        if (closeSink) {
+                            Streams.close(sink);
+                        }
                     }
                 }
             }

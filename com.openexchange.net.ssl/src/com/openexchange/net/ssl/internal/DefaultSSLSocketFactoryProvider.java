@@ -68,29 +68,18 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public class DefaultSSLSocketFactoryProvider implements SSLSocketFactoryProvider {
 
-    private static final DefaultSSLSocketFactoryProvider INSTANCE = new DefaultSSLSocketFactoryProvider();
-
-    /**
-     * Gets the {@link DefaultSSLSocketFactoryProvider} instance.
-     *
-     * @return The provider instance
-     */
-    public static DefaultSSLSocketFactoryProvider getInstance() {
-        return INSTANCE;
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------------------
+    private final SSLConfigurationService sslConfigService;
 
     /**
      * Initializes a new {@link DefaultSSLSocketFactoryProvider}.
      */
-    private DefaultSSLSocketFactoryProvider() {
+    public DefaultSSLSocketFactoryProvider(SSLConfigurationService sslConfigService) {
         super();
+        this.sslConfigService = sslConfigService;
     }
 
     @Override
     public SSLSocketFactory getDefault() {
-        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         if (sslConfigService.getTrustLevel().equals(TrustLevel.TRUST_ALL)) {
             // Globally configured to user trust-all socket factory
             return TrustAllSSLSocketFactory.getDefault();
@@ -105,11 +94,12 @@ public class DefaultSSLSocketFactoryProvider implements SSLSocketFactoryProvider
         // Try to determine by user
         int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
         int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
-        if ((user == -1) || (context == -1)) {
+        if ((user < 0) || (context < 0)) {
             // No user-specific socket factory selectable
             return TrustedSSLSocketFactory.getDefault();
         }
 
         return userSSLConfig.isTrustAll(user, context) ? TrustAllSSLSocketFactory.getDefault() : TrustedSSLSocketFactory.getDefault();
     }
+
 }

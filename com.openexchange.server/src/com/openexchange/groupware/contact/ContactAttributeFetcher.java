@@ -49,9 +49,8 @@
 
 package com.openexchange.groupware.contact;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -76,7 +75,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
     private static final Map<String, AttributeGetter> GETTERS;
 
     static {
-        final Map<String, AttributeGetter> m = new HashMap<String, AttributeGetter>(25);
+        ImmutableMap.Builder<String, AttributeGetter> m = ImmutableMap.builder();
 
         m.put(ContactFields.ANNIVERSARY, new AttributeGetter() {
 
@@ -740,7 +739,7 @@ public class ContactAttributeFetcher implements SearchAttributeFetcher<Contact> 
             }
         });
 
-        GETTERS = Collections.unmodifiableMap(m);
+        GETTERS = m.build();
     }
 
     private static final ContactAttributeFetcher instance = new ContactAttributeFetcher();

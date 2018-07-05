@@ -51,7 +51,6 @@ package com.openexchange.rest.services.database.sql;
 
 import com.openexchange.database.AbstractCreateTableImpl;
 
-
 /**
  * {@link CreateServiceSchemaVersionTable}
  *
@@ -66,16 +65,16 @@ public class CreateServiceSchemaVersionTable extends AbstractCreateTableImpl {
 
     @Override
     public String[] tablesToCreate() {
-        return new String[]{"serviceSchemaVersion"};
+        return new String[] { "serviceSchemaVersion" };
     }
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[]{"CREATE TABLE `serviceSchemaVersion` (" + 
+        return new String[] { "CREATE TABLE `serviceSchemaVersion` (" + 
             "  `version` varchar(128) NOT NULL DEFAULT ''," + 
             "  `module` varchar(128) NOT NULL DEFAULT ''," + 
             "  PRIMARY KEY (`version`,`module`)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"};
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;" 
+        };
     }
-
 }

@@ -117,7 +117,7 @@ public class UpdateObjectPermissionAction extends AbstractObjectPermissionAction
                     stmt.setInt(6, oldDocument.getModifiedBy());
                     stmt.setInt(7, oldDocument.getCreatedBy());
                     stmt.setInt(8, removedPermission.getPermissions());
-                    stmt.setLong(9, document.getLastModified().getTime());
+                    stmt.setLong(9, document.getSequenceNumber());
                     stmt.setBoolean(10, removedPermission.isGroup());
                 }
             });
@@ -133,7 +133,7 @@ public class UpdateObjectPermissionAction extends AbstractObjectPermissionAction
                     stmt.setInt(1, document.getModifiedBy());
                     stmt.setInt(2, document.getCreatedBy());
                     stmt.setInt(3, updatedPermission.getPermissions());
-                    stmt.setLong(4, document.getLastModified().getTime());
+                    stmt.setLong(4, document.getSequenceNumber());
                     stmt.setInt(5, getContext().getContextId());
                     stmt.setInt(6, document.getId());
                     stmt.setInt(7, updatedPermission.getEntity());
@@ -156,7 +156,7 @@ public class UpdateObjectPermissionAction extends AbstractObjectPermissionAction
                     stmt.setInt(6, document.getModifiedBy());
                     stmt.setInt(7, document.getCreatedBy());
                     stmt.setInt(8, addedPermission.getPermissions());
-                    stmt.setLong(9, document.getLastModified().getTime());
+                    stmt.setLong(9, document.getSequenceNumber());
                     stmt.setBoolean(10, addedPermission.isGroup());
                 }
             });
@@ -196,7 +196,7 @@ public class UpdateObjectPermissionAction extends AbstractObjectPermissionAction
                         stmt.setInt(6, oldDocument.getModifiedBy());
                         stmt.setInt(7, oldDocument.getCreatedBy());
                         stmt.setInt(8, objectPermission.getPermissions());
-                        stmt.setLong(9, oldDocument.getLastModified().getTime());
+                        stmt.setLong(9, oldDocument.getSequenceNumber());
                         stmt.setBoolean(10, objectPermission.isGroup());
                     }
                 });

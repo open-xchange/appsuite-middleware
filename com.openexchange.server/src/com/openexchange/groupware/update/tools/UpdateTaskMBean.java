@@ -75,7 +75,7 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.SchemaStore;
@@ -99,7 +99,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
 
     private final MBeanInfo mbeanInfo;
 
-    private final String[] taskTypeNames = { "taskName", "successful", "lastModified" };
+    private final String[] taskTypeNames = { "taskName", "successful", "lastModified", "uuid" };
     private final ConcurrentMap<String, UpdateTaskToolkitJob<?>> jobs;
     private CompositeType taskType;
     private TabularType taskListType;
@@ -194,64 +194,29 @@ public final class UpdateTaskMBean implements DynamicMBean {
     private MBeanInfo buildMBeanInfo() {
         final List<MBeanOperationInfo> operations = new ArrayList<MBeanOperationInfo>(6);
         // Trigger update process
-        final MBeanParameterInfo[] tparams = { new MBeanParameterInfo(
-            "id",
-            "java.lang.String",
-            "A valid context identifier contained in target schema or a schema name") };
+        final MBeanParameterInfo[] tparams = { new MBeanParameterInfo("id", "java.lang.String", "A valid context identifier contained in target schema or a schema name") };
         operations.add(new MBeanOperationInfo("runUpdate", "Runs the schema's update.", tparams, "void", MBeanOperationInfo.ACTION));
         // Force re-run operation
-        final MBeanParameterInfo[] forceParams = {
-            new MBeanParameterInfo("className", "java.lang.String", "The update task's class name"),
-            new MBeanParameterInfo("id", "java.lang.String", "A valid context identifier contained in target schema or a schema name") };
-        operations.add(new MBeanOperationInfo(
-            "force",
-            "Forces re-run of given update task.",
-            forceParams,
-            "void",
-            MBeanOperationInfo.ACTION));
+        final MBeanParameterInfo[] forceParams = { new MBeanParameterInfo("className", "java.lang.String", "The update task's class name"), new MBeanParameterInfo("id", "java.lang.String", "A valid context identifier contained in target schema or a schema name") };
+        operations.add(new MBeanOperationInfo("force", "Forces re-run of given update task.", forceParams, "void", MBeanOperationInfo.ACTION));
         // Force re-run operation on all schemas
-        final MBeanParameterInfo[] forceAllParams = { new MBeanParameterInfo(
-            "className",
-            "java.lang.String",
-            "The update task's class name") };
-        operations.add(new MBeanOperationInfo(
-            "forceOnAllSchemas",
-            "Forces re-run of given update task on all schemas.",
-            forceAllParams,
-            "void",
-            MBeanOperationInfo.ACTION));
+        final MBeanParameterInfo[] forceAllParams = { new MBeanParameterInfo("className", "java.lang.String", "The update task's class name") };
+        operations.add(new MBeanOperationInfo("forceOnAllSchemas", "Forces re-run of given update task on all schemas.", forceAllParams, "void", MBeanOperationInfo.ACTION));
         // Run update on all database schemas
         operations.add(new MBeanOperationInfo("runAllUpdate", "Runs the update on all schemas.", null, "void", MBeanOperationInfo.ACTION));
         try {
             // List executed update tasks
-            final String[] taskTypeDescriptions = {
-                "Class name of the update task", "Wether it is executed successfully or not.", "Last task execution time stamp." };
-            final OpenType[] taskTypes = { SimpleType.STRING, SimpleType.BOOLEAN, SimpleType.DATE };
-            taskType = new CompositeType(
-                "Update task",
-                "Executed update task",
-                taskTypeNames,
-                taskTypeDescriptions,
-                taskTypes);
-            taskListType = new TabularType("UpdateTask list", "List of update tasks.", taskType, new String[] { "taskName" });
-            final MBeanParameterInfo[] listExecutedTasks = { new MBeanParameterInfo(
-                "schema",
-                "java.lang.String",
-                "Name of a schema that update tasks should be listed.") };
-            operations.add(new MBeanOperationInfo(
-                "listExecutedTasks",
-                "Lists executed update tasks of a schema.",
-                listExecutedTasks,
-                "javax.management.openmbean.TabularData",
-                MBeanOperationInfo.INFO));
+            final String[] taskTypeDescriptions = { "Class name of the update task", "Whether it is executed successfully or not.", "Last task execution time stamp.", "The UUID of the update task." };
+            final OpenType[] taskTypes = { SimpleType.STRING, SimpleType.BOOLEAN, SimpleType.DATE, SimpleType.STRING };
+            taskType = new CompositeType("Update task", "Executed update task", taskTypeNames, taskTypeDescriptions, taskTypes);
+            taskListType = new TabularType("UpdateTask list", "List of update tasks.", taskType, new String[] { "taskName", "uuid" });
+            final MBeanParameterInfo[] listExecutedTasks = { new MBeanParameterInfo("schema", "java.lang.String", "Name of a schema that update tasks should be listed.") };
+            operations.add(new MBeanOperationInfo("listExecutedTasks", "Lists executed update tasks of a schema.", listExecutedTasks, "javax.management.openmbean.TabularData", MBeanOperationInfo.INFO));
         } catch (final OpenDataException e) {
             LOG.error("", e);
         }
         // Get status text
-        final MBeanParameterInfo[] sparams = { new MBeanParameterInfo(
-            "id",
-            "java.lang.String",
-            "A valid job identifier") };
+        final MBeanParameterInfo[] sparams = { new MBeanParameterInfo("id", "java.lang.String", "A valid job identifier") };
         operations.add(new MBeanOperationInfo("getStatus", "Gets the status text for a given job identifier.", tparams, "void", MBeanOperationInfo.ACTION));
         // MBean info
         return new MBeanInfo(UpdateTaskMBean.class.getName(), "Update task toolkit", null, null, operations.toArray(new MBeanOperationInfo[operations.size()]), null);
@@ -283,10 +248,16 @@ public final class UpdateTaskMBean implements DynamicMBean {
                     if (param instanceof Integer) {
                         updateProcess = new UpdateProcess(((Integer) param).intValue());
                     } else {
-                        final String sParam = param.toString();
-                        final int parsed = parsePositiveInt(sParam);
-
-                        updateProcess = parsed >= 0 ? new UpdateProcess(parsed, true, false) : new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString()), true, false);
+                        String contextOrSchemaName = param.toString();
+                        int optContextId = parsePositiveInt(contextOrSchemaName);
+                        if (optContextId > 0) {
+                            // Assume context identifier is given
+                            updateProcess = new UpdateProcess(optContextId, true, false);
+                        } else {
+                            // Assume schema name is given
+                            SchemaInfo schema = UpdateTaskToolkit.getInfoBySchemaName(contextOrSchemaName);
+                            updateProcess = new UpdateProcess(schema.getPoolId(), schema.getSchema(), true, false);
+                        }
                     }
                 }
 
@@ -304,7 +275,8 @@ public final class UpdateTaskMBean implements DynamicMBean {
                         } else {
                             sb.append("\\R");
                         }
-                        sb.append(' ').append(taskInfo.getTaskName()).append(" (schema=").append(taskInfo.getSchema()).append(')');
+                        sb.append(' ').append(taskInfo.getTaskName()).append(" (class=").append(taskInfo.getClass().getName()).append(')');
+                        sb.append(" (schema=").append(taskInfo.getSchema()).append(')');
                     }
                     return sb.toString();
                 }
@@ -414,6 +386,16 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error("", e);
                 throw e;
             }
+        } else if (actionName.equals("getNamespaceAware")) {
+            try {
+                return UpdateTaskToolkit.getNamespaceAwareUpdateTasks();
+            } catch (final RuntimeException e) {
+                LOG.error("", e);
+                throw e;
+            } catch (final Error e) {
+                LOG.error("", e);
+                throw e;
+            }
         }
         final ReflectionException e = new ReflectionException(new NoSuchMethodException(actionName));
         LOG.error("", e);
@@ -432,24 +414,24 @@ public final class UpdateTaskMBean implements DynamicMBean {
 
     private TabularDataSupport getExecutedTasksList(final String schemaName) throws OXException {
         final SchemaStore store = SchemaStore.getInstance();
-        final TabularDataSupport retval;
         try {
-            final int contextId = UpdateTaskToolkit.getContextIdBySchema(schemaName);
-            final int poolId = Database.resolvePool(contextId, true);
-            ExecutedTask[] tasks = store.getExecutedTasks(poolId, schemaName);
+            SchemaInfo schemaInfo = UpdateTaskToolkit.getInfoBySchemaName(schemaName);
+            ExecutedTask[] tasks = store.getExecutedTasks(schemaInfo.getPoolId(), schemaName);
             if (null == tasks) {
                 tasks = new ExecutedTask[0];
+            } else {
+                Arrays.sort(tasks);
             }
-            Arrays.sort(tasks);
-            retval = new TabularDataSupport(taskListType, tasks.length, 1);
-            for (final ExecutedTask task : tasks) {
-                final CompositeDataSupport data = new CompositeDataSupport(taskType, taskTypeNames, new Object[] { task.getTaskName(), B(task.isSuccessful()), task.getLastModified() });
+
+            TabularDataSupport retval = new TabularDataSupport(taskListType, tasks.length, 1);
+            for (ExecutedTask task : tasks) {
+                CompositeDataSupport data = new CompositeDataSupport(taskType, taskTypeNames, new Object[] { task.getTaskName(), B(task.isSuccessful()), task.getLastModified(), task.getUUID().toString() });
                 retval.put(data);
             }
+            return retval;
         } catch (final OpenDataException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         }
-        return retval;
     }
 
 }

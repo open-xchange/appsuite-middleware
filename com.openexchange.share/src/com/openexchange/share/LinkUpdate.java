@@ -63,6 +63,7 @@ public class LinkUpdate {
     private String password;
     private boolean containsExpiryDate;
     private boolean containsPassword;
+    private boolean includeSubfolders;
 
     /**
      * Initializes a new {@link LinkUpdate}.
@@ -125,6 +126,24 @@ public class LinkUpdate {
      */
     public boolean containsPassword() {
         return containsPassword;
+    }
+
+    /**
+     * Gets the includeSubfolders
+     * 
+     * @return The includeSubfolders
+     */
+    public boolean isIncludeSubfolders() {
+        return includeSubfolders;
+    }
+
+    /**
+     * Sets the includeSubfolders
+     *
+     * @param includeSubfolders Whether sub-folders should be included or not
+     */
+    public void setIncludeSubfolders(boolean includeSubfolders) {
+        this.includeSubfolders = includeSubfolders;
     }
 
 }

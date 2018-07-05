@@ -50,9 +50,8 @@
 package com.openexchange.groupware.container.participants;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * {@link ConfirmStatus}
@@ -83,10 +82,10 @@ public enum ConfirmStatus {
     private static Map<Integer, ConfirmStatus> ID_MAP;
 
     static {
-        Map<Integer, ConfirmStatus> m = new HashMap<Integer, ConfirmStatus>(4, 1);
+        ImmutableMap.Builder<Integer, ConfirmStatus> m = ImmutableMap.builder();
         for (ConfirmStatus status : values()) {
             m.put(I(status.getId()), status);
         }
-        ID_MAP = Collections.unmodifiableMap(m);
+        ID_MAP = m.build();
     }
 }

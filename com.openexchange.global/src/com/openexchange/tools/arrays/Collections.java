@@ -172,6 +172,16 @@ public final class Collections {
     }
 
     /**
+     * Gets a value indicating whether the supplied collection reference is <code>null</code> or does not contain any element.
+     *
+     * @param collection The collection to check
+     * @return <code>true</code> if the collection is <code>null</code> or empty, <code>false</code>, otherwise
+     */
+    public static boolean isNullOrEmpty(Collection<?> collection) {
+        return null == collection || collection.isEmpty();
+    }
+
+    /**
      * ByteArrayOutputStream implementation that does not synchronize methods and does not copy the data on toByteArray().
      */
     public static class FastByteArrayOutputStream extends OutputStream {

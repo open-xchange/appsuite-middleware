@@ -49,8 +49,6 @@
 
 package com.openexchange.context.mbean;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,6 +63,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 
 
 /**

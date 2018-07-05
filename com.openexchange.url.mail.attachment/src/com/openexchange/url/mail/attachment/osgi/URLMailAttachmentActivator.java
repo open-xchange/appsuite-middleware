@@ -96,7 +96,7 @@ public final class URLMailAttachmentActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         LOG.info("stopping bundle: {}", name);
         try {
-            unregisterServices();
+            super.stopBundle();
         } catch (final Exception e) {
             LOG.error("stopping bundle failed: {}", name, e);
             throw e;

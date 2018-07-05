@@ -83,6 +83,7 @@ import javax.xml.bind.annotation.XmlType;
 public class UserModuleAccess {
 
     @XmlElement(name = "OLOX20", nillable = true)
+    @Deprecated
     protected Boolean olox20;
     @XmlElement(name = "USM", nillable = true)
     protected Boolean usm;
@@ -131,6 +132,7 @@ public class UserModuleAccess {
     @XmlElement(nillable = true)
     protected Boolean webdav;
     @XmlElement(nillable = true)
+    @Deprecated
     protected Boolean webdavXml;
     @XmlElement(nillable = true)
     protected Boolean webmail;
@@ -141,7 +143,7 @@ public class UserModuleAccess {
      * @return
      *     possible object is
      *     {@link Boolean }
-     *
+     * @deprecated
      */
     public Boolean isOLOX20() {
         return olox20;
@@ -153,6 +155,7 @@ public class UserModuleAccess {
      * @param value
      *     allowed object is
      *     {@link Boolean }
+     * @deprecated
      *
      */
     public void setOLOX20(Boolean value) {
@@ -717,6 +720,7 @@ public class UserModuleAccess {
      * @return
      *     possible object is
      *     {@link Boolean }
+     * @deprecated
      *
      */
     public Boolean isWebdavXml() {
@@ -729,6 +733,7 @@ public class UserModuleAccess {
      * @param value
      *     allowed object is
      *     {@link Boolean }
+     * @deprecated
      *
      */
     public void setWebdavXml(Boolean value) {

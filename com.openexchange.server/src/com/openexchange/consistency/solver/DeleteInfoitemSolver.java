@@ -52,7 +52,6 @@ package com.openexchange.consistency.solver;
 import java.text.MessageFormat;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
-import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 
@@ -74,35 +73,33 @@ public class DeleteInfoitemSolver implements ProblemSolver {
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        if (entity.getType().equals(EntityType.Context)) {
-            // Now we go through the set an delete each superfluous entry:
-            for (final String identifier : problems) {
+        // Now we go through the set an delete each superfluous entry:
+        for (final String identifier : problems) {
+            try {
+                database.startTransaction();
+                database.startDBTransaction();
+                database.setRequestTransactional(true);
+                final int[] numbers = database.removeDocument(identifier, entity.getContext());
+                database.commit();
+                if (numbers[0] == 1) {
+                    LOG.info(MessageFormat.format("Have to change infostore version number for entry: {0}", identifier));
+                }
+                if (numbers[1] == 1) {
+                    LOG.info(MessageFormat.format("Deleted entry {0} from infostore_documents.", identifier));
+                }
+            } catch (final OXException e) {
+                LOG.error("{}", e.getMessage(), e);
                 try {
-                    database.startTransaction();
-                    database.startDBTransaction();
-                    database.setRequestTransactional(true);
-                    final int[] numbers = database.removeDocument(identifier, entity.getContext());
-                    database.commit();
-                    if (numbers[0] == 1) {
-                        LOG.info(MessageFormat.format("Have to change infostore version number for entry: {0}", identifier));
-                    }
-                    if (numbers[1] == 1) {
-                        LOG.info(MessageFormat.format("Deleted entry {0} from infostore_documents.", identifier));
-                    }
+                    database.rollback();
+                    return;
+                } catch (final OXException e1) {
+                    LOG.debug("{}", e1.getMessage(), e1);
+                }
+            } finally {
+                try {
+                    database.finish();
                 } catch (final OXException e) {
-                    LOG.error("", e);
-                    try {
-                        database.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG.debug("", e1);
-                    }
-                } finally {
-                    try {
-                        database.finish();
-                    } catch (final OXException e) {
-                        LOG.debug("", e);
-                    }
+                    LOG.debug("{}", e.getMessage(), e);
                 }
             }
         }

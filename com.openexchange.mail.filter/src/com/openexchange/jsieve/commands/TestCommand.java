@@ -369,7 +369,7 @@ public class TestCommand extends Command {
 
         /**
          * The JSON mappings for the header match types
-         * 
+         *
          * @return A {@link List} with mappings
          */
         private static List<JSONMatchType> headerJSONMatchTypes() {

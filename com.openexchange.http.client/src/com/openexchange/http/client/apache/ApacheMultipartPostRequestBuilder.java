@@ -158,7 +158,7 @@ public class ApacheMultipartPostRequestBuilder extends CommonApacheHTTPRequest<H
 			managedFiles.add(managedFile);
 			return new FilePartSource(filename, managedFile.getFile());
 		} catch (FileNotFoundException e) {
-			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		}
 	}
 

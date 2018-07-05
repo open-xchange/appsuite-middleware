@@ -51,7 +51,6 @@ package com.openexchange.snippet.mime.groupware;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -59,7 +58,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.snippet.mime.Services;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -73,23 +71,26 @@ public class SnippetSizeColumnUpdateTask implements UpdateTaskV2 {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = Services.getService(DatabaseService.class);
-        int contextID = params.getContextId();
-        Connection connnection = dbService.getForUpdateTask(contextID);
-        Column sizeColumn = new Column("size", "int(10) unsigned DEFAULT NULL");
+        Connection connnection = params.getConnection();
+        boolean rollback = false;
         try {
             connnection.setAutoCommit(false);
+            rollback = true;
+
+            Column sizeColumn = new Column("size", "int(10) unsigned DEFAULT NULL");
             Tools.checkAndAddColumns(connnection, "snippet", sizeColumn);
+
             connnection.commit();
+            rollback = false;
         } catch (SQLException e) {
-            Databases.rollback(connnection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            Databases.rollback(connnection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(connnection);
+            }
             Databases.autocommit(connnection);
-            dbService.backForUpdateTask(connnection);
         }
 
     }

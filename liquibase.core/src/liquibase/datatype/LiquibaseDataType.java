@@ -1,3 +1,4 @@
+
 package liquibase.datatype;
 
 import java.util.ArrayList;
@@ -23,13 +24,13 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     private String additionalInformation;
 
     protected LiquibaseDataType(LiquibaseDataType originalType) {
-    	name = originalType.name;
-    	this.minParameters = originalType.minParameters;
+        name = originalType.name;
+        this.minParameters = originalType.minParameters;
         this.maxParameters = originalType.maxParameters;
         this.aliases = originalType.aliases;
         this.priority = originalType.priority;
     }
-    
+
     public LiquibaseDataType() {
         DataTypeInfo dataTypeAnnotation = this.getClass().getAnnotation(DataTypeInfo.class);
         this.name = dataTypeAnnotation.name();
@@ -63,7 +64,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     public boolean supports(Database database) {
         return true;
     }
-    
+
     public int getMinParameters(Database database) {
         return minParameters;
     }
@@ -75,7 +76,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     public Object[] getParameters() {
         return parameters.toArray();
     }
-    
+
     public void addParameter(Object value) {
         this.parameters.add(value);
     }
@@ -93,10 +94,10 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         int minParameters = this.getMinParameters(database);
 
         if (parameters.size() > maxParameters) {
-            throw new UnexpectedLiquibaseException("Type "+getClass()+" doesn't support "+ maxParameters+" parameters");
+            throw new UnexpectedLiquibaseException("Type " + getClass() + " doesn't support " + maxParameters + " parameters");
         }
         if (parameters.size() < minParameters) {
-            throw new UnexpectedLiquibaseException("Type "+getClass()+" requires "+ minParameters+" parameters");
+            throw new UnexpectedLiquibaseException("Type " + getClass() + " requires " + minParameters + " parameters");
         }
 
         return true;
@@ -120,7 +121,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         }
         return value.toString();
     }
-    
+
     public Object sqlToObject(String value, Database database) {
         return value;
     }
@@ -130,15 +131,16 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         String returnString = getName();
         if (parameters != null && parameters.size() > 0 && maxParameters > 0) {
             returnString += "(";
+            StringBuilder retStringBuilder = new StringBuilder(returnString);
             for (Object param : parameters) {
-                returnString += param.toString()+",";
+                retStringBuilder.append(param.toString()).append(",");
             }
-            returnString = returnString.replaceFirst(",$", "");
+            returnString = retStringBuilder.toString().replaceFirst(",$", "");
             returnString += ")";
         }
 
         if (additionalInformation != null) {
-            returnString += " "+additionalInformation;
+            returnString += " " + additionalInformation;
         }
 
         return returnString.trim();

@@ -50,21 +50,16 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ContactClearDelTablesTasks}
@@ -91,11 +86,12 @@ public final class ContactClearDelTablesTasks extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection connection = databaseService.getForUpdateTask(contextID);
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
             connection.setAutoCommit(false);
+            rollback = true;
+
             LOG.info("Clearing obsolete fields in 'del_dlist'...");
             int cleared = clearDeletedDistributionLists(connection);
             LOG.info("Cleared {} rows in 'del_dlist'.", cleared);
@@ -105,16 +101,18 @@ public final class ContactClearDelTablesTasks extends UpdateTaskAdapter {
             LOG.info("Clearing obsolete fields in 'del_contacts'...");
             cleared = clearDeletedContacts(connection);
             LOG.info("Cleared {} rows in 'del_contacts'.", cleared);
+
             connection.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connection);
-            Database.backNoTimeout(contextID, true, connection);
+            if (rollback) {
+                Databases.rollback(connection);
+            }
+            Databases.autocommit(connection);
         }
     }
 
@@ -145,7 +143,7 @@ public final class ContactClearDelTablesTasks extends UpdateTaskAdapter {
             statement = connection.prepareStatement(StringBuilder.toString());
             return statement.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -155,7 +153,7 @@ public final class ContactClearDelTablesTasks extends UpdateTaskAdapter {
             statement = connection.prepareStatement("DELETE FROM del_dlist;");
             return statement.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -165,7 +163,7 @@ public final class ContactClearDelTablesTasks extends UpdateTaskAdapter {
             statement = connection.prepareStatement("DELETE FROM del_contacts_image;");
             return statement.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 

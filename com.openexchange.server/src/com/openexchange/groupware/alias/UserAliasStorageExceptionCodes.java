@@ -59,6 +59,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link UserAliasStorageExceptionCodes} - The error messages for mail account exceptions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  */
 public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode {
 
@@ -114,9 +115,9 @@ public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode
     /**
      * Default constructor.
      *
-     * @param message message.
-     * @param category category.
-     * @param number number.
+     * @param message The message
+     * @param category The {@link Category}
+     * @param number The unique number
      */
     private UserAliasStorageExceptionCodes(final String message, final Category category, final int number) {
         this(message, category, number, null);
@@ -125,10 +126,10 @@ public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode
     /**
      * Default constructor.
      *
-     * @param message
-     * @param category
-     * @param number
-     * @param displayMessage
+     * @param message The message
+     * @param category The {@link Category}
+     * @param number The unique number
+     * @param displayMessage The display message
      */
     private UserAliasStorageExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
         this.message = message;

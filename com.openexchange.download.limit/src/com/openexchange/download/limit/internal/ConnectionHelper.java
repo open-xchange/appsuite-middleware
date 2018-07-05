@@ -52,9 +52,9 @@ package com.openexchange.download.limit.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.download.limit.exceptions.LimitExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ConnectionHelper}
@@ -153,10 +153,10 @@ public class ConnectionHelper {
     public void backWritable() {
         if (null != writableConnection) {
             if (false == committed) {
-                DBUtils.rollback(writableConnection);
+                Databases.rollback(writableConnection);
             }
             if (backWritable) {
-                DBUtils.autocommit(writableConnection);
+                Databases.autocommit(writableConnection);
                 databaseService.backWritable(contextId, writableConnection);
                 writableConnection = null;
             }
@@ -171,10 +171,10 @@ public class ConnectionHelper {
     public void backWritableAfterReading() throws OXException {
         if (null != writableConnection) {
             if (false == committed) {
-                DBUtils.rollback(writableConnection);
+                Databases.rollback(writableConnection);
             }
             if (backWritable) {
-                DBUtils.autocommit(writableConnection);
+                Databases.autocommit(writableConnection);
                 databaseService.backWritableAfterReading(contextId, writableConnection);
                 writableConnection = null;
             }

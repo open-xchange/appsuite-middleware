@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2016 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,19 +40,26 @@
 
 package com.sun.mail.pop3;
 
-import javax.mail.*;
-import javax.mail.event.*;
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
-import java.lang.reflect.Constructor;
-
+import javax.mail.AuthenticationFailedException;
+import javax.mail.FetchProfile;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.FolderClosedException;
+import javax.mail.FolderNotFoundException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
+import javax.mail.UIDFolder;
+import javax.mail.event.ConnectionEvent;
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.MailLogger;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A POP3 Folder (can only be "INBOX").
@@ -86,17 +93,20 @@ public class POP3Folder extends Folder {
 	if (name.equalsIgnoreCase("INBOX"))
 	    exists = true;
 	logger = new MailLogger(this.getClass(),
-				"DEBUG POP3", store.getSession());
+				"DEBUG POP3", store.getSession().getDebug(), store.getSession().getDebugOut());
     }
 
+    @Override
     public String getName() {
 	return name;
     }
 
+    @Override
     public String getFullName() {
 	return name;
     }
 
+    @Override
     public Folder getParent() {
 	return new DefaultFolder(store);
     }
@@ -107,6 +117,7 @@ public class POP3Folder extends Folder {
      *
      * @return	true for INBOX, false otherwise
      */
+    @Override
     public boolean exists() {
 	return exists;
     }
@@ -117,6 +128,7 @@ public class POP3Folder extends Folder {
      *
      * @exception	MessagingException	always
      */
+    @Override
     public Folder[] list(String pattern) throws MessagingException {
 	throw new MessagingException("not a directory");
     }
@@ -126,6 +138,7 @@ public class POP3Folder extends Folder {
      *
      * @return	NUL
      */
+    @Override
     public char getSeparator() {
 	return '\0';
     }
@@ -135,6 +148,7 @@ public class POP3Folder extends Folder {
      *
      * @return	Folder.HOLDS_MESSAGES
      */
+    @Override
     public int getType() {
 	return HOLDS_MESSAGES;
     }
@@ -145,6 +159,7 @@ public class POP3Folder extends Folder {
      *
      * @return	false
      */
+    @Override
     public boolean create(int type) throws MessagingException {
 	return false;
     }
@@ -155,6 +170,7 @@ public class POP3Folder extends Folder {
      *
      * @return	false
      */
+    @Override
     public boolean hasNewMessages() throws MessagingException {
 	return false;    // no way to know
     }
@@ -165,6 +181,7 @@ public class POP3Folder extends Folder {
      *
      * @exception	MessagingException	always
      */
+    @Override
     public Folder getFolder(String name) throws MessagingException {
 	throw new MessagingException("not a directory");
     }
@@ -176,6 +193,7 @@ public class POP3Folder extends Folder {
      *
      * @exception	MethodNotSupportedException	always
      */
+    @Override
     public boolean delete(boolean recurse) throws MessagingException {
 	throw new MethodNotSupportedException("delete");
     }
@@ -186,6 +204,7 @@ public class POP3Folder extends Folder {
      *
      * @exception	MethodNotSupportedException	always
      */
+    @Override
     public boolean renameTo(Folder f) throws MessagingException {
 	throw new MethodNotSupportedException("renameTo");
     }
@@ -198,6 +217,7 @@ public class POP3Folder extends Folder {
      * @exception	AuthenticationFailedException	authentication failures
      * @exception	MessagingException	other open failures
      */
+    @Override
     public synchronized void open(int mode) throws MessagingException {
 	checkClosed();
 	if (!exists)
@@ -238,6 +258,7 @@ public class POP3Folder extends Folder {
 	notifyConnectionListeners(ConnectionEvent.OPENED);
     }
 
+    @Override
     public synchronized void close(boolean expunge) throws MessagingException {
 	checkOpen();
 
@@ -297,6 +318,7 @@ public class POP3Folder extends Folder {
 	}
     }
 
+    @Override
     public synchronized boolean isOpen() {
 	if (!opened)
 	    return false;
@@ -308,9 +330,8 @@ public class POP3Folder extends Folder {
 		close(false);
 	    } catch (MessagingException mex) {
 		// ignore it
-	    } finally {
-		return false;
 	    }
+	    return false;
 	}
 	return true;
     }
@@ -321,6 +342,7 @@ public class POP3Folder extends Folder {
      *
      * @return	empty Flags object
      */
+    @Override
     public Flags getPermanentFlags() {
 	return new Flags(); // empty flags object
     }
@@ -330,6 +352,7 @@ public class POP3Folder extends Folder {
      * protocol doesn't support notification of new messages
      * arriving in open folders.
      */
+    @Override
     public synchronized int getMessageCount() throws MessagingException {
 	if (!opened)
 	    return -1;
@@ -337,6 +360,7 @@ public class POP3Folder extends Folder {
 	return total;
     }
 
+    @Override
     public synchronized Message getMessage(int msgno)
 					throws MessagingException {
 	checkOpen();
@@ -374,6 +398,7 @@ public class POP3Folder extends Folder {
      *
      * @exception	MethodNotSupportedException	always
      */
+    @Override
     public void appendMessages(Message[] msgs) throws MessagingException {
 	throw new MethodNotSupportedException("Append not supported");	
     }
@@ -387,6 +412,7 @@ public class POP3Folder extends Folder {
      *
      * @exception	MethodNotSupportedException	always
      */
+    @Override
     public Message[] expunge() throws MessagingException {
 	throw new MethodNotSupportedException("Expunge not supported");
     }
@@ -400,6 +426,7 @@ public class POP3Folder extends Folder {
      * the headers and size of all messages are fetched using the POP3 TOP
      * and LIST commands.
      */
+    @Override
     public synchronized void fetch(Message[] msgs, FetchProfile fp)
 				throws MessagingException {
 	checkReadable();
@@ -548,6 +575,7 @@ public class POP3Folder extends Folder {
     /**
      * Close the folder when we're finalized.
      */
+    @Override
     protected void finalize() throws Throwable {
 	forceClose = !store.finalizeCleanClose;
 	try {
@@ -600,6 +628,7 @@ public class POP3Folder extends Folder {
     /*
      * Only here to make accessible to POP3Message.
      */
+    @Override
     protected void notifyMessageChangedListeners(int type, Message m) {
 	super.notifyMessageChangedListeners(type, m);
     }

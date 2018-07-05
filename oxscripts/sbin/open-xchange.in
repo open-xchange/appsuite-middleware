@@ -57,6 +57,7 @@ OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 OXPREFIX=@prefix@
 CONSOLELOG=@consolelogfile@
+OSGI_JAR=/opt/open-xchange/bundles/org.eclipse.osgi_3.12.50.v20170928-1321.jar
 
 test -f $OXFUNCTIONS || {
     echo "missing common shell functions file"
@@ -133,4 +134,4 @@ then
   echo "WARNING: Current charmap: \"${charmap}\" might cause encoding problems."  >> ${CONSOLELOG}
 fi
 
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.11.0.v20160603-1336.jar -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar ${OSGI_JAR} -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1

@@ -1,20 +1,30 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.util.ArrayList;
+import java.util.List;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.*;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Creates a new table.

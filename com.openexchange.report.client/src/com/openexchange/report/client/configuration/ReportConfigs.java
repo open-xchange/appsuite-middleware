@@ -51,7 +51,6 @@ package com.openexchange.report.client.configuration;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Report configurations.

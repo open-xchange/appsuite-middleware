@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.json;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -56,10 +58,6 @@ import java.io.InputStream;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.BinaryContent;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link BinaryContentDumperTest}

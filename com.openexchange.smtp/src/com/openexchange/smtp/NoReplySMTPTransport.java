@@ -59,9 +59,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.mail.transport.config.NoReplyConfig.SecureMode;
-import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
 import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
@@ -232,6 +232,12 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
         @Override
         public String getSSLCipherSuites() {
             return smtpProperties.getSSLCipherSuites();
+        }
+
+        @Override
+        public String getPrimaryAddressHeader() {
+            // Not needed for special no-reply MTA
+            return null;
         }
     }
 

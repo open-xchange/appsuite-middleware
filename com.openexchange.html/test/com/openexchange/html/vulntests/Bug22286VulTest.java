@@ -66,6 +66,6 @@ public class Bug22286VulTest extends AbstractSanitizing {
             "<!--[if<img src=x onerror=alert(1)//]>-->\n" +
             "<!--[if<img src=x onerror=alert(2)//]--!>-->";
 
-        AssertionHelper.assertSanitizedEquals(getHtmlService(), content, "--&#62;", false);
+        AssertionHelper.assertSanitizedEquals(getHtmlService(), content, "--&gt;", false);
     }
 }

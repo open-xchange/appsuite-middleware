@@ -51,19 +51,20 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.Date;
 import java.util.TimeZone;
+import com.openexchange.data.conversion.ical.ZoneInfo;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.CalendarCollectionUtils;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
 import net.fortuna.ical4j.util.TimeZones;
 import net.fortuna.ical4j.zoneinfo.outlook.OutlookTimeZoneRegistryFactory;
-import com.openexchange.data.conversion.ical.ZoneInfo;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
 
 /**
  *
@@ -72,7 +73,6 @@ import com.openexchange.groupware.container.CalendarObject;
 public final class EmitterTools {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EmitterTools.class);
-    private static volatile CalendarCollectionService calendarCollection;
 
     private final TimeZoneRegistry registry;
 
@@ -175,17 +175,19 @@ public final class EmitterTools {
     public static java.util.Date calculateExactTime(final CalendarDataObject appointment, final java.util.Date exception) {
         java.util.Date retval = exception;
         try {
-            final CalendarCollectionService service = calendarCollection;
-            final RecurringResultsInterface rrs = service.calculateRecurring(
+            final RecurringResultsInterface rrs = CalendarCollectionUtils.calculateRecurring(
                 appointment,
-                service.normalizeLong(exception.getTime() - Constants.MILLI_WEEK),
-                service.normalizeLong(exception.getTime() + Constants.MILLI_WEEK),
+                normalizeLong(exception.getTime() - Constants.MILLI_WEEK),
+                normalizeLong(exception.getTime() + Constants.MILLI_WEEK),
                 0,
-                CalendarCollectionService.MAX_OCCURRENCESE,
+                CalendarCollectionUtils.MAX_OCCURRENCESE,
                 true);
             final int recurrencePosition = rrs.getPositionByLong(exception.getTime());
             if (recurrencePosition > 0) {
-                retval = new java.util.Date(rrs.getRecurringResultByPosition(recurrencePosition).getStart());
+                RecurringResultInterface result = rrs.getRecurringResultByPosition(recurrencePosition);
+                if (result != null) {
+                    retval = new java.util.Date(result.getStart());
+                }
             }
         } catch (final OXException e) {
             LOG.warn("", e);
@@ -193,8 +195,8 @@ public final class EmitterTools {
         return retval;
     }
 
-    public static void setCalendarCollection(final CalendarCollectionService calendarCollection) {
-        EmitterTools.calendarCollection = calendarCollection;
+    private static long normalizeLong(final long millis) {
+        return millis - (millis % Constants.MILLI_DAY);
     }
 
     public TimeZoneRegistry getTimeZoneRegistry() {

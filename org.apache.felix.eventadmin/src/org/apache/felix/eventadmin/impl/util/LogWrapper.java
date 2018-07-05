@@ -21,7 +21,6 @@ package org.apache.felix.eventadmin.impl.util;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;

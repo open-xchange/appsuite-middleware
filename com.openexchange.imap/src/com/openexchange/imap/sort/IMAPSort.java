@@ -51,10 +51,6 @@ package com.openexchange.imap.sort;
 
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
@@ -69,7 +65,6 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPException.Code;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.search.IMAPSearch;
-import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.imap.util.WrappingProtocolException;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -88,6 +83,10 @@ import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.SearchSequence;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 
 /**
  * {@link IMAPSort} - Perform the IMAP sort.
@@ -761,10 +760,16 @@ public final class IMAPSort {
                 p.notifyResponseHandlers(r);
             } else if (response.isBAD()) {
                 LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                if (null != imapFolder) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                }
+                throw new BadCommandException(response);
             } else if (response.isNO()) {
                 LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                if (null != imapFolder) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                }
+                throw new CommandFailedException(response);
             } else {
                 LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                 p.handleResult(response);

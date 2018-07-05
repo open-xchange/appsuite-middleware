@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -142,8 +143,9 @@ abstract class CheckPermission {
      * @param folder The folder needed to determine type, module, etc.
      * @param permissions The basic permissions to check against
      * @return The effective user permission
+     * @throws OXException If loading user's groups fails
      */
-    protected static EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig, final FolderObject folder, final OCLPermission[] permissions) {
+    protected static EffectivePermission getEffectiveUserPermission(final int userId, final UserConfiguration userConfig, final FolderObject folder, final OCLPermission[] permissions) throws OXException {
         final EffectivePermission maxPerm = new EffectivePermission(
             userId,
             folder.getObjectID(),
@@ -158,7 +160,10 @@ abstract class CheckPermission {
             OCLPermission.NO_PERMISSIONS);
         final int[] idArr;
         {
-            final int[] groups = userConfig.getGroups();
+            int[] groups = userConfig.getGroups();
+            if (null == groups) {
+                groups = UserStorage.getInstance().getUser(userId, userConfig.getContext()).getGroups();
+            }
             idArr = new int[groups.length + 1];
             idArr[0] = userId;
             System.arraycopy(groups, 0, idArr, 1, groups.length);

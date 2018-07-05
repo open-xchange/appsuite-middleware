@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,7 +40,10 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class is to support writing out Strings as a sequence of bytes
@@ -51,9 +54,12 @@ import java.io.*;
  * stream. <p>
  *
  * @author John Mani
+ * @author Bill Shannon
  */
 
 public class LineOutputStream extends FilterOutputStream {
+    private boolean allowutf8;
+
     private static byte[] newline;
 
     static {
@@ -63,11 +69,25 @@ public class LineOutputStream extends FilterOutputStream {
     }
 
     public LineOutputStream(OutputStream out) {
+	this(out, false);
+    }
+
+    /**
+     * @param   out the OutputStream
+     * @param   allowutf8   allow UTF-8 characters?
+     * @since	JavaMail 1.6
+     */
+    public LineOutputStream(OutputStream out, boolean allowutf8) {
 	super(out);
+	this.allowutf8 = allowutf8;
     }
 
     public void writeln(String s) throws IOException {
-	byte[] bytes = ASCIIUtility.getBytes(s);
+	byte[] bytes;
+	if (allowutf8)
+	    bytes = s.getBytes(StandardCharsets.UTF_8);
+	else
+	    bytes = ASCIIUtility.getBytes(s);
 	out.write(bytes);
 	out.write(newline);
     }

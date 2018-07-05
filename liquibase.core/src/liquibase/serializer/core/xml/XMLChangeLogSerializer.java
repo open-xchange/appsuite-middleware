@@ -1,6 +1,28 @@
 package liquibase.serializer.core.xml;
 
-import liquibase.change.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -13,13 +35,6 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
-import org.w3c.dom.*;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.util.*;
 
 public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
@@ -97,16 +112,18 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         in.close();
 
         FileOutputStream out = new FileOutputStream(changeLogFile);
+        try {
+            if (!existingChangeLog.contains("</databaseChangeLog>")) {
+                write(Arrays.asList(changeSet), out);
+            } else {
+                existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 
-        if (!existingChangeLog.contains("</databaseChangeLog>")) {
-            write(Arrays.asList(changeSet), out);
-        } else {
-            existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
-
-            StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes()), out);
+                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes()), out);
+            }
+            out.flush();
+        } finally {
+            try { out.close(); } catch (Exception e) { /* Ignore */ }
         }
-        out.flush();
-        out.close();
     }
 
     public Element createNode(LiquibaseSerializable object) {

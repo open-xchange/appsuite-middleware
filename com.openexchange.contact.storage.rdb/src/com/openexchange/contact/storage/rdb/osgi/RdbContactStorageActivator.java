@@ -66,6 +66,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -115,6 +116,7 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
             registerService(Reloadable.class, FulltextAutocompleteAdapter.RELOADABLE);
             track(I18nService.class, new I18nTracker(context));
             track(ManagementService.class, new ManagementRegisterer(context));
+            trackService(ImageMetadataService.class);
             openTrackers();
         } catch (Exception e) {
             logger.error("error starting \"com.openexchange.contact.storage.rdb\"", e);

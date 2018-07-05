@@ -219,11 +219,31 @@ public class CacheEventQueue extends AbstractQueue<StampedCacheEvent> implements
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
-            StampedCacheEvent first = q.peek();
-            if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
-                return null;
-            } else {
-                return q.poll();
+            for (;;) {
+                StampedCacheEvent first = q.peek();
+                if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
+                    return null;
+                } else {
+                    first = q.poll();
+
+                    com.openexchange.caching.events.Condition eventCondition = first.optCondition();
+                    if (null != eventCondition) {
+                        int peeked = eventCondition.peekShouldDeliver();
+                        if (peeked < 0) {
+                            // Condition not yet available, reschedule and repeat
+                            first.forceReset();
+                            q.offer(first);
+                            continue;
+                        }
+
+                        if (peeked == 0) {
+                            // Discard... Event is not supposed to be propagated
+                            continue;
+                        }
+                    }
+
+                    return first;
+                }
             }
         } finally {
             lock.unlock();
@@ -248,7 +268,26 @@ public class CacheEventQueue extends AbstractQueue<StampedCacheEvent> implements
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     if (delay <= 0) {
-                        return q.poll();
+                        // Found expired element
+                        first = q.poll();
+
+                        com.openexchange.caching.events.Condition eventCondition = first.optCondition();
+                        if (null != eventCondition) {
+                            int peeked = eventCondition.peekShouldDeliver();
+                            if (peeked < 0) {
+                                // Condition not yet available, reschedule and repeat
+                                first.forceReset();
+                                q.offer(first);
+                                continue;
+                            }
+
+                            if (peeked == 0) {
+                                // Discard... Event is not supposed to be propagated
+                                continue;
+                            }
+                        }
+
+                        return first;
                     } else if (leader != null) {
                         available.await();
                     } else {
@@ -297,7 +336,26 @@ public class CacheEventQueue extends AbstractQueue<StampedCacheEvent> implements
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     if (delay <= 0) {
-                        return q.poll();
+                        // Found expired element
+                        first = q.poll();
+
+                        com.openexchange.caching.events.Condition eventCondition = first.optCondition();
+                        if (null != eventCondition) {
+                            int peeked = eventCondition.peekShouldDeliver();
+                            if (peeked < 0) {
+                                // Condition not yet available, reschedule and repeat
+                                first.forceReset();
+                                q.offer(first);
+                                continue;
+                            }
+
+                            if (peeked == 0) {
+                                // Discard... Event is not supposed to be propagated
+                                continue;
+                            }
+                        }
+
+                        return first;
                     }
                     if (nanos <= 0) {
                         return null;
@@ -377,7 +435,25 @@ public class CacheEventQueue extends AbstractQueue<StampedCacheEvent> implements
                 if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                     break;
                 }
-                c.add(q.poll());
+                first = q.poll();
+
+                com.openexchange.caching.events.Condition eventCondition = first.optCondition();
+                if (null != eventCondition) {
+                    int peeked = eventCondition.peekShouldDeliver();
+                    if (peeked < 0) {
+                        // Condition not yet available, reschedule and repeat
+                        first.forceReset();
+                        q.offer(first);
+                        continue;
+                    }
+
+                    if (peeked == 0) {
+                        // Discard... Event is not supposed to be propagated
+                        continue;
+                    }
+                }
+
+                c.add(first);
                 ++n;
             }
             return n;
@@ -412,7 +488,25 @@ public class CacheEventQueue extends AbstractQueue<StampedCacheEvent> implements
                 if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                     break;
                 }
-                c.add(q.poll());
+                first = q.poll();
+
+                com.openexchange.caching.events.Condition eventCondition = first.optCondition();
+                if (null != eventCondition) {
+                    int peeked = eventCondition.peekShouldDeliver();
+                    if (peeked < 0) {
+                        // Condition not yet available, reschedule and repeat
+                        first.forceReset();
+                        q.offer(first);
+                        continue;
+                    }
+
+                    if (peeked == 0) {
+                        // Discard... Event is not supposed to be propagated
+                        continue;
+                    }
+                }
+
+                c.add(first);
                 ++n;
             }
             return n;

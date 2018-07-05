@@ -65,10 +65,20 @@ import com.openexchange.session.Session;
 public interface MailTransportListener {
 
     /**
+     * Checks if specified security settings are orderly handled.
+     *
+     * @param securitySettings The security settings to consider
+     * @param session The associated session
+     * @return <code>true</code> if handled; otherwise <code>false</code>
+     * @throws OXException If check fails unexpectedly
+     */
+    boolean checkSettings(SecuritySettings securitySettings, Session session) throws OXException;
+
+    /**
      * Called before a message transport takes place.
      *
      * @param message The message about to send
-     * @param recipients.  Array of recipients
+     * @param recipients An array of recipients
      * @param securitySettings The optional security settings to consider or <code>null</code>
      * @param session The associated session
      * @return The processing result

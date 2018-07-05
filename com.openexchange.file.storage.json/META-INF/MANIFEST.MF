@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage JSON Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.json
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -29,12 +29,12 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.requesthandler.jobqueue,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.tools,
+ com.openexchange.ajax.writer,
  com.openexchange.caching,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.datatypes.genericonf,
  com.openexchange.datatypes.genericonf.json,
- com.openexchange.documentation,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.file.storage.composition,
@@ -45,11 +45,13 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.file.storage.registry,
  com.openexchange.filestore,
  com.openexchange.folderstorage,
+ com.openexchange.folderstorage.database.contentType,
  com.openexchange.folderstorage.filestorage.contentType,
  com.openexchange.folderstorage.type,
  com.openexchange.groupware,
  com.openexchange.groupware.attach,
  com.openexchange.groupware.attach.util,
+ com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.infostore.utils,
  com.openexchange.groupware.ldap,
@@ -78,6 +80,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.tools.filename,
  com.openexchange.tools.id,
  com.openexchange.tools.images,
+ com.openexchange.tools.io,
  com.openexchange.tools.iterator,
  com.openexchange.tools.service,
  com.openexchange.tools.servlet,

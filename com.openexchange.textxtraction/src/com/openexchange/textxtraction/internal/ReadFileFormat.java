@@ -50,19 +50,16 @@
 package com.openexchange.textxtraction.internal;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
+import org.apache.poi.POITextExtractor;
 import org.apache.poi.extractor.ExtractorFactory;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.poifs.eventfilesystem.POIFSReader;
 import org.apache.poi.poifs.eventfilesystem.POIFSReaderEvent;
 import org.apache.poi.poifs.eventfilesystem.POIFSReaderListener;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
 import org.apache.poi.util.LittleEndian;
-import org.apache.xmlbeans.XmlException;
 import com.openexchange.java.Streams;
 
 /**
@@ -76,16 +73,12 @@ public class ReadFileFormat {
 
     private final StringBuilder sb;
 
-    private final StringBuilder textBuffer;
-
-
     /**
      * Initializes a new {@link ReadFileFormat}.
      */
     public ReadFileFormat() {
         super();
         sb = new StringBuilder(8192);
-        textBuffer = new StringBuilder();
     }
 
     /**
@@ -93,21 +86,16 @@ public class ReadFileFormat {
      *
      * @param in The input stream
      * @return The extracted text or <code>null</code>
-     * @throws IOException If an I/O error occurs
      */
-    public String ms2text(final InputStream in) throws IOException {
+    public String ms2text(final InputStream in) {
+        POITextExtractor extractor = null;
         try {
-            return ExtractorFactory.createExtractor(in).getText();
-        } catch (final InvalidFormatException e) {
-            LOG.debug("", e);
-        } catch (final OpenXML4JException e) {
-            LOG.debug("", e);
-        } catch (final XmlException e) {
-            LOG.debug("", e);
-        } catch (final RuntimeException e) {
+            extractor = ExtractorFactory.createExtractor(in);
+            return extractor.getText();
+        } catch (Exception e) {
             LOG.debug("", e);
         } finally {
-            Streams.close(in);
+            Streams.close(in, extractor);
         }
         return null;
     }
@@ -126,10 +114,16 @@ public class ReadFileFormat {
     }
 
     public String ppt2text(final String fileName) throws Exception {
-        final POIFSReader poifReader = new POIFSReader();
-        poifReader.registerListener(new ReadFileFormat.MyPOIFSReaderListener());
-        poifReader.read(new FileInputStream(fileName));
-        return sb.toString();
+        InputStream in = null;
+        try {
+            final POIFSReader poifReader = new POIFSReader();
+            poifReader.registerListener(new ReadFileFormat.MyPOIFSReaderListener());
+            in = new FileInputStream(fileName);
+            poifReader.read(in);
+            return sb.toString();
+        } finally {
+            Streams.close(in);
+        }
     }
 
     class MyPOIFSReaderListener implements POIFSReaderListener {

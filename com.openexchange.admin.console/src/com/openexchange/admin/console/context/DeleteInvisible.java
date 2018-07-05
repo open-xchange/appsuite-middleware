@@ -59,7 +59,7 @@ public class DeleteInvisible extends ContextAbstraction {
 
     public DeleteInvisible(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("downgradecontext");
+        final AdminParser parser = new AdminParser("deleteinvisible");
 
         setOptions(parser);
 

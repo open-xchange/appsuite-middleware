@@ -37,13 +37,13 @@ Currently supported objects/items:
 
 The quota for objects/items is configured through the following properties:
 
- - [com.openexchange.quota.calendar](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.quota.calendar)
- - [com.openexchange.quota.task](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.quota.task)
- - [com.openexchange.quota.contact](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.quota.contact)
- - [com.openexchange.quota.infostore](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.quota.infostore)
- - [com.openexchange.quota.attachment](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.quota.attachment)
- - [com.openexchange.quota.invite_guests](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.quota.invite_guests)
- - [com.openexchange.quota.share_links](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.quota.share_links)
+ - [com.openexchange.quota.calendar](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.quota.calendar)
+ - [com.openexchange.quota.task](/config{{ site.baseurl }}/index.html#com.openexchange.quota.task)
+ - [com.openexchange.quota.contact](/config{{ site.baseurl }}/index.html#com.openexchange.quota.contact)
+ - [com.openexchange.quota.infostore](/config{{ site.baseurl }}/index.html#com.openexchange.quota.infostore)
+ - [com.openexchange.quota.attachment](/config{{ site.baseurl }}/index.html#com.openexchange.quota.attachment)
+ - [com.openexchange.quota.invite_guests](/config{{ site.baseurl }}/index.html#com.openexchange.quota.invite_guests)
+ - [com.openexchange.quota.share_links](/config{{ site.baseurl }}/index.html#com.openexchange.quota.share_links)
 
 Moreover, these properties are config-cascade aware and thus it is possible to set/apply certain values to server, context-set and context scopes (user scope is not supported as values apply to contexts and not to individual users). Thus Open-Xchange Middleware also ships with a ``quota.yml`` file located at ``/opt/open-xchange/etc/contextSets`` to specify object/items quotas for a set of contexts (see [Context Set Scope](http://oxpedia.org/wiki/index.php?title=ConfigCascade#Specifying_Configuration_-_Context_Set_Scope)).
 
@@ -98,7 +98,7 @@ Currently supported objects/items:
 
 The quota for objects/items is configured through the following properties:
 
- - [com.openexchange.snippet.quota.limit](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.snippet.quota.limit)
+ - [com.openexchange.snippet.quota.limit](/config{{ site.baseurl }}/index.html#com.openexchange.snippet.quota.limit)
 
 Moreover, these properties are config-cascade aware and thus it is possible to set/apply certain values to server, context-set, context and user scopes.
 

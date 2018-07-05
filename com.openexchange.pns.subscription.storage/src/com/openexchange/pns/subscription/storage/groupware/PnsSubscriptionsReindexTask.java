@@ -49,16 +49,14 @@
 
 package com.openexchange.pns.subscription.storage.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.*;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -71,16 +69,11 @@ import com.openexchange.tools.update.Tools;
  */
 public class PnsSubscriptionsReindexTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link PnsSubscriptionsReindexTask}.
-     *
-     * @param services A service lookup reference
      */
-    public PnsSubscriptionsReindexTask(ServiceLookup services) {
+    public PnsSubscriptionsReindexTask() {
         super();
-        this.services = services;
     }
 
     @Override
@@ -90,15 +83,11 @@ public class PnsSubscriptionsReindexTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService dbService = services.getOptionalService(DatabaseService.class);
-        if (null == dbService) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
-        }
-        Connection connection = dbService.getForUpdateTask(contextID);
-        boolean committed = false;
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
             connection.setAutoCommit(false);
+            rollback = true;
             /*
              * remove previous primary key as needed
              */
@@ -113,20 +102,16 @@ public class PnsSubscriptionsReindexTask extends UpdateTaskAdapter {
              * commit
              */
             connection.commit();
-            committed = true;
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connection);
-            if (committed) {
-                dbService.backForUpdateTask(contextID, connection);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextID, connection);
+            if (rollback) {
+                rollback(connection);
             }
+            autocommit(connection);
         }
     }
 

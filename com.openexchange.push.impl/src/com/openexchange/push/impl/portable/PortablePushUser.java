@@ -54,6 +54,7 @@ import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.push.PushUser;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 
 /**
  * {@link PortablePushUser}

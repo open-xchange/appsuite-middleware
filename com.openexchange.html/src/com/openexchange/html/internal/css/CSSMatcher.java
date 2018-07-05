@@ -786,12 +786,12 @@ public final class CSSMatcher {
         }
         final String css = replaceCRLFsWithSpace(cssBuilder);
         try {
-            final int cssLength = css.length();
-            final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
             final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
             if (!m.find()) {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
+            final int cssLength = css.length();
+            final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
             final Thread thread = Thread.currentThread();
             cssBuilder.setLength(0);
             int lastPos = 0;

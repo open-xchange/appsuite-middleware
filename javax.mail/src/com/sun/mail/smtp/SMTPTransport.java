@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2016 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,17 +40,56 @@
 
 package com.sun.mail.smtp;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.Flushable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.lang.reflect.Constructor;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
-import java.lang.reflect.*;
+import javax.mail.Address;
+import javax.mail.AuthenticationFailedException;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.SendFailedException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.URLName;
+import javax.mail.event.TransportEvent;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimePart;
+import javax.mail.internet.ParseException;
 import javax.net.ssl.SSLSocket;
-import javax.mail.*;
-import javax.mail.event.*;
-import javax.mail.internet.*;
-import com.sun.mail.util.*;
-import com.sun.mail.auth.*;
+import com.sun.mail.auth.Ntlm;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.LineInputStream;
+import com.sun.mail.util.MailConnectException;
+import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.SocketConnectException;
+import com.sun.mail.util.SocketFetcher;
+import com.sun.mail.util.TraceInputStream;
+import com.sun.mail.util.TraceOutputStream;
 
 /**
  * This class implements the Transport abstract class using SMTP for
@@ -139,6 +178,8 @@ public class SMTPTransport extends Transport {
     private boolean noauthdebug = true;	// hide auth info in debug output
     private boolean debugusername;	// include username in debug output?
     private boolean debugpassword;	// include password in debug output?
+    private boolean allowutf8;		// allow UTF-8 usernames and passwords?
+    private int chunkSize;		// chunk size if CHUNKING supported
 
     /** Headers that should not be included when sending */
     private static final String[] ignoreList = { "Bcc", "Content-Length" };
@@ -168,19 +209,22 @@ public class SMTPTransport extends Transport {
     protected SMTPTransport(Session session, URLName urlname,
 				String name, boolean isSSL) {
 	super(session, urlname);
-	logger = new MailLogger(this.getClass(), "DEBUG SMTP", session);
-	traceLogger = logger.getSubLogger("protocol", null);
-	noauthdebug = !PropUtil.getBooleanSessionProperty(session,
-			    "mail.debug.auth", false);
-	debugusername = PropUtil.getBooleanSessionProperty(session,
-			"mail.debug.auth.username", true);
-	debugpassword = PropUtil.getBooleanSessionProperty(session,
-			"mail.debug.auth.password", false);
+	Properties props = session.getProperties();
+
+    logger = new MailLogger(this.getClass(), "DEBUG SMTP",
+                session.getDebug(), session.getDebugOut());
+    traceLogger = logger.getSubLogger("protocol", null);
+    noauthdebug = !PropUtil.getBooleanProperty(props,
+                "mail.debug.auth", false);
+    debugusername = PropUtil.getBooleanProperty(props,
+            "mail.debug.auth.username", true);
+    debugpassword = PropUtil.getBooleanProperty(props,
+            "mail.debug.auth.password", false);
 	if (urlname != null)
 	    name = urlname.getProtocol();
 	this.name = name;
 	if (!isSSL)
-	    isSSL = PropUtil.getBooleanSessionProperty(session,
+	    isSSL = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".ssl.enable", false);
 	if (isSSL)
 	    this.defaultPort = 465;
@@ -190,39 +234,49 @@ public class SMTPTransport extends Transport {
 
 	// setting mail.smtp.quitwait to false causes us to not wait for the
 	// response from the QUIT command
-	quitWait = PropUtil.getBooleanSessionProperty(session,
+	quitWait = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".quitwait", true);
 
 	// mail.smtp.reportsuccess causes us to throw an exception on success
-	reportSuccess = PropUtil.getBooleanSessionProperty(session,
+	reportSuccess = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".reportsuccess", false);
 
 	// mail.smtp.starttls.enable enables use of STARTTLS command
-	useStartTLS = PropUtil.getBooleanSessionProperty(session,
+	useStartTLS = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".starttls.enable", false);
 
 	// mail.smtp.starttls.required requires use of STARTTLS command
-	requireStartTLS = PropUtil.getBooleanSessionProperty(session,
+	requireStartTLS = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".starttls.required", false);
 
 	// mail.smtp.userset causes us to use RSET instead of NOOP
 	// for isConnected
-	useRset = PropUtil.getBooleanSessionProperty(session,
+	useRset = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".userset", false);
 
 	// mail.smtp.noop.strict requires 250 response to indicate success
-	noopStrict = PropUtil.getBooleanSessionProperty(session,
+	noopStrict = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".noop.strict", true);
 
 	// check if SASL is enabled
-	enableSASL = PropUtil.getBooleanSessionProperty(session,
+	enableSASL = PropUtil.getBooleanProperty(props,
 	    "mail." + name + ".sasl.enable", false);
 	if (enableSASL)
 	    logger.config("enable SASL");
-	useCanonicalHostName = PropUtil.getBooleanSessionProperty(session,
+	useCanonicalHostName = PropUtil.getBooleanProperty(props,
 	    "mail." + name + ".sasl.usecanonicalhostname", false);
 	if (useCanonicalHostName)
 	    logger.config("use canonical host name");
+
+	allowutf8 = PropUtil.getBooleanProperty(props,
+	    "mail.mime.allowutf8", false);
+	if (allowutf8)
+	    logger.config("allow UTF-8");
+
+	chunkSize = PropUtil.getIntProperty(props,
+	    "mail." + name + ".chunksize", -1);
+	if (chunkSize > 0 && logger.isLoggable(Level.CONFIG))
+	    logger.config("chunk size " + chunkSize);
 
 	// created here, because they're inner classes that reference "this"
 	Authenticator[] a = new Authenticator[] {
@@ -233,7 +287,7 @@ public class SMTPTransport extends Transport {
 	    new OAuth2Authenticator(),
 	    new OAuthBearerAuthenticator()
 	};
-	StringBuffer sb = new StringBuffer();
+	StringBuilder sb = new StringBuilder();
 	for (int i = 0; i < a.length; i++) {
 	    authenticators.put(a[i].getMechanism(), a[i]);
 	    sb.append(a[i].getMechanism()).append(' ');
@@ -656,10 +710,13 @@ public class SMTPTransport extends Transport {
      * @return	true if connection successful, false if authentication failed
      * @exception MessagingException	for non-authentication failures
      */
+    @Override
     protected synchronized boolean protocolConnect(String host, int port,
 			String user, String password) throws MessagingException {
+    Properties props = session.getProperties();
+
 	// setting mail.smtp.auth to true enables attempts to use AUTH
-	boolean useAuth = PropUtil.getBooleanSessionProperty(session,
+	boolean useAuth = PropUtil.getBooleanProperty(props,
 					"mail." + name + ".auth", false);
 
 	/*
@@ -680,7 +737,7 @@ public class SMTPTransport extends Transport {
 	}
 
 	// setting mail.smtp.ehlo to false disables attempts to use EHLO
-	boolean useEhlo =  PropUtil.getBooleanSessionProperty(session,
+	boolean useEhlo =  PropUtil.getBooleanProperty(props,
 					"mail." + name + ".ehlo", true);
 	if (logger.isLoggable(Level.FINE))
 	    logger.fine("useEhlo " + useEhlo + ", useAuth " + useAuth);
@@ -690,7 +747,7 @@ public class SMTPTransport extends Transport {
          * property if it exists, otherwise default to 25.
 	 */
         if (port == -1)
-	    port = PropUtil.getIntSessionProperty(session,
+	    port = PropUtil.getIntProperty(props,
 					"mail." + name + ".port", -1);
         if (port == -1)
 	    port = defaultPort;
@@ -735,6 +792,10 @@ public class SMTPTransport extends Transport {
 			"host does not support STARTTLS");
 		}
 	    }
+
+	    if (allowutf8 && !supportsExtension("SMTPUTF8"))
+		logger.log(Level.INFO, "mail.mime.allowutf8 set " +
+			    "but server doesn't advertise SMTPUTF8 support");
 
 	    if ((useAuth || (user != null && password != null)) &&
 		  (supportsExtension("AUTH") ||
@@ -827,8 +888,9 @@ public class SMTPTransport extends Transport {
 	    if (mechs == defaultAuthenticationMechanisms) {
 		String dprop = "mail." + name + ".auth." +
 				    m.toLowerCase(Locale.ENGLISH) + ".disable";
-		boolean disabled = PropUtil.getBooleanSessionProperty(
-						session, dprop, !a.enabled());
+		boolean disabled = PropUtil.getBooleanProperty(
+                            session.getProperties(),
+                            dprop, !a.enabled());
 		if (disabled) {
 		    if (logger.isLoggable(Level.FINE))
 			logger.fine("mechanism " + m +
@@ -956,15 +1018,16 @@ public class SMTPTransport extends Transport {
 	    super("LOGIN");
 	}
 
+	@Override
 	void doAuth(String host, int port, String authzid, String user, String passwd)
 				    throws MessagingException, IOException {
 	    // send username
 	    resp = simpleCommand(
-		BASE64EncoderStream.encode(ASCIIUtility.getBytes(user)));
+		BASE64EncoderStream.encode(user.getBytes(StandardCharsets.UTF_8)));
 	    if (resp == 334) {
 		// send passwd
 		resp = simpleCommand(
-		    BASE64EncoderStream.encode(ASCIIUtility.getBytes(passwd)));
+		    BASE64EncoderStream.encode(passwd.getBytes(StandardCharsets.UTF_8)));
 	    }
 	}
     }
@@ -977,6 +1040,7 @@ public class SMTPTransport extends Transport {
 	    super("PLAIN");
 	}
 
+	@Override
 	String getInitialResponse(String host, int port, String authzid, String user,
 			String passwd) throws MessagingException, IOException {
 	    // return "authzid<NUL>user<NUL>passwd"
@@ -984,16 +1048,17 @@ public class SMTPTransport extends Transport {
 	    OutputStream b64os =
 			new BASE64EncoderStream(bos, Integer.MAX_VALUE);
 	    if (authzid != null)
-		b64os.write(ASCIIUtility.getBytes(authzid));
+		b64os.write(authzid.getBytes(StandardCharsets.UTF_8));
 	    b64os.write(0);
-	    b64os.write(ASCIIUtility.getBytes(user));
+	    b64os.write(user.getBytes(StandardCharsets.UTF_8));
 	    b64os.write(0);
-	    b64os.write(ASCIIUtility.getBytes(passwd));
+	    b64os.write(passwd.getBytes(StandardCharsets.UTF_8));
 	    b64os.flush(); 	// complete the encoding
 
 	    return ASCIIUtility.toString(bos.toByteArray());
 	}
 
+	@Override
 	void doAuth(String host, int port, String authzid, String user, String passwd)
 				    throws MessagingException, IOException {
 	    // should never get here
@@ -1017,6 +1082,7 @@ public class SMTPTransport extends Transport {
 	    return md5support;
 	}
 
+	@Override
 	void doAuth(String host, int port, String authzid, String user, String passwd)
 				    throws MessagingException, IOException {
 	    DigestMD5 md5 = getMD5();
@@ -1048,6 +1114,7 @@ public class SMTPTransport extends Transport {
 	    super("NTLM");
 	}
 
+	@Override
 	String getInitialResponse(String host, int port, String authzid, String user,
 		String passwd) throws MessagingException, IOException {
 	    ntlm = new Ntlm(getNTLMDomain(), getLocalHost(),
@@ -1061,6 +1128,7 @@ public class SMTPTransport extends Transport {
 	    return type1;
 	}
 
+	@Override
 	void doAuth(String host, int port, String authzid, String user, String passwd)
 		throws MessagingException, IOException {
 	    assert ntlm != null;
@@ -1080,14 +1148,17 @@ public class SMTPTransport extends Transport {
 	    super("XOAUTH2", false);	// disabled by default
 	}
 
+	@Override
 	String getInitialResponse(String host, int port, String authzid, String user,
 		String passwd) throws MessagingException, IOException {
 	    String resp = "user=" + user + "\001auth=Bearer " +
 			    passwd + "\001\001";
-	    byte[] b = BASE64EncoderStream.encode(ASCIIUtility.getBytes(resp));
+	    byte[] b = BASE64EncoderStream.encode(
+					resp.getBytes(StandardCharsets.UTF_8));
 	    return ASCIIUtility.toString(b);
 	}
 
+	@Override
 	void doAuth(String host, int port, String authzid, String user, String passwd)
 		throws MessagingException, IOException {
 	    // should never get here
@@ -1110,7 +1181,7 @@ public class SMTPTransport extends Transport {
         // n,a=user@example.com,^Ahost=server.example.com^Aport=143^A
         // auth=Bearer vF9dft4qmTc2Nvb3RlckBhbHRhdmlzdGEuY29tCg==^A^A
         String resp = "n,a=" + user + ",\001host=" + host + "\001port=" + port + "\001auth=Bearer " + passwd + "\001\001";
-        byte[] b = BASE64EncoderStream.encode(ASCIIUtility.getBytes(resp));
+        byte[] b = BASE64EncoderStream.encode(resp.getBytes(StandardCharsets.UTF_8));
         return ASCIIUtility.toString(b);
     }
 
@@ -1169,13 +1240,13 @@ public class SMTPTransport extends Transport {
 	List<String> v;
 	if (allowed != null && allowed.length > 0) {
 	    // remove anything not supported by the server
-	    v = new ArrayList<String>(allowed.length);
+	    v = new ArrayList<>(allowed.length);
 	    for (int i = 0; i < allowed.length; i++)
 		if (supportsAuthentication(allowed[i]))	// XXX - case must match
 		    v.add(allowed[i]);
 	} else {
 	    // everything is allowed
-	    v = new ArrayList<String>();
+	    v = new ArrayList<>();
 	    if (extMap != null) {
 		String a = extMap.get("AUTH");
 		if (a != null) {
@@ -1232,6 +1303,7 @@ public class SMTPTransport extends Transport {
      *                  or not in the connected state or if the message is
      *                  not a MimeMessage.
      */
+    @Override
     public synchronized void sendMessage(Message message, Address[] addresses)
 		    throws MessagingException, SendFailedException {
 
@@ -1262,7 +1334,7 @@ public class SMTPTransport extends Transport {
 	if (message instanceof SMTPMessage)
 	    use8bit = ((SMTPMessage)message).getAllow8bitMIME();
 	if (!use8bit)
-	    use8bit = PropUtil.getBooleanSessionProperty(session,
+	    use8bit = PropUtil.getBooleanProperty(session.getProperties(),
 				"mail." + name + ".allow8bitmime", false);
 	if (logger.isLoggable(Level.FINE))
 	    logger.fine("use8bit " + use8bit);
@@ -1281,8 +1353,22 @@ public class SMTPTransport extends Transport {
 	try {
 	    mailFrom();
 	    rcptTo();
-	    this.message.writeTo(data(), ignoreList);
-	    finishData();
+	    if (chunkSize > 0 && supportsExtension("CHUNKING")) {
+		/*
+		 * Use BDAT to send the data in chunks.
+		 * Note that even though the BDAT command is able to send
+		 * messages that contain binary data, we can't use it to
+		 * do that because a) we still need to canonicalize the
+		 * line terminators for text data, which we can't tell apart
+		 * from the message content, and b) the message content is
+		 * encoded before we even know that we can use BDAT.
+		 */
+		this.message.writeTo(bdat(), ignoreList);
+		finishBdat();
+	    } else {
+		this.message.writeTo(data(), ignoreList);
+		finishData();
+	    }
 	    if (sendPartiallyFailed) {
 		// throw the exception,
 		// fire TransportEvent.MESSAGE_PARTIALLY_DELIVERED event
@@ -1368,6 +1454,7 @@ public class SMTPTransport extends Transport {
     /**
      * Close the Transport and terminate the connection to the server.
      */
+    @Override
     public synchronized void close() throws MessagingException {
 	if (!super.isConnected()) // Already closed.
 	    return;
@@ -1406,6 +1493,7 @@ public class SMTPTransport extends Transport {
      * Check whether the transport is connected. Override superclass
      * method, to actually ping our server connection.
      */
+    @Override
     public synchronized boolean isConnected() {
 	if (!super.isConnected())
 	    // if we haven't been connected at all, don't bother with NOOP
@@ -1463,6 +1551,7 @@ public class SMTPTransport extends Transport {
      *
      * @since	JavaMail 1.4.2
      */
+    @Override
     protected void notifyTransportListeners(int type, Address[] validSent,
 					    Address[] validUnsent,
 					    Address[] invalid, Message msg) {
@@ -1484,7 +1573,7 @@ public class SMTPTransport extends Transport {
 	    if (a.isGroup()) {
 		if (groups == null) {
 		    // first group, catch up with where we are
-		    groups = new ArrayList<Address>();
+		    groups = new ArrayList<>();
 		    for (int k = 0; k < i; k++)
 			groups.add(addresses[k]);
 		}
@@ -1610,6 +1699,7 @@ public class SMTPTransport extends Transport {
 	return need8bit;
     }
 
+    @Override
     protected void finalize() throws Throwable {
 	try {
 	    closeConnection();
@@ -1666,7 +1756,7 @@ public class SMTPTransport extends Transport {
 	    BufferedReader rd =
 		new BufferedReader(new StringReader(lastServerResponse));
 	    String line;
-	    extMap = new Hashtable<String, String>();
+	    extMap = new Hashtable<>();
 	    try {
 		boolean first = true;
 		while ((line = rd.readLine()) != null) {
@@ -1732,6 +1822,9 @@ public class SMTPTransport extends Transport {
 
 	String cmd = "MAIL FROM:" + normalizeAddress(from);
 
+	if (allowutf8 && supportsExtension("SMTPUTF8"))
+	    cmd += " SMTPUTF8";
+
 	// request delivery status notification?
 	if (supportsExtension("DSN")) {
 	    String ret = null;
@@ -1758,7 +1851,8 @@ public class SMTPTransport extends Transport {
 	    // XXX - check for legal syntax?
 	    if (submitter != null) {
 		try {
-		    String s = xtext(submitter);
+		    String s = xtext(submitter,
+				    allowutf8 && supportsExtension("SMTPUTF8"));
 		    cmd += " AUTH=" + s;
 		} catch (IllegalArgumentException ex) {
 		    if (logger.isLoggable(Level.FINE))
@@ -1824,9 +1918,9 @@ public class SMTPTransport extends Transport {
      * valid addr: 552 (quota), 450, 451, 452 (quota), 421 (srvr abort)
      */
     protected void rcptTo() throws MessagingException {
-	List<InternetAddress> valid = new ArrayList<InternetAddress>();
-	List<InternetAddress> validUnsent = new ArrayList<InternetAddress>();
-	List<InternetAddress> invalid = new ArrayList<InternetAddress>();
+	List<InternetAddress> valid = new ArrayList<>();
+	List<InternetAddress> validUnsent = new ArrayList<>();
+	List<InternetAddress> invalid = new ArrayList<>();
 	int retCode = -1;
 	MessagingException mex = null;
 	boolean sendFailed = false;
@@ -1836,7 +1930,7 @@ public class SMTPTransport extends Transport {
 	if (message instanceof SMTPMessage)
 	    sendPartial = ((SMTPMessage)message).getSendPartial();
 	if (!sendPartial)
-	    sendPartial = PropUtil.getBooleanSessionProperty(session,
+	    sendPartial = PropUtil.getBooleanProperty(session.getProperties(),
 					"mail." + name + ".sendpartial", false);
 	if (sendPartial)
 	    logger.fine("sendPartial set");
@@ -2090,6 +2184,32 @@ public class SMTPTransport extends Transport {
     }
 
     /**
+     * Return a stream that will use the SMTP BDAT command to send data.
+     *
+     * @return		the stream to write to
+     * @exception	MessagingException for failures
+     * @since JavaMail 1.6.0
+     */
+    protected OutputStream bdat() throws MessagingException {
+	assert Thread.holdsLock(this);
+	dataStream = new BDATOutputStream(serverOutput, chunkSize);
+	return dataStream;
+    }
+
+    /**
+     * Terminate the sent data.
+     *
+     * @exception	IOException for I/O errors
+     * @exception	MessagingException for other failures
+     * @since JavaMail 1.6.0
+     */
+    protected void finishBdat() throws IOException, MessagingException {
+	assert Thread.holdsLock(this);
+	dataStream.ensureAtBOL();
+	dataStream.close();	// doesn't close underlying socket
+    }
+
+    /**
      * Issue the <code>STARTTLS</code> command and switch the socket to
      * TLS mode if it succeeds.
      *
@@ -2147,7 +2267,7 @@ public class SMTPTransport extends Transport {
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("could not connect to host \"" +
 				    host + "\", port: " + port +
-				    ", response: " + r + "\n");
+				    ", response: " + r);
 		throw new MessagingException(
 			"Could not connect to SMTP host: " + host +
 				    ", port: " + port +
@@ -2155,7 +2275,7 @@ public class SMTPTransport extends Transport {
 	    } else {
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("connected to host \"" +
-				       host + "\", port: " + port + "\n");
+				       host + "\", port: " + port);
 	    }
 	} catch (UnknownHostException uhex) {
 	    throw new MessagingException("Unknown SMTP host: " + host, uhex);
@@ -2194,7 +2314,7 @@ public class SMTPTransport extends Transport {
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("got bad greeting from host \"" +
 				    host + "\", port: " + port +
-				    ", response: " + r + "\n");
+				    ", response: " + r);
 		throw new MessagingException(
 			"Got bad greeting from SMTP host: " + host +
 				    ", port: " + port +
@@ -2202,7 +2322,7 @@ public class SMTPTransport extends Transport {
 	    } else {
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("protocol started to host \"" +
-				       host + "\", port: " + port + "\n");
+				       host + "\", port: " + port);
 	    }
 	} catch (IOException ioe) {
 	    throw new MessagingException(
@@ -2213,7 +2333,7 @@ public class SMTPTransport extends Transport {
 
 
     private void initStreams() throws IOException {
-	boolean quote = PropUtil.getBooleanSessionProperty(session,
+	boolean quote = PropUtil.getBooleanProperty(session.getProperties(),
 					"mail.debug.quote", false);
 
 	traceInput =
@@ -2354,7 +2474,7 @@ public class SMTPTransport extends Transport {
      * @since JavaMail 1.4.1
      */
     protected void sendCommand(String cmd) throws MessagingException {
-	sendCommand(ASCIIUtility.getBytes(cmd));
+	sendCommand(toBytes(cmd));
     }
 
     private void sendCommand(byte[] cmdBytes) throws MessagingException {
@@ -2384,7 +2504,7 @@ public class SMTPTransport extends Transport {
 	assert Thread.holdsLock(this);
         String serverResponse = "";
         int returnCode = 0;
-	StringBuffer buf = new StringBuffer(100);
+	StringBuilder buf = new StringBuilder(100);
 
 	// read the server response line(s) and add them to the buffer
 	// that stores the response
@@ -2565,16 +2685,35 @@ public class SMTPTransport extends Transport {
      * @return	the xtext format string
      * @since JavaMail 1.4.1
      */
+    // XXX - keeping this around only for compatibility
     protected static String xtext(String s) {
-	StringBuffer sb = null;
-	for (int i = 0; i < s.length(); i++) {
-	    char c = s.charAt(i);
-	    if (c >= 128)	// not ASCII
+	return xtext(s, false);
+    }
+
+    /**
+     * Like xtext(s), but allow UTF-8 strings.
+     *
+     * @param	s	the string to convert
+     * @param	utf8	convert string to UTF-8 first?
+     * @return	the xtext format string
+     * @since JavaMail 1.6.0
+     */
+    protected static String xtext(String s, boolean utf8) {
+	StringBuilder sb = null;
+	byte[] bytes;
+	if (utf8)
+	    bytes = s.getBytes(StandardCharsets.UTF_8);
+	else
+	    bytes = ASCIIUtility.getBytes(s);
+	for (int i = 0; i < bytes.length; i++) {
+	    char c = (char)(((int)bytes[i])&0xff);
+	    if (!utf8 && c >= 128)	// not ASCII
 		throw new IllegalArgumentException(
-		    "Non-ASCII character in SMTP submitter: " + s);
+			    "Non-ASCII character in SMTP submitter: " + s);
 	    if (c < '!' || c > '~' || c == '+' || c == '=') {
+		// not printable ASCII
 		if (sb == null) {
-		    sb = new StringBuffer(s.length() + 4);
+		    sb = new StringBuilder(s.length() + 4);
 		    sb.append(s.substring(0, i));
 		}
 		sb.append('+');
@@ -2597,11 +2736,158 @@ public class SMTPTransport extends Transport {
 				(password == null ? "<null>" : "<non-null>");
     }
 
+    /**
+     * Convert the String to either ASCII or UTF-8 bytes
+     * depending on allowutf8.
+     */
+    private byte[] toBytes(String s) {
+	if (allowutf8)
+	    return s.getBytes(StandardCharsets.UTF_8);
+	else
+	    // don't use StandardCharsets.US_ASCII because it rejects non-ASCII
+	    return ASCIIUtility.getBytes(s);
+    }
+
     /*
      * Probe points for GlassFish monitoring.
      */
     private void sendMessageStart(String subject) { }
     private void sendMessageEnd() { }
+
+
+    /**
+     * An SMTPOutputStream that wraps a ChunkedOutputStream.
+     */
+    private class BDATOutputStream extends SMTPOutputStream {
+
+	/**
+	 * Create a BDATOutputStream that wraps a ChunkedOutputStream
+	 * of the given size and built on top of the specified
+	 * underlying output stream.
+	 *
+	 * @param	out	the underlying output stream
+	 * @param	size	the chunk size
+	 */
+	public BDATOutputStream(OutputStream out, int size) {
+	    super(new ChunkedOutputStream(out, size));
+	}
+
+	/**
+	 * Close this output stream.
+	 *
+	 * @exception	IOException	for I/O errors
+	 */
+	@Override
+	public void close() throws IOException {
+	    out.close();
+	}
+    }
+
+    /**
+     * An OutputStream that buffers data in chunks and uses the
+     * RFC 3030 BDAT SMTP command to send each chunk.
+     */
+    private class ChunkedOutputStream extends OutputStream {
+	private final OutputStream out;
+	private final byte[] buf;
+	private int count = 0;
+
+	/**
+	 * Create a ChunkedOutputStream built on top of the specified
+	 * underlying output stream.
+	 *
+	 * @param	out	the underlying output stream
+	 * @param	size	the chunk size
+	 */
+	public ChunkedOutputStream(OutputStream out, int size) {
+	    this.out = out;
+	    buf = new byte[size];
+	}
+
+	/**
+	 * Writes the specified <code>byte</code> to this output stream.
+	 *
+	 * @param	b	the byte to write
+	 * @exception	IOException	for I/O errors
+	 */
+	@Override
+	public void write(int b) throws IOException {
+	    buf[count++] = (byte)b;
+	    if (count >= buf.length)
+		flush();
+	}
+		
+	/**
+	 * Writes len bytes to this output stream starting at off.
+	 *
+	 * @param	b	bytes to write
+	 * @param	off	offset in array
+	 * @param	len	number of bytes to write
+	 * @exception	IOException	for I/O errors
+	 */
+	@Override
+	public void write(byte b[], int off, int len) throws IOException {
+	    while (len > 0) {
+		int size = Math.min(buf.length - count, len);
+		if (size == buf.length) {
+		    // avoid the copy
+		    bdat(b, off, size, false);
+		} else {
+		    System.arraycopy(b, off, buf, count, size);
+		    count += size;
+		}
+		off += size;
+		len -= size;
+		if (count >= buf.length)
+		    flush();
+	    }
+	}
+
+	/**
+	 * Flush this output stream.
+	 *
+	 * @exception	IOException	for I/O errors
+	 */
+	@Override
+	public void flush() throws IOException {
+	    bdat(buf, 0, count, false);
+	    count = 0;
+	}
+
+	/**
+	 * Close this output stream.
+	 *
+	 * @exception	IOException	for I/O errors
+	 */
+	@Override
+	public void close() throws IOException {
+	    bdat(buf, 0, count, true);
+	    count = 0;
+	}
+
+	/**
+	 * Send the specified bytes using the BDAT command.
+	 */
+	private void bdat(byte[] b, int off, int len, boolean last)
+				throws IOException {
+	    if (len > 0 || last) {
+		try {
+		    if (last)
+			sendCommand("BDAT " + len + " LAST");
+		    else
+			sendCommand("BDAT " + len);
+		    out.write(b, off, len);
+		    out.flush();
+		    int ret = readServerResponse();
+		    if (ret != 250)
+			throw new IOException(lastServerResponse);
+		} catch (MessagingException mex) {
+		    throw new IOException("BDAT write exception", mex);
+		}
+	    }
+	}
+    }
+
 
     // ---------------------------------------------------------------------------------------- //
 

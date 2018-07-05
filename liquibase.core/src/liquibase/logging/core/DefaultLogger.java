@@ -1,10 +1,5 @@
 package liquibase.logging.core;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.logging.LogLevel;
-import liquibase.util.StringUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -12,6 +7,10 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.logging.LogLevel;
+import liquibase.util.StringUtils;
 
 public class DefaultLogger extends AbstractLogger {
 

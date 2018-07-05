@@ -56,9 +56,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -67,13 +64,13 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -88,6 +85,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -219,7 +217,7 @@ public abstract class AbstractOneDriveResourceAccess {
     protected static final String URL_API_BASE = "https://apis.live.net/v5.0/";
 
     /** The type constants for a folder */
-    private static final Set<String> TYPES_FOLDER = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(OneDriveConstants.TYPE_FOLDER, OneDriveConstants.TYPE_ALBUM)));
+    private static final Set<String> TYPES_FOLDER = ImmutableSet.of(OneDriveConstants.TYPE_FOLDER, OneDriveConstants.TYPE_ALBUM);
 
     /**
      * Checks if specified JSON item is a folder
@@ -272,7 +270,7 @@ public abstract class AbstractOneDriveResourceAccess {
                 try {
                     int keepOn = 1;
                     while (keepOn > 0) {
-                        DefaultHttpClient httpClient = oneDriveAccess.<DefaultHttpClient> getClient().client;
+                        HttpClient httpClient = oneDriveAccess.<HttpClient> getClient().client;
                         HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
                         request = method;
                         // HttpClients.setRequestTimeout(3500, method);
@@ -317,7 +315,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws ClientProtocolException If client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected HttpResponse execute(HttpRequestBase method, DefaultHttpClient httpClient) throws ClientProtocolException, IOException {
+    protected HttpResponse execute(HttpRequestBase method, HttpClient httpClient) throws ClientProtocolException, IOException {
         //long st = System.currentTimeMillis();
         HttpResponse httpResponse = httpClient.execute(method);
         //long dur = System.currentTimeMillis() - st;
@@ -471,7 +469,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws OXException If performing closure fails
      */
     protected <R> R perform(OneDriveClosure<R> closure) throws OXException {
-        return closure.perform(this, oneDriveAccess.<DefaultHttpClient> getClient().client, session);
+        return closure.perform(this, oneDriveAccess.<HttpClient> getClient().client, session);
     }
 
     /**

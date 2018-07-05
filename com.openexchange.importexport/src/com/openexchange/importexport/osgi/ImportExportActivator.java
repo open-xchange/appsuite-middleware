@@ -51,6 +51,10 @@ package com.openexchange.importexport.osgi;
 
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -59,8 +63,7 @@ import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.importexport.actions.ExportActionFactory;
 import com.openexchange.importexport.actions.ImportActionFactory;
@@ -82,12 +85,15 @@ public class ImportExportActivator extends AJAXModuleActivator{
 		    ContactService.class,
 			FolderUpdaterRegistry.class,
 			ICalParser.class,
-			AppointmentSqlFactoryService.class,
-			CalendarCollectionService.class,
 			ConfigurationService.class,
 			ICalEmitter.class,
 			ConfigViewFactory.class,
-			VCardService.class
+			VCardService.class,
+			FolderService.class,
+			IDBasedCalendarAccessFactory.class,
+			ICalService.class,
+			CalendarService.class,
+			CalendarUtilities.class
 		};
 	}
 

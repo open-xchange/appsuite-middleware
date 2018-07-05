@@ -49,7 +49,9 @@
 
 package com.openexchange.mailaccount.json.actions;
 
-import static com.openexchange.tools.sql.DBUtils.*;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -110,23 +112,14 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
     private static final EnumSet<Attribute> DEFAULT = EnumSet.of(Attribute.ARCHIVE_FULLNAME_LITERAL, Attribute.ARCHIVE_LITERAL, Attribute.CONFIRMED_HAM_FULLNAME_LITERAL, Attribute.CONFIRMED_HAM_LITERAL, Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL, Attribute.CONFIRMED_SPAM_LITERAL, Attribute.DRAFTS_FULLNAME_LITERAL, Attribute.DRAFTS_LITERAL, Attribute.SENT_FULLNAME_LITERAL, Attribute.SENT_LITERAL, Attribute.SPAM_FULLNAME_LITERAL, Attribute.SPAM_LITERAL, Attribute.TRASH_FULLNAME_LITERAL, Attribute.TRASH_LITERAL);
 
-    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(   Attribute.ID_LITERAL,
-                                                                        Attribute.PERSONAL_LITERAL,
-                                                                        Attribute.REPLY_TO_LITERAL,
-                                                                        Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
-                                                                        Attribute.ARCHIVE_LITERAL,
-                                                                        Attribute.ARCHIVE_FULLNAME_LITERAL,
-                                                                        Attribute.SENT_LITERAL,
-                                                                        Attribute.SENT_FULLNAME_LITERAL,
-                                                                        Attribute.TRASH_LITERAL,
-                                                                        Attribute.TRASH_FULLNAME_LITERAL,
-                                                                        Attribute.SPAM_LITERAL,
-                                                                        Attribute.SPAM_FULLNAME_LITERAL,
-                                                                        Attribute.DRAFTS_LITERAL,
-                                                                        Attribute.DRAFTS_FULLNAME_LITERAL);
+    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(Attribute.ID_LITERAL, Attribute.PERSONAL_LITERAL, Attribute.REPLY_TO_LITERAL, Attribute.UNIFIED_INBOX_ENABLED_LITERAL, Attribute.ARCHIVE_LITERAL, Attribute.ARCHIVE_FULLNAME_LITERAL, Attribute.SENT_LITERAL, Attribute.SENT_FULLNAME_LITERAL, Attribute.TRASH_LITERAL, Attribute.TRASH_FULLNAME_LITERAL, Attribute.SPAM_LITERAL, Attribute.SPAM_FULLNAME_LITERAL, Attribute.DRAFTS_LITERAL, Attribute.DRAFTS_FULLNAME_LITERAL);
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
+        if (null == jData) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
         MailAccountDescription accountDescription = new MailAccountDescription();
         List<OXException> warnings = new LinkedList<>();
         Set<Attribute> fieldsToUpdate = DefaultMailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);

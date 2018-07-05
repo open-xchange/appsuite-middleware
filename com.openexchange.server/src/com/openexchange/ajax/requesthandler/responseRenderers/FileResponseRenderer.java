@@ -61,6 +61,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.HttpStatus;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.Readable;
@@ -73,12 +74,13 @@ import com.openexchange.ajax.requesthandler.responseRenderers.actions.OutputBina
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.PrepareResponseHeaderAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.RemovePragmaHeaderAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.SetBinaryInputStreamAction;
-import com.openexchange.ajax.requesthandler.responseRenderers.actions.TransformImageAction;
+import com.openexchange.ajax.requesthandler.responseRenderers.actions.TransformImageClientAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.UpdateETagHeaderAction;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
+import com.openexchange.imageconverter.api.IImageClient;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -99,8 +101,8 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
-    private final AtomicReference<File> tmpDirReference;
-    private final TransformImageAction imageAction;
+    protected final AtomicReference<File> tmpDirRef = new AtomicReference<>();
+    private final TransformImageClientAction imageClientAction = new TransformImageClientAction();
     private final List<IFileResponseRendererAction> registeredActions;
 
     /**
@@ -110,19 +112,17 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         super();
 
         // Initialize renderer actions
-        imageAction = new TransformImageAction();
-        registeredActions = new ArrayList<IFileResponseRendererAction>(8);
+        ImmutableList.Builder<IFileResponseRendererAction> registeredActions = ImmutableList.builder();
         registeredActions.add(new CheckParametersAction());
-        registeredActions.add(imageAction);
+        registeredActions.add(imageClientAction);
         registeredActions.add(new SetBinaryInputStreamAction());
         registeredActions.add(new PrepareResponseHeaderAction());
         registeredActions.add(new RemovePragmaHeaderAction());
         registeredActions.add(new UpdateETagHeaderAction());
         registeredActions.add(new OutputBinaryContentAction());
+        this.registeredActions = registeredActions.build();
 
         // Initialize rest
-        final AtomicReference<File> tmpDirReference = new AtomicReference<File>();
-        this.tmpDirReference = tmpDirReference;
         final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
         // Get configuration service
         final ConfigurationService cs = registry.getService(ConfigurationService.class);
@@ -134,13 +134,16 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             @Override
             public void onPropertyChange(final PropertyEvent event) {
                 if (PropertyEvent.Type.CHANGED.equals(event.getType())) {
-                    tmpDirReference.set(getTmpDirByPath(event.getValue()));
+                    tmpDirRef.set(getTmpDirByPath(event.getValue()));
                 }
             }
         });
-        tmpDirReference.set(getTmpDirByPath(path));
+        tmpDirRef.set(getTmpDirByPath(path));
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.requesthandler.ResponseRenderer#getRanking()
+     */
     @Override
     public int getRanking() {
         return 0;
@@ -152,19 +155,35 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
      * @param scaler The image scaler
      */
     public void setScaler(ImageTransformationService scaler) {
-        imageAction.setScaler(scaler);
+        imageClientAction.setScaler(scaler);
     }
 
+    /**
+     * Sets the image scaler.
+     *
+     * @param scaler The image scaler
+     */
+    public void setImageClient(IImageClient imageClient) {
+        imageClientAction.setImageClient(imageClient);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.requesthandler.ResponseRenderer#handles(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.ajax.requesthandler.AJAXRequestResult)
+     */
     @Override
     public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
         return (result.getResultObject() instanceof IFileHolder);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.ajax.requesthandler.responseRenderers.AbstractListenerCollectingResponseRenderer#actualWrite(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.ajax.requesthandler.AJAXRequestResult, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
     @Override
     public void actualWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
+
         // Check if file is actually supplied by the request URL.
-        if (file == null || hasNoFileItem(file)) {
+        if ((null == file) || hasNoFileItem(file)) {
             try {
                 // Do your thing if the file is not supplied to the request URL or if there is no file item associated with specified file
                 // Throw an exception, or send 404, or show default/warning page, or just ignore it.
@@ -172,16 +191,19 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             } catch (final IOException e) {
                 LOG.error("Exception while trying to write HTTP response.", e);
             }
-            return;
-        }
-        try {
-            writeFileHolder(file, request, result, req, resp);
-        } finally {
-            postProcessingTasks(file);
+        } else {
+            try {
+                writeFileHolder(file, request, result, req, resp);
+            } finally {
+                postProcessingTasks(file);
+            }
         }
     }
 
-    private void postProcessingTasks(IFileHolder file) {
+    /**
+     * @param file
+     */
+    private static void postProcessingTasks(IFileHolder file) {
         List<Runnable> tasks = file.getPostProcessingTasks();
         if (null != tasks && !tasks.isEmpty()) {
             for (Runnable task : tasks) {
@@ -202,9 +224,9 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
     public void writeFileHolder(IFileHolder fileHolder, AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         final String fileName = fileHolder.getName();
         final long length = fileHolder.getLength();
-        final List<Closeable> closeables = new LinkedList<Closeable>();
+        final List<Closeable> closeables = new LinkedList<>();
         final String fileContentType = fileHolder.getContentType();
-        IDataWrapper data = new DataWrapper().setContentTypeByParameter(false).setLength(length).setFile(fileHolder).setRequest(req).setFileContentType(fileContentType).setFileName(fileName).setRequestData(requestData).setResponse(resp).setCloseAbles(closeables).setResult(result).setTmpDirReference(tmpDirReference);
+        IDataWrapper data = new DataWrapper().setContentTypeByParameter(Boolean.FALSE).setLength(length).setFile(fileHolder).setRequest(req).setFileContentType(fileContentType).setFileName(fileName).setRequestData(requestData).setResponse(resp).setCloseAbles(closeables).setResult(result).setTmpDirReference(tmpDirRef);
 
         try {
             data.setUserAgent(AJAXUtility.sanitizeParam(req.getHeader("user-agent")));
@@ -253,19 +275,32 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         }
     }
 
+    /**
+     * @param fileName
+     * @return
+     */
     public static String getContentTypeByFileName(final String fileName) {
         return null == fileName ? null : MimeType2ExtMap.getContentType(fileName, null);
     }
 
-    private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
+    /**
+     * @param sc
+     * @param msg
+     * @param resp
+     */
+    private static void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
         try {
             Tools.sendErrorPage(resp, sc, msg);
-        } catch (final Exception e) {
+        } catch (@SuppressWarnings("unused") final Exception e) {
             // Ignore
         }
     }
 
-    private boolean hasNoFileItem(final IFileHolder file) {
+    /**
+     * @param file
+     * @return
+     */
+    private static boolean hasNoFileItem(final IFileHolder file) {
         final String fileMIMEType = file.getContentType();
         return ((isEmpty(fileMIMEType) || SAVE_AS_TYPE.equals(fileMIMEType)) && isEmpty(file.getName()) && (file.getLength() <= 0L));
     }
@@ -293,7 +328,12 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         return tmpDir;
     }
 
-    private class DataWrapper implements IDataWrapper {
+    /**
+     * {@link DataWrapper}
+     *
+     * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+     */
+    private static class DataWrapper implements IDataWrapper {
 
         private String delivery = null;
         private String contentType = null;
@@ -310,7 +350,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         private AJAXRequestData requestData;
         private AJAXRequestResult result;
         private List<Closeable> closeables;
-        private AtomicReference<File> tmpDirReference;
+        private AtomicReference<File> localTmpDirRef;
 
         /**
          * Initializes a new {@link DataWrapper}.
@@ -465,7 +505,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
         @Override
         public void addCloseable(Closeable closeable) {
             if (this.closeables == null) {
-                this.closeables = new ArrayList<Closeable>();
+                this.closeables = new ArrayList<>();
             }
 
             this.closeables.add(closeable);
@@ -477,7 +517,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
                 this.closeables = closeables;
             }
             return this;
-        };
+        }
 
         @Override
         public List<Closeable> getCloseables() {
@@ -497,12 +537,12 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
 
         @Override
         public AtomicReference<File> getTmpDirReference() {
-            return tmpDirReference;
+            return localTmpDirRef;
         }
 
         @Override
         public IDataWrapper setTmpDirReference(AtomicReference<File> tmpDirReference) {
-            this.tmpDirReference = tmpDirReference;
+            this.localTmpDirRef = tmpDirReference;
             return this;
         }
     } // End of class DataWrapper

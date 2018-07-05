@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -215,7 +216,7 @@ public class Datamining {
             Questions.reportNumberOfUsersWhoLoggedInWithClientCardDAVInTheLast30Days();
             Questions.reportSliceAndDiceOnDraftMailSize();
             Questions.reportSliceAndDiceOnExternalAccountUsage();
-            
+
             rightNow = Calendar.getInstance();
             final long after = rightNow.getTime().getTime();
             report("durationInSeconds", Long.toString((after - before) / 1000));
@@ -270,10 +271,6 @@ public class Datamining {
     }
 
     private static void printHelp() {
-        //try {
-//            System.out.println("---");
-//            System.out.println("Usage of the Open-Xchange datamining-tool:\n\n");
-            //optionParser.printHelpOn(System.out);
             HelpFormatter formatter = new HelpFormatter();
             formatter.setWidth(120);
             formatter.printHelp( "datamining", staticOptions );
@@ -282,9 +279,6 @@ public class Datamining {
             System.out.println("Please note that if you want to override hostname / dbName / dbPort at least hostname must be given (no default) and defaults will apply for the other 2.");
 
             helpPrinted = true;
-//        } catch (IOException io) {
-//            io.printStackTrace();
-//        }
     }
 
     private static void reportNumberOfContexts() {
@@ -314,6 +308,7 @@ public class Datamining {
         return allTheAnswers.get(parameter);
     }
 
+    @SuppressWarnings("static-access")
     private static void readParameters(String[] args) {
 
     	boolean mandatoryOptionsSet = !configDBURL.equals("") && !configDBUser.equals("") && !configDBPassword.equals("");
@@ -321,15 +316,6 @@ public class Datamining {
     	String hostname, dbPort, dbName;
 
     	Options options = new Options();
-
-//    	options.addOption("n", "hostname", true, "Host where the Open-Xchange MySQL-database is running");
-//    	options.addOption("u", "dbUser", true, "Name of the MySQL-User for configdb");
-//    	options.addOption("p", "dbPassword", true, "Password for the user specified with \"-dbUser\"");
-//    	options.addOption("d", "dbName", true, "Name of the MySQL-database that contains the Open-Xchange configDB");
-//    	options.addOption("r", "reportfilePath", true, "Path where the report-file is saved");
-//    	options.addOption("v", "verbose", false, "With this the tool prints what it is doing live");
-//    	options.addOption("o", "dbPort", true, "Port where MySQL is running on the host specified with \"-hostname\"");
-//    	options.addOption("h", "help", false, "Print this helpfile");
 
     	options.addOption(OptionBuilder.withLongOpt("hostname").isRequired(!mandatoryOptionsSet).hasArg().withDescription("Host where the Open-Xchange MySQL-database is running").create("n"));
     	options.addOption(OptionBuilder.withLongOpt("dbUser").isRequired(!mandatoryOptionsSet).hasArg().withDescription("Name of the MySQL-User for configdb").create("u"));
@@ -380,65 +366,6 @@ public class Datamining {
 			System.out.println(e.getMessage());
 		}
 
-        // mandatory
-//        optionParser.acceptsAll(Arrays.asList("hostname", "n"), "Host where the Open-Xchange MySQL-database is running").withRequiredArg().describedAs(
-//            "hostname").ofType(String.class);
-//        optionParser.acceptsAll(Arrays.asList("dbUser", "u"), "Name of the MySQL-User for configdb").withRequiredArg().describedAs(
-//            "dbuser").ofType(String.class);
-//        optionParser.acceptsAll(Arrays.asList("dbPassword", "p"), "Password for the user specified with \"-dbUser\"").withRequiredArg().describedAs(
-//            "dbpassword").ofType(String.class);
-//        // optional
-//        optionParser.acceptsAll(Arrays.asList("dbName", "d"), "Name of the MySQL-database that contains the Open-Xchange configDB").withRequiredArg().describedAs(
-//            "dbname").ofType(String.class).defaultsTo("configdb");
-//        optionParser.acceptsAll(Arrays.asList("reportfilePath"), "Path where the report-file is saved").withRequiredArg().describedAs(
-//            "path").ofType(String.class).defaultsTo("./");
-//        optionParser.acceptsAll(Arrays.asList("v", "verbose"), "With this the tool prints what it is doing live");
-//        optionParser.acceptsAll(Arrays.asList("dbPort"), "Port where MySQL is running on the host specified with \"-hostname\"").withRequiredArg().describedAs(
-//            "port").defaultsTo("3306");
-//        optionParser.acceptsAll(Arrays.asList("h", "help", "?"), "Print this helpfile");
-//
-//        boolean helpCalled = false;
-//        for (int i = 0; i < args.length; i++) {
-//            String string = args[i];
-//            if (string.equals("-h") || string.equals("-?") || string.equals("--help")) {
-//                helpCalled = true;
-//                printHelp();
-//                helpPrinted = true;
-//                break;
-//            }
-//        }
-//
-//        for (int i = 0; i < args.length; i++) {
-//            String string = args[i];
-//            if (string.equals("-v") || string.equals("--verbose")) {
-//                verbose = true;
-//                break;
-//            }
-//        }
-//
-//        if (!helpCalled) {
-//            try {
-//                OptionSet options = optionParser.parse(args);
-//                hostname = getValueForOption("hostname", options);
-//                dbName = getValueForOption("dbName", options);
-//                dbPort = (String) options.valueOf("dbPort");
-//
-//                if (!getValueForOption("dbUser", options).equals("")){
-//                	configDBUser = getValueForOption("dbUser", options);
-//                }
-//                if (!getValueForOption("dbPassword", options).equals("")){
-//                	configDBPassword = getValueForOption("dbPassword", options);
-//                }
-//                verbose = options.has("verbose");
-//
-//                if (!hostname.equals("") && !dbName.equals("") && !dbPort.equals("")){
-//                    configDBURL = "jdbc:mysql://" + hostname + ":" + dbPort + "/" + dbName;
-//                }
-//                reportfilePath = getValueForOption("reportfilePath", options);
-//            } catch (OptionException e) {
-//                System.out.println(e.getMessage());
-//            }
-//        }
     }
 
     private static void readProperties() {
@@ -507,7 +434,15 @@ public class Datamining {
 
             // connect
             DriverManager.setLoginTimeout(5);
-            Connection conn = DriverManager.getConnection(url + "?" + "user=" + user + "&" + "password=" + password);
+            java.util.Properties defaults = new java.util.Properties();
+            if (user != null) {
+                defaults.put("user", user);
+            }
+            if (password != null) {
+                defaults.put("password", password);
+            }
+            defaults.setProperty("useSSL", "false");
+            Connection conn = DriverManager.getConnection(url, defaults);
             return (MySQLConnection) conn;
         } catch (ClassNotFoundException e) {
             System.out.println("Error : JDBC driver not found");
@@ -543,10 +478,10 @@ public class Datamining {
                 ResultSet result = null;
                 try {
                     query = configdbConnection.createStatement();
-                    
+
                     String sql = "SELECT DISTINCT csp.db_schema, csp.read_db_pool_id, dp.url, dp.login, dp.password FROM context_server2db_pool csp, db_pool dp WHERE csp.read_db_pool_id = dp.db_pool_id;";
                     result = query.executeQuery(sql);
-                    
+
                     while (result.next()) {
                         Schema schema = new Schema(
                             result.getString("db_schema"),
@@ -592,6 +527,7 @@ public class Datamining {
                 }
             }
         } catch (Exception e) {
+            //TODO why no exception handling here? Can be ignored?
         }
         return schemata;
     }
@@ -608,10 +544,10 @@ public class Datamining {
                     ResultSet result = null;
                     try {
                         query = conn.createStatement();
-                        
+                        // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                         String sql = "SELECT AVG(number_per_context) FROM (SELECT COUNT(id) AS number_per_context FROM infostore GROUP BY cid) AS T";
                         result = query.executeQuery(sql);
-                        
+
                         while (result.next()) {
                             String numberInOneSchema = result.getString(1);
                             numberInAllSchemata += new Float(numberInOneSchema);
@@ -625,6 +561,7 @@ public class Datamining {
                 }
             }
         } catch (Exception e) {
+            //TODO why no exception handling here? Can be ignored?
         }
         report(AVERAGE_NUMBER_OF_INFOSTORE_OBJECTS_PER_CONTEXT, Float.toString(numberInAllSchemata / allSchemata.size()));
     }
@@ -641,10 +578,10 @@ public class Datamining {
                     ResultSet result = null;
                     try {
                         query = conn.createStatement();
-                        
+
                         String sql = "SELECT COUNT(*) FROM infostore";
                         result = query.executeQuery(sql);
-                        
+
                         while (result.next()) {
                             String numberInOneSchema = result.getString(1);
                             numberInAllSchemata += new Float(numberInOneSchema);
@@ -658,6 +595,7 @@ public class Datamining {
                 }
             }
         } catch (Exception e) {
+            //TODO why no exception handling here? Can be ignored?
         }
         report(AVERAGE_NUMBER_OF_INFOSTORE_OBJECTS_PER_SCHEMA, Float.toString(numberInAllSchemata / allSchemata.size()));
     }
@@ -691,11 +629,11 @@ public class Datamining {
         // we want to keep the order of ranges
         final LinkedHashMap<Integer, Integer> rm = new LinkedHashMap<>(ranges.length);
         for(int r : ranges) {
-            rm.put(r, 0);
+            rm.put(Integer.valueOf(r), Integer.valueOf(0));
         }
-        rm.put(Integer.MAX_VALUE, 0);
+        rm.put(Integer.valueOf(Integer.MAX_VALUE), Integer.valueOf(0));
         for (Schema schema : allSchemata) {
-            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + '/' + schema.getSchemaname();
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
                 java.sql.PreparedStatement prep = null;
@@ -713,11 +651,12 @@ public class Datamining {
                             if( null != sp ) {
                                 int spsize = sp.toString().getBytes().length;
                                 int ll = 0;
-                                for(Integer rtb : rm.keySet()) {
-                                    if( spsize > ll && spsize <= rtb ) {
-                                        rm.put(rtb, (rm.get(rtb))+1);
+                                for (Map.Entry<Integer, Integer> entry : rm.entrySet()) {
+                                    Integer rtb = entry.getKey();
+                                    if (spsize > ll && spsize <= rtb.intValue()) {
+                                        rm.put(rtb, Integer.valueOf(entry.getValue().intValue() + 1));
                                     }
-                                    ll = rtb;
+                                    ll = rtb.intValue();
                                 }
                             }
                         }
@@ -746,16 +685,18 @@ public class Datamining {
                 java.sql.PreparedStatement prep = null;
                 ResultSet result = null;
                 try {
+                    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                     prep = conn.prepareStatement("SELECT COUNT(id) FROM user_mail_account WHERE name != ? GROUP BY cid,user");
                     prep.setString(1, "E-Mail");
                     result = prep.executeQuery();
                     while (result.next()) {
-                        Integer ecnt = result.getInt(1);
+                        int ecnt = result.getInt(1);
                         ecnt = ecnt > max ? max : ecnt;
-                        if( null != ret.get(ecnt) ) {
-                            ret.put(ecnt, (ret.get(ecnt))+1);
+                        Integer ecntI = Integer.valueOf(ecnt);
+                        if (null != ret.get(ecntI)) {
+                            ret.put(ecntI, Integer.valueOf(ret.get(ecntI).intValue() + 1));
                         } else {
-                            ret.put(ecnt, 1);
+                            ret.put(ecntI, Integer.valueOf(1));
                         }
                     }
                 } catch (SQLException e) {

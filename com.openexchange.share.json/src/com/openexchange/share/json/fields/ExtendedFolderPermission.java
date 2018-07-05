@@ -51,8 +51,10 @@ package com.openexchange.share.json.fields;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
@@ -61,6 +63,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ExtendedFolderPermission}
@@ -68,6 +71,11 @@ import com.openexchange.share.recipient.RecipientType;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ExtendedFolderPermission extends ExtendedPermission {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ExtendedFolderPermission.class);
+    }
 
     private final FolderObject folder;
     private final OCLPermission permission;
@@ -94,27 +102,32 @@ public class ExtendedFolderPermission extends ExtendedPermission {
     public JSONObject toJSON(AJAXRequestData requestData) throws JSONException, OXException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("entity", permission.getEntity());
-        jsonObject.put("bits", Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(),
-            permission.getWritePermission(), permission.getDeletePermission(), permission.isFolderAdmin()));
+        jsonObject.put("bits", createPermissionBits(permission));
         if (permission.isGroupPermission()) {
             jsonObject.put("type", "group");
             addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
         } else {
             User user = resolver.getUser(permission.getEntity());
             if (null == user) {
-                org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermissionsField.class).warn(
-                    "Can't resolve user permission entity {} for folder {}", permission.getEntity(), folder);
+                LoggerHolder.LOGGER.debug("Can't resolve user permission entity {} for folder {}", permission.getEntity(), folder);
             } else if (user.isGuest()) {
                 GuestInfo guest = resolver.getGuest(user.getId());
                 if (guest == null) {
-                    int contextId = requestData.getSession() == null ? -1 : requestData.getSession().getContextId();
+                    ServerSession session = requestData.getSession();
+                    int contextId = session == null ? -1 : session.getContextId();
                     throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not resolve guest info for ID " + user.getId() + " in context " + contextId + ". " +
                         "It might have been deleted in the mean time or is in an inconsistent state.");
                 }
 
                 jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
                 if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
-                    addShareInfo(requestData, jsonObject, resolver.getShare(folder, permission.getEntity()));
+                    if (permission.getType() == FolderPermissionType.INHERITED) {
+                        FolderObject legator = new FolderObject(Integer.valueOf(permission.getPermissionLegator()));
+                        legator.setModule(folder.getModule());
+                        addShareInfo(requestData, jsonObject, resolver.getShare(legator, permission.getEntity()));
+                    } else {
+                        addShareInfo(requestData, jsonObject, resolver.getShare(folder, permission.getEntity()));
+                    }
                 } else {
                     addUserInfo(requestData, jsonObject, user);
                 }
@@ -123,7 +136,15 @@ public class ExtendedFolderPermission extends ExtendedPermission {
                 addUserInfo(requestData, jsonObject, user);
             }
         }
+        if (permission.getType() == FolderPermissionType.INHERITED) {
+            jsonObject.put("isInherited", true);
+            jsonObject.put("isInheritedFrom", permission.getPermissionLegator());
+        }
         return jsonObject;
+    }
+
+    private static int createPermissionBits(OCLPermission permission) {
+        return Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(), permission.getWritePermission(), permission.getDeletePermission(), permission.isFolderAdmin());
     }
 
 }

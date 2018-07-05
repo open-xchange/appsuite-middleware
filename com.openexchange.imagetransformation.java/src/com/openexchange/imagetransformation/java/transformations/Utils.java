@@ -57,7 +57,6 @@ import java.awt.image.ColorModel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -68,12 +67,14 @@ import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.Utility;
 import com.openexchange.imagetransformation.java.exif.ExifTool;
 import com.openexchange.imagetransformation.java.exif.Orientation;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.twelvemonkeys.imageio.plugins.bmp.BMPImageReaderSpi;
 import com.twelvemonkeys.imageio.plugins.bmp.CURImageReaderSpi;
@@ -120,65 +121,79 @@ public class Utils {
         for (ImageReaderSpi readerSpi : readerSpis) {
             readerSpi.onRegistration(registry, ImageReaderSpi.class);
             for (String formatName : readerSpi.getFormatNames()) {
-                readerSpiByFormatName.put(formatName, readerSpi);
+                readerSpiByFormatName.put(Strings.toLowerCase(formatName), readerSpi);
             }
             String[] fileSuffixes = readerSpi.getFileSuffixes();
             if (null != fileSuffixes) {
                 for (String extension : readerSpi.getFileSuffixes()) {
-                    readerSpiByExtension.put(extension, readerSpi);
+                    readerSpiByExtension.put(Strings.toLowerCase(extension), readerSpi);
                 }
             }
         }
-        READER_SPI_BY_EXTENSION = Collections.unmodifiableMap(readerSpiByExtension);
-        READER_SPI_BY_FORMAT_NAME = Collections.unmodifiableMap(readerSpiByFormatName);
+        READER_SPI_BY_EXTENSION = ImmutableMap.copyOf(readerSpiByExtension);
+        READER_SPI_BY_FORMAT_NAME = ImmutableMap.copyOf(readerSpiByFormatName);
     }
 
     /**
      * Gets an image reader suitable for the supplied image input stream.
      *
      * @param inputStream The image input stream to create the reader for
-     * @param contentType The indicated content type, or <code>null</code> if no available
-     * @param fileName The indicated file name, or <code>null</code> if no available
+     * @param optContentType The indicated content type, or <code>null</code> if not available
+     * @param optFileName The indicated file name, or <code>null</code> if not available
      * @return The image reader
      */
-    public static ImageReader getImageReader(ImageInputStream inputStream, String contentType, String fileName) throws IOException {
-        if (null != contentType) {
-            /*
-             * prefer alternative image readers if possible
-             */
-            ImageReaderSpi readerSpi = null;
-            String extension = getFileExtension(fileName);
-            if (null != extension) {
-                readerSpi = READER_SPI_BY_EXTENSION.get(extension);
-            }
-            if (null == readerSpi) {
-                readerSpi = READER_SPI_BY_FORMAT_NAME.get(Utility.getImageFormat(contentType));
-            }
-            if (null != readerSpi) {
-                try {
+    public static ImageReader getImageReader(ImageInputStream inputStream, String optContentType, String optFileName) throws IOException {
+        ImageReader reader = null;
+        try {
+            // Prefer alternative image reader by MIME type if possible
+            if (null != optContentType) {
+                ImageReaderSpi readerSpi = null;
+                String extension = getFileExtension(optFileName);
+                if (null != extension) {
+                    readerSpi = READER_SPI_BY_EXTENSION.get(Strings.toLowerCase(extension));
+                }
+                if (null == readerSpi) {
+                    readerSpi = READER_SPI_BY_FORMAT_NAME.get(Strings.toLowerCase(Utility.getImageFormat(optContentType)));
+                }
+                if (null != readerSpi) {
+                    // Unlike a standard InputStream, all ImageInputStreams support marking.
                     inputStream.mark();
-                    if (readerSpi.canDecodeInput(inputStream)) {
-                        ImageReader reader = readerSpi.createReaderInstance();
-                        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), contentType);
-                        return reader;
+                    try {
+                        if (readerSpi.canDecodeInput(inputStream)) {
+                            reader = readerSpi.createReaderInstance();
+                            LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), optContentType);
+                        }
+                    } catch (IOException e) {
+                        LOG.debug("Error probing for suitable image reader", e);
+                    } finally {
+                        inputStream.reset();
                     }
-                } catch (IOException e) {
-                    LOG.debug("Error probing for suitable image reader", e);
-                } finally {
-                    inputStream.reset();
+                }
+            }
+
+            // Fall back to regularly registered readers in case no alternative image reader was acquired
+            if (null == reader) {
+                Iterator<ImageReader> readers = ImageIO.getImageReaders(inputStream);
+                if (false == readers.hasNext()) {
+                    throw new IOException("No image reader available for format " + optContentType);
+                }
+                reader = readers.next();
+                LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), optContentType);
+            }
+
+            // Successfully obtained ImageReader instance. Return it.
+            ImageReader retval = reader;
+            reader = null; // Avoid premature disposal of ImageReader instance
+            return retval;
+        } finally {
+            if (null != reader) {
+                try {
+                    reader.dispose();
+                } catch (final Exception e) {
+                    // Ignore
                 }
             }
         }
-        /*
-         * fallback to regularly registered readers
-         */
-        Iterator<ImageReader> readers = ImageIO.getImageReaders(inputStream);
-        if (false == readers.hasNext()) {
-            throw new IOException("No image reader available for format " + contentType);
-        }
-        ImageReader reader = readers.next();
-        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), contentType);
-        return reader;
     }
 
     /**
@@ -356,34 +371,38 @@ public class Utils {
      * @return <code>-1</code> if the first candidate was selected, <code>1</code> for the second one
      */
     private static int selectResolution(Dimension resolution1, Dimension resolution2, Dimension requiredResolution, long maxResolution) {
+        long resolutionWidth1 = resolution1.width;
+        long resolutionHeight1 = resolution1.height;
+        long resolutionWidth2 = resolution2.width;
+        long resolutionHeight2 = resolution2.height;
+
         if (0 < maxResolution) {
-            if (resolution1.width * resolution1.height <= maxResolution) {
-                if (resolution2.width * resolution2.height > maxResolution) {
+            if (resolutionWidth1 * resolutionHeight1 <= maxResolution) {
+                if (resolutionWidth2 * resolutionHeight2 > maxResolution) {
                     /*
                      * only first resolution fulfills max. resolution constraint
                      */
                     return -1;
                 }
-            } else if (resolution2.width * resolution2.height <= maxResolution) {
+            } else if (resolutionWidth2 * resolutionHeight2 <= maxResolution) {
                 /*
                  * only second resolution fulfills max. resolution constraint
                  */
                 return 1;
             }
         }
-        if (resolution1.width >= requiredResolution.width && resolution1.height >= requiredResolution.height) {
-            if (resolution2.width >= requiredResolution.width && resolution2.height >= requiredResolution.height) {
+        if (resolutionWidth1 >= requiredResolution.width && resolutionHeight1 >= requiredResolution.height) {
+            if (resolutionWidth2 >= requiredResolution.width && resolutionHeight2 >= requiredResolution.height) {
                 /*
                  * both resolutions fulfill required resolution, choose closest one
                  */
-                return resolution1.width * resolution1.height > resolution2.width * resolution2.height ? 1 : -1;
-            } else {
-                /*
-                 * only first resolution fulfills required resolution
-                 */
-                return -1;
+                return resolutionWidth1 * resolutionHeight1 > resolutionWidth2 * resolutionHeight2 ? 1 : -1;
             }
-        } else if (resolution2.width >= requiredResolution.width && resolution2.height >= requiredResolution.height) {
+            /*
+             * only first resolution fulfills required resolution
+             */
+            return -1;
+        } else if (resolutionWidth2 >= requiredResolution.width && resolutionHeight2 >= requiredResolution.height) {
             /*
              * only second resolution fulfills required resolution
              */
@@ -392,7 +411,7 @@ public class Utils {
             /*
              * no resolution fulfills required resolution, choose closest one
              */
-            return resolution1.width * resolution1.height >= resolution2.width * resolution2.height ? -1 : 1;
+            return resolutionWidth1 * resolutionHeight1 >= resolutionWidth2 * resolutionHeight2 ? -1 : 1;
         }
     }
 

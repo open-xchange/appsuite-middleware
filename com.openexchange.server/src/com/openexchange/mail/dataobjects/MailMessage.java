@@ -73,7 +73,6 @@ import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.TimeZoneUtils;
@@ -198,6 +197,20 @@ public abstract class MailMessage extends MailPart {
      * @value $Junk
      */
     public static final String USER_SPAM = "$Junk";
+
+    /**
+     * Marks if the mail has an attachment
+     *
+     * @value $HasAttachment
+     */
+    public static final String USER_HAS_ATTACHMENT = "$HasAttachment";
+
+    /**
+     * Marks if the mail has no attachment
+     *
+     * @value $HasNoAttachment
+     */
+    public static final String USER_HAS_NO_ATTACHMENT = "$HasNoAttachment";
 
     /*-
      * ------------------- Priority ------------------------------
@@ -325,6 +338,26 @@ public abstract class MailMessage extends MailPart {
      */
     public static String getColorLabelStringValue(final int cl) {
         return new StringBuilder(COLOR_LABEL_PREFIX).append(cl).toString();
+    }
+
+    /**
+     * Checks if the provided user flag is <code>"$HasAttachment"</code>.
+     *
+     * @param userFlag The flag to check
+     * @return <code>true</code> if the flag is <code>"$HasAttachment"</code>; otherwise <code>false</code>
+     */
+    public static boolean isHasAttachment(String userFlag) {
+        return MailMessage.USER_HAS_ATTACHMENT.equalsIgnoreCase(userFlag);
+    }
+
+    /**
+     * Checks if the provided user flag is <code>"$HasNoAttachment"</code>.
+     *
+     * @param userFlag The flag to check
+     * @return <code>true</code> if the flag is <code>"$HasNoAttachment"</code>; otherwise <code>false</code>
+     */
+    public static boolean isHasNoAttachment(String userFlag) {
+        return MailMessage.USER_HAS_NO_ATTACHMENT.equalsIgnoreCase(userFlag);
     }
 
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];
@@ -475,6 +508,13 @@ public abstract class MailMessage extends MailPart {
     private boolean b_hasAttachment;
 
     /**
+     * The alternative flag whether an attachment is present or not.
+     */
+    private boolean alternativeHasAttachment;
+
+    private boolean b_alternativeHasAttachment;
+
+    /**
      * Whether a VCard should be appended or not.
      */
     private boolean appendVCard;
@@ -518,6 +558,18 @@ public abstract class MailMessage extends MailPart {
      */
     private SecurityResult securityResult;
     private boolean b_securityResult;
+
+    /**
+     * Email authenticity results
+     */
+    private MailAuthenticityResult authenticityResult;
+    private boolean b_authenticityResult;
+
+    /**
+     * The text preview
+     */
+    private String textPreview;
+    private boolean b_textPreview;
 
     /**
      * Default constructor
@@ -1497,11 +1549,11 @@ public abstract class MailMessage extends MailPart {
         if (!b_priority) {
             final String imp = getFirstHeader(MessageHeaders.HDR_IMPORTANCE);
             if (imp != null) {
-                setPriority(MimeMessageConverter.parseImportance(imp));
+                setPriority(MimeMessageUtility.parseImportance(imp));
             } else {
                 final String prioStr = getFirstHeader(MessageHeaders.HDR_X_PRIORITY);
                 if (prioStr != null) {
-                    setPriority(MimeMessageConverter.parsePriority(prioStr));
+                    setPriority(MimeMessageUtility.parsePriority(prioStr));
                 }
             }
         }
@@ -1613,6 +1665,40 @@ public abstract class MailMessage extends MailPart {
     public void setOriginalFolder(final FullnameArgument originalFolder) {
         this.originalFolder = originalFolder;
         b_originalFolder = true;
+    }
+
+    /**
+     * Gets the text preview
+     *
+     * @return the text preview
+     */
+    public String getTextPreview() {
+        return textPreview;
+    }
+
+    /**
+     * @return <code>true</code> if text preview is set; otherwise <code>false</code>
+     */
+    public boolean containsTextPreview() {
+        return b_textPreview;
+    }
+
+    /**
+     * Removes the text preview
+     */
+    public void removeTextPreview() {
+        textPreview = null;
+        b_textPreview = false;
+    }
+
+    /**
+     * Sets the text preview
+     *
+     * @param textPreview the text preview to set
+     */
+    public void setTextPreview(final String textPreview) {
+        this.textPreview = textPreview;
+        b_textPreview = true;
     }
 
     /**
@@ -1752,23 +1838,32 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Gets the hasAttachment
+     * Checks if this mail message is marked to contain (file) attachments
      *
-     * @return the hasAttachment
+     * @return <code>true</code> if this mail message is marked to contain (file) attachments; otherwise <code>false</code>
      */
     public boolean hasAttachment() {
+        return b_hasAttachment ? hasAttachment : alternativeHasAttachment;
+    }
+
+    /**
+     * Gets the has-attachment flag
+     *
+     * @return the has-attachment flag
+     */
+    public boolean isHasAttachment() {
         return hasAttachment;
     }
 
     /**
-     * @return <code>true</code> if hasAttachment is set; otherwise <code>false</code>
+     * @return <code>true</code> if has-attachment flag is set; otherwise <code>false</code>
      */
     public boolean containsHasAttachment() {
         return b_hasAttachment;
     }
 
     /**
-     * Removes the hasAttachment
+     * Removes the has-attachment flag
      */
     public void removeHasAttachment() {
         hasAttachment = false;
@@ -1776,13 +1871,47 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Sets the hasAttachment
+     * Sets the has-attachment flag
      *
-     * @param hasAttachment the hasAttachment to set
+     * @param hasAttachment the has-attachment flag to set
      */
     public void setHasAttachment(final boolean hasAttachment) {
         this.hasAttachment = hasAttachment;
         b_hasAttachment = true;
+    }
+
+    /**
+     * Gets the alternative has-attachment flag
+     *
+     * @return the alternative has-attachment flag
+     */
+    public boolean isAlternativeHasAttachment() {
+        return alternativeHasAttachment;
+    }
+
+    /**
+     * @return <code>true</code> if alternative has-attachment flag is set; otherwise <code>false</code>
+     */
+    public boolean containsAlternativeHasAttachment() {
+        return b_alternativeHasAttachment;
+    }
+
+    /**
+     * Removes the alternative has-attachment flag
+     */
+    public void removeAlternativeHasAttachment() {
+        alternativeHasAttachment = false;
+        b_alternativeHasAttachment = false;
+    }
+
+    /**
+     * Sets the alternative has-attachment flag
+     *
+     * @param hasAttachment the alternative has-attachment flag to set
+     */
+    public void setAlternativeHasAttachment(final boolean hasAttachment) {
+        this.alternativeHasAttachment = hasAttachment;
+        b_alternativeHasAttachment = true;
     }
 
     @Override
@@ -2100,6 +2229,51 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Sets the given authentication result for this mail.
+     *
+     * @param result The authentication result to set
+     */
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        this.authenticityResult = authenticationResult;
+        b_authenticityResult = true;
+    }
+
+    /**
+     * Gets the authentication result for this mail.
+     *
+     * @return The authentication result or <code>null</code> if not set
+     */
+    public MailAuthenticityResult getAuthenticityResult() {
+        return this.authenticityResult;
+    }
+
+    /**
+     * Checks if authentication result is available.
+     *
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public boolean hasAuthenticityResult() {
+        return authenticityResult != null;
+    }
+
+    /**
+     * Checks if authentication result has been set for this mail.
+     *
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean containsAuthenticityResult() {
+        return b_authenticityResult;
+    }
+
+    /**
+     * Removes the authentication result from this mail.
+     */
+    public void removeAuthenticityResult() {
+        this.authenticityResult = null;
+        b_authenticityResult = false;
+    }
+
+    /**
      * Gets the implementation-specific unique ID of this mail in its mail folder. The ID returned by this method is used in storages to
      * refer to a mail.
      *
@@ -2128,5 +2302,4 @@ public abstract class MailMessage extends MailPart {
      * @param unreadMessages The number of unread messages
      */
     public abstract void setUnreadMessages(int unreadMessages);
-
 }

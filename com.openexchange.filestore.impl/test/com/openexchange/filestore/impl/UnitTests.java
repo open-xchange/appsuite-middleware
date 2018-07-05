@@ -64,6 +64,7 @@ import org.junit.runners.Suite.SuiteClasses;
     com.openexchange.filestore.impl.ConcurrentSaveDeleteHashingFileStorageTest.class,
     /*com.openexchange.filestore.impl.HashingFileStorageMultithreadingTest.class,*/
     com.openexchange.filestore.impl.HashingFileStorageTest.class,
+    com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaUtilsTest.class
 })
 public class UnitTests {
 

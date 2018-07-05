@@ -1,8 +1,7 @@
 package liquibase.sql;
 
-import liquibase.structure.DatabaseObject;
-
 import java.util.Collection;
+import liquibase.structure.DatabaseObject;
 
 public interface Sql {
     public String toSql();

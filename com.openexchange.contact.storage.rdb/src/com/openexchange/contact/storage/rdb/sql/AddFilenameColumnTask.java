@@ -49,14 +49,9 @@
 
 package com.openexchange.contact.storage.rdb.sql;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -82,24 +77,27 @@ public class AddFilenameColumnTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = RdbServiceLookup.getService(DatabaseService.class);
-        int contextID = params.getContextId();
-        Connection connnection = dbService.getForUpdateTask(contextID);
-        Column filenameColumn = new Column("filename", "VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL");
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            connnection.setAutoCommit(false);
-            Tools.checkAndAddColumns(connnection, Table.CONTACTS.getName(), filenameColumn);
-            Tools.checkAndAddColumns(connnection, Table.DELETED_CONTACTS.getName(), filenameColumn);
-            connnection.commit();
+            con.setAutoCommit(false);
+            rollback = true;
+
+            Column filenameColumn = new Column("filename", "VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL");
+            Tools.checkAndAddColumns(con, Table.CONTACTS.getName(), filenameColumn);
+            Tools.checkAndAddColumns(con, Table.DELETED_CONTACTS.getName(), filenameColumn);
+
+            con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connnection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connnection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connnection);
-            Database.backNoTimeout(contextID, true, connnection);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 

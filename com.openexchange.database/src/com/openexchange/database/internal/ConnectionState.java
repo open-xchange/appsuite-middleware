@@ -60,6 +60,7 @@ public class ConnectionState {
     private boolean usedAsRead;
     private boolean usedForUpdate;
     private boolean updateCommitted;
+    private boolean heartbeatEnabled;
 
     /**
      * Initializes a new {@link ConnectionState}.
@@ -71,6 +72,25 @@ public class ConnectionState {
         this.usedAsRead = usedAsRead;
         usedForUpdate = false;
         updateCommitted = false;
+        heartbeatEnabled = false;
+    }
+
+    /**
+     * Checks if heart-beat has been enabled.
+     *
+     * @return The heart-beat enabled flag
+     */
+    public boolean isHeartbeatEnabled() {
+        return heartbeatEnabled;
+    }
+
+    /**
+     * Sets the heart-beat enabled flag
+     *
+     * @param heartbeatEnabled The heart-beat enabled flag
+     */
+    public void setHeartbeatEnabled(boolean heartbeatEnabled) {
+        this.heartbeatEnabled = heartbeatEnabled;
     }
 
     /**

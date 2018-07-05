@@ -76,6 +76,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.writer.MessageWriter;
@@ -87,6 +88,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -164,14 +166,17 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(accountId, mail.getFolder()));
                     jsonObject.put(DataFields.ID, mail.getMailId());
                 }
-                jsonObject.put(
-                    MailJSONField.HAS_ATTACHMENTS.getKey(),
-                    mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
+                jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail.hasAttachment());
                 jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
                 jsonObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
                 // jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
                 jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
                 jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountId());
+                if (mail.containsTextPreview()) {
+                    jsonObject.put(MailJSONField.TEXT_PREVIEW.getKey(), mail.getTextPreview());
+                }
+                MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
+                jsonObject.put(MailJSONField.AUTHENTICITY.getKey(), null == mailAuthenticityResult ? null : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
                 if (mail.containsOriginalId()) {
                     String originalId = mail.getOriginalId();
                     if (null != originalId) {
@@ -385,7 +390,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                      */
                     int priority = MailMessage.PRIORITY_NORMAL;
                     if (null != entry.getValue()) {
-                        priority = MimeMessageConverter.parseImportance(entry.getValue());
+                        priority = MimeMessageUtility.parseImportance(entry.getValue());
                         jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
                     }
                 } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(headerName)) {
@@ -395,7 +400,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                          */
                         int priority = MailMessage.PRIORITY_NORMAL;
                         if (null != entry.getValue()) {
-                            priority = MimeMessageConverter.parsePriority(entry.getValue());
+                            priority = MimeMessageUtility.parsePriority(entry.getValue());
                         }
                         jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
                     }
@@ -881,9 +886,9 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
             final JSONObject jsonObject = new JSONObject(8);
             jsonObject.put(MailListField.ID.getKey(), id);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
-            jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
+            jsonObject.put(MailJSONField.SIZE.getKey(), null == content ? 0 : content.length());
             jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
-            jsonObject.put(MailJSONField.CONTENT.getKey(), content);
+            jsonObject.put(MailJSONField.CONTENT.getKey(), null == content ? JSONObject.NULL : content);
             jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), filename);
             getBodyArr().put(jsonObject);
         } catch (final JSONException e) {

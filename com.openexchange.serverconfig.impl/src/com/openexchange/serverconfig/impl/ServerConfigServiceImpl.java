@@ -161,7 +161,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
             Object value = configEntry.getValue();
             if (null == value) {
                 LOG.debug("Empty configuration \"{}\" is not applicable", configEntry.getKey());
-            } else {                
+            } else {
                 if (value instanceof Map) {
                     Map<String, Object> possibleConfiguration = (Map<String, Object>) value;
                     if (looksApplicable(possibleConfiguration, hostName)) {
@@ -192,8 +192,8 @@ public class ServerConfigServiceImpl implements ServerConfigService {
             for (String prefix : PREFIXES) {
                 if (propName.startsWith(prefix)) {
                     String value = entry.getValue().get();
-                    //Allow to keep value from global config if specified as "<as-config>"
-                    if (!value.equals("<as-config>")) {
+                    // Allow to keep value from global config if specified as "<as-config>"
+                    if (null != value && !value.equals("<as-config>")) {
                         ccValues.put(propName.substring(prefix.length()), value);
                     }
                 }

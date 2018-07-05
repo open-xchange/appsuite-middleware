@@ -1,0 +1,31 @@
+/chronos?action=needsAction:
+  get:
+    operationId: getEventsNeedingAction
+    tags:
+      - Chronos
+    summary: Gets all events where the session userattendee's participation status equals "NEEDS-ACTION".
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: rangeStart
+        type: string
+        description: |
+          Lower inclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which start on or after this date are returned.
+        required: true
+      - in: query
+        name: rangeEnd
+        type: string
+        description: |
+          Upper exclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which end before this date are returned.
+        required: true
+      - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosOrder"
+      - $ref: "#/parameters/QueryParamChronosSort"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with events. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/EventsResponse"

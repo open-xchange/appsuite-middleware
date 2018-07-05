@@ -51,10 +51,7 @@ package com.openexchange.webdav.action;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.servlet.http.HttpServletResponse;
-
-
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.io.SizeAwareInputStream;
 import com.openexchange.webdav.protocol.WebdavProtocolException;

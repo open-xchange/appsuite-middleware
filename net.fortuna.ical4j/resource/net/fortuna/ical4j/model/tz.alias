@@ -1,26 +1,14 @@
-## Unsupported timezone identifiers..
-Etc/GMT+0=Etc/GMT
-Etc/GMT-0=Etc/GMT
-Etc/GMT0=Etc/GMT
+## Unsupported timezone identifiers..		
 GMT=Etc/GMT
 
-### Temporary hack to support above timezones..
-Etc/GMT=Europe/London
-Etc/Greenwich=Etc/GMT
-Etc/UCT=Europe/London
-Etc/UTC=Europe/London
-Etc/Universal=Etc/UTC
-
-Etc/Zulu=Etc/UTC
-
-## Non-Oslon aliases:
+## Non-Olson aliases:
 #
 US/Pacific-New=America/Los_Angeles
 
 ## Update Olson backward compatibility here:
 #
-Africa/Asmera = Africa/Asmara
-Africa/Timbuktu = Africa/Bamako
+Africa/Asmera = Africa/Nairobi
+Africa/Timbuktu = Africa/Abidjan
 America/Argentina/ComodRivadavia = America/Argentina/Catamarca
 America/Atka = America/Adak
 America/Buenos_Aires = America/Argentina/Buenos_Aires
@@ -34,17 +22,23 @@ America/Jujuy = America/Argentina/Jujuy
 America/Knox_IN = America/Indiana/Knox
 America/Louisville = America/Kentucky/Louisville
 America/Mendoza = America/Argentina/Mendoza
+America/Montreal = America/Toronto
 America/Porto_Acre = America/Rio_Branco
 America/Rosario = America/Argentina/Cordoba
-America/Virgin = America/St_Thomas
+America/Shiprock = America/Denver
+America/Virgin = America/Port_of_Spain
+Antarctica/South_Pole = Pacific/Auckland
 Asia/Ashkhabad = Asia/Ashgabat
-Asia/Chungking = Asia/Chongqing
-Asia/Dacca = Asia/Dhaka
-Asia/Katmandu = Asia/Kathmandu
 Asia/Calcutta = Asia/Kolkata
+Asia/Chongqing = Asia/Shanghai
+Asia/Chungking = Asia/Shanghai
+Asia/Dacca = Asia/Dhaka
+Asia/Harbin = Asia/Shanghai
+Asia/Kashgar = Asia/Urumqi
+Asia/Katmandu = Asia/Kathmandu
 Asia/Macao = Asia/Macau
-Asia/Tel_Aviv = Asia/Jerusalem
 Asia/Saigon = Asia/Ho_Chi_Minh
+Asia/Tel_Aviv = Asia/Jerusalem
 Asia/Thimbu = Asia/Thimphu
 Asia/Ujung_Pandang = Asia/Makassar
 Asia/Ulan_Bator = Asia/Ulaanbaatar
@@ -83,10 +77,10 @@ Europe/Belfast = Europe/London
 Europe/Tiraspol = Europe/Chisinau
 GB = Europe/London
 GB-Eire = Europe/London
-GMT+0 = Etc/GMT
-GMT-0 = Etc/GMT
-GMT0 = Etc/GMT
-Greenwich = Etc/GMT
+GMT+0 = Etc/GMT+0
+GMT-0 = Etc/GMT-0
+GMT0 = Etc/GMT0
+Greenwich = Etc/Greenwich
 Hongkong = Asia/Hong_Kong
 Iceland = Atlantic/Reykjavik
 Iran = Asia/Tehran
@@ -102,10 +96,10 @@ NZ = Pacific/Auckland
 NZ-CHAT = Pacific/Chatham
 Navajo = America/Denver
 PRC = Asia/Shanghai
-Pacific/Samoa = Pacific/Pago_Pago
-Pacific/Yap = Pacific/Chuuk
-Pacific/Truk = Pacific/Chuuk
 Pacific/Ponape = Pacific/Pohnpei
+Pacific/Samoa = Pacific/Pago_Pago
+Pacific/Truk = Pacific/Chuuk
+Pacific/Yap = Pacific/Chuuk
 Poland = Europe/Warsaw
 Portugal = Europe/Lisbon
 ROC = Asia/Taipei
@@ -126,6 +120,6 @@ US/Mountain = America/Denver
 US/Pacific = America/Los_Angeles
 US/Samoa = Pacific/Pago_Pago
 UTC = Etc/UTC
-Universal = Etc/UTC
+Universal = Etc/Universal
 W-SU = Europe/Moscow
-Zulu = Etc/UTC
+Zulu = Etc/Zulu

@@ -101,7 +101,22 @@ public class PreconditionException extends WebdavProtocolException {
      *        resolve the conflict and resubmit the request
      */
     public PreconditionException(String namespace, String name, WebdavPath url, int status) {
-        super(url, status, OXException.general(namespace + ':' + name));
+        this(OXException.general(name), namespace, name, url, status);
+    }
+
+    /**
+     * Initializes a new {@link PreconditionException}.
+     *
+     * @param cause The causing exception
+     * @param namespace The namespace for the included precondition element
+     * @param name The namespace for the included precondition element
+     * @param url The WebDAV resource URL
+     * @param status The HTTP response status; either {@link HttpServletResponse#SC_FORBIDDEN} if the request should not be repeated
+     *            because it will always fail, or {@link HttpServletResponse#SC_CONFLICT} if it is expected that the user might be able to
+     *            resolve the conflict and resubmit the request
+     */
+    public PreconditionException(OXException cause, String namespace, String name, WebdavPath url, int status) {
+        super(url, status, cause);
         this.preconditionElement = new Element(name, namespace);
     }
 

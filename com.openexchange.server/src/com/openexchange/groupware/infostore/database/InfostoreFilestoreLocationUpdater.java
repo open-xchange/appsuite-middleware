@@ -49,12 +49,6 @@
 
 package com.openexchange.groupware.infostore.database;
 
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -71,6 +65,12 @@ import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Reference;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
 
 
 /**

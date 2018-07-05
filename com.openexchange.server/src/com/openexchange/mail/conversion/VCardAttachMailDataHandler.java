@@ -123,6 +123,10 @@ public final class VCardAttachMailDataHandler implements DataHandler {
 
     @Override
     public ConversionResult processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
+        if (null == session) {
+            throw DataExceptionCodes.MISSING_ARGUMENT.create("session");
+        }
+
         final Context ctx;
         final UserSettingMail usm;
         ctx = ContextStorage.getStorageContext(session);

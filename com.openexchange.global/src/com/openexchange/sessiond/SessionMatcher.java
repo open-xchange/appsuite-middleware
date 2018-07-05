@@ -56,13 +56,18 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SessionMatcher}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SessionMatcher {
 
     /**
      * The constant set indicating no flags.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: Might be an expensive operation as both - long-term container and session storage - are considered.
+     * </div>
      */
     public static final Set<Flag> NO_FLAGS = Collections.unmodifiableSet(EnumSet.noneOf(Flag.class));
 
@@ -87,7 +92,7 @@ public interface SessionMatcher {
 
     /**
      * Gets the matcher's behavioral flags.
-     * 
+     *
      * @return The flags or <code>null</code> for no flags at all
      * @see #NO_FLAGS
      * @see #ALL_FLAGS
@@ -96,7 +101,7 @@ public interface SessionMatcher {
 
     /**
      * Checks whether passed session is accepted; meaning it fulfills matcher's condition.
-     * 
+     *
      * @param session The session to check
      * @return <code>true</code> if accepted; otherwise <code>false</code> if not
      */

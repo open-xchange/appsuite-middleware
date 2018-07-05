@@ -64,6 +64,7 @@ import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
+import com.hazelcast.nio.serialization.VersionedPortable;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAppender;
@@ -76,7 +77,7 @@ import com.openexchange.sessionstorage.StoredSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PortableSession extends StoredSession implements CustomPortable {
+public class PortableSession extends StoredSession implements CustomPortable, VersionedPortable {
 
     private static final long serialVersionUID = -2346327568417617677L;
 
@@ -106,6 +107,14 @@ public class PortableSession extends StoredSession implements CustomPortable {
     /** The unique portable class ID of the {@link PortableSession} */
     public static final int CLASS_ID = 1;
 
+    /**
+     * The class version for {@link PortableSession}
+     * <p>
+     * This number should be incremented whenever fields are added;
+     * see <a href="http://docs.hazelcast.org/docs/latest-development/manual/html/Serialization/Implementing_Portable_Serialization/Versioning_for_Portable_Serialization.html">here</a> for reference.
+     */
+    public static final int CLASS_VERSION = 2;
+
     public static final String PARAMETER_LOGIN_NAME = "loginName";
     public static final String PARAMETER_PASSWORD = "password";
     public static final String PARAMETER_CONTEXT_ID = "contextId";
@@ -120,12 +129,14 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_CLIENT = "client";
     public static final String PARAMETER_USER_LOGIN = "userLogin";
     public static final String PARAMETER_ALT_ID = "altId";
+    public static final String PARAMETER_USER_AGENT = "userAgent";
+    public static final String PARAMETER_LOGIN_TIME = "loginTime";
+    public static final String PARAMETER_LOCAL_LAST_ACTIVE = "localLastActive";
     public static final String PARAMETER_REMOTE_PARAMETER_NAMES = "remoteParameterNames";
     public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
-    public static final String PARAMETER_NAME_XOAUTH2_TOKEN = "xoauth2";
 
-    /** The class definition for PortableCacheEvent */
-    public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+    /** The class definition for PortableSession */
+    public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID, CLASS_VERSION)
         .addUTFField(PARAMETER_LOGIN_NAME)
         .addUTFField(PARAMETER_PASSWORD)
         .addIntField(PARAMETER_CONTEXT_ID)
@@ -140,6 +151,9 @@ public class PortableSession extends StoredSession implements CustomPortable {
         .addUTFField(PARAMETER_CLIENT)
         .addUTFField(PARAMETER_USER_LOGIN)
         .addUTFField(PARAMETER_ALT_ID)
+        .addUTFField(PARAMETER_USER_AGENT)
+        .addLongField(PARAMETER_LOGIN_TIME)
+        .addLongField(PARAMETER_LOCAL_LAST_ACTIVE)
         .addUTFField(PARAMETER_REMOTE_PARAMETER_NAMES)
         .addUTFField(PARAMETER_REMOTE_PARAMETER_VALUES)
         .build();
@@ -147,12 +161,14 @@ public class PortableSession extends StoredSession implements CustomPortable {
     // -------------------------------------------------------------------------------------------------
 
     private final Set<String> remoteParameterNames;
+    private Long localLastActive;
 
     /**
      * Initializes a new {@link PortableSession}.
      */
     public PortableSession() {
         super();
+        localLastActive = null;
         remoteParameterNames = Collections.emptySet();
     }
 
@@ -163,6 +179,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
      */
     public PortableSession(final Session session) {
         super(session);
+        localLastActive = null;
         Collection<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId);
         Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
         // Add static remote parameters
@@ -170,6 +187,28 @@ public class PortableSession extends StoredSession implements CustomPortable {
         // Add configured remote parameters
         remoteParameterNames.addAll(configuredRemoteParameterNames);
         this.remoteParameterNames = remoteParameterNames;
+    }
+
+    /**
+     * Sets the local last-active time stamp.
+     *
+     * @param localLastActive The local last-active time stamp to set
+     */
+    public void setLocalLastActive(long localLastActive) {
+        this.localLastActive = Long.valueOf(localLastActive);
+    }
+
+    /**
+     * Gets the local last-active time stamp.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: This method might return <code>null</code>. Beware of auto-unboxing!
+     * </div>
+     *
+     * @return The local last-active time stamp or <code>null</code> if not available
+     */
+    public Long getLocalLastActive() {
+        return localLastActive;
     }
 
     @Override
@@ -180,6 +219,11 @@ public class PortableSession extends StoredSession implements CustomPortable {
     @Override
     public int getClassId() {
         return CLASS_ID;
+    }
+
+    @Override
+    public int getClassVersion() {
+        return CLASS_VERSION;
     }
 
     @Override
@@ -206,6 +250,18 @@ public class PortableSession extends StoredSession implements CustomPortable {
         {
             Object altId = parameters.get(PARAM_ALTERNATIVE_ID);
             writer.writeUTF(PARAMETER_ALT_ID, null == altId ? null : altId.toString());
+        }
+        {
+            Object userAgent = parameters.get(PARAM_USER_AGENT);
+            writer.writeUTF(PARAMETER_USER_AGENT, null == userAgent ? null : userAgent.toString());
+        }
+        {
+            Object loginTime = parameters.get(PARAM_LOGIN_TIME);
+            writer.writeLong(PARAMETER_LOGIN_TIME, null != loginTime ? ((Long) loginTime).longValue() : -1L);
+        }
+        {
+            Long localLastActive = this.localLastActive;
+            writer.writeLong(PARAMETER_LOCAL_LAST_ACTIVE, null != localLastActive ? localLastActive.longValue() : -1L);
         }
         {
             Set<String> remoteParameterNames = this.remoteParameterNames;
@@ -265,6 +321,22 @@ public class PortableSession extends StoredSession implements CustomPortable {
             if (null != altId) {
                 parameters.put(PARAM_ALTERNATIVE_ID, altId);
             }
+        }
+        {
+            String userAgent = reader.readUTF(PARAMETER_USER_AGENT);
+            if (null != userAgent) {
+                parameters.put(PARAM_USER_AGENT, userAgent);
+            }
+        }
+        {
+            long loginTime = reader.readLong(PARAMETER_LOGIN_TIME);
+            if (loginTime > 0) {
+                parameters.put(PARAM_LOGIN_TIME, Long.valueOf(loginTime));
+            }
+        }
+        {
+            long localLastActive = reader.readLong(PARAMETER_LOCAL_LAST_ACTIVE);
+            this.localLastActive = localLastActive > 0 ? Long.valueOf(localLastActive) : null;
         }
         {
             String sNames = reader.readUTF(PARAMETER_REMOTE_PARAMETER_NAMES);
@@ -353,8 +425,8 @@ public class PortableSession extends StoredSession implements CustomPortable {
         } catch (Exception e) {
             // Ignore...
         }
-        *
-        */
+         *
+         */
 
         return value;
     }

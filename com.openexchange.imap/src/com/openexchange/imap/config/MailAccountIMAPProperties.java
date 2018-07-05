@@ -49,12 +49,12 @@
 
 package com.openexchange.imap.config;
 
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.config.MailAccountProperties;
 import com.openexchange.mailaccount.MailAccount;
@@ -144,7 +144,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         String imapAuthEncStr = getAccountProperty("com.openexchange.imap.imapAuthEnc");
         if (null != imapAuthEncStr) {
             imapAuthEncStr = imapAuthEncStr.trim();
-            if (Charset.isSupported(imapAuthEncStr)) {
+            if (CharsetDetector.isValid(imapAuthEncStr)) {
                 return imapAuthEncStr;
             }
             final String fallback = IMAPProperties.getInstance().getImapAuthEnc();
@@ -156,7 +156,7 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
             imapAuthEncStr = lookUpProperty("com.openexchange.imap.primary.imapAuthEnc");
             if (null != imapAuthEncStr) {
                 imapAuthEncStr = imapAuthEncStr.trim();
-                if (Charset.isSupported(imapAuthEncStr)) {
+                if (CharsetDetector.isValid(imapAuthEncStr)) {
                     return imapAuthEncStr;
                 }
                 final String fallback = IMAPProperties.getInstance().getImapAuthEnc();
@@ -516,6 +516,28 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
 
         return lookUpProperty("com.openexchange.imap.ssl.ciphersuites", IMAPProperties.getInstance().getSSLCipherSuites());
+    }
+
+    @Override
+    public boolean isAttachmentMarkerEnabled() {
+        if (false == isUserFlagsEnabled()) {
+            return false;
+        }
+
+        String tmp = getAccountProperty("com.openexchange.imap.attachmentMarker.enabled");
+        if (null != tmp) {
+            return Boolean.parseBoolean(tmp.trim());
+        }
+
+        if (mailAccountId == PRIMARY) { // only for primary account
+            tmp = lookUpProperty("com.openexchange.imap.attachmentMarker.enabled");
+            if (null != tmp) {
+                return Boolean.parseBoolean(tmp.trim());
+            }
+        }
+
+        // Not applicable for non-primary account
+        return false;
     }
 
 }

@@ -54,7 +54,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.search.internal.terms.AndTerm;
 import com.openexchange.search.internal.terms.NotTerm;
 import com.openexchange.search.internal.terms.OrTerm;
@@ -173,12 +173,12 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
         private static final transient Map<String, CompositeOperation> map;
 
         static {
-            final CompositeOperation[] values = CompositeOperation.values();
-            final Map<String, CompositeOperation> m = new HashMap<String, CompositeOperation>(values.length);
-            for (final CompositeOperation singleOperation : values) {
+            CompositeOperation[] values = CompositeOperation.values();
+            Map<String, CompositeOperation> m = new HashMap<String, CompositeOperation>(values.length);
+            for (CompositeOperation singleOperation : values) {
                 m.put(singleOperation.str, singleOperation);
             }
-            map = java.util.Collections.unmodifiableMap(m);
+            map = ImmutableMap.copyOf(m);
         }
 
         /**
@@ -272,9 +272,11 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
      * Adds specified search term.
      *
      * @param searchTerm The search term to add.
+     * @return A self reference
      */
-    public void addSearchTerm(final SearchTerm<?> searchTerm) {
+    public CompositeSearchTerm addSearchTerm(final SearchTerm<?> searchTerm) {
         operands.add(searchTerm);
+        return this;
     }
 
     @Override

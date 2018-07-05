@@ -2,25 +2,23 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Calendar Printing Plug-in
 Bundle-SymbolicName: com.openexchange.calendar.printing
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.calendar.printing.osgi.CalendarPrintingActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.osgi,
  com.openexchange.ajax.printing,
  com.openexchange.ajax.requesthandler,
- com.openexchange.api2,
- com.openexchange.calendar.itip,
  com.openexchange.capabilities,
+ com.openexchange.chronos,
+ com.openexchange.chronos.common,
+ com.openexchange.chronos.service,
  com.openexchange.config.cascade,
  com.openexchange.dispatcher,
  com.openexchange.exception,
- com.openexchange.folder,
  com.openexchange.group,
  com.openexchange.groupware,
- com.openexchange.groupware.calendar,
- com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.i18n,
  com.openexchange.groupware.ldap,
@@ -45,6 +43,7 @@ Import-Package: com.openexchange.ajax,
  javax.servlet.http,
  org.apache.commons.lang;version="2.4.0",
  org.apache.commons.logging,
+ org.dmfs.rfc5545,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker,

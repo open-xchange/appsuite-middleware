@@ -193,10 +193,18 @@ public class StatementBuilder implements IStatementBuilder {
     public PreparedStatement prepareStatement(Connection con, Command element, List<? extends Object> values) throws SQLException {
 	    String command = buildCommand(element);
 	    PreparedStatement statement = con.prepareStatement(command);
-	    for (int i = 0; i < values.size(); i++) {
-	        statement.setObject(i+1, values.get(i));
-	    }
-	    return statement;
+	    try {
+            for (int i = 0; i < values.size(); i++) {
+                statement.setObject(i + 1, values.get(i));
+            }
+            PreparedStatement retval = statement;
+            statement = null; // Avoid premature closing
+            return retval;
+        } finally {
+            if (null != statement) {
+                try { statement.close(); } catch (SQLException e) { /* Ignore */ }
+            }
+        }
 	}
 
 	public int executeStatement(Connection con, Command element, List<? extends Object> values) throws SQLException {

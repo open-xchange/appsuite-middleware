@@ -2,24 +2,19 @@
 
 Name:          open-xchange-client-onboarding
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 35
+%define        ox_release 10
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -85,8 +80,8 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     fi
 
     # SoftwareChange_Request-3414
-    sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' /opt/open-xchange/etc/client-onboarding-scenarios.yml
-
+    PFILE=/opt/open-xchange/etc/client-onboarding-scenarios.yml
+    $(contains '-> Requires "emclient" capability' $PFILE) && sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' $PFILE
 
     # SoftwareChange_Request-3954
     PFILE=/opt/open-xchange/etc/client-onboarding.properties
@@ -107,6 +102,41 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     ox_add_property com.openexchange.client.onboarding.caldav.login.customsource false /opt/open-xchange/etc/client-onboarding-caldav.properties
     ox_add_property com.openexchange.client.onboarding.carddav.login.customsource false /opt/open-xchange/etc/client-onboarding-carddav.properties
     ox_add_property com.openexchange.client.onboarding.eas.login.customsource false /opt/open-xchange/etc/client-onboarding-eas.properties
+
+    # SCR-120
+    scenarios=com.openexchange.client.onboarding.windows.desktop.scenarios
+    enabled_scenarios=com.openexchange.client.onboarding.enabledScenarios
+    pfile=/opt/open-xchange/etc/client-onboarding.properties
+
+    scenarios_line=$(ox_read_property ${scenarios} ${pfile})
+    newline=$(sed -r -e 's/oxupdaterinstall *,? *| *,? *oxupdaterinstall//' <<<${scenarios_line})
+    ox_set_property ${scenarios} "${newline}" ${pfile}
+
+    enabled_scenarios_line=$(ox_read_property ${enabled_scenarios} ${pfile})
+    newline=$(sed -r -e 's/oxupdaterinstall *,? *| *,? *oxupdaterinstall//' <<<${enabled_scenarios_line})
+    ox_set_property ${enabled_scenarios} "${newline}" ${pfile}
+
+    # SCR-187
+    pfile=/opt/open-xchange/etc/client-onboarding-mailapp.properties
+    playstore_key=com.openexchange.client.onboarding.mailapp.store.google.playstore
+    playstore_old_default=https://play.google.com/store/apps/details?id=com.openexchange.mobile.mailapp.enterprise
+    playstore_new_default=https://play.google.com/store/apps/details?id=com.openxchange.mobile.oxmail
+    appstore_key=com.openexchange.client.onboarding.mailapp.store.apple.appstore
+    appstore_old_default=https://itunes.apple.com/us/app/ox-mail/id1008644994
+    appstore_new_default=https://itunes.apple.com/us/app/ox-mail-v2/id1385582725
+
+    playstore_curr_val=$(ox_read_property ${playstore_key} ${pfile})
+    if [ "${playstore_curr_val}" == ${playstore_old_default} ]
+    then
+      ox_set_property ${playstore_key} ${playstore_new_default} ${pfile}
+    fi
+
+    appstore_curr_val=$(ox_read_property ${appstore_key} ${pfile})
+    if [ "${appstore_curr_val}" == "${appstore_old_default}" ]
+    then
+      ox_set_property ${appstore_key} ${appstore_new_default} ${pfile}
+    fi
+
 fi
 
 %clean
@@ -129,70 +159,28 @@ fi
 %doc com.openexchange.client.onboarding/doc/examples
 
 %changelog
-* Tue Jun 26 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-06-21 (4801)
-* Mon Jun 18 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-06-25 (4791)
-* Fri Jun 08 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-06-11 (4771)
-* Tue Jun 05 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-06-06 (4773)
-* Tue May 22 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-05-28 (4758)
-* Mon Apr 30 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-05-07 (4685)
-* Mon Apr 30 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-04-30 (4691)
-* Fri Apr 20 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-04-23 (4670)
-* Thu Apr 12 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-04-12 (4674)
+* Fri Jun 29 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Fourth candidate for 7.10.0 release
+* Wed Jun 27 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Third candidate for 7.10.0 release
+* Mon Jun 25 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Second candidate for 7.10.0 release
+* Mon Jun 11 2018 Thorben Betten <thorben.betten@open-xchange.com>
+First candidate for 7.10.0 release
+* Fri May 18 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Sixth preview of 7.10.0 release
+* Thu Apr 19 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Fifth preview of 7.10.0 release
 * Tue Apr 03 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-04-03 (4642)
-* Fri Mar 23 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-03-26 (4619)
-* Mon Mar 12 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-03-12 (4602)
-* Mon Feb 26 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-02-26 (4583)
-* Mon Jan 29 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-02-05 (4555)
-* Mon Jan 15 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-01-22 (4538)
-* Tue Jan 02 2018 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2018-01-08 (4516)
-* Fri Dec 08 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for Patch 2017-12-11 (4473)
-* Thu Nov 16 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-11-20 (4441)
-* Tue Nov 14 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-11-15 (4448)
-* Wed Oct 25 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-10-30 (4415)
-* Mon Oct 23 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-10-29 (4425)
-* Mon Oct 16 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-10-16 (4394)
-* Wed Sep 27 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-10-02 (4377)
-* Thu Sep 21 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-09-22 (4373)
-* Tue Sep 12 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-09-18 (4354)
-* Fri Sep 01 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-09-04 (4328)
-* Mon Aug 14 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-08-21 (4318)
-* Tue Aug 01 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-08-07 (4304)
-* Mon Jul 17 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-07-24 (4285)
-* Mon Jul 03 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-07-10 (4257)
-* Wed Jun 21 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-06-26 (4233)
-* Tue Jun 06 2017 Thorben Betten <thorben.betten@open-xchange.com>
-Build for patch 2017-06-08 (4180)
+Fourth preview of 7.10.0 release
+* Tue Feb 20 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Third preview of 7.10.0 release
+* Fri Feb 02 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Second preview for 7.10.0 release
+* Fri Dec 01 2017 Thorben Betten <thorben.betten@open-xchange.com>
+First preview for 7.10.0 release
+* Thu Oct 12 2017 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Thorben Betten <thorben.betten@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Thorben Betten <thorben.betten@open-xchange.com>

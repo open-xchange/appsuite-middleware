@@ -51,8 +51,8 @@ package com.openexchange.passwordchange.history.impl.events;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
 import com.openexchange.passwordchange.history.PasswordChangeRecorder;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
 import com.openexchange.session.Session;
 
 /**
@@ -94,8 +94,8 @@ public class PasswordChangeEventListener implements EventHandler {
         }
 
         // Read user/context identifier
-        int contextId = (int) event.getProperty("com.openexchange.passwordchange.contextId");
-        int userId = (int) event.getProperty("com.openexchange.passwordchange.userId");
+        int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
+        int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
         String ipAddress = String.valueOf(event.getProperty(("com.openexchange.passwordchange.ipAddress")));
         Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
 

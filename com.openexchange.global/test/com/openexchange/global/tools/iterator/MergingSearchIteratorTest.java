@@ -49,16 +49,15 @@
 
 package com.openexchange.global.tools.iterator;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Comparator;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.MergingSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link MergingSearchIteratorTest}

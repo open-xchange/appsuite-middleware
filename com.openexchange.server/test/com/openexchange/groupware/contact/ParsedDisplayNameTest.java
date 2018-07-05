@@ -49,11 +49,8 @@
 
 package com.openexchange.groupware.contact;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link ParsedDisplayNameTest}

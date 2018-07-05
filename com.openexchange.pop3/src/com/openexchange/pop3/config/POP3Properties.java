@@ -50,9 +50,9 @@
 package com.openexchange.pop3.config;
 
 import static com.openexchange.pop3.services.POP3ServiceRegistry.getServiceRegistry;
-import java.nio.charset.Charset;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
@@ -186,7 +186,7 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
 
         {
             final String pop3AuthEncStr = configuration.getProperty("com.openexchange.pop3.pop3AuthEnc", "UTF-8").trim();
-            if (Charset.isSupported(pop3AuthEncStr)) {
+            if (CharsetDetector.isValid(pop3AuthEncStr)) {
                 pop3AuthEnc = pop3AuthEncStr;
                 logBuilder.append("\tAuthentication Encoding: ").append(pop3AuthEnc).append('\n');
             } else {
@@ -266,6 +266,11 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
     @Override
     public int getMailFetchLimit() {
         return mailProperties.getMailFetchLimit();
+    }
+
+    @Override
+    public boolean hideInlineImages() {
+        return mailProperties.hideInlineImages();
     }
 
     @Override

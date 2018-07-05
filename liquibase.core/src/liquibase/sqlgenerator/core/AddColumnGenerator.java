@@ -1,29 +1,36 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import liquibase.database.Database;
-import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.structure.core.Schema;
+import liquibase.database.core.CacheDatabase;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.database.core.*;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
-import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.ForeignKeyConstraint;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.AddForeignKeyConstraintStatement;
+import liquibase.statement.core.AddUniqueConstraintStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement> {
 
@@ -57,7 +64,9 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
-        	alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+            if (null != autoIncrementConstraint) {
+                alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+            }
         }
 
         if (!statement.isNullable()) {

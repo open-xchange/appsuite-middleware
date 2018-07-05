@@ -57,12 +57,14 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.pns.Hits;
+import com.openexchange.pns.IteratorBackedHits;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushSubscription;
-import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscriptionProvider;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionResult;
+import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 
 
 /**
@@ -114,16 +116,21 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
     }
 
     @Override
-    public Hits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
-        return getInterestedSubscriptions(null, userId, contextId, topic);
+    public Hits getInterestedSubscriptions(int[] userIds, int contextId, String topic) throws OXException {
+        return getInterestedSubscriptions(null, userIds, contextId, topic);
     }
 
     @Override
-    public Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+    public Hits getInterestedSubscriptions(String client, int[] userIds, int contextId, String topic) throws OXException {
         Map<ClientAndTransport, List<PushMatch>> map = null;
 
         {
-            Hits currentHits = null == client ? persistentRegistry.getInterestedSubscriptions(userId, contextId, topic) : persistentRegistry.getInterestedSubscriptions(client, userId, contextId, topic);
+            Hits currentHits;
+            if (null == client) {
+                currentHits = persistentRegistry.getInterestedSubscriptions(userIds, contextId, topic);
+            } else {
+                currentHits = persistentRegistry.getInterestedSubscriptions(client, userIds, contextId, topic);
+            }
             if (false == currentHits.isEmpty()) {
                 map = ((MapBackedHits) currentHits).getMap();
             }
@@ -135,7 +142,12 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         // Check for more hits from providers
         LinkedList<Hits> moreHits = null;
         for (PushSubscriptionProvider provider : providers) {
-            Hits currentHits = null == client ? provider.getInterestedSubscriptions(userId, contextId, topic) : provider.getInterestedSubscriptions(client, userId, contextId, topic);
+            Hits currentHits;
+            if (null == client) {
+                currentHits = provider.getInterestedSubscriptions(userIds, contextId, topic);
+            } else {
+                currentHits = provider.getInterestedSubscriptions(client, userIds, contextId, topic);
+            }
             if (false == currentHits.isEmpty()) {
                 if (null == moreHits) {
                     moreHits = new LinkedList<>();
@@ -156,7 +168,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
     }
 
     @Override
-    public void registerSubscription(PushSubscription subscription) throws OXException {
+    public PushSubscriptionResult registerSubscription(PushSubscription subscription) throws OXException {
         List<PushSubscriptionListener> listeners = this.listeners.getServiceList();
         for (PushSubscriptionListener listener : listeners) {
             try {
@@ -164,38 +176,41 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
                     LOG.info("Listener {} denied registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()));
                 }
             } catch (Exception e) {
-                LOG.info("Listener {} failed handling registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+                LOG.error("Listener {} failed handling registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
             }
         }
 
-        persistentRegistry.registerSubscription(subscription);
+        PushSubscriptionResult result = persistentRegistry.registerSubscription(subscription);
 
-        for (PushSubscriptionListener listener : listeners) {
-            try {
-                listener.addedSubscription(subscription);
-            } catch (Exception e) {
-                LOG.info("Listener {} failed handling performed registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+        if (PushSubscriptionResult.Status.OK == result.getStatus()) {
+            for (PushSubscriptionListener listener : listeners) {
+                try {
+                    listener.addedSubscription(subscription);
+                } catch (Exception e) {
+                    LOG.error("Listener {} failed handling performed registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+                }
             }
         }
+
+        return result;
     }
 
     @Override
     public boolean unregisterSubscription(PushSubscription subscription) throws OXException {
         PushSubscription removedSubscription = persistentRegistry.removeSubscription(subscription);
-        boolean removed = null != removedSubscription;
-
-        if (removed) {
-            PushSubscription subscriptionToUse = null == removedSubscription ? subscription : removedSubscription;
-            for (PushSubscriptionListener listener : listeners) {
-                try {
-                    listener.removedSubscription(subscriptionToUse);
-                } catch (Exception e) {
-                    LOG.info("Listener {} failed handling performed unregistration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscriptionToUse.getTopics(), I(subscriptionToUse.getUserId()), I(subscriptionToUse.getContextId()), e);
-                }
-            }
+        if (null == removedSubscription) {
+            // Nothing removed
+            return false;
         }
 
-        return removed;
+        for (PushSubscriptionListener listener : listeners) {
+            try {
+                listener.removedSubscription(removedSubscription);
+            } catch (Exception e) {
+                LOG.error("Listener {} failed handling performed unregistration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), removedSubscription.getTopics(), I(removedSubscription.getUserId()), I(removedSubscription.getContextId()), e);
+            }
+        }
+        return true;
     }
 
     @Override

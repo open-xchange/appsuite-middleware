@@ -49,6 +49,11 @@
 package com.openexchange.admin.console.util.database;
 
 import java.rmi.Naming;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUtilInterface;
@@ -60,7 +65,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  * @author d7,cutmasta
  *
  */
-public class RegisterDatabase extends DatabaseAbstraction {
+public final class RegisterDatabase extends DatabaseAbstraction {
 
     public RegisterDatabase(final String[] args2) {
 
@@ -83,7 +88,64 @@ public class RegisterDatabase extends DatabaseAbstraction {
 
             parseAndSetMasterAndID(parser, db);
 
-            displayRegisteredMessage(String.valueOf(oxutil.registerDatabase(db, auth).getId()), parser);
+            parseAndSetCreateAndNumberOfSchemas(parser);
+
+            if (null == createSchemas || !createSchemas.booleanValue()) {
+                // Simple database registration w/o pre-creation of schemas
+                displayRegisteredMessage(oxutil.registerDatabase(db, createSchemas, numberOfSchemas, auth).getId().toString(), parser);
+                sysexit(0);
+                return;
+            }
+
+            // Trigger database registration w/ pre-creation of schemas
+            final AtomicInteger dbId = new AtomicInteger(0);
+            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+            Runnable runnbable = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        dbId.set(oxutil.registerDatabase(db, createSchemas, numberOfSchemas, auth).getId().intValue());
+                    } catch (Exception e) {
+                        errorRef.set(e);
+                    }
+                }
+            };
+            FutureTask<Void> ft = new FutureTask<Void>(runnbable, null);
+            new Thread(ft, "Open-Xchange Database Registerer").start();
+
+            // Await termination
+            String infoMessage;
+            if (null == numberOfSchemas || numberOfSchemas.intValue() <= 0) {
+                infoMessage = "Registering database " + dbname + " and pre-creating schemas. This may take a while";
+            } else {
+                int numSchemas = numberOfSchemas.intValue();
+                if (1 == numSchemas) {
+                    infoMessage = "Registering database " + dbname + " and pre-creating 1 schema. This may take a while";
+                } else {
+                    infoMessage = "Registering database " + dbname + " and pre-creating " + numSchemas + " schemas. This may take a while";
+                }
+            }
+            System.out.print(infoMessage);
+            int c = infoMessage.length();
+            while (false == ft.isDone()) {
+                System.out.print(".");
+                if (c++ >= 76) {
+                    c = 0;
+                    System.out.println();
+                }
+                LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(500L, TimeUnit.MILLISECONDS));
+            }
+            System.out.println();
+
+            // Check for error
+            Exception error = errorRef.get();
+            if (null != error) {
+                throw error;
+            }
+
+            // Success..
+            displayRegisteredMessage(String.valueOf(dbId.get()), parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(null, null, e, parser);
@@ -105,10 +167,11 @@ public class RegisterDatabase extends DatabaseAbstraction {
         setDatabasePasswdOption(parser, true);
         setDatabaseIsMasterOption(parser, true);
         setDatabaseMasterIDOption(parser, false);
-        setDatabaseWeightOption(parser, String.valueOf(OXUtilInterface.DEFAULT_DB_WEIGHT), false);
         setDatabaseMaxUnitsOption(parser, String.valueOf(OXUtilInterface.DEFAULT_MAXUNITS), false);
         setDatabasePoolHardlimitOption(parser, String.valueOf(OXUtilInterface.DEFAULT_POOL_HARD_LIMIT), false);
         setDatabasePoolInitialOption(parser, String.valueOf(OXUtilInterface.DEFAULT_POOL_INITIAL), false);
         setDatabasePoolMaxOption(parser, String.valueOf(OXUtilInterface.DEFAULT_POOL_MAX), false);
+
+        setCreateAndNumberOfSchemasOption(parser);
     }
 }

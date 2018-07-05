@@ -1,14 +1,13 @@
 package liquibase.dbdoc;
 
-import liquibase.change.Change;
-import liquibase.database.Database;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DatabaseHistoryException;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import liquibase.change.Change;
+import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
 
 public class PendingChangesWriter extends HTMLWriter {
 

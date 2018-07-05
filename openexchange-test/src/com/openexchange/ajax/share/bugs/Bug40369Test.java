@@ -60,8 +60,6 @@ import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.ShareLink;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
@@ -92,51 +90,6 @@ public class Bug40369Test extends ShareTest {
 
     private void testCreateFolderLinkConcurrently(EnumAPI api, int module) throws Exception {
         testCreateFolderLinkConcurrently(api, module, getDefaultFolder(module));
-    }
-
-    @Test
-    public void testCreateFileLinkConcurrently() throws Exception {
-        /*
-         * create folder and a file inside
-         */
-        FolderObject folder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getDefaultFolder(FolderObject.INFOSTORE));
-        File file = insertFile(folder.getObjectID());
-        /*
-         * get a link for the file concurrently
-         */
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
-        GetLinkResponse[] responses = getLinkConcurrently(target, NUM_THREADS);
-        /*
-         * check that there's exactly one anonymous guest entity in file afterwards
-         */
-        file = getFile(file.getId());
-        assertNotNull(file.getObjectPermissions());
-        assertEquals(1, file.getObjectPermissions().size());
-        FileStorageObjectPermission matchingPermission = file.getObjectPermissions().get(0);
-        assertNotNull("No matching permission in created file found", matchingPermission);
-        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
-        assertNotNull(guest);
-        /*
-         * check responses, assert the same link for the same target, thereof one marked as "new"
-         */
-        String shareURL = null;
-        boolean oneNew = false;
-        for (GetLinkResponse response : responses) {
-            if (response.hasError()) {
-                fail(response.getErrorMessage());
-            }
-            ShareLink shareLink = response.getShareLink();
-            assertNotNull(shareLink);
-            if (null == shareURL) {
-                shareURL = shareLink.getShareURL();
-            } else {
-                assertEquals(shareURL, shareLink.getShareURL());
-            }
-            if (shareLink.isNew()) {
-                assertFalse(oneNew);
-                oneNew = true;
-            }
-        }
     }
 
     private void testCreateFolderLinkConcurrently(EnumAPI api, int module, int parent) throws Exception {

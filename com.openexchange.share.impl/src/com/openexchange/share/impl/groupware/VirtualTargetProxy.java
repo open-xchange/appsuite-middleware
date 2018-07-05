@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.core.groupware.AbstractTargetProxy;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetProxyType;

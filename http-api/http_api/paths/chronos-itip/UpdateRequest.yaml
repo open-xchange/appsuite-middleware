@@ -1,0 +1,33 @@
+/chronos/itip?action=update:
+  put:
+    operationId: update
+    tags:
+      - Chronos
+    consumes:
+      - application/json
+    summary: Updates an event based on an update sent by the organizer or a reply sent to the organizer.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: dataSource
+        type: string
+        description: The identifier of the data source. Currently only "com.openexchange.mail.ical" is valid.
+        default: com.openexchange.mail.ical
+        required: true
+      - in: query
+        name: descriptionFormat
+        type: string
+        description: The desired output fromat. Currently only "html" is valid.
+        default: html
+        required: true
+      - in: body
+        name: body
+        description: The data source object.
+        required: true
+        schema:
+          $ref: "#/definitions/ConversionDataSource"
+    responses:
+      200:
+        description: An array of Events that were newly created or changed.
+        schema:
+          $ref: "#/definitions/ActionResponse"

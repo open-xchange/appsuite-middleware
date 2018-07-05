@@ -65,6 +65,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  * {@link SSLConfigActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.3
  */
 public class SSLConfigActivator extends HousekeepingActivator {
@@ -102,7 +103,7 @@ public class SSLConfigActivator extends HousekeepingActivator {
                 org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("Enabled SSL debug logging.");
             }
 
-            UserAwareSSLConfigurationServiceRegisterer registerer = new UserAwareSSLConfigurationServiceRegisterer(configViewFactory, context);
+            UserAwareSSLConfigurationServiceRegisterer registerer = new UserAwareSSLConfigurationServiceRegisterer(configViewFactory, configService, context);
             track(registerer.getFilter(), registerer);
             openTrackers();
 
@@ -110,7 +111,7 @@ public class SSLConfigActivator extends HousekeepingActivator {
             {
                 TrustLevel trustLevel = SSLProperties.trustLevel(configService);
                 if (TrustLevel.TRUST_ALL.equals(trustLevel)) {
-                    sslConfigurationService = new TrustAllSSLConfigurationService();
+                    sslConfigurationService = TrustAllSSLConfigurationService.getInstance();
                 } else {
                     RestrictedSSLConfigurationService restrictedSslConfigurationService = new RestrictedSSLConfigurationService(trustLevel, configService);
                     sslConfigurationService = restrictedSslConfigurationService;

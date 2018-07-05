@@ -50,8 +50,10 @@
 package com.openexchange.login;
 
 import java.util.Collection;
+import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.Header;
+import com.openexchange.authentication.ResponseEnhancement;
 import com.openexchange.authentication.ResultCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;

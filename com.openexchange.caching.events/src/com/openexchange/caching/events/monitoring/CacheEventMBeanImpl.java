@@ -157,7 +157,7 @@ public class CacheEventMBeanImpl extends StandardMBean implements CacheEventMBea
         }
     }
 
-    private final class Measurement {
+    private static final class Measurement {
 
         private final long timestamp;
         private final long measuredOfferedEvents;

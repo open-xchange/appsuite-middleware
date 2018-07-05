@@ -54,28 +54,28 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.action.CalDAVGETAction;
+import com.openexchange.caldav.action.CalDAVHEADAction;
+import com.openexchange.caldav.action.CalDAVIfScheduleTagMatchAction;
 import com.openexchange.caldav.action.CalDAVPOSTAction;
+import com.openexchange.caldav.action.CalDAVPUTAction;
 import com.openexchange.caldav.action.MKCALENDARAction;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
 import com.openexchange.dav.actions.ACLAction;
 import com.openexchange.dav.actions.ExtendedMKCOLAction;
+import com.openexchange.dav.actions.PROPPATCHAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
-import com.openexchange.webdav.action.OXWebdavPutAction;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.action.WebdavCopyAction;
 import com.openexchange.webdav.action.WebdavDeleteAction;
 import com.openexchange.webdav.action.WebdavExistsAction;
-import com.openexchange.webdav.action.WebdavGetAction;
-import com.openexchange.webdav.action.WebdavHeadAction;
 import com.openexchange.webdav.action.WebdavIfAction;
 import com.openexchange.webdav.action.WebdavIfMatchAction;
 import com.openexchange.webdav.action.WebdavLockAction;
 import com.openexchange.webdav.action.WebdavMoveAction;
 import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
-import com.openexchange.webdav.action.WebdavProppatchAction;
 import com.openexchange.webdav.action.WebdavReportAction;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
@@ -88,7 +88,7 @@ import com.openexchange.webdav.protocol.WebdavMethod;
  */
 public class CaldavPerformer extends DAVPerformer {
 
-    private final CaldavProtocol PROTOCOL = new CaldavProtocol();
+    private static final CaldavProtocol PROTOCOL = new CaldavProtocol();
 
     private final GroupwareCaldavFactory factory;
     private final Map<WebdavMethod, WebdavAction> actions;
@@ -112,24 +112,22 @@ public class CaldavPerformer extends DAVPerformer {
     private EnumMap<WebdavMethod, WebdavAction> initActions() {
         EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
         actions.put(WebdavMethod.UNLOCK, prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.PROPPATCH, prepare(new WebdavProppatchAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.PROPPATCH, prepare(new PROPPATCHAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.PROPFIND, prepare(new WebdavPropfindAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.REPORT, prepare(new WebdavReportAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, false, null, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.MOVE, prepare(new WebdavMoveAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, true)));
+        actions.put(WebdavMethod.MOVE, prepare(new WebdavMoveAction(factory), true, true, new WebdavExistsAction(), new CalDAVIfScheduleTagMatchAction(PROTOCOL), new WebdavIfAction(0, true, true)));
         actions.put(WebdavMethod.MKCOL, prepare(new ExtendedMKCOLAction(PROTOCOL), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.LOCK, prepare(new WebdavLockAction(), true, true, new WebdavIfAction(0, true, false)));
-        actions.put(WebdavMethod.COPY, prepare(new WebdavCopyAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, true)));
-        actions.put(WebdavMethod.DELETE, prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfMatchAction(), new WebdavIfAction(0, true, false)));
-        actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, false, null, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
-        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, null, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
+        actions.put(WebdavMethod.COPY, prepare(new WebdavCopyAction(factory), true, true, new WebdavExistsAction(), new CalDAVIfScheduleTagMatchAction(PROTOCOL), new WebdavIfAction(0, false, true)));
+        actions.put(WebdavMethod.DELETE, prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfMatchAction(), new CalDAVIfScheduleTagMatchAction(PROTOCOL), new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.GET, prepare(new CalDAVGETAction(factory), true, true, false, null, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
+        actions.put(WebdavMethod.HEAD, prepare(new CalDAVHEADAction(factory), true, true, false, null, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
         actions.put(WebdavMethod.POST, prepare(new CalDAVPOSTAction(factory), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.MKCALENDAR, prepare(new MKCALENDARAction(PROTOCOL), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL), true, true, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
-        OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
-        OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction(this);
-        actions.put(WebdavMethod.PUT, prepare(oxWebdavPut, true, true, new WebdavIfMatchAction(), oxWebdavMaxUploadSize));
+        actions.put(WebdavMethod.PUT, prepare(new CalDAVPUTAction(factory), true, true, new WebdavIfMatchAction(), new CalDAVIfScheduleTagMatchAction(PROTOCOL)));
         makeLockNullTolerant(actions);
         return actions;
     }

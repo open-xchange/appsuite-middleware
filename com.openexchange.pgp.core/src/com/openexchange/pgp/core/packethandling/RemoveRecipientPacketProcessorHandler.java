@@ -57,7 +57,7 @@ import org.bouncycastle.bcpg.PublicKeyEncSessionPacket;
  * {@link RemoveRecipientPacketProcessorHandler} removes recipients from a PGP Message without the need for re-encrypting the whole message
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public class RemoveRecipientPacketProcessorHandler implements PacketProcessorHandler {
 
@@ -65,7 +65,7 @@ public class RemoveRecipientPacketProcessorHandler implements PacketProcessorHan
 
     /**
      * Initializes a new {@link RemoveRecipientPacketProcessorHandler}.
-     * 
+     *
      * @param keyIds The IDs of the key's which should be removed from being able to decrypt the PGP Message
      */
     public RemoveRecipientPacketProcessorHandler(long[] keyIds) {
@@ -74,7 +74,7 @@ public class RemoveRecipientPacketProcessorHandler implements PacketProcessorHan
 
     /**
      * Internal method to check if a session packet matches one of the IDs which get removed
-     * 
+     *
      * @param session The session packet
      * @return True, if the session packet should be removed, false otherwise
      */
@@ -92,7 +92,7 @@ public class RemoveRecipientPacketProcessorHandler implements PacketProcessorHan
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.guard.pgpcore.commons.PGPPacketProcessorHandler#handlePacket(com.openexchange.guard.pgpcore.commons.GuardBCPacket)
      */
     @Override
@@ -100,10 +100,18 @@ public class RemoveRecipientPacketProcessorHandler implements PacketProcessorHan
         Packet rawPacket = packet.getBcPacket();
         if (rawPacket instanceof PublicKeyEncSessionPacket) {
             if (shouldRemoveSession((PublicKeyEncSessionPacket) rawPacket)) {
-                //packet will not be written back 
+                //packet will not be written back
                 return null;
             }
         }
         return new PGPPacket[] { packet };
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.pgp.core.packethandling.PacketProcessorHandler#modifyPacketData(com.openexchange.pgp.core.packethandling.PGPPacket, byte[])
+     */
+    @Override
+    public byte[] handlePacketData(PGPPacket packet, byte[] packetData) {
+        return packetData;
     }
 }

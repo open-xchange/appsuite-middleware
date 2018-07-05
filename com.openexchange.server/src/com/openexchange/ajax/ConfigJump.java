@@ -110,8 +110,8 @@ public class ConfigJump extends SessionServlet {
                     response.setException(SessionExceptionCodes.SESSION_EXPIRED.create(sessionId));
                 }
             } else {
-                final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-                final String protocol = Tools.getProtocol(req);
+                Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+                String protocol = Tools.getProtocol(req);
                 URL url = com.openexchange.configjump.client.ConfigJump.getLink(new Replacements() {
 
                     @Override

@@ -1,194 +1,68 @@
-open-xchange-push-imapidle (7.8.4-35) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-10) stable; urgency=medium
 
-  * Build for patch 2018-06-21 (4801)
+  * Fourth candidate for 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 26 Jun 2018 14:57:15 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 29 Jun 2018 12:38:28 +0200
 
-open-xchange-push-imapidle (7.8.4-34) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-9) stable; urgency=medium
 
-  * Build for patch 2018-06-25 (4791)
+  * Third candidate for 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 18 Jun 2018 12:23:35 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 27 Jun 2018 14:50:06 +0200
 
-open-xchange-push-imapidle (7.8.4-33) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-8) stable; urgency=medium
 
-  * Build for patch 2018-06-11 (4771)
+  * Second candidate for 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 08 Jun 2018 11:09:14 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 25 Jun 2018 14:33:29 +0200
 
-open-xchange-push-imapidle (7.8.4-32) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-7) stable; urgency=medium
 
-  * Build for patch 2018-06-06 (4773)
+  * First candidate for 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 05 Jun 2018 11:32:37 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 11 Jun 2018 07:01:02 +0200
 
-open-xchange-push-imapidle (7.8.4-31) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-6) stable; urgency=medium
 
-  * Build for patch 2018-05-28 (4758)
+  * Sixth preview of 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 22 May 2018 10:49:18 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 18 May 2018 12:54:40 +0200
 
-open-xchange-push-imapidle (7.8.4-30) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-5) stable; urgency=medium
 
-  * Build for patch 2018-05-07 (4685)
+  * Fifth preview of 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 30 Apr 2018 16:35:40 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 19 Apr 2018 15:17:43 +0200
 
-open-xchange-push-imapidle (7.8.4-29) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-4) stable; urgency=medium
 
-  * Build for patch 2018-04-30 (4691)
+  * Fourth preview of 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 30 Apr 2018 10:59:27 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 03 Apr 2018 12:57:58 +0200
 
-open-xchange-push-imapidle (7.8.4-28) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-3) stable; urgency=medium
 
-  * Build for patch 2018-04-23 (4670)
+  * Third preview of 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 20 Apr 2018 10:50:59 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 20 Feb 2018 16:17:30 +0100
 
-open-xchange-push-imapidle (7.8.4-27) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-2) stable; urgency=medium
 
-  * Build for patch 2018-04-12 (4674)
+  * Second preview for 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 12 Apr 2018 22:41:45 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 02 Feb 2018 15:13:01 +0100
 
-open-xchange-push-imapidle (7.8.4-26) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-1) stable; urgency=medium
 
-  * Build for patch 2018-04-03 (4642)
+  * First preview for 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 03 Apr 2018 10:43:31 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 01 Dec 2017 18:02:07 +0100
 
-open-xchange-push-imapidle (7.8.4-25) stable; urgency=medium
+open-xchange-push-imapidle (7.10.0-0) unstable; urgency=medium
 
-  * Build for patch 2018-03-26 (4619)
+  * prepare for 7.10.0 release
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 23 Mar 2018 10:51:17 +0100
-
-open-xchange-push-imapidle (7.8.4-24) stable; urgency=medium
-
-  * Build for patch 2018-03-12 (4602)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 12 Mar 2018 11:21:35 +0100
-
-open-xchange-push-imapidle (7.8.4-23) stable; urgency=medium
-
-  * Build for patch 2018-02-26 (4583)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 26 Feb 2018 15:46:59 +0100
-
-open-xchange-push-imapidle (7.8.4-22) stable; urgency=medium
-
-  * Build for patch 2018-02-05 (4555)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 29 Jan 2018 17:36:36 +0100
-
-open-xchange-push-imapidle (7.8.4-21) stable; urgency=medium
-
-  * Build for patch 2018-01-22 (4538)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 15 Jan 2018 11:03:20 +0100
-
-open-xchange-push-imapidle (7.8.4-20) stable; urgency=medium
-
-  * Build for patch 2018-01-08 (4516)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Jan 2018 16:58:55 +0100
-
-open-xchange-push-imapidle (7.8.4-19) stable; urgency=medium
-
-  * Build for Patch 2017-12-11 (4473)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 08 Dec 2017 16:22:01 +0100
-
-open-xchange-push-imapidle (7.8.4-18) stable; urgency=medium
-
-  * Build for patch 2017-11-20 (4441)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 16 Nov 2017 10:16:54 +0100
-
-open-xchange-push-imapidle (7.8.4-17) stable; urgency=medium
-
-  * Build for patch 2017-11-15 (4448)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 14 Nov 2017 12:17:16 +0100
-
-open-xchange-push-imapidle (7.8.4-16) stable; urgency=medium
-
-  * Build for patch 2017-10-30 (4415)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 25 Oct 2017 15:16:28 +0200
-
-open-xchange-push-imapidle (7.8.4-15) stable; urgency=medium
-
-  * Build for patch 2017-10-29 (4425)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 23 Oct 2017 16:21:15 +0200
-
-open-xchange-push-imapidle (7.8.4-14) stable; urgency=medium
-
-  * Build for patch 2017-10-16 (4394)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 16 Oct 2017 09:19:05 +0200
-
-open-xchange-push-imapidle (7.8.4-13) stable; urgency=medium
-
-  * Build for patch 2017-10-02 (4377)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 27 Sep 2017 14:51:47 +0200
-
-open-xchange-push-imapidle (7.8.4-12) stable; urgency=medium
-
-  * Build for patch 2017-09-22 (4373)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 21 Sep 2017 11:19:39 +0200
-
-open-xchange-push-imapidle (7.8.4-11) stable; urgency=medium
-
-  * Build for patch 2017-09-18 (4354)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 12 Sep 2017 11:53:50 +0200
-
-open-xchange-push-imapidle (7.8.4-10) stable; urgency=medium
-
-  * Build for patch 2017-09-04 (4328)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 01 Sep 2017 11:10:51 +0200
-
-open-xchange-push-imapidle (7.8.4-9) stable; urgency=medium
-
-  * Build for patch 2017-08-21 (4318)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 14 Aug 2017 16:27:15 +0200
-
-open-xchange-push-imapidle (7.8.4-8) stable; urgency=medium
-
-  * Build for patch 2017-08-07 (4304)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 01 Aug 2017 15:02:53 +0200
-
-open-xchange-push-imapidle (7.8.4-7) stable; urgency=medium
-
-  * Build for patch 2017-07-24 (4285)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 17 Jul 2017 11:06:48 +0200
-
-open-xchange-push-imapidle (7.8.4-6) stable; urgency=medium
-
-  * Build for patch 2017-07-10 (4257)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 03 Jul 2017 15:59:05 +0200
-
-open-xchange-push-imapidle (7.8.4-5) stable; urgency=medium
-
-  * Build for patch 2017-06-26 (4233)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 21 Jun 2017 10:36:12 +0200
-
-open-xchange-push-imapidle (7.8.4-4) stable; urgency=medium
-
-  * Build for patch 2017-06-08 (4180)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 06 Jun 2017 16:27:51 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 12 Oct 2017 14:39:00 +0200
 
 open-xchange-push-imapidle (7.8.4-3) stable; urgency=medium
 

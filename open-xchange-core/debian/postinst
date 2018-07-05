@@ -17,1421 +17,498 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-DIVERTFILES="outlook2003.de_DE.properties outlook2003.en_EN.properties outlook2003.fr_FR.properties outlook2003.nl_NL.properties"
-
-for FILE in ${DIVERTFILES}; do
-    if dpkg-divert --list | grep $FILE; then
-        dpkg-divert --package open-xchange --rename --remove /opt/open-xchange/importCSV/${FILE}
-    fi
-done
-
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/filestorage.properties \
-      /opt/open-xchange/etc/filestorage.properties 6.20.99 open-xchange-file-storage-config \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-file-storage-config)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/folderjson.properties \
-      /opt/open-xchange/etc/folderjson.properties 6.20.99 open-xchange-folder-json \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-folder-json)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/common/i18n.properties \
-      /opt/open-xchange/etc/i18n.properties 6.20.99 open-xchange-i18n \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-i18n)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/mail-push.properties \
-      /opt/open-xchange/etc/mail-push.properties 6.20.99 open-xchange-push \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-push)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/messaging.properties \
-      /opt/open-xchange/etc/messaging.properties 6.20.99 open-xchange-messaging \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-messaging)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/publications.properties \
-      /opt/open-xchange/etc/publications.properties  6.20.99 open-xchange-publish-basic \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-publish-basic)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/push.properties \
-      /opt/open-xchange/etc/push-udp.properties 6.20.99 open-xchange-push-udp \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-push-udp)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/secret.properties \
-      /opt/open-xchange/etc/secret.properties 6.20.99 open-xchange-secret \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-secret)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/secrets \
-      /opt/open-xchange/etc/secrets 6.20.99 open-xchange-secret \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-secret)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/threadpool.properties \
-      /opt/open-xchange/etc/threadpool.properties  6.20.99 open-xchange-threadpool \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-threadpool)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/meta/ui.yml \
-      /opt/open-xchange/etc/meta/ui.yml 6.20.99 open-xchange-settings-extensions \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-settings-extensions)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/settings/themes.properties \
-      /opt/open-xchange/etc/settings/themes.properties 6.20.99 open-xchange-settings-extensions \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-settings-extensions)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/settings/ui.properties \
-      /opt/open-xchange/etc/settings/ui.properties 6.20.99 open-xchange-settings-extensions \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-settings-extensions)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/management.properties \
-      /opt/open-xchange/etc/management.properties 6.20.99 open-xchange-management \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-management)
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/templating.properties \
-      /opt/open-xchange/etc/templating.properties 6.20.99 open-xchange-templating \
-      -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-templating)
-
-COMMONCONFFILES="excludedupdatetasks.properties foldercache.properties transport.properties"
-
-for FILE in ${COMMONCONFFILES}; do
-    dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/common/${FILE} \
-        /opt/open-xchange/etc/${FILE} 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
-done
-
-GWCONFFILES="attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessiond.properties smtp.properties system.properties user.properties whitelist.properties folder-reserved-names"
-
-for FILE in ${GWCONFFILES}; do
-    dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/${FILE} \
-        /opt/open-xchange/etc/${FILE} 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
-done
-
-# SoftwareChange_Request-1297
-if [ -e /opt/open-xchange/etc/sessioncache.ccf ]; then
-    dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/sessioncache.ccf -- "$@"
-fi
-
-# SoftwareChange_Request-1094
-dpkg-maintscript-helper rm_conffile \
-    /opt/open-xchange/etc/groupware/mailjsoncache.properties 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
-
-# SoftwareChange_Request-1091
-dpkg-maintscript-helper rm_conffile \
-    /opt/open-xchange/etc/groupware/TidyConfiguration.properties 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
-dpkg-maintscript-helper rm_conffile \
-    /opt/open-xchange/etc/groupware/TidyMessages.properties 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
-
 . /opt/open-xchange/lib/oxfunctions.sh
 
-# Fix for bug 25999
-ox_remove_property com.openexchange.servlet.sessionCleanerInterval /opt/open-xchange/etc/server.properties
-
-pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
-    ox_remove_property COMMONPROPERTIESDIR $pfile
-    # without original values, we're lost...
-    if [ -e ${pfile}.dpkg-new ]; then
-       CHECKPROPS="LIBPATH PROPERTIESDIR LOGGINGPROPERTIES OSGIPATH"
-       grep JAVA_OXCMD_OPTS $pfile > /dev/null || CHECKPROPS="$CHECKPROPS JAVA_OXCMD_OPTS" && true
-       for prop in $CHECKPROPS; do
-           oval=$(ox_read_property $prop ${pfile}.dpkg-new)
-           if [ -n "$oval" ]; then
-              ox_set_property $prop "$oval" $pfile
-           fi
-       done
-    fi
-fi
-
-# SoftwareChange_Request-1559
-pfile=/opt/open-xchange/etc/mail.properties
-VALUE=$(ox_read_property com.openexchange.mail.mailAccessCacheIdleSeconds $pfile)
-if [ "$VALUE" == "7" ]; then
-    ox_set_property com.openexchange.mail.mailAccessCacheIdleSeconds 4 $pfile
-fi
-
-# SoftwareChange_Request-1557
-pfile=/opt/open-xchange/etc/mail.properties
-if ! ox_exists_property com.openexchange.mail.maxForwardCount $pfile; then
-    ox_set_property com.openexchange.mail.maxForwardCount 8 $pfile
-fi
-
-# SoftwareChange_Request-1518
-pfile=/opt/open-xchange/etc/mail.properties
-if ! ox_exists_property com.openexchange.mail.hideDetailsForDefaultAccount $pfile; then
-    ox_set_property com.openexchange.mail.hideDetailsForDefaultAccount false $pfile
-fi
-
-# SoftwareChange_Request-1497
-pfile=/opt/open-xchange/etc/hazelcast.properties
-if ! ox_exists_property com.openexchange.hazelcast.logging.enabled $pfile; then
-    ox_set_property com.openexchange.hazelcast.logging.enabled true $pfile
-fi
-
-# SoftwareChange_Request-1492
-pfile=/opt/open-xchange/etc/server.properties
-for key in com.openexchange.json.poolEnabled com.openexchange.json.poolSize com.openexchange.json.poolCharArrayLength; do
-    if ox_exists_property $key $pfile; then
-       ox_remove_property $key $pfile
-    fi
-done
-
-# SoftwareChange_Request-1483
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.servlet.maxRateTimeWindow $pfile; then
-    ox_set_property com.openexchange.servlet.maxRateTimeWindow 300000 $pfile
-fi
-if ! ox_exists_property com.openexchange.servlet.maxRate $pfile; then
-    ox_set_property com.openexchange.servlet.maxRate 1500 $pfile
-fi
-if ! ox_exists_property com.openexchange.servlet.maxRateLenientClients $pfile; then
-    ox_set_property com.openexchange.servlet.maxRateLenientClients '"Open-Xchange .NET HTTP Client*", "Open-Xchange USM HTTP Client*", "Jakarta Commons-HttpClient*"' $pfile
-fi
-if ! ox_exists_property com.openexchange.servlet.maxRateKeyPartProviders $pfile; then
-    ox_set_property com.openexchange.servlet.maxRateKeyPartProviders '' $pfile
-fi
-
-# SoftwareChange_Request-1459
-pfile=/opt/open-xchange/etc/mail.properties
-if ! ox_exists_property com.openexchange.mail.supportMsisdnAddresses $pfile; then
-    ox_set_property com.openexchange.mail.supportMsisdnAddresses false $pfile
-fi
-
-# SoftwareChange_Request-1458
-pfile=/opt/open-xchange/etc/mail.properties
-if ! ox_exists_property com.openexchange.mail.maxMailSize $pfile; then
-    ox_set_property com.openexchange.mail.maxMailSize -1 $pfile
-fi
-
-# SoftwareChange_Request-1455
-pfile=/opt/open-xchange/etc/sessiond.properties
-if ! ox_exists_property com.openexchange.sessiond.asyncPutToSessionStorage $pfile; then
-    ox_set_property com.openexchange.sessiond.asyncPutToSessionStorage false $pfile
-fi
-
-# SoftwareChange_Request-1448
-ox_set_property com.openexchange.push.udp.pushEnabled false /opt/open-xchange/etc/push-udp.properties
-ox_set_property com.openexchange.push.udp.registerDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
-ox_set_property com.openexchange.push.udp.eventDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
-ox_set_property com.openexchange.push.udp.multicastEnabled false /opt/open-xchange/etc/push-udp.properties
-
-# SoftwareChange_Request-1446
-pfile=/opt/open-xchange/etc/server.properties
-VALUE=$(ox_read_property MAX_UPLOAD_SIZE $pfile)
-if [ "$VALUE" == "0" ]; then
-    ox_set_property MAX_UPLOAD_SIZE 104857600 $pfile
-fi
-VALUE=$(ox_read_property com.openexchange.defaultMaxConcurrentAJAXRequests $pfile)
-if [ "$VALUE" == "250" ]; then
-    ox_set_property com.openexchange.defaultMaxConcurrentAJAXRequests 100 $pfile
-fi
-VALUE=$(ox_read_property com.openexchange.servlet.maxActiveSessions $pfile)
-if [ "$VALUE" == "-1" ]; then
-    ox_set_property com.openexchange.servlet.maxActiveSessions 250000 $pfile
-fi
-pfile=/opt/open-xchange/etc/sessiond.properties
-VALUE=$(ox_read_property com.openexchange.sessiond.maxSession $pfile)
-if [ "$VALUE" == "5000" ]; then
-    ox_set_property com.openexchange.sessiond.maxSession 50000 $pfile
-fi
-VALUE=$(ox_read_property com.openexchange.sessiond.randomTokenTimeout $pfile)
-if [ "$VALUE" == "1M" ]; then
-    ox_set_property com.openexchange.sessiond.randomTokenTimeout 30000 $pfile
-fi
-
-# SoftwareChange_Request-1445
-pfile=/opt/open-xchange/etc/hazelcast.properties
-if ! ox_exists_property com.openexchange.hazelcast.maxOperationTimeout $pfile; then
-    ox_set_property com.openexchange.hazelcast.maxOperationTimeout 300000 $pfile
-fi
-
-# SoftwareChange_Request-1426
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.log.maxMessageLength $pfile; then
-    ox_set_property com.openexchange.log.maxMessageLength -1 $pfile
-fi
-
-# SoftwareChange_Request-1365
-pfile=/opt/open-xchange/etc/configdb.properties
-if ! ox_exists_property com.openexchange.database.replicationMonitor $pfile; then
-    ox_set_property com.openexchange.database.replicationMonitor true $pfile
-fi
-
-# SoftwareChange_Request-1389
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/foldercache.properties
-if ! ox_exists_property com.openexchange.folderstorage.database.preferDisplayName $pfile; then
-    ox_set_property com.openexchange.folderstorage.database.preferDisplayName false $pfile
-fi
-
-# SoftwareChange_Request-1330
-pfile=/opt/open-xchange/etc/mime.types
-if ! grep docm $pfile > /dev/null; then
-   ptmp=${pfile}.$$
-   cp $pfile $ptmp
-   cat<<EOF >> $ptmp
-application/vnd.ms-word.document.macroEnabled.12 docm
-application/vnd.ms-word.template dotm
-application/vnd.openxmlformats-officedocument.wordprocessingml.template dotx
-application/vnd.ms-powerpoint.presentation.macroEnabled.12 potm
-application/vnd.openxmlformats-officedocument.presentationml.template potx
-application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
-application/vnd.ms-excel.sheet.macroEnabled.12 xlsm
-application/vnd.openxmlformats-officedocument.spreadsheetml.sheet xlsx
-EOF
-   if [ -s $ptmp ]; then
-      cp $ptmp $pfile
-   fi
-   rm -f $ptmp
-fi
-
-# SoftwareChange_Request-1324
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/hazelcast.properties
-if ! ox_exists_property com.openexchange.hazelcast.enableIPv6Support $pfile; then
-    ox_set_property com.openexchange.hazelcast.enableIPv6Support false $pfile
-fi
-
-# SoftwareChange_Request-1308
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/hazelcast.properties
-if ! ox_exists_property com.openexchange.hazelcast.networkConfig.port $pfile; then
-    ox_set_property com.openexchange.hazelcast.networkConfig.port 5701 $pfile
-fi
-if ! ox_exists_property com.openexchange.hazelcast.networkConfig.portAutoIncrement $pfile; then
-    ox_set_property com.openexchange.hazelcast.networkConfig.portAutoIncrement true $pfile
-fi
-if ! ox_exists_property com.openexchange.hazelcast.networkConfig.outboundPortDefinitions $pfile; then
-    ox_set_property com.openexchange.hazelcast.networkConfig.outboundPortDefinitions '' $pfile
-fi
-
-# SoftwareChange_Request-1307
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.server.considerXForwards $pfile; then
-    ox_set_property com.openexchange.server.considerXForwards false $pfile
-fi
-if ! ox_exists_property com.openexchange.server.forHeader $pfile; then
-    ox_set_property com.openexchange.server.forHeader X-Forwarded-For $pfile
-fi
-if ! ox_exists_property com.openexchange.server.knownProxies $pfile; then
-    ox_set_property com.openexchange.server.knownProxies '' $pfile
-fi
-
-# SoftwareChange_Request-1296
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/cache.properties
-if ! ox_exists_property com.openexchange.caching.jcs.eventInvalidation $pfile; then
-    ox_set_property com.openexchange.caching.jcs.eventInvalidation true $pfile
-fi
-
-# SoftwareChange_Request-1302
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/user.properties
-if ! ox_exists_property com.openexchange.user.maxClientCount $pfile; then
-    ox_set_property com.openexchange.user.maxClientCount -1 $pfile
-fi
-
-# SoftwareChange_Request-1252
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/whitelist.properties
-if ! grep -E '^html.tag.div.*bgcolor' $pfile > /dev/null; then
-    oval=$(ox_read_property html.tag.div ${pfile})
-    oval=${oval//\"/}
-    ox_set_property html.tag.div \""${oval}bgcolor,"\" $pfile
-fi
-
-# SoftwareChange_Request-1247
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/hazelcast.properties
-if ! ox_exists_property com.openexchange.hazelcast.enabled $pfile; then
-    ox_set_property com.openexchange.hazelcast.enabled true $pfile
-fi
-
-# SoftwareChange_Request-1223
-# SoftwareChange_Request-1237
-# SoftwareChange_Request-1243
-# SoftwareChange_Request-1245
-# SoftwareChange_Request-1392
-# SoftwareChange_Request-1468
-# SoftwareChange_Request-1498
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-if grep -q '^JAVA_XTRAOPTS=".*"$' "${pfile}"
-then
-    jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
-    jopts=${jopts//\"/}
-    nopts=$jopts
-    # -----------------------------------------------------------------------
-    permval=$(echo $nopts | sed 's;^.*MaxPermSize=\([0-9]*\).*$;\1;')
-    if [ $permval -lt 256 ]; then
-        nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
-    fi
-    # -----------------------------------------------------------------------
-    for opt in "-server" "-Djava.awt.headless=true" \
-        "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
-        "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
-        "-XX:-OmitStackTraceInFastThrow"; do
-        if ! echo $nopts | grep -- $opt > /dev/null; then
-            if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
-                opt="-XX:CMSInitiatingOccupancyFraction=75"
-            elif [ "$opt" = "-XX:NewRatio=" ]; then
-                opt="-XX:NewRatio=3"
-            fi
-            if [ "$opt" == "-XX:+UseConcMarkSweepGC" -o "$opt" == "-XX:+UseParNewGC" -o "$opt" == "-XX:CMSInitiatingOccupancyFraction=75" -o "$opt" == "-XX:+UseCMSInitiatingOccupancyOnly" ]; then
-                if ! echo $nopts | grep -- "-XX:+UseParallelGC" > /dev/null && ! echo $nopts | grep -- "-XX:+UseParallelOldGC" > /dev/null; then
-                    nopts="$nopts $opt"
-                fi
-            else
-                nopts="$nopts $opt"
-            fi
-        fi
-    done
-    # -----------------------------------------------------------------------
-    for opt in "-XX:+UnlockExperimentalVMOptions" "-XX:+UseG1GC" "-XX:+CMSClassUnloadingEnabled"; do
-        if echo $nopts | grep -- $opt > /dev/null; then
-            nopts=$(echo $nopts | sed "s;$opt;;")
-        fi
-    done
-    if [ "$jopts" != "$nopts" ]; then
-        ox_set_property JAVA_XTRAOPTS \""$nopts"\" $pfile
-    fi
-fi
-
-# SoftwareChange_Request-1141
-pfile=/opt/open-xchange/etc/mime.types
-if ! grep font-woff $pfile > /dev/null; then
-   ptmp=${pfile}.$$
-   cp $pfile $ptmp
-   cat<<EOF >> $ptmp
-application/font-woff woff
-text/cache-manifest appcache
-text/javascript js
-EOF
-   if [ -s $ptmp ]; then
-      cp $ptmp $pfile
-   fi
-   rm -f $ptmp
-fi
-if grep -E "application\/javascript.*js" $pfile > /dev/null; then
-   ptmp=${pfile}.$$
-   grep -vE "^application\/.*javascript" $pfile > $ptmp
-   cat<<EOF >> $ptmp
-application/javascript
-application/x-javascript
-EOF
-   if [ -s $ptmp ]; then
-      cp $ptmp $pfile
-   fi
-   rm -f $ptmp
-fi
-
-# SoftwareChange_Request-1212
-pfile=/opt/open-xchange/etc/foldercache.properties
-if ! ox_exists_property com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore $pfile; then
-    ox_set_property com.openexchange.folderstorage.outlook.showPersonalBelowInfoStore true $pfile
-fi
-
-# SoftwareChange_Request-1196
-pfile=/opt/open-xchange/etc/import.properties
-if ! ox_exists_property com.openexchange.import.ical.limit $pfile; then
-    ox_set_property com.openexchange.import.ical.limit 10000 $pfile
-fi
-
-# SoftwareChange_Request-1220
-# obsoletes SoftwareChange_Request-1068
-# -----------------------------------------------------------------------
-pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-if grep -q '^JAVA_XTRAOPTS=".*"$' "${pfile}"
-then
-    jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
-    jopts=${jopts//\"/}
-    if echo $jopts | grep "osgi.compatibility.bootdelegation" > /dev/null; then
-        jopts=$(echo $jopts | sed 's;-Dosgi.compatibility.bootdelegation=true;-Dosgi.compatibility.bootdelegation=false;')
-        ox_set_property JAVA_XTRAOPTS \""$jopts"\" $pfile
-    fi
-fi
-
-# SoftwareChange_Request-1135
-pfile=/opt/open-xchange/etc/contact.properties
-for key in scale_images scale_image_width scale_image_height; do
-    if ox_exists_property $key $pfile; then
-       ox_remove_property $key $pfile
-    fi
-done
-
-# SoftwareChange_Request-1124
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.ajax.response.includeStackTraceOnError $pfile; then
-    ox_set_property com.openexchange.ajax.response.includeStackTraceOnError false $pfile
-fi
-
-# SoftwareChange_Request-1117
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.webdav.disabled $pfile; then
-    ox_set_property com.openexchange.webdav.disabled false $pfile
-fi
-
-# SoftwareChange_Request-1105
-pfile=/opt/open-xchange/etc/cache.ccf
-ptmp=${pfile}.$$
-if grep -E "^jcs.region.OXIMAPConCache" $pfile > /dev/null; then
-    grep -vE "^jcs.region.OXIMAPConCache" $pfile > $ptmp
-    if [ -s $ptmp ]; then
-        cp $ptmp $pfile
-    fi
-    rm -f $ptmp
-fi
-
-# SoftwareChange_Request-1091
-pfile=/opt/open-xchange/etc/contact.properties
-if ox_exists_property contactldap.configuration.path $pfile; then
-    ox_remove_property contactldap.configuration.path $pfile
-fi
-
-# SoftwareChange_Request-1101
-pfile=/opt/open-xchange/etc/configdb.properties
-if ox_exists_property writeOnly $pfile; then
-    ox_remove_property writeOnly $pfile
-fi
-# SoftwareChange_Request-1091
-if ox_exists_property useSeparateWrite $pfile; then
-    ox_remove_property useSeparateWrite $pfile
-fi
-
-# SoftwareChange_Request-1091
-pfile=/opt/open-xchange/etc/system.properties
-for prop in Calendar Infostore Attachment Notification ServletMappingDir CONFIGPATH \
-    AJPPROPERTIES IMPORTEREXPORTER LDAPPROPERTIES EVENTPROPERTIES PUSHPROPERTIES \
-    UPDATETASKSCFG HTMLEntities MailCacheConfig TidyMessages TidyConfiguration Whitelist; do
-    if ox_exists_property $prop $pfile; then
-       ox_remove_property $prop $pfile
-    fi
-done
-
-if grep -E '^com.openexchange.caching.configfile.*/' $pfile >/dev/null; then
-    ox_set_property com.openexchange.caching.configfile cache.ccf $pfile
-fi
-if ox_exists_property MimeTypeFile $pfile; then
-    ox_set_property MimeTypeFileName mime.types $pfile
-    ox_remove_property MimeTypeFile $pfile
-fi
-pfile=/opt/open-xchange/etc/import.properties
-if ! ox_exists_property com.openexchange.import.mapper.path $pfile; then
-    ox_set_property com.openexchange.import.mapper.path /opt/open-xchange/importCSV $pfile
-fi
-pfile=/opt/open-xchange/etc/mail.properties
-if ! ox_exists_property com.openexchange.mail.JavaMailProperties $pfile || grep -E '^com.openexchange.mail.JavaMailProperties.*/' $pfile >/dev/null; then
-    ox_set_property com.openexchange.mail.JavaMailProperties javamail.properties $pfile
-fi
-pfile=/opt/open-xchange/etc/sessiond.properties
-if ox_exists_property com.openexchange.sessiond.sessionCacheConfig $pfile; then
-    ox_remove_property com.openexchange.sessiond.sessionCacheConfig $pfile
-fi
-
-# SoftwareChange_Request-1024
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.IPMaskV4 $pfile; then
-    ox_set_property com.openexchange.IPMaskV4 "" $pfile
-fi
-if ! ox_exists_property com.openexchange.IPMaskV6 $pfile; then
-    ox_set_property com.openexchange.IPMaskV6 "" $pfile
-fi
-
-# SoftwareChange_Request-1027
-pfile=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.dispatcher.prefix $pfile; then
-    ox_set_property com.openexchange.dispatcher.prefix "/ajax/" $pfile
-fi
-
-# SoftwareChange_Request-1167
-pfile=/opt/open-xchange/etc/contact.properties
-if ! ox_exists_property "com.openexchange.contact.scaleVCardImages" $pfile; then
-   ox_set_property "com.openexchange.contact.scaleVCardImages" "200x200" $pfile
-fi
-
-# SoftwareChange_Request-1148
-pfile=/opt/open-xchange/etc/whitelist.properties
-if ! ox_exists_property "html.style.word-break" $pfile; then
-   ox_set_property "html.style.word-break" '"break-all"' $pfile
-fi
-if ! ox_exists_property "html.style.word-wrap" $pfile; then
-   ox_set_property "html.style.word-wrap" '"break-word"' $pfile
-fi
-
-# SoftwareChange_Request-1125
-pfile=/opt/open-xchange/etc/contactcollector.properties
-if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $pfile; then
-   ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
-fi
-
-# SoftwareChange_Request-1540
-pfile=/opt/open-xchange/etc/permissions.properties
-if ! grep "com.openexchange.capability.boring" >/dev/null $pfile; then
-    echo -e "\n# Mark this installation as boring, i.e. disable an easter egg\n" >> $pfile
-    echo "# com.openexchange.capability.boring=true" >> $pfile
-fi
-
-# SoftwareChange_Request-1556
-pfile=/opt/open-xchange/etc/excludedupdatetasks.properties
-if ! grep "com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >/dev/null $pfile; then
-    echo -e "\n# v7.4.0 update tasks start here\n" >> $pfile
-    echo "# Changes the columns actual_costs and target_costs for tasks from float to NUMERIC(12, 2)" >> $pfile
-    echo "!com.openexchange.groupware.tasks.database.TasksModifyCostColumnTask" >> $pfile
-fi
-
-# SoftwareChange_Request-1558
-pfile=/opt/open-xchange/etc/import.properties
-if ! grep "com.openexchange.import.contacts.limit" >/dev/null $pfile; then
-    echo -e "\n# sets the limit on how many contacts can be imported at once\n" >> $pfile
-    echo "# -1 means unlimited, defaults to -1" >> $pfile
-    echo "# com.openexchange.import.contacts.limit=-1" >> $pfile
-fi
-
-# SoftwareChange_Request-1564
-VALUE=""
-[ -e /opt/open-xchange/etc/cluster.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
-[ -e /opt/open-xchange/etc/cluster.properties.dpkg-remove ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
-[ -e /opt/open-xchange/etc/cluster.properties.dpkg-backup ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
-[ -e /opt/open-xchange/etc/cluster.properties.dpkg-bak ] && VALUE=$(ox_read_property com.openexchange.cluster.name /opt/open-xchange/etc/cluster.properties)
-TOVALUE=$(ox_read_property com.openexchange.hazelcast.group.name /opt/open-xchange/etc/hazelcast.properties)
-if [ -n "$VALUE" -a -z "$TOVALUE" ]; then
-    ox_set_property com.openexchange.hazelcast.group.name "$VALUE" /opt/open-xchange/etc/hazelcast.properties
-fi
-dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/cluster.properties 7.4.0-5 -- "$@"
-[ -e /opt/open-xchange/etc/static-cluster-discovery.properties ] && VALUE=$(ox_read_property com.openexchange.cluster.discovery.static.nodes /opt/open-xchange/etc/static-cluster-discovery.properties)
-TOVALUE=$(ox_read_property com.openexchange.hazelcast.network.join.static.nodes /opt/open-xchange/etc/hazelcast.properties)
-if [ -n "$VALUE" -a -z "$TOVALUE" ]; then
-    ox_set_property com.openexchange.hazelcast.network.join.static.nodes "$VALUE" /opt/open-xchange/etc/hazelcast.properties
-fi
-pfile=/opt/open-xchange/etc/hazelcast.properties
-OLDNAMES=( com.openexchange.hazelcast.interfaces com.openexchange.hazelcast.mergeFirstRunDelay com.openexchange.hazelcast.mergeRunDelay com.openexchange.hazelcast.networkConfig.port com.openexchange.hazelcast.networkConfig.portAutoIncrement com.openexchange.hazelcast.networkConfig.outboundPortDefinitions com.openexchange.hazelcast.enableIPv6Support )
-NEWNAMES=( com.openexchange.hazelcast.network.interfaces com.openexchange.hazelcast.merge.firstRunDelay com.openexchange.hazelcast.merge.runDelay com.openexchange.hazelcast.network.port com.openexchange.hazelcast.network.portAutoIncrement com.openexchange.hazelcast.network.outboundPortDefinitions com.openexchange.hazelcast.network.enableIPv6Support )
-DEFAULTS=( 127.0.0.1 120s 120s 5701 true "" false )
-for I in $(seq 1 ${#OLDNAMES[@]}); do
-    OLDNAME=${OLDNAMES[$I-1]}
-    NEWNAME=${NEWNAMES[$I-1]}
-    VALUE=$(ox_read_property $OLDNAME $pfile)
-    if ox_exists_property $OLDNAME $pfile; then
-        ox_remove_property $OLDNAME $pfile
-    fi
-    if [ -z "$VALUE" ]; then
-        VALUE="${DEFAULTS[$I-1]}"
-    fi
-    if ! ox_exists_property $NEWNAME $pfile; then
-        ox_set_property $NEWNAME "$VALUE" $pfile
-    fi
-done
-NEWPROPS=( com.openexchange.hazelcast.jmxDetailed com.openexchange.hazelcast.network.join.multicast.group com.openexchange.hazelcast.network.join.multicast.port com.openexchange.hazelcast.group.password com.openexchange.hazelcast.memcache.enabled com.openexchange.hazelcast.rest.enabled com.openexchange.hazelcast.socket.bindAny )
-DEFAULTS=( false 224.2.2.3 54327 'wtV6$VQk8#+3ds!a' false false false )
-for I in $(seq 1 ${#NEWPROPS[@]}); do
-    NEWPROP=${NEWPROPS[$I-1]}
-    DEFAULT=${DEFAULTS[$I-1]}
-    if ! ox_exists_property $NEWPROP $pfile; then
-        ox_set_property $NEWPROP "$DEFAULT" $pfile
-    fi
-done
-
-# SoftwareChange_Request-1601
-ox_set_property com.openexchange.server.considerXForwards "true" /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-1607
-pfile=/opt/open-xchange/etc/preview.properties
-if ! ox_exists_property com.openexchange.preview.cache.type $pfile; then
-    ox_set_property com.openexchange.preview.cache.type "FS" $pfile
-fi
-if ! ox_exists_property com.openexchange.preview.cache.quotaAware $pfile; then
-    ox_set_property com.openexchange.preview.cache.quotaAware false $pfile
-fi
-
-# SoftwareChange_Request-1610
-pfile=/opt/open-xchange/etc/templating.properties
-if ! ox_exists_property com.openexchange.templating.trusted $pfile; then
-    ox_set_property com.openexchange.templating.trusted server $pfile
-fi
-
-# SoftwareChange_Request-1635
-PFILE=/opt/open-xchange/etc/permissions.properties
-if ! ox_exists_property com.openexchange.capability.filestore $PFILE; then
-    ox_set_property com.openexchange.capability.filestore true $PFILE
-fi
-
-# SoftwareChange_Request-1643
-PFILE=/opt/open-xchange/etc/login.properties
-if ! ox_exists_property com.openexchange.ajax.login.randomToken $PFILE; then
-    ox_set_property com.openexchange.ajax.login.randomToken false $PFILE
-fi
-
-# SoftwareChange_Request-1645
-PFILE=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.cookie.hash.salt $PFILE; then
-    ox_set_property com.openexchange.cookie.hash.salt replaceMe1234567890 $PFILE
-fi
-
-# SoftwareChange_Request-1646
-PFILE=/opt/open-xchange/etc/configdb.properties
-if ! ox_exists_property com.openexchange.database.checkWriteCons $PFILE; then
-    ox_set_property com.openexchange.database.checkWriteCons false $PFILE
-fi
-
-# SoftwareChange_Request-1648
-PFILE=/opt/open-xchange/etc/server.properties
-if ! ox_exists_property com.openexchange.servlet.maxRateLenientModules $PFILE; then
-    ox_set_property com.openexchange.servlet.maxRateLenientModules "rt, system" $PFILE
-fi
-
-# SoftwareChange_Request-1667
-ox_add_property com.openexchange.html.css.parse.timeout 4 /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-1684
-ox_add_property com.openexchange.templating.usertemplating false /opt/open-xchange/etc/templating.properties
-
-# SoftwareChange_Request-1702
-ox_add_property com.openexchange.mail.transport.removeMimeVersionInSubParts false /opt/open-xchange/etc/transport.properties
-
-# SoftwareChange_Request-1707
-ox_add_property com.openexchange.servlet.contentSecurityPolicy '""' /opt/open-xchange/etc/server.properties
-
-PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-if ! grep "com.openexchange.groupware.update.tasks.FolderExtendNameTask" >/dev/null $PFILE; then
-    cat >> $PFILE <<EOF
-
-# v7.4.2 update tasks start here
-
-# Extends the size of the 'fname' column in the 'oxfolder_tree' table, as well as the 'name' column in the 'virtualTree' table.
-!com.openexchange.groupware.update.tasks.FolderExtendNameTask
-EOF
-fi
-
-# SoftwareChange_Request-1747
-ox_add_property com.openexchange.log.suppressedCategories USER_INPUT /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-1760
-ox_add_property com.openexchange.mail.account.blacklist "" /opt/open-xchange/etc/mail.properties
-
-# SoftwareChange_Request-1772
-set -e # Bug 40756
-if [ ! -e /opt/open-xchange/etc/log4j.xml ]; then
-    # Configuration has been modified after installation. Try to migrate.
-    if [ -e /opt/open-xchange/etc/file-logging.properties.dpkg-backup ]; then
-        TMPFILE=$(mktemp)
-
-        /opt/open-xchange/sbin/extractJULModifications -i /opt/open-xchange/etc/file-logging.properties.dpkg-backup | /opt/open-xchange/sbin/convertJUL2Logback -o $TMPFILE
-        /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/logger -r $TMPFILE -d @name
-        [ -e /opt/open-xchange/etc/logback.xml.new ] && cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
-        /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/root -r $TMPFILE
-        if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
-            cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
-            rm -f /opt/open-xchange/etc/logback.xml.new
-        fi
-
-        rm -f $TMPFILE
-    fi
-
-    if [ -e /opt/open-xchange/etc/file-logging.properties.dpkg-backup ] || [ -e /opt/open-xchange/etc/file-logging.properties.dpkg-remove ]; then
-        cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/appender[@name=\'ASYNC\']/appender-ref -r -
-<configuration>
-    <appender name="ASYNC">
-        <appender-ref ref="FILE_COMPAT"/>
-    </appender>
-</configuration>
-EOF
-        if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
-            cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
-            rm -f /opt/open-xchange/etc/logback.xml.new
+postFix() {
+    # e.g 7.8.4-26 -> 784
+    local version=${1%-*}
+    version=${version//[-.]/}
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # Fix for bug 25999
+    ox_remove_property com.openexchange.servlet.sessionCleanerInterval /opt/open-xchange/etc/server.properties
+
+    # SoftwareChange_Request-2456
+    ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
+
+    # SoftwareChange_Request-2464
+    ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open-xchange/etc/hazelcast.properties
+
+    # SoftwareChange_Request-2470
+    ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
+
+    # SoftwareChange_Request-2541
+    if dpkg --compare-versions "7.8.0-0" gt-nl "$1"; then
+        VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)
+        if [ "5000" = "$VALUE" ]; then
+            ox_set_property com.openexchange.hazelcast.maxOperationTimeout 30000 /opt/open-xchange/etc/hazelcast.properties
         fi
     fi
-fi
-set +e # Bug 40756
-dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/file-logging.properties 7.4.2~ -- "$@"
 
-# SoftwareChange_Request-1773
-ox_add_property com.openexchange.hazelcast.network.symmetricEncryption false /opt/open-xchange/etc/hazelcast.properties
-ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.algorithm PBEWithMD5AndDES /opt/open-xchange/etc/hazelcast.properties
-ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.salt 2mw67LqNDEb3 /opt/open-xchange/etc/hazelcast.properties
-ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.password D2xhL8mPkjsF /opt/open-xchange/etc/hazelcast.properties
-ox_add_property com.openexchange.hazelcast.network.symmetricEncryption.iterationCount 19 /opt/open-xchange/etc/hazelcast.properties
-
-# SoftwareChange_Request-1786
-ox_add_property com.openexchange.threadpool.keepAliveThreshold 1000 /opt/open-xchange/etc/threadpool.properties
-
-# SoftwareChange_Request-1823
-ox_add_property com.openexchange.preview.cache.enabled true /opt/open-xchange/etc/preview.properties
-
-# SoftwareChange_Request-1828
-ox_add_property com.openexchange.capability.alone false /opt/open-xchange/etc/permissions.properties
-
-# SoftwareChange_Request-1832
-ox_set_property readProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
-ox_set_property writeProperty.5 autoReconnect=false /opt/open-xchange/etc/configdb.properties
-
-# Change jolokia.properties comment by reloading properties
-pfile=/opt/open-xchange/etc/jolokia.properties
-VALUE=$(ox_read_property com.openexchange.jolokia.user $pfile)
-if [ -n "$VALUE" ]; then
-    ox_set_property com.openexchange.jolokia.user "$VALUE" $pfile
-else
-    ox_set_property com.openexchange.jolokia.user "" $pfile
-fi
-VALUE=$(ox_read_property com.openexchange.jolokia.password $pfile)
-if [ -n "$VALUE" ]; then
-    ox_set_property com.openexchange.jolokia.password "$VALUE" $pfile
-else
-    ox_set_property com.openexchange.jolokia.password "" $pfile
-fi
-
-# SoftwareChange_Request-1865
-PFILE=/opt/open-xchange/etc/whitelist.properties
-if [ -n "$(ox_read_property html.tag.base $PFILE)" ]; then
-    ox_comment html.tag.base= add /opt/open-xchange/etc/whitelist.properties
-fi
-if [ -n "$(ox_read_property html.tag.meta $PFILE)" ]; then
-    ox_comment html.tag.meta= add $PFILE
-fi
-
-# SoftwareChange_Request-1886
-PFILE=/opt/open-xchange/etc/server.properties
-if ox_exists_property com.openexchange.server.fullPrimaryKeySupport $PFILE; then
-    ox_remove_property com.openexchange.server.fullPrimaryKeySupport $PFILE
-fi
-
-# SoftwareChange_Request-1956
-ox_add_property com.openexchange.ajax.login.formatstring.login "" /opt/open-xchange/etc/login.properties
-ox_add_property com.openexchange.ajax.login.formatstring.logout "" /opt/open-xchange/etc/login.properties
-
-# SoftwareChange_Request-1959
-VALUE=$(ox_read_property com.openexchange.servlet.maxInactiveInterval /opt/open-xchange/etc/server.properties)
-ox_set_property com.openexchange.servlet.maxInactiveInterval "$VALUE" /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-1968
-VALUE=$(ox_read_property com.openexchange.sessiond.sessionDefaultLifeTime /opt/open-xchange/etc/sessiond.properties)
-ox_set_property com.openexchange.sessiond.sessionDefaultLifeTime "$VALUE" /opt/open-xchange/etc/sessiond.properties
-
-# SoftwareChange_Request-1980
-VALUE=$(ox_read_property com.openexchange.jolokia.restrict.to.localhost /opt/open-xchange/etc/jolokia.properties)
-ox_set_property com.openexchange.jolokia.restrict.to.localhost "$VALUE" /opt/open-xchange/etc/jolokia.properties
-
-# SoftwareChange_Request-1985
-ox_remove_property com.openexchange.log.propertyNames /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-1987
-set -e # Bug 40756
-cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o /opt/open-xchange/etc/logback.xml.new -x /configuration/define -d @name -r -
-<configuration>
-    <define name="syslogPatternLayoutActivator" class="com.openexchange.logback.extensions.SyslogPatternLayoutActivator"/>
-</configuration>
-EOF
-if [ -e /opt/open-xchange/etc/logback.xml.new ]; then
-    cat /opt/open-xchange/etc/logback.xml.new > /opt/open-xchange/etc/logback.xml
-    rm -f /opt/open-xchange/etc/logback.xml.new
-fi
-set +e # Bug 40756
-
-# SoftwareChange_Request-1990
-ox_add_property com.openexchange.quota.attachment -1 /opt/open-xchange/etc/quota.properties
-
-# SoftwareChagne_Request-2002
-ox_add_property com.openexchange.infostore.zipDocumentsCompressionLevel -1 /opt/open-xchange/etc/infostore.properties
-
-# SoftwareChange_Request-2027
-pfile=/opt/open-xchange/etc/whitelist.properties
-if ! grep -E '^html.tag.table.*height' $pfile > /dev/null; then
-    oval=$(ox_read_property html.tag.table ${pfile})
-    oval=${oval//\"/}
-    ox_set_property html.tag.table \""${oval}height,"\" $pfile
-fi
-if ! grep -E '^html.style.combimap.background.*radial-gradient' $pfile > /dev/null; then
-    oval=$(ox_read_property html.style.combimap.background ${pfile})
-    oval=${oval//\"/}
-    ox_set_property html.style.combimap.background \""${oval}radial-gradient,"\" $pfile
-fi
-
-# SoftwareChange_Request-2036
-VALUE=$(ox_read_property com.openexchange.hazelcast.network.symmetricEncryption /opt/open-xchange/etc/hazelcast.properties)
-ox_set_property com.openexchange.hazelcast.network.symmetricEncryption "$VALUE" /opt/open-xchange/etc/hazelcast.properties
-
-# SoftwareChange_Request-2037
-PFILE=/opt/open-xchange/etc/sessiond.properties
-if ! grep "com.openexchange.sessiond.remoteParameterNames" >/dev/null $PFILE; then
-    echo -e "\n# Specifies the colon-separated names of such parameters that are supposed to be taken over from session to stored session representation." >> $PFILE
-    echo "# The parameter names MUST NOT contain the ':' colon character that serves as a delimiter." >> $PFILE
-    echo "# E.g.    com.openexchange.sessiond.remoteParameterNames=remoteParameter1:remoteParameter2:...:remoteParameterN" >> $PFILE
-    echo "#" >> $PFILE
-    echo "# By default this setting is empty." >> $PFILE
-    echo "#com.openexchange.sessiond.remoteParameterNames=" >> $PFILE
-fi
-
-# SoftwareChange_Request-2055
-ox_add_property com.openexchange.rest.services.basic-auth.login "" /opt/open-xchange/etc/server.properties
-ox_add_property com.openexchange.rest.services.basic-auth.password "" /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-2079
-ox_add_property com.openexchange.passwordchange.allowedPattern "" /opt/open-xchange/etc/passwordchange.properties
-ox_add_property com.openexchange.passwordchange.allowedPatternHint "" /opt/open-xchange/etc/passwordchange.properties
-
-# SoftwareChange_Request-2081
-PFILE=/opt/open-xchange/etc/configdb.properties
-KEY=minIdle
-if ox_exists_property $KEY $PFILE; then
-    ox_remove_property $KEY $PFILE
-fi
-
-# SoftwareChange_Request-2094
-PFILE=/opt/open-xchange/etc/mail.properties
-KEY=com.openexchange.mail.imageHost
-ox_add_property $KEY "" $PFILE
-
-# SoftwareChange_Request-2108
-pfile=/opt/open-xchange/etc/mime.types
-if ! grep vnd.openxmlformats-officedocument.spreadsheetml.template $pfile > /dev/null; then
-   ptmp=${pfile}.$$
-   cp $pfile $ptmp
-   cat<<EOF >> $ptmp
-application/vnd.openxmlformats-officedocument.spreadsheetml.template xltx
-application/vnd.openxmlformats-officedocument.presentationml.slideshow ppsx
-application/vnd.openxmlformats-officedocument.presentationml.presentation pptx
-application/vnd.openxmlformats-officedocument.presentationml.slide sldx
-application/vnd.ms-excel.addin.macroEnabled.12 xlam
-application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
-EOF
-   if [ -s $ptmp ]; then
-      cp $ptmp $pfile
-   fi
-   rm -f $ptmp
-fi
-
-# SoftwareChange_Request-2110
-ox_add_property html.tag.strike '""' /opt/open-xchange/etc/whitelist.properties
-
-# SoftwareChange_Request-2171
-PFILE=/opt/open-xchange/etc/server.properties
-VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.password $PFILE)
-if [ "secret" = "$VALUE" ]; then
-    ox_set_property com.openexchange.rest.services.basic-auth.password "" $PFILE
-fi
-
-# SoftwareChange_Request-2177
-ox_add_property com.openexchange.preview.thumbnail.blockingWorker false /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-2190
-pfile=/opt/open-xchange/etc/cache.ccf
-if ! grep "jcs.region.UserPermissionBits=LTCP" > /dev/null $pfile; then
-    echo -e "\n# Pre-defined cache for user configuration" >> $pfile
-    echo "jcs.region.UserPermissionBits=LTCP" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxObjects=20000" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.UseMemoryShrinker=true" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxMemoryIdleTimeSeconds=360" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.ShrinkerIntervalSeconds=60" >> $pfile
-    echo "jcs.region.UserPermissionBits.cacheattributes.MaxSpoolPerRun=500" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes=org.apache.jcs.engine.ElementAttributes" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.IsEternal=false" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.MaxLifeSeconds=-1" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.IdleTime=360" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.IsSpool=false" >> $pfile
-    echo "jcs.region.UserPermissionBits.elementattributes.IsRemote=false" >> $pfile
-    echo -e "jcs.region.UserPermissionBits.elementattributes.IsLateral=false\n" >> $pfile
-fi
-
-# SoftwareChange_Request-2197
-PFILE=/opt/open-xchange/etc/cache.ccf
-NAMES=( jcs.region.OXFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.OXFolderCache.elementattributes.MaxLifeSeconds jcs.region.OXFolderCache.elementattributes.IdleTime jcs.region.OXFolderQueryCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.OXFolderQueryCache.elementattributes.MaxLifeSeconds jcs.region.OXFolderQueryCache.elementattributes.IdleTime jcs.region.UserSettingMail.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.UserSettingMail.elementattributes.MaxLifeSeconds jcs.region.UserSettingMail.elementattributes.IdleTime jcs.region.MailAccount.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.MailAccount.elementattributes.MaxLifeSeconds jcs.region.MailAccount.elementattributes.IdleTime jcs.region.GlobalFolderCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.GlobalFolderCache.elementattributes.MaxLifeSeconds jcs.region.GlobalFolderCache.elementattributes.IdleTime )
-OLDDEFAULTS=( 180 300 180 150 300 150 180 300 180 180 300 180 180 300 180 )
-NEWDEFAULTS=( 360 -1 360 360 -1 360 360 -1 360 360 -1 360 360 -1 360 )
-for I in $(seq 1 ${#NAMES[@]}); do
-    VALUE=$(ox_read_property ${NAMES[$I-1]} $PFILE)
-    if [ "${VALUE}" = "${OLDDEFAULTS[$I-1]}" ]; then
-        ox_set_property ${NAMES[$I-1]} "${NEWDEFAULTS[$I-1]}" $PFILE
+    # SoftwareChange_Request-2546
+    if dpkg --compare-versions "7.6.2-0" gt-nl "$1"; then
+        VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+        if [ "\"USM-EAS*\", \"USM-JSON*\"" = "$VALUE" ]; then
+            ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" /opt/open-xchange/etc/mail-push.properties
+        fi
     fi
-done
+    ox_add_property com.openexchange.push.allowPermanentPush true /opt/open-xchange/etc/mail-push.properties
+    ox_add_property com.openexchange.push.credstorage.enabled false /opt/open-xchange/etc/mail-push.properties
+    ox_add_property com.openexchange.push.credstorage.passcrypt "" /opt/open-xchange/etc/mail-push.properties
+    ox_add_property com.openexchange.push.credstorage.rdb false /opt/open-xchange/etc/mail-push.properties
 
-# SoftwareChange_Request-2199
-ox_add_property com.openexchange.servlet.maxRateLenientRemoteAddresses "" /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-2204
-ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-2206
-NAMES=( com.openexchange.quota.calendar com.openexchange.quota.task com.openexchange.quota.contact com.openexchange.quota.infostore com.openexchange.quota.attachment )
-for I in "${NAMES[@]}"; do
-    VALUE=$(ox_read_property $I /opt/open-xchange/etc/quota.properties)
-    ox_set_property $I "$VALUE" /opt/open-xchange/etc/quota.properties
-done
-
-# SoftwareChange_Request-2224
-ox_add_property com.openexchange.webdav.recursiveMarshallingLimit 250000 /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-2235
-ox_add_property com.openexchange.ajax.login.maxRateTimeWindow 300000 /opt/open-xchange/etc/login.properties
-ox_add_property com.openexchange.ajax.login.maxRate 50 /opt/open-xchange/etc/login.properties
-
-# SoftwareChange_Request-2243
-if dpkg --compare-versions "7.6.2-0" gt-nl "$2"; then
-    VALUE=$(ox_read_property com.openexchange.servlet.maxRate /opt/open-xchange/etc/server.properties)
-    if [ "500" = "$VALUE" ]; then
-        ox_set_property com.openexchange.servlet.maxRate 1500 /opt/open-xchange/etc/server.properties
+    # SoftwareChange_Request-2549
+    if dpkg --compare-versions "7.6.2-0" gt-nl "$1"; then
+        VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
+        if [ "" = "$VALUE" ]; then
+            ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\"" /opt/open-xchange/etc/server.properties
+        fi
     fi
-fi
 
-# SoftwareChange_Request-2245
-ox_add_property com.openexchange.sessiond.useDistributedTokenSessions false /opt/open-xchange/etc/sessiond.properties
+    # SoftwareChange_Request-2568
+    ox_add_property com.openexchange.contact.storeVCards true /opt/open-xchange/etc/contact.properties
+    ox_add_property com.openexchange.contact.maxVCardSize 4194304 /opt/open-xchange/etc/contact.properties
 
-# SoftwareChange_Request-2249
-ox_add_property com.openexchange.requestwatcher.usm.ignore.path /syncUpdate /opt/open-xchange/etc/requestwatcher.properties
+    # SoftwareChange_Request-2575
+    ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
 
-# SoftwareChange_Request-2250
-ox_add_property com.openexchange.requestwatcher.eas.ignore.cmd sync,ping /opt/open-xchange/etc/requestwatcher.properties
+    # SoftwareChange_Request-2630
+    ox_add_property com.openexchange.capability.share_links true /opt/open-xchange/etc/permissions.properties
+    ox_add_property com.openexchange.capability.invite_guests true /opt/open-xchange/etc/permissions.properties
 
-# SoftwareChange_Request-2270
-ox_add_property html.tag.center '""' /opt/open-xchange/etc/whitelist.properties
+    # SoftwareChange_Request-2652
+    ox_add_property com.openexchange.contact.image.scaleImages true /opt/open-xchange/etc/contact.properties
+    ox_add_property com.openexchange.contact.image.maxWidth 250 /opt/open-xchange/etc/contact.properties
+    ox_add_property com.openexchange.contact.image.maxHeight 250 /opt/open-xchange/etc/contact.properties
+    ox_add_property com.openexchange.contact.image.scaleType 2 /opt/open-xchange/etc/contact.properties
 
-# SoftwareChange_Request-2335
-PFILE=/opt/open-xchange/etc/ox-scriptconf.sh
-if grep -q '^JAVA_XTRAOPTS=".*"$' "${PFILE}"
-then
-    JOPTS=$(eval ox_read_property JAVA_XTRAOPTS $PFILE)
-    JOPTS=${JOPTS//\"/}
-    if ! echo $JOPTS | grep "logback.threadlocal.put.duplicate" > /dev/null; then
-        JOPTS="$JOPTS -Dlogback.threadlocal.put.duplicate=false"
-        ox_set_property JAVA_XTRAOPTS \""$JOPTS"\" $PFILE
-    fi
-fi
+    # SoftwareChange_Request-2662
+    ox_add_property com.openexchange.file.storage.numberOfPregeneratedPreviews 20 /opt/open-xchange/etc/filestorage.properties
 
-# SoftwareChange_Request-2342
-PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-if ! grep "com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob" >/dev/null $PFILE; then
-    cat >> $PFILE <<EOF
+    # SoftwareChange_Request-2665
+    ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
 
-# Check for possibly preset message format preference in JSLob and aligns the DB value accordingly
-!com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob
-EOF
-fi
+    # SoftwareChange_Request-2672
+    ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
+    ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
 
-# SoftwareChange_Request-2350
-ox_add_property com.openexchange.mail.signature.maxImageSize 1 /opt/open-xchange/etc/mail.properties
-ox_add_property com.openexchange.mail.signature.maxImageLimit 3 /opt/open-xchange/etc/mail.properties
+    # SoftwareChange_Request-2698
+    ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
 
-# SoftwareChange_Request-2353
-ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
+    # SoftwareChange_Request-2772
+    ox_add_property com.openexchange.ajax.response.includeArguments false /opt/open-xchange/etc/server.properties
 
-# SoftwareChange_Request-2442
-if dpkg --compare-versions "7.6.2-0" gt-nl "$2"; then
-    VALUE=$(ox_read_property html.style.background-position /opt/open-xchange/etc/whitelist.properties)
-    if [ "\",top,bottom,center,left,right,\"" = "$VALUE" ]; then
-        ox_set_property html.style.background-position "\",N,top,bottom,center,left,right,\"" /opt/open-xchange/etc/whitelist.properties
-    fi
-fi
-
-# SoftwareChange_Request-2456
-ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
-
-# SoftwareChange_Request-2464
-ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open-xchange/etc/hazelcast.properties
-
-# SoftwareChange_Request-2470
-ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
-
-# SoftwareChange_Request-2530
-ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy "" /opt/open-xchange/etc/autoconfig.properties
-ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
-ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
-
-# SoftwareChange_Request-2541
-if dpkg --compare-versions "7.8.0-0" gt-nl "$2"; then
-    VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)
-    if [ "5000" = "$VALUE" ]; then
-        ox_set_property com.openexchange.hazelcast.maxOperationTimeout 30000 /opt/open-xchange/etc/hazelcast.properties
-    fi
-fi
-
-# SoftwareChange_Request-2546
-if dpkg --compare-versions "7.6.2-0" gt-nl "$2"; then
-    VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
-    if [ "\"USM-EAS*\", \"USM-JSON*\"" = "$VALUE" ]; then
-        ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" /opt/open-xchange/etc/mail-push.properties
-    fi
-fi
-ox_add_property com.openexchange.push.allowPermanentPush true /opt/open-xchange/etc/mail-push.properties
-ox_add_property com.openexchange.push.credstorage.enabled false /opt/open-xchange/etc/mail-push.properties
-ox_add_property com.openexchange.push.credstorage.passcrypt "" /opt/open-xchange/etc/mail-push.properties
-ox_add_property com.openexchange.push.credstorage.rdb false /opt/open-xchange/etc/mail-push.properties
-
-# SoftwareChange_Request-2549
-if dpkg --compare-versions "7.6.2-0" gt-nl "$2"; then
-    VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
-    if [ "" = "$VALUE" ]; then
-        ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\"" /opt/open-xchange/etc/server.properties
-    fi
-fi
-
-# SoftwareChange_Request-2568
-ox_add_property com.openexchange.contact.storeVCards true /opt/open-xchange/etc/contact.properties
-ox_add_property com.openexchange.contact.maxVCardSize 4194304 /opt/open-xchange/etc/contact.properties
-
-# SoftwareChange_Request-2575
-ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
-
-# SoftwareChange_Request-2630
-ox_add_property com.openexchange.capability.share_links true /opt/open-xchange/etc/permissions.properties
-ox_add_property com.openexchange.capability.invite_guests true /opt/open-xchange/etc/permissions.properties
-
-# SoftwareChange_Request-2652
-ox_add_property com.openexchange.contact.image.scaleImages true /opt/open-xchange/etc/contact.properties
-ox_add_property com.openexchange.contact.image.maxWidth 250 /opt/open-xchange/etc/contact.properties
-ox_add_property com.openexchange.contact.image.maxHeight 250 /opt/open-xchange/etc/contact.properties
-ox_add_property com.openexchange.contact.image.scaleType 2 /opt/open-xchange/etc/contact.properties
-
-# SoftwareChange_Request-2662
-ox_add_property com.openexchange.file.storage.numberOfPregeneratedPreviews 20 /opt/open-xchange/etc/filestorage.properties
-
-# SoftwareChange_Request-2665
-ox_add_property com.openexchange.calendar.notify.poolenabled true /opt/open-xchange/etc/notification.properties
-
-# SoftwareChange_Request-2672
-ox_add_property com.openexchange.connector.shutdownFast false /opt/open-xchange/etc/server.properties
-ox_add_property com.openexchange.connector.awaitShutDownSeconds 90 /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-2698
-ox_add_property com.openexchange.mail.rateLimitDisabledRange "" /opt/open-xchange/etc/mail.properties
-
-# SoftwareChange_Request-2772
-ox_add_property com.openexchange.ajax.response.includeArguments false /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-2811
-PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-if ! grep "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2" >/dev/null $PFILE; then
-    cat >> $PFILE <<EOF
+    # SoftwareChange_Request-2811
+    PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+    if ! grep "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2" >/dev/null $PFILE; then
+        cat >> $PFILE <<EOF
 
 # Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
 !com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2
 EOF
-fi
+    fi
 
-# SoftwareChange_Request-2815
-ox_add_property html.tag.s '""' /opt/open-xchange/etc/whitelist.properties
+    # SoftwareChange_Request-2815
+    ox_add_property html.tag.s '""' /opt/open-xchange/etc/whitelist.properties
 
-# SoftwareChange_Request-2821
-ox_remove_property com.openexchange.mail.autoconfig.ispdb.proxy /opt/open-xchange/etc/autoconfig.properties
-ox_remove_property com.openexchange.mail.autoconfig.ispdb.proxy.login /opt/open-xchange/etc/autoconfig.properties
-ox_remove_property com.openexchange.mail.autoconfig.ispdb.proxy.password /opt/open-xchange/etc/autoconfig.properties
-ox_add_property com.openexchange.mail.autoconfig.http.proxy "" /opt/open-xchange/etc/autoconfig.properties
-ox_add_property com.openexchange.mail.autoconfig.http.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
-ox_add_property com.openexchange.mail.autoconfig.http.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
-ox_add_property com.openexchange.mail.autoconfig.allowGuess true /opt/open-xchange/etc/autoconfig.properties
+    # SoftwareChange_Request-2821
+    ox_add_property com.openexchange.mail.autoconfig.http.proxy "" /opt/open-xchange/etc/autoconfig.properties
+    ox_add_property com.openexchange.mail.autoconfig.http.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
+    ox_add_property com.openexchange.mail.autoconfig.http.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
+    ox_add_property com.openexchange.mail.autoconfig.allowGuess true /opt/open-xchange/etc/autoconfig.properties
 
-# SoftwareChange_Request-2831
-ox_add_property com.openexchange.tools.images.transformations.maxSize 5242880 /opt/open-xchange/etc/server.properties
-ox_add_property com.openexchange.tools.images.transformations.maxResolution 12087962 /opt/open-xchange/etc/server.properties
-ox_add_property com.openexchange.tools.images.transformations.waitTimeoutSeconds 10 /opt/open-xchange/etc/server.properties
+    # SoftwareChange_Request-2831
+    ox_add_property com.openexchange.tools.images.transformations.maxSize 5242880 /opt/open-xchange/etc/server.properties
+    ox_add_property com.openexchange.tools.images.transformations.maxResolution 12087962 /opt/open-xchange/etc/server.properties
+    ox_add_property com.openexchange.tools.images.transformations.waitTimeoutSeconds 10 /opt/open-xchange/etc/server.properties
 
-# SoftwareChange_Request-2849
-PFILE=/opt/open-xchange/etc/permissions.properties
-if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
-    ox_set_property com.openexchange.capability.archive_emails true $PFILE
-fi
+    # SoftwareChange_Request-2849
+    PFILE=/opt/open-xchange/etc/permissions.properties
+    if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
+        ox_set_property com.openexchange.capability.archive_emails true $PFILE
+    fi
 
-# SoftwareChange_Request-2914
-PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-if ! grep "com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask" >/dev/null $PFILE; then
-    cat >> $PFILE <<EOF
+    # SoftwareChange_Request-2914
+    PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+    if ! grep "com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask" >/dev/null $PFILE; then
+        cat >> $PFILE <<EOF
 
 # Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder
 !com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask
 EOF
-fi
+    fi
 
-# SoftwareChange_Request-2990
-# Bug #53993
-if ! egrep -q '^\s*<logger.*com\.hazelcast\.internal\.(monitors|diagnostics).*$' /opt/open-xchange/etc/logback.xml; then
-  TMPFILE=$(mktemp)
-  rm -f $TMPFILE
-  cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
-<configuration>
-    <logger name="com.hazelcast.internal.monitors" level="INFO"/>
-</configuration>
-EOF
-  if [ -e $TMPFILE ]; then
-    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    # SoftwareChange_Request-2990
+    ox_add_property com.openexchange.hazelcast.healthMonitorLevel silent /opt/open-xchange/etc/hazelcast.properties
+
+    # SoftwareChange_Request-2993
+    ox_add_property com.openexchange.contact.fulltextAutocomplete false /opt/open-xchange/etc/contact.properties
+    ox_add_property com.openexchange.contact.fulltextIndexFields "DISPLAY_NAME, SUR_NAME, GIVEN_NAME, TITLE, SUFFIX, MIDDLE_NAME, COMPANY, EMAIL1, EMAIL2, EMAIL3" /opt/open-xchange/etc/contact.properties
+
+    # SoftwareChange_Request-3000
+    ox_add_property com.openexchange.contact.autocomplete.fields "GIVEN_NAME, SUR_NAME, DISPLAY_NAME, EMAIL1, EMAIL2, EMAIL3" /opt/open-xchange/etc/contact.properties
+    ox_add_property com.openexchange.contact.search.fields "ADDRESS_FIELDS, EMAIL_FIELDS, NAME_FIELDS, PHONE_FIELDS, CATEGORIES, COMPANY, DEPARTMENT, COMMERCIAL_REGISTER, POSITION" /opt/open-xchange/etc/contact.properties
+
+    # SoftwareChange_Request-3034
+    ox_add_property com.openexchange.mail.bodyDisplaySizeLimit 10485760 /opt/open-xchange/etc/mail.properties
+
+    # SoftwareChange_Request-3054
+    ox_add_property com.openexchange.mail.forwardUnquoted false /opt/open-xchange/etc/mail.properties
+
+    # SoftwareChange_Request-3113
+    TMPFILE=$(mktemp)
     rm -f $TMPFILE
-  fi
-fi
-ox_add_property com.openexchange.hazelcast.healthMonitorLevel silent /opt/open-xchange/etc/hazelcast.properties
-
-# SoftwareChange_Request-2993
-ox_add_property com.openexchange.contact.fulltextAutocomplete false /opt/open-xchange/etc/contact.properties
-ox_add_property com.openexchange.contact.fulltextIndexFields "DISPLAY_NAME, SUR_NAME, GIVEN_NAME, TITLE, SUFFIX, MIDDLE_NAME, COMPANY, EMAIL1, EMAIL2, EMAIL3" /opt/open-xchange/etc/contact.properties
-
-# SoftwareChange_Request-3000
-ox_add_property com.openexchange.contact.autocomplete.fields "GIVEN_NAME, SUR_NAME, DISPLAY_NAME, EMAIL1, EMAIL2, EMAIL3" /opt/open-xchange/etc/contact.properties
-ox_add_property com.openexchange.contact.search.fields "ADDRESS_FIELDS, EMAIL_FIELDS, NAME_FIELDS, PHONE_FIELDS, CATEGORIES, COMPANY, DEPARTMENT, COMMERCIAL_REGISTER, POSITION" /opt/open-xchange/etc/contact.properties
-
-# SoftwareChange_Request-3034
-ox_add_property com.openexchange.mail.bodyDisplaySizeLimit 10485760 /opt/open-xchange/etc/mail.properties
-
-# SoftwareChange_Request-3054
-ox_add_property com.openexchange.mail.forwardUnquoted false /opt/open-xchange/etc/mail.properties
-
-# SoftwareChange_Request-3113
-TMPFILE=$(mktemp)
-rm -f $TMPFILE
-cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
 <configuration>
     <logger name="liquibase.ext.logging.slf4j.Slf4jLogger" level="WARN"/>
 </configuration>
 EOF
-if [ -e $TMPFILE ]; then
-    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-    rm -f $TMPFILE
-fi
-
-# SoftwareChange_Request-3159
-ox_add_property com.openexchange.snippet.quota.limit -1 /opt/open-xchange/etc/snippets.properties
-
-# SoftwareChange_Request-3219
-ox_remove_property com.openexchange.participant.MaximumNumberParticipants /opt/open-xchange/etc/participant.properties
-
-# SoftwareChange_Request-3248
-ox_add_property com.openexchange.connector.networkSslListenerPort 8010 /opt/open-xchange/etc/server.properties
-
-# SoftwareChange_Request-3254
-if dpkg --compare-versions "7.8.2-0" gt-nl "$2"; then
-    VALUE=$(ox_read_property com.openexchange.mail.account.blacklist /opt/open-xchange/etc/mail.properties)
-    if [ "" = "$VALUE" ]; then
-        ox_set_property com.openexchange.mail.account.blacklist "127.0.0.1-127.255.255.255,localhost" /opt/open-xchange/etc/mail.properties
+    if [ -e $TMPFILE ]; then
+        cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+        rm -f $TMPFILE
     fi
-fi
-ox_add_property com.openexchange.mail.account.whitelist.ports "143,993, 25,465,587, 110,995" /opt/open-xchange/etc/mail.properties
 
-# SoftwareChange_Request-3225
-ox_add_property com.openexchange.tools.images.transformations.preferThumbnailThreshold 0.8 /opt/open-xchange/etc/server.properties
+    # SoftwareChange_Request-3159
+    ox_add_property com.openexchange.snippet.quota.limit -1 /opt/open-xchange/etc/snippets.properties
 
-# SoftwareChange_Request-3246
-ox_add_property com.openexchange.mail.mailStartTls false /opt/open-xchange/etc/mail.properties
-ox_add_property com.openexchange.mail.transportStartTls false /opt/open-xchange/etc/mail.properties
+    # SoftwareChange_Request-3219
+    ox_remove_property com.openexchange.participant.MaximumNumberParticipants /opt/open-xchange/etc/participant.properties
 
-# SoftwareChange_Request-3350
-sed -i '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
+    # SoftwareChange_Request-3248
+    ox_add_property com.openexchange.connector.networkSslListenerPort 8010 /opt/open-xchange/etc/server.properties
 
-# SoftwareChange_Request-3355,3417
-oldlink=$(ox_read_property object_link /opt/open-xchange/etc/notification.properties)
-if [[ ${oldlink} == *"[uiwebpath]#m=[module]&i=[object]&f=[folder]" ]]
-then
-  newlink=$(echo ${oldlink} | sed -e 's;^\(.*\)/\[uiwebpath\].*$;\1/[uiwebpath]#!!\&app=io.ox/[module]\&id=[object]\&folder=[folder];')
-  ox_set_property object_link ${newlink} /opt/open-xchange/etc/notification.properties
-fi
+    # SoftwareChange_Request-3254
+    if dpkg --compare-versions "7.8.2-0" gt-nl "$1"; then
+        VALUE=$(ox_read_property com.openexchange.mail.account.blacklist /opt/open-xchange/etc/mail.properties)
+        if [ "" = "$VALUE" ]; then
+            ox_set_property com.openexchange.mail.account.blacklist "127.0.0.1-127.255.255.255,localhost" /opt/open-xchange/etc/mail.properties
+        fi
+    fi
+    ox_add_property com.openexchange.mail.account.whitelist.ports "143,993, 25,465,587, 110,995" /opt/open-xchange/etc/mail.properties
 
-# SoftwareChange_Request-3356
-ox_add_property com.openexchange.ajax.login.checkPunyCodeLoginString false /opt/open-xchange/etc/login.properties
+    # SoftwareChange_Request-3225
+    ox_add_property com.openexchange.tools.images.transformations.preferThumbnailThreshold 0.8 /opt/open-xchange/etc/server.properties
 
-# SoftwareChange_Request-3405
-ox_add_property com.openexchange.ical.updateTimezones true /opt/open-xchange/etc/server.properties
+    # SoftwareChange_Request-3246
+    ox_add_property com.openexchange.mail.mailStartTls false /opt/open-xchange/etc/mail.properties
+    ox_add_property com.openexchange.mail.transportStartTls false /opt/open-xchange/etc/mail.properties
 
-# SoftwareChange_Request-3406
-# search from the named appender up to the next closing pattern or
-# suffixPattern and replace only %message with %sanitisedMessage in that
-# context
-logconfig=/opt/open-xchange/etc/logback.xml
-sed -r -i '/<appender .*name="FILE".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $logconfig
-sed -r -i '/<appender .*name="FILE_COMPAT".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $logconfig
-sed -r -i '/<appender .*name="SYSLOG".*>/,/<\/suffixPattern>/ s/%message/%sanitisedMessage/g' $logconfig
+    # SoftwareChange_Request-3350
+    if grep "XX:DisableExplicitGC" >/dev/null /opt/open-xchange/etc/ox-scriptconf.sh; then
+      sed -i '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
+    fi
 
-# SoftwareChange_Request-3421
-ox_remove_property com.openexchange.mail.transport.enablePublishOnExceededQuota /opt/open-xchange/etc/transport.properties
-ox_remove_property com.openexchange.mail.transport.publishPrimaryAccountOnly /opt/open-xchange/etc/transport.properties
-ox_remove_property com.openexchange.mail.transport.sendAttachmentToExternalRecipients /opt/open-xchange/etc/transport.properties
-ox_remove_property com.openexchange.mail.transport.provideLinksInAttachment /opt/open-xchange/etc/transport.properties
-ox_remove_property com.openexchange.mail.transport.publishedDocumentTimeToLive /opt/open-xchange/etc/transport.properties
-ox_remove_property com.openexchange.mail.transport.externalRecipientsLocale /opt/open-xchange/etc/transport.properties
-
-# SoftwareChange_Request-3482
-ox_add_property com.openexchange.secret.recovery.fast.enabled true /opt/open-xchange/etc/secret.properties
-
-# Bug 47925
-dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/contextSets/index.yml 7.8.3~ -- "$@"
-
-# SoftwareChange_Request-3528
-ox_add_property html.tag.code '""' /opt/open-xchange/etc/whitelist.properties
-
-# Bug #45347
-old_key=io.ox.calendar//participantBlacklist
-new_key=io.ox/calendar//participantBlacklist
-propfile=/opt/open-xchange/etc/settings/participant-blacklist.properties
-
-if ! ox_exists_property ${new_key} ${propfile}
-then
-    if ox_exists_property ${old_key} ${propfile}
+    # SoftwareChange_Request-3355,3417
+    oldlink=$(ox_read_property object_link /opt/open-xchange/etc/notification.properties)
+    if [[ ${oldlink} == *"[uiwebpath]#m=[module]&i=[object]&f=[folder]" ]]
     then
-        value=$(ox_read_property ${old_key} ${propfile})
-        ox_remove_property ${old_key} ${propfile}
-        ox_add_property ${new_key} "${value}" ${propfile}
+      newlink=$(echo ${oldlink} | sed -e 's;^\(.*\)/\[uiwebpath\].*$;\1/[uiwebpath]#!!\&app=io.ox/[module]\&id=[object]\&folder=[folder];')
+      ox_set_property object_link ${newlink} /opt/open-xchange/etc/notification.properties
+    fi
+
+    # SoftwareChange_Request-3356
+    ox_add_property com.openexchange.ajax.login.checkPunyCodeLoginString false /opt/open-xchange/etc/login.properties
+
+    # SoftwareChange_Request-3405
+    ox_add_property com.openexchange.ical.updateTimezones true /opt/open-xchange/etc/server.properties
+
+    # SoftwareChange_Request-3406
+    # search from the named appender up to the next closing pattern or
+    # suffixPattern and replace only %message with %sanitisedMessage in that
+    # context
+    logconfig=/opt/open-xchange/etc/logback.xml
+    tmp=${logconfig}.tmp
+    cp -a --remove-destination $logconfig $tmp
+    sed -r -i '/<appender .*name="FILE".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $tmp
+    sed -r -i '/<appender .*name="FILE_COMPAT".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $tmp
+    sed -r -i '/<appender .*name="SYSLOG".*>/,/<\/suffixPattern>/ s/%message/%sanitisedMessage/g' $tmp
+    if [[ $(ox_md5 $tmp) != $(ox_md5 $logconfig) ]]; then
+      cat $tmp >$logconfig
     else
-        ox_comment ${old_key} remove ${propfile}
-        ox_remove_property ${old_key} ${propfile}
-        ox_add_property ${new_key} "" ${propfile}
+      rm $tmp
     fi
-fi
 
-# SoftwareChange_Request-3616
-ox_add_property com.openexchange.mail.compose.share.preview.timeout 1000 /opt/open-xchange/etc/mail-compose.properties
+    # SoftwareChange_Request-3421
+    ox_remove_property com.openexchange.mail.transport.enablePublishOnExceededQuota /opt/open-xchange/etc/transport.properties
+    ox_remove_property com.openexchange.mail.transport.publishPrimaryAccountOnly /opt/open-xchange/etc/transport.properties
+    ox_remove_property com.openexchange.mail.transport.sendAttachmentToExternalRecipients /opt/open-xchange/etc/transport.properties
+    ox_remove_property com.openexchange.mail.transport.provideLinksInAttachment /opt/open-xchange/etc/transport.properties
+    ox_remove_property com.openexchange.mail.transport.publishedDocumentTimeToLive /opt/open-xchange/etc/transport.properties
+    ox_remove_property com.openexchange.mail.transport.externalRecipientsLocale /opt/open-xchange/etc/transport.properties
 
-# SoftwareChange_Request-3637
-if dpkg --compare-versions "7.8.3-0" gt-nl "$2"; then
-    VALUE=$(ox_read_property com.openexchange.connector.maxRequestParameters /opt/open-xchange/etc/server.properties)
-    if [ "30" = "$VALUE" ]; then
-        ox_set_property com.openexchange.connector.maxRequestParameters 1000 /opt/open-xchange/etc/server.properties
+    # SoftwareChange_Request-3482
+    ox_add_property com.openexchange.secret.recovery.fast.enabled true /opt/open-xchange/etc/secret.properties
+
+    # Bug 47925
+    dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/contextSets/index.yml 7.8.3~ -- "$@"
+
+    # SoftwareChange_Request-3528
+    ox_add_property html.tag.code '""' /opt/open-xchange/etc/whitelist.properties
+
+    # Bug #45347
+    old_key=io.ox.calendar//participantBlacklist
+    new_key=io.ox/calendar//participantBlacklist
+    propfile=/opt/open-xchange/etc/settings/participant-blacklist.properties
+
+    if ! ox_exists_property ${new_key} ${propfile}
+    then
+        if ox_exists_property ${old_key} ${propfile}
+        then
+            value=$(ox_read_property ${old_key} ${propfile})
+            ox_remove_property ${old_key} ${propfile}
+            ox_add_property ${new_key} "${value}" ${propfile}
+        else
+            ox_comment ${old_key} remove ${propfile}
+            ox_remove_property ${old_key} ${propfile}
+            ox_add_property ${new_key} "" ${propfile}
+        fi
     fi
-fi
 
-# SoftwareChange_Request-3773
-sed -i '/^# Maximum number of open Files for the groupware$/{i\
+    # SoftwareChange_Request-3616
+    ox_add_property com.openexchange.mail.compose.share.preview.timeout 1000 /opt/open-xchange/etc/mail-compose.properties
+
+    # SoftwareChange_Request-3637
+    if dpkg --compare-versions "7.8.3-0" gt-nl "$1"; then
+        VALUE=$(ox_read_property com.openexchange.connector.maxRequestParameters /opt/open-xchange/etc/server.properties)
+        if [ "30" = "$VALUE" ]; then
+            ox_set_property com.openexchange.connector.maxRequestParameters 1000 /opt/open-xchange/etc/server.properties
+        fi
+    fi
+
+    # SoftwareChange_Request-3773
+    if grep '^# Maximum number of open Files for the groupware$' >/dev/null /opt/open-xchange/etc/ox-scriptconf.sh; then
+      sed -i '/^# Maximum number of open Files for the groupware$/{i\
 # Maximum number of open Files for the groupware. This value will only be\
 # applied when using sysv init. For systemd have a look at the drop-in configs\
 # at /etc/systemd/system/open-xchange.service.d
 d
 }' /opt/open-xchange/etc/ox-scriptconf.sh
-
-# SoftwareChange_Request-3784
-if dpkg --compare-versions "7.8.4-0" gt-nl "$2"; then
-    VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
-    if [ "\"open-xchange-mailapp\"" = "$VALUE" ]; then
-        ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\", \"open-xchange-mobile-api-facade\"" /opt/open-xchange/etc/server.properties
     fi
 
-    # SoftwareChange_Request-3859
-    VALUE=$(ox_read_property NRFILES /opt/open-xchange/etc/ox-scriptconf.sh)
-    VALUE=${VALUE//\"/}
-    if [ "8192" = "$VALUE" ]; then
-        ox_set_property NRFILES 65536 /opt/open-xchange/etc/ox-scriptconf.sh
+    # SoftwareChange_Request-3784
+    if dpkg --compare-versions "7.8.4-0" gt-nl "$1"; then
+        VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
+        if [ "\"open-xchange-mailapp\"" = "$VALUE" ]; then
+            ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\", \"open-xchange-mobile-api-facade\"" /opt/open-xchange/etc/server.properties
+        fi
+
+        # SoftwareChange_Request-3859
+        VALUE=$(ox_read_property NRFILES /opt/open-xchange/etc/ox-scriptconf.sh)
+        VALUE=${VALUE//\"/}
+        if [ "8192" = "$VALUE" ]; then
+            ox_set_property NRFILES 65536 /opt/open-xchange/etc/ox-scriptconf.sh
+        fi
     fi
 
     # SoftwareChange_Request-3862
-    ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
-    ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
-fi
+    if ! grep -Eq "^#\s?html.tag.form" >/dev/null /opt/open-xchange/etc/whitelist.properties; then
+        ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
+    fi
+    if ! grep -Eq "^#\s?html.tag.input" >/dev/null /opt/open-xchange/etc/whitelist.properties; then
+        ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
+    fi
 
-# SoftwareChange_Request-3882
-ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
+    # SoftwareChange_Request-3882
+    ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 
-# SoftwareChange_Request-3934
-ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
+    # SoftwareChange_Request-3934
+    if ! grep -Eq "^#\s?html.style.list-style-image" >/dev/null /opt/open-xchange/etc/whitelist.properties; then
+      ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
+    fi
 
-# SoftwareChange_Request-4033
-sed -i 's/com\.hazelcast\.internal\.monitors/com.hazelcast.internal.diagnostics/' /opt/open-xchange/etc/logback.xml
-
-# SoftwareChange_Request-4059
-ox_remove_property com.openexchange.mail.enforceSecureConnection /opt/open-xchange/etc/mail.properties
-
-# SoftwareChange_Request-4094
-VALUE=$(ox_read_property com.openexchange.mail.autoconfig.ispdb /opt/open-xchange/etc/autoconfig.properties)
-if [ "https://live.mozillamessaging.com/autoconfig/v1.1/" = "$VALUE" ]; then
-    ox_set_property com.openexchange.mail.autoconfig.ispdb "https://autoconfig.thunderbird.net/v1.1/" /opt/open-xchange/etc/autoconfig.properties
-fi
-
-# SoftwareChange_Request-4096
-# use subshell to not pollute current env when sourcing ox-scriptconf.sh
-(
-  . /opt/open-xchange/lib/oxfunctions.sh
-  to_migrate=/opt/open-xchange/etc/ox-scriptconf.sh
-
-  # Pitfall_1 JAVA_XTRAOPTS="${JAVA_XTRAOPTS} foo=bar"
-  # was added by some customers to ox-scriptconf.sh
-  unset JAVA_XTRAOPTS
-  . ${to_migrate}
-  opts_old=${JAVA_XTRAOPTS}
-
-  # only migrate if pre RM-177 style options are found
-  if [[ ! -z "${opts_old}" ]]
-  then
-    backup=${to_migrate}.$(date +%s)
-    cp -a --remove-destination ${to_migrate} ${backup}
-
-    gc_regx="-XX:\+UseConcMarkSweepGC|-XX:\+UseParNewGC|-XX:CMSInitiatingOccupancyFraction|-XX:\+UseCMSInitiatingOccupancyOnly|-XX:NewRatio|-XX:\+DisableExplicitGC"
-    log_regx="-Dlogback.threadlocal.put.duplicate|-XX:-OmitStackTraceInFastThrow"
-    mem_regx="-Xmx|-XX:MaxHeapSize|-XX:MaxPermSize|-XX:\+UseTLAB"
-    net_regx="-Dsun.net.inetaddr.ttl|-Dnetworkaddress.cache.ttl|-Dnetworkaddress.cache.negative.ttl"
-    osgi_regx="-Dosgi.compatibility.bootdelegation"
-    server_regx="-server|-Djava.awt.headless"
-
-    opts_gc=()
-    opts_log=()
-    opts_mem=()
-    opts_net=()
-    opts_osgi=()
-    opts_server=()
-    opts_other=()
-
-    ((debug)) && echo "The options are: ${opts_old}"
-
-    opt_arr=(${opts_old})
-    num_opts=${#opt_arr[@]}
-    ((debug)) && echo "There are ${num_opts} options to migrate"
-    for ((i=0; i < num_opts; i++))
-    do
-      #assign single options to appropriate array
-      ((debug)) && echo "Option ${i}: ${opt_arr[${i}]}"
-      curr_opt=${opt_arr[${i}]}
-      if [[ "${curr_opt}" =~ ${gc_regx} ]]
-      then
-        ((debug)) && echo "${curr_opt} is a gc opt"
-        opts_gc+=(${curr_opt})
-      elif [[ "${curr_opt}" =~ ${log_regx} ]]
-      then
-        ((debug)) && echo "${curr_opt} is a log opt"
-        opts_log+=(${curr_opt})
-      elif [[ "${curr_opt}" =~ ${mem_regx} ]]
-      then
-        ((debug)) && echo "${curr_opt} is a mem opt"
-        opts_mem+=(${curr_opt})
-      elif [[ "${curr_opt}" =~ ${net_regx} ]]
-      then
-        ((debug)) && echo "${curr_opt} is a net opt"
-        opts_net+=(${curr_opt})
-      elif [[ "${curr_opt}" =~ ${osgi_regx} ]]
-      then
-        ((debug)) && echo "${curr_opt} is an osgi opt"
-        opts_osgi+=(${curr_opt})
-      elif [[ "${curr_opt}" =~ ${server_regx} ]]
-      then
-        ((debug)) && echo "${curr_opt} is a server opt"
-        opts_server+=(${curr_opt})
-      else
-        ((debug)) && echo "${curr_opt} is another opt"
-        opts_other+=(${curr_opt})
-      fi
-    done
-
-    ox_add_property JAVA_OPTS_GC     "\"${opts_gc[*]}\""     "${to_migrate}"
-    ox_add_property JAVA_OPTS_LOG    "\"${opts_log[*]}\""    "${to_migrate}"
-    ox_add_property JAVA_OPTS_MEM    "\"${opts_mem[*]}\""    "${to_migrate}"
-    ox_add_property JAVA_OPTS_NET    "\"${opts_net[*]}\""    "${to_migrate}"
-    ox_add_property JAVA_OPTS_OSGI   "\"${opts_osgi[*]}\""   "${to_migrate}"
-    ox_add_property JAVA_OPTS_SERVER "\"${opts_server[*]}\"" "${to_migrate}"
-    ox_add_property JAVA_OPTS_OTHER  "\"${opts_other[*]}\""  "${to_migrate}"
-    sed -i -e '${a\
-# Define options for debugging the groupware Java virtual machine, disabled by default.\
-#JAVA_OPTS_DEBUG="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/mnt/heapdump -Xloggc:/var/log/open-xchange/gc.log -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintHeapAtGC -XX:+PrintGCApplicationStoppedTime -XX:+PrintTenuringDistribution"
-    }' "${to_migrate}"
-
-    # Pitfall_1: removes all occurrences
-    ox_remove_property JAVA_XTRAOPTS "${to_migrate}"
-  fi
-)
-
-# SoftwareChange_Request-4098
-ox_remove_property com.openexchange.mail.attachmentDisplaySizeLimit /opt/open-xchange/etc/mail.properties
-
-# Bug #53993: Zap duplicate loggers
-if [[ 1 < $(egrep -c '^\s*<logger.*"com\.hazelcast\.internal\.diagnostics".*$' /opt/open-xchange/etc/logback.xml) ]]; then
-  TMPFILE=$(mktemp)
-  rm -f $TMPFILE
-  cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
+    # SoftwareChange_Request-4033
+    TMPFILE=$(mktemp)
+    rm -f $TMPFILE
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -m -
+<configuration>
+    <logger name="com.hazelcast.internal.monitors" level="INFO"/>
+</configuration>
+EOF
+    if [ -e $TMPFILE ]; then
+      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+      rm -f $TMPFILE
+    fi
+    # Bug #53993: Zap duplicate loggers
+    rm -f $TMPFILE
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
 <configuration>
     <logger name="com.hazelcast.internal.diagnostics" level="INFO"/>
 </configuration>
 EOF
-  if [ -e $TMPFILE ]; then
-    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    if [ -e $TMPFILE ]; then
+      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+      rm -f $TMPFILE
+    fi
+
+    # SoftwareChange_Request-4059
+    ox_remove_property com.openexchange.mail.enforceSecureConnection /opt/open-xchange/etc/mail.properties
+
+    # SoftwareChange_Request-4094
+    VALUE=$(ox_read_property com.openexchange.mail.autoconfig.ispdb /opt/open-xchange/etc/autoconfig.properties)
+    if [ "https://live.mozillamessaging.com/autoconfig/v1.1/" = "$VALUE" ]; then
+        ox_set_property com.openexchange.mail.autoconfig.ispdb "https://autoconfig.thunderbird.net/v1.1/" /opt/open-xchange/etc/autoconfig.properties
+    fi
+
+    # SoftwareChange_Request-4096
+    # use subshell to not pollute current env when sourcing ox-scriptconf.sh
+    (
+      . /opt/open-xchange/lib/oxfunctions.sh
+      to_migrate=/opt/open-xchange/etc/ox-scriptconf.sh
+
+      # Pitfall_1 JAVA_XTRAOPTS="${JAVA_XTRAOPTS} foo=bar"
+      # was added by some customers to ox-scriptconf.sh
+      unset JAVA_XTRAOPTS
+      . ${to_migrate}
+      opts_old=${JAVA_XTRAOPTS}
+
+      # only migrate if pre RM-177 style options are found
+      if [[ ! -z "${opts_old}" ]]
+      then
+        backup=${to_migrate}.$(date +%s)
+        cp -a --remove-destination ${to_migrate} ${backup}
+
+        gc_regx="-XX:\+UseConcMarkSweepGC|-XX:\+UseParNewGC|-XX:CMSInitiatingOccupancyFraction|-XX:\+UseCMSInitiatingOccupancyOnly|-XX:NewRatio|-XX:\+DisableExplicitGC"
+        log_regx="-Dlogback.threadlocal.put.duplicate|-XX:-OmitStackTraceInFastThrow"
+        mem_regx="-Xmx|-XX:MaxHeapSize|-XX:MaxPermSize|-XX:\+UseTLAB"
+        net_regx="-Dsun.net.inetaddr.ttl|-Dnetworkaddress.cache.ttl|-Dnetworkaddress.cache.negative.ttl"
+        osgi_regx="-Dosgi.compatibility.bootdelegation"
+        server_regx="-server|-Djava.awt.headless"
+
+        opts_gc=()
+        opts_log=()
+        opts_mem=()
+        opts_net=()
+        opts_osgi=()
+        opts_server=()
+        opts_other=()
+
+        ((debug)) && echo "The options are: ${opts_old}"
+
+        opt_arr=(${opts_old})
+        num_opts=${#opt_arr[@]}
+        ((debug)) && echo "There are ${num_opts} options to migrate"
+        for ((i=0; i < num_opts; i++))
+        do
+          #assign single options to appropriate array
+          ((debug)) && echo "Option ${i}: ${opt_arr[${i}]}"
+          curr_opt=${opt_arr[${i}]}
+          if [[ "${curr_opt}" =~ ${gc_regx} ]]
+          then
+            ((debug)) && echo "${curr_opt} is a gc opt"
+            opts_gc+=(${curr_opt})
+          elif [[ "${curr_opt}" =~ ${log_regx} ]]
+          then
+            ((debug)) && echo "${curr_opt} is a log opt"
+            opts_log+=(${curr_opt})
+          elif [[ "${curr_opt}" =~ ${mem_regx} ]]
+          then
+            ((debug)) && echo "${curr_opt} is a mem opt"
+            opts_mem+=(${curr_opt})
+          elif [[ "${curr_opt}" =~ ${net_regx} ]]
+          then
+            ((debug)) && echo "${curr_opt} is a net opt"
+            opts_net+=(${curr_opt})
+          elif [[ "${curr_opt}" =~ ${osgi_regx} ]]
+          then
+            ((debug)) && echo "${curr_opt} is an osgi opt"
+            opts_osgi+=(${curr_opt})
+          elif [[ "${curr_opt}" =~ ${server_regx} ]]
+          then
+            ((debug)) && echo "${curr_opt} is a server opt"
+            opts_server+=(${curr_opt})
+          else
+            ((debug)) && echo "${curr_opt} is another opt"
+            opts_other+=(${curr_opt})
+          fi
+        done
+
+        ox_add_property JAVA_OPTS_GC     "\"${opts_gc[*]}\""     "${to_migrate}"
+        ox_add_property JAVA_OPTS_LOG    "\"${opts_log[*]}\""    "${to_migrate}"
+        ox_add_property JAVA_OPTS_MEM    "\"${opts_mem[*]}\""    "${to_migrate}"
+        ox_add_property JAVA_OPTS_NET    "\"${opts_net[*]}\""    "${to_migrate}"
+        ox_add_property JAVA_OPTS_OSGI   "\"${opts_osgi[*]}\""   "${to_migrate}"
+        ox_add_property JAVA_OPTS_SERVER "\"${opts_server[*]}\"" "${to_migrate}"
+        ox_add_property JAVA_OPTS_OTHER  "\"${opts_other[*]}\""  "${to_migrate}"
+        sed -i -e '${a\
+    # Define options for debugging the groupware Java virtual machine, disabled by default.\
+    #JAVA_OPTS_DEBUG="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/mnt/heapdump -Xloggc:/var/log/open-xchange/gc.log -verbose:gc -XX:+PrintGCDateStamps -XX:+PrintHeapAtGC -XX:+PrintGCApplicationStoppedTime -XX:+PrintTenuringDistribution"
+        }' "${to_migrate}"
+
+        # Pitfall_1: removes all occurrences
+        ox_remove_property JAVA_XTRAOPTS "${to_migrate}"
+      fi
+    )
+
+    # SoftwareChange_Request-4098
+    ox_remove_property com.openexchange.mail.attachmentDisplaySizeLimit /opt/open-xchange/etc/mail.properties
+
+    # SoftwareChange_Request-4149
+    ox_set_property marital_status 'Marital status' /opt/open-xchange/importCSV/open-xchange.properties
+    if [ "Number of employee" == "$(ox_read_property employee_type /opt/open-xchange/importCSV/open-xchange.properties)" ]; then
+      sed -i 's/employee_type=Number of employee/number_of_employees=Employee ID/g' /opt/open-xchange/importCSV/open-xchange.properties
+    fi
+
+    # SoftwareChange_Request-4204
+    pfile=/opt/open-xchange/etc/whitelist.properties
+    for property in html.style.page-break-{after,before,inside}
+    do
+      ox_remove_property ${property} ${pfile}
+    done
+
+    # SoftwareChange_Request-4249
+    set -e
+    TMPFILE=$(mktemp)
     rm -f $TMPFILE
-  fi
-fi
+    /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -s 4249 -o $TMPFILE
+    if [ -e $TMPFILE ]; then
+      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+      rm -f $TMPFILE
+    fi
+    set +e
 
-# SoftwareChange_Request-4204
-pfile=/opt/open-xchange/etc/whitelist.properties
-for property in html.style.page-break-{after,before,inside}
-do
-  ox_remove_property ${property} ${pfile}
-done
+    # SoftwareChange_Request-66
+    ox_remove_property com.openexchange.hazelcast.jmxDetailed /opt/open-xchange/etc/hazelcast.properties
 
-# SoftwareChange_Request-4249
-set -e
-TMPFILE=$(mktemp)
-/opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -s 4249 -o $TMPFILE
-if [ -e $TMPFILE ]; then
-  cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-  rm -f $TMPFILE
-fi
-set +e
+    # SoftwareChange_Request-77
+    PFILE=/opt/open-xchange/etc/cache.ccf
+    NAMES=( jcs.region.User.cacheattributes.MaxObjects jcs.region.UserConfiguration.cacheattributes.MaxObjects jcs.region.UserPermissionBits.cacheattributes.MaxObjects jcs.region.UserSettingMail.cacheattributes.MaxObjects jcs.region.Context.cacheattributes.MaxObjects )
+    OLDDEFAULTS=( 40000 20000 20000 20000 10000 )
+    NEWDEFAULTS=( 4000000 4000000 4000000 4000000 1000000 )
+    for I in $(seq 1 ${#NAMES[@]}); do
+      VALUE=$(ox_read_property ${NAMES[$I-1]} $PFILE)
+      if [ "${VALUE}" = "${OLDDEFAULTS[$I-1]}" ]; then
+        ox_set_property ${NAMES[$I-1]} "${NEWDEFAULTS[$I-1]}" $PFILE
+      fi
+    done
 
-# SoftwareChange_Request-175
-ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
+    # SoftwareChange_Request-82
+    ox_remove_property com.openexchange.caching.jcs.enabled /opt/open-xchange/etc/cache.properties
+
+    # SoftwareChange_Request-151
+    if dpkg --compare-versions "7.10.0-0" gt-nl "$1"; then
+      VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+      if [ "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" = "${VALUE}" ]; then
+        ox_set_property com.openexchange.push.allowedClients "${VALUE}, \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
+      fi
+    fi
+
+    # SoftwareChange_Request-160
+    whlipr=/opt/open-xchange/etc/whitelist.properties
+    ox_add_property html.style.webkit-box-sizing '""' ${whlipr}
+    ox_add_property html.style.moz-box-sizing '""' ${whlipr}
+    ox_add_property html.style.box-sizing '"border-box"' ${whlipr}
+    ox_add_property html.style.-webkit-box-sizing '"border-box"' ${whlipr}
+    ox_add_property html.style.-moz-box-sizing '"border-box"' ${whlipr}
+
+    # SoftwareChange_Request-174
+    ox_remove_property IGNORE_SHARED_ADDRESSBOOK /opt/open-xchange/etc/foldercache.properties
+
+    # SoftwareChange_Request-175
+    ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
+
+}
 
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -1448,6 +525,10 @@ setConfigFilePermissions() {
 
 case "$1" in
     configure)
+        test -n "$2" && {
+            # we are in update mode, run postFix to apply fixes
+            postFix "$2"
+        }
         setConfigFilePermissions
     ;;
 
@@ -1460,6 +541,8 @@ case "$1" in
     ;;
 esac
 
+# SCR-168
+dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/calendar.properties 7.10.0~ -- "$@"
 
 # dh_installdeb will replace this with shell code automatically
 # generated by other debhelper scripts.

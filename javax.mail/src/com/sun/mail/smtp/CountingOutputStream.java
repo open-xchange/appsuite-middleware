@@ -62,24 +62,14 @@ public class CountingOutputStream extends FilterOutputStream {
     /** The count of bytes that have passed. */
     private long count = 0;
 
-    private long maxMailSize;
-
-    /**
-     * Constructs a new CountingOutputStream.
-     * 
-     * @param out the OutputStream to write to
-     */
-    public CountingOutputStream(OutputStream out) {
-        super(out);
-    }
-
-    // -----------------------------------------------------------------------
+    /** The max. number of bytes that may be written. */
+    private final long maxMailSize;
 
     /**
      * Initializes a new {@link CountingOutputStream}.
-     * 
-     * @param data
-     * @param maxMailSize
+     *
+     * @param data The output stream to delegate to
+     * @param maxMailSize The max. number of bytes that may be written
      */
     public CountingOutputStream(OutputStream out, long maxMailSize) {
         super(out);
@@ -88,7 +78,7 @@ public class CountingOutputStream extends FilterOutputStream {
 
     /**
      * Updates the count with the number of bytes that are being written.
-     * 
+     *
      * @param n number of bytes to be written to the stream
      * @throws IOException
      */
@@ -105,7 +95,7 @@ public class CountingOutputStream extends FilterOutputStream {
 
     /**
      * Invokes the delegate's <code>write(int)</code> method.
-     * 
+     *
      * @param idx the byte to write
      * @throws IOException if an I/O error occurs
      */
@@ -122,14 +112,18 @@ public class CountingOutputStream extends FilterOutputStream {
 
     /**
      * Invokes the delegate's <code>write(byte[])</code> method.
-     * 
+     *
      * @param bts the bytes to write
      * @throws IOException if an I/O error occurs
      */
     @Override
     public void write(byte[] bts) throws IOException {
+        if (null == bts) {
+            return;
+        }
+
         try {
-            int len = bts != null ? bts.length : 0;
+            int len = bts.length;
             beforeWrite(len);
             out.write(bts);
             afterWrite(len);
@@ -140,7 +134,7 @@ public class CountingOutputStream extends FilterOutputStream {
 
     /**
      * Invokes the delegate's <code>write(byte[])</code> method.
-     * 
+     *
      * @param bts the bytes to write
      * @param st The start offset
      * @param end The number of bytes to write
@@ -159,7 +153,7 @@ public class CountingOutputStream extends FilterOutputStream {
 
     /**
      * Invokes the delegate's <code>flush()</code> method.
-     * 
+     *
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -173,7 +167,7 @@ public class CountingOutputStream extends FilterOutputStream {
 
     /**
      * Invokes the delegate's <code>close()</code> method.
-     * 
+     *
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -191,19 +185,20 @@ public class CountingOutputStream extends FilterOutputStream {
      * <p>
      * Subclasses can override this method to add common post-processing functionality without having to override all the write methods. The
      * default implementation does nothing.
-     * 
+     *
      * @since 2.0
      * @param n number of bytes written
      * @throws IOException if the post-processing fails
      */
     protected void afterWrite(int n) throws IOException {
+        // Nothing
     }
 
     /**
      * Handle any IOExceptions thrown.
      * <p>
      * This method provides a point to implement custom exception handling. The default behaviour is to re-throw the exception.
-     * 
+     *
      * @param e The IOException thrown
      * @throws IOException if an I/O error occurs
      * @since 2.0

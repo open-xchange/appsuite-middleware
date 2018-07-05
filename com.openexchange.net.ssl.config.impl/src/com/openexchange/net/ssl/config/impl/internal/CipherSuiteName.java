@@ -87,11 +87,7 @@ final class CipherSuiteName {
         super();
         this.originalName = originalName;
         String unifiedName = Strings.toUpperCase(originalName);
-        if (unifiedName.startsWith("SSL_") || unifiedName.startsWith("TLS_")) {
-            this.unifiedName = unifiedName.substring(4);
-        } else {
-            this.unifiedName = unifiedName;
-        }
+        this.unifiedName = (unifiedName.startsWith("SSL_") || unifiedName.startsWith("TLS_")) ? unifiedName.substring(4) : unifiedName;
         hash = 31 * 1 + this.unifiedName.hashCode();
     }
 
@@ -124,7 +120,7 @@ final class CipherSuiteName {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder(64);
         builder.append("[");
         if (unifiedName != null) {
             builder.append(unifiedName).append(", ");

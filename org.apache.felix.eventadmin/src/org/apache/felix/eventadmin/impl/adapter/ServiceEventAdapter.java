@@ -20,7 +20,6 @@ package org.apache.felix.eventadmin.impl.adapter;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;

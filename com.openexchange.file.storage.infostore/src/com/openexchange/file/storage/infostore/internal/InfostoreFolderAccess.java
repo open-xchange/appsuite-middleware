@@ -50,11 +50,15 @@
 package com.openexchange.file.storage.infostore.internal;
 
 import java.sql.Connection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageRestoringFolderAccess;
 import com.openexchange.file.storage.FolderStatsAware;
 import com.openexchange.file.storage.MediaFolderAwareFolderAccess;
 import com.openexchange.file.storage.PermissionAware;
@@ -66,8 +70,10 @@ import com.openexchange.file.storage.infostore.folder.ParsedFolder;
 import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.RestoringFolderService;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.type.DocumentsType;
@@ -87,7 +93,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFolderAwareFolderAccess, PermissionAware, FolderStatsAware, FileStorageCaseInsensitiveAccess {
+public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFolderAwareFolderAccess, PermissionAware, FolderStatsAware, FileStorageCaseInsensitiveAccess, FileStorageRestoringFolderAccess {
 
     private static final String INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
     private static final String TREE_ID = "1";
@@ -358,6 +364,31 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
         decorator.put("altNames", Boolean.TRUE.toString());
         decorator.setLocale(session.getUser().getLocale());
         return decorator;
+    }
+
+    @Override
+    public Map<String, FileStorageFolder[]> restoreFolderFromTrash(List<String> folderIds, String defaultDestFolderId) throws OXException {
+        FolderService folderService = getFolderService();
+        if (false == (folderService instanceof RestoringFolderService)) {
+            throw FileStorageExceptionCodes.NO_RESTORE_SUPPORT.create();
+        }
+
+        FolderServiceDecorator decorator = initDecorator();
+        UserizedFolder destFolder = folderService.getFolder(TREE_ID, defaultDestFolderId, session, decorator);
+        FolderResponse<Map<String, List<UserizedFolder>>> result = ((RestoringFolderService) folderService).restoreFolderFromTrash(TREE_ID, folderIds, destFolder, session, decorator);
+        Map<String, List<UserizedFolder>> map = result.getResponse();
+
+        Map<String, FileStorageFolder[]> retval = new LinkedHashMap<String, FileStorageFolder[]>(map.size());
+        for (Map.Entry<String, List<UserizedFolder>> entry : map.entrySet()) {
+            List<UserizedFolder> path = entry.getValue();
+            FileStorageFolder[] folders = new FileStorageFolder[path.size()];
+            int i = 0;
+            for (UserizedFolder userizedFolder : path) {
+                folders[i++] = FolderWriter.writeFolder(userizedFolder);
+            }
+            retval.put(entry.getKey(), folders);
+        }
+        return retval;
     }
 
 }

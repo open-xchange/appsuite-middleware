@@ -11,7 +11,7 @@ com.openexchange.snippet.filestore.quota.mode=dedicated
 com.openexchange.snippet.filestore.quota.perUserLimit=5MB
 ```
 
-The first property activates the dedicated quota mode and the second one defines the quota limit for this quota. See [config docu](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#mode=search&term=com.openexchange.snippet.filestore.quota) for more informations about those properties.
+The first property activates the dedicated quota mode and the second one defines the quota limit for this quota. See [config docu](/components/middleware/config{{ site.baseurl }}/index.html#mode=search&term=com.openexchange.snippet.filestore.quota) for more informations about those properties.
 
 Please note that the `com.openexchange.snippet.mime.groupware.SnippetSizeColumnUpdateTask` update task has to be run before the 'dedicated' quota mode can be activated.
 

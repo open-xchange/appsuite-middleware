@@ -55,6 +55,7 @@ import static com.openexchange.file.storage.FileStorageEventConstants.DELETE_TOP
 import static com.openexchange.file.storage.FileStorageEventConstants.FILE_NAME;
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_FOLDER_TOPIC;
 import static com.openexchange.file.storage.FileStorageEventConstants.UPDATE_TOPIC;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -287,7 +288,7 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                 for (Map.Entry<Integer, Set<FolderID>> entry : directoryChecksumsToInvalidate.entrySet()) {
                     RdbChecksumStore checksumStore = new RdbChecksumStore(entry.getKey().intValue());
                     LOG.debug("Invalidating directory checksums for {} folders in context {}...",
-                        entry.getValue().size(), entry.getKey().intValue());
+                        I(entry.getValue().size()), entry.getKey());
                     checksumStore.removeAllDirectoryChecksums(new ArrayList<FolderID>(entry.getValue()));
                 }
             } catch (OXException e) {
@@ -302,7 +303,7 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                 for (Map.Entry<Integer, Set<FileID>> entry : fileChecksumsToInvalidate.entrySet()) {
                     RdbChecksumStore checksumStore = new RdbChecksumStore(entry.getKey().intValue());
                     LOG.debug("Invalidating file checksums for {} files in context {}...",
-                        entry.getValue().size(), entry.getKey().intValue());
+                        I(entry.getValue().size()), entry.getKey());
                     checksumStore.removeFileChecksums(entry.getValue().toArray(new FileID[entry.getValue().size()]));
                 }
             } catch (OXException e) {
@@ -317,7 +318,7 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                 for (Map.Entry<Integer, Set<FolderID>> entry : fileChecksumsInFolderToInvalidate.entrySet()) {
                     RdbChecksumStore checksumStore = new RdbChecksumStore(entry.getKey().intValue());
                     LOG.debug("Invalidating file checksums for {} folders in context {}...",
-                        entry.getValue().size(), entry.getKey().intValue());
+                        I(entry.getValue().size()), entry.getKey());
                     checksumStore.removeFileChecksumsInFolders(new ArrayList<FolderID>(entry.getValue()));
                 }
             } catch (OXException e) {

@@ -49,12 +49,10 @@
 
 package com.openexchange.groupware.tasks.database;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -83,24 +81,28 @@ public final class TasksModifyCostColumnTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        Connection con = service.getForUpdateTask(contextID);
-        Column actualCostsColumn = new Column("actual_costs", "DECIMAL(12,2) DEFAULT NULL");
-        Column targetCostsColumn = new Column("target_costs", "DECIMAL(12,2) DEFAULT NULL");
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            startTransaction(con);
+            con.setAutoCommit(false);
+            rollback = true;
+
+            Column actualCostsColumn = new Column("actual_costs", "DECIMAL(12,2) DEFAULT NULL");
+            Column targetCostsColumn = new Column("target_costs", "DECIMAL(12,2) DEFAULT NULL");
             Tools.checkAndModifyColumns(con, "task", true, actualCostsColumn, targetCostsColumn);
             Tools.checkAndModifyColumns(con, "del_task", true, actualCostsColumn, targetCostsColumn);
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            service.backForUpdateTask(contextID, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 }

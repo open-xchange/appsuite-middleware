@@ -73,17 +73,45 @@ public class ListContextByFilestore extends ContextAbstraction {
         try {
             parser.ownparse(args2);
 
-            final Filestore fs = parseAndSetFilestoreId(parser);
+            Filestore fs = parseAndSetFilestoreId(parser);
+            Credentials auth = credentialsparsing(parser);
+            boolean csv = null != parser.getOptionValue(this.csvOutputOption);
 
-            final Credentials auth = credentialsparsing(parser);
+            OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
 
-            final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
-            final Context[] ctxs = oxctx.listByFilestore(fs, auth);
-
-            if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(ctxs, parser);
+            boolean first = true;
+            int offset = 0;
+            int length = 10000;
+            Context[] ctxs;
+            for (; (ctxs = oxctx.listByFilestore(fs, offset, length, auth)).length == length; offset = offset + length) {
+                if (first) {
+                    if (csv) {
+                        precsvinfos(ctxs, parser);
+                    } else {
+                        sysoutOutput(ctxs, parser);
+                    }
+                    first = false;
+                } else {
+                    if (csv) {
+                        precsvinfos(ctxs, true, parser);
+                    } else {
+                        sysoutOutput(ctxs, true, parser);
+                    }
+                }
+            }
+            if (first) {
+                if (csv) {
+                    precsvinfos(ctxs, parser);
+                } else {
+                    sysoutOutput(ctxs, parser);
+                }
+                first = false;
             } else {
-                sysoutOutput(ctxs, parser);
+                if (csv) {
+                    precsvinfos(ctxs, true, parser);
+                } else {
+                    sysoutOutput(ctxs, true, parser);
+                }
             }
 
             sysexit(0);

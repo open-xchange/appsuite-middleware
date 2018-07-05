@@ -49,10 +49,9 @@
 
 package com.openexchange.groupware.update.internal;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -60,6 +59,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -71,6 +72,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
@@ -81,7 +83,6 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.caching.SerializedCachingLoader;
 import com.openexchange.tools.caching.StorageLoader;
 import com.openexchange.tools.update.Tools;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Implements loading and storing the schema version information.
@@ -96,8 +97,15 @@ public class SchemaStoreImpl extends SchemaStore {
     private static final String TABLE_NAME = "updateTask";
     private static final String LOCKED = "LOCKED";
     private static final String BACKGROUND = "BACKGROUND";
+    private static final byte[] UUID_LOCKED =     UUIDs.toByteArray(UUIDs.fromUnformattedString("8d8b93e559794baca39daef8f87087a1"));
+    private static final byte[] UUID_BACKGROUND = UUIDs.toByteArray(UUIDs.fromUnformattedString("5b7a2847985a49aa874c17df79af48b3"));
 
-    private final Lock cacheLock = new ReentrantLock();
+    private static final int MYSQL_DEADLOCK = 1213;
+    private static final int MYSQL_DUPLICATE = 1062;
+
+    // -------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private final Lock cacheLock;
     private volatile Cache cache;
 
     /**
@@ -105,24 +113,27 @@ public class SchemaStoreImpl extends SchemaStore {
      */
     public SchemaStoreImpl() {
         super();
+        cacheLock = new ReentrantLock();
     }
 
     @Override
     protected SchemaUpdateState getSchema(final int poolId, final String schemaName, final Connection con) throws OXException {
         final Cache cache = this.cache;
         return SerializedCachingLoader.fetch(cache, CACHE_REGION, null, cacheLock, new StorageLoader<SchemaUpdateState>() {
+
             @Override
             public Serializable getKey() {
                 return cache.newCacheKey(poolId, schemaName);
             }
+
             @Override
             public SchemaUpdateState load() throws OXException {
-                return loadSchema(con);
+                return loadSchema(poolId, schemaName, con);
             }
         });
     }
 
-    static SchemaUpdateState loadSchema(Connection con) throws OXException {
+    static SchemaUpdateState loadSchema(int poolId, String schemaName, Connection con) throws OXException {
         final SchemaUpdateState retval;
         boolean rollback = false;
         try {
@@ -130,7 +141,7 @@ public class SchemaStoreImpl extends SchemaStore {
             rollback = true;
 
             checkForTable(con);
-            retval = loadSchemaStatus(con);
+            retval = loadSchemaStatus(poolId, schemaName, con);
 
             con.commit();
             rollback = false;
@@ -166,92 +177,37 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public void lockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
-        final int poolId = Database.resolvePool(contextId, true);
-        Cache cache = this.cache;
-        CacheKey key = null;
-        if (null != cache) {
-            key = cache.newCacheKey(poolId, schema.getSchema());
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-        lockSchemaDB(schema, contextId, background);
-        if (null != cache && null != key) {
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    private static void lockSchemaDB(final Schema schema, final int contextId, final boolean background) throws OXException {
-        Connection con = Database.get(contextId, true);
-        boolean rollback = false;
+    public void lockSchema(Schema schema, boolean background) throws OXException {
+        Connection con = Database.get(schema.getPoolId(), schema.getSchema());
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
             // Insert lock
-            insertLock(con, schema, background ? BACKGROUND : LOCKED);
+            if (background) {
+                insertLock(con, schema, BACKGROUND, UUID_BACKGROUND);
+            } else {
+                insertLock(con, schema, LOCKED, UUID_LOCKED);
+            }
             // Everything went fine. Schema is marked as locked
             con.commit();
-            rollback = false;
-        } catch (final OXException e) {
-            throw e;
+            rollback = 2;
+            // Invalidate cache
+            invalidateCache(schema);
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
-            Database.back(contextId, true, con);
+            Database.back(schema.getPoolId(), con);
         }
     }
 
-    private static final int MYSQL_DEADLOCK = 1213;
-
-    private static final int MYSQL_DUPLICATE = 1062;
-
-    private static void insertLock(final Connection con, final Schema schema, final String idiom) throws SQLException, OXException {
-        if (hasUUID(con)) {
-            insertLockUUID(con, schema, idiom);
-        } else {
-            insertLockNoUUID(con, schema, idiom);
-        }
-    }
-
-    private static void insertLockNoUUID(Connection con, Schema schema, String idiom) throws OXException {
-        // Check for existing lock exclusively
-        final ExecutedTask[] tasks = readUpdateTasks(con);
-        for (final ExecutedTask task : tasks) {
-            if (idiom.equals(task.getTaskName())) {
-                throw SchemaExceptionCodes.ALREADY_LOCKED.create(schema.getSchema());
-            }
-        }
-        // Insert lock
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("INSERT INTO updateTask (cid,taskName,successful,lastModified) VALUES (0,?,true,?)");
-            stmt.setString(1, idiom);
-            stmt.setLong(2, System.currentTimeMillis());
-            if (stmt.executeUpdate() == 0) {
-                throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
-            }
-        } catch (final SQLException e) {
-            if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode()) {
-                throw SchemaExceptionCodes.ALREADY_LOCKED.create(e, schema.getSchema());
-            }
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    private static void insertLockUUID(Connection con, Schema schema, String idiom) throws OXException {
+    private static void insertLock(Connection con, Schema schema, String idiom, byte[] idiomUUID) throws OXException {
         // Check for existing lock exclusively
         final ExecutedTask[] tasks = readUpdateTasks(con);
         for (final ExecutedTask task : tasks) {
@@ -265,12 +221,12 @@ public class SchemaStoreImpl extends SchemaStore {
             stmt = con.prepareStatement("INSERT INTO updateTask (cid,taskName,successful,lastModified,uuid) VALUES (0,?,true,?,?)");
             stmt.setString(1, idiom);
             stmt.setLong(2, System.currentTimeMillis());
-            stmt.setBytes(3, generateUUID());
+            stmt.setBytes(3, idiomUUID);
             if (stmt.executeUpdate() == 0) {
                 throw SchemaExceptionCodes.LOCK_FAILED.create(schema.getSchema());
             }
         } catch (final SQLException e) {
-            if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode()) {
+            if (MYSQL_DEADLOCK == e.getErrorCode() || MYSQL_DUPLICATE == e.getErrorCode() || Databases.isPrimaryKeyConflictInMySQL(e)) {
                 throw SchemaExceptionCodes.ALREADY_LOCKED.create(e, schema.getSchema());
             }
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -280,36 +236,22 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public boolean tryRefreshSchemaLock(Schema schema, int contextId, boolean background) throws OXException {
-        int poolId = Database.resolvePool(contextId, true);
-        Cache cache = this.cache;
-        CacheKey key = null;
-        if (null != cache) {
-            key = cache.newCacheKey(poolId, schema.getSchema());
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-        boolean refreshed = tryRefreshLock(contextId, background);
-        if (null != cache && null != key) {
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-        return refreshed;
+    public boolean tryRefreshSchemaLock(Schema schema, boolean background) throws OXException {
+        return tryRefreshLock(schema, background);
     }
 
-    private static boolean tryRefreshLock(int contextId, boolean background) throws OXException {
-        Connection con = Database.get(contextId, true);
+    private boolean tryRefreshLock(Schema schema, boolean background) throws OXException {
+        int poolId = schema.getPoolId();
+        Connection con = Database.get(poolId, schema.getSchema());
         try {
             // Refresh lock
-            return tryRefreshLock(con, background ? BACKGROUND : LOCKED);
+            boolean refreshed = tryRefreshLock(con, background ? BACKGROUND : LOCKED);
+            if (refreshed) {
+                invalidateCache(schema);
+            }
+            return refreshed;
         } finally {
-            Database.back(contextId, true, con);
+            Database.back(poolId, con);
         }
     }
 
@@ -329,30 +271,9 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public void unlockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
-        final int poolId = Database.resolvePool(contextId, true);
-        Cache cache = this.cache;
-        CacheKey key = null;
-        if (null != cache) {
-            key = cache.newCacheKey(poolId, schema.getSchema());
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-        unlockSchemaDB(schema, contextId, background);
-        if (null != cache && null != key) {
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    private static void unlockSchemaDB(final Schema schema, final int contextId, final boolean background) throws OXException {
-        Connection con = Database.get(contextId, true);
+    public void unlockSchema(final Schema schema, final boolean background) throws OXException {
+        int poolId = schema.getPoolId();
+        Connection con = Database.get(poolId, schema.getSchema());
         boolean rollback = false;
         try {
             // End of update process, so unlock schema
@@ -363,6 +284,8 @@ public class SchemaStoreImpl extends SchemaStore {
             // Everything went fine. Schema is marked as unlocked
             con.commit();
             rollback = false;
+            // Invalidate
+            invalidateCache(schema);
         } catch (final SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final OXException e) {
@@ -372,7 +295,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 rollback(con);
             }
             autocommit(con);
-            Database.back(contextId, true, con);
+            Database.back(poolId, con);
         }
     }
 
@@ -410,15 +333,14 @@ public class SchemaStoreImpl extends SchemaStore {
     /**
      * @param con connection to the master in transaction mode.
      */
-    private static SchemaUpdateState loadSchemaStatus(final Connection con) throws OXException, SQLException {
+    private static SchemaUpdateState loadSchemaStatus(int poolId, String schemaName, Connection con) throws OXException, SQLException {
         final SchemaUpdateStateImpl retval = new SchemaUpdateStateImpl();
         retval.setBlockingUpdatesRunning(false);
         retval.setBackgroundUpdatesRunning(false);
         loadUpdateTasks(con, retval);
-        retval.setGroupwareCompatible(true);
-        retval.setAdminCompatible(true);
         retval.setServer(Database.getServerName());
-        retval.setSchema(con.getCatalog());
+        retval.setSchema(schemaName);
+        retval.setPoolId(poolId);
         return retval;
     }
 
@@ -437,20 +359,20 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     private static ExecutedTask[] readUpdateTasks(final Connection con) throws OXException {
-        List<ExecutedTask> retval = null;
+        List<ExecutedTask> retval;
         {
             Statement stmt = null;
             ResultSet result = null;
             try {
                 stmt = con.createStatement();
-                result = stmt.executeQuery("SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE");
+                result = stmt.executeQuery("SELECT taskName,successful,lastModified,uuid FROM updateTask WHERE cid=0 FOR UPDATE");
                 if (false == result.next()) {
                     return new ExecutedTask[0];
                 }
 
                 retval = new ArrayList<ExecutedTask>(512);
                 do {
-                    ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)));
+                    ExecutedTask task = new ExecutedTaskImpl(result.getString(1), result.getBoolean(2), new Date(result.getLong(3)), UUIDs.toUUID(result.getBytes(4)));
                     retval.add(task);
                 } while (result.next());
             } catch (final SQLException e) {
@@ -478,87 +400,109 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
-    public void addExecutedTask(final Connection con, final String taskName, final boolean success, final int poolId, final String schema) throws OXException {
-        addExecutedTask(con, taskName, success);
-        Cache cache = this.cache;
-        if (null != cache) {
-            final CacheKey key = cache.newCacheKey(poolId, schema);
-            try {
-                cache.remove(key);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
-        }
+    public void addExecutedTask(Connection con, String taskName, boolean success, int poolId, String schema) throws OXException {
+        doAddExecutedTasks(con, Collections.singletonList(taskName), success, poolId, schema);
+        invalidateCache(poolId, schema);
     }
 
-    private static void addExecutedTask(final Connection con, final String taskName, final boolean success) throws OXException {
-        try {
-            if (hasUUID(con)) {
-                addExecutedTaskUUID(con, taskName, success);
-            } else {
-                addExecutedTaskNoUUID(con, taskName, success);
-            }
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+    @Override
+    public void addExecutedTasks(Connection con, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException {
+        if (null == taskNames || taskNames.isEmpty()) {
+            return;
         }
+
+        doAddExecutedTasks(con, taskNames, success, poolId, schema);
+        invalidateCache(poolId, schema);
     }
 
-    private static void addExecutedTaskNoUUID(Connection con, String taskName, boolean success) throws OXException {
-        boolean update = false;
-        for (final ExecutedTask executed : readUpdateTasks(con)) {
-            if (taskName.equals(executed.getTaskName())) {
-                update = true;
-                break;
-            }
-        }
-        final String insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName) VALUES (0,?,?,?)";
-        final String updateSQL = "UPDATE updateTask SET successful=?, lastModified=? WHERE cid=0 AND taskName=?";
-        PreparedStatement stmt = null;
+    private static void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException {
+        doAddExecutedTasks(con, taskNames, success);
+    }
+
+    private static void doAddExecutedTasks(Connection con, Collection<String> taskNames, boolean success) throws OXException {
+        PreparedStatement insertStatement = null;
+        PreparedStatement updateStatement = null;
         try {
-            stmt = con.prepareStatement(update ? updateSQL : insertSQL);
-            int pos = 1;
-            stmt.setBoolean(pos++, success);
-            stmt.setLong(pos++, System.currentTimeMillis());
-            stmt.setString(pos++, taskName);
-            final int rows = stmt.executeUpdate();
-            if (1 != rows) {
-                throw SchemaExceptionCodes.WRONG_ROW_COUNT.create(I(1), I(rows));
+            long now = System.currentTimeMillis();
+            for (String taskName : taskNames) {
+                if (taskExists(con, taskName)) {
+                    if (null == updateStatement) {
+                        updateStatement = con.prepareStatement("UPDATE updateTask SET successful=?,lastModified=? WHERE cid=0 AND taskName=?");
+                    }
+                    updateTask(updateStatement, taskName, success, now);
+                } else {
+                    if (null == insertStatement) {
+                        insertStatement = con.prepareStatement("INSERT INTO updateTask (cid,successful,lastModified,taskName,uuid) VALUES (0,?,?,?,?)");
+                    }
+                    insertTask(insertStatement, taskName, success, now);
+                }
             }
-        } catch (final SQLException e) {
+            if (null != insertStatement) {
+                insertStatement.executeBatch();
+            }
+            if (null != updateStatement) {
+                updateStatement.executeBatch();
+            }
+        } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(insertStatement, updateStatement);
         }
     }
 
-    private static void addExecutedTaskUUID(Connection con, String taskName, boolean success) throws OXException {
-        boolean update = false;
-        for (final ExecutedTask executed : readUpdateTasks(con)) {
-            if (taskName.equals(executed.getTaskName())) {
-                update = true;
-                break;
-            }
-        }
-        final String insertSQL = "INSERT INTO updateTask (cid,successful,lastModified,taskName,uuid) VALUES (0,?,?,?,?)";
-        final String updateSQL = "UPDATE updateTask SET successful=?, lastModified=? WHERE cid=0 AND taskName=?";
-        PreparedStatement stmt = null;
+    /**
+     * Inserts an update task
+     *
+     * @param insertStatement The {@link PreparedStatement} for the insert
+     * @param taskName the task's name
+     * @param success whether the task was successful
+     * @param now The current time stamp
+     * @throws SQLException if an SQL error is occurred
+     */
+    private static void insertTask(PreparedStatement insertStatement, String taskName, boolean success, long now) throws SQLException {
+        int parameterIndex = 1;
+        insertStatement.setBoolean(parameterIndex++, success);
+        insertStatement.setLong(parameterIndex++, now);
+        insertStatement.setString(parameterIndex++, taskName);
+        insertStatement.setBytes(parameterIndex++, UUIDs.toByteArray(UUID.randomUUID()));
+        insertStatement.addBatch();
+    }
+
+    /**
+     * Updates the status and time stamp of the task with the specified name
+     *
+     * @param updateStatement The {@link PreparedStatement} for the update
+     * @param taskName The task's name
+     * @param success Whether the task was successful
+     * @param now the current time stamp
+     * @throws SQLException if an SQL error is occurred
+     */
+    private static void updateTask(PreparedStatement updateStatement, String taskName, boolean success, long now) throws SQLException {
+        int parameterIndex = 1;
+        updateStatement.setBoolean(parameterIndex++, success);
+        updateStatement.setLong(parameterIndex++, now);
+        updateStatement.setString(parameterIndex, taskName);
+        updateStatement.addBatch();
+    }
+
+    /**
+     * Checks whether a task already exists in the table
+     *
+     * @param con The {@link Connection}
+     * @param taskName The task's name
+     * @return <code>true</code> if another task already exists in the table; <code>false</code> otherwise
+     * @throws SQLException if an SQL error is occurred
+     */
+    private static boolean taskExists(Connection con, String taskName) throws SQLException {
+        PreparedStatement statement = null;
+        ResultSet result = null;
         try {
-            stmt = con.prepareStatement(update ? updateSQL : insertSQL);
-            int pos = 1;
-            stmt.setBoolean(pos++, success);
-            stmt.setLong(pos++, System.currentTimeMillis());
-            stmt.setString(pos++, taskName);
-            if (!update) {
-                stmt.setBytes(pos++, generateUUID());
-            }
-            final int rows = stmt.executeUpdate();
-            if (1 != rows) {
-                throw SchemaExceptionCodes.WRONG_ROW_COUNT.create(I(1), I(rows));
-            }
-        } catch (final SQLException e) {
-            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            statement = con.prepareStatement("SELECT 1 FROM updateTask WHERE cid=0 AND taskName=? FOR UPDATE");
+            statement.setString(1, taskName);
+            result = statement.executeQuery();
+            return result.next();
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(statement, result);
         }
     }
 
@@ -600,12 +544,20 @@ public class SchemaStoreImpl extends SchemaStore {
         }
     }
 
-    private static boolean hasUUID(Connection con) throws SQLException {
-        return Tools.columnExists(con, TABLE_NAME, "uuid");
+    private void invalidateCache(Schema schema) {
+        invalidateCache(schema.getPoolId(), schema.getSchema());
     }
 
-    private static byte[] generateUUID() {
-        UUID uuid = UUID.randomUUID();
-        return UUIDs.toByteArray(uuid);
+    private void invalidateCache(int poolId, String schema) {
+        Cache cache = this.cache;
+        if (null != cache) {
+            CacheKey key = cache.newCacheKey(poolId, schema);
+            try {
+                cache.remove(key);
+            } catch (final OXException e) {
+                LOG.error("", e);
+            }
+        }
     }
+
 }

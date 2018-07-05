@@ -270,20 +270,11 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
                 Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + cookieHash(request, authRequest));
                 if (secretCookie != null && session.getSecret().equals(secretCookie.getValue())) {
-                    try {
-                        SessionUtility.checkIP(session, request.getRemoteAddr());
-                        return session;
-                    } catch (OXException e) {
-                        if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
-                            LOG.debug("Client IP check failed during OAuth flow.");
-                        } else {
-                            throw e;
-                        }
-                    }
+                    SessionUtility.checkIP(session, request.getRemoteAddr());
+                    return session;
                 }
             }
         }
-
         return null;
     }
 
@@ -400,7 +391,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
 
             return redirectLocation;
         } catch (OXException e) {
-            if (SessionExceptionCodes.SESSION_EXPIRED.equals(e) || SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
+            if (SessionExceptionCodes.SESSION_EXPIRED.equals(e)) {
                 Map<String, String> redirectParams = prepareSelfRedirectParams(request, authRequest);
                 redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.SESSION_EXPIRED.getCode());
                 return URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);

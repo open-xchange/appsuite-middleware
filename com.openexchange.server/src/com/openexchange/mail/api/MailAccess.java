@@ -50,7 +50,6 @@
 package com.openexchange.mail.api;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.io.Closeable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -110,7 +109,7 @@ import com.openexchange.version.Version;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable, Closeable, IMailStorage {
+public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable, IMailStorage {
 
     /**
      * Serial version UID
@@ -287,7 +286,13 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @param warnings The warnings to add
      */
     public void addWarnings(final Collection<OXException> warnings) {
-        this.warnings.addAll(warnings);
+        if (null != warnings) {
+            for (OXException warning : warnings) {
+                if (null != warning) {
+                    this.warnings.add(warning);
+                }
+            }
+        }
     }
 
     /**
@@ -764,7 +769,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                         if (null != oauthService) {
                             OAuthAccount oAuthAccount;
                             try {
-                                oAuthAccount = oauthService.getAccount(mailAccount.getMailOAuthId(), session, session.getUserId(), session.getContextId());
+                                oAuthAccount = oauthService.getAccount(session, mailAccount.getMailOAuthId());
                             } catch (Exception x) {
                                 LOG.warn("Failed to load mail-associated OAuth account", x);
                                 oAuthAccount = null;
@@ -849,7 +854,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                     LOG.warn("Detected failed OAuth authentication, but unable to handle as needed service {} is missing", OAuthService.class.getSimpleName());
                 } else {
                     try {
-                        OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                        OAuthAccount oAuthAccount = oauthService.getAccount(session, oauthAccountId);
                         API api = oAuthAccount.getAPI();
                         Throwable cause = e.getCause();
                         return AuthenticationFailureHandlerResult.createErrorResult(OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId())));
@@ -966,7 +971,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         return AuthType.LOGIN == authType;
     }
 
-    @Override
+    /**
+     * Closes this access, trying to put it into cache for re-usage.
+     * <p>
+     * An already closed access is not going to be put into cache and is treated as a no-op.
+     */
     public void close() {
         try { close(true); } catch (final Exception x) { LOG.debug("Error while closing MailAccess instance.", x); }
     }

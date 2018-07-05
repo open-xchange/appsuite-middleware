@@ -55,7 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.rdb.Services;
@@ -64,7 +64,6 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FileStorageRdbCreateTableTask}
@@ -84,12 +83,12 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
         return "CREATE TABLE filestorageAccount (" +
         " cid INT4 unsigned NOT NULL," +
         " user INT4 unsigned NOT NULL," +
-        " serviceId VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " serviceId VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
         " account INT4 unsigned NOT NULL," +
         " confId INT4 unsigned NOT NULL," +
-        " displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+        " displayName VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
         " PRIMARY KEY (cid, user, serviceId, account)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     @Override
@@ -108,9 +107,8 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
     }
 
     @Override
-    public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
-        final int contextId = params.getContextId();
-        createTable("filestorageAccount", getMessagingAccountTable(), contextId);
+    public void perform(PerformParameters params) throws com.openexchange.exception.OXException {
+        createTable("filestorageAccount", getMessagingAccountTable(), params.getConnectionProvider().getConnection());
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageRdbCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", FileStorageRdbCreateTableTask.class.getSimpleName());
     }
@@ -125,9 +123,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
         return new String[] { "filestorageAccount" };
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final DatabaseService ds = getService(DatabaseService.class);
-        final Connection writeCon = ds.getForUpdateTask(contextId);
+    private void createTable(String tablename, String sqlCreate, Connection writeCon) throws OXException {
         PreparedStatement stmt = null;
         try {
             if (tableExists(writeCon, tablename)) {
@@ -138,8 +134,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
-            ds.backWritable(contextId, writeCon);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -151,7 +146,7 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
         } finally {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
         return retval;
     }

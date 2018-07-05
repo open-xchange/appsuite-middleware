@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.List;
 import javax.mail.MessagingException;
+import javax.net.ssl.SSLException;
 import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -73,6 +74,7 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.utils.MailAccountUtils;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -116,12 +118,22 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
         }
     }
 
-    private static boolean indicatesCommunicationProblem(Throwable cause) {
+    protected static boolean indicatesCommunicationProblem(Throwable cause) {
         if (MessagingException.class.isInstance(cause)) {
             Exception ne = ((MessagingException) cause).getNextException();
             return indicatesCommunicationProblem(ne);
         }
         return com.sun.mail.iap.ConnectionException.class.isInstance(cause) || java.net.SocketException.class.isInstance(cause);
+    }
+
+    /**
+     * Checks the specified {@link OXException} for any indication about a potential SSL problem
+     *
+     * @param exception The {@link OXException} to check
+     * @return <code>true</code> if the root cause indicates an SSL problem, <code>false</code> otherwise
+     */
+    protected static boolean indicatesSSLProblem(OXException exception) {
+        return SSLExceptionCode.PREFIX.equals(exception.getPrefix()) || SSLException.class.isInstance(exception.getCause());
     }
 
     protected static boolean checkMailServerURL(MailAccountDescription accountDescription, ServerSession session, List<OXException> warnings, boolean errorOnDenied) throws OXException {
@@ -147,16 +159,20 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
         if (null == mailAccess) {
             return false;
         }
-        // Now try to connect
-        final boolean success = mailAccess.ping();
-        // Add possible warnings
-        {
-            final Collection<OXException> currentWarnings = mailAccess.getWarnings();
-            if (null != currentWarnings) {
-                warnings.addAll(currentWarnings);
+        try {
+            // Now try to connect
+            final boolean success = mailAccess.ping();
+            // Add possible warnings
+            {
+                final Collection<OXException> currentWarnings = mailAccess.getWarnings();
+                if (null != currentWarnings) {
+                    warnings.addAll(currentWarnings);
+                }
             }
+            return success;
+        } finally {
+            mailAccess.close(false);
         }
-        return success;
     }
 
     protected static boolean checkTransportServerURL(MailAccountDescription accountDescription, ServerSession session, List<OXException> warnings, boolean errorOnDenied) throws OXException {
@@ -259,7 +275,7 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
         String password = accountDescription.getPassword();
 
         if (accountId >= 0 && (isEmpty(login) || isEmpty(password))) {
-            /* ID is delivered, but password not set. Thus load from storage version.*/
+            /* ID is delivered, but password not set. Thus load from storage version. */
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             final MailAccount mailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
 

@@ -49,19 +49,12 @@
 
 package com.openexchange.oauth.impl.internal.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -70,13 +63,10 @@ import com.openexchange.tools.update.Tools;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class OAuthCreateTableTask2 extends UpdateTaskAdapter {
+public final class OAuthCreateTableTask2 extends AbstractOAuthUpdateTask {
 
-    private final DatabaseService dbService;
-
-    public OAuthCreateTableTask2(final DatabaseService dbService) {
+    public OAuthCreateTableTask2() {
         super();
-        this.dbService = dbService;
     }
 
     @Override
@@ -85,32 +75,15 @@ public final class OAuthCreateTableTask2 extends UpdateTaskAdapter {
     }
 
     @Override
-    public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection writeCon;
-        try {
-            writeCon = dbService.getForUpdateTask(contextId);
-        } catch (final OXException e) {
-            throw e;
+    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
+        final List<Column> toChange = new ArrayList<Column>();
+        if (Tools.isVARCHAR(connection, CreateOAuthAccountTable.TABLE_NAME, "accessToken")) {
+            toChange.add(new Column("accessToken", "TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL"));
         }
-        final PreparedStatement stmt = null;
-        try {
-            startTransaction(writeCon);
-            final List<Column> toChange = new ArrayList<Column>();
-            if (Tools.isVARCHAR(writeCon, "oauthAccounts", "accessToken")) {
-                toChange.add(new Column("accessToken", "TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL"));
-            }
-            if (Tools.isVARCHAR(writeCon, "oauthAccounts", "accessSecret")) {
-                toChange.add(new Column("accessSecret", "TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL"));
-            }
-            Tools.modifyColumns(writeCon, "oauthAccounts", toChange);
-            writeCon.commit();
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            autocommit(writeCon);
-            closeSQLStuff(stmt);
-            dbService.backForUpdateTask(contextId, writeCon);
+        if (Tools.isVARCHAR(connection, CreateOAuthAccountTable.TABLE_NAME, "accessSecret")) {
+            toChange.add(new Column("accessSecret", "TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL"));
         }
+        Tools.modifyColumns(connection, CreateOAuthAccountTable.TABLE_NAME, toChange);
+
     }
 }

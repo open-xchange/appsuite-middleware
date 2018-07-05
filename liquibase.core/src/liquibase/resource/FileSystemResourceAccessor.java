@@ -1,10 +1,20 @@
 package liquibase.resource;
 
-import java.io.*;
-import java.net.MalformedURLException;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * A FileOpener implementation which finds Files in the
@@ -32,8 +42,9 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
      * @param base The path to use to resolve relative paths
      */
     public FileSystemResourceAccessor(String base) {
-        if (new File(base).isFile())
+        if (new File(base).isFile()) {
             throw new IllegalArgumentException("base must be a directory");
+        }
         baseDirectory = base;
     }
 
@@ -65,13 +76,14 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
             return new Vector<URL>().elements();
         }
         File[] files = directoryFile.listFiles();
-        
+
         List<URL> results = new ArrayList<URL>();
 
         if (files != null) {
             for (File f : files) {
-                if (!f.isDirectory())
+                if (!f.isDirectory()) {
                     results.add(f.toURI().toURL());
+                }
             }
         }
 
@@ -93,9 +105,10 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
     @Override
     public ClassLoader toClassLoader() {
         try {
-            return new URLClassLoader(new URL[]{new URL("file://" + baseDirectory)});
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
+            return AccessController.doPrivileged((PrivilegedExceptionAction<ClassLoader>) () -> new URLClassLoader(new URL[]{new URL("file://" + baseDirectory)}));
+        } catch (PrivilegedActionException e) {
+            Exception exception = e.getException();
+            throw exception instanceof RuntimeException ? (RuntimeException) exception : new RuntimeException(exception);
         }
     }
 

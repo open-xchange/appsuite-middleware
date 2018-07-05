@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/wss4j-1.6.19.jar" sourcepath="lib/source/wss4j-1.6.19-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/cxf-bundle-2.6.8.jar" sourcepath="lib/source/cxf-bundle-2.6.8-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/neethi-3.0.2.jar" sourcepath="lib/source/neethi-3.0.2-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xmlschema-core-2.0.3.jar" sourcepath="lib/source/xmlschema-core-2.0.3-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/wsdl4j-1.6.3.jar" sourcepath="lib/source/wsdl4j-1.6.3-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<accessrules>
 			<accessrule kind="accessible" pattern="com/sun/xml/internal/ws/developer/**"/>
 		</accessrules>
 	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/asm-5.2.jar" sourcepath="lib/source/asm-5.2-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cxf-core-3.2.4.jar" sourcepath="lib/source/cxf-core-3.2.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cxf-rt-bindings-soap-3.2.4.jar" sourcepath="lib/source/cxf-rt-bindings-soap-3.2.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cxf-rt-bindings-xml-3.2.4.jar" sourcepath="lib/source/cxf-rt-bindings-xml-3.2.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cxf-rt-databinding-jaxb-3.2.4.jar" sourcepath="lib/source/cxf-rt-databinding-jaxb-3.2.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cxf-rt-frontend-jaxws-3.2.4.jar" sourcepath="lib/source/cxf-rt-frontend-jaxws-3.2.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cxf-rt-frontend-simple-3.2.4.jar" sourcepath="lib/source/cxf-rt-frontend-simple-3.2.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cxf-rt-transports-http-3.2.4.jar" sourcepath="lib/source/cxf-rt-transports-http-3.2.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cxf-rt-ws-addr-3.2.4.jar" sourcepath="lib/source/cxf-rt-ws-addr-3.2.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cxf-rt-ws-policy-3.2.4.jar" sourcepath="lib/source/cxf-rt-ws-policy-3.2.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/cxf-rt-wsdl-3.2.4.jar" sourcepath="lib/source/cxf-rt-wsdl-3.2.4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/neethi-3.1.1.jar" sourcepath="lib/source/neethi-3.1.1-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wsdl4j-1.6.3.jar" sourcepath="lib/source/wsdl4j-1.6.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xmlschema-core-2.2.3.jar" sourcepath="lib/source/xmlschema-core-2.2.3-sources.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

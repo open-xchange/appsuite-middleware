@@ -22,6 +22,7 @@ public class MoveTest extends AppointmentTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -37,7 +38,7 @@ public class MoveTest extends AppointmentTest {
         appointmentObj.setTitle("testMove2PrivateFolder" + date);
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setShownAs(Appointment.RESERVED);
@@ -60,7 +61,7 @@ public class MoveTest extends AppointmentTest {
         appointmentObj.setTitle("testMove2PublicFolder" + date);
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
         appointmentObj.setShownAs(Appointment.RESERVED);

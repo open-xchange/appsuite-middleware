@@ -49,13 +49,11 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -71,32 +69,37 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
  */
 public class RemoveAliasInUserAttributesTable extends UpdateTaskAdapter {
 
-    private static final String DELETE_ALIAS_STMT = "DELETE FROM user_attribute WHERE name='alias'";
+    /**
+     * Initializes a new {@link RemoveAliasInUserAttributesTable}.
+     */
+    public RemoveAliasInUserAttributesTable() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.getContextId();
-        Connection conn = Database.getNoTimeout(ctxId, true);
-        Statement stmt = null;
+        Connection con = params.getConnection();
         boolean rollback = false;
+        Statement stmt = null;
         try {
-            conn.setAutoCommit(false);
+            con.setAutoCommit(false);
             rollback = true;
-            stmt = conn.createStatement();
-            stmt.execute(DELETE_ALIAS_STMT);
-            conn.commit();
+
+            stmt = con.createStatement();
+            stmt.execute("DELETE FROM user_attribute WHERE name='alias'");
+
+            con.commit();
             rollback = false;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(conn);
-            }
-            autocommit(conn);
             closeSQLStuff(stmt);
-            Database.backNoTimeout(ctxId, true, conn);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 

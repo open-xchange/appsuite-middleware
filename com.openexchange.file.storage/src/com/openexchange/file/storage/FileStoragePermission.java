@@ -145,6 +145,34 @@ public interface FileStoragePermission extends Cloneable {
     void setSystem(int system);
 
     /**
+     * Gets this folder permission's type.
+     *
+     * @return This folder permission's type.
+     */
+    public FileStorageFolderPermissionType getType();
+
+    /**
+     * Sets this folder permission's type.
+     *
+     * @param type This folder permission's type.
+     */
+    public void setType(FileStorageFolderPermissionType type);
+
+    /**
+     * If this permission is handed down from a parent folder this method retrieves the sharing parent folder id.
+     *
+     * @return This sharing folder id
+     */
+    public String getPermissionLegator();
+
+    /**
+     * Sets the id of the folder who has handed down this permission
+     *
+     * @param legator This sharing parent folder
+     */
+    public void setPermissionLegator(String legator);
+
+    /**
      * Checks if this folder permission's entity is a group.
      *
      * @return <code>true</code> if this folder permission's entity is a group; otherwise <code>false</code>

@@ -1,5 +1,14 @@
 package liquibase.util.csv.opencsv.bean;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorManager;
+import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  Copyright 2007 Kyle Miller.
 
@@ -17,15 +26,6 @@ package liquibase.util.csv.opencsv.bean;
  */
 
 import liquibase.util.csv.opencsv.CSVReader;
-
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorManager;
-import java.io.Reader;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CsvToBean {
 

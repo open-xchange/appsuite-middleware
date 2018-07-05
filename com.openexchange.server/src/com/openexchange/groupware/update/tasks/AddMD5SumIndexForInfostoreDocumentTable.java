@@ -49,12 +49,11 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -77,8 +76,7 @@ public class AddMD5SumIndexForInfostoreDocumentTable extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.getContextId();
-        Connection con = Database.getNoTimeout(ctxId, true);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             startTransaction(con);
@@ -100,7 +98,6 @@ public class AddMD5SumIndexForInfostoreDocumentTable extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            Database.backNoTimeout(ctxId, true, con);
         }
     }
 

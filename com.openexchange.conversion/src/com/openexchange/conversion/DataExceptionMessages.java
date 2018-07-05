@@ -49,6 +49,7 @@
 
 package com.openexchange.conversion;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**

@@ -51,7 +51,6 @@ package com.openexchange.scripting.rhino;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ScriptableObject;
-
 import com.openexchange.scripting.rhino.libs.Underscore;
 
 public class SharedScope {

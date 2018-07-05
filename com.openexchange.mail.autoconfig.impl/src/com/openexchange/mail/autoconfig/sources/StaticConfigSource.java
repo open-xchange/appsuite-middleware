@@ -50,8 +50,8 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
+import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 
 /**
  * {@link StaticConfigSource} - An abstract class for static auto-config sources.

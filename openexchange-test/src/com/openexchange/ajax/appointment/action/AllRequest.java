@@ -57,8 +57,6 @@ import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.CommonAllRequest;
-import com.openexchange.ajax.request.AppointmentRequest;
-import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.search.Order;
 
@@ -68,6 +66,10 @@ import com.openexchange.groupware.search.Order;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AllRequest extends CommonAllRequest {
+
+    public static final int[] COLUMNS_ALL_ALIAS = new int[] { 1, 20, 207, 206, 2 };
+
+    public static final int[] COLUMNS_LIST_ALIAS = new int[] { 1, 20, 207, 206, 2, 200, 201, 202, 203, 209, 221, 401, 402, 102, 400, 101, 220, 215, 100 };
 
     public static final int[] GUI_COLUMNS = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID };
 
@@ -98,11 +100,8 @@ public class AllRequest extends CommonAllRequest {
 
     public AllRequest(final int folderId, final int[] columns, final Date start, final Date end, final TimeZone tz, final boolean recurrenceMaster, final boolean showPrivates) {
         super(AbstractAppointmentRequest.URL, folderId, addGUIColumns(columns), 0, null, true);
-        // Add time zone's offset to simulate local time as passed by requests from GUI
-        this.start = addTimeZone2Date(start, tz);
-        this.end = addTimeZone2Date(end, tz);
-//        this.start = start;
-//        this.end = end;
+        this.start = start;
+        this.end = end;
         this.recurrenceMaster = recurrenceMaster;
         this.showPrivates = showPrivates;
         this.timeZoneId = tz.getID();
@@ -186,7 +185,7 @@ public class AllRequest extends CommonAllRequest {
 
         params.add(new Parameter(AJAXServlet.PARAMETER_START, start));
         params.add(new Parameter(AJAXServlet.PARAMETER_END, end));
-        params.add(new Parameter(AppointmentRequest.RECURRENCE_MASTER, recurrenceMaster));
+        params.add(new Parameter(AJAXServlet.PARAMETER_RECURRENCE_MASTER, recurrenceMaster));
         params.add(new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, showPrivates));
 
         return params.toArray(new Parameter[] {});
@@ -201,10 +200,10 @@ public class AllRequest extends CommonAllRequest {
             return new AllParser(isFailOnError(), getColumns());
         } else {
             if (getAlias().equals("all")) {
-                return new AllParser(isFailOnError(), AppointmentAction.COLUMNS_ALL_ALIAS);
+                return new AllParser(isFailOnError(), COLUMNS_ALL_ALIAS);
             }
             if (getAlias().equals("list")) {
-                return new AllParser(isFailOnError(), AppointmentAction.COLUMNS_LIST_ALIAS);
+                return new AllParser(isFailOnError(), COLUMNS_LIST_ALIAS);
             }
         }
         return null;

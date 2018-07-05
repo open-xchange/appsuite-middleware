@@ -52,7 +52,6 @@ package com.openexchange.groupware.update.tasks;
 import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -87,8 +86,7 @@ public final class POP3ExtendUidlTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        Connection con = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             Databases.startTransaction(con);
@@ -113,7 +111,6 @@ public final class POP3ExtendUidlTask extends UpdateTaskAdapter {
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
         }
     }
 

@@ -1,0 +1,59 @@
+/chronos?action=updateAttendee:
+  put:
+    operationId: updateAttendee
+    tags:
+      - Chronos
+    summary: Updates the attendee status of an event.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosRecurrenceID"
+      - $ref: "#/parameters/QueryParamChronosNotification"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the event.
+        required: true
+      - $ref: "#/parameters/QueryParamChronosCheckConflicts"
+      - in: query
+        name: rangeStart
+        type: string
+        description: |
+          If expand is set to 'true' this parameter defines a lower inclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+          Only events which start on or after this date are returned.
+        required: false
+      - in: query
+        name: rangeEnd
+        type: string
+        description: |
+          If expand is set to 'true' this parameter defines a upper exclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+          Only events which end before this date are returned.
+        required: false
+      - $ref: "#/parameters/QueryParamChronosExpand"
+      - in: body
+        name: body
+        description: A JSON object with the field `attendee` and `alarms`.
+        required: true
+        schema:
+          type: object
+          title: AttendeeAndAlarm
+          properties:
+            attendee:
+              $ref: "#/definitions/Attendee"
+            alarms:
+              type: array
+              description: A list of alarms for this event.
+              items:
+                $ref: "#/definitions/Alarm"
+    responses:
+      200:
+        description: |
+          A JSON object containing containing the result of the update. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/ChronosCalendarResultResponse"

@@ -50,9 +50,9 @@
 package com.openexchange.tools.iterator;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.LinkedList;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 

@@ -50,7 +50,7 @@
 package com.openexchange.tools.update;
 
 /**
- * {@link Column}
+ * {@link Column} - Immutable column representation providing column name and column definition.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -91,4 +91,17 @@ public class Column {
     public String getDefinition() {
         return definition;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(32);
+        if (name != null) {
+            builder.append(name);
+        }
+        if (definition != null) {
+            builder.append(" ").append(definition);
+        }
+        return builder.toString();
+    }
+
 }

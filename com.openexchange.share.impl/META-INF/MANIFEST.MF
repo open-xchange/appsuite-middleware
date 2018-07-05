@@ -2,12 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The share implementation bundle
 Bundle-SymbolicName: com.openexchange.share.impl
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.collect;version="18.0.0",
- com.google.common.io;version="18.0.0",
- com.openexchange.capabilities,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.capabilities,
  com.openexchange.cluster.timer,
  com.openexchange.config,
  com.openexchange.config.cascade,
@@ -28,6 +26,7 @@ Import-Package: com.google.common.collect;version="18.0.0",
  com.openexchange.folderstorage.filestorage.contentType,
  com.openexchange.folderstorage.type,
  com.openexchange.group,
+ com.openexchange.groupware.alias,
  com.openexchange.groupware.container,
  com.openexchange.groupware.container.mail,
  com.openexchange.groupware.contexts,
@@ -68,6 +67,7 @@ Import-Package: com.google.common.collect;version="18.0.0",
  com.openexchange.sessiond,
  com.openexchange.share,
  com.openexchange.share.core,
+ com.openexchange.share.core.groupware,
  com.openexchange.share.core.tools,
  com.openexchange.share.groupware,
  com.openexchange.share.groupware.spi,

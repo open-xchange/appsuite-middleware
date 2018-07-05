@@ -139,7 +139,7 @@ public class Bug15903Test extends CalendarTestManagerTest {
         UserParticipant uP = new UserParticipant(firstUserId);
         userParticipants.add(uP);
         reload.setParticipants(participants);
-        //reload.setUsers(userParticipants);
+        reload.setUsers(userParticipants);
         reload.setIgnoreConflicts(true);
         catm.update(reload);
         Appointment reloadAgain = catm.get(appointment);

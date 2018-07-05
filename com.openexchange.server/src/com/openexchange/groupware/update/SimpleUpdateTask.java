@@ -49,12 +49,9 @@
 
 package com.openexchange.groupware.update;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 
 /**
@@ -67,21 +64,29 @@ public abstract class SimpleUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public final void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            startTransaction(con);
             if (!shouldRun(con)) {
                 return;
             }
+
+            con.setAutoCommit(false);
+            rollback = true;
+
             perform(con);
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 

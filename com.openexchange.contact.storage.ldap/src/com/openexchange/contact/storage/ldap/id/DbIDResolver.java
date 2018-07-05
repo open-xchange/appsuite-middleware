@@ -59,10 +59,10 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
 import com.openexchange.contact.storage.ldap.internal.LdapServiceLookup;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DbIDResolver}
@@ -127,13 +127,13 @@ public class DbIDResolver extends DefaultLdapIDResolver {
                 this.contactIDs.put(ldapID, Integer.valueOf(id));
                 return id;
             } catch (SQLException e) {
-                DBUtils.rollback(connection);
+                Databases.rollback(connection);
                 throw ContactExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
                 if (false == committed) {
-                    DBUtils.rollback(connection);
+                    Databases.rollback(connection);
                 }
-                DBUtils.autocommit(connection);
+                Databases.autocommit(connection);
                 databaseService.backWritable(contextID, connection);
             }
         }
@@ -191,7 +191,7 @@ public class DbIDResolver extends DefaultLdapIDResolver {
             resultSet = stmt.executeQuery();
             return resultSet.next() ? resultSet.getString("ldapId") : null;
         } finally {
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -206,7 +206,7 @@ public class DbIDResolver extends DefaultLdapIDResolver {
             resultSet = stmt.executeQuery();
             return resultSet.next() ? resultSet.getInt("contact") : -1;
         } finally {
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
     }
 
@@ -224,7 +224,7 @@ public class DbIDResolver extends DefaultLdapIDResolver {
             }
             return id;
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -243,7 +243,7 @@ public class DbIDResolver extends DefaultLdapIDResolver {
                 map.put(ldapID, contactID);
             }
         } finally {
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
         return map;
     }

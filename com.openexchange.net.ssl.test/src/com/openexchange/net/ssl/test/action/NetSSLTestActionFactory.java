@@ -83,16 +83,6 @@ public class NetSSLTestActionFactory implements AJAXActionServiceFactory {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
-     */
-    @Override
-    public Collection<?> getSupportedServices() {
-        return supportedServices;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
      */
     @Override

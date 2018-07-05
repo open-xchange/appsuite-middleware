@@ -49,20 +49,15 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.database.DatabaseFolder;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -113,15 +108,6 @@ public final class SystemRootFolder {
         return retval;
     }
 
-    /**
-     * Gets the subfolder identifiers of database folder representing system root folder for given user.
-     *
-     * @return The subfolder identifiers of database folder representing system root folder for given user
-     */
-    public static List<String[]> getSystemRootFolderSubfolder(final User user, final UserPermissionBits userPerm, final Context ctx, final Connection con) throws OXException {
-        return getSystemRootFolderSubfolder(user.getLocale());
-    }
-
     private static final ConcurrentMap<Locale, List<String[]>> CACHED_SUBFOLDERS = new ConcurrentHashMap<Locale, List<String[]>>(16);
 
     /**
@@ -129,7 +115,7 @@ public final class SystemRootFolder {
      *
      * @return The subfolder identifiers of database folder representing system root folder for given user
      */
-    private static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
+    public static List<String[]> getSystemRootFolderSubfolder(final Locale locale) {
         /*
          * The system root folder
          */

@@ -2,10 +2,20 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Open-Xchange Google API Client
 Bundle-SymbolicName: com.openexchange.google.api.client
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.api.client.googleapis.auth.oauth2,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.fasterxml.jackson.annotation,
+ com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util,
+ com.fasterxml.jackson.databind,
+ com.google.api.client.googleapis.auth.oauth2,
  com.google.api.client.googleapis.javanet,
  com.google.api.client.http,
  com.google.api.client.http.javanet,
@@ -13,7 +23,6 @@ Import-Package: com.google.api.client.googleapis.auth.oauth2,
  com.google.api.client.json.jackson,
  com.google.api.client.json.jackson2,
  com.openexchange.cluster.lock,
- com.openexchange.cluster.lock.policies,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.exception,
@@ -22,6 +31,7 @@ Import-Package: com.google.api.client.googleapis.auth.oauth2,
  com.openexchange.net.ssl.exception,
  com.openexchange.oauth,
  com.openexchange.osgi,
+ com.openexchange.policy.retry,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,

@@ -50,15 +50,15 @@
 package com.openexchange.uadetector.internal;
 
 import java.util.concurrent.TimeUnit;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.openexchange.java.Strings;
+import com.openexchange.uadetector.UserAgentParser;
 import net.sf.uadetector.ReadableUserAgent;
 import net.sf.uadetector.UserAgent;
 import net.sf.uadetector.UserAgentFamily;
 import net.sf.uadetector.UserAgentStringParser;
 import net.sf.uadetector.service.UADetectorServiceFactory;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.openexchange.java.Strings;
-import com.openexchange.uadetector.UserAgentParser;
 
 
 /**

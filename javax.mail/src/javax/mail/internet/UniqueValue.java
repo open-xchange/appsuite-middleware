@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,7 +40,6 @@
 
 package javax.mail.internet;
 
-import java.net.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.Session;
 
@@ -70,7 +69,7 @@ class UniqueValue {
      * and the current time (in milliseconds).
      */
     public static String getUniqueBoundaryValue() {
-	StringBuffer s = new StringBuffer();
+	StringBuilder s = new StringBuilder();
 	long hash = s.hashCode();
 
 	// Unique string is ----=_Part_<part>_<hashcode>.<currentTime>
@@ -107,7 +106,7 @@ class UniqueValue {
 	if (at >= 0)
 	    suffix = suffix.substring(at);
 
-	StringBuffer s = new StringBuffer();
+	StringBuilder s = new StringBuilder();
 
 	// Unique string is <hashcode>.<id>.<currentTime><suffix>
 	s.append(s.hashCode()).append('.').

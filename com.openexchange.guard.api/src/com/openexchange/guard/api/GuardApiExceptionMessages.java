@@ -59,16 +59,19 @@ import com.openexchange.i18n.LocalizableStrings;
 public final class GuardApiExceptionMessages implements LocalizableStrings {
 
     // A Guard error occurred: %1$s
-    public static final String GUARD_ERROR_MSG = "A Guard error occurred: %1$s";
+    public static final String GUARD_ERROR_MSG = "An error occurred: %1$s";
 
     // A Guard error occurred: %1$s
-    public static final String GUARD_SERVER_ERROR_MSG = "A Guard server error occurred with HTTP status code %1$s. Error message: %2$s";
+    public static final String GUARD_SERVER_ERROR_MSG = "A server error occurred with HTTP status code %1$s. Error message: %2$s";
 
     // Invalid Guard URL: %1$s
-    public static final String INVALID_GUARD_URL_MSG = "The provided Guard URL: %1$s is invalid";
+    public static final String INVALID_GUARD_URL_MSG = "The provided URL: %1$s is invalid";
 
     // The Guard resource does not exist: %1$s
-    public static final String NOT_FOUND_MSG = "The provided Guard resource does not exist: %1$s";
+    public static final String NOT_FOUND_MSG = "The provided resource does not exist: %1$s";
+
+    // The Guard resource does not exist
+    public static final String NOT_FOUND_SIMPLE_MSG = "The resource does not exist";
 
     // An I/O error occurred: %1$s
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
@@ -76,8 +79,7 @@ public final class GuardApiExceptionMessages implements LocalizableStrings {
     // Authentication failed: %1$s
     public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
 
-    // The Guard resource does not exist
-    public static final String NOT_FOUND_SIMPLE_MSG = "The Guard resource does not exist";
+    public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
 
     /**
      * Initializes a new {@link GuardApiExceptionMessages}.

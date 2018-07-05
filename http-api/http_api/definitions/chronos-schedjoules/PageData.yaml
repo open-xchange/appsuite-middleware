@@ -1,0 +1,27 @@
+type: object
+properties:
+  item_id:
+    type: integer
+    description: The page's unique identifier
+  name:
+    type: string
+    description: The page's name (localisable)
+  category_id:
+    type: integer
+    description: The page's category identifier (Not applicable to root page)
+  category:
+    type: string
+    description: The page's category name (Not applicable to root page)
+  country:
+    type: string
+    description: The country for which the page is valid for
+  description:
+    type: string
+    description: The page's description (Not applicable to root page)
+  icon:
+    type: string
+    description: The URL of the page's icon (Not applicable to root page)
+  page_sections:
+    type: array
+    items:
+      $ref: "#/definitions/PageSectionsData"

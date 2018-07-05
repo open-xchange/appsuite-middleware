@@ -59,6 +59,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.utils.MessageUtility;
@@ -139,7 +140,7 @@ public final class RFC2231Tools {
     public static String rfc2231Decode(final String encoded, final String charset) {
         if ((encoded == null) || (encoded.length() == 0)) {
             return encoded;
-        } else if (null == charset || !Charset.isSupported(charset)) {
+        } else if (null == charset || !CharsetDetector.isValid(charset)) {
             return encoded;
         }
 
@@ -264,7 +265,7 @@ public final class RFC2231Tools {
             return toEncode;
         } else if (!force && isAscii(toEncode)) {
             return toEncode;
-        } else if (!Charset.isSupported(charset)) {
+        } else if (!CharsetDetector.isValid(charset)) {
             return toEncode;
         }
         final StringBuilder retval = new StringBuilder(toEncode.length() * 3);

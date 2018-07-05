@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,15 +40,13 @@
 
 package com.sun.mail.imap;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-
-import javax.mail.*;
-
+import java.util.List;
+import javax.mail.Message;
 import com.sun.mail.imap.protocol.MessageSet;
 import com.sun.mail.imap.protocol.UIDSet;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Holder for some static utility methods.
@@ -77,7 +75,7 @@ public final class Utility {
      * @return		the MessageSet array
      */
     public static MessageSet[] toMessageSet(Message[] msgs, Condition cond) {
-	List<MessageSet> v = new ArrayList<MessageSet>(1);
+	List<MessageSet> v = new ArrayList<>(1);
 	int current, next;
 
 	IMAPMessage msg;
@@ -154,7 +152,7 @@ public final class Utility {
 	msgs = msgs.clone();
 	Arrays.sort(msgs,
 	    new Comparator<Message>() {
-		//@Override
+		@Override
 		public int compare(Message msg1, Message msg2) {
 		    return msg1.getMessageNumber() - msg2.getMessageNumber();
 		}
@@ -170,7 +168,7 @@ public final class Utility {
      * @return		the UIDSet array
      */
     public static UIDSet[] toUIDSet(Message[] msgs) {
-	List<UIDSet> v = new ArrayList<UIDSet>(1);
+	List<UIDSet> v = new ArrayList<>(1);
 	long current, next;
 
 	IMAPMessage msg;
@@ -235,4 +233,41 @@ public final class Utility {
     public static interface Condition {
 	public boolean test(IMAPMessage message);
     }
+
+    /** ASCII-wise to upper-case */
+    public static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+
+        int length = chars.length();
+        StringBuilder builder = null;
+        for (int i = 0; i < length; i++) {
+            char c = chars.charAt(i);
+            if (null == builder) {
+                if ((c >= 'a') && (c <= 'z')) {
+                    builder = new StringBuilder(length);
+                    if (i > 0) {
+                        builder.append(chars, 0, i);
+                    }
+                    builder.append((char) (c & 0x5f));
+                }
+            } else {
+                builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+            }
+        }
+        return null == builder ? chars.toString() : builder.toString();
+    }
+    
+    /** To upper-case */
+    public static char toUpperCase(final char c) {
+        if ((c >= 'A') && (c <= 'Z')) {
+            return c;
+        }
+        if ((c >= 'a') && (c <= 'z')) {
+            return (char) (c & 0x5f);
+        }
+        return Character.toUpperCase(c);
+    }
+
 }

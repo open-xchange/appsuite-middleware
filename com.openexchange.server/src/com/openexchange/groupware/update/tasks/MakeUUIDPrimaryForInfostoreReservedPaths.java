@@ -53,16 +53,14 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
-
 
 /**
  * {@link MakeUUIDPrimaryForInfostoreReservedPaths}
@@ -74,9 +72,12 @@ public class MakeUUIDPrimaryForInfostoreReservedPaths extends UpdateTaskAdapter 
     @Override
     public void perform(PerformParameters params) throws OXException {
         ProgressState progress = params.getProgressState();
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
-            DBUtils.startTransaction(connection);
+            Databases.startTransaction(connection);
+            rollback = true;
+
             final String table = "infostoreReservedPaths";
             final String column = "uuid";
             progress.setTotal(getTotalRows(table, connection));
@@ -87,13 +88,16 @@ public class MakeUUIDPrimaryForInfostoreReservedPaths extends UpdateTaskAdapter 
             AddUUIDForInfostoreReservedPaths.fillUUIDs(connection, table, progress);
             Tools.modifyColumns(connection, table, new Column(column, "BINARY(16) NOT NULL"));
             Tools.createPrimaryKeyIfAbsent(connection, table, new String[] { "cid", column });
+
             connection.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
+            if (rollback) {
+                Databases.rollback(connection);
+            }
+            Databases.autocommit(connection);
         }
     }
 
@@ -113,7 +117,7 @@ public class MakeUUIDPrimaryForInfostoreReservedPaths extends UpdateTaskAdapter 
                 rows += rs.getInt(1);
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         return rows;
     }

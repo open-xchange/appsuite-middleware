@@ -1,0 +1,92 @@
+[
+    {
+        "language_id": 1,
+        "name": "Français",
+        "iso_639_1": "fr"
+    },
+    {
+        "language_id": 2,
+        "name": "Nederlands",
+        "iso_639_1": "nl"
+    },
+    {
+        "language_id": 3,
+        "name": "Deutsch",
+        "iso_639_1": "de"
+    },
+    {
+        "language_id": 4,
+        "name": "English",
+        "iso_639_1": "en"
+    },
+    {
+        "language_id": 5,
+        "name": "中文",
+        "iso_639_1": "zh"
+    },
+    {
+        "language_id": 6,
+        "name": "Español",
+        "iso_639_1": "es"
+    },
+    {
+        "language_id": 7,
+        "name": "Italiano",
+        "iso_639_1": "it"
+    },
+    {
+        "language_id": 8,
+        "name": "Polski",
+        "iso_639_1": "pl"
+    },
+    {
+        "language_id": 9,
+        "name": "Português",
+        "iso_639_1": "pt"
+    },
+    {
+        "language_id": 10,
+        "name": "عربى",
+        "iso_639_1": "ar"
+    },
+    {
+        "language_id": 11,
+        "name": "Русский",
+        "iso_639_1": "ru"
+    },
+    {
+        "language_id": 12,
+        "name": "日本語",
+        "iso_639_1": "ja"
+    },
+    {
+        "language_id": 13,
+        "name": "Svenska",
+        "iso_639_1": "sv"
+    },
+    {
+        "language_id": 14,
+        "name": "Danish",
+        "iso_639_1": "da"
+    },
+    {
+        "language_id": 15,
+        "name": "Norsk bokmål",
+        "iso_639_1": "no"
+    },
+    {
+        "language_id": 16,
+        "name": "Suomi",
+        "iso_639_1": "fi"
+    },
+    {
+        "language_id": 18,
+        "name": "Türkçe",
+        "iso_639_1": "tr"
+    },
+    {
+        "language_id": 27,
+        "name": "한국어",
+        "iso_639_1": "ko"
+    }
+]

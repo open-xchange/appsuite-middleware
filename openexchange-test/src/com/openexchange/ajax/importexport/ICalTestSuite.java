@@ -51,7 +51,6 @@ package com.openexchange.ajax.importexport;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -59,10 +58,10 @@ import com.openexchange.test.concurrent.ParallelSuite;
  */
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
-    ICalImportTest.class,
     ICalTaskExportTest.class,
     ICalAppointmentExportTest.class,
     ICalSeriesTests.class,
+    ICalSingleAndBatchExportTest.class,
     Bug9840Test.class,
     Bug11724Test.class,
     Bug11868Test.class,
@@ -75,7 +74,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug17963Test_DateWithoutTime.class,
     Bug19046Test_SeriesWithExtraneousStartDate.class,
     Bug19089Test.class,
-    Bug19463Test_TimezoneOffsetsWith4Digits.class,
     Bug19681_TimezoneForUtcProperties.class,
     Bug19915Test.class,
     Bug20132Test_WrongRecurrenceDatePosition.class,
@@ -90,7 +88,9 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug22059Test.class,
     Bug27474Test.class,
     Bug28071Test.class,
-    Bug56435Test_TaskStateRoundtrip.class
+    Bug56435Test_TaskStateRoundtrip.class,
+    Bug8475Test_TaskAttendeeHandling.class,
+    Bug8654Test_TaskImport.class
 })
 public final class ICalTestSuite {
 }

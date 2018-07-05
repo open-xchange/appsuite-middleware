@@ -41,7 +41,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.CalendarException;
 import net.fortuna.ical4j.model.Component;
@@ -67,9 +68,6 @@ import net.fortuna.ical4j.model.property.XProperty;
 import net.fortuna.ical4j.util.CompatibilityHints;
 import net.fortuna.ical4j.util.Constants;
 import net.fortuna.ical4j.util.Strings;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Parses and builds an iCalendar model from an input stream. Note that this class is not thread-safe.

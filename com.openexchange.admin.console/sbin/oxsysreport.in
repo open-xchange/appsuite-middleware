@@ -89,7 +89,7 @@ EXCLUDE_OLDER_LOGS_THAN_VALUES="0 ... n Days or 'all'"
 EXCLUDE_SECRETS=true
 EXCLUDE_SECRETS_LONG=exclude-ox-secrets
 EXCLUDE_SECRETS_VALUES="true false"
-KEEP_LOGS_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log ox-udm-modules-switch.log"
+KEEP_LOGS_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log ox-udm-modules-switch.log console.log guard.log"
 READEREINGINE_CACHE_DIR=/var/spool/open-xchange/documentconverter/readerengine.cache
 PROCS='
     cat /proc/cpuinfo;
@@ -97,6 +97,7 @@ PROCS='
     dmesg;
     free;
     getmissingservices;
+    hostname -f;
     java -version;
     listbundles;
     listconfigdiff;
@@ -123,7 +124,7 @@ LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cut cp df du egrep find file grep gzip head mkdir mktemp rm rmdir sed sleep tail tar tr xargs"
 OX_LOG_DIR=/var/log/open-xchange
-OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/documentconverter/etc"
+OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/documentconverter/etc /opt/open-xchange/mobile-api-facade/etc"
 OTHER_CONFIGS="/etc/security/limits.conf /etc/*-release"
 
 ###############################################################################
@@ -917,7 +918,7 @@ to separated this first!
    chown open-xchange:open-xchange ${OX_LOG_DIR}
 
 EOF
-read -p "Press ENTER to continue or [ctrl+c] to cancel..."
+read -p "Press ENTER to continue without log files or [ctrl+c] to cancel..."
 echo
 }
 

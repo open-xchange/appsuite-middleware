@@ -438,7 +438,7 @@ public final class HtmlServices {
     /**
      * Checks whether to use Jericho HTML parser or Jsoup (<code>"<i>com.openexchange.html.jericho</i>"</code> property).
      *
-     * @return <code>true</code> for Jericho; otherwise <code>false</code>
+     * @return <code>true</code> for Jericho; otherwise <code>false</code> (default)
      */
     public static boolean useJericho() {
         Boolean i = useJericho;
@@ -447,7 +447,7 @@ public final class HtmlServices {
                 i = useJericho;
                 if (null == i) {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
-                    boolean def = true;
+                    boolean def = false;
                     if (null == service) {
                         return def;
                     }

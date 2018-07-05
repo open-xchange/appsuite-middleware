@@ -80,4 +80,13 @@ public class PGPKeyParserImpl implements PGPKeyRingParser {
         KeyRingParserResult result = parser.parse(inputStream);
         return result;
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.pgp.keys.parsing.PGPKeyRingParser#parse(java.lang.String)
+     */
+    @Override
+    public KeyRingParserResult parse(String data) throws IOException {
+        KeyRingParserResult result = parser.parse(data);
+        return result;
+    }
 }

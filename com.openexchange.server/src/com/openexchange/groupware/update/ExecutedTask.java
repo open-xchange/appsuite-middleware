@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update;
 
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * {@link ExecutedTask}
@@ -58,9 +59,31 @@ import java.util.Date;
  */
 public interface ExecutedTask extends Comparable<ExecutedTask> {
 
+    /**
+     * Returns the task's name
+     * 
+     * @return the task's name
+     */
     String getTaskName();
 
+    /**
+     * Returns whether the task was successfully executed
+     * 
+     * @return <code>true</code> if the task was successfully executed; <code>false otherwise</code>
+     */
     boolean isSuccessful();
 
+    /**
+     * Returns the last modified {@link Date}
+     * 
+     * @return the last modified {@link Date}
+     */
     Date getLastModified();
+
+    /**
+     * Returns the task's {@link UUID}
+     * 
+     * @return the task's {@link UUID}
+     */
+    UUID getUUID();
 }

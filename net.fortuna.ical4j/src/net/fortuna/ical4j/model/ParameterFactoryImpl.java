@@ -32,7 +32,6 @@
 package net.fortuna.ical4j.model;
 
 import java.net.URISyntaxException;
-
 import net.fortuna.ical4j.model.parameter.Abbrev;
 import net.fortuna.ical4j.model.parameter.AltRep;
 import net.fortuna.ical4j.model.parameter.Cn;

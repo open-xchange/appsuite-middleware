@@ -49,17 +49,13 @@
 
 package com.openexchange.groupware.attach;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import com.openexchange.database.provider.DBPoolProvider;
-import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.ContactEventInterface;
 import com.openexchange.event.impl.NoDelayEventInterface;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tasks.Task;
@@ -68,17 +64,14 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
-public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface, NoDelayEventInterface {
+public class AttachmentCleaner implements TaskEventInterface, ContactEventInterface, NoDelayEventInterface {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentCleaner.class);
 
     private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission
-
-    @Override
-    public final void appointmentDeleted(final Appointment appointmentObj, final Session sessionObj) {
-        deleteAttachments(appointmentObj.getParentFolderID(), appointmentObj.getObjectID(), Types.APPOINTMENT, sessionObj);
-    }
 
     @Override
     public final void taskDeleted(final Task taskObj, final Session sessionObj) {
@@ -89,18 +82,6 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
     @Override
     public final void contactDeleted(final Contact contactObj, final Session sessionObj) {
         deleteAttachments(contactObj.getParentFolderID(), contactObj.getObjectID(), Types.CONTACT, sessionObj);
-
-    }
-
-    @Override
-    public final void appointmentCreated(final Appointment appointmentObj, final Session sessionObj) {
-        // Nothing to do
-
-    }
-
-    @Override
-    public final void appointmentModified(final Appointment appointment, final Session session) {
-        // Nothing to do.
 
     }
 
@@ -204,26 +185,6 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
             log(e);
         }
         log(x);
-    }
-
-    @Override
-    public void appointmentAccepted(final Appointment appointmentObj, final Session sessionObj) {
-        // Nothing to do
-    }
-
-    @Override
-    public void appointmentDeclined(final Appointment appointmentObj, final Session sessionObj) {
-        // Nothing to do
-    }
-
-    @Override
-    public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session sessionObj) {
-        // Nothing to do
-    }
-
-    @Override
-    public void appointmentWaiting(final Appointment appointmentObj, final Session sessionObj) {
-        // Nothing to do
     }
 
     @Override

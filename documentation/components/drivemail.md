@@ -22,7 +22,7 @@ This feature is included in ``open-xchange-core`` package. Thus, no additional p
 An administrator is able to configure this feature through `/opt/open-xchange/etc/mail-compose.properties` file. All configuration options are config-cascade capable.
 
 ## Enabling
-The feature is enabled via [com.openexchange.mail.compose.share.enabled](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.enabled) property, which defaults to ``true``.
+The feature is enabled via [com.openexchange.mail.compose.share.enabled](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.enabled) property, which defaults to ``true``.
 
 If enabled and user holds sufficient capabilities (_"infostore"_ and _"share_links"_), clients are allowed to signal that a mail is supposed to be sent containing a share link, rather than actual file attachments, through enhancing the JSON request body of the ``/mail?action=new`` call:
 
@@ -41,14 +41,14 @@ If enabled and user holds sufficient capabilities (_"infostore"_ and _"share_lin
 
 ## Display name
 
-It is possible to change the display name of that feature according to customer needs through [com.openexchange.mail.compose.share.name](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.name) option. Default is _Drive Mail_.
+It is possible to change the display name of that feature according to customer needs through [com.openexchange.mail.compose.share.name](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.name) option. Default is _Drive Mail_.
 
 ## Threshold
 
-Since file attachments are not physically attached, but stored in Drive of sending user, a user can be forced to send a share link through specifying property [com.openexchange.mail.compose.share.threshold](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.threshold). That option accepts a threshold, which is the total number of bytes of all file attachments that are allowed to be sent physically attached. Once exceeded the file attachments are made accessible via a share link.
+Since file attachments are not physically attached, but stored in Drive of sending user, a user can be forced to send a share link through specifying property [com.openexchange.mail.compose.share.threshold](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.threshold). That option accepts a threshold, which is the total number of bytes of all file attachments that are allowed to be sent physically attached. Once exceeded the file attachments are made accessible via a share link.
 
 ## External recipient locale
-The option [com.openexchange.mail.compose.share.externalRecipientsLocale](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.externalRecipientsLocale) specifies what locale to use when composing a mail containing share information for an external recipient.
+The option [com.openexchange.mail.compose.share.externalRecipientsLocale](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.externalRecipientsLocale) specifies what locale to use when composing a mail containing share information for an external recipient.
 
 This option either accepts special value ``user-defined`` (that is to choose sending user's locale) or a locale identifier according to RFC 2798 and 2068; such as ``en_US``.
 
@@ -57,5 +57,5 @@ By default a user can optionally specify whether a share link has an expiry date
 
 An administrator can enforce, whether an expiry date and an accompanying auto-delete flag is required.
 
- - [com.openexchange.mail.compose.share.requiredExpiration](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.requiredExpiration) (default id ``false``). If set to ``true``, the user is required to specify an expiry date for the created share link. Otherwise sending the mail is rejected.
- - [com.openexchange.mail.compose.share.forceAutoDelete](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.forceAutoDelete) (default id ``false``). If set to ``true``, the files/folder associated with the share will be automatically deletes once the share link expires.
+ - [com.openexchange.mail.compose.share.requiredExpiration](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.requiredExpiration) (default id ``false``). If set to ``true``, the user is required to specify an expiry date for the created share link. Otherwise sending the mail is rejected.
+ - [com.openexchange.mail.compose.share.forceAutoDelete](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.compose.share.forceAutoDelete) (default id ``false``). If set to ``true``, the files/folder associated with the share will be automatically deletes once the share link expires.

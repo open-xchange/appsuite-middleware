@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,26 +40,49 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-import java.lang.reflect.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.mail.search.*;
-
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Quota;
+import javax.mail.UIDFolder;
+import javax.mail.internet.MimeUtility;
+import javax.mail.search.SearchException;
+import javax.mail.search.SearchTerm;
 import com.sun.mail.auth.Ntlm;
-
+import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.BadCommandException;
+import com.sun.mail.iap.ByteArray;
+import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.Literal;
+import com.sun.mail.iap.LiteralException;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
-import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.CopyUID;
-import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.ResyncData;
+import com.sun.mail.imap.Rights;
+import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.Utility;
 import com.sun.mail.util.ASCIIUtility;
 import com.sun.mail.util.BASE64EncoderStream;
@@ -84,7 +107,7 @@ public class IMAPProtocol extends Protocol {
     private boolean failOnNOFetch = false; // Whether a NO response for issued FETCH throws a CommandFailedException or only returns null
     private boolean connected = false;	// did constructor succeed?
     private boolean rev1 = false;	// REV1 server ?
-    private boolean overwritePreLoginCapabilitiesAfterLogin = false;
+    boolean overwritePreLoginCapabilitiesAfterLogin = false;
     private boolean referralException;	// throw exception for IMAP REFERRAL?
     private boolean noauthdebug = true;	// hide auth info in debug output
     private boolean authenticated;	// authenticated?
@@ -98,6 +121,7 @@ public class IMAPProtocol extends Protocol {
     private List<String> authmechs;
     // WARNING: authmechs may be initialized as a result of superclass
     //		constructor, don't initialize it here.
+    private boolean utf8;		// UTF-8 support enabled?
 
     protected SearchSequence searchSequence;
     protected String[] searchCharsets; 	// array of search charsets
@@ -230,40 +254,55 @@ public class IMAPProtocol extends Protocol {
      */
     public void capability(boolean reparse) throws ProtocolException {
 	// Check CAPABILITY
-	final Response[] r = command("CAPABILITY", null);
-    Response response = r[r.length-1];
-	if (!response.isOK()) {
-        handleResult(response);
+	Response[] r = command("CAPABILITY", null);
+	Response response = r[r.length-1];
+
+	if (response.isOK())
+	    handleCapabilityResponse(r, reparse);
+	handleResult(response);
     }
 
-	if (reparse) {
-	    capabilities = new HashMap<String, String>(10);
-	    authmechs = new ArrayList<String>(5);
-	} else {
-	    if (null == capabilities) {
-	        capabilities = new HashMap<String, String>(10);
-        }
-	    if (null == authmechs) {
-	        authmechs = new ArrayList<String>(5);
-        }
-	}
+    /**
+     * Handle any untagged CAPABILITY response in the Response array.
+     *
+     * @param   r   the responses
+     * @param   reparse <code>true</code> to reparse capabilities (previous ones are dropped); otherwise <code>false</code> to simply add new ones
+     * @return <code>true</code> if response contained <code>"[CAPABILITY"</code>; otherwise <code>false</code>
+     */
+    public boolean handleCapabilityResponse(Response[] r, boolean reparse) {
+	boolean containsCapabilityResponse = false;
+    boolean first = true;
 	for (int i = 0, len = r.length; i < len; i++) {
-	    if (!(r[i] instanceof IMAPResponse)) {
-            continue;
-        }
+	    if (!(r[i] instanceof IMAPResponse))
+		continue;
 
-	    final IMAPResponse ir = (IMAPResponse)r[i];
+	    IMAPResponse ir = (IMAPResponse)r[i];
 
 	    // Handle *all* untagged CAPABILITY responses.
-	    //   Though the spec seemingly states that only
+	    // Though the spec seemingly states that only
 	    // one CAPABILITY response string is allowed (6.1.1),
 	    // some server vendors claim otherwise.
 	    if (ir.keyEquals("CAPABILITY")) {
-            parseCapabilities(ir);
-            if (false == rev1 && capabilities.containsKey("IMAP4REV1"))
-                rev1 = true;
-        }
+	    containsCapabilityResponse = true;
+		if (first) {
+		    // clear out current when first response seen
+		    if (reparse) {
+                capabilities = new HashMap<String, String>(10);
+                authmechs = new ArrayList<String>(5);
+            } else {
+                if (null == capabilities) {
+                    capabilities = new HashMap<String, String>(10);
+                }
+                if (null == authmechs) {
+                    authmechs = new ArrayList<String>(5);
+                }
+            }
+		    first = false;
+		}
+		parseCapabilities(ir);
+	    }
 	}
+	return containsCapabilityResponse;
     }
 
     /**
@@ -334,14 +373,15 @@ public class IMAPProtocol extends Protocol {
     /**
      * Parse the capabilities from a CAPABILITY response or from
      * a CAPABILITY response code attached to (e.g.) an OK response.
+     *
+     * @param	r	the CAPABILITY response
      */
-    protected void parseCapabilities(final Response r) {
+    protected void parseCapabilities(Response r) {
 	String s;
 	while ((s = r.readAtom()) != null) {
 	    if (s.length() == 0) {
-		if (r.peekByte() == (byte)']') {
-            break;
-        }
+		if (r.peekByte() == (byte)']')
+		    break;
 		/*
 		 * Probably found something here that's not an atom.
 		 * Rather than loop forever or fail completely, we'll
@@ -501,7 +541,7 @@ public class IMAPProtocol extends Protocol {
 	        // Check for "*"
 	        return true;
 	    }
-	    final Iterator<String> it = capabilities.keySet().iterator();
+	    Iterator<String> it = capabilities.keySet().iterator();
 	    while (it.hasNext()) {
 		if (it.next().startsWith(c)) {
             return true;
@@ -532,11 +572,21 @@ public class IMAPProtocol extends Protocol {
     }
 
     /**
+     * Does the server support UTF-8?
+     *
+     * @since JavaMail 1.6.0
+     */
+    public boolean supportsUtf8() {
+	return utf8;
+    }
+
+    /**
      * Close socket connection.
      *
      * This method just makes the Protocol.disconnect() method
      * public.
      */
+    @Override
     public void disconnect() {
 	super.disconnect();
 	authenticated = false;	// just in case
@@ -593,46 +643,38 @@ public class IMAPProtocol extends Protocol {
      * @throws ProtocolException as thrown by {@link Protocol#handleResult}.
      * @see "RFC2060, section 6.2.2"
      */
-    public synchronized void login(final String u, final String p) throws ProtocolException {
+    public void login(String u, String p) throws ProtocolException {
     try {
-        authenticatedStatusChanging0(true, u, p);
-        final Argument args = new Argument();
-        args.writeString(u);
-        args.writeString(p);
-        Response[] r = null;
-        try {
-            if (noauthdebug && isTracing()) {
-                logger.fine("LOGIN command trace suppressed");
-                suspendTracing();
-            }
-            r = command("LOGIN", args);
-        } finally {
-            resumeTracing();
+    authenticatedStatusChanging0(true, u, p);
+    Argument args = new Argument();
+    args.writeString(u);
+    args.writeString(p);
+
+    Response[] r = null;
+    try {
+        if (noauthdebug && isTracing()) {
+            logger.fine("LOGIN command trace suppressed");
+            suspendTracing();
         }
-        // dispatch untagged responses
-        notifyResponseHandlers(r);
-        // Handle result of this command
-        if (noauthdebug && isTracing())
-            logger.fine("LOGIN command result: " + r[r.length - 1]);
-        handleLoginResult(r[r.length-1]);
-        // If the response includes a CAPABILITY response code, process it
-        boolean hasCaps = setCapabilities(r[r.length - 1], overwritePreLoginCapabilitiesAfterLogin);
-        if (hasCaps) {
-            capabilities.remove("__PRELOGIN__");
-        } else {
-            // Check for any unsolicited response that might provide capabilities
-            if (r.length > 0) {
-                for (int i = r.length-1; !hasCaps && i-- > 0;) {
-                    Response unsolicited = r[i];
-                    hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
-                    if (hasCaps) {
-                        capabilities.remove("__PRELOGIN__");
-                    }
-                }
-            }
-        }
-        // if we get this far without an exception, we're authenticated
-        authenticated = true;
+        r = command("LOGIN", args);
+    } finally {
+        resumeTracing();
+    }
+
+    	// handle an illegal but not uncommon untagged CAPABILTY response
+    handleCapabilityResponse(r, overwritePreLoginCapabilitiesAfterLogin);
+
+    // dispatch untagged responses
+    notifyResponseHandlers(r);
+
+    // Handle result of this command
+    if (noauthdebug && isTracing())
+        logger.fine("LOGIN command result: " + r[r.length - 1]);
+    handleLoginResult(r[r.length-1]);
+    // If the response includes a CAPABILITY response code, process it
+    setCapabilities(r[r.length - 1], false);
+    // if we get this far without an exception, we're authenticated
+    authenticated = true;
     } finally {
         if (!authenticated) {
             authenticatedStatusChanging0(false, u, p);
@@ -648,122 +690,115 @@ public class IMAPProtocol extends Protocol {
      * @throws ProtocolException as thrown by {@link Protocol#handleResult}.
      * @see "RFC2060, section 6.2.1"
      */
-    public synchronized void authlogin(final String u, final String p)
+    public synchronized void authlogin(String u, String p)
 				throws ProtocolException {
     authenticatedStatusChanging0(true, u, p);
     try {
-        final List<Response> v = new ArrayList<Response>();
-        String tag = null;
-        Response r = null;
-        boolean done = false;
+	List<Response> v = new ArrayList<>();
+	String tag = null;
+	Response r = null;
+	boolean done = false;
 
-        try {
+	try {
 
-        if (noauthdebug && isTracing()) {
-            logger.fine("AUTHENTICATE LOGIN command trace suppressed");
-            suspendTracing();
-        }
+	if (noauthdebug && isTracing()) {
+	    logger.fine("AUTHENTICATE LOGIN command trace suppressed");
+	    suspendTracing();
+	}
 
-        try {
-            tag = writeCommand("AUTHENTICATE LOGIN", null);
-        } catch (final Exception ex) {
-            // Convert this into a BYE response
-            r = Response.byeResponse(ex);
-            done = true;
-        }
+	try {
+	    tag = writeCommand("AUTHENTICATE LOGIN", null);
+	} catch (Exception ex) {
+	    // Convert this into a BYE response
+	    r = Response.byeResponse(ex);
+	    done = true;
+	}
 
-        final OutputStream os = getOutputStream(); // stream to IMAP server
+	OutputStream os = getOutputStream(); // stream to IMAP server
 
-        /* Wrap a BASE64Encoder around a ByteArrayOutputstream
-         * to craft b64 encoded username and password strings
-         *
-         * Note that the encoded bytes should be sent "as-is" to the
-         * server, *not* as literals or quoted-strings.
-         *
-         * Also note that unlike the B64 definition in MIME, CRLFs 
-         * should *not* be inserted during the encoding process. So, I
-         * use Integer.MAX_VALUE (0x7fffffff (> 1G)) as the bytesPerLine,
-         * which should be sufficiently large !
-         *
-         * Finally, format the line in a buffer so it can be sent as
-         * a single packet, to avoid triggering a bug in SUN's SIMS 2.0
-         * server caused by patch 105346.
-         */
+	/* Wrap a BASE64Encoder around a ByteArrayOutputstream
+	 * to craft b64 encoded username and password strings
+	 *
+	 * Note that the encoded bytes should be sent "as-is" to the
+	 * server, *not* as literals or quoted-strings.
+	 *
+	 * Also note that unlike the B64 definition in MIME, CRLFs 
+	 * should *not* be inserted during the encoding process. So, I
+	 * use Integer.MAX_VALUE (0x7fffffff (> 1G)) as the bytesPerLine,
+	 * which should be sufficiently large !
+	 *
+	 * Finally, format the line in a buffer so it can be sent as
+	 * a single packet, to avoid triggering a bug in SUN's SIMS 2.0
+	 * server caused by patch 105346.
+	 */
 
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        final OutputStream b64os = new BASE64EncoderStream(bos, Integer.MAX_VALUE);
-        boolean first = true;
+	ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	OutputStream b64os = new BASE64EncoderStream(bos, Integer.MAX_VALUE);
+	boolean first = true;
 
-        while (!done) { // loop till we are done
-            try {
-        	r = readResponse();
-            	if (r.isContinuation()) {
-        	    // Server challenge ..
-        	    String s;
-        	    if (first) { // Send encoded username
-        		s = u;
-        		first = false;
-        	    } else 	// Send encoded password
-        		s = p;
-        	    
-        	    // obtain b64 encoded bytes
-        	    b64os.write(ASCIIUtility.getBytes(s));
-        	    b64os.flush(); 	// complete the encoding
+	while (!done) { // loop till we are done
+	    try {
+		r = readResponse();
+	    	if (r.isContinuation()) {
+		    // Server challenge ..
+		    String s;
+		    if (first) { // Send encoded username
+			s = u;
+			first = false;
+		    } else 	// Send encoded password
+			s = p;
+		    
+		    // obtain b64 encoded bytes
+		    b64os.write(s.getBytes(StandardCharsets.UTF_8));
+		    b64os.flush(); 	// complete the encoding
 
-        	    bos.write(CRLF); 	// CRLF termination
-        	    os.write(bos.toByteArray()); // write out line
-        	    os.flush(); 	// flush the stream
-        	    bos.reset(); 	// reset buffer
-        	} else if (r.isTagged() && r.getTag().equals(tag)) {
-                // Ah, our tagged response
-        	    done = true;
-            } else if (r.isBYE()) {
-                done = true;
-            } else {
-                v.add(r);
-            }
-            } catch (final Exception ioex) {
-        	// convert this into a BYE response
-        	r = Response.byeResponse(ioex);
-        	done = true;
-            }
-        }
+		    bos.write(CRLF); 	// CRLF termination
+		    os.write(bos.toByteArray()); // write out line
+		    os.flush(); 	// flush the stream
+		    bos.reset(); 	// reset buffer
+		} else if (r.isTagged() && r.getTag().equals(tag))
+		    // Ah, our tagged response
+		    done = true;
+		else if (r.isBYE()) // outta here
+		    done = true;
+		// hmm .. unsolicited response here ?!
+	    } catch (Exception ioex) {
+		// convert this into a BYE response
+		r = Response.byeResponse(ioex);
+		done = true;
+	    }
+	    v.add(r);
+	}
 
-        } finally {
-            resumeTracing();
-        }
+	} finally {
+	    resumeTracing();
+	}
 
-        /* Dispatch untagged responses.
-         * NOTE: in our current upper level IMAP classes, we add the
-         * responseHandler to the Protocol object only *after* the 
-         * connection has been authenticated. So, for now, the below
-         * code really ends up being just a no-op.
-         */
-        final Response[] responses = v.toArray(new Response[v.size()]);
-        notifyResponseHandlers(responses);
+	Response[] responses = v.toArray(new Response[v.size()]);
 
-        // Handle the final OK, NO, BAD or BYE response
-        if (noauthdebug && isTracing())
-            logger.fine("AUTHENTICATE LOGIN command result: " + r);
-        handleLoginResult(r);
-        // If the response includes a CAPABILITY response code, process it
-        boolean hasCaps = setCapabilities(r, overwritePreLoginCapabilitiesAfterLogin);
-        if (hasCaps) {
-            capabilities.remove("__PRELOGIN__");
-        } else {
-            // Check for any unsolicited response that might provide capabilities
-            if (responses.length > 0) {
-                for (int i = responses.length; !hasCaps && i-- > 0;) {
-                    Response unsolicited = responses[i];
-                    hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
-                    if (hasCaps) {
-                        capabilities.remove("__PRELOGIN__");
-                    }
-                }
-            }
-        }
-        // if we get this far without an exception, we're authenticated
-        authenticated = true;
+	// handle an illegal but not uncommon untagged CAPABILTY response
+	boolean hasCaps = handleCapabilityResponse(responses, overwritePreLoginCapabilitiesAfterLogin);
+	if (hasCaps) {
+        capabilities.remove("__PRELOGIN__");
+    }
+
+	/*
+	 * Dispatch untagged responses.
+	 * NOTE: in our current upper level IMAP classes, we add the
+	 * responseHandler to the Protocol object only *after* the 
+	 * connection has been authenticated. So, for now, the below
+	 * code really ends up being just a no-op.
+	 */
+	notifyResponseHandlers(responses);
+
+	// Handle the final OK, NO, BAD or BYE response
+	if (noauthdebug && isTracing())
+	    logger.fine("AUTHENTICATE LOGIN command result: " + r);
+	handleLoginResult(r);
+    // If the response includes a CAPABILITY response code, process it
+	setCapabilities(r, false);
+	// if we get this far without an exception, we're authenticated
+	authenticated = true;
     } finally {
         if (!authenticated) {
             authenticatedStatusChanging0(false, u, p);
@@ -784,146 +819,143 @@ public class IMAPProtocol extends Protocol {
      * @see "RFC2595, section 6"
      * @since  JavaMail 1.3.2
      */
-    public synchronized void authplain(final String authzid, final String u, final String p)
+    public synchronized void authplain(String authzid, String u, String p)
 				throws ProtocolException {
     try {
-        authenticatedStatusChanging0(true, u, p);
-        final List<Response> v = new ArrayList<Response>();
-        String tag = null;
-        Response r = null;
-        boolean done = false;
-        try {
+    authenticatedStatusChanging0(true, u, p);
+	List<Response> v = new ArrayList<>();
+	String tag = null;
+	Response r = null;
+	boolean done = false;
 
-            if (noauthdebug && isTracing()) {
-                logger.fine("AUTHENTICATE PLAIN command trace suppressed");
-                suspendTracing();
-            }
+	try {
 
-            boolean useInitialClientResponse = false;
-            if (null != capabilities && capabilities.containsKey("SASL-IR")) {
-                /* It is allowed to use initial client response according to RFC 4959 (https://tools.ietf.org/html/rfc4959)
-                 *
-                 *    C: C01 CAPABILITY
-                 *    S: * CAPABILITY IMAP4rev1 SASL-IR AUTH=PLAIN
-                 *    S: C01 OK Completed
-                 *    C: A01 AUTHENTICATE PLAIN dGVzdAB0ZXN0AHRlc3Q=
-                 *    S: A01 OK Success (tls protection)
-                 */
-                useInitialClientResponse = true;
-            }
+	if (noauthdebug && isTracing()) {
+	    logger.fine("AUTHENTICATE PLAIN command trace suppressed");
+	    suspendTracing();
+	}
 
-            /* Wrap a BASE64Encoder around a ByteArrayOutputstream
-             * to craft b64 encoded username and password strings
-             *
-             * Note that the encoded bytes should be sent "as-is" to the
-             * server, *not* as literals or quoted-strings.
-             *
-             * Also note that unlike the B64 definition in MIME, CRLFs
-             * should *not* be inserted during the encoding process. So, I
-             * use Integer.MAX_VALUE (0x7fffffff (> 1G)) as the bytesPerLine,
-             * which should be sufficiently large !
-             *
-             * Finally, format the line in a buffer so it can be sent as
-             * a single packet, to avoid triggering a bug in SUN's SIMS 2.0
-             * server caused by patch 105346.
-             */
-            
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            OutputStream b64os = new BASE64EncoderStream(bos, Integer.MAX_VALUE);
-
-            if (useInitialClientResponse) {
-                // Initially pass b64 encoded username and password string
-                try {
-                    String nullByte = "\0";
-                    String s = (authzid == null ? "" : authzid) + nullByte + u + nullByte + p;
-        
-                    // obtain b64 encoded bytes
-                    b64os.write(ASCIIUtility.getBytes(s));
-                    b64os.flush(); // complete the encoding
-                    
-                    tag = writeCommand("AUTHENTICATE PLAIN " + ASCIIUtility.toString(bos.toByteArray()), null);
-                    bos.reset(); // reset buffer
-                } catch (final Exception ex) {
-                    // Convert this into a BYE response
-                    r = Response.byeResponse(ex);
-                    done = true;
-                }
-            } else {
-                try {
-                    tag = writeCommand("AUTHENTICATE PLAIN", null);
-                } catch (final Exception ex) {
-                    // Convert this into a BYE response
-                    r = Response.byeResponse(ex);
-                    done = true;
-                }
-            }
-
-            OutputStream os = getOutputStream(); // stream to IMAP server
-
-            while (!done) { // loop till we are done
-                try {
-                    r = readResponse();
-                    if (r.isContinuation()) {
-                        // Server challenge ..
-                        String nullByte = "\0";
-                        String s = (authzid == null ? "" : authzid) + nullByte + u + nullByte + p;
-
-                        // obtain b64 encoded bytes
-                        b64os.write(ASCIIUtility.getBytes(s));
-                        b64os.flush(); // complete the encoding
-
-                        bos.write(CRLF); // CRLF termination
-                        os.write(bos.toByteArray()); // write out line
-                        os.flush(); // flush the stream
-                        bos.reset(); // reset buffer
-                    } else if (r.isTagged() && r.getTag().equals(tag)) {
-                        // Ah, our tagged response
-                        done = true;
-                    } else if (r.isBYE()) {
-                        done = true;
-                    } else {
-                        v.add(r);
-                    }
-                } catch (final Exception ioex) {
-                    // convert this into a BYE response
-                    r = Response.byeResponse(ioex);
-                    done = true;
-                }
-            }
-
-        } finally {
-            resumeTracing();
-        }
-        /* Dispatch untagged responses.
-         * NOTE: in our current upper level IMAP classes, we add the
-         * responseHandler to the Protocol object only *after* the
-         * connection has been authenticated. So, for now, the below
-         * code really ends up being just a no-op.
+    boolean useInitialClientResponse = false;
+    if (null != capabilities && capabilities.containsKey("SASL-IR")) {
+	    /* It is allowed to use initial client response according to RFC 4959 (https://tools.ietf.org/html/rfc4959)
+	     *
+	     *    C: C01 CAPABILITY
+	     *    S: * CAPABILITY IMAP4rev1 SASL-IR AUTH=PLAIN
+         *    S: C01 OK Completed
+         *    C: A01 AUTHENTICATE PLAIN dGVzdAB0ZXN0AHRlc3Q=
+         *    S: A01 OK Success (tls protection)
          */
-        final Response[] responses = v.toArray(new Response[v.size()]);
-        notifyResponseHandlers(responses);
-        // Handle the final OK, NO, BAD or BYE response
-        if (noauthdebug && isTracing())
-            logger.fine("AUTHENTICATE PLAIN command result: " + r);
-        handleLoginResult(r);
-        // If the response includes a CAPABILITY response code, process it
-        boolean hasCaps = setCapabilities(r, overwritePreLoginCapabilitiesAfterLogin);
-        if (hasCaps) {
-            capabilities.remove("__PRELOGIN__");
-        } else {
-            // Check for any unsolicited response that might provide capabilities
-            if (responses.length > 0) {
-                for (int i = responses.length; !hasCaps && i-- > 0;) {
-                    Response unsolicited = responses[i];
-                    hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
-                    if (hasCaps) {
-                        capabilities.remove("__PRELOGIN__");
-                    }
-                }
-            }
-        }
-        // if we get this far without an exception, we're authenticated
-        authenticated = true;
+	    useInitialClientResponse = true;
+     }
+
+	/* Wrap a BASE64Encoder around a ByteArrayOutputstream
+	 * to craft b64 encoded username and password strings
+	 *
+	 * Note that the encoded bytes should be sent "as-is" to the
+	 * server, *not* as literals or quoted-strings.
+	 *
+	 * Also note that unlike the B64 definition in MIME, CRLFs
+	 * should *not* be inserted during the encoding process. So, I
+	 * use Integer.MAX_VALUE (0x7fffffff (> 1G)) as the bytesPerLine,
+	 * which should be sufficiently large !
+	 *
+	 * Finally, format the line in a buffer so it can be sent as
+	 * a single packet, to avoid triggering a bug in SUN's SIMS 2.0
+	 * server caused by patch 105346.
+	 */
+            
+	ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	OutputStream b64os = new BASE64EncoderStream(bos, Integer.MAX_VALUE);
+
+	if (useInitialClientResponse) {
+	    // Initially pass b64 encoded username and password string
+	    try {
+		    String nullByte = "\0";
+		    String s = (authzid == null ? "" : authzid) + nullByte + u + nullByte + p;
+
+		    // obtain b64 encoded bytes
+		    b64os.write(s.getBytes(StandardCharsets.UTF_8));
+		    b64os.flush(); // complete the encoding
+                
+		    tag = writeCommand("AUTHENTICATE PLAIN " + ASCIIUtility.toString(bos.toByteArray()), null);
+		    bos.reset(); // reset buffer
+	    } catch (final Exception ex) {
+		    // Convert this into a BYE response
+		    r = Response.byeResponse(ex);
+		    done = true;
+	    }
+	} else {
+	    try {
+		    tag = writeCommand("AUTHENTICATE PLAIN", null);
+	    } catch (final Exception ex) {
+		    // Convert this into a BYE response
+		    r = Response.byeResponse(ex);
+		    done = true;
+	    }
+	}
+
+	OutputStream os = getOutputStream(); // stream to IMAP server
+
+	while (!done) { // loop till we are done
+	    try {
+		r = readResponse();
+		if (r.isContinuation()) {
+		    // Server challenge ..
+		    final String nullByte = "\0";
+		    String s = (authzid == null ? "" : authzid) +
+				    nullByte + u + nullByte + p;
+
+		    // obtain b64 encoded bytes
+		    b64os.write(s.getBytes(StandardCharsets.UTF_8));
+		    b64os.flush(); 	// complete the encoding
+
+		    bos.write(CRLF); 	// CRLF termination
+		    os.write(bos.toByteArray()); // write out line
+		    os.flush(); 	// flush the stream
+		    bos.reset(); 	// reset buffer
+		} else if (r.isTagged() && r.getTag().equals(tag))
+		    // Ah, our tagged response
+		    done = true;
+		else if (r.isBYE()) // outta here
+		    done = true;
+		// hmm .. unsolicited response here ?!
+	    } catch (Exception ioex) {
+		// convert this into a BYE response
+		r = Response.byeResponse(ioex);
+		done = true;
+	    }
+	    v.add(r);
+	}
+
+	} finally {
+	    resumeTracing();
+	}
+
+	Response[] responses = v.toArray(new Response[v.size()]);
+
+	// handle an illegal but not uncommon untagged CAPABILTY response
+	boolean hasCaps = handleCapabilityResponse(responses, overwritePreLoginCapabilitiesAfterLogin);
+	if (hasCaps) {
+	    capabilities.remove("__PRELOGIN__");
+	}
+
+	/*
+	 * Dispatch untagged responses.
+	 * NOTE: in our current upper level IMAP classes, we add the
+	 * responseHandler to the Protocol object only *after* the
+	 * connection has been authenticated. So, for now, the below
+	 * code really ends up being just a no-op.
+	 */
+	notifyResponseHandlers(responses);
+
+	// Handle the final OK, NO, BAD or BYE response
+	if (noauthdebug && isTracing())
+	    logger.fine("AUTHENTICATE PLAIN command result: " + r);
+	handleLoginResult(r);
+	// If the response includes a CAPABILITY response code, process it
+	setCapabilities(r, false);
+	// if we get this far without an exception, we're authenticated
+	authenticated = true;
     } finally {
         if (!authenticated) {
             authenticatedStatusChanging0(false, u, p);
@@ -947,97 +979,95 @@ public class IMAPProtocol extends Protocol {
 				throws ProtocolException {
     authenticatedStatusChanging0(true, u, p);
     try {
-        final List<Response> v = new ArrayList<Response>();
-        String tag = null;
-        Response r = null;
-        boolean done = false;
-        final String type1Msg = null;
-        final int flags = PropUtil.getIntProperty(props, "mail." + name + ".auth.ntlm.flags", 0);
-        final String domain = props.getProperty("mail." + name + ".auth.ntlm.domain", "");
-        Ntlm ntlm = new Ntlm(domain, getLocalHost(), u, p, logger);
-        try {
+	List<Response> v = new ArrayList<>();
+	String tag = null;
+	Response r = null;
+	boolean done = false;
 
-            if (noauthdebug && isTracing()) {
-                logger.fine("AUTHENTICATE NTLM command trace suppressed");
-                suspendTracing();
-            }
+	String type1Msg = null;
+	int flags = PropUtil.getIntProperty(props,
+	    "mail." + name + ".auth.ntlm.flags", 0);
+	String domain = props.getProperty(
+	    "mail." + name + ".auth.ntlm.domain", "");
+	Ntlm ntlm = new Ntlm(domain, getLocalHost(), u, p, logger);
 
-            try {
-                tag = writeCommand("AUTHENTICATE NTLM", null);
-            } catch (final Exception ex) {
-                // Convert this into a BYE response
-                r = Response.byeResponse(ex);
-                done = true;
-            }
+	try {
 
-            final OutputStream os = getOutputStream(); // stream to IMAP server
-            boolean first = true;
+	if (noauthdebug && isTracing()) {
+	    logger.fine("AUTHENTICATE NTLM command trace suppressed");
+	    suspendTracing();
+	}
 
-            while (!done) { // loop till we are done
-                try {
-                    r = readResponse();
-                    if (r.isContinuation()) {
-                        // Server challenge ..
-                        String s;
-                        if (first) {
-                            s = ntlm.generateType1Msg(flags);
-                            first = false;
-                        } else {
-                            s = ntlm.generateType3Msg(r.getRest());
-                        }
+	try {
+	    tag = writeCommand("AUTHENTICATE NTLM", null);
+	} catch (Exception ex) {
+	    // Convert this into a BYE response
+	    r = Response.byeResponse(ex);
+	    done = true;
+	}
 
-                        os.write(ASCIIUtility.getBytes(s));
-                        os.write(CRLF); // CRLF termination
-                        os.flush(); // flush the stream
-                    } else if (r.isTagged() && r.getTag().equals(tag)) {
-                        // Ah, our tagged response
-                        done = true;
-                    } else if (r.isBYE()) {
-                        done = true;
-                    } else {
-                        v.add(r);
-                    }
-                } catch (final Exception ioex) {
-                    // convert this into a BYE response
-                    r = Response.byeResponse(ioex);
-                    done = true;
-                }
-            }
+	OutputStream os = getOutputStream(); // stream to IMAP server
+	boolean first = true;
 
-        } finally {
-            resumeTracing();
-        }
-        /*
-         * Dispatch untagged responses.
-         * NOTE: in our current upper level IMAP classes, we add the
-         * responseHandler to the Protocol object only *after* the
-         * connection has been authenticated. So, for now, the below
-         * code really ends up being just a no-op.
-         */
-        final Response[] responses = v.toArray(new Response[v.size()]);
-        notifyResponseHandlers(responses);
-        // Handle the final OK, NO, BAD or BYE response
-        if (noauthdebug && isTracing())
-            logger.fine("AUTHENTICATE NTLM command result: " + r);
-        handleLoginResult(r);
-        // If the response includes a CAPABILITY response code, process it
-        boolean hasCaps = setCapabilities(r, overwritePreLoginCapabilitiesAfterLogin);
-        if (hasCaps) {
-            capabilities.remove("__PRELOGIN__");
-        } else {
-            // Check for any unsolicited response that might provide capabilities
-            if (responses.length > 0) {
-                for (int i = responses.length; !hasCaps && i-- > 0;) {
-                    Response unsolicited = responses[i];
-                    hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
-                    if (hasCaps) {
-                        capabilities.remove("__PRELOGIN__");
-                    }
-                }
-            }
-        }
-        // if we get this far without an exception, we're authenticated
-        authenticated = true;
+	while (!done) { // loop till we are done
+	    try {
+		r = readResponse();
+	    	if (r.isContinuation()) {
+		    // Server challenge ..
+		    String s;
+		    if (first) {
+			s = ntlm.generateType1Msg(flags);
+			first = false;
+		    } else {
+			s = ntlm.generateType3Msg(r.getRest());
+		    }
+ 
+		    os.write(s.getBytes(StandardCharsets.UTF_8));
+		    os.write(CRLF); 	// CRLF termination
+		    os.flush(); 	// flush the stream
+		} else if (r.isTagged() && r.getTag().equals(tag))
+		    // Ah, our tagged response
+		    done = true;
+		else if (r.isBYE()) // outta here
+		    done = true;
+		// hmm .. unsolicited response here ?!
+	    } catch (Exception ioex) {
+		// convert this into a BYE response
+		r = Response.byeResponse(ioex);
+		done = true;
+	    }
+	    v.add(r);
+	}
+
+	} finally {
+	    resumeTracing();
+	}
+
+	Response[] responses = v.toArray(new Response[v.size()]);
+
+	// handle an illegal but not uncommon untagged CAPABILTY response
+	boolean hasCaps = handleCapabilityResponse(responses, overwritePreLoginCapabilitiesAfterLogin);
+    if (hasCaps) {
+        capabilities.remove("__PRELOGIN__");
+    }
+
+	/*
+	 * Dispatch untagged responses.
+	 * NOTE: in our current upper level IMAP classes, we add the
+	 * responseHandler to the Protocol object only *after* the
+	 * connection has been authenticated. So, for now, the below
+	 * code really ends up being just a no-op.
+	 */
+	notifyResponseHandlers(responses);
+
+	// Handle the final OK, NO, BAD or BYE response
+	if (noauthdebug && isTracing())
+	    logger.fine("AUTHENTICATE NTLM command result: " + r);
+	handleLoginResult(r);
+	// If the response includes a CAPABILITY response code, process it
+	setCapabilities(r, false);
+	// if we get this far without an exception, we're authenticated
+	authenticated = true;
     } finally {
         if (!authenticated) {
             authenticatedStatusChanging0(false, u, p);
@@ -1060,7 +1090,7 @@ public class IMAPProtocol extends Protocol {
 				throws ProtocolException {
     authenticatedStatusChanging0(true, u, p);
     try {
-	List<Response> v = new ArrayList<Response>();
+	List<Response> v = new ArrayList<>();
 	String tag = null;
 	Response r = null;
 	boolean done = false;
@@ -1078,7 +1108,7 @@ public class IMAPProtocol extends Protocol {
 	    if (hasCapability("SASL-IR")) {
 		String resp = "user=" + u + "\001auth=Bearer " + p + "\001\001";
 		byte[] ba = BASE64EncoderStream.encode(
-						ASCIIUtility.getBytes(resp));
+				    resp.getBytes(StandardCharsets.UTF_8));
 		String irs = ASCIIUtility.toString(ba, 0, ba.length);
 		args.writeAtom(irs);
 	    }
@@ -1099,7 +1129,7 @@ public class IMAPProtocol extends Protocol {
 		    String resp = "user=" + u + "\001auth=Bearer " +
 				    p + "\001\001";
 		    byte[] b = BASE64EncoderStream.encode(
-						ASCIIUtility.getBytes(resp));
+				    resp.getBytes(StandardCharsets.UTF_8));
 		    os.write(b);	// write out response
 		    os.write(CRLF); 	// CRLF termination
 		    os.flush(); 	// flush the stream
@@ -1108,26 +1138,34 @@ public class IMAPProtocol extends Protocol {
 		    done = true;
 		else if (r.isBYE()) // outta here
 		    done = true;
-		else // hmm .. unsolicited response here ?!
-		    v.add(r);
+		// hmm .. unsolicited response here ?!
 	    } catch (Exception ioex) {
 		// convert this into a BYE response
 		r = Response.byeResponse(ioex);
 		done = true;
 	    }
+	    v.add(r);
 	}
 
 	} finally {
 	    resumeTracing();
 	}
 
-	/* Dispatch untagged responses.
+	Response[] responses = v.toArray(new Response[v.size()]);
+
+	// handle an illegal but not uncommon untagged CAPABILTY response
+	boolean hasCaps = handleCapabilityResponse(responses, overwritePreLoginCapabilitiesAfterLogin);
+	if (hasCaps) {
+        capabilities.remove("__PRELOGIN__");
+	}
+
+	/*
+	 * Dispatch untagged responses.
 	 * NOTE: in our current upper level IMAP classes, we add the
 	 * responseHandler to the Protocol object only *after* the
 	 * connection has been authenticated. So, for now, the below
 	 * code really ends up being just a no-op.
 	 */
-	Response[] responses = v.toArray(new Response[v.size()]);
 	notifyResponseHandlers(responses);
 
 	// Handle the final OK, NO, BAD or BYE response
@@ -1135,21 +1173,7 @@ public class IMAPProtocol extends Protocol {
 	    logger.fine("AUTHENTICATE XOAUTH2 command result: " + r);
 	handleLoginResult(r);
 	// If the response includes a CAPABILITY response code, process it
-	boolean hasCaps = setCapabilities(r, overwritePreLoginCapabilitiesAfterLogin);
-    if (hasCaps) {
-        capabilities.remove("__PRELOGIN__");
-    } else {
-        // Check for any unsolicited response that might provide capabilities
-        if (responses.length > 0) {
-            for (int i = responses.length; !hasCaps && i-- > 0;) {
-                Response unsolicited = responses[i];
-                hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
-                if (hasCaps) {
-                    capabilities.remove("__PRELOGIN__");
-                }
-            }
-        }
-    }
+	setCapabilities(r, false);
 	// if we get this far without an exception, we're authenticated
 	authenticated = true;
     } finally {
@@ -1194,7 +1218,7 @@ public class IMAPProtocol extends Protocol {
         // auth=Bearer vF9dft4qmTc2Nvb3RlckBhbHRhdmlzdGEuY29tCg==^A^A
         String resp = "n,a=" + u + ",\001host=" + host + "\001port=" + port + "\001auth=Bearer " + p + "\001\001";
         byte[] ba = BASE64EncoderStream.encode(
-                        ASCIIUtility.getBytes(resp));
+            resp.getBytes(StandardCharsets.UTF_8));
         String irs = ASCIIUtility.toString(ba, 0, ba.length);
         args.writeAtom(irs);
         }
@@ -1214,7 +1238,7 @@ public class IMAPProtocol extends Protocol {
             // Server challenge ..
             String resp = "n,a=" + u + ",\001host=" + host + "\001port=" + port + "\001auth=Bearer " + p + "\001\001";
             byte[] b = BASE64EncoderStream.encode(
-                        ASCIIUtility.getBytes(resp));
+                    resp.getBytes(StandardCharsets.UTF_8));
             os.write(b);    // write out response
             os.write(CRLF);     // CRLF termination
             os.flush();     // flush the stream
@@ -1223,17 +1247,25 @@ public class IMAPProtocol extends Protocol {
             done = true;
         else if (r.isBYE()) // outta here
             done = true;
-        else // hmm .. unsolicited response here ?!
-            v.add(r);
+        // hmm .. unsolicited response here ?!
         } catch (Exception ioex) {
         // convert this into a BYE response
         r = Response.byeResponse(ioex);
         done = true;
         }
+        v.add(r);
     }
 
     } finally {
         resumeTracing();
+    }
+
+    Response[] responses = v.toArray(new Response[v.size()]);
+
+    // handle an illegal but not uncommon untagged CAPABILTY response
+    boolean hasCaps = handleCapabilityResponse(responses, overwritePreLoginCapabilitiesAfterLogin);
+    if (hasCaps) {
+        capabilities.remove("__PRELOGIN__");
     }
 
     /* Dispatch untagged responses.
@@ -1242,7 +1274,6 @@ public class IMAPProtocol extends Protocol {
      * connection has been authenticated. So, for now, the below
      * code really ends up being just a no-op.
      */
-    Response[] responses = v.toArray(new Response[v.size()]);
     notifyResponseHandlers(responses);
 
     // Handle the final OK, NO, BAD or BYE response
@@ -1250,21 +1281,7 @@ public class IMAPProtocol extends Protocol {
         logger.fine("AUTHENTICATE XOAUTH2 command result: " + r);
     handleLoginResult(r);
     // If the response includes a CAPABILITY response code, process it
-    boolean hasCaps = setCapabilities(r, overwritePreLoginCapabilitiesAfterLogin);
-    if (hasCaps) {
-        capabilities.remove("__PRELOGIN__");
-    } else {
-        // Check for any unsolicited response that might provide capabilities
-        if (responses.length > 0) {
-            for (int i = responses.length; !hasCaps && i-- > 0;) {
-                Response unsolicited = responses[i];
-                hasCaps = setCapabilities(unsolicited, overwritePreLoginCapabilitiesAfterLogin);
-                if (hasCaps) {
-                    capabilities.remove("__PRELOGIN__");
-                }
-            }
-        }
-    }
+    setCapabilities(r, false);
     // if we get this far without an exception, we're authenticated
     authenticated = true;
     } finally {
@@ -1276,19 +1293,26 @@ public class IMAPProtocol extends Protocol {
 
     /**
      * SASL-based login.
+     *
+     * @param	allowed	the SASL mechanisms we're allowed to use
+     * @param	realm	the SASL realm
+     * @param	authzid	the authorization id
+     * @param	u	the username
+     * @param	p	the password
+     * @exception	ProtocolException	for protocol failures
      */
-    public void sasllogin(final String[] allowed, final String realm, final String authzid,
-				final String u, final String p) throws ProtocolException {
+    public void sasllogin(String[] allowed, String realm, String authzid,
+				String u, String p) throws ProtocolException {
     authenticatedStatusChanging0(true, u, p);
     try {
-    boolean useCanonicalHostName = PropUtil.getBooleanProperty(props,
+	boolean useCanonicalHostName = PropUtil.getBooleanProperty(props,
 		    "mail." + name + ".sasl.usecanonicalhostname", false);
 	String serviceHost;
 	if (useCanonicalHostName)
 	    serviceHost = getInetAddress().getCanonicalHostName();
 	else
 	    serviceHost = host;
-    if (saslAuthenticator == null) {
+	if (saslAuthenticator == null) {
 	    try {
 		Class<?> sac = Class.forName(
 		    "com.sun.mail.imap.protocol.IMAPSaslAuthenticator");
@@ -1318,17 +1342,15 @@ public class IMAPProtocol extends Protocol {
 	List<String> v;
 	if (allowed != null && allowed.length > 0) {
 	    // remove anything not supported by the server
-	    v = new ArrayList<String>(allowed.length);
-	    for (int i = 0; i < allowed.length; i++) {
-            if (authmechs.contains(allowed[i])) {
-                v.add(allowed[i]);
-            }
-        }
+	    v = new ArrayList<>(allowed.length);
+	    for (int i = 0; i < allowed.length; i++)
+		if (authmechs.contains(allowed[i]))	// XXX - case must match
+		    v.add(allowed[i]);
 	} else {
 	    // everything is allowed
 	    v = authmechs;
 	}
-	final String[] mechs = v.toArray(new String[v.size()]);
+	String[] mechs = v.toArray(new String[v.size()]);
 
 	try {
 
@@ -1382,8 +1404,8 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "Netscape/iPlanet/SunONE Messaging Server extension"
      */
-    public void proxyauth(final String u) throws ProtocolException {
-	final Argument args = new Argument();
+    public void proxyauth(String u) throws ProtocolException {
+	Argument args = new Argument();
 	args.writeString(u);
 
 	simpleCommand("PROXYAUTH", args);
@@ -1427,7 +1449,7 @@ public class IMAPProtocol extends Protocol {
     @Deprecated
     public void id(String guid) throws ProtocolException {
 	// support this for now, but remove it soon
-	Map<String,String> gmap = new HashMap<String,String>();
+	Map<String,String> gmap = new HashMap<>();
 	gmap.put("GUID", guid);
 	id(gmap);
     }
@@ -1451,13 +1473,13 @@ public class IMAPProtocol extends Protocol {
 	    logger.log(Level.FINE, "STARTTLS Exception", ex);
 	    // any other exception means we have to shut down the connection
 	    // generate an artificial BYE response and disconnect
-	    final Response[] r = { Response.byeResponse(ex) };
+	    Response[] r = { Response.byeResponse(ex) };
 	    notifyResponseHandlers(r);
 	    disconnect();
 	    throw new ProtocolException("STARTTLS failure", ex);
 	}
     }
-    
+
     /**
      * COMPRESS Command.  Only supports DEFLATE.
      * 
@@ -1485,6 +1507,21 @@ public class IMAPProtocol extends Protocol {
     }
 
     /**
+     * Encode a mailbox name appropriately depending on whether or not
+     * the server supports UTF-8, and add the encoded name to the
+     * Argument.
+     *
+     * @since	JavaMail 1.6.0
+     */
+    protected void writeMailboxName(Argument args, String name) {
+	if (utf8)
+	    args.writeString(name, StandardCharsets.UTF_8);
+	else
+	    // encode the mbox as per RFC2060
+	    args.writeString(BASE64MailboxEncoder.encode(name));
+    }
+
+    /**
      * SELECT Command.
      *
      * @param	mbox	the mailbox name
@@ -1507,12 +1544,10 @@ public class IMAPProtocol extends Protocol {
      * @see "RFC5162, section 3.1"
      * @since	JavaMail 1.5.1
      */
-    public MailboxInfo select(String mbox, ResyncData rd) throws ProtocolException {
-	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
-
-	final Argument args = new Argument();	
-	args.writeString(mbox);
+    public MailboxInfo select(String mbox, ResyncData rd)
+				throws ProtocolException {
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 
 	if (rd != null) {
 	    if (rd == ResyncData.CONDSTORE) {
@@ -1526,23 +1561,22 @@ public class IMAPProtocol extends Protocol {
 	    }
 	}
 
-	final Response[] r = command("SELECT", args);
+	Response[] r = command("SELECT", args);
 
 	// Note that MailboxInfo also removes those responses 
 	// it knows about
-	final MailboxInfo minfo = new MailboxInfo(r);
+	MailboxInfo minfo = new MailboxInfo(r);
 	
 	// dispatch any remaining untagged responses
 	notifyResponseHandlers(r);
 
-	final Response response = r[r.length-1];
+	Response response = r[r.length-1];
 
 	if (response.isOK()) { // command succesful 
-	    if (response.toString().indexOf("READ-ONLY") != -1) {
-            minfo.mode = Folder.READ_ONLY;
-        } else {
-            minfo.mode = Folder.READ_WRITE;
-        }
+	    if (response.toString().indexOf("READ-ONLY") != -1)
+		minfo.mode = Folder.READ_ONLY;
+	    else
+		minfo.mode = Folder.READ_WRITE;
 	} 
 	
 	handleResult(response);
@@ -1564,7 +1598,7 @@ public class IMAPProtocol extends Protocol {
     /**
      * EXAMINE Command with QRESYNC data.
      *
-     * @param	mbox1	the mailbox name
+     * @param	mbox	the mailbox name
      * @param	rd	the ResyncData
      * @return		MailboxInfo if successful
      * @exception	ProtocolException	for protocol failures
@@ -1572,13 +1606,11 @@ public class IMAPProtocol extends Protocol {
      * @see "RFC5162, section 3.1"
      * @since	JavaMail 1.5.1
      */
-    public MailboxInfo examine(String mbox1, ResyncData rd) throws ProtocolException {
-	// encode the mbox as per RFC2060
-	String mbox = BASE64MailboxEncoder.encode(mbox1);
+    public MailboxInfo examine(String mbox, ResyncData rd)
+				throws ProtocolException {
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 
-	final Argument args = new Argument();	
-	args.writeString(mbox);
-	
 	if (rd != null) {
 	    if (rd == ResyncData.CONDSTORE) {
 		if (!hasCapability("CONDSTORE"))
@@ -1591,11 +1623,11 @@ public class IMAPProtocol extends Protocol {
 	    }
 	}
 
-	final Response[] r = command("EXAMINE", args);
+	Response[] r = command("EXAMINE", args);
 
 	// Note that MailboxInfo also removes those responses
 	// it knows about
-	final MailboxInfo minfo = new MailboxInfo(r);
+	MailboxInfo minfo = new MailboxInfo(r);
 	minfo.mode = Folder.READ_ONLY; // Obviously
 
 	// dispatch any remaining untagged responses
@@ -1605,7 +1637,7 @@ public class IMAPProtocol extends Protocol {
 	return minfo;
     }
 
-	/**
+    /**
      * Generate a QRESYNC argument list based on the ResyncData.
      */
     private static Argument resyncArgs(ResyncData rd) {
@@ -1636,8 +1668,11 @@ public class IMAPProtocol extends Protocol {
 	args.writeAtom(cap);
 	simpleCommand("ENABLE", args);
 	if (enabled == null)
-	    enabled = new HashSet<String>();
+	    enabled = new HashSet<>();
 	enabled.add(cap.toUpperCase(Locale.ENGLISH));
+
+	// update the utf8 flag
+	utf8 = isEnabled("UTF8=ACCEPT");
     }
 
     /**
@@ -1663,9 +1698,8 @@ public class IMAPProtocol extends Protocol {
      * @since	JavaMail 1.4.4
      */
     public void unselect() throws ProtocolException {
-	if (!hasCapability("UNSELECT")) {
-        throw new BadCommandException("UNSELECT not supported");
-    }
+	if (!hasCapability("UNSELECT")) 
+	    throw new BadCommandException("UNSELECT not supported");
 	simpleCommand("UNSELECT", null);
     }
 
@@ -1685,11 +1719,8 @@ public class IMAPProtocol extends Protocol {
 	    // does support this.
 	    throw new BadCommandException("STATUS not supported");
 
-	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
-
 	Argument args = new Argument();	
-	args.writeString(mbox);
+	writeMailboxName(args, mbox);
 
 	Argument itemArgs = new Argument();
 	if (items == null)
@@ -1730,16 +1761,13 @@ public class IMAPProtocol extends Protocol {
     /**
      * CREATE Command.
      *
-     * @param	mbox1	the mailbox to create
+     * @param	mbox	the mailbox to create
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2060, section 6.3.3"
      */
-    public void create(String mbox1) throws ProtocolException {
-	// encode the mbox as per RFC2060
-	String mbox = BASE64MailboxEncoder.encode(mbox1);
-
-	final Argument args = new Argument();	
-	args.writeString(mbox);
+    public void create(String mbox) throws ProtocolException {
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 
 	simpleCommand("CREATE", args);
     }
@@ -1751,12 +1779,9 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2060, section 6.3.4"
      */
-    public void delete(String mbox1) throws ProtocolException {
-	// encode the mbox as per RFC2060
-	String mbox = BASE64MailboxEncoder.encode(mbox1);
-
-	final Argument args = new Argument();	
-	args.writeString(mbox);
+    public void delete(String mbox) throws ProtocolException {
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 
 	simpleCommand("DELETE", args);
     }
@@ -1770,13 +1795,9 @@ public class IMAPProtocol extends Protocol {
      * @see "RFC2060, section 6.3.5"
      */
     public void rename(String o, String n) throws ProtocolException {
-	// encode the mbox as per RFC2060
-	o = BASE64MailboxEncoder.encode(o);
-	n = BASE64MailboxEncoder.encode(n);
-
-	final Argument args = new Argument();	
-	args.writeString(o);
-	args.writeString(n);
+	Argument args = new Argument();	
+	writeMailboxName(args, o);
+	writeMailboxName(args, n);
 
 	simpleCommand("RENAME", args);
     }
@@ -1788,11 +1809,9 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2060, section 6.3.6"
      */
-    public void subscribe(String mbox1) throws ProtocolException {
-	final Argument args = new Argument();	
-	// encode the mbox as per RFC2060
-	String mbox = BASE64MailboxEncoder.encode(mbox1);
-	args.writeString(mbox);
+    public void subscribe(String mbox) throws ProtocolException {
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 
 	simpleCommand("SUBSCRIBE", args);
     }
@@ -1804,11 +1823,9 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2060, section 6.3.7"
      */
-    public void unsubscribe(String mbox1) throws ProtocolException {
-	final Argument args = new Argument();	
-	// encode the mbox as per RFC2060
-	String mbox = BASE64MailboxEncoder.encode(mbox1);
-	args.writeString(mbox);
+    public void unsubscribe(String mbox) throws ProtocolException {
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 
 	simpleCommand("UNSUBSCRIBE", args);
     }
@@ -1822,7 +1839,7 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2060, section 6.3.8"
      */
-    public ListInfo[] list(final String ref, final String pattern) 
+    public ListInfo[] list(String ref, String pattern) 
 			throws ProtocolException {
 	return doList("LIST", ref, pattern);
     }
@@ -1836,7 +1853,7 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2060, section 6.3.9"
      */
-    public ListInfo[] lsub(final String ref, final String pattern) 
+    public ListInfo[] lsub(String ref, String pattern) 
 			throws ProtocolException {
 	return doList("LSUB", ref, pattern);
     }
@@ -1854,27 +1871,22 @@ public class IMAPProtocol extends Protocol {
      */
     protected ListInfo[] doList(String cmd, String ref, String pat)
 			throws ProtocolException {
-	// encode the mbox as per RFC2060
-	ref = BASE64MailboxEncoder.encode(ref);
-	pat = BASE64MailboxEncoder.encode(pat);
+	Argument args = new Argument();	
+	writeMailboxName(args, ref);
+	writeMailboxName(args, pat);
 
-	final Argument args = new Argument();	
-	args.writeString(ref);
-	args.writeString(pat);
-
-	final Response[] r = command(cmd, args);
+	Response[] r = command(cmd, args);
 
 	ListInfo[] linfo = null;
-	final Response response = r[r.length-1];
+	Response response = r[r.length-1];
 
 	if (response.isOK()) { // command succesful 
-	    final List<ListInfo> v = new ArrayList<ListInfo>(1);
+	    List<ListInfo> v = new ArrayList<>(1);
 	    for (int i = 0, len = r.length; i < len; i++) {
-		if (!(r[i] instanceof IMAPResponse)) {
-            continue;
-        }
+		if (!(r[i] instanceof IMAPResponse))
+		    continue;
 
-		final IMAPResponse ir = (IMAPResponse)r[i];
+		IMAPResponse ir = (IMAPResponse)r[i];
 		if (ir.keyEquals(cmd)) {
 		    v.add(new ListInfo(ir));
 		    r[i] = null;
@@ -1901,8 +1913,8 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2060, section 6.3.11"
      */
-    public void append(final String mbox, final Flags f, final Date d,
-			final Literal data) throws ProtocolException {
+    public void append(String mbox, Flags f, Date d,
+			Literal data) throws ProtocolException {
 	appenduid(mbox, f, d, data, false);	// ignore return value
     }
 
@@ -1917,18 +1929,15 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2060, section 6.3.11"
      */
-    public AppendUID appenduid(final String mbox, final Flags f, final Date d,
-			final Literal data) throws ProtocolException {
+    public AppendUID appenduid(String mbox, Flags f, Date d,
+			Literal data) throws ProtocolException {
 	return appenduid(mbox, f, d, data, true);
     }
 
-    public AppendUID appenduid(String mbox1, Flags f, final Date d,
-			final Literal data, final boolean uid) throws ProtocolException {
-	// encode the mbox as per RFC2060
-    String mbox = BASE64MailboxEncoder.encode(mbox1);
-
-	final Argument args = new Argument();	
-	args.writeString(mbox);
+    public AppendUID appenduid(String mbox, Flags f, Date d,
+			Literal data, boolean uid) throws ProtocolException {
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 
 	if (f != null) { // set Flags in appended message
 	    // can't set the \Recent flag in APPEND
@@ -1949,13 +1958,12 @@ public class IMAPProtocol extends Protocol {
 	     */
 	    args.writeAtom(createFlagList(f));
 	}
-	if (d != null) { // set INTERNALDATE in appended message
-        args.writeString(INTERNALDATE.format(d));
-    }
+	if (d != null) // set INTERNALDATE in appended message
+	    args.writeString(INTERNALDATE.format(d));
 
 	args.writeBytes(data);
 
-	final Response[] r = command("APPEND", args);
+	Response[] r = command("APPEND", args);
 
 	// dispatch untagged responses
 	notifyResponseHandlers(r);
@@ -1963,36 +1971,31 @@ public class IMAPProtocol extends Protocol {
 	// Handle result of this command
 	handleResult(r[r.length-1]);
 
-	if (uid) {
-        return getAppendUID(r[r.length-1]);
-    } else {
-        return null;
-    }
+	if (uid)
+	    return getAppendUID(r[r.length-1]);
+	else
+	    return null;
     }
 
     /**
      * If the response contains an APPENDUID response code, extract
      * it and return an AppendUID object with the information.
      */
-    private AppendUID getAppendUID(final Response r) {
-	if (!r.isOK()) {
-        return null;
-    }
+    private AppendUID getAppendUID(Response r) {
+	if (!r.isOK())
+	    return null;
 	byte b;
-	while ((b = r.readByte()) > 0 && b != (byte)'[') {
-        ;
-    }
-	if (b == 0) {
-        return null;
-    }
+	while ((b = r.readByte()) > 0 && b != (byte)'[')
+	    ;
+	if (b == 0)
+	    return null;
 	String s;
 	s = r.readAtom();
-	if (!s.equalsIgnoreCase("APPENDUID")) {
-        return null;
-    }
+	if (!s.equalsIgnoreCase("APPENDUID"))
+	    return null;
 
-	final long uidvalidity = r.readLong();
-	final long uid = r.readLong();
+	long uidvalidity = r.readLong();
+	long uid = r.readLong();
 	return new AppendUID(uidvalidity, uid);
     }
 
@@ -2033,10 +2036,9 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC4315, section 2"
      */
-    public void uidexpunge(final UIDSet[] set) throws ProtocolException {
-	if (!hasCapability("UIDPLUS")) {
-        throw new BadCommandException("UID EXPUNGE not supported");
-    }
+    public void uidexpunge(UIDSet[] set) throws ProtocolException {
+	if (!hasCapability("UIDPLUS")) 
+	    throw new BadCommandException("UID EXPUNGE not supported");
 	simpleCommand("UID EXPUNGE " + UIDSet.toString(set), null);
     }
 
@@ -2047,18 +2049,17 @@ public class IMAPProtocol extends Protocol {
      * @return		the BODYSTRUCTURE item
      * @exception	ProtocolException	for protocol failures
      */
-    public BODYSTRUCTURE fetchBodyStructure(final int msgno) 
+    public BODYSTRUCTURE fetchBodyStructure(int msgno) 
 			throws ProtocolException {
-	final Response[] r = fetch(msgno, "BODYSTRUCTURE");
+	Response[] r = fetch(msgno, "BODYSTRUCTURE");
 	notifyResponseHandlers(r);
 
-	final Response response = r[r.length-1];
-	if (response.isOK()) {
-        return FetchResponse.getItem(r, msgno, 
-					BODYSTRUCTURE.class);
-    } else if (response.isNO()) {
-        return null;
-    } else {
+	Response response = r[r.length-1];
+	if (response.isOK())
+	    return FetchResponse.getItem(r, msgno, BODYSTRUCTURE.class);
+	else if (response.isNO())
+	    return null;
+	else {
 	    handleResult(response);
 	    return null;
 	}
@@ -2332,7 +2333,7 @@ public class IMAPProtocol extends Protocol {
      */
     @Override
     protected ByteArray getResponseBuffer() {
-	final ByteArray ret = ba;
+	ByteArray ret = ba;
 	ba = null;
 	return ret;
     }
@@ -2347,22 +2348,21 @@ public class IMAPProtocol extends Protocol {
      * @return		the RFC822DATA item
      * @exception	ProtocolException	for protocol failures
      */
-    public RFC822DATA fetchRFC822(final int msgno, final String what)
+    public RFC822DATA fetchRFC822(int msgno, String what)
 			throws ProtocolException {
-	final Response[] r = fetch(msgno,
+	Response[] r = fetch(msgno,
 			     what == null ? "RFC822" : "RFC822." + what
 			    );
 
 	// dispatch untagged responses
 	notifyResponseHandlers(r);
 
-	final Response response = r[r.length-1]; 
-	if (response.isOK()) {
-        return FetchResponse.getItem(r, msgno, 
-					RFC822DATA.class);
-    } else if (response.isNO()) {
-        return null;
-    } else {
+	Response response = r[r.length-1]; 
+	if (response.isOK())
+	    return FetchResponse.getItem(r, msgno, RFC822DATA.class);
+	else if (response.isNO())
+	    return null;
+	else {
 	    handleResult(response);
 	    return null;
 	}
@@ -2405,19 +2405,18 @@ public class IMAPProtocol extends Protocol {
      * @return		the Flags
      * @exception	ProtocolException	for protocol failures
      */
-    public Flags fetchFlags(final int msgno) throws ProtocolException {
+    public Flags fetchFlags(int msgno) throws ProtocolException {
 	Flags flags = null;
-	final Response[] r = fetch(msgno, "FLAGS");
+	Response[] r = fetch(msgno, "FLAGS");
 
 	// Search for our FLAGS response
 	for (int i = 0, len = r.length; i < len; i++) {
 	    if (r[i] == null ||
 		!(r[i] instanceof FetchResponse) ||
-		((FetchResponse)r[i]).getNumber() != msgno) {
-            continue;
-        }		
+		((FetchResponse)r[i]).getNumber() != msgno)
+		continue;		
 	    
-	    final FetchResponse fr = (FetchResponse)r[i];
+	    FetchResponse fr = (FetchResponse)r[i];
 	    if ((flags = fr.getItem(FLAGS.class)) != null) {
 		r[i] = null; // remove this response
 		break;
@@ -2575,7 +2574,7 @@ public class IMAPProtocol extends Protocol {
      * @since   JavaMail 1.5.3
      */
     public void fetchSequenceNumbers(long[] uids) throws ProtocolException {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     for (int i = 0; i < uids.length; i++) {
         if (i > 0)
         sb.append(",");
@@ -2724,12 +2723,10 @@ public class IMAPProtocol extends Protocol {
 				throws ProtocolException {
 	if (uid && !hasCapability("UIDPLUS")) 
 	    throw new BadCommandException("UIDPLUS not supported");
-	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
 
 	Argument args = new Argument();	
 	args.writeAtom(msgSequence);
-	args.writeString(mbox);
+	writeMailboxName(args, mbox);
 
 	Response[] r = command("COPY", args);
 
@@ -2822,12 +2819,10 @@ public class IMAPProtocol extends Protocol {
 	    throw new BadCommandException("MOVE not supported");
 	if (uid && !hasCapability("UIDPLUS")) 
 	    throw new BadCommandException("UIDPLUS not supported");
-	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
 
 	Argument args = new Argument();	
 	args.writeAtom(msgSequence);
-	args.writeString(mbox);
+	writeMailboxName(args, mbox);
 
 	Response[] r = command("MOVE", args);
 
@@ -2925,14 +2920,13 @@ public class IMAPProtocol extends Protocol {
      * @since	JavaMail 1.5.4
      */
     protected String createFlagList(final Flags flags) {
-	final StringBuilder sb = new StringBuilder();
-	sb.append("("); // start of flag_list
+	StringBuilder sb = new StringBuilder().append("("); // start of flag_list
 
-	final Flags.Flag[] sf = flags.getSystemFlags(); // get the system flags
+	Flags.Flag[] sf = flags.getSystemFlags(); // get the system flags
 	boolean first = true;
 	for (int i = 0; i < sf.length; i++) {
 	    String s;
-	    final Flags.Flag f = sf[i];
+	    Flags.Flag f = sf[i];
 	    if (f == Flags.Flag.ANSWERED) {
             s = "\\Answered";
         } else if (f == Flags.Flag.DELETED) {
@@ -2957,7 +2951,7 @@ public class IMAPProtocol extends Protocol {
 	    sb.append(s);
 	}
 
-	final String[] uf = flags.getUserFlags(); // get the user flag strings
+	String[] uf = flags.getUserFlags(); // get the user flag strings
 	for (int i = 0; i < uf.length; i++) {
 	    if (first) {
             first = false;
@@ -2997,7 +2991,7 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @exception	SearchException	for search failures
      */
-    public int[] search(final SearchTerm term) 
+    public int[] search(SearchTerm term) 
 			throws ProtocolException, SearchException {
 	return search("ALL", term);
     }
@@ -3007,13 +3001,13 @@ public class IMAPProtocol extends Protocol {
      * Returns array of matching sequence numbers. Note that an empty
      * array is returned for no matches.
      */
-    private int[] search(final String msgSequence, final SearchTerm term)
+    private int[] search(String msgSequence, SearchTerm term)
 			throws ProtocolException, SearchException {
 	// Check if the search "text" terms contain only ASCII chars
-	if (getSearchSequence().isAscii(term)) {
+	if (SearchSequence.isAscii(term)) {
 	    try {
 		return issueSearch(msgSequence, term, null);
-	    } catch (final IOException ioex) { /* will not happen */ }
+	    } catch (IOException ioex) { /* will not happen */ }
 	}
 
 	/*
@@ -3026,13 +3020,12 @@ public class IMAPProtocol extends Protocol {
 
 	// Cycle thru the list of charsets
 	for (int i = 0; i < searchCharsets.length; i++) {
-	    if (searchCharsets[i] == null) {
-            continue;
-        }
+	    if (searchCharsets[i] == null)
+		continue;
 
 	    try {
 		return issueSearch(msgSequence, term, searchCharsets[i]);
-	    } catch (final CommandFailedException cfx) {
+	    } catch (CommandFailedException cfx) {
 		/*
 		 * Server returned NO. For now, I'll just assume that 
 		 * this indicates that this charset is unsupported.
@@ -3041,12 +3034,12 @@ public class IMAPProtocol extends Protocol {
 		 */
 		searchCharsets[i] = null;
 		continue;
-	    } catch (final IOException ioex) {
+	    } catch (IOException ioex) {
 		/* Charset conversion failed. Try the next one */
 		continue;
-	    } catch (final ProtocolException pex) {
+	    } catch (ProtocolException pex) {
 		throw pex;
-	    } catch (final SearchException sex) {
+	    } catch (SearchException sex) {
 		throw sex;
 	    }
 	}
@@ -3060,12 +3053,12 @@ public class IMAPProtocol extends Protocol {
      * Returns array of matching sequence numbers. Note that an empty
      * array is returned for no matches.
      */
-    private int[] issueSearch(final String msgSequence, final SearchTerm term,
-      			      final String charset) 
+    private int[] issueSearch(String msgSequence, SearchTerm term,
+      			      String charset) 
 	     throws ProtocolException, SearchException, IOException {
 
 	// Generate a search-sequence with the given charset
-	final Argument args = getSearchSequence().generateSequence(term, 
+	Argument args = getSearchSequence().generateSequence(term, 
 			  charset == null ? null : 
 					    MimeUtility.javaCharset(charset)
 			);
@@ -3123,7 +3116,7 @@ public class IMAPProtocol extends Protocol {
      */
     protected SearchSequence getSearchSequence() {
 	if (searchSequence == null)
-	    searchSequence = new SearchSequence();
+	    searchSequence = new SearchSequence(this);
 	return searchSequence;
     }
 
@@ -3256,31 +3249,26 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2087"
      */
-    public Quota[] getQuotaRoot(String mbox1) throws ProtocolException {
-	if (!hasCapability("QUOTA")) {
-        throw new BadCommandException("GETQUOTAROOT not supported");
-    }
+    public Quota[] getQuotaRoot(String mbox) throws ProtocolException {
+	if (!hasCapability("QUOTA")) 
+	    throw new BadCommandException("GETQUOTAROOT not supported");
 
-	// encode the mbox as per RFC2060
-	String mbox = BASE64MailboxEncoder.encode(mbox1);
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 
-	final Argument args = new Argument();	
-	args.writeString(mbox);
+	Response[] r = command("GETQUOTAROOT", args);
 
-	final Response[] r = command("GETQUOTAROOT", args);
+	Response response = r[r.length-1];
 
-	final Response response = r[r.length-1];
-
-	Map<String, Quota> tab = new HashMap<String, Quota>();
+	Map<String, Quota> tab = new HashMap<>();
 
 	// Grab all QUOTAROOT and QUOTA responses
 	if (response.isOK()) { // command succesful 
 	    for (int i = 0, len = r.length; i < len; i++) {
-		if (!(r[i] instanceof IMAPResponse)) {
-            continue;
-        }
+		if (!(r[i] instanceof IMAPResponse))
+		    continue;
 
-		final IMAPResponse ir = (IMAPResponse)r[i];
+		IMAPResponse ir = (IMAPResponse)r[i];
 		if (ir.keyEquals("QUOTAROOT")) {
 		    // quotaroot_response
 		    //		       ::= "QUOTAROOT" SP astring *(SP astring)
@@ -3330,28 +3318,26 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2087"
      */
-    public Quota[] getQuota(final String root) throws ProtocolException {
-	if (!hasCapability("QUOTA")) {
-        throw new BadCommandException("QUOTA not supported");
-    }
+    public Quota[] getQuota(String root) throws ProtocolException {
+	if (!hasCapability("QUOTA")) 
+	    throw new BadCommandException("QUOTA not supported");
 
-	final Argument args = new Argument();	
-	args.writeString(root);
+	Argument args = new Argument();	
+	args.writeString(root);		// XXX - could be UTF-8?
 
-	final Response[] r = command("GETQUOTA", args);
+	Response[] r = command("GETQUOTA", args);
 
 	Quota quota = null;
-	final List<Quota> v = new ArrayList<Quota>(r.length);
-	final Response response = r[r.length-1];
+	List<Quota> v = new ArrayList<>();
+	Response response = r[r.length-1];
 
 	// Grab all QUOTA responses
 	if (response.isOK()) { // command succesful 
 	    for (int i = 0, len = r.length; i < len; i++) {
-		if (!(r[i] instanceof IMAPResponse)) {
-            continue;
-        }
+		if (!(r[i] instanceof IMAPResponse))
+		    continue;
 
-		final IMAPResponse ir = (IMAPResponse)r[i];
+		IMAPResponse ir = (IMAPResponse)r[i];
 		if (ir.keyEquals("QUOTA")) {
 		    quota = parseQuota(ir);
 		    v.add(quota);
@@ -3375,14 +3361,13 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2087"
      */
-    public void setQuota(final Quota quota) throws ProtocolException {
-	if (!hasCapability("QUOTA")) {
-        throw new BadCommandException("QUOTA not supported");
-    }
+    public void setQuota(Quota quota) throws ProtocolException {
+	if (!hasCapability("QUOTA")) 
+	    throw new BadCommandException("QUOTA not supported");
 
-	final Argument args = new Argument();	
-	args.writeString(quota.quotaRoot);
-	final Argument qargs = new Argument();	
+	Argument args = new Argument();	
+	args.writeString(quota.quotaRoot);	// XXX - could be UTF-8?
+	Argument qargs = new Argument();	
 	if (quota.resources != null) {
 	    for (int i = 0; i < quota.resources.length; i++) {
 		qargs.writeAtom(quota.resources[i].name);
@@ -3391,8 +3376,8 @@ public class IMAPProtocol extends Protocol {
 	}
 	args.writeArgument(qargs);
 
-	final Response[] r = command("SETQUOTA", args);
-	final Response response = r[r.length-1];
+	Response[] r = command("SETQUOTA", args);
+	Response response = r[r.length-1];
 
 	// XXX - It's not clear from the RFC whether the SETQUOTA command
 	// will provoke untagged QUOTA responses.  If it does, perhaps
@@ -3429,28 +3414,26 @@ public class IMAPProtocol extends Protocol {
     /**
      * Parse a QUOTA response.
      */
-    private Quota parseQuota(final Response r) throws ParsingException {
+    private Quota parseQuota(Response r) throws ParsingException {
 	// quota_response ::= "QUOTA" SP astring SP quota_list
-	final String quotaRoot = r.readAtomString();	// quotaroot ::= astring
-	final Quota q = new Quota(quotaRoot);
+	String quotaRoot = r.readAtomString();	// quotaroot ::= astring
+	Quota q = new Quota(quotaRoot);
 	r.skipSpaces();
 	// quota_list ::= "(" #quota_resource ")"
-	if (r.readByte() != '(') {
-        throw new ParsingException("parse error in QUOTA");
-    }
+	if (r.readByte() != '(')
+	    throw new ParsingException("parse error in QUOTA");
 
-	final List<Quota.Resource> v = new ArrayList<Quota.Resource>();
-	while (r.peekByte() != ')') {
+	List<Quota.Resource> v = new ArrayList<>();
+	while (!r.isNextNonSpace(')')) {
 	    // quota_resource ::= atom SP number SP number
-	    final String name = r.readAtom();
+	    String name = r.readAtom();
 	    if (name != null) {
-		final long usage = r.readLong();
-		final long limit = r.readLong();
-		final Quota.Resource res = new Quota.Resource(name, usage, limit);
+		long usage = r.readLong();
+		long limit = r.readLong();
+		Quota.Resource res = new Quota.Resource(name, usage, limit);
 		v.add(res);
 	    }
 	}
-	r.readByte();
 	q.resources = v.toArray(new Quota.Resource[v.size()]);
 	return q;
     }
@@ -3465,26 +3448,21 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2086"
      */
-    public void setACL(String mbox, final char modifier, final ACL acl)
+    public void setACL(String mbox, char modifier, ACL acl)
 				throws ProtocolException {
-	if (!hasCapability("ACL")) {
-        throw new BadCommandException("ACL not supported");
-    }
+	if (!hasCapability("ACL")) 
+	    throw new BadCommandException("ACL not supported");
 
-	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
-
-	final Argument args = new Argument();	
-	args.writeString(mbox);
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 	args.writeString(acl.getName());
 	String rights = acl.getRights().toString();
-	if (modifier == '+' || modifier == '-') {
-        rights = modifier + rights;
-    }
+	if (modifier == '+' || modifier == '-')
+	    rights = modifier + rights;
 	args.writeString(rights);
 
-	final Response[] r = command("SETACL", args);
-	final Response response = r[r.length-1];
+	Response[] r = command("SETACL", args);
+	Response response = r[r.length-1];
 
 	// dispatch untagged responses
 	notifyResponseHandlers(r);
@@ -3499,20 +3477,16 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2086"
      */
-    public void deleteACL(String mbox, final String user) throws ProtocolException {
-	if (!hasCapability("ACL")) {
-        throw new BadCommandException("ACL not supported");
-    }
+    public void deleteACL(String mbox, String user) throws ProtocolException {
+	if (!hasCapability("ACL")) 
+	    throw new BadCommandException("ACL not supported");
 
-	// encode the mbox as per RFC2060
-	mbox = BASE64MailboxEncoder.encode(mbox);
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
+	args.writeString(user);		// XXX - could be UTF-8?
 
-	final Argument args = new Argument();	
-	args.writeString(mbox);
-	args.writeString(user);
-
-	final Response[] r = command("DELETEACL", args);
-	final Response response = r[r.length-1];
+	Response[] r = command("DELETEACL", args);
+	Response response = r[r.length-1];
 
 	// dispatch untagged responses
 	notifyResponseHandlers(r);
@@ -3527,29 +3501,24 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2086"
      */
-    public ACL[] getACL(String mbox1) throws ProtocolException {
-	if (!hasCapability("ACL")) {
-        throw new BadCommandException("ACL not supported");
-    }
+    public ACL[] getACL(String mbox) throws ProtocolException {
+	if (!hasCapability("ACL")) 
+	    throw new BadCommandException("ACL not supported");
 
-	// encode the mbox as per RFC2060
-	String mbox = BASE64MailboxEncoder.encode(mbox1);
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 
-	final Argument args = new Argument();	
-	args.writeString(mbox);
-
-	final Response[] r = command("GETACL", args);
-	final Response response = r[r.length-1];
+	Response[] r = command("GETACL", args);
+	Response response = r[r.length-1];
 
 	// Grab all ACL responses
-	final List<ACL> v = new ArrayList<ACL>(r.length);
+	List<ACL> v = new ArrayList<>();
 	if (response.isOK()) { // command succesful 
 	    for (int i = 0, len = r.length; i < len; i++) {
-		if (!(r[i] instanceof IMAPResponse)) {
-            continue;
-        }
+		if (!(r[i] instanceof IMAPResponse))
+		    continue;
 
-		final IMAPResponse ir = (IMAPResponse)r[i];
+		IMAPResponse ir = (IMAPResponse)r[i];
 		if (ir.keyEquals("ACL")) {
 		    // acl_data ::= "ACL" SPACE mailbox
 		    //		*(SPACE identifier SPACE rights)
@@ -3557,11 +3526,10 @@ public class IMAPProtocol extends Protocol {
 		    ir.readAtomString();
 		    String name = null;
 		    while ((name = ir.readAtomString()) != null) {
-			final String rights = ir.readAtomString();
-			if (rights == null) {
-                break;
-            }
-			final ACL acl = new ACL(name, new Rights(rights));
+			String rights = ir.readAtomString();
+			if (rights == null)
+			    break;
+			ACL acl = new ACL(name, new Rights(rights));
 			v.add(acl);
 		    }
 		    r[i] = null;
@@ -3584,31 +3552,26 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2086"
      */
-    public Rights[] listRights(String mbox1, final String user)
+    public Rights[] listRights(String mbox, String user)
 				throws ProtocolException {
-	if (!hasCapability("ACL")) {
-        throw new BadCommandException("ACL not supported");
-    }
+	if (!hasCapability("ACL")) 
+	    throw new BadCommandException("ACL not supported");
 
-	// encode the mbox as per RFC2060
-	String mbox = BASE64MailboxEncoder.encode(mbox1);
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
+	args.writeString(user);		// XXX - could be UTF-8?
 
-	final Argument args = new Argument();	
-	args.writeString(mbox);
-	args.writeString(user);
-
-	final Response[] r = command("LISTRIGHTS", args);
-	final Response response = r[r.length-1];
+	Response[] r = command("LISTRIGHTS", args);
+	Response response = r[r.length-1];
 
 	// Grab LISTRIGHTS response
-	final List<Rights> v = new ArrayList<Rights>(r.length);
+	List<Rights> v = new ArrayList<>();
 	if (response.isOK()) { // command succesful 
 	    for (int i = 0, len = r.length; i < len; i++) {
-		if (!(r[i] instanceof IMAPResponse)) {
-            continue;
-        }
+		if (!(r[i] instanceof IMAPResponse))
+		    continue;
 
-		final IMAPResponse ir = (IMAPResponse)r[i];
+		IMAPResponse ir = (IMAPResponse)r[i];
 		if (ir.keyEquals("LISTRIGHTS")) {
 		    // listrights_data ::= "LISTRIGHTS" SPACE mailbox
 		    //		SPACE identifier SPACE rights *(SPACE rights)
@@ -3617,9 +3580,8 @@ public class IMAPProtocol extends Protocol {
 		    // read identifier and throw away
 		    ir.readAtomString();
 		    String rights;
-		    while ((rights = ir.readAtomString()) != null) {
-                v.add(new Rights(rights));
-            }
+		    while ((rights = ir.readAtomString()) != null)
+			v.add(new Rights(rights));
 		    r[i] = null;
 		}
 	    }
@@ -3639,37 +3601,31 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2086"
      */
-    public Rights myRights(String mbox1) throws ProtocolException {
-	if (!hasCapability("ACL")) {
-        throw new BadCommandException("ACL not supported");
-    }
+    public Rights myRights(String mbox) throws ProtocolException {
+	if (!hasCapability("ACL")) 
+	    throw new BadCommandException("ACL not supported");
 
-	// encode the mbox as per RFC2060
-	String mbox = BASE64MailboxEncoder.encode(mbox1);
+	Argument args = new Argument();	
+	writeMailboxName(args, mbox);
 
-	final Argument args = new Argument();	
-	args.writeString(mbox);
-
-	final Response[] r = command("MYRIGHTS", args);
-	final Response response = r[r.length-1];
+	Response[] r = command("MYRIGHTS", args);
+	Response response = r[r.length-1];
 
 	// Grab MYRIGHTS response
 	Rights rights = null;
 	if (response.isOK()) { // command succesful 
 	    for (int i = 0, len = r.length; i < len; i++) {
-		if (!(r[i] instanceof IMAPResponse)) {
-            continue;
-        }
+		if (!(r[i] instanceof IMAPResponse))
+		    continue;
 
-		final IMAPResponse ir = (IMAPResponse)r[i];
+		IMAPResponse ir = (IMAPResponse)r[i];
 		if (ir.keyEquals("MYRIGHTS")) {
 		    // myrights_data ::= "MYRIGHTS" SPACE mailbox SPACE rights
 		    // read name of mailbox and throw away
 		    ir.readAtomString();
-		    final String rs = ir.readAtomString();
-		    if (rights == null) {
-                rights = new Rights(rs);
-            }
+		    String rs = ir.readAtomString();
+		    if (rights == null)
+			rights = new Rights(rs);
 		    r[i] = null;
 		}
 	    }
@@ -3701,25 +3657,25 @@ public class IMAPProtocol extends Protocol {
      * no other threads may issue any commands to the server that would
      * use this same connection.
      *
+     * @exception	ProtocolException	for protocol failures
      * @see "RFC2177"
      * @since	JavaMail 1.4.1
      */
     public synchronized void idleStart() throws ProtocolException {
-	if (!hasCapability("IDLE")) {
-        throw new BadCommandException("IDLE not supported");
-    }
+	if (!hasCapability("IDLE")) 
+	    throw new BadCommandException("IDLE not supported");
 
-	final List<Response> v = new ArrayList<Response>();
+	List<Response> v = new ArrayList<>();
 	boolean done = false;
 	Response r = null;
 
 	// write the command
 	try {
 	    idleTag = writeCommand("IDLE", null);
-	} catch (final LiteralException lex) {
+	} catch (LiteralException lex) {
 	    v.add(lex.getResponse());
 	    done = true;
-	} catch (final Exception ex) {
+	} catch (Exception ex) {
 	    // Convert this into a BYE response
 	    v.add(Response.byeResponse(ex));
 	    done = true;
@@ -3728,28 +3684,26 @@ public class IMAPProtocol extends Protocol {
 	while (!done) {
 	    try {
 		r = readResponse();
-	    } catch (final IOException ioex) {
+	    } catch (IOException ioex) {
 		// convert this into a BYE response
 		r = Response.byeResponse(ioex);
-	    } catch (final ProtocolException pex) {
+	    } catch (ProtocolException pex) {
 		continue; // skip this response
 	    }
 
 	    v.add(r);
 
-	    if (r.isContinuation() || r.isBYE()) {
-            done = true;
-        }
+	    if (r.isContinuation() || r.isBYE())
+		done = true;
 	}
 
-	final Response[] responses = v.toArray(new Response[v.size()]);
+	Response[] responses = v.toArray(new Response[v.size()]);
 	r = responses[responses.length-1];
 
 	// dispatch remaining untagged responses
 	notifyResponseHandlers(responses);
-	if (!r.isContinuation()) {
-        handleResult(r);
-    }
+	if (!r.isContinuation())
+	    handleResult(r);
     }
 
     /**
@@ -3822,7 +3776,7 @@ public class IMAPProtocol extends Protocol {
      * @since	JavaMail 1.4.1
      */
     public void idleAbort() {
-	final OutputStream os = getOutputStream();
+	OutputStream os = getOutputStream();
 	try {
 	    os.write(DONE);
 	    os.flush();

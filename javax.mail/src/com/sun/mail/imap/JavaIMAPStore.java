@@ -54,6 +54,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.StringTokenizer;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -102,7 +103,8 @@ public class JavaIMAPStore extends IMAPStore {
      */
     public JavaIMAPStore(final Session session, final URLName url, final String name, final boolean isSSL) {
         super(session, url, name, isSSL);
-        enableSASL = PropUtil.getBooleanSessionProperty(session, "mail.imap.sasl.enable", false);
+        Properties properties = session.getProperties();
+        enableSASL = PropUtil.getBooleanProperty(properties, "mail.imap.sasl.enable", false);
         if (enableSASL) {
             // Kerberos subject
             kerberosSubject = (Subject) session.getProperties().get("mail.imap.sasl.kerberosSubject");
@@ -136,7 +138,7 @@ public class JavaIMAPStore extends IMAPStore {
             }
         }
         // Whether to count or not
-        count = PropUtil.getBooleanSessionProperty(session, "mail.imap.count.enable", false);
+        count = PropUtil.getBooleanProperty(properties, "mail.imap.count.enable", false);
     }
 
     /**

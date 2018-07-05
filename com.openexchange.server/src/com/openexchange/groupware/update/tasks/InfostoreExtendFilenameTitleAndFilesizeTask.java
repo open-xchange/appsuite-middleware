@@ -49,14 +49,13 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -103,20 +102,26 @@ public final class InfostoreExtendFilenameTitleAndFilesizeTask extends UpdateTas
             new Column("filename", "varchar(767)"),
             new Column("file_size", "bigint(20)")
         };
-        Connection connnection = Database.getNoTimeout(params.getContextId(), true);
+
+        Connection connnection = params.getConnection();
+        boolean rollback = false;
         try {
             connnection.setAutoCommit(false);
+            rollback = true;
+
             checkAndModifyColumns(connnection, "infostore_document", colums);
+
             connnection.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connnection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (Exception e) {
-            rollback(connnection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(connnection);
+            }
             autocommit(connnection);
-            Database.backNoTimeout(params.getContextId(), true, connnection);
         }
         log.info("{} successfully performed.", InfostoreExtendFilenameTitleAndFilesizeTask.class.getSimpleName());
     }

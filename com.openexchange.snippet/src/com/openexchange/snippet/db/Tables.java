@@ -84,7 +84,7 @@ public final class Tables {
                " user INT4 unsigned NOT NULL," +
                " id VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
                " accountId INT4 unsigned DEFAULT NULL," +
-               " displayName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+               " displayName VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
                " module VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
                " type VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
                " shared TINYINT unsigned DEFAULT NULL," +
@@ -95,7 +95,7 @@ public final class Tables {
                " PRIMARY KEY (cid, user, id)," +
                " INDEX `indexShared` (cid, shared)," +
                " INDEX `indexRefType` (cid, user, id, refType)" +
-               ") ENGINE=InnoDB";
+               ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
 }

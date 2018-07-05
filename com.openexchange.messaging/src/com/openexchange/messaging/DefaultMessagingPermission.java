@@ -74,6 +74,8 @@ public class DefaultMessagingPermission implements MessagingPermission {
 
     private int system;
 
+    private MessagingFolderPermissionType type;
+
     private int deletePermission;
 
     private int folderPermission;
@@ -106,6 +108,7 @@ public class DefaultMessagingPermission implements MessagingPermission {
         result = prime * result + (group ? 1231 : 1237);
         result = prime * result + readPermission;
         result = prime * result + system;
+        result = prime * result + type.getTypeNumber();
         result = prime * result + writePermission;
         return result;
     }
@@ -141,6 +144,9 @@ public class DefaultMessagingPermission implements MessagingPermission {
             return false;
         }
         if (system != other.getSystem()) {
+            return false;
+        }
+        if (type != other.getType()) {
             return false;
         }
         if (writePermission != other.getWritePermission()) {
@@ -262,6 +268,16 @@ public class DefaultMessagingPermission implements MessagingPermission {
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
+    }
+
+    @Override
+    public MessagingFolderPermissionType getType() {
+        return type;
+    }
+
+    @Override
+    public void setType(MessagingFolderPermissionType type) {
+        this.type = type;
     }
 
 }

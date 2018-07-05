@@ -49,9 +49,6 @@
 
 package com.openexchange.i18n.yaml.osgi;
 
-import java.rmi.Remote;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.i18n.yaml.I18NYamlParserService;
 import com.openexchange.i18n.yaml.internal.I18NYamlParserImpl;

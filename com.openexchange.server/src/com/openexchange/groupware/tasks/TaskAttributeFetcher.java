@@ -49,9 +49,8 @@
 
 package com.openexchange.groupware.tasks;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
@@ -77,7 +76,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
     private static final Map<String, AttributeGetter> GETTERS;
 
     static {
-        final Map<String, AttributeGetter> m = new HashMap<String, AttributeGetter>(25);
+        ImmutableMap.Builder<String, AttributeGetter> m = ImmutableMap.builder();
 
         m.put(TaskFields.ACTUAL_COSTS, new AttributeGetter() {
 
@@ -147,7 +146,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
             @Override
             public Object getObject(final Task candidate) {
-                return Integer.valueOf(candidate.getPriority());
+                return candidate.getPriority();
             }
         });
 
@@ -471,7 +470,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
             }
         });
 
-        GETTERS = Collections.unmodifiableMap(m);
+        GETTERS = m.build();
     }
 
     private static final TaskAttributeFetcher instance = new TaskAttributeFetcher();

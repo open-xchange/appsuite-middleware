@@ -81,12 +81,11 @@ package com.openexchange.http.grizzly.service.http;/*
  * Portions Copyright 2016-2020 OX Software GmbH, licensed under GPL Version 2.
  */
 
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-
+import java.util.Dictionary;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
-import java.util.Dictionary;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 /**
  * An extension to the OSGi {@link HttpService} interface allowing the

@@ -65,12 +65,26 @@ public class Bug21757Test extends AbstractSanitizing {
      public void testEnsureBodyTagPresence() throws Exception {
         String htmlContent = "<center>Lorem Ipsum Dolor<table<tr><td>cell</td></tr></table></center>";
         String actual = getHtmlService().getConformHTML(htmlContent, "UTF-8");
-        StringBuilder expectedBuilder = new StringBuilder();
-        expectedBuilder.append("<!DOCTYPE html>\n");
-        expectedBuilder.append("<html><head>\n");
-        expectedBuilder.append("    <meta charset=\"UTF-8\">\n");
-        expectedBuilder.append("</head><body><center>Lorem Ipsum Dolor<table><tbody><tr><td>cell</td></tr></tbody></table></center></body></html>\n ");
-        String expected = expectedBuilder.toString();
+
+        String expected = "<!doctype html>\n" +
+            "<html>\n" +
+            " <head> \n" +
+            "  <meta charset=\"UTF-8\"> \n" +
+            " </head>\n" +
+            " <body>\n" +
+            "  <center>\n" +
+            "   Lorem Ipsum Dolor\n" +
+            "   <table>\n" +
+            "    <tbody>\n" +
+            "     <tr>\n" +
+            "      <td>cell</td>\n" +
+            "     </tr>\n" +
+            "    </tbody>\n" +
+            "   </table>\n" +
+            "  </center> \n" +
+            " </body>\n" +
+            "</html>";
+
         assertTrue("The opening <body> tag is missing", actual.contains("<body>"));
         assertTrue("The closing </body> tag is missing", actual.contains("</body>"));
         assertEquals("Unexpected value", expected, actual);

@@ -50,7 +50,9 @@
 package com.openexchange.file.storage.json;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -61,17 +63,21 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.FileStorageConstants;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
+import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.file.storage.meta.FileFieldGet;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.filename.FileNameTools;
 
 /**
  * {@link JsonFieldHandler}
@@ -82,12 +88,17 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(JsonFieldHandler.class);
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-    private static final FileFieldGet get = new FileFieldGet();
+    private static final FileFieldGet GETTER = new FileFieldGet();
 
     private static final String FIELD_ENCRYPTED = Strings.asciiLowerCase(FileStorageConstants.METADATA_KEY_ENCRYPTED);
 
+    private static final String USER_INFOSTORE_FOLDER_ID   = Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+    private static final String PUBLIC_INFOSTORE_FOLDER_ID = Integer.toString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+
     private final AJAXInfostoreRequest request;
     private final JSONObject optJsonFile;
+    private Map<String, Object> cache;
+    private IDBasedFolderAccess folderAccess;
 
     /**
      * Initializes a new {@link JsonFieldHandler}.
@@ -112,7 +123,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
 
     @Override
     public Object handle(final Field field, final Object... args) {
-        final Object value = field.doSwitch(get, args);
+        Object value = field.doSwitch(GETTER, args);
         if (File.Field.FILE_MIMETYPE == field) {
             if (null == value) {
                 return value;
@@ -127,8 +138,13 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                 return value;
             }
         }
-        if ((value == null) && (field == File.Field.LOCKED_UNTIL)) {
-            return Integer.valueOf(0);
+        if (value == null) {
+            if (field == File.Field.LOCKED_UNTIL) {
+                return Integer.valueOf(0);
+            }
+            if (field == File.Field.FILENAME) {
+                return "";
+            }
         }
         if (Date.class.isInstance(value)) {
             Date d = (Date) value;
@@ -212,10 +228,133 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
             }
 
             return new JSONArray(0);
+        case ORIGIN:
+            return handleFolderPath((FolderPath) value);
         default: // do nothing;
         }
 
         return value;
+    }
+
+    private Object handleFolderPath(FolderPath folderPath) {
+        if (null == folderPath) {
+            return null;
+        }
+
+        try {
+            FolderPath effectiveFolderPath = folderPath;
+            String folderId;
+            switch (effectiveFolderPath.getType()) {
+                case PRIVATE:
+                    folderId = getInfoStorePersonalFolder().getId();
+                    break;
+                case PUBLIC:
+                    folderId = PUBLIC_INFOSTORE_FOLDER_ID;
+                    break;
+                case SHARED:
+                    folderId = USER_INFOSTORE_FOLDER_ID;
+                    break;
+                case UNDEFINED: /* fall-through */
+                default:
+                    folderId = getInfoStorePersonalFolder().getId();
+                    effectiveFolderPath = FolderPath.EMPTY_PATH;
+            }
+
+            FileStorageFolder folder = getFolderFor(folderId);
+            Locale locale = request.getSession().getUser().getLocale();
+            StringBuilder sb = new StringBuilder();
+            sb.append(folder.getLocalizedName(locale));
+
+            if (!effectiveFolderPath.isEmpty()) {
+                boolean searchInSubfolders = true;
+                for (String folderName : effectiveFolderPath.getPathForRestore()) {
+                    boolean found = false;
+                    if (searchInSubfolders) {
+                        FileStorageFolder[] subfolders = getSubfoldersFor(folder.getId());
+                        for (int i = 0; !found && i < subfolders.length; i++) {
+                            FileStorageFolder subfolder = subfolders[i];
+                            if (folderName.equals(subfolder.getName())) {
+                                found = true;
+                                sb.append("/").append(subfolder.getLocalizedName(locale));
+                                folder = subfolder;
+                            }
+                        }
+                    }
+
+                    if (false == found) {
+                        sb.append("/").append(folderName);
+                        searchInSubfolders = false;
+                    }
+                }
+            }
+
+            return sb.toString();
+        } catch (OXException e) {
+            LOG.debug("Failed to determine original path", e);
+            return null;
+        }
+    }
+
+    private FileStorageFolder getInfoStorePersonalFolder() throws OXException {
+        Map<String, Object> cache = this.cache;
+        if (null == cache) {
+            cache = new HashMap<String, Object>();
+            this.cache = cache;
+        }
+
+        FileStorageFolder personalFolder = (FileStorageFolder) cache.get("__personal__");
+        if (null == personalFolder) {
+            IDBasedFolderAccess folderAccess = this.folderAccess;
+            if (null == folderAccess) {
+                folderAccess = Services.getFolderAccessFactory().createAccess(request.getSession());
+            }
+
+            personalFolder = folderAccess.getPersonalFolder(PUBLIC_INFOSTORE_FOLDER_ID); // An arbitrary InfoStore folder identifier
+            cache.put(personalFolder.getId(), personalFolder);
+            cache.put("__personal__", personalFolder);
+        }
+        return personalFolder;
+    }
+
+    private FileStorageFolder getFolderFor(String folderId) throws OXException {
+        Map<String, Object> cache = this.cache;
+        if (null == cache) {
+            cache = new HashMap<String, Object>();
+            this.cache = cache;
+        }
+
+        FileStorageFolder folder = (FileStorageFolder) cache.get(folderId);
+        if (null == folder) {
+            IDBasedFolderAccess folderAccess = this.folderAccess;
+            if (null == folderAccess) {
+                folderAccess = Services.getFolderAccessFactory().createAccess(request.getSession());
+            }
+
+            folder = folderAccess.getFolder(folderId);
+            cache.put(folderId, folder);
+        }
+        return folder;
+    }
+
+    private FileStorageFolder[] getSubfoldersFor(String folderId) throws OXException {
+        Map<String, Object> cache = this.cache;
+        if (null == cache) {
+            cache = new HashMap<String, Object>();
+            this.cache = cache;
+        }
+
+        String key = "sub_" + folderId;
+        FileStorageFolder[] subfolders = (FileStorageFolder[]) cache.get(key);
+        if (null == subfolders) {
+            IDBasedFolderAccess folderAccess = this.folderAccess;
+            if (null == folderAccess) {
+                folderAccess = Services.getFolderAccessFactory().createAccess(request.getSession());
+            }
+
+            subfolders = folderAccess.getSubfolders(folderId, true);
+            cache.put(key, subfolders);
+        }
+        return subfolders;
     }
 
     private Object writeDate(final Date date, final TimeZone tz) {

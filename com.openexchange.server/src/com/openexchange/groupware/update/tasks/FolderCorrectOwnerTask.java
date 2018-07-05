@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.Reference;
-import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
@@ -109,7 +107,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
         Logger log = org.slf4j.LoggerFactory.getLogger(FolderCorrectOwnerTask.class);
         log.info("Performing update task {}", FolderCorrectOwnerTask.class.getSimpleName());
 
-        Connection con = Database.getNoTimeout(params.getContextId(), true);
+        Connection con = params.getConnection();
         boolean rollback = false;
         final Map<Integer, List<Map<Integer, List<VersionControlResult>>>> resultMaps = new LinkedHashMap<Integer, List<Map<Integer, List<VersionControlResult>>>>();
         try {
@@ -191,7 +189,6 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
 
             // Ensure auto-commit mode is restored & push back to pool
             Databases.autocommit(con);
-            Database.backNoTimeout(params.getContextId(), true, con);
         }
         log.info("{} successfully performed.", FolderCorrectOwnerTask.class.getSimpleName());
     }
@@ -209,7 +206,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             }
             return users;
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -228,7 +225,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             }
 
             int trashId = rs.getInt(1);
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
@@ -236,7 +233,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             collectTrashFolders(trashId, folderId2Owner, userId, contextId, con);
             return folderId2Owner;
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -266,7 +263,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
                     }
                 }
             } while (rs.next());
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
@@ -274,7 +271,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
                 collectTrashFolders(childId, folderId2Owner, userId, contextId, con);
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -301,7 +298,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
                 list.add(resultMap);
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

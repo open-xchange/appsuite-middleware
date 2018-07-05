@@ -2287,13 +2287,14 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
             }
 
         	@Override
-        	public void set(final PreparedStatement statement, final int parameterIndex, final Contact contact) throws SQLException {
+            public int set(final PreparedStatement statement, final int parameterIndex, final Contact contact) throws SQLException {
         		// special handling, since previous contact database implementation expected 'null', when the private flag is 'false'
         		if (contact.containsPrivateFlag() && contact.getPrivateFlag()) {
     				statement.setInt(parameterIndex, 1);
         		} else {
         			statement.setNull(parameterIndex, this.getSqlType());
         		}
+                return 1;
         	}
 
 			@Override

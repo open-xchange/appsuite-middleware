@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics;
 
+import java.util.function.Supplier;
 import com.openexchange.metrics.jmx.MetricServiceListener;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
@@ -95,7 +96,7 @@ public interface MetricService {
     Counter getCounter(MetricDescriptor descriptor);
 
     /**
-     * Gets an existing {@link Gauge} for the specified {@link MetricDescriptor} with the specified {@link MetricSupplier}
+     * Gets an existing {@link Gauge} for the specified {@link MetricDescriptor} with the specified {@link Supplier}
      * or creates and remembers a new one if it doesn't exist yet.
      *
      * @param descriptior The {@link MetricDescriptor}

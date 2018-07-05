@@ -53,8 +53,11 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPEncryptedData;
@@ -78,14 +81,82 @@ import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
  * {@link AbstractPGPTest}
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public class AbstractPGPTest {
 
     protected int TEST_KEY_SIZE = 1024;
-    protected String TEST_IDENTITY = "Max Mustermann";
-    protected char[] TEST_PASSWORD = "secret".toCharArray();
+    protected String TEST_IDENTITY_NAME = "Max Mustermann";
+    protected char[] TEST_IDENTITY_PASSWORD = "secret".toCharArray();
 
+    public static final String TEST_TEXT = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    /**
+     *
+     * {@link Identity} Represents a Identity containing one PGP Key useful for testing purpose.
+     *
+     * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+     * @since v2.4.2
+     */
+    protected class Identity {
+
+        private final String identity;
+        private final PGPPublicKey publicKey;
+        private final PGPSecretKey secretKey;
+        private final char[] password;
+
+        /**
+         * Initializes a new {@link Identity}.
+         *
+         * @param identity The name of the identity
+         * @param publicKey The public key of the identity
+         * @param secretKey The secret key of the identity
+         * @param password The password for accessing the private key
+         */
+        public Identity(String identity, PGPPublicKey publicKey, PGPSecretKey secretKey, char[] password) {
+            super();
+            this.identity = identity;
+            this.publicKey = publicKey;
+            this.secretKey = secretKey;
+            this.password = password;
+        }
+
+        /**
+         * Gets the identity
+         *
+         * @return The identity
+         */
+        public String getIdentity() {
+            return identity;
+        }
+
+        /**
+         * Gets the publicKey
+         *
+         * @return The publicKey
+         */
+        public PGPPublicKey getPublicKey() {
+            return publicKey;
+        }
+
+        /**
+         * Gets the secretKey
+         *
+         * @return The secretKey
+         */
+        public PGPSecretKey getSecretKey() {
+            return secretKey;
+        }
+
+        /**
+         * Gets the password
+         *
+         * @return The password
+         */
+        public char[] getPassword() {
+            return password;
+        }
+    }
     /**
      * Initializes a new {@link AbstractPGPTest}.
      */
@@ -98,7 +169,7 @@ public class AbstractPGPTest {
 
     /**
      * Generates a basic KeyPair for testing purpose
-     * 
+     *
      * @return A KeyPair
      * @throws NoSuchAlgorithmException
      * @throws NoSuchProviderException
@@ -112,19 +183,33 @@ public class AbstractPGPTest {
 
     /**
      * Create a new key pair generator using the default test credentials
-     * 
+     *
      * @return The new generator
      * @throws NoSuchAlgorithmException
      * @throws NoSuchProviderException
      * @throws PGPException
      */
     public PGPKeyRingGenerator createPGPKeyPairGenerator() throws NoSuchAlgorithmException, NoSuchProviderException, PGPException {
-        return createPGPKeyPairGenerator(TEST_IDENTITY, TEST_PASSWORD);
+        return createPGPKeyPairGenerator(TEST_IDENTITY_NAME, TEST_IDENTITY_PASSWORD);
+    }
+
+    /**
+     * A helper method for getting all Public Keys from a group of identities
+     *
+     * @param identities The identities to get the keys for
+     * @return A set of Public Keys for the given identities
+     */
+    protected PGPPublicKey[] getPublicKeysFor(List<Identity> identities) {
+        PGPPublicKey[] ret = new PGPPublicKey[(identities.size())];
+        for (int i = 0; i < identities.size(); i++) {
+            ret[i] = identities.get(i).getPublicKey();
+        }
+        return ret;
     }
 
     /**
      * Creates a new key pair generator
-     * 
+     *
      * @param identity the identify of to set for the key pair
      * @param passphrase the passphrase for protecting the SecretKey
      * @return the new generator
@@ -148,7 +233,7 @@ public class AbstractPGPTest {
 
     /**
      * Extracts the public key from the generator
-     * 
+     *
      * @param generator the generator to extract the public key from
      * @return the extracted public key
      */
@@ -158,24 +243,48 @@ public class AbstractPGPTest {
 
     /**
      * Extracts the secret key from the generator
-     * 
+     *
      * @param generator the generator to extract the secret key from
      * @return the extracted secret key
      */
     public PGPSecretKey getSecretKeyFromGenerator(PGPKeyRingGenerator generator) {
         return generator.generateSecretKeyRing().getSecretKey();
     }
-    
+
     /**
      * Extracts a private key from a PGPSecretKey object
-     * 
+     *
      * @param secretKey The PGPSecretKeyObject
-     * @param password The password 
+     * @param password The password
      * @return The decoded private key
      * @throws PGPException
      */
-    public PGPPrivateKey decodePrivateKey(PGPSecretKey secretKey, char[] password) throws PGPException {        
+    public PGPPrivateKey decodePrivateKey(PGPSecretKey secretKey, char[] password) throws PGPException {
         PBESecretKeyDecryptor extractor = new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(password);
         return secretKey.extractPrivateKey(extractor);
+    }
+
+    /**
+     * A helper method for creating clear text test data which can be used for encryption
+     *
+     * @return A bunch of test data
+     */
+    public byte[] generateTestData() {
+        return "test".getBytes();
+    }
+
+    /**
+     * A helper method for creating clear text test data which can be used for encryption of specified length
+     *
+     * @return A bunch of test data
+     */
+    public byte[] generateTestData(int length) {
+        char[] buf = new char[length];
+        char[] textData = TEST_TEXT.toCharArray();
+        Random random = new SecureRandom();
+        for (int i = 0; i < length; i++) {
+            buf[i] = textData[random.nextInt(textData.length)];
+        }
+        return new String(buf).getBytes();
     }
 }

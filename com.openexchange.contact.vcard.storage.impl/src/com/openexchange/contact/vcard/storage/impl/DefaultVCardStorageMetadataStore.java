@@ -55,8 +55,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.contact.vcard.storage.VCardStorageExceptionCodes;
+import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -92,6 +92,29 @@ public class DefaultVCardStorageMetadataStore implements VCardStorageMetadataSto
         try {
             stmt = con.prepareStatement("SELECT vCardId FROM prg_contacts WHERE cid=? AND vCardid IS NOT NULL");
             stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                refIds.add(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            throw VCardStorageExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
+        return refIds;
+    }
+
+    @Override
+    public Set<String> loadRefIds(int contextId, int userId) throws OXException {
+        Set<String> refIds = new HashSet<String>();
+        Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT vCardId FROM prg_contacts WHERE cid=? AND created_from=? AND vCardid IS NOT NULL");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             while (rs.next()) {
                 refIds.add(rs.getString(1));

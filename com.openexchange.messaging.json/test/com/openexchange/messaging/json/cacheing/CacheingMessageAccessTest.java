@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.json.cacheing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.Test;
@@ -58,10 +60,6 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.SimMessageAccess;
 import com.openexchange.messaging.SimpleMessagingMessage;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

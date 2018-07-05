@@ -53,7 +53,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 
@@ -71,7 +70,7 @@ public class OAuthAccessRegistryServiceImpl implements OAuthAccessRegistryServic
      */
     public OAuthAccessRegistryServiceImpl() {
         super();
-        mapRef = new AtomicReference<ConcurrentMap<String,OAuthAccessRegistryImpl>>(new ConcurrentHashMap<String, OAuthAccessRegistryImpl>());
+        mapRef = new AtomicReference<ConcurrentMap<String, OAuthAccessRegistryImpl>>(new ConcurrentHashMap<String, OAuthAccessRegistryImpl>());
     }
 
     @Override
@@ -93,20 +92,32 @@ public class OAuthAccessRegistryServiceImpl implements OAuthAccessRegistryServic
     }
 
     /**
+     * Notifies this registry that specified user went inactive.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public void userInactive(int userId, int contextId) {
+        ConcurrentMap<String, OAuthAccessRegistryImpl> map = mapRef.get();
+        if (null == map) {
+            return;
+        }
+
+        for (OAuthAccessRegistryImpl registry : map.values()) {
+            registry.removeIfLast(contextId, userId);
+        }
+    }
+
+    /**
      * Clears this registry
      */
     public void clear() {
         ConcurrentMap<String, OAuthAccessRegistryImpl> map = mapRef.getAndSet(null);
         if (null != map) {
             for (OAuthAccessRegistryImpl registry : map.values()) {
-                for (OAuthAccess oAuthAccess : registry) {
-                    if (null != oAuthAccess) {
-                        oAuthAccess.dispose();
-                    }
-                }
+                registry.disposeAll();
             }
             map.clear();
         }
     }
-
 }

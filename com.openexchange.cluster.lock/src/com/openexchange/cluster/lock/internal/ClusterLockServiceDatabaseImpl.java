@@ -56,11 +56,11 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.cluster.lock.ClusterTask;
-import com.openexchange.cluster.lock.policies.RetryPolicy;
-import com.openexchange.cluster.lock.policies.RunOnceRetryPolicy;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.policy.retry.RetryPolicy;
+import com.openexchange.policy.retry.RunOnceRetryPolicy;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -116,7 +116,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
             return updateTimestamp(clusterTask, timeNow, timeThen, connection);
         } catch (SQLException e) {
-            throw ClusterLockExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw ClusterLockExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeResources(resultSet, statement, connection, false, contextId);
         }
@@ -315,7 +315,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw ClusterLockExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw ClusterLockExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
         }

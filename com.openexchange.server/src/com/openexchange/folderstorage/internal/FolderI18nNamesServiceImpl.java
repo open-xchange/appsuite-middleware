@@ -115,6 +115,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(MailStrings.CONFIRMED_HAM_ALT);
         identifiers.add(MailStrings.CONFIRMED_SPAM);
         identifiers.add(MailStrings.CONFIRMED_SPAM_ALT);
+        identifiers.add(MailStrings.ARCHIVE);
         identifiersPerModule.put(Integer.valueOf(Module.MAIL.getFolderConstant()), identifiers);
         /*
          * calendar
@@ -129,7 +130,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers = new HashSet<String>();
         identifiers.add(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
         identifiers.add(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
-        identifiers.add(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
+        /*identifiers.add(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);*/ // finally dropped
         identifiers.add(FolderStrings.SYSTEM_LDAP_FOLDER_NAME);
         identifiers.add(FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME);
         identifiersPerModule.put(Integer.valueOf(Module.CONTACTS.getFolderConstant()), identifiers);

@@ -2,15 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hosting Plugin for Administration Daemon
 Bundle-SymbolicName: com.openexchange.admin.plugin.hosting
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.admin.osgi.MainActivator
-Import-Package: com.google.common.collect,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
  com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions,
- com.openexchange.admin.schemacache,
- com.openexchange.admin.schemacache.inmemory,
  com.openexchange.caching,
  com.openexchange.caching.events,
  com.openexchange.config,
@@ -39,11 +39,16 @@ Import-Package: com.google.common.collect,
  com.openexchange.quota.groupware,
  com.openexchange.sessiond,
  com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
  com.openexchange.tools.arrays,
  com.openexchange.tools.file,
  com.openexchange.tools.oxfolder,
  com.openexchange.tools.pipesnfilters,
  com.openexchange.tools.sql,
+ gnu.trove.list,
+ gnu.trove.list.array,
+ gnu.trove.map,
+ gnu.trove.map.hash,
  javax.mail,
  javax.mail.internet,
  javax.mail.internet.idn,
@@ -60,7 +65,7 @@ Export-Package: com.openexchange.admin.rmi.impl,
  com.openexchange.admin.schemamove,
  com.openexchange.admin.schemamove.mbean,
  com.openexchange.admin.storage.interfaces
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Require-Bundle: com.openexchange.admin
 Eclipse-BuddyPolicy: registered

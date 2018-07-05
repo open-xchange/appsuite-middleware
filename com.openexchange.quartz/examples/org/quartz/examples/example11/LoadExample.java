@@ -20,13 +20,12 @@ package org.quartz.examples.example11;
 import static org.quartz.DateBuilder.futureDate;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
-
+import org.quartz.DateBuilder.IntervalUnit;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
 import org.quartz.SchedulerMetaData;
 import org.quartz.Trigger;
-import org.quartz.DateBuilder.IntervalUnit;
 import org.quartz.impl.StdSchedulerFactory;
 
 

@@ -109,6 +109,25 @@ public final class ReminderAJAXRequest {
     }
 
     /**
+     * Requires <code>long</code> parameter.
+     *
+     * @param name The parameter name
+     * @return The <code>long</code>
+     * @throws OXException If parameter is missing or not a number
+     */
+    public long checkLong(final String name) throws OXException {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        try {
+            return Long.parseLong(parameter.trim());
+        } catch (final NumberFormatException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+        }
+    }
+
+    /**
      * Gets the data object.
      *
      * @return The data object or <code>null</code> if no data object available

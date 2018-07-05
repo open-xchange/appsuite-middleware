@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,16 +40,42 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import javax.activation.*;
-import java.lang.*;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import com.sun.mail.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Properties;
+import javax.activation.DataHandler;
+import javax.mail.Address;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.FolderClosedException;
+import javax.mail.Header;
+import javax.mail.IllegalWriteException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
 import javax.mail.util.LimitExceededException;
 import javax.mail.util.LimitedStringBuilder;
 import javax.mail.util.SharedByteArrayInputStream;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.FolderClosedIOException;
+import com.sun.mail.util.LineOutputStream;
+import com.sun.mail.util.MessageRemovedIOException;
+import com.sun.mail.util.MimeUtil;
+import com.sun.mail.util.PropUtil;
 
 /**
  * This class represents a MIME style email message. It implements
@@ -181,6 +207,8 @@ public class MimeMessage extends Message implements MimePart {
 
     // Should addresses in headers be parsed in "strict" mode?
     private boolean strict = true;
+    // Is UTF-8 allowed in headers?
+    private boolean allowutf8 = false;
     
     // Keep the reference to SharedInputStream to avoid preliminary garbage collection.
     private SharedInputStream sis;
@@ -322,9 +350,13 @@ public class MimeMessage extends Message implements MimePart {
      * Set the strict flag based on property.
      */
     private void initStrict() {
-	if (session != null)
-	    strict = PropUtil.getBooleanSessionProperty(session,
-				    "mail.mime.address.strict", true);
+	if (session != null) {
+	    Properties props = session.getProperties();
+        strict = PropUtil.getBooleanProperty(props,
+                    "mail.mime.address.strict", true);
+        allowutf8 = PropUtil.getBooleanProperty(props,
+                    "mail.mime.allowutf8", false);
+	}
     }
 
     /**
@@ -375,6 +407,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception	MessagingException for failures
      * @see	#headers
      */
+    @Override
     public Address[] getFrom() throws MessagingException {
 	Address[] a = getAddressHeader("From");
 	if (a == null)
@@ -396,6 +429,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void setFrom(Address address) throws MessagingException {
 	if (address == null)
 	    removeHeader("From");
@@ -435,6 +469,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void setFrom() throws MessagingException {
 	InternetAddress me = null;
 	try {
@@ -462,6 +497,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void addFrom(Address[] addresses) throws MessagingException {
 	addAddressHeader("From", addresses);
     }
@@ -527,6 +563,7 @@ public class MimeMessage extends Message implements MimePart {
 	    super(type);
 	}
 
+	@Override
 	protected Object readResolve() throws ObjectStreamException {
 	    if (type.equals("Newsgroups"))
 		return NEWSGROUPS;
@@ -563,6 +600,7 @@ public class MimeMessage extends Message implements MimePart {
      * @see		javax.mail.Message.RecipientType#BCC
      * @see		javax.mail.internet.MimeMessage.RecipientType#NEWSGROUPS
      */
+    @Override
     public Address[] getRecipients(Message.RecipientType type)
 				throws MessagingException {
 	if (type == RecipientType.NEWSGROUPS) {
@@ -583,6 +621,7 @@ public class MimeMessage extends Message implements MimePart {
      * @see		javax.mail.Message.RecipientType#BCC
      * @see		javax.mail.internet.MimeMessage.RecipientType#NEWSGROUPS
      */
+    @Override
     public Address[] getAllRecipients() throws MessagingException {
 	Address[] all = super.getAllRecipients();
 	Address[] ng = getRecipients(RecipientType.NEWSGROUPS);
@@ -613,6 +652,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception	MessagingException for other failures
      * @see		#getRecipients
      */
+    @Override
     public void setRecipients(Message.RecipientType type, Address[] addresses)
                                 throws MessagingException {
 	if (type == RecipientType.NEWSGROUPS) {
@@ -666,6 +706,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void addRecipients(Message.RecipientType type, Address[] addresses)
                                 throws MessagingException {
 	if (type == RecipientType.NEWSGROUPS) {
@@ -697,7 +738,8 @@ public class MimeMessage extends Message implements MimePart {
             if (addresses != null && addresses.length() != 0)
                 addHeader("Newsgroups", addresses);
         } else
-            addAddressHeader(getHeaderName(type), InternetAddress.parse(addresses));
+            addAddressHeader(getHeaderName(type),
+		    InternetAddress.parse(addresses));
     }
  
     /**
@@ -711,6 +753,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception	MessagingException for failures
      * @see		#headers
      */
+    @Override
     public Address[] getReplyTo() throws MessagingException {
 	Address[] a = getAddressHeader("Reply-To");
 	if (a == null || a.length == 0)
@@ -729,6 +772,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void setReplyTo(Address[] addresses) throws MessagingException {
 	setAddressHeader("Reply-To", addresses);
     }
@@ -743,7 +787,11 @@ public class MimeMessage extends Message implements MimePart {
     // Convenience method to set addresses
     private void setAddressHeader(String name, Address[] addresses)
 			throws MessagingException {
-	String s = InternetAddress.toString(addresses, name.length() + 2);
+	String s;
+	if (allowutf8)
+	    s = InternetAddress.toUnicodeString(addresses, name.length() + 2);
+	else
+	    s = InternetAddress.toString(addresses, name.length() + 2);
 	if (s == null)
 	    removeHeader(name);
 	else
@@ -763,7 +811,11 @@ public class MimeMessage extends Message implements MimePart {
 	    System.arraycopy(a, 0, anew, 0, a.length);
 	    System.arraycopy(addresses, 0, anew, a.length, addresses.length);
 	}
-	String s = InternetAddress.toString(anew, name.length() + 2);
+	String s;
+	if (allowutf8)
+	    s = InternetAddress.toUnicodeString(anew, name.length() + 2);
+	else
+	    s = InternetAddress.toString(anew, name.length() + 2);
 	if (s == null)
 	    return;
 	setHeader(name, s);
@@ -784,6 +836,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception	MessagingException for failures
      * @see		#headers
      */
+    @Override
     public String getSubject() throws MessagingException {
 	String rawvalue = getHeader("Subject", null);
 
@@ -821,6 +874,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void setSubject(String subject) throws MessagingException {
 	setSubject(subject, null);
     }
@@ -874,6 +928,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return          The sent Date
      * @exception	MessagingException for failures
      */
+    @Override
     public Date getSentDate() throws MessagingException {
 	String s = getHeader("Date", null);
 	if (s != null) {
@@ -907,6 +962,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void setSentDate(Date d) throws MessagingException {
 	if (d == null)
 	    removeHeader("Date");
@@ -936,6 +992,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return          the date this message was received
      * @exception	MessagingException for failures
      */
+    @Override
     public Date getReceivedDate() throws MessagingException {
 	return null;	
     }
@@ -957,6 +1014,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return          size of content in bytes
      * @exception	MessagingException for failures
      */  
+    @Override
     public int getSize() throws MessagingException {
 	if (content != null)
 	    return content.length;
@@ -987,9 +1045,10 @@ public class MimeMessage extends Message implements MimePart {
      * @return          number of lines in the content.
      * @exception	MessagingException for failures
      */  
-     public int getLineCount() throws MessagingException {
+    @Override
+    public int getLineCount() throws MessagingException {
 	return -1;
-     }
+    }
 
     /**
      * Returns the value of the RFC 822 "Content-Type" header field. 
@@ -1004,6 +1063,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception	MessagingException for failures
      * @see             javax.activation.DataHandler
      */
+    @Override
     public String getContentType() throws MessagingException {
 	String s = getHeader("Content-Type", null);
 	s = MimeUtil.cleanContentType(this, s);
@@ -1030,6 +1090,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return			true if it matches the MIME type
      * @exception		MessagingException for failures
      */
+    @Override
     public boolean isMimeType(String mimeType) throws MessagingException {
 	return MimeBodyPart.isMimeType(this, mimeType);
     }
@@ -1048,6 +1109,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return          disposition of this part, or null if unknown
      * @exception	MessagingException for failures
      */
+    @Override
     public String getDisposition() throws MessagingException {
 	return MimeBodyPart.getDisposition(this);
     }
@@ -1063,6 +1125,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void setDisposition(String disposition) throws MessagingException {
 	MimeBodyPart.setDisposition(this, disposition);
     }
@@ -1079,6 +1142,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return          content-transfer-encoding
      * @exception	MessagingException for failures
      */
+    @Override
     public String getEncoding() throws MessagingException {
 	return MimeBodyPart.getEncoding(this);
     }
@@ -1094,6 +1158,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return          content-ID
      * @exception	MessagingException for failures
      */
+    @Override
     public String getContentID() throws MessagingException {
 	return getHeader("Content-Id", null);
     }
@@ -1128,6 +1193,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return          content-MD5
      * @exception	MessagingException for failures
      */
+    @Override
     public String getContentMD5() throws MessagingException {
 	return getHeader("Content-MD5", null);
     }
@@ -1141,6 +1207,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception	MessagingException for other failures
      */
+    @Override
     public void setContentMD5(String md5) throws MessagingException {
 	setHeader("Content-MD5", md5);
     }
@@ -1161,6 +1228,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return	content-description
      * @exception	MessagingException for failures
      */
+    @Override
     public String getDescription() throws MessagingException {
 	return MimeBodyPart.getDescription(this);
     }
@@ -1190,6 +1258,7 @@ public class MimeMessage extends Message implements MimePart {
      *			in the exception chain if the charset
      *			conversion fails.
      */
+    @Override
     public void setDescription(String description) throws MessagingException {
 	setDescription(description, null);
     }
@@ -1237,6 +1306,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return			value of content-language header.
      * @exception		MessagingException for failures
      */
+    @Override
     public String[] getContentLanguage() throws MessagingException {
 	return MimeBodyPart.getContentLanguage(this);
     }
@@ -1252,6 +1322,7 @@ public class MimeMessage extends Message implements MimePart {
      *				obtained from a READ_ONLY folder.
      * @exception		MessagingException for other failures
      */
+    @Override
     public void setContentLanguage(String[] languages)
 			throws MessagingException {
 	MimeBodyPart.setContentLanguage(this, languages);
@@ -1295,6 +1366,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return	filename
      * @exception		MessagingException for failures
      */
+    @Override
     public String getFileName() throws MessagingException {
 	return MimeBodyPart.getFileName(this);
     }
@@ -1319,6 +1391,7 @@ public class MimeMessage extends Message implements MimePart {
      *				obtained from a READ_ONLY folder.
      * @exception		MessagingException for other failures
      */
+    @Override
     public void setFileName(String filename) throws MessagingException {
 	MimeBodyPart.setFileName(this, filename);	
     }
@@ -1356,6 +1429,7 @@ public class MimeMessage extends Message implements MimePart {
      * @see	#getContentStream
      * @see 	javax.activation.DataHandler#getInputStream
      */
+    @Override
     public InputStream getInputStream() 
 		throws IOException, MessagingException {
 	return getDataHandler().getInputStream();
@@ -1434,6 +1508,7 @@ public class MimeMessage extends Message implements MimePart {
      *
      * @exception	MessagingException for failures
      */
+    @Override
     public synchronized DataHandler getDataHandler() 
 		throws MessagingException {
 	if (dh == null)
@@ -1464,6 +1539,7 @@ public class MimeMessage extends Message implements MimePart {
      *			javax.activation.DataHandler for more details.
      * @exception       MessagingException for other failures
      */
+    @Override
     public Object getContent() throws IOException, MessagingException {
 	if (cachedContent != null)
 	    return cachedContent;
@@ -1500,6 +1576,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception       MessagingException for other failures
      */
+    @Override
     public synchronized void setDataHandler(DataHandler dh) 
 		throws MessagingException {
 	this.dh = dh;
@@ -1526,6 +1603,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception       MessagingException for other failures
      */
+    @Override
     public void setContent(Object o, String type) 
 			throws MessagingException {
 	if (o instanceof Multipart)
@@ -1553,6 +1631,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception	MessagingException	if an error occurs
      * @see	#setText(String text, String charset)
      */
+    @Override
     public void setText(String text) throws MessagingException {
 	setText(text, null);
     }
@@ -1568,6 +1647,7 @@ public class MimeMessage extends Message implements MimePart {
      * @param	charset	the charset to use for the text
      * @exception	MessagingException	if an error occurs
      */
+    @Override
     public void setText(String text, String charset)
 			throws MessagingException {
 	MimeBodyPart.setText(this, text, charset, "plain");
@@ -1586,6 +1666,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception	MessagingException	if an error occurs
      * @since	JavaMail 1.4
      */
+    @Override
     public void setText(String text, String charset, String subtype)
                         throws MessagingException {
 	MimeBodyPart.setText(this, text, charset, subtype);
@@ -1602,6 +1683,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception       MessagingException for other failures
      */
+    @Override
     public void setContent(Multipart mp) throws MessagingException {
 	setDataHandler(new DataHandler(mp, mp.getContentType()));
 	mp.setParent(this);
@@ -1636,6 +1718,7 @@ public class MimeMessage extends Message implements MimePart {
      * @return		the reply Message
      * @exception	MessagingException for failures
      */
+    @Override
     public Message reply(boolean replyToAll) throws MessagingException {
 	return reply(replyToAll, true);
     }
@@ -1693,7 +1776,7 @@ public class MimeMessage extends Message implements MimePart {
 	Address a[] = getReplyTo();
 	reply.setRecipients(Message.RecipientType.TO, a);
 	if (replyToAll) {
-	    List<Address> v = new ArrayList<Address>();
+	    List<Address> v = new ArrayList<>();
 	    // add my own address to list
 	    InternetAddress me = InternetAddress.getLocalAddress(session);
 	    if (me != null)
@@ -1709,8 +1792,9 @@ public class MimeMessage extends Message implements MimePart {
 	    String replyallccStr = null;
 	    boolean replyallcc = false;
 	    if (session != null)
-		replyallcc = PropUtil.getBooleanSessionProperty(session,
-						"mail.replyallcc", false);
+	    replyallcc = PropUtil.getBooleanProperty(
+                        session.getProperties(),
+                        "mail.replyallcc", false);
 	    // add the recipients from the To field so far
 	    eliminateDuplicates(v, a);
 	    a = getRecipients(Message.RecipientType.TO);
@@ -1837,6 +1921,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception MessagingException for other failures
      * @see javax.activation.DataHandler#writeTo
      */
+    @Override
     public void writeTo(OutputStream os)
 				throws IOException, MessagingException {
 	writeTo(os, null);
@@ -1871,9 +1956,8 @@ public class MimeMessage extends Message implements MimePart {
 
 	// Else, the content is untouched, so we can just output it
 	// First, write out the header
-	@SuppressWarnings("unchecked")
 	Enumeration<String> hdrLines = getNonMatchingHeaderLines(ignoreList);
-	LineOutputStream los = new LineOutputStream(os);
+	LineOutputStream los = new LineOutputStream(os, allowutf8);
 	while (hdrLines.hasMoreElements())
 	    los.writeln(hdrLines.nextElement());
 
@@ -1916,6 +2000,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception       MessagingException for failures
      * @see 	javax.mail.internet.MimeUtility
      */
+    @Override
     public String[] getHeader(String name)
 			throws MessagingException {
 	return headers.getHeader(name);
@@ -1933,6 +2018,7 @@ public class MimeMessage extends Message implements MimePart {
      *				this name
      * @exception       	MessagingException for failures
      */
+    @Override
     public String getHeader(String name, String delimiter)
 				throws MessagingException {
 	return headers.getHeader(name, delimiter);
@@ -1954,6 +2040,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception       MessagingException for other failures
      */
+    @Override
     public void setHeader(String name, String value)
                                 throws MessagingException {
 	headers.setHeader(name, value);	
@@ -1974,6 +2061,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception       MessagingException for other failures
      */
+    @Override
     public void addHeader(String name, String value)
                                 throws MessagingException {
 	headers.addHeader(name, value);
@@ -1987,6 +2075,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception       MessagingException for other failures
      */
+    @Override
     public void removeHeader(String name)
                                 throws MessagingException {
 	headers.removeHeader(name);
@@ -2007,8 +2096,8 @@ public class MimeMessage extends Message implements MimePart {
      * @exception  MessagingException for failures
      * @see 	javax.mail.internet.MimeUtility
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getAllHeaders() throws MessagingException {
+    @Override
+    public Enumeration<Header> getAllHeaders() throws MessagingException {
 	return headers.getAllHeaders();	
     }
 
@@ -2019,8 +2108,8 @@ public class MimeMessage extends Message implements MimePart {
      *
      * @exception  MessagingException for failures
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getMatchingHeaders(String[] names)
+    @Override
+    public Enumeration<Header> getMatchingHeaders(String[] names)
 			throws MessagingException {
 	return headers.getMatchingHeaders(names);
     }
@@ -2032,8 +2121,8 @@ public class MimeMessage extends Message implements MimePart {
      *
      * @exception  MessagingException for failures
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getNonMatchingHeaders(String[] names)
+    @Override
+    public Enumeration<Header> getNonMatchingHeaders(String[] names)
 			throws MessagingException {
 	return headers.getNonMatchingHeaders(names);
     }
@@ -2047,6 +2136,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception  	MessagingException for other failures
      */
+    @Override
     public void addHeaderLine(String line) throws MessagingException {
 	headers.addHeaderLine(line);
     }
@@ -2058,8 +2148,8 @@ public class MimeMessage extends Message implements MimePart {
      *
      * @exception  	MessagingException for failures
      */
-    @SuppressWarnings("rawtypes")
-    public Enumeration getAllHeaderLines() throws MessagingException {
+    @Override
+    public Enumeration<String> getAllHeaderLines() throws MessagingException {
 	return headers.getAllHeaderLines();
     }
 
@@ -2070,7 +2160,8 @@ public class MimeMessage extends Message implements MimePart {
      *
      * @exception  	MessagingException for failures
      */
-    public Enumeration getMatchingHeaderLines(String[] names)
+    @Override
+    public Enumeration<String> getMatchingHeaderLines(String[] names)
                                         throws MessagingException {
 	return headers.getMatchingHeaderLines(names);
     }
@@ -2082,9 +2173,47 @@ public class MimeMessage extends Message implements MimePart {
      *
      * @exception  	MessagingException for failures
      */
-    public Enumeration getNonMatchingHeaderLines(String[] names)
+    @Override
+    public Enumeration<String> getNonMatchingHeaderLines(String[] names)
                                         throws MessagingException {
 	return headers.getNonMatchingHeaderLines(names);
+    }
+
+    /**
+     * Folds all header lines at linear whitespace so that each line is no
+     * longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     */
+    public void foldAllHeaderLines() {
+    headers.foldAllHeaderLines( );
+    }
+
+    /**
+     * Folds matching header header lines at linear whitespace so that each
+     * line is no longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     * 
+     * @param names The names of the headers to fold
+     */
+    public void foldMatchingHeaderLines(String[] names) {
+    headers.foldMatchingHeaderLines(names);
+    }
+
+    /**
+     * Folds non-matching header header lines at linear whitespace so that
+     * each line is no longer than 76 characters, if possible.
+     * <p>
+     * If there are more than 76 non-whitespace characters consecutively,
+     * the string is folded at the first whitespace after that sequence.
+     * 
+     * @param names The names of the headers not to fold
+     */
+    public void foldNonMatchingHeaderLines(String[] names) {
+    headers.foldNonMatchingHeaderLines(names);
     }
 
     /**
@@ -2099,6 +2228,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception  	MessagingException for failures
      * @see 		javax.mail.Flags
      */
+    @Override
     public synchronized Flags getFlags() throws MessagingException {
 	return (Flags)flags.clone();
     }
@@ -2121,6 +2251,7 @@ public class MimeMessage extends Message implements MimePart {
      * @see		javax.mail.Flags.Flag#RECENT
      * @see		javax.mail.Flags.Flag#SEEN
      */
+    @Override
     public synchronized boolean isSet(Flags.Flag flag)
 				throws MessagingException {
 	return (flags.contains(flag));
@@ -2137,6 +2268,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception  	MessagingException for other failures
      */
+    @Override
     public synchronized void setFlags(Flags flag, boolean set)
 			throws MessagingException {
 	if (set)
@@ -2169,6 +2301,7 @@ public class MimeMessage extends Message implements MimePart {
      *			obtained from a READ_ONLY folder.
      * @exception  	MessagingException for other failures
      */
+    @Override
     public void saveChanges() throws MessagingException {
 	modified = true;
 	saved = true;
@@ -2193,7 +2326,8 @@ public class MimeMessage extends Message implements MimePart {
      * Called by the <code>saveChanges</code> method to actually
      * update the MIME headers.  The implementation here sets the
      * <code>Content-Transfer-Encoding</code> header (if needed
-     * and not already set), the <code>MIME-Version</code> header
+     * and not already set), the <code>Date</code> header (if
+     * not already set), the <code>MIME-Version</code> header
      * and the <code>Message-ID</code> header. Also, if the content
      * of this message is a <code>MimeMultipart</code>, its
      * <code>updateHeaders</code> method is called. <p>
@@ -2213,6 +2347,8 @@ public class MimeMessage extends Message implements MimePart {
     protected synchronized void updateHeaders() throws MessagingException {
 	MimeBodyPart.updateHeaders(this);	
 	setHeader("MIME-Version", "1.0");
+	if (getHeader("Date") == null)
+	    setSentDate(new Date());
         updateMessageID();
 
 	if (cachedContent != null) {
@@ -2242,7 +2378,7 @@ public class MimeMessage extends Message implements MimePart {
      */
     protected InternetHeaders createInternetHeaders(InputStream is)
 				throws MessagingException {
-	return new InternetHeaders(is);
+	return new InternetHeaders(is, allowutf8);
     }
 
     /**

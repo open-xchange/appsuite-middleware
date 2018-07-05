@@ -49,13 +49,13 @@
 
 package com.openexchange.mailaccount;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.json.MailAccountFields;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link Attribute}.

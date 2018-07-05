@@ -51,10 +51,10 @@ package com.openexchange.search.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -147,7 +147,7 @@ public final class SearchServiceImpl implements SearchService {
             }
         });
 
-        MATCHERS = Collections.unmodifiableMap(m);
+        MATCHERS = ImmutableMap.copyOf(m);
     }
 
     private static <C> boolean singleTermMatch(final C candidate, final SingleSearchTerm searchTerm, final SearchAttributeFetcher<C> attributeFetcher) {

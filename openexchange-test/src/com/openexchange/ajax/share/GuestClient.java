@@ -357,7 +357,7 @@ public class GuestClient extends AJAXClient {
         if ("guest".equals(shareResponse.getLoginType()) || "guest_password".equals(shareResponse.getLoginType())) {
             String loginName = Strings.isNotEmpty(shareResponse.getLoginName()) ? shareResponse.getLoginName() : config.username;
             GuestCredentials credentials = new GuestCredentials(loginName, config.password);
-            loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), credentials, config.client, false);
+            loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(),  credentials, config.client, false);
         } else if ("anonymous_password".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), config.password, false);
         } else {
@@ -446,7 +446,7 @@ public class GuestClient extends AJAXClient {
         /*
          * get folder
          */
-        GetResponse getResponse = execute(new GetRequest(EnumAPI.OX_NEW, Integer.valueOf(folderID)));
+        GetResponse getResponse = execute(new GetRequest(EnumAPI.OX_NEW, folderID));
         FolderObject folder = getResponse.getFolder();
         folder.setLastModified(getResponse.getTimestamp());
         /*

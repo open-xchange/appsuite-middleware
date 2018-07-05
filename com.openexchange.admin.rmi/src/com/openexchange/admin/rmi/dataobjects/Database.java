@@ -97,10 +97,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
 
     private boolean schemeset;
 
-    private Integer clusterWeight;
-
-    private boolean clusterWeightset;
-
     private Integer maxUnits;
 
     private boolean maxUnitsset;
@@ -147,6 +143,57 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         init();
         this.id = Integer.valueOf(id);
         this.scheme = schema;
+    }
+
+    /**
+     * The copy constructor.
+     *
+     * @param toCopy To copy from
+     */
+    public Database(final Database toCopy) {
+        super();
+        init();
+        this.currentUnits = toCopy.currentUnits;
+        this.currentUnitsset = toCopy.currentUnitsset;
+        this.driver = toCopy.driver;
+        this.driverset = toCopy.driverset;
+        this.id = toCopy.id;
+        this.idset = toCopy.idset;
+        this.login = toCopy.login;
+        this.loginset = toCopy.loginset;
+        this.master = toCopy.master;
+        this.masterId = toCopy.masterId;
+        this.masterIdset = toCopy.masterIdset;
+        this.masterset = toCopy.masterset;
+        this.maxUnits = toCopy.maxUnits;
+        this.maxUnitsset = toCopy.maxUnitsset;
+        this.name = toCopy.name;
+        this.nameset = toCopy.nameset;
+        this.password = toCopy.password;
+        this.passwordset = toCopy.passwordset;
+        this.poolHardLimit = toCopy.poolHardLimit;
+        this.poolHardLimitset = toCopy.poolHardLimitset;
+        this.poolInitial = toCopy.poolInitial;
+        this.poolInitialset = toCopy.poolInitialset;
+        this.poolMax = toCopy.poolMax;
+        this.poolMaxset = toCopy.poolMaxset;
+        this.read_id = toCopy.read_id;
+        this.read_idset = toCopy.read_idset;
+        this.scheme = toCopy.scheme;
+        this.schemeset = toCopy.schemeset;
+        this.url = toCopy.url;
+        this.urlset = toCopy.urlset;
+    }
+
+    /**
+     * The copy constructor.
+     *
+     * @param toCopy To copy from
+     */
+    public Database(final Database toCopy, final String schema) {
+        this(toCopy);
+        this.scheme = schema;
+        this.schemeset = true;
     }
 
     public Database() {
@@ -224,20 +271,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         this.schemeset = true;
     }
 
-    public Integer getClusterWeight() {
-        return this.clusterWeight;
-    }
-
-    /**
-     * The system weight factor of this database in percent, value is Integer
-     * This value defines how contexts will be distributed over multiple
-     * databases/db pools.
-     */
-    public void setClusterWeight(final Integer clusterWeight) {
-        this.clusterWeight = clusterWeight;
-        this.clusterWeightset = true;
-    }
-
     public Integer getMaxUnits() {
         return this.maxUnits;
     }
@@ -269,15 +302,32 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         return this.masterId;
     }
 
+    /**
+     * Sets the identifier of the associated master database.
+     * <p>
+     * Implicitly marks this database as a slave (suitable for read-only accesses)
+     *
+     * @param masterId The identifier of the master database
+     */
     public void setMasterId(final Integer masterId) {
         this.masterId = masterId;
         this.masterIdset = true;
     }
 
+    /**
+     * Signals if this database is a master (suitable for read-write accesses)
+     *
+     * @return <code>true</code> if master; otherwise <code>false</code>
+     */
     public Boolean isMaster() {
         return this.master;
     }
 
+    /**
+     * Sets if this database is a master (suitable for read-write accesses)
+     *
+     * @param master <code>true</code> if master; otherwise <code>false</code>
+     */
     public void setMaster(final Boolean master) {
         this.master = master;
         this.masterset = true;
@@ -341,7 +391,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     private void init() {
         this.id = null;
         this.read_id = null;
-        this.clusterWeight = null;
         this.url = null;
         this.login = null;
         this.password = null;
@@ -387,13 +436,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     @Override
     public String[] getMandatoryMembersRegister() {
         return new String[] { "password", "name", "master" };
-    }
-
-    /**
-     * @return the clusterWeightset
-     */
-    public boolean isClusterWeightset() {
-        return clusterWeightset;
     }
 
     /**
@@ -508,8 +550,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((clusterWeight == null) ? 0 : clusterWeight.hashCode());
-        result = prime * result + (clusterWeightset ? 1231 : 1237);
         result = prime * result + ((currentUnits == null) ? 0 : currentUnits.hashCode());
         result = prime * result + (currentUnitsset ? 1231 : 1237);
         result = prime * result + ((driver == null) ? 0 : driver.hashCode());
@@ -558,16 +598,6 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
             return false;
         }
         final Database other = (Database) obj;
-        if (clusterWeight == null) {
-            if (other.clusterWeight != null) {
-                return false;
-            }
-        } else if (!clusterWeight.equals(other.clusterWeight)) {
-            return false;
-        }
-        if (clusterWeightset != other.clusterWeightset) {
-            return false;
-        }
         if (currentUnits == null) {
             if (other.currentUnits != null) {
                 return false;

@@ -123,7 +123,7 @@ public class GenerateMasterPasswordCLT {
         Map<Parameter, String> parameters = new HashMap<Parameter, String>();
         initParameters(parameters);
         boolean printUsage = false;
-        String exceptionMessage = new String();
+        String exceptionMessage = "";
         try {
             CommandLine cl = parser.parse(options, args);
             if (cl.hasOption("h")) {

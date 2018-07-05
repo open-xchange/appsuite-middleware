@@ -49,8 +49,6 @@
 
 package com.openexchange.folderstorage.database.getfolder;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -70,6 +68,9 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
 
 /**
  * {@link SystemPublicFolder} - Gets the system shared folder.
@@ -141,44 +142,15 @@ public final class SystemPublicFolder {
             /*
              * Check for presence of virtual folders
              */
-            {
-                final boolean tmp =
-                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
-                        FolderObject.CALENDAR,
-                        user.getId(),
-                        user.getGroups(),
-                        userPerm,
-                        ctx,
-                        con);
-                if (tmp) {
-                    subfolderIds.add(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
-                }
+            TIntSet containedModules = OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK }, user.getId(), user.getGroups(), userPerm, ctx, con);
+            if (containedModules.contains(FolderObject.CALENDAR)) {
+                subfolderIds.add(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID);
             }
-            {
-                final boolean tmp =
-                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
-                        FolderObject.CONTACT,
-                        user.getId(),
-                        user.getGroups(),
-                        userPerm,
-                        ctx,
-                        con);
-                if (tmp) {
-                    subfolderIds.add(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
-                }
+            if (containedModules.contains(FolderObject.CONTACT)) {
+                subfolderIds.add(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID);
             }
-            {
-                final boolean tmp =
-                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
-                        FolderObject.TASK,
-                        user.getId(),
-                        user.getGroups(),
-                        userPerm,
-                        ctx,
-                        con);
-                if (tmp) {
-                    subfolderIds.add(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
-                }
+            if (containedModules.contains(FolderObject.TASK)) {
+                subfolderIds.add(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
             }
             return subfolderIds.toArray();
         } catch (final SQLException e) {
@@ -225,44 +197,15 @@ public final class SystemPublicFolder {
             /*
              * Check for presence of virtual folders
              */
-            {
-                final boolean tmp =
-                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
-                        FolderObject.CALENDAR,
-                        user.getId(),
-                        user.getGroups(),
-                        userPerm,
-                        ctx,
-                        con);
-                if (tmp) {
-                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME)));
-                }
+            TIntSet containedModules = OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK }, user.getId(), user.getGroups(), userPerm, ctx, con);
+            if (containedModules.contains(FolderObject.CALENDAR)) {
+                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CALENDAR_FOLDER_NAME)));
             }
-            {
-                final boolean tmp =
-                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
-                        FolderObject.CONTACT,
-                        user.getId(),
-                        user.getGroups(),
-                        userPerm,
-                        ctx,
-                        con);
-                if (tmp) {
-                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME)));
-                }
+            if (containedModules.contains(FolderObject.CONTACT)) {
+                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_CONTACT_FOLDER_NAME)));
             }
-            {
-                final boolean tmp =
-                    OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(
-                        FolderObject.TASK,
-                        user.getId(),
-                        user.getGroups(),
-                        userPerm,
-                        ctx,
-                        con);
-                if (tmp) {
-                    subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME)));
-                }
+            if (containedModules.contains(FolderObject.TASK)) {
+                subfolderIds.add(toArray(String.valueOf(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID), sh.getString(FolderStrings.VIRTUAL_LIST_TASK_FOLDER_NAME)));
             }
             return subfolderIds;
         } catch (final SQLException e) {

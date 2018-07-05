@@ -65,10 +65,10 @@ import com.openexchange.admin.storage.interfaces.OXContextGroupStorageInterface;
 import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupEvent;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OXContextGroupMySQLStorage}
@@ -157,7 +157,7 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
                     tableColumnObject.setType(rsColumns.getInt("DATA_TYPE"));
                     tableColumnObject.setColumnSize(rsColumns.getInt("COLUMN_SIZE"));
                     tableObject.addColumn(tableColumnObject);
-                    
+
                     if (columnName.equals("gid")) {
                         tableObjects.add(tableObject);
                     }
@@ -168,8 +168,8 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
         } catch (SQLException e) {
             throw e;
         } finally {
-            DBUtils.closeSQLStuff(rs);
-            DBUtils.closeSQLStuff(rsColumns);
+            Databases.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rsColumns);
         }
 
         return tableObjects;
@@ -286,11 +286,11 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
 
             connection.commit();
         } catch (SQLException e) {
-            DBUtils.rollback(connection);
+            Databases.rollback(connection);
             throw new StorageException(e);
         } finally {
-            DBUtils.closeSQLStuff(statement);
-            DBUtils.autocommit(connection);
+            Databases.closeSQLStuff(statement);
+            Databases.autocommit(connection);
         }
     }
 }

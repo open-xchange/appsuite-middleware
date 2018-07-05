@@ -66,8 +66,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerExceptionCodes;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
-import com.openexchange.reseller.data.Restriction;
 import com.openexchange.reseller.data.ResellerAdmin.ResellerAdminBuilder;
+import com.openexchange.reseller.data.Restriction;
 
 /**
  * {@link ResellerServiceImpl}

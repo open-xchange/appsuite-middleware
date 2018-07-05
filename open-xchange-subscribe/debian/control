@@ -2,14 +2,12 @@ Source: open-xchange-subscribe
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant-optional (>= 1.7.0), java7-jdk | java7-sdk, open-xchange-oauth (>= @OXVERSION@)
-Standards-Version: 3.8.4
+Build-Depends: debhelper (>= 4.0.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-oauth (>= @OXVERSION@)
+Standards-Version: 3.9.8
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-subscribe
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-oauth (>= @OXVERSION@)
-Replaces: open-xchange-subscribe-crawler, open-xchange-subscribe-json, open-xchange-subscribe-linkedin, open-xchange-subscribe-microformats, open-xchange-subscribe-msn, open-xchange-subscribe-yahoo
-Conflicts: open-xchange-subscribe-crawler, open-xchange-subscribe-json, open-xchange-subscribe-linkedin, open-xchange-subscribe-microformats, open-xchange-subscribe-msn, open-xchange-subscribe-yahoo
 Description: The Open Xchange backend subscribe extension
  Adds the feature to subscribe to third party services or publications to the backend installation.

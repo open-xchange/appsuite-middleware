@@ -49,7 +49,13 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
@@ -60,28 +66,56 @@ import com.openexchange.groupware.modules.Module;
 public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
     protected int folderID;
-
+    protected int secondFolderID;
+    
+    protected String folderName1;
+    protected String folderName2;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
         UserValues values = getClient().getValues();
-        FolderObject folder = ftm.generatePublicFolder("ManagedContactTest_" + (new Date().getTime()), Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
+        this.folderName1 = ("ManagedContactTest_" + (new Date().getTime()));
+        FolderObject folder = ftm.generatePublicFolder(folderName1, Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
         folder = ftm.insertFolderOnServer(folder);
         folderID = folder.getObjectID();
+        
+        this.folderName2 = ("ManagedContactTest_2" + (new Date().getTime()));
+        folder = ftm.generatePublicFolder(folderName2, Module.CONTACTS.getFolderConstant(), values.getPrivateContactFolder(), values.getUserId());
+        folder = ftm.insertFolderOnServer(folder);
+        secondFolderID = folder.getObjectID();
     }
 
     protected Contact generateContact(String lastname) {
+        return this.generateContact(lastname, folderID);
+    }
+    
+    protected Contact generateContact(String lastname, int folderId) {
         Contact contact = new Contact();
         contact.setSurName(lastname);
         contact.setGivenName("Given name");
         contact.setDisplayName(contact.getSurName() + ", " + contact.getGivenName());
-        contact.setParentFolderID(folderID);
+        contact.setParentFolderID(folderId);
         return contact;
     }
 
     protected Contact generateContact() {
         return generateContact("Surname");
     }
+    
+    protected void assertFileName(HttpResponse httpResp, String expectedFileName) {
+        Header[] headers = httpResp.getHeaders("Content-Disposition");
+        for (Header header : headers) {
+            assertNotNull(header.getValue());
+            assertTrue(header.getValue().contains(expectedFileName));
+        }
+    }    
+    
+    protected JSONObject addRequestIds(int folderId, int objectId) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("id", objectId);
+        json.put("folder_id", folderId);
+        return json;
+    }   
 }

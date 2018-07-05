@@ -55,7 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Vector;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.database.Databases;
 
 /**
  *
@@ -214,12 +214,12 @@ public class DataFetcherMysql implements DataFetcher {
                         tableObjects.add(to);
                     }
                 } finally {
-                    DBUtils.closeSQLStuff(columns_res);
+                    Databases.closeSQLStuff(columns_res);
                 }
             }
             log.debug("####### Found -> {} tables", tableObjects.size());
         } finally {
-            DBUtils.closeSQLStuff(rs2);
+            Databases.closeSQLStuff(rs2);
         }
 
         return tableObjects;
@@ -286,7 +286,7 @@ public class DataFetcherMysql implements DataFetcher {
                     }
                 }
             } finally {
-                DBUtils.closeSQLStuff(table_references);
+                Databases.closeSQLStuff(table_references);
             }
         }
     }

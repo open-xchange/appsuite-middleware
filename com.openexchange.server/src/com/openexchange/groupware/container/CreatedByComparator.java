@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.container;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.text.Collator;
 import java.util.Comparator;
 import java.util.Locale;
@@ -58,6 +56,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Collators;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link CreatedByComparator} - Comparator for "created-by" field.

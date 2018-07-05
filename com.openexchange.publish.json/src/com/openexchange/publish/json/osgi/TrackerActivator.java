@@ -70,22 +70,24 @@ public class TrackerActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        trackers = new Stack<ServiceTracker<?,?>>();
+    public synchronized void start(final BundleContext context) throws Exception {
+        Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?,?>>();
         trackers.add(new ServiceTracker<I18nService,I18nService>(context, I18nService.class, new I18nCustomizer(context)));
         trackers.add(new HostnameServiceTracker(context, Hostname.getInstance()));
         for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
+        this.trackers = trackers;
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public synchronized void stop(final BundleContext context) throws Exception {
+        Stack<ServiceTracker<?, ?>> trackers = this.trackers;
         if (null != trackers) {
+            this.trackers = null;
             while (!trackers.isEmpty()) {
                 trackers.pop().close();
             }
-            trackers = null;
         }
     }
 }

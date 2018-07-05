@@ -49,11 +49,15 @@
 
 package com.openexchange.caldav.mixins;
 
+import java.util.Calendar;
 import java.util.Date;
 import org.jdom2.Namespace;
 import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
-import com.openexchange.caldav.resources.CalDAVFolderCollection;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
@@ -72,17 +76,70 @@ public class MinDateTime extends SingleXMLPropertyMixin {
     public static final String PROPERTY_NAME = "min-date-time";
     public static final Namespace NAMESPACE = CaldavProtocol.CAL_NS;
 
-    private final CalDAVFolderCollection<?> collection;
+    private final GroupwareCaldavFactory factory;
 
-    public MinDateTime(CalDAVFolderCollection<?> collection) {
+    private Date minDateTime;
+
+    /**
+     * Initializes a new {@link MinDateTime}.
+     *
+     * @param factory The underlying CalDAV factory
+     */
+    public MinDateTime(GroupwareCaldavFactory factory) {
         super(NAMESPACE.getURI(), PROPERTY_NAME);
-        this.collection = collection;
+        this.factory = factory;
     }
 
     @Override
     protected String getValue() {
-        Date minDateTime = collection.getIntervalStart();
+        Date minDateTime = getMinDateTime();
         return null != minDateTime ? Tools.formatAsUTC(minDateTime) : null;
+    }
+
+    /**
+     * Gets the start time of the configured synchronization timeframe for CalDAV.
+     *
+     * @return The start of the configured synchronization interval
+     */
+    public Date getMinDateTime() {
+        if (null == minDateTime) {
+            String value = null;
+            try {
+                value = factory.getConfigValue("com.openexchange.caldav.interval.start", "0");
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(MinDateTime.class).warn("falling back to '0' as interval end", e);
+                value = "0";
+            }
+            /*
+             * try numerical value
+             */
+            try {
+                int days = Integer.parseInt(value);
+                if (0 >= days) {
+                    return null;
+                }
+                Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
+                calendar.add(Calendar.DATE, -1 * days);
+                minDateTime = CalendarUtils.truncateTime(calendar).getTime();
+            } catch (NumberFormatException e) {
+                /*
+                 * no numerical value, fall back to static constants, otherwise
+                 */
+                Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
+                if ("one_year".equals(value)) {
+                    calendar.add(Calendar.YEAR, -1);
+                    calendar.set(Calendar.DAY_OF_YEAR, 1);
+                } else if ("six_months".equals(value)) {
+                    calendar.add(Calendar.MONTH, -6);
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+                } else {
+                    calendar.add(Calendar.MONTH, -1);
+                    calendar.set(Calendar.DAY_OF_MONTH, 1);
+                }
+                minDateTime = CalendarUtils.truncateTime(calendar).getTime();
+            }
+        }
+        return minDateTime;
     }
 
 }

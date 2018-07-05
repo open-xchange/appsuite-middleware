@@ -57,7 +57,7 @@ import java.util.Date;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public interface ShareLink extends ShareInfo {
+public interface ShareLink extends SubfolderAwareShareInfo {
 
     /**
      * The timestamp of the underlying share target to catch concurrent modifications.

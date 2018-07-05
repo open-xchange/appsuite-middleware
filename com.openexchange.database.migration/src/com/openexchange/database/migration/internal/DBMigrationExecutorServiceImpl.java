@@ -57,18 +57,19 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import liquibase.Liquibase;
-import liquibase.changelog.ChangeSet;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.LockException;
-import liquibase.exception.ValidationFailedException;
 import com.openexchange.database.migration.DBMigration;
 import com.openexchange.database.migration.DBMigrationCallback;
+import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationState;
 import com.openexchange.database.migration.mbean.MBeanRegisterer;
 import com.openexchange.exception.OXException;
+import liquibase.Liquibase;
+import liquibase.changelog.ChangeSet;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.LockException;
+import liquibase.exception.ValidationFailedException;
 
 /**
  * Implementation of {@link DBMigrationExecutorService} to execute database migrations via liquibase.
@@ -126,12 +127,13 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     @Override
     public List<ChangeSet> listUnrunDBChangeSets(DBMigration migration) throws OXException {
+        DBMigrationConnectionProvider connectionProvider = migration.getConnectionProvider();
         Connection connection = null;
         Liquibase liquibase = null;
         try {
-            connection = migration.getConnectionProvider().get();
-        	liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
-        	return new ArrayList<ChangeSet>(liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT));
+            connection = connectionProvider.get();
+            liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
+            return new ArrayList<ChangeSet>(liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT));
         } catch (Exception exception) {
             if (exception instanceof OXException) {
                 throw DBMigrationExceptionCodes.DB_MIGRATION_ERROR.create(exception);
@@ -147,10 +149,10 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
                 throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
             }
         } finally {
-        	LiquibaseHelper.cleanUpLiquibase(liquibase);
-        	if (null != connection) {
-        	    migration.getConnectionProvider().back(connection);
-        	}
+            LiquibaseHelper.cleanUpLiquibase(liquibase);
+            if (null != connection) {
+                connectionProvider.back(connection);
+            }
         }
     }
 
@@ -166,10 +168,11 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
      * @return The database migration status
      */
     public String getDBStatus(DBMigration migration) throws OXException {
+        DBMigrationConnectionProvider connectionProvider = migration.getConnectionProvider();
         Connection connection = null;
         Liquibase liquibase = null;
         try {
-            connection = migration.getConnectionProvider().get();
+            connection = connectionProvider.get();
             liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
             StringWriter sw = new StringWriter();
             liquibase.reportStatus(true, LIQUIBASE_NO_DEFINED_CONTEXT, sw);
@@ -179,25 +182,26 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         } finally {
             LiquibaseHelper.cleanUpLiquibase(liquibase);
             if (null != connection) {
-                migration.getConnectionProvider().back(connection);
+                connectionProvider.back(connection);
             }
         }
     }
 
     /**
-     * Gets some textual information about any resent locks for a database migration.
+     * Gets some textual information about any recent locks for a database migration.
      *
      * @param migration The migration to get the locks for
      * @return The database migration locks
      */
     public String listDBLocks(DBMigration migration) throws OXException {
+        DBMigrationConnectionProvider connectionProvider = migration.getConnectionProvider();
         Connection connection = null;
         Liquibase liquibase = null;
         try {
-            connection = migration.getConnectionProvider().get();
+            connection = connectionProvider.get();
             liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            PrintStream ps = new PrintStream(os);
+            PrintStream ps = new PrintStream(os, false, "UTF8");
             liquibase.reportLocks(ps);
             return os.toString("UTF8");
         } catch (LiquibaseException e) {
@@ -207,7 +211,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
         } finally {
             LiquibaseHelper.cleanUpLiquibase(liquibase);
             if (null != connection) {
-                migration.getConnectionProvider().back(connection);
+                connectionProvider.back(connection);
             }
         }
     }

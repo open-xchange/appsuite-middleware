@@ -1,0 +1,9 @@
+type: object
+title: DateTime
+properties:
+  value:
+    type: string
+    description: A date-time value without timezone information as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000"
+  tzid:
+    type: string
+    description: A timezone identifier. E.g. "America/New_York"

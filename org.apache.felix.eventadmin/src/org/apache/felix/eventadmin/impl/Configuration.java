@@ -134,6 +134,7 @@ public class Configuration
     static final String PROP_IGNORE_TIMEOUT = "org.apache.felix.eventadmin.IgnoreTimeout";
     static final String PROP_IGNORE_TOPIC = "org.apache.felix.eventadmin.IgnoreTopic";
     static final String PROP_LOG_LEVEL = "org.apache.felix.eventadmin.LogLevel";
+    static final String PROP_MAX_NUM_EVENTS_PER_THREAD = "org.apache.felix.eventadmin.MaxNumEventsPerThread";
 
     /** The bundle context. */
     private final BundleContext m_bundleContext;
@@ -153,6 +154,8 @@ public class Configuration
     private String[] m_ignoreTopics;
 
     private int m_logLevel;
+
+    private int m_maxNumEventsPerThread;
 
     // The thread pool used - this is a member because we need to close it on stop
     private volatile DefaultThreadPool m_sync_pool;
@@ -255,20 +258,20 @@ public class Configuration
                 // is blocked.
                 m_threadPoolSize = getIntProperty(
                     PROP_THREAD_POOL_SIZE, m_bundleContext.getProperty(PROP_THREAD_POOL_SIZE), 20, 2);
-    
+
                 // The ratio of asynchronous to synchronous threads in the internal thread
                 // pool.  Ratio must be positive and may be adjusted to represent the
                 // distribution of post to send operations.  Applications with higher number
                 // of post operations should have a higher ratio.
                 m_asyncToSyncThreadRatio = getDoubleProperty(
                 	PROP_ASYNC_TO_SYNC_THREAD_RATIO, m_bundleContext.getProperty(PROP_ASYNC_TO_SYNC_THREAD_RATIO), 0.5, 0.0);
-    
+
                 // The timeout in milliseconds - A value of less then 100 turns timeouts off.
                 // Any other value is the time in milliseconds granted to each EventHandler
                 // before it gets blacklisted.
                 m_timeout = getIntProperty(PROP_TIMEOUT,
                         m_bundleContext.getProperty(PROP_TIMEOUT), 5000, Integer.MIN_VALUE);
-    
+
                 // Are EventHandler required to be registered with a topic? - The default is
                 // true. The specification says that EventHandler must register with a list
                 // of topics they are interested in. Setting this value to false will enable
@@ -290,7 +293,7 @@ public class Configuration
                         m_ignoreTimeout[i] = st.nextToken();
                     }
                 }
-    
+
                 final String valueIgnoreTopic = m_bundleContext.getProperty(PROP_IGNORE_TOPIC);
                 if ( valueIgnoreTopic == null )
                 {
@@ -309,6 +312,9 @@ public class Configuration
                         m_bundleContext.getProperty(PROP_LOG_LEVEL),
                         LogWrapper.LOG_WARNING, // default log level is WARNING
                         LogWrapper.LOG_ERROR);
+
+                m_maxNumEventsPerThread = getIntProperty(PROP_MAX_NUM_EVENTS_PER_THREAD,
+                    m_bundleContext.getProperty(PROP_MAX_NUM_EVENTS_PER_THREAD), 2048, Integer.MIN_VALUE);
             }
             else
             {
@@ -351,6 +357,7 @@ public class Configuration
                         config.get(PROP_LOG_LEVEL),
                         LogWrapper.LOG_WARNING, // default log level is WARNING
                         LogWrapper.LOG_ERROR);
+                m_maxNumEventsPerThread = getIntProperty(PROP_MAX_NUM_EVENTS_PER_THREAD, config.get(PROP_MAX_NUM_EVENTS_PER_THREAD), 2048, Integer.MIN_VALUE);
             }
             // a timeout less or equals to 100 means : disable timeout
             if ( m_timeout <= 100 )
@@ -378,7 +385,9 @@ public class Configuration
                 PROP_TIMEOUT + "=" + m_timeout);
             LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
                 PROP_REQUIRE_TOPIC + "=" + m_requireTopic);
-    
+            LogWrapper.getLogger().log(LogWrapper.LOG_DEBUG,
+                PROP_MAX_NUM_EVENTS_PER_THREAD + "=" + m_maxNumEventsPerThread);
+
             // Note that this uses a lazy thread pool that will create new threads on
             // demand - in case none of its cached threads is free - until threadPoolSize
             // is reached. Subsequently, a threadPoolSize of 2 effectively disables
@@ -400,7 +409,7 @@ public class Configuration
             {
                 m_async_pool.configure(asyncThreadPoolSize);
             }
-    
+
             if ( m_admin == null )
             {
                 m_admin = new EventAdminImpl(m_bundleContext,
@@ -409,17 +418,18 @@ public class Configuration
                         m_timeout,
                         m_ignoreTimeout,
                         m_requireTopic,
-                        m_ignoreTopics);
-    
+                        m_ignoreTopics,
+                        m_maxNumEventsPerThread);
+
                 // Finally, adapt the outside events to our kind of events as per spec
                 adaptEvents(m_admin);
-    
+
                 // register the admin wrapped in a service factory (SecureEventAdminFactory)
                 // that hands-out the m_admin object wrapped in a decorator that checks
                 // appropriated permissions of each calling bundle
                 m_registration = m_bundleContext.registerService(EventAdmin.class.getName(),
                         new SecureEventAdminFactory(m_admin), null);
-    
+
                 try {
                     m_mbean = new EventAdminMBeanImpl(m_admin.getAsyncDeliverTasks());
                     m_mbean_registration = m_bundleContext.registerService(EventAdminMBean.class.getName(), m_mbean, null);
@@ -429,7 +439,7 @@ public class Configuration
             }
             else
             {
-                m_admin.update(m_timeout, m_ignoreTimeout, m_requireTopic, m_ignoreTopics);
+                m_admin.update(m_timeout, m_ignoreTimeout, m_requireTopic, m_ignoreTopics, m_maxNumEventsPerThread);
             }
         }
     }

@@ -145,7 +145,7 @@ public class ListenerManagingSubscriptionListener implements PushSubscriptionLis
                 return;
             }
 
-            pushListenerService.unregisterPermanentListenerFor(session, subscription.getClient());
+            pushListenerService.unregisterPermanentListenerFor(session.getUserId(), session.getContextId(), subscription.getClient());
         }
     }
 

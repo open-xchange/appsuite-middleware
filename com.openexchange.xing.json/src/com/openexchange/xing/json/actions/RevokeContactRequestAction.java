@@ -50,7 +50,6 @@
 package com.openexchange.xing.json.actions;
 
 import org.json.JSONException;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;

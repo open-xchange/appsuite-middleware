@@ -71,7 +71,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -188,7 +187,7 @@ public class ReportClientBaseTest {
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
-    
+
     @Mock
     private ReportConfiguration reportConfiguration;
 
@@ -290,7 +289,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_noOptionSet_reportSentAndPrinted_inAppsuiteStyle() throws IOException, JSONException {
+     public void testStart_noOptionSet_reportSentAndPrinted_inAppsuiteStyle() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().build(), REPORT);
@@ -300,7 +299,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_runOldStyle_reportSentAndPrinted() throws IOException, JSONException {
+     public void testStart_runOldStyle_reportSentAndPrinted() throws Exception {
         reportClientBase.start(new Builder().addRunAndDeliverOldReport().build(), REPORT);
 
         Mockito.verify(transportHandler, Mockito.times(1)).sendReport(totals, macdetails, null, serverConfig, VERSIONS, clientLoginCount, clientLoginCountYear, false);
@@ -308,7 +307,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_displayOnly_displayedNotSend() throws IOException, JSONException {
+     public void testStart_displayOnly_displayedNotSend() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addDisplay().build(), REPORT);
@@ -318,7 +317,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_displayOnly_displayedNotSend_inOldStyle() throws IOException, JSONException {
+     public void testStart_displayOnly_displayedNotSend_inOldStyle() throws Exception {
         reportClientBase.start(new Builder().addDisplay().addRunAndDeliverOldReport().build(), REPORT);
 
         validatePrint();
@@ -326,7 +325,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_sendAndSave_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving() throws IOException, JSONException {
+     public void testStart_sendAndSave_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addSend().addSaveReport().build(), REPORT);
@@ -337,7 +336,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_sendAndSave_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving_inOldStyle() throws IOException, JSONException {
+     public void testStart_sendAndSave_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving_inOldStyle() throws Exception {
         reportClientBase.start(new Builder().addSend().addSaveReport().addRunAndDeliverOldReport().build(), REPORT);
 
         validatePrint(ReportClientBase.TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND);
@@ -347,7 +346,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_sendOnly_sentNotDisplayed() throws IOException, JSONException {
+     public void testStart_sendOnly_sentNotDisplayed() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addSend().build(), REPORT);
@@ -358,7 +357,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_sendOnly_sentNotDisplayed_inOldStyle() throws IOException, JSONException {
+     public void testStart_sendOnly_sentNotDisplayed_inOldStyle() throws Exception {
         reportClientBase.start(new Builder().addSend().addRunAndDeliverOldReport().build(), REPORT);
 
         validateNotPrint();
@@ -367,7 +366,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_sendAndDisplay_displayedAndSent() throws IOException, JSONException {
+     public void testStart_sendAndDisplay_displayedAndSent() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addSend().addDisplay().build(), REPORT);
@@ -377,7 +376,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_sendAndDisplay_displayedAndSent_inOldStyle() throws IOException, JSONException {
+     public void testStart_sendAndDisplay_displayedAndSent_inOldStyle() throws Exception {
         reportClientBase.start(new Builder().addSend().addDisplay().addRunAndDeliverOldReport().build(), REPORT);
 
         Mockito.verify(transportHandler, Mockito.times(1)).sendReport(totals, macdetails, null, serverConfig, VERSIONS, clientLoginCount, clientLoginCountYear, false);
@@ -386,7 +385,7 @@ public class ReportClientBaseTest {
 
     //CSV only included in print method
      @Test
-     public void testStart_csvOnly_noCsvForAppsuiteReportAvailable() throws IOException, JSONException {
+     public void testStart_csvOnly_noCsvForAppsuiteReportAvailable() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addCSV().build(), REPORT);
@@ -399,7 +398,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_csvOnly_printOutputSentReportDisplayedCSV_inOldStyle() throws IOException, JSONException {
+     public void testStart_csvOnly_printOutputSentReportDisplayedCSV_inOldStyle() throws Exception {
         reportClientBase.start(new Builder().addCSV().addRunAndDeliverOldReport().build(), REPORT);
 
         validatePrintCSV();
@@ -407,7 +406,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_saveReport_onlySaved() throws IOException, JSONException {
+     public void testStart_saveReport_onlySaved() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addSaveReport().build(), REPORT);
@@ -417,7 +416,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_saveReport_onlySaved_inOldStyle() throws IOException, JSONException {
+     public void testStart_saveReport_onlySaved_inOldStyle() throws Exception {
         reportClientBase.start(new Builder().addSaveReport().addRunAndDeliverOldReport().build(), REPORT);
 
         validateNotPrint();
@@ -426,7 +425,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_saveAndDisplayReport_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving() throws IOException, JSONException {
+     public void testStart_saveAndDisplayReport_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addSaveReport().addDisplay().build(), REPORT);
@@ -437,7 +436,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_saveAndDisplayReport_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving_inOldStyle() throws IOException, JSONException {
+     public void testStart_saveAndDisplayReport_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving_inOldStyle() throws Exception {
         reportClientBase.start(new Builder().addSaveReport().addDisplay().addRunAndDeliverOldReport().build(), REPORT);
 
         validatePrint(ReportClientBase.TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND);
@@ -447,7 +446,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_saveAndDisplayAndAdvancedReport_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving() throws IOException, JSONException {
+     public void testStart_saveAndDisplayAndAdvancedReport_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addSaveReport().addDisplay().addAdvancedReport().build(), REPORT);
@@ -458,7 +457,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_saveAndDisplayAndAdvancedReport_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving_inOldStyle() throws IOException, JSONException {
+     public void testStart_saveAndDisplayAndAdvancedReport_tooManyArgumentsFallBackToDisplayAndSendWithoutSaving_inOldStyle() throws Exception {
         reportClientBase.start(new Builder().addSaveReport().addDisplay().addAdvancedReport().addRunAndDeliverOldReport().build(), REPORT);
 
         validatePrint(ReportClientBase.TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND);
@@ -467,7 +466,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_displayAndAdvancedReport_displayAdvanced() throws IOException, JSONException {
+     public void testStart_displayAndAdvancedReport_displayAdvanced() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addDisplay().addAdvancedReport().build(), REPORT);
@@ -477,7 +476,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_displayAndAdvancedReport_displayAdvanced_inOldStyle() throws IOException, JSONException {
+     public void testStart_displayAndAdvancedReport_displayAdvanced_inOldStyle() throws Exception {
         reportClientBase.start(new Builder().addDisplay().addAdvancedReport().addRunAndDeliverOldReport().build(), REPORT);
 
         validatePrint(true);
@@ -485,7 +484,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_displayAndAdvancedReportAndCSV_displayAdvancedCSV() throws IOException, JSONException {
+     public void testStart_displayAndAdvancedReportAndCSV_displayAdvancedCSV() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addDisplay().addAdvancedReport().addCSV().build(), REPORT);
@@ -498,7 +497,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_displayAndAdvancedReportAndCSV_displayAdvancedCSV_inOldStyle() throws IOException, JSONException {
+     public void testStart_displayAndAdvancedReportAndCSV_displayAdvancedCSV_inOldStyle() throws Exception {
         reportClientBase.start(new Builder().addDisplay().addAdvancedReport().addCSV().addRunAndDeliverOldReport().build(), REPORT);
 
         validatePrintCSV(true);
@@ -514,7 +513,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_showCombi_showsCombiAndDoesNothingElse_reportStyleUnrelated() throws IOException, JSONException {
+     public void testStart_showCombi_showsCombiAndDoesNothingElse_reportStyleUnrelated() throws Exception {
         reportClientBase.start(new Builder().addShowAccessCombination("268422943").addAdvancedReport().addCSV().addDisplay().addGetAppsuiteReport().addRunAndDeliverAppsuiteReport().build(), REPORT);
 
         validateNotPrint();
@@ -534,7 +533,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_getAppsuiteReportNoAdditionalOptionSelected_fallThroughDisplayAndSend() throws IOException, JSONException {
+     public void testStart_getAppsuiteReportNoAdditionalOptionSelected_fallThroughDisplayAndSend() throws Exception {
         reportClientBase.start(new Builder().addGetAppsuiteReport().build(), REPORT);
 
         Mockito.verify(transportHandler, Mockito.times(1)).sendASReport(report, false);
@@ -542,7 +541,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_getAppsuiteReportAndCsv_csvNotValidForAppsuiteReportFallThroughDisplayAndSend() throws IOException, JSONException {
+     public void testStart_getAppsuiteReportAndCsv_csvNotValidForAppsuiteReportFallThroughDisplayAndSend() throws Exception {
         reportClientBase.start(new Builder().addGetAppsuiteReport().addCSV().build(), REPORT);
 
         Mockito.verify(transportHandler, Mockito.times(1)).sendASReport(report, false);
@@ -550,7 +549,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_getAppsuiteReportAndAdvanced_advancedOptionNotValidForAppsuiteReportFallThroughDisplayAndSend() throws IOException, JSONException {
+     public void testStart_getAppsuiteReportAndAdvanced_advancedOptionNotValidForAppsuiteReportFallThroughDisplayAndSend() throws Exception {
         reportClientBase.start(new Builder().addGetAppsuiteReport().addAdvancedReport().build(), REPORT);
 
         Mockito.verify(transportHandler, Mockito.times(1)).sendASReport(report, false);
@@ -558,20 +557,20 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_getAppsuiteReportAndDisplay_displayReport() throws IOException, JSONException {
+     public void testStart_getAppsuiteReportAndDisplay_displayReport() throws Exception {
         reportClientBase.start(new Builder().addGetAppsuiteReport().addDisplay().build(), REPORT);
 
         Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
         validatePrint(APPSUITE_REPORT);
     }
-    
+
      @Test
-     public void testStart_getAppsuiteReportWithTimeframeAndDisplay_displayReport() throws IOException, JSONException {
+     public void testStart_getAppsuiteReportWithTimeframeAndDisplay_displayReport() throws Exception {
         Builder builder = new Builder();
         builder.addGetAppsuiteReport().addDisplay();
         builder.addGetAppsuiteReport().addTimeframeStart("01.01.2016");
         builder.addGetAppsuiteReport().addTimeframeEnd("01.03.2016");
-        
+
         reportClientBase.start(builder.build(), REPORT);
 
         Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
@@ -579,7 +578,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_runAndDeliverOption_getPrintAndSentReportBecauseOfFallThroughToDefault() throws IOException, JSONException {
+     public void testStart_runAndDeliverOption_getPrintAndSentReportBecauseOfFallThroughToDefault() throws Exception {
         Mockito.when(report.get("uuid")).thenReturn(UUID.randomUUID().toString());
 
         reportClientBase.start(new Builder().addRunAndDeliverAppsuiteReport().build(), REPORT);
@@ -589,7 +588,7 @@ public class ReportClientBaseTest {
     }
 
      @Test
-     public void testStart_runOption_runAndRetrieveResultsAndPrintDiagnostics() throws IOException, JSONException, InstanceNotFoundException, MBeanException, ReflectionException {
+     public void testStart_runOption_runAndRetrieveResultsAndPrintDiagnostics() throws Exception {
         reportClientBase.start(new Builder().addRunAppsuiteReport().build(), REPORT);
 
         //No longer valid test since the method expects a distinct instance of ReportConfigs.
@@ -812,13 +811,13 @@ public class ReportClientBaseTest {
             params.add(OPT_RUN_AND_DELIVER_OLD_REPORT_SHORT);
             return this;
         }
-        
+
         public Builder addTimeframeStart(String timeString) {
             params.add(OPT_TIMEFRAME_START);
             params.add(timeString);
             return this;
         }
-        
+
         public Builder addTimeframeEnd(String timeString) {
             params.add(OPT_TIMEFRAME_END);
             params.add(timeString);

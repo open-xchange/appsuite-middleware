@@ -59,7 +59,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -71,16 +70,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.capabilities.ConfigurationProperty;
 import com.openexchange.capabilities.DependentCapabilityChecker;
+import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.capabilities.osgi.PermissionAvailabilityServiceRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -140,7 +140,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     private static final Map<String, PropertyHandler> PROPERTY_HANDLERS;
 
     static {
-        final Map<String, PropertyHandler> map = new HashMap<String, PropertyHandler>(4);
+        ImmutableMap.Builder<String, PropertyHandler> map = ImmutableMap.builder();
 
         map.put("com.openexchange.caldav.enabled", new PropertyHandler() {
 
@@ -166,7 +166,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             }
         });
 
-        PROPERTY_HANDLERS = Collections.unmodifiableMap(map);
+        PROPERTY_HANDLERS = map.build();
     }
 
     // ------------------------------------------------------------------------------------------------ //
@@ -749,7 +749,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (!Strings.isEmpty(user.getMail())) {
                 capabilities.add(getCapability("edit_password"));
             }
-            capabilities.remove("guard");
+            capabilities.remove("mailfilter_v2");
+            capabilities.remove("mailfilter");
         }
     }
 

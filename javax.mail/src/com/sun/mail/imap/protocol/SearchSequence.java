@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,15 +40,37 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.*;
 import java.io.IOException;
-
-import javax.mail.*;
-import javax.mail.search.*;
-import com.sun.mail.iap.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import javax.mail.Flags;
+import javax.mail.Message;
+import javax.mail.search.AddressTerm;
+import javax.mail.search.AndTerm;
+import javax.mail.search.BodyTerm;
+import javax.mail.search.ComparisonTerm;
+import javax.mail.search.DateTerm;
+import javax.mail.search.FlagTerm;
+import javax.mail.search.FromStringTerm;
+import javax.mail.search.FromTerm;
+import javax.mail.search.HeaderTerm;
+import javax.mail.search.MessageIDTerm;
+import javax.mail.search.NotTerm;
+import javax.mail.search.OrTerm;
+import javax.mail.search.ReceivedDateTerm;
+import javax.mail.search.RecipientStringTerm;
+import javax.mail.search.RecipientTerm;
+import javax.mail.search.SearchException;
+import javax.mail.search.SearchTerm;
+import javax.mail.search.SentDateTerm;
+import javax.mail.search.SizeTerm;
+import javax.mail.search.StringTerm;
+import javax.mail.search.SubjectTerm;
+import com.sun.mail.iap.Argument;
+import com.sun.mail.imap.ModifiedSinceTerm;
 import com.sun.mail.imap.OlderTerm;
 import com.sun.mail.imap.YoungerTerm;
-import com.sun.mail.imap.ModifiedSinceTerm;
 
 /**
  * This class traverses a search-tree and generates the 
@@ -59,8 +81,28 @@ import com.sun.mail.imap.ModifiedSinceTerm;
  * support for additional product-specific search terms.
  *
  * @author	John Mani
+ * @author	Bill Shannon
  */
 public class SearchSequence {
+
+    private IMAPProtocol protocol;	// for hasCapability checks; may be null
+
+    /**
+     * Create a SearchSequence for this IMAPProtocol.
+     *
+     * @param	p	the IMAPProtocol object for the server
+     * @since	JavaMail 1.6.0
+     */
+    public SearchSequence(IMAPProtocol p) {
+	protocol = p;
+    }
+
+    /**
+     * Create a SearchSequence.
+     */
+    @Deprecated
+    public SearchSequence() {
+    }
 
     /**
      * Generate the IMAP search sequence for the given search expression. 
@@ -406,7 +448,7 @@ public class SearchSequence {
     protected Calendar cal = new GregorianCalendar();
 
     protected String toIMAPDate(Date date) {
-	StringBuffer s = new StringBuffer();
+	StringBuilder s = new StringBuilder();
 
 	cal.setTime(date);
 
@@ -488,6 +530,8 @@ public class SearchSequence {
      * @since	JavaMail 1.5.1
      */
     protected Argument older(OlderTerm term) throws SearchException {
+	if (protocol != null && !protocol.hasCapability("WITHIN"))
+	    throw new SearchException("Server doesn't support OLDER searches");
 	Argument result = new Argument();
 	result.writeAtom("OLDER");
 	result.writeNumber(term.getInterval());
@@ -503,6 +547,8 @@ public class SearchSequence {
      * @since	JavaMail 1.5.1
      */
     protected Argument younger(YoungerTerm term) throws SearchException {
+	if (protocol != null && !protocol.hasCapability("WITHIN"))
+	    throw new SearchException("Server doesn't support YOUNGER searches");
 	Argument result = new Argument();
 	result.writeAtom("YOUNGER");
 	result.writeNumber(term.getInterval());
@@ -519,6 +565,8 @@ public class SearchSequence {
      */
     protected Argument modifiedSince(ModifiedSinceTerm term)
 				throws SearchException {
+	if (protocol != null && !protocol.hasCapability("CONDSTORE"))
+	    throw new SearchException("Server doesn't support MODSEQ searches");
 	Argument result = new Argument();
 	result.writeAtom("MODSEQ");
 	result.writeNumber(term.getModSeq());

@@ -1,23 +1,28 @@
 package liquibase.changelog.visitor;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.SetupException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
+import liquibase.logging.LogFactory;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
 
 public class ValidatingVisitor implements ChangeSetVisitor {
 

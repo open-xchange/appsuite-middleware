@@ -49,8 +49,6 @@
 
 package com.openexchange.database.migration.osgi;
 
-import liquibase.servicelocator.CustomResolverServiceLocator;
-import liquibase.servicelocator.ServiceLocator;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.database.migration.internal.BundlePackageScanClassResolver;
@@ -59,6 +57,8 @@ import com.openexchange.database.migration.internal.DBMigrationMonitor;
 import com.openexchange.database.migration.mbean.MBeanRegisterer;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import liquibase.servicelocator.CustomResolverServiceLocator;
+import liquibase.servicelocator.ServiceLocator;
 
 /**
  * Activator for the main migration bundle

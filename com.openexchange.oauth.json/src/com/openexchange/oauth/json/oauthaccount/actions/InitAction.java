@@ -50,14 +50,12 @@
 package com.openexchange.oauth.json.oauthaccount.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
-import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +63,8 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.Client;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -74,8 +74,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.HostInfo;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
@@ -95,9 +95,11 @@ import com.openexchange.tools.session.ServerSession;
  * {@link InitAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> (refactoring)
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class InitAction extends AbstractOAuthTokenAction {
+
+    private static final Logger LOG = LoggerFactory.getLogger(InitAction.class);
 
     /**
      * Initializes a new {@link InitAction}.
@@ -108,21 +110,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        try {
-            String accountId = request.getParameter("id");
-            if (null == accountId) {
-                /*
-                 * Call-back with action=create
-                 */
-                return createCallbackAction(request, session);
-            }
-            /*
-             * Call-back with action=reauthorize
-             */
-            return reauthorizeCallbackAction(accountId, request, session);
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
+        return createCallbackAction(request, session);
     }
 
     /**
@@ -151,7 +139,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
             // Get the scopes
             Set<OAuthScope> scopes = getScopes(request, serviceId);
 
-            return invokeInteraction(request, session, "create", -1, serviceId, scopes);
+            return invokeInteraction(request, session, "callback", serviceId, scopes);
         } catch (OXException e) {
             if (Client.OX6_UI.getClientId().equals(session.getClient())) {
                 throw e;
@@ -171,31 +159,6 @@ public final class InitAction extends AbstractOAuthTokenAction {
     }
 
     /**
-     * Creates an <code>init?action=reauthorize</code> call-back action
-     *
-     * @param request The {@link AJAXRequestData}
-     * @param session The server session
-     * @return the {@link AJAXRequestResult} containing the {@link OAuthInteraction} as a {@link JSONObject}
-     * @throws OXException if the call-back action cannot be created
-     */
-    private AJAXRequestResult reauthorizeCallbackAction(final String accountId, final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
-        final OAuthService oAuthService = getOAuthService();
-        /*
-         * Get account by identifier
-         */
-        final OAuthAccount account = oAuthService.getAccount(getUnsignedInteger(accountId), session, session.getUserId(), session.getContextId());
-        final String serviceId = account.getMetaData().getId();
-        // Get the scopes
-        Set<OAuthScope> scopesToEnable = getScopes(request, serviceId);
-        // Merge scopes
-        Set<OAuthScope> scopes = new HashSet<>();
-        scopes.addAll(account.getEnabledScopes());
-        scopes.addAll(scopesToEnable);
-
-        return invokeInteraction(request, session, "reauthorize", account.getId(), serviceId, scopes);
-    }
-
-    /**
      * Processes and invokes the {@link OAuthInteraction}
      *
      * @param request The {@link AJAXRequestData}
@@ -208,7 +171,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
      * @throws JSONException if a JSON error is occurred
      * @throws OXException if a server error is occurred
      */
-    private AJAXRequestResult invokeInteraction(AJAXRequestData request, ServerSession session, String action, int accountId, String serviceId, Set<OAuthScope> scopes) throws JSONException, OXException {
+    private AJAXRequestResult invokeInteraction(AJAXRequestData request, ServerSession session, String action, String serviceId, Set<OAuthScope> scopes) throws JSONException, OXException {
         /*
          * Generate UUID
          */
@@ -218,13 +181,13 @@ public final class InitAction extends AbstractOAuthTokenAction {
          */
         final String oauthSessionToken = UUID.randomUUID().toString();
 
-        String callbackUrl = composeCallbackURL(request, session, action, scopes, accountId, serviceId, uuid, oauthSessionToken);
+        String callbackUrl = composeCallbackURL(request, session, action, scopes, serviceId, uuid, oauthSessionToken);
         OAuthService oauthService = getOAuthService();
         /*
          * Invoke
          */
         final HostInfo currentHost = determineHost(request, session);
-        final OAuthInteraction interaction = oauthService.initOAuth(serviceId, callbackUrl, currentHost, session, scopes);
+        final OAuthInteraction interaction = oauthService.initOAuth(session, serviceId, callbackUrl, currentHost, scopes);
         final OAuthToken requestToken = interaction.getRequestToken();
         /*
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
@@ -246,6 +209,9 @@ public final class InitAction extends AbstractOAuthTokenAction {
         oauthState.put(OAuthConstants.ARGUMENT_AUTH_URL, interaction.getAuthorizationURL());
         session.setParameter(uuid, oauthState);
         session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
+
+        String authorizationURL = interaction.getAuthorizationURL();
+        LOG.debug("Initialised an OAuth workflow with {}", authorizationURL);
         /*
          * Check redirect parameter
          */
@@ -254,6 +220,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
             HttpServletResponse response = request.optHttpServletResponse();
             if (null != response) {
                 try {
+                    LOG.debug("Sending redirect to the '{}' provider", serviceId);
                     response.sendRedirect(interaction.getAuthorizationURL());
                     //response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
                     return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(ResultType.DIRECT);
@@ -262,6 +229,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
                 }
             }
         }
+        LOG.debug("Returning the initialised OAuth interaction for '{}'", serviceId);
         /*
          * Write as JSON
          */
@@ -289,12 +257,9 @@ public final class InitAction extends AbstractOAuthTokenAction {
      * @param oauthSessionToken The OAuth token for the session
      * @return The call-back URL as a String
      */
-    private String composeCallbackURL(AJAXRequestData request, Session session, String action, Set<OAuthScope> scopes, int accountId, String serviceId, String uuid, String oauthSessionToken) {
+    private String composeCallbackURL(AJAXRequestData request, Session session, String action, Set<OAuthScope> scopes, String serviceId, String uuid, String oauthSessionToken) {
         final StringBuilder callbackUrlBuilder = request.constructURL(new StringBuilder(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
         callbackUrlBuilder.append("?action=").append(action);
-        if (accountId >= 0) {
-            callbackUrlBuilder.append("&id=").append(accountId);
-        }
         callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
         {
             final String name = AccountField.DISPLAY_NAME.getName();
@@ -306,10 +271,15 @@ public final class InitAction extends AbstractOAuthTokenAction {
         callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
         callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
         callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
-        callbackUrlBuilder.append('&').append("scopes").append('=').append(OAuthUtil.oxScopesToString(scopes));
+        callbackUrlBuilder.append("&scopes=").append(OAuthUtil.oxScopesToString(scopes));
+        callbackUrlBuilder.append('&').append(AccountField.ID.getName()).append('=').append(getAccountId(request));
         final String cb = request.getParameter("cb");
-        if (!isEmpty(cb)) {
+        if (Strings.isNotEmpty(cb)) {
             callbackUrlBuilder.append("&callback=").append(cb);
+        }
+        String actionHint = request.getParameter(OAuthConstants.URLPARAM_ACTION_HINT);
+        if (Strings.isNotEmpty(actionHint)) {
+            callbackUrlBuilder.append('&').append(OAuthConstants.URLPARAM_ACTION_HINT).append('=').append(actionHint);
         }
 
         return callbackUrlBuilder.toString();

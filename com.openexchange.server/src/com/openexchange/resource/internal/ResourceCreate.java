@@ -55,6 +55,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
@@ -67,7 +68,6 @@ import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ResourceCreate} - Performs insertion of a {@link Resource resource}.
@@ -203,7 +203,7 @@ public final class ResourceCreate {
             insert(con);
             con.commit();
         } catch (final SQLException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw ResourceExceptionCode.SQL_ERROR.create(e);
         } finally {
             try {

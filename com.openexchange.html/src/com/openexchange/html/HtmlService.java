@@ -51,6 +51,7 @@ package com.openexchange.html;
 
 import java.io.Reader;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.whitelist.Whitelist;
 import com.openexchange.osgi.annotation.SingletonService;
 
 
@@ -252,6 +253,15 @@ public interface HtmlService {
     String documentizeContent(String htmlContent, String charset);
 
     /**
+     * Attempts to generate well-formed HTML document for specified HTML fragment.
+     *
+     * @param htmlContent The HTML fragment
+     * @return The well-formed HTML document
+     * @throws OXException If operation fails
+     */
+    String getWellFormedHTMLDocument(String htmlContent) throws OXException;
+
+    /**
      * Creates valid HTML from specified HTML content conform to W3C standards. Non-ascii-URLs will be replaced with puny-code-encoded URLs.
      *
      * @param htmlContent The HTML content
@@ -363,4 +373,12 @@ public interface HtmlService {
      * @return input encoded for use as an HTML attribute
      */
     String encodeForHTMLAttribute(String input);
+
+    /**
+     * Gets the currently applicable white-lists for HTML and CSS
+     *
+     * @param withCss Whether returned white-list should also contain the CSS stuff (if <code>false</code> an empty map is returned for {@link Whitelist#getStyleWhitelist()})
+     * @return The HTML/CSS white-lists
+     */
+    Whitelist getWhitelist(boolean withCss);
 }

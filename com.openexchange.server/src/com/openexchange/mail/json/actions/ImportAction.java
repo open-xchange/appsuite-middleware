@@ -75,6 +75,7 @@ import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.BodyDescriptor;
 import org.apache.james.mime4j.stream.Field;
 import org.apache.james.mime4j.stream.MimeConfig;
+import org.apache.james.mime4j.stream.MimeConfig.Builder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,6 +97,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.DefaultConverterConfig;
 import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -315,11 +317,12 @@ public final class ImportAction extends AbstractMailAction {
     }
 
     private void validateRfc822Message(File rfc822File) throws IOException, OXException {
-        MimeConfig config = new MimeConfig();
-        config.setMaxLineLen(-1);
-        config.setMaxHeaderLen(-1);
-        config.setMaxHeaderCount(250);
-        config.setStrictParsing(true);
+        MimeConfig config = new Builder()
+            .setStrictParsing(true)
+            .setMaxLineLen(-1)
+            .setMaxHeaderLen(-1)
+            .setMaxHeaderCount(250)
+            .build();
 
         MimeStreamParser parser = new MimeStreamParser(config);
         parser.setContentHandler(DO_NOTHING_HANDLER);
@@ -395,7 +398,7 @@ public final class ImportAction extends AbstractMailAction {
                     boolean quit = messages.remove(POISON);
                     for (MimeMessage message : messages) {
                         message.getHeader("Date", null);
-                        MailMessage mm = MimeMessageConverter.convertMessage(message);
+                        MailMessage mm = MimeMessageConverter.convertMessage(message, new DefaultConverterConfig(mailInterface.getMailConfig(), true, false));
                         mails.add(mm);
                     }
                     String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);

@@ -15,11 +15,10 @@ import org.junit.Test;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.webdav.PropertyStore;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.test.AjaxInit;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
 public class PropertyStoreTest {
@@ -31,13 +30,22 @@ public class PropertyStoreTest {
     protected int entity = 23;
     protected int entity2 = 42;
 
-    private final Context ctx = new ContextImpl(1);
-    private final User user = null;
-    private final UserConfiguration userConfig = null;
+    private Context ctx;
 
     @Before
     public void setUp() throws Exception {
         Init.startServer();
+
+        String[] loginParts = AjaxInit.getAJAXProperty("login").split("@");
+        String context = null;
+        if (loginParts.length == 2) {
+            context = loginParts[1];
+        } else {
+            context = AjaxInit.getAJAXProperty("contextName");
+        }
+
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(context));
+
         this.propertyStore = new PropertyStoreImpl(new DBPoolProvider(), "infostore_property");
 
         propertyStore.startTransaction();

@@ -319,7 +319,7 @@ public class AmountQuotas {
             if (rs.wasNull()) {
                 return null;
             }
-            return Long.valueOf(retval <= 0 ? Quota.UNLIMITED : retval);
+            return Long.valueOf(retval < 0 ? Quota.UNLIMITED : retval);
         } catch (final SQLException e) {
             throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

@@ -50,11 +50,13 @@
 package com.openexchange.audit.impl;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.Set;
 import org.apache.commons.lang.Validate;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -63,6 +65,7 @@ import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.audit.configuration.AuditConfiguration;
 import com.openexchange.audit.services.Services;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.contact.ContactService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -71,7 +74,6 @@ import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -80,6 +82,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -94,8 +97,11 @@ import ch.qos.logback.core.status.Status;
 import ch.qos.logback.core.util.FileSize;
 
 /**
+ * {@link AuditEventHandler}
+ * 
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a> - refactoring
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Switched from appointments to calendar events
  */
 public class AuditEventHandler implements EventHandler {
 
@@ -419,58 +425,55 @@ public class AuditEventHandler implements EventHandler {
     /**
      * Handles appointment events.
      *
-     * @param event - the {@link CommonEvent} that was received
+     * @param commonEvent - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
      * @param logBuilder - the log to add information
-     * @throws OXException
      */
-    protected void handleAppointmentCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) throws OXException {
+    protected void handleAppointmentCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) {
+
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
         Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
 
-        final Appointment appointment = (Appointment) commonEvent.getActionObj();
-        Appointment oldAppointment = (Appointment) commonEvent.getOldObj();
+        // Get calendar events
+        final com.openexchange.chronos.Event event = castTo(commonEvent.getActionObj(), com.openexchange.chronos.Event.class);
+        final com.openexchange.chronos.Event oldEvent = castTo(commonEvent.getOldObj(), com.openexchange.chronos.Event.class);
+        Validate.notNull(event, "Calendar event is null. Can't write usefull information.");
 
-        logBuilder.append("OBJECT TYPE: APPOINTMENT; ");
+        logBuilder.append("OBJECT TYPE: EVENT; ");
         appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), logBuilder);
         logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
-        logBuilder.append("OBJECT ID: ").append(appointment.getObjectID()).append("; ");
-        {
-            int createdBy = appointment.getCreatedBy();
-            if (createdBy > 0) {
-                try {
-                    logBuilder.append("CREATED BY: ").append(userService.getUser(createdBy, context).getDisplayName()).append("; ");
-                } catch (OXException e) {
-                    logger.debug("Failed to load user {} in context {}", createdBy, context.getContextId(), e);
-                    logBuilder.append("CREATED BY: <unknown>; ");
-                }
+        logBuilder.append("OBJECT ID: ").append(event.getId()).append("; ");
+
+        appendIfSet(logBuilder, "CREATED BY: ", null == event.getCreatedBy() ? null: event.getCreatedBy().getCn());
+        appendIfSet(logBuilder, "MODIFIED BY: ", null == event.getModifiedBy() ? null : event.getModifiedBy().getCn());
+
+        try {
+            Map<Integer, Set<Integer>> affectedUsersWithFolder = commonEvent.getAffectedUsersWithFolder();
+            Set<Integer> folders = affectedUsersWithFolder.get(Integer.valueOf(commonEvent.getUserId()));
+            if (null != folders && folders.size() == 1) {
+                // Only one folder affected for the user
+                int folderId = folders.iterator().next().intValue();
+                appendIfSet(logBuilder, "FOLDER: ", getPathToRoot(folderId, commonEvent.getSession()));
             } else {
-                logBuilder.append("CREATED BY: <unknown>; ");
+                // Don't known which folder to use, so ...
+                logBuilder.append("FOLDER: <unknown>; ");
             }
+        } catch (NullPointerException | ClassCastException | NoSuchElementException e) {
+            logger.debug("Could not resolve folder with id {} to its absolute path.", event.getFolderId(), e);
+            logBuilder.append("FOLDER: <unknown>; ");
         }
-        {
-            int modifiedBy = appointment.getModifiedBy();
-            if (modifiedBy > 0) {
-                try {
-                    logBuilder.append("MODIFIED BY: ").append(userService.getUser(modifiedBy, context).getDisplayName()).append("; ");
-                } catch (OXException e) {
-                    logger.debug("Failed to load user {} in context {}", modifiedBy, context.getContextId(), e);
-                    logBuilder.append("MODIFIED BY: <unknown>; ");
-                }
-            } else {
-                logBuilder.append("MODIFIED BY: <unknown>; ");
-            }
-        }
-        logBuilder.append("TITLE: ").append(appointment.getTitle()).append("; ");
-        logBuilder.append("START DATE: ").append(appointment.getStartDate()).append("; ");
-        logBuilder.append("END DATE: ").append(appointment.getEndDate()).append("; ");
-        logBuilder.append("FOLDER: ").append(getPathToRoot(appointment.getParentFolderID(), commonEvent.getSession())).append("; ");
-        logBuilder.append("PARTICIPANTS: ").append(Arrays.toString(appointment.getParticipants())).append("; ");
-        if (oldAppointment != null) {
-            logBuilder.append("OLD PARTICIPANTS: ").append(Arrays.toString(oldAppointment.getParticipants())).append("; ");
+
+        appendIfSet(logBuilder, "TITLE: ", event.getSummary());
+        appendIfSet(logBuilder, "START DATE: ", event.getStartDate());
+        appendIfSet(logBuilder, "END DATE: ", event.getEndDate());
+
+        appendAttendees(logBuilder, event.getAttendees(), "ATTENDEES: ");
+
+        if (oldEvent != null) {
+            appendAttendees(logBuilder, oldEvent.getAttendees(), "OLD ATTENDEES: ");
         }
         if (commonEvent.getSession() != null) {
-            logBuilder.append("CLIENT: ").append(commonEvent.getSession().getClient()).append("; ");
+            appendIfSet(logBuilder, "CLIENT: ", commonEvent.getSession().getClient());
         }
     }
 
@@ -492,12 +495,10 @@ public class AuditEventHandler implements EventHandler {
         if (null != contact) {
             logBuilder.append("OBJECT ID: ").append(contact.getObjectID()).append("; ");
             if (contact.containsCreatedBy()) {
-                logBuilder.append("CREATED BY: ").append(
-                    userService.getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
+                logBuilder.append("CREATED BY: ").append(userService.getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
             }
             if (contact.containsModifiedBy()) {
-                logBuilder.append("MODIFIED BY: ").append(
-                    userService.getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
+                logBuilder.append("MODIFIED BY: ").append(userService.getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
             }
             logBuilder.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
             logBuilder.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
@@ -513,9 +514,7 @@ public class AuditEventHandler implements EventHandler {
      */
     private Contact extractContact(CommonEvent commonEvent) throws OXException {
         Contact contact = (Contact) commonEvent.getActionObj();
-        if (CommonEvent.DELETE != commonEvent.getAction() && null != commonEvent.getSession() && contact!=null && (
-            false == contact.containsDisplayName() || false == contact.containsCreatedBy() ||
-            false == contact.containsModifiedBy()  || false == contact.containsObjectID()  || false == contact.containsParentFolderID())) {
+        if (CommonEvent.DELETE != commonEvent.getAction() && null != commonEvent.getSession() && contact != null && (false == contact.containsDisplayName() || false == contact.containsCreatedBy() || false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
             /*
              * try and get more details
              */
@@ -524,8 +523,7 @@ public class AuditEventHandler implements EventHandler {
                 ContactField[] requestedFields = {
                     ContactField.DISPLAY_NAME, ContactField.FOLDER_ID, ContactField.CREATED_BY, ContactField.MODIFIED_BY
                 };
-                return contactService.getContact(commonEvent.getSession(), String.valueOf(contact.getParentFolderID()),
-                    String.valueOf(contact.getObjectID()), requestedFields);
+                return contactService.getContact(commonEvent.getSession(), String.valueOf(contact.getParentFolderID()), String.valueOf(contact.getObjectID()), requestedFields);
             }
         }
         return contact;
@@ -626,4 +624,49 @@ public class AuditEventHandler implements EventHandler {
         logBuilder.append("; ");
     }
 
+    /**
+     * Append given attendees to the logBuilder
+     *
+     * @param logBuilder The {@link StringBuilder}
+     * @param attendees The {@link Attendee}s to add
+     * @param text The key the attendees should be added to
+     */
+    private void appendAttendees(StringBuilder logBuilder, List<Attendee> attendees, String text) {
+        StringBuilder attendeesText = new StringBuilder();
+        if (null != attendees) {
+            for (Iterator<Attendee> iterator = attendees.iterator(); iterator.hasNext();) {
+                Attendee attendee = iterator.next();
+                if (attendee.containsCn()) {
+                    attendeesText.append(attendee.getCn());
+                    if (iterator.hasNext()) {
+                        attendeesText.append(", ");
+                    }
+                }
+            }
+        }
+        appendIfSet(logBuilder, text, attendeesText);
+    }
+
+    /**
+     * Append the given object if it is not <code>null</code> or an empty string
+     *
+     * @param logBuilder The {@link StringBuilder}
+     * @param text The key to add the objecct to
+     * @param objectToAppend The object to add
+     */
+    private void appendIfSet(StringBuilder logBuilder, String text, Object objectToAppend) {
+        String value = String.valueOf(objectToAppend);
+        if (Strings.isEmpty(value) || value.equals("null")) {
+            logBuilder.append(text).append("<unknown>; ");
+        } else {
+            logBuilder.append(text).append(value).append("; ");
+        }
+    }
+    
+    private static <T> T castTo(Object actionObject, Class<T> clazz) {
+        if (null != actionObject && clazz.isAssignableFrom(actionObject.getClass())) {
+            return clazz.cast(actionObject);
+        }
+        return null;
+    }
 }

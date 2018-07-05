@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Session Management JSON
+Bundle-SymbolicName: com.openexchange.session.management.json
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.ajax,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.annotation,
+ com.openexchange.clientinfo,
+ com.openexchange.config.lean,
+ com.openexchange.exception,
+ com.openexchange.groupware.ldap,
+ com.openexchange.i18n.tools,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.session.management,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ net.sf.uadetector,
+ org.json,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.session.management.json.osgi.SessionManagementJSONActivator

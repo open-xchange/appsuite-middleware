@@ -154,7 +154,7 @@ public class WebdavLogAction extends AbstractAction {
              */
             yield(request, response);
             if (null != capturingResponse) {
-                LOG.trace(capturingResponse.getBodyAsString());
+                LOG.trace(capturingResponse.getBodyAsString(), System.lineSeparator());
             }
         } catch (WebdavProtocolException e) {
             if (HttpServletResponse.SC_INTERNAL_SERVER_ERROR == e.getStatus()) {
@@ -179,7 +179,7 @@ public class WebdavLogAction extends AbstractAction {
                 b.append(line);
                 b.append(lineSeparator);
             }
-            LOG.trace(b.toString());
+            LOG.trace(b.toString(), lineSeparator);
         } catch (final IOException x) {
             LOG.debug("", x);
         } finally {

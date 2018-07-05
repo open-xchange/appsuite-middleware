@@ -49,8 +49,8 @@
 
 package com.openexchange.cluster.lock;
 
-import com.openexchange.cluster.lock.policies.RetryPolicy;
 import com.openexchange.exception.OXException;
+import com.openexchange.policy.retry.RetryPolicy;
 
 /**
  * {@link ClusterLockService}

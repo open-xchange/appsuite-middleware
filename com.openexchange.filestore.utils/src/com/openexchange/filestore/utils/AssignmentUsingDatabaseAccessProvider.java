@@ -49,8 +49,8 @@
 
 package com.openexchange.filestore.utils;
 
-import com.google.common.collect.SetMultimap;
 import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
+import com.google.common.collect.SetMultimap;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;

@@ -52,13 +52,13 @@ package liquibase.precondition.ext;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.commons.lang.Validate;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CustomPreconditionErrorException;
 import liquibase.exception.CustomPreconditionFailedException;
 import liquibase.precondition.CustomPrecondition;
-import org.apache.commons.lang.Validate;
 
 /**
  * Verifies the size of the database column by ignoring the type of the column!
@@ -108,27 +108,27 @@ public class ColumnSizePrecondition implements CustomPrecondition {
     public void check(final Database database) throws CustomPreconditionFailedException, CustomPreconditionErrorException {
         try {
             Validate.notNull(database, "Database provided by Liquibase might not be null!");
-    
+
             DatabaseConnection databaseConnection = database.getConnection();
             Validate.notNull(databaseConnection, "DatabaseConnection might not be null!");
-    
+
             JdbcConnection connection = null;
             if (databaseConnection instanceof JdbcConnection) {
                 connection = (JdbcConnection)databaseConnection;
             } else {
                 throw new CustomPreconditionErrorException("Cannot get underlying connection because database connection is not from type JdbcConnection. Type is: " + databaseConnection.getClass().getName());
             }
-    
+
             boolean columnFound = false;
-    
+            ResultSet rsColumns = null;
             try {
                 DatabaseMetaData meta = connection.getUnderlyingConnection().getMetaData();
-                ResultSet rsColumns = meta.getColumns(null, null, tableName, null);
+                rsColumns = meta.getColumns(null, null, tableName, null);
                 if (!rsColumns.next()) {
                     throw new CustomPreconditionErrorException("No columns for table " + tableName + " found! Aborting database migration execution for the given changeset.");
                 }
                 rsColumns.beforeFirst();
-    
+
                 while (rsColumns.next()) {
                     final String lColumnName = rsColumns.getString("COLUMN_NAME");
                     if (columnName.equals(lColumnName)) {
@@ -141,6 +141,10 @@ public class ColumnSizePrecondition implements CustomPrecondition {
                 }
             } catch (SQLException sqlException) {
                 throw new CustomPreconditionErrorException("Error while evaluating type of column " + columnName + " in table " + tableName + ".", sqlException);
+            } finally {
+                if (null != rsColumns) {
+                    try { rsColumns.close(); } catch (SQLException e) { /* Ignore */ }
+                }
             }
             if (!columnFound) {
                 throw new CustomPreconditionErrorException("Desired column to update not found! Tried update for column " + columnName + " on table " + tableName);

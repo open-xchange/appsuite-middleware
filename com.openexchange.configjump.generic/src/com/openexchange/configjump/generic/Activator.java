@@ -66,16 +66,20 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        servicess = new Services(context);
+    protected synchronized void startBundle() throws Exception {
+        Services servicess = new Services(context);
         track(ConfigurationService.class, new ConfigurationTracker(context, servicess));
+        this.servicess = servicess;
         openTrackers();
     }
 
     @Override
-    public void stopBundle() {
-        servicess.unregisterService();
-        closeTrackers();
-        cleanUp();
+    public synchronized void stopBundle() throws Exception {
+        Services servicess = this.servicess;
+        if (null != servicess) {
+            this.servicess = null;
+            servicess.unregisterService();
+        }
+        super.stopBundle();
     }
 }

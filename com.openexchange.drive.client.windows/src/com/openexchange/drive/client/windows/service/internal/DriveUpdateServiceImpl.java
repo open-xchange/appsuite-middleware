@@ -153,6 +153,9 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         values.put("OX_USERNAME", StringEscapeUtils.escapeXml(quote(username)));
         String exeFileName = getExeFileName(branding);
         String msiFileName = getMsiFileName(branding);
+        if(exeFileName == null || msiFileName == null) {
+            throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
+        }
         try {
             values.put("URL", StringEscapeUtils.escapeXml(Utils.getFileUrl(serverUrl, exeFileName)));
             values.put("MD5", provider.getMD5(branding, exeFileName));

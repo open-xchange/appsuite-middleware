@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -42,11 +42,10 @@ package javax.mail;
 
 import java.util.EventListener;
 import java.util.Vector;
-import java.util.Queue;
 import java.util.WeakHashMap;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.mail.event.MailEvent;
 
 /**
@@ -73,6 +72,7 @@ class EventQueue implements Runnable {
 	    super(new Object());
 	}
 
+	@Override
 	public void dispatch(Object listener) {
 	    // Kill the event dispatching thread.
 	    Thread.currentThread().interrupt();
@@ -107,7 +107,7 @@ class EventQueue implements Runnable {
 	    Vector<? extends EventListener> vector) {
 	// if this is the first event, create the queue and start the event task
 	if (q == null) {
-	    q = new LinkedBlockingQueue<QueueElement>();
+	    q = new LinkedBlockingQueue<>();
 	    if (executor != null) {
 		executor.execute(this);
 	    } else {
@@ -124,8 +124,7 @@ class EventQueue implements Runnable {
      */
     synchronized void terminateQueue() {
 	if (q != null) {
-	    Vector<EventListener> dummyListeners = new Vector<EventListener>();
-	    dummyListeners.setSize(1); // need atleast one listener
+	    Vector<EventListener> dummyListeners = new Vector<>(1); // need atleast one listener
 	    q.add(new QueueElement(new TerminatorEvent(), dummyListeners));
 	    q = null;
 	}
@@ -138,7 +137,7 @@ class EventQueue implements Runnable {
     static synchronized EventQueue getApplicationEventQueue(Executor ex) {
 	ClassLoader cl = Session.getContextClassLoader();
 	if (appq == null)
-	    appq = new WeakHashMap<ClassLoader,EventQueue>();
+	    appq = new WeakHashMap<>();
 	EventQueue q = appq.get(cl);
 	if (q == null) {
 	    q = new EventQueue(ex);
@@ -150,6 +149,7 @@ class EventQueue implements Runnable {
     /**
      * Pull events off the queue and dispatch them.
      */
+    @Override
     public void run() {
 
 	BlockingQueue<QueueElement> bq = q;

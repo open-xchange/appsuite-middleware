@@ -33,7 +33,6 @@ package net.fortuna.ical4j.model.component;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.Property;

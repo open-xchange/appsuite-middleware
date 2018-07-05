@@ -57,16 +57,16 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CreateClusterLockTable extends AbstractCreateTableImpl {
-    
+
     static final String TABLE_NAME = "clusterLock";
-    
+
     static final String CREATE_TABLE_STATEMENT = "CREATE TABLE clusterLock (" +
         "cid INT4 UNSIGNED NOT NULL, " +
         "user INT4 UNSIGNED NOT NULL, " +
-        "name VARCHAR(255) NOT NULL, " +
-        "timestamp INT8 UNSIGNED NOT NULL, " + 
+        "name VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, " +
+        "timestamp INT8 UNSIGNED NOT NULL, " +
         "PRIMARY KEY (cid, user, name) " +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     /**
      * Initialises a new {@link CreateClusterLockTable}.
@@ -77,7 +77,7 @@ public class CreateClusterLockTable extends AbstractCreateTableImpl {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.database.CreateTableService#requiredTables()
      */
     @Override
@@ -87,7 +87,7 @@ public class CreateClusterLockTable extends AbstractCreateTableImpl {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.database.CreateTableService#tablesToCreate()
      */
     @Override
@@ -97,7 +97,7 @@ public class CreateClusterLockTable extends AbstractCreateTableImpl {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.database.AbstractCreateTableImpl#getCreateStatements()
      */
     @Override

@@ -49,29 +49,57 @@
 
 package com.openexchange.importexport.exporters;
 
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.ServiceLookup;
+import java.util.List;
+import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.importexport.helpers.ExportFileNameCreator;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
  * {@link AbstractExporter}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10.0
  */
 public abstract class AbstractExporter implements Exporter {
-    protected ServiceLookup services;
-    
-    public AbstractExporter(ServiceLookup services) {
-        this.services = services;
+
+    @Override
+    public String getFolderExportFileName(ServerSession session, String folder, String extension) {
+        return ExportFileNameCreator.createFolderExportFileName(session, folder, extension);
     }
-    
-    
-    public boolean acceptContact(Contact contact, ServerSession session) {
-        if (contact.getParentFolderID() == 6 && contact.getInternalUserId() == session.getContext().getMailadmin()) {
-            
+
+    @Override
+    public String getBatchExportFileName(ServerSession session, Map<String, List<String>> batchIds, String extension) {
+        return ExportFileNameCreator.createBatchExportFileName(session, batchIds, extension);
+    }
+
+    /**
+     * Reads the saveToDisk parameter
+     *
+     * @param optionalParams The optional parameters of the request
+     * @return boolean The value of the saveToDisk parameter
+     */
+    public boolean isSaveToDisk(final Map<String, Object> optionalParams) {
+        if (null == optionalParams) {
+            return false;
         }
-        return true;
+        final Object object = optionalParams.get("__saveToDisk");
+        if (null == object) {
+            return false;
+        }
+        return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
+    }
+
+    /**
+     * Creates an encoded file name
+     *
+     * @param requestData The AJAX request data
+     * @param fileName The file name to export
+     * @return String The fully parsed file name
+     */
+    public String appendFileNameParameter(AJAXRequestData requestData, String fileName) {
+        return ExportFileNameCreator.appendFileNameParameter(requestData, fileName);
     }
 
 }

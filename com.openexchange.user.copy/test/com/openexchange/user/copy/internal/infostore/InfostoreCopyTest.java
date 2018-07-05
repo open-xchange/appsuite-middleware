@@ -120,7 +120,7 @@ public class InfostoreCopyTest extends AbstractUserCopyTest {
             copyTask.copyUser(mapping);    
             dstCon.commit();
         } catch (final OXException e) {
-            DBUtils.rollback(dstCon);
+            Databases.rollback(dstCon);
             e.printStackTrace();
             fail("A UserCopyException occurred.");
         }
@@ -152,7 +152,7 @@ public class InfostoreCopyTest extends AbstractUserCopyTest {
     @After
     public void tearDown()
  throws Exception {
-        DBUtils.autocommit(dstCon);
+        Databases.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "infostore", "infostore_document");
         super.tearDown();
     }   

@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,8 +40,12 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
-import java.util.*;
+import java.io.EOFException;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
 
 /**
  * A support class that contains the state and logic needed when
@@ -50,9 +54,10 @@ import java.util.*;
 final class MessageLoader {
     private final TempFile temp;
     private FileInputStream fis = null;
-    private AppendStream fos = null;
-    private int pos, len;
-    private long off;
+    private OutputStream fos = null;
+    private int pos, len;	// position in and length of buffer
+    private long off;		// current offset in temp file
+    private long prevend;	// the end of the previous message in temp file
     private MboxFolder.MessageMetadata md;
     private byte[] buf = null;
     // the length of the longest header we'll need to look at
@@ -70,7 +75,8 @@ final class MessageLoader {
      * The data is assumed to be in UNIX mbox format, with newlines
      * only as the line terminators.
      */
-    public int load(FileDescriptor fd, long offset, List msgs)
+    public int load(FileDescriptor fd, long offset,
+        List<MboxFolder.MessageMetadata> msgs)
 				throws IOException {
 	// XXX - could allocate and deallocate buffers here
 	int loaded = 0;
@@ -78,36 +84,42 @@ final class MessageLoader {
 	    fis = new FileInputStream(fd);
 	    if (fis.skip(offset) != offset)
 		throw new EOFException("Failed to skip to offset " + offset);
-	    this.off = offset;
+	    this.off = prevend = temp.length();
 	    pos = len = 0;
 	    line = new char[LINELEN];
 	    buf = new byte[64 * 1024];
 	    fos = temp.getAppendStream();
 	    int n;
 	    // keep loading messages as long as we have headers
-	    while ((n = skipHeader()) >= 0) {
+	    while ((n = skipHeader(loaded == 0)) >= 0) {
 		long start;
 		if (n == 0) {
 		    // didn't find a Content-Length, skip the body
 		    start = skipBody();
 		    if (start < 0) {
-			md.end = -1;
+			// md.end = -1;
+			md.dataend = -1;
 			msgs.add(md);
 			loaded++;
 			break;
 		    }
+		    md.dataend = start;
 		} else {
 		    // skip over the body
 		    skip(n);
+		    md.dataend = off;
 		    int b;
-		    start = off;
 		    // skip any blank lines after the body
 		    while ((b = get()) >= 0) {
 			if (b != '\n')
 			    break;
 		    }
+		    start = off;
+		    if (b >= 0)
+			start--;	// back up one byte if not at EOF
 		}
-		md.end = start;
+		// md.end = start;
+		prevend = start;
 		msgs.add(md);
 		loaded++;
 	    }
@@ -134,12 +146,15 @@ final class MessageLoader {
      * Update the MessageMetadata based on the headers seen.
      * return -1 on EOF.
      */
-    private int skipHeader()  throws IOException {
+    private int skipHeader(boolean first)  throws IOException {
 	int clen = 0;
 	boolean bol = true;
 	int lpos = -1;
 	int b;
+	boolean saw_unix_from = false;
+	int lineno = 0;
 	md = new MboxFolder.MessageMetadata();
+	md.start = prevend;
 	md.recent = true;
 	while ((b = get()) >= 0) {
 	    if (bol) {
@@ -149,13 +164,17 @@ final class MessageLoader {
 	    }
 	    if (b == '\n') {
 		bol = true;
+		lineno++;
 		// newline at end of line, was the line one of the headers
 		// we're looking for?
 		if (lpos > 7) {
 		    // XXX - make this more efficient?
 		    String s = new String(line, 0, lpos);
 		    // fast check for Content-Length header
-		    if (line[7] == '-' && isPrefix(s, "Content-Length:")) {
+		    if (lineno == 1 && line[0] == 'F' && isPrefix(s, "From ")) {
+			saw_unix_from = true;
+		    } else if (line[7] == '-' &&
+				isPrefix(s, "Content-Length:")) {
 			s = s.substring(15).trim();
 			try {
 			    clen = Integer.parseInt(s);
@@ -192,7 +211,12 @@ final class MessageLoader {
 		    line[lpos++] = (char)b;
 	    }
 	}
-	if (b < 0)
+
+	// if we hit EOF, or this is the first message we're loading and
+	// it doesn't have a UNIX From line, return EOF.
+	// (After the first message, UNIX From lines are seen by skipBody
+	// to terminate the message.)
+	if (b < 0 || (first && !saw_unix_from))
 	    return -1;
 	else
 	    return clen;

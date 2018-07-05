@@ -49,8 +49,8 @@
 
 package com.openexchange.twitter;
 
-import twitter4j.TwitterException;
 import com.openexchange.i18n.LocalizableStrings;
+import twitter4j.TwitterException;
 
 /**
  * {@link TwitterExceptionMessages} - Exception messages for {@link TwitterException} that must be translated.

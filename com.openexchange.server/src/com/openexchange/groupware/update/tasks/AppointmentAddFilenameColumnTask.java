@@ -49,19 +49,14 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-
+import static com.openexchange.database.Databases.autocommit;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -79,24 +74,27 @@ public class AppointmentAddFilenameColumnTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection connnection = dbService.getForUpdateTask(contextID);
-        Column filenameColumn = new Column("filename", "VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL");
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            connnection.setAutoCommit(false);
-            Tools.checkAndAddColumns(connnection, "prg_dates", filenameColumn);
-            Tools.checkAndAddColumns(connnection, "del_dates", filenameColumn);
-            connnection.commit();
+            con.setAutoCommit(false);
+            rollback = true;
+
+            Column filenameColumn = new Column("filename", "VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL");
+            Tools.checkAndAddColumns(con, "prg_dates", filenameColumn);
+            Tools.checkAndAddColumns(con, "del_dates", filenameColumn);
+
+            con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connnection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connnection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connnection);
-            Database.backNoTimeout(contextID, true, connnection);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            autocommit(con);
         }
     }
 

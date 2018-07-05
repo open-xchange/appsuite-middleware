@@ -81,25 +81,21 @@ public class CPCalendar extends GregorianCalendar {
 
     private final SimpleDateFormat format;
 
-    public CPCalendar() {
-        this(TimeZone.getDefault(), Locale.getDefault());
-    }
-
-    public CPCalendar(TimeZone zone, Locale locale) {
+    private CPCalendar(TimeZone zone, Locale locale) {
         super(zone, locale);
         this.locale = locale;
         format = new SimpleDateFormat("", locale);
         format.setTimeZone(zone);
     }
 
-    public static CPCalendar getCalendar(TimeZone zone, Locale locale) {
-        CPCalendar cal = new CPCalendar(zone, locale);
+    public static CPCalendar getCalendar() {
+        CPCalendar cal = new CPCalendar(TimeZone.getDefault(), Locale.getDefault());
         setWorkWeek(cal);
         return cal;
     }
 
-    public static CPCalendar getCalendar() {
-        CPCalendar cal = new CPCalendar();
+    public static CPCalendar getCalendar(TimeZone zone, Locale locale) {
+        CPCalendar cal = new CPCalendar(zone, locale);
         setWorkWeek(cal);
         return cal;
     }

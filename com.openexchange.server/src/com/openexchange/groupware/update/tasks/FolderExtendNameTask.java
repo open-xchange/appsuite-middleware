@@ -49,16 +49,12 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -66,7 +62,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -102,26 +97,28 @@ public final class FolderExtendNameTask extends UpdateTaskAdapter {
         Logger log = org.slf4j.LoggerFactory.getLogger(FolderExtendNameTask.class);
         String simpleName = FolderExtendNameTask.class.getSimpleName();
         log.info("Performing update task {}", simpleName);
-        Connection connnection = Database.getNoTimeout(params.getContextId(), true);
+
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            connnection.setAutoCommit(false);
+            con.setAutoCommit(false);
             rollback = true;
-            Tools.changeVarcharColumnSize("fname", 767, "oxfolder_tree", connnection);
-            Tools.changeVarcharColumnSize("name", 767, "virtualTree", connnection);
-            connnection.commit();
+
+            Tools.changeVarcharColumnSize("fname", 767, "oxfolder_tree", con);
+            Tools.changeVarcharColumnSize("name", 767, "virtualTree", con);
+
+            con.commit();
             rollback = false;
+            log.info("{} successfully performed.", simpleName);
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                rollback(connnection);
+                rollback(con);
             }
-            autocommit(connnection);
-            Database.backNoTimeout(params.getContextId(), true, connnection);
+            autocommit(con);
         }
-        log.info("{} successfully performed.", simpleName);
     }
 }

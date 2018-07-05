@@ -52,33 +52,20 @@ package com.openexchange.rest.client.httpclient.ssl;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.scheme.SchemeLayeredSocketFactory;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import org.apache.http.HttpHost;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.protocol.HttpContext;
 
 /**
  * {@link EasySSLSocketFactory}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class EasySSLSocketFactory implements SchemeLayeredSocketFactory {
+public class EasySSLSocketFactory implements ConnectionSocketFactory {
 
     private static final EasySSLSocketFactory INSTANCE = new EasySSLSocketFactory();
-
-    private volatile SSLContext sslcontext = null;
-
-    /**
-     * Initializes a new {@link EasySSLSocketFactory}.
-     */
-    public EasySSLSocketFactory() {
-        super();
-    }
 
     /**
      * Gets the instance.
@@ -89,27 +76,39 @@ public class EasySSLSocketFactory implements SchemeLayeredSocketFactory {
         return INSTANCE;
     }
 
+    // --------------------------------------------------------------------------------------------------
+
+    private volatile SSLContext sslcontext = null;
+
+    /**
+     * Initializes a new {@link EasySSLSocketFactory}.
+     */
+    public EasySSLSocketFactory() {
+        super();
+    }
+
     @Override
-    public Socket createSocket(HttpParams params) throws IOException {
+    public Socket createSocket(HttpContext context) throws IOException {
         return getSSLContext().getSocketFactory().createSocket();
     }
 
     @Override
-    public Socket connectSocket(Socket sock, InetSocketAddress remoteAddress, InetSocketAddress localAddress, HttpParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
-        final int connTimeout = HttpConnectionParams.getConnectionTimeout(params);
-        final int soTimeout = HttpConnectionParams.getSoTimeout(params);
-
-        final SSLSocket sslsock = (SSLSocket) (sock != null ? sock : createSocket(params));
-        sslsock.bind(localAddress);
-        sslsock.connect(remoteAddress, connTimeout);
-        sslsock.setSoTimeout(soTimeout);
-
-        return sslsock;
-    }
-
-    @Override
-    public boolean isSecure(Socket sock) throws IllegalArgumentException {
-        return true;
+    public Socket connectSocket(int connectTimeout, Socket socket, HttpHost host, InetSocketAddress remoteAddress, InetSocketAddress localAddress, HttpContext context) throws IOException {
+        Socket sock = socket != null ? socket : createSocket(context);
+        if (localAddress != null) {
+            sock.bind(localAddress);
+        }
+        try {
+            sock.connect(remoteAddress, connectTimeout);
+        } catch (IOException ex) {
+            try {
+                sock.close();
+            } catch (Exception ignore) {
+                // Ignore
+            }
+            throw ex;
+        }
+        return sock;
     }
 
     private SSLContext createEasySSLContext() throws IOException {
@@ -138,7 +137,7 @@ public class EasySSLSocketFactory implements SchemeLayeredSocketFactory {
 
     @Override
     public boolean equals(final Object obj) {
-        return obj != null && obj.getClass().equals(EasySSLSocketFactory.class);
+        return obj != null && this.getClass().isInstance(obj);
     }
 
     @Override
@@ -146,34 +145,4 @@ public class EasySSLSocketFactory implements SchemeLayeredSocketFactory {
         return EasySSLSocketFactory.class.hashCode();
     }
 
-    @Override
-    public Socket createLayeredSocket(Socket socket, String host, int port, HttpParams params) throws IOException, UnknownHostException {
-        SSLSocket sslSocket = (SSLSocket) TrustAllSSLSocketFactory.getDefault().createSocket(socket, host, port, true);
-        if (!sslSocket.isConnected()) {
-            int connTimeout = HttpConnectionParams.getConnectionTimeout(params);
-            InetSocketAddress remoteAddress = new InetSocketAddress(host, port);
-            sslSocket.connect(remoteAddress, connTimeout);
-        }
-
-        int soTimeout = HttpConnectionParams.getSoTimeout(params);
-        sslSocket.setSoTimeout(soTimeout);
-
-        return sslSocket;
-
-        /*
-        Socket sock = socket != null ? socket : createSocket(params);
-        if (sock instanceof SSLSocket) {
-            final SSLSocket sslsock = (SSLSocket) sock;
-            sslsock.connect(remoteAddress, connTimeout);
-            sslsock.setSoTimeout(soTimeout);
-            sock = sslsock;
-        } else {
-            if (!sock.isConnected()) {
-                sock.connect(remoteAddress, connTimeout);
-                sock.setSoTimeout(soTimeout);
-            }
-        }
-        */
-
-    }
 }

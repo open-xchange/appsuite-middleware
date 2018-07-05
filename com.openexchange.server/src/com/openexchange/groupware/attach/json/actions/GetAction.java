@@ -72,10 +72,6 @@ public final class GetAction extends AbstractAttachmentAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
 
-    private static final String DATASOURCE = "datasource";
-
-    private static final String IDENTIFIER = "identifier";
-
     /**
      * Initializes a new {@link GetAction}.
      */

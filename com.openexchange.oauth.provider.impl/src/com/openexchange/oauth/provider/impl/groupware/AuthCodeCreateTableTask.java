@@ -49,20 +49,17 @@
 
 package com.openexchange.oauth.provider.impl.groupware;
 
-import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link AuthCodeCreateTableTask}
@@ -71,37 +68,40 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class AuthCodeCreateTableTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link AuthCodeCreateTableTask}.
-     *
-     * @param dbService
      */
-    public AuthCodeCreateTableTask(ServiceLookup services) {
+    public AuthCodeCreateTableTask() {
         super();
-        this.services = services;
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        DatabaseService dbService = requireService(DatabaseService.class, services);
-        int contextId = params.getContextId();
-        Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            perform(writeCon);
+            con.setAutoCommit(false);
+            rollback = true;
+
+            perform(con);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            dbService.backForUpdateTask(contextId, writeCon);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 
     private void perform(Connection con) throws OXException {
         PreparedStatement stmt = null;
-        boolean rollback = false;
         try {
-            DBUtils.startTransaction(con); // BEGIN
-            rollback = true;
-
             String[] tableNames = AuthCodeCreateTableService.getTablesToCreate();
             String[] createStmts = AuthCodeCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
@@ -111,19 +111,12 @@ public class AuthCodeCreateTableTask extends UpdateTaskAdapter {
                 stmt = con.prepareStatement(createStmts[i]);
                 stmt.executeUpdate();
             }
-
-            con.commit(); // COMMIT
-            rollback = false;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                DBUtils.rollback(con);
-            }
-            DBUtils.closeSQLStuff(stmt);
-            DBUtils.autocommit(con);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -135,14 +128,12 @@ public class AuthCodeCreateTableTask extends UpdateTaskAdapter {
     private static final boolean tableExists(final Connection con, final String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
-        boolean retval = false;
         try {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
+            return (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
-        return retval;
     }
 
 }

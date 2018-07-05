@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -154,13 +153,14 @@ public class TaskCopyTask implements CopyUserTaskService {
         final Set<Integer> sourceFolderIds = folderMapping.getSourceKeys();
 
         final Map<Integer, Task> tasks = loadTasksFromDatabase(srcCon, srcCtx, srcUserId, sourceFolderIds);
-        addParticipants(tasks);
+        addParticipants(tasks, srcCon, srcCtx, srcUserId);
         exchangeIds(tasks, folderMapping, dstUserId, dstCtx, dstCon);
         writeTasksToDatabase(dstCon, dstCtx, srcCtx, dstUserId, tasks, folderMapping);
 
         final IntegerMapping mapping = new IntegerMapping();
-        for(Entry<Integer, Task> entry : tasks.entrySet()) {
-        	mapping.addMapping(entry.getKey(), entry.getValue().getObjectID());
+        for (final int taskId : tasks.keySet()) {
+            final Task task = tasks.get(taskId);
+            mapping.addMapping(taskId, task.getObjectID());
         }
         return mapping;
     }
@@ -189,17 +189,18 @@ public class TaskCopyTask implements CopyUserTaskService {
     }
 
     private void writeTasksToDatabase(final Connection dstCon, final Context dstCtx, final Context srcCtx, final int dstUserId, final Map<Integer, Task> tasks, final ObjectMapping<FolderObject> folderMapping) throws OXException {
-        for (Entry<Integer, Task> entry: tasks.entrySet()) {
-            final Task task = entry.getValue();
+        final Set<Folder> newFolders = new HashSet<Folder>();
+        for (final int taskId : tasks.keySet()) {
+            final Task task = tasks.get(taskId);
             try {
-            	final Set<Folder> newFolders = new HashSet<Folder>();
                 TaskStorage.getInstance().insertTask(dstCtx, dstCon, task, StorageType.ACTIVE);
-                final Set<Folder> source = FolderStorage.getInstance().selectFolder(srcCtx, srcCon, entry.getKey(), StorageType.ACTIVE);
+                final Set<Folder> source = FolderStorage.getInstance().selectFolder(srcCtx, srcCon, taskId, StorageType.ACTIVE);
                 for (int i = 0; i < source.size(); i++) {
                     final Folder newFolder = new Folder(task.getParentFolderID(), dstUserId);
                     newFolders.add(newFolder);
                 }
                 FolderStorage.getInstance().insertFolder(dstCtx, dstCon, task.getObjectID(), newFolders, StorageType.ACTIVE);
+                newFolders.clear();
                 final Set<InternalParticipant> internals = new HashSet<InternalParticipant>();
                 final Set<ExternalParticipant> externals = new HashSet<ExternalParticipant>();
 
@@ -222,7 +223,10 @@ public class TaskCopyTask implements CopyUserTaskService {
                                 externals.add(ext);
                             }
                         } else if (p.getType() == Participant.EXTERNAL_USER) {
-                            final ExternalParticipant ext = new ExternalParticipant(createExternal(p));
+                            final ExternalUserParticipant extParticipant = new ExternalUserParticipant(p.getEmailAddress());
+                            extParticipant.setDisplayName(p.getDisplayName());
+                            extParticipant.setIdentifier(p.getIdentifier());
+                            final ExternalParticipant ext = new ExternalParticipant(extParticipant);
                             externals.add(ext);
                         } else {
                             continue;
@@ -237,8 +241,9 @@ public class TaskCopyTask implements CopyUserTaskService {
         }
     }
 
-    private void addParticipants(final Map<Integer, Task> tasks) throws OXException {
-        for (Task task : tasks.values()) {
+    private void addParticipants(final Map<Integer, Task> tasks, final Connection con, final Context ctx, final int userId) throws OXException {
+        for (final int taskId : tasks.keySet()) {
+            final Task task = tasks.get(taskId);
             convertInternalToExternalParticipant(task);
         }
     }
@@ -252,10 +257,16 @@ public class TaskCopyTask implements CopyUserTaskService {
                     if (p.getIdentifier() == srcUserId) {
                         participant = p;
                     } else {
-                        participant = createExternal(p);
+                        final ExternalUserParticipant extParticipant = new ExternalUserParticipant(p.getEmailAddress());
+                        extParticipant.setDisplayName(p.getDisplayName());
+                        extParticipant.setIdentifier(p.getIdentifier());
+                        participant = extParticipant;
                     }
                 } else if (p.getType() == Participant.EXTERNAL_USER) {
-                    participant = createExternal(p);
+                    final ExternalUserParticipant extParticipant = new ExternalUserParticipant(p.getEmailAddress());
+                    extParticipant.setDisplayName(p.getDisplayName());
+                    extParticipant.setIdentifier(p.getIdentifier());
+                    participant = extParticipant;
                 } else {
                     continue;
                 }
@@ -265,22 +276,18 @@ public class TaskCopyTask implements CopyUserTaskService {
         return participants;
     }
 
-	@SuppressWarnings("deprecation")
-	private ExternalUserParticipant createExternal(final Participant p) {
-		final ExternalUserParticipant extParticipant = new ExternalUserParticipant(p.getEmailAddress());
-		extParticipant.setDisplayName(p.getDisplayName());
-		extParticipant.setIdentifier(p.getIdentifier());
-		return extParticipant;
-	}
-
-	private void exchangeIds(final Map<Integer, Task> tasks, final ObjectMapping<FolderObject> folderMapping, final int userId, final Context ctx, final Connection con) throws OXException {
+    private void exchangeIds(final Map<Integer, Task> tasks, final ObjectMapping<FolderObject> folderMapping, final int userId, final Context ctx, final Connection con) throws OXException {
+        final Map<Integer, Task> series = new HashMap<Integer, Task>();
         try {
-            for (Entry<Integer, Task> entry : tasks.entrySet()) {
+            for (final int taskId : tasks.keySet()) {
                 final int newTaskId = IDGenerator.getId(ctx, com.openexchange.groupware.Types.TASK, con);
-                final Task task = entry.getValue();
+                final Task task = tasks.get(taskId);
                 task.setObjectID(newTaskId);
                 task.setCreatedBy(userId);
                 task.setModifiedBy(userId);
+                if (task.getRecurrenceID() != -1) {
+                    series.put(taskId, task);
+                }
                 final FolderObject sourceFolder = folderMapping.getSource(task.getParentFolderID());
                 int newParentFolderId = task.getParentFolderID();
                 if (sourceFolder != null) {

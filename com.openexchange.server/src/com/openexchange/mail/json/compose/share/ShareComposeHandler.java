@@ -301,7 +301,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             ComposedMailMessage composeMessage = createRegularComposeMessage(context);
             DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
             transportMessage.setAppendToSentFolder(false);
-            return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage, true);
+            return DefaultComposeTransportResult.builder()
+                .withTransportMessages(Collections.<ComposedMailMessage> singletonList(transportMessage), true)
+                .withSentMessage(composeMessage)
+                .withTransportEqualToSent()
+                .build();
         }
 
         // Get the basic source message
@@ -434,11 +438,16 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 }
             }
 
-            // Commit attachment storage
-            attachmentsControl.commit();
+            // Everything went fine. Let 'StoredAttachmentsControl' instance be managed by transport result now.
+            DefaultComposeTransportResult transportResult = DefaultComposeTransportResult.builder()
+                .withTransportMessages(transportMessages, true)
+                .withSentMessage(sentMessage)
+                .withAttachmentsControl(attachmentsControl)
+                .build();
+            attachmentsControl = null;
             rollback = false;
 
-            return new DefaultComposeTransportResult(transportMessages, sentMessage, false);
+            return transportResult;
         } finally {
             if (null != attachmentsControl) {
                 if (rollback) {
@@ -446,11 +455,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 }
                 attachmentsControl.finish();
             }
-            if (null != previewImages) {
-                if (rollback) {
-                    for (ThresholdFileHolder tfh : previewImages.values()) {
-                        tfh.close();
-                    }
+            if (rollback && null != previewImages) {
+                for (ThresholdFileHolder tfh : previewImages.values()) {
+                    tfh.close();
                 }
             }
         }
@@ -511,14 +518,17 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             String id = entry.getKey();
             try {
                 ThresholdFileHolder encodedThumbnail = entry.getValue().get(timeout, TimeUnit.MILLISECONDS);
-                previews.put(id, encodedThumbnail);
+                if (null == encodedThumbnail) {
+                    // No thumbnail available. Put default thumbnail.
+                    previews.put(id, getDefaultThumbnail(mimeTypes.get(id), templatePath));
+                } else {
+                    encodedThumbnail.automanaged();
+                    previews.put(id, encodedThumbnail);
+                }
             } catch (InterruptedException | TimeoutException e) {
                 LOG.debug(e.getMessage(), e);
             } catch (ExecutionException e) {
                 LOG.error(e.getMessage(), e);
-            }
-            if (null == previews.get(id)) {
-                previews.put(id, getDefaultThumbnail(mimeTypes.get(id), templatePath));
             }
         }
         return previews;
@@ -579,12 +589,14 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             in = new FileInputStream(thumbnail);
             preview = new ThresholdFileHolder();
             preview.write(in);
+            ThresholdFileHolder toReturn = preview;
+            preview = null;
+            return toReturn;
         } catch (IOException e) {
             throw MimeMailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(in);
+            Streams.close(in, preview);
         }
-        return preview;
     }
 
     private Map<String, String> getCidMapping(Map<String, ThresholdFileHolder> previewImages) {
@@ -652,14 +664,15 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         public ThresholdFileHolder call() throws Exception {
             ThresholdFileHolder encodedThumbnail = null;
             try {
+                String mimeType = Strings.isEmpty(this.mimeType) ? null : Strings.asciiLowerCase(this.mimeType);
 
                 // Document is an image
-                if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("image") && !mimeType.toLowerCase().startsWith("image/svg+xml")) {
+                if (null != mimeType && mimeType.startsWith("image/") && mimeType.indexOf("svg") < 0) {
                     encodedThumbnail = transformImage(document, mimeType);
                 }
 
                 // Document is an audio file
-                else if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("audio/mpeg")) {
+                else if (null != mimeType && mimeType.startsWith("audio/mpeg")) {
                     if (Mp3CoverExtractor.isSupported(mimeType)) {
                         IFileHolder mp3Cover = null;
                         try {
@@ -678,14 +691,17 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 // Document is something else, try to get preview image with document converter
                 else {
                     if (documentPreviewEnabled) {
-                        PreviewDocument preview = getDocumentPreview(document, mimeType, session);
+                        PreviewDocument preview = getDocumentPreview(document, this.mimeType, session);
                         InputStream in = null;
+                        ThresholdFileHolder previewSink = null;
                         try {
                             in = preview.getThumbnail();
-                            encodedThumbnail = new ThresholdFileHolder();
-                            encodedThumbnail.write(in);
+                            previewSink = new ThresholdFileHolder(false);
+                            previewSink.write(in);
+                            encodedThumbnail = previewSink;
+                            previewSink = null; // Avoid premature closing
                         } finally {
-                            Streams.close(in);
+                            Streams.close(in, previewSink);
                         }
                     }
                 }
@@ -700,13 +716,18 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
 
         private ThresholdFileHolder transformImage(InputStream image, String mimeType) throws OXException {
+            ThresholdFileHolder transformedImage = null;
             try {
                 ImageTransformations transformed = transformationService.transfom(image).rotate().scale(200, 150, ScaleType.COVER_AND_CROP, true);
-                ThresholdFileHolder transformedImage = new ThresholdFileHolder();
+                transformedImage = new ThresholdFileHolder(false);
                 transformedImage.write(transformed.getFullTransformedImage(mimeType).getImageStream());
-                return transformedImage;
+                ThresholdFileHolder retval = transformedImage;
+                transformedImage = null;
+                return retval;
             } catch (IOException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(transformedImage);
             }
         }
 
@@ -714,18 +735,13 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             Mp3CoverExtractor mp3CoverExtractor = new Mp3CoverExtractor();
             ThresholdFileHolder fileHolder = null;
             try {
-                fileHolder = new ThresholdFileHolder();
+                fileHolder = new ThresholdFileHolder(false);
                 fileHolder.write(audioFile);
                 fileHolder.setContentType("audio/mpeg");
                 fileHolder.setName(id + ".mp3");
                 return mp3CoverExtractor.extractCover(fileHolder);
-            } catch (OXException e) {
-                throw e;
-            }
-            finally {
-                if (null != fileHolder) {
-                    fileHolder.close();
-                }
+            } finally {
+                Streams.close(fileHolder);
             }
         }
 

@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,17 +40,39 @@
 
 package com.sun.mail.util;
 
-import java.security.*;
-import java.net.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.channels.SocketChannel;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.regex.*;
+import java.nio.charset.StandardCharsets;
+import java.security.AccessController;
+import java.security.GeneralSecurityException;
+import java.security.PrivilegedAction;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
-import java.security.cert.*;
-import javax.net.*;
-import javax.net.ssl.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * This class is used to get Sockets. Depending on the arguments passed
@@ -182,6 +204,7 @@ public class SocketFetcher {
 	int cto = PropUtil.getIntProperty(props,
 					prefix + ".connectiontimeout", -1);
 	Socket socket = null;
+	try {
 	String localaddrstr = props.getProperty(prefix + ".localaddress", null);
 	InetAddress localaddr = null;
 	if (localaddrstr != null) {
@@ -277,7 +300,14 @@ public class SocketFetcher {
 	    }
 	}
 
-	return socket;
+	Socket returnMe = socket;
+	socket = null;
+    return returnMe;
+	} finally {
+	    if (null != socket) {
+            socket.close();
+        }
+	}
     }
 
     public static Socket getSocket(String host, int port, Properties props,
@@ -313,8 +343,6 @@ public class SocketFetcher {
 				Properties props, String prefix,
 				SocketFactory sf, boolean useSSL)
 				throws IOException {
-	Socket socket = null;
-
 	if (logger.isLoggable(Level.FINEST)) {
         logger.finest("create socket: prefix " + prefix +
 		", localaddr " + localaddr + ", localport " + localport +
@@ -323,10 +351,33 @@ public class SocketFetcher {
 		", socket factory " + sf + ", useSSL " + useSSL);
     }
 
-	String socksHost = props.getProperty(prefix + ".socks.host", null);
+	Socket socket = null;
+    Socket overriddenSocket = null;
+	try {
+    String proxyHost = props.getProperty(prefix + ".proxy.host", null);
+	int proxyPort = 80;
+	String socksHost = null;
 	int socksPort = 1080;
 	String err = null;
-	if (socksHost != null) {
+
+    if (proxyHost != null) {
+	    int i = proxyHost.indexOf(':');
+	    if (i >= 0) {
+		proxyHost = proxyHost.substring(0, i);
+		try {
+		    proxyPort = Integer.parseInt(proxyHost.substring(i + 1));
+		} catch (NumberFormatException ex) {
+		    // ignore it
+		}
+	    }
+	    proxyPort = PropUtil.getIntProperty(props,
+					prefix + ".proxy.port", proxyPort);
+	    err = "Using web proxy host, port: " + proxyHost + ", " + proxyPort;
+	    if (logger.isLoggable(Level.FINER)) {
+            logger.finer("web proxy host " + proxyHost + ", port " + proxyPort);
+        }
+	} else if ((socksHost =
+		    props.getProperty(prefix + ".socks.host", null)) != null) {
 	    int i = socksHost.indexOf(':');
 	    if (i >= 0) {
 		socksHost = socksHost.substring(0, i);
@@ -379,7 +430,9 @@ public class SocketFetcher {
     }
 	try {
 	    logger.finest("connecting...");
-	    if (cto >= 0) {
+	    if (proxyHost != null) {
+            proxyConnect(socket, proxyHost, proxyPort, host, port, cto);
+        } else if (cto >= 0) {
             socket.connect(new InetSocketAddress(address, port), cto);
         } else {
             socket.connect(new InetSocketAddress(address, port));
@@ -394,9 +447,6 @@ public class SocketFetcher {
 	 * If we want an SSL connection and we didn't get an SSLSocket,
 	 * wrap our plain Socket with an SSLSocket.
 	 */
-	boolean error = true;
-	Socket closeMeOnError = socket;
-	try {
 	if ((useSSL || sf instanceof SSLSocketFactory) &&
 		!(socket instanceof SSLSocket)) {
 	    String trusted;
@@ -421,7 +471,10 @@ public class SocketFetcher {
         } else {
             ssf = (SSLSocketFactory)SSLSocketFactory.getDefault();
         }
-	    socket = ssf.createSocket(socket, host, port, true);
+	    overriddenSocket = socket;
+	    socket = ssf.createSocket(overriddenSocket, host, port, true);
+	    // Socket successfully layered over existing socket
+	    overriddenSocket = null;
 	    sf = ssf;
 	}
 
@@ -434,13 +487,11 @@ public class SocketFetcher {
 	/*
 	 * Apparently, everything went fine
 	 */
-	error = false;
-	return socket;
+	Socket returnMe = socket;
+	socket = null;
+    return returnMe;
 	} finally {
-	    if (error) {
-	        closeMeOnError.close();
-            socket.close();
-        }
+	    close(overriddenSocket, socket);
 	}
     }
 
@@ -690,13 +741,34 @@ public class SocketFetcher {
 	if (sf instanceof MailSSLSocketFactory) {
 	    MailSSLSocketFactory msf = (MailSSLSocketFactory)sf;
 	    if (!msf.isServerTrusted(host, sslsocket)) {
-		try {
-		    sslsocket.close();
-		} finally {
-		    throw new IOException("Server is not trusted: " + host);
-		}
+		throw cleanupAndThrow(sslsocket,
+			new IOException("Server is not trusted: " + host));
 	    }
 	}
+    }
+
+    private static IOException cleanupAndThrow(Socket socket, IOException ife) {
+	try {
+	    socket.close();
+	} catch (Throwable thr) {
+	    if (isRecoverable(thr)) {
+		ife.addSuppressed(thr);
+	    } else {
+		thr.addSuppressed(ife);
+		if (thr instanceof Error) {
+		    throw (Error) thr;
+		}
+		if (thr instanceof RuntimeException) {
+		    throw (RuntimeException) thr;
+		}
+		throw new RuntimeException("unexpected exception", thr);
+	    }
+	}
+	return ife;
+    }
+
+    private static boolean isRecoverable(Throwable t) {
+	return (t instanceof Exception) || (t instanceof LinkageError);
     }
 
     /**
@@ -855,6 +927,70 @@ public class SocketFetcher {
     }
 
     /**
+     * Use the HTTP CONNECT protocol to connect to a
+     * site through an HTTP proxy server. <p>
+     *
+     * Protocol is roughly:
+     * <pre>
+     * CONNECT <host>:<port> HTTP/1.1
+     * <blank line>
+     *
+     * HTTP/1.1 200 Connect established
+     * <headers>
+     * <blank line>
+     * </pre>
+     */
+    private static void proxyConnect(Socket socket,
+				String proxyHost, int proxyPort,
+				String host, int port, int cto)
+				throws IOException {
+	if (logger.isLoggable(Level.FINE)) {
+        logger.fine("connecting through proxy " +
+			proxyHost + ":" + proxyPort + " to " +
+			host + ":" + port);
+    }
+	if (cto >= 0) {
+        socket.connect(new InetSocketAddress(proxyHost, proxyPort), cto);
+    } else {
+        socket.connect(new InetSocketAddress(proxyHost, proxyPort));
+    }
+	PrintStream os = new PrintStream(socket.getOutputStream(), false,
+        StandardCharsets.UTF_8.name());
+    os.print("CONNECT " + host + ":" + port + " HTTP/1.1\r\n");
+    os.print("Host: " + host + ":" + port + "\r\n\r\n");
+	os.flush();
+	BufferedReader r = new BufferedReader(new InputStreamReader(
+						socket.getInputStream(), StandardCharsets.UTF_8));
+	String line;
+	boolean first = true;
+	while ((line = r.readLine()) != null) {
+	    if (line.length() == 0) {
+            break;
+        }
+	    logger.finest(line);
+	    if (first) {
+		StringTokenizer st = new StringTokenizer(line);
+		String http = st.nextToken();
+		String code = st.nextToken();
+		if (!code.equals("200")) {
+		    try {
+			socket.close();
+		    } catch (IOException ioex) {
+			// ignored
+		    }
+		    ConnectException ex = new ConnectException(
+			"connection through proxy " +
+			proxyHost + ":" + proxyPort + " to " +
+			host + ":" + port + " failed: " + line);
+		    logger.log(Level.FINE, "connect failed", ex);
+		    throw ex;
+		}
+		first = false;
+	    }
+	}
+    }
+
+    /**
      * Parse a string into whitespace separated tokens
      * and return the tokens in an array.
      */
@@ -884,5 +1020,24 @@ public class SocketFetcher {
 		return cl;
 	    }
 	});
+    }
+
+    /**
+     * Safely closes specified {@link Closeable} instances.
+     *
+     * @param closeables The {@link Closeable} instances
+     */
+    private static void close(Closeable... closeables) {
+        if (null != closeables) {
+            for (Closeable toClose : closeables) {
+                if (null != toClose) {
+                    try {
+                        toClose.close();
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
     }
 }

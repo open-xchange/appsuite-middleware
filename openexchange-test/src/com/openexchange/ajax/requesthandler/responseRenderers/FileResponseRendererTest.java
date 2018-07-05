@@ -118,6 +118,7 @@ public class FileResponseRendererTest {
         final SimConfigurationService simConfigurationService = new SimConfigurationService();
         simConfigurationService.stringProperties.put("UPLOAD_DIRECTORY", "/tmp/");
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, simConfigurationService);
+        AJAXConfig.init();
     }
 
     @After
@@ -614,7 +615,7 @@ public class FileResponseRendererTest {
 
     @Test
     public void testContentLengthMailAttachments_Bug26926() {
-        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
+        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
         try {
             InputStream is = null;
             is = new FileInputStream(new File(testDataDir + "26926_27394.pdf"));
@@ -834,6 +835,23 @@ public class FileResponseRendererTest {
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         final String expectedCT = "text/plain";
         assertTrue("Wrong Content-Type", resp.getContentType().startsWith(expectedCT));
+    }
+
+    @Test
+    public void testXSSVuln_Bug58742() throws IOException {
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("html-xml", "application/xml", Delivery.view, Disposition.inline, "html-xml");
+        final AJAXRequestData requestData = new AJAXRequestData();
+        requestData.putParameter("content_disposition", "inline");
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        req.setParameter("content_disposition", "inline");
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        final String expectedDisposition = "attachment";
+        assertTrue("Wrong Content-Type", resp.getHeader("Content-Disposition").startsWith(expectedDisposition));
     }
 
     private static final class TestableResourceCache implements ResourceCache {

@@ -85,8 +85,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
@@ -426,7 +426,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                             // Check for ESORT
                             Message[] messages;
                             if (hasEsort) {
-                                messages = performEsort(getSortTermsBy(searchRequest), searchTerm, realStart, end, imapFolder);
+                                messages = performEsort(getSortTermsBy(), searchTerm, realStart, end, imapFolder);
 
                                 // Check if ESORT succeeded
                                 if (null == messages) {
@@ -455,7 +455,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                         // Check for ESORT
                         Message[] messages;
                         if (hasEsort) {
-                            messages = performEsort(getSortTermsBy(searchRequest), searchTerm, start, end, imapFolder);
+                            messages = performEsort(getSortTermsBy(), searchTerm, start, end, imapFolder);
 
                             // Check if ESORT succeeded
                             if (null == messages) {
@@ -544,7 +544,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
         return files;
     }
 
-    private SortTerm[] getSortTermsBy(SearchRequest searchRequest) {
+    private SortTerm[] getSortTermsBy() {
         /*-
          * Sort attachments by name
          * SORT (SUBJECT) ...

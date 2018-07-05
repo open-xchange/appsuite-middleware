@@ -49,23 +49,21 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
 
 /**
  * {@link UserClearDelTablesTask}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class UserClearDelTablesTask extends UpdateTaskAdapter {
@@ -83,18 +81,15 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection con = dbService.getForUpdateTask(ctxId);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             for (String column : OBSOLETE_COLUMNS) {
                 int type = Tools.getColumnType(con, TABLE, column);
                 if (!Tools.hasDefaultValue(con, TABLE, column)) {
@@ -151,23 +146,22 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
                     stmt.close();
                 }
             }
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
             closeSQLStuff(stmt);
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[0];

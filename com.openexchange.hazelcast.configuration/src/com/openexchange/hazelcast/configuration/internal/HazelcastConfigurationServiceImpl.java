@@ -203,7 +203,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             }
             config.getGroupConfig().setPassword(groupPassword);
         }
-        config.setLiteMember(configService.getBoolProperty("com.openexchange.hazelcast.liteMember", false));
+        config.setLiteMember(configService.getBoolProperty("com.openexchange.hazelcast.liteMember", config.isLiteMember()));
         /*
          * Network Join
          */
@@ -318,7 +318,6 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         config.setProperty(GroupProperty.HEALTH_MONITORING_LEVEL.getName(), configService.getProperty("com.openexchange.hazelcast.healthMonitorLevel", "silent").toUpperCase());
         config.setProperty(GroupProperty.OPERATION_CALL_TIMEOUT_MILLIS.getName(), configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "30000"));
         config.setProperty(GroupProperty.ENABLE_JMX.getName(), configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
-        config.setProperty(GroupProperty.ENABLE_JMX_DETAILED.getName(), configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "true"));
         config.setProperty(GroupProperty.MEMCACHE_ENABLED.getName(), configService.getProperty("com.openexchange.hazelcast.memcache.enabled", "false"));
         config.setProperty(GroupProperty.REST_ENABLED.getName(), configService.getProperty("com.openexchange.hazelcast.rest.enabled", "false"));
         /*

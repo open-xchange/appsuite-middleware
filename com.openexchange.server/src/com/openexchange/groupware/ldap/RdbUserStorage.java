@@ -49,13 +49,13 @@
 
 package com.openexchange.groupware.ldap;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -87,6 +87,7 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.server.impl.DBPool;
@@ -114,8 +115,6 @@ public class RdbUserStorage extends UserStorage {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbUserStorage.class);
 
     private static final String SELECT_CONTACT = "SELECT intfield01,field03,field02,field01 FROM prg_contacts WHERE cid=? AND intfield01 IN (";
-
-    private static final String SELECT_ID = "SELECT id FROM login2user WHERE cid=? AND uid=?";
 
     private static final String SELECT_LOGIN = "SELECT id,uid FROM login2user where cid=? AND id IN (";
 
@@ -168,24 +167,23 @@ public class RdbUserStorage extends UserStorage {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        int userId = -1;
         try {
-            stmt = con.prepareStatement(SELECT_ID);
+            stmt = con.prepareStatement("SELECT id FROM login2user WHERE cid=? AND uid=?");
             stmt.setInt(1, context.getContextId());
             stmt.setString(2, uid);
             result = stmt.executeQuery();
-            if (result.next()) {
-                userId = result.getInt(1);
-            } else {
+            if (false == result.next()) {
                 throw LdapExceptionCode.USER_NOT_FOUND.create(uid, I(context.getContextId())).setPrefix("USR");
             }
+            int userId = result.getInt(1);
+            LogProperties.put(LogProperties.Name.LOGIN_RESOLVED_LOGIN, uid);
+            return userId;
         } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
-        return userId;
     }
 
     @Override
@@ -294,6 +292,7 @@ public class RdbUserStorage extends UserStorage {
             /*
              * fetch required data of deleted user
              */
+            int contextId = context.getContextId();
             int contactId;
             int uidNumber;
             int gidNumber;
@@ -303,11 +302,11 @@ public class RdbUserStorage extends UserStorage {
             PreparedStatement stmt = null;
             try {
                 stmt = con.prepareStatement("SELECT mail,contactId,uidNumber,gidNumber,guestCreatedBy FROM user WHERE cid=? AND id=?;");
-                stmt.setInt(1, context.getContextId());
+                stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 result = stmt.executeQuery();
                 if (false == result.next()) {
-                    throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(context.getContextId()));
+                    throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), I(contextId));
                 }
                 mail = result.getString(1);
                 contactId = result.getInt(2);
@@ -323,9 +322,9 @@ public class RdbUserStorage extends UserStorage {
             DeleteEvent deleteEvent;
             if (0 < guestCreatedBy) {
                 int subType = Strings.isEmpty(mail) ? DeleteEvent.SUBTYPE_ANONYMOUS_GUEST : DeleteEvent.SUBTYPE_INVITED_GUEST;
-                deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, subType, context, null);
+                deleteEvent = DeleteEvent.createDeleteEventForUserDeletion(this, userId, subType, context, null);
             } else {
-                deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, context);
+                deleteEvent = DeleteEvent.createDeleteEventForUserDeletion(this, userId, context);
             }
             DeleteRegistry.getInstance().fireDeleteEvent(deleteEvent, con, con);
             /*
@@ -333,7 +332,7 @@ public class RdbUserStorage extends UserStorage {
              */
             try {
                 stmt = con.prepareStatement("INSERT INTO del_user (cid,id,contactId,uidNumber,gidNumber,guestCreatedBy) VALUES (?,?,?,?,?,?)");
-                stmt.setInt(1, context.getContextId());
+                stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.setInt(3, contactId);
                 stmt.setInt(4, uidNumber);
@@ -349,7 +348,7 @@ public class RdbUserStorage extends UserStorage {
             if (0 < guestCreatedBy) {
                 try {
                     stmt = con.prepareStatement("DELETE FROM login2user WHERE cid=? AND id=?");
-                    stmt.setInt(1, context.getContextId());
+                    stmt.setInt(1, contextId);
                     stmt.setInt(2, userId);
                     stmt.executeUpdate();
                 } finally {
@@ -361,18 +360,25 @@ public class RdbUserStorage extends UserStorage {
              */
             try {
                 stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=?");
-                stmt.setInt(1, context.getContextId());
+                stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
             } finally {
                 closeSQLStuff(stmt);
             }
             /*
+             * remove all user aliases
+             */
+            UserAliasStorage aliasStorage = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
+            if (null != aliasStorage) {
+                aliasStorage.deleteAliases(con, contextId, userId);
+            }
+            /*
              * delete user from user table
              */
             try {
                 stmt = con.prepareStatement("DELETE FROM user WHERE cid=? AND id=?");
-                stmt.setInt(1, context.getContextId());
+                stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 stmt.executeUpdate();
             } finally {
@@ -385,7 +391,7 @@ public class RdbUserStorage extends UserStorage {
                 List<Integer> guestUserIDs = new ArrayList<Integer>();
                 try {
                     stmt = con.prepareStatement("SELECT id FROM user WHERE cid=? AND guestCreatedBy=?");
-                    stmt.setInt(1, context.getContextId());
+                    stmt.setInt(1, contextId);
                     stmt.setInt(2, userId);
                     result = stmt.executeQuery();
                     while (result.next()) {
@@ -398,7 +404,7 @@ public class RdbUserStorage extends UserStorage {
                     int newGuestCreatedBy;
                     try {
                         stmt = con.prepareStatement("SELECT created_by FROM share WHERE cid=? AND guest=? AND created_by<>? ORDER BY created ASC LIMIT 1");
-                        stmt.setInt(1, context.getContextId());
+                        stmt.setInt(1, contextId);
                         stmt.setInt(2, guestUserID.intValue());
                         stmt.setInt(3, userId);
                         result = stmt.executeQuery();
@@ -409,7 +415,7 @@ public class RdbUserStorage extends UserStorage {
                     try {
                         stmt = con.prepareStatement("UPDATE user SET guestCreatedBy=? WHERE cid=? AND id=?");
                         stmt.setInt(1, newGuestCreatedBy);
-                        stmt.setInt(2, context.getContextId());
+                        stmt.setInt(2, contextId);
                         stmt.setInt(3, guestUserID.intValue());
                         stmt.executeUpdate();
                     } finally {
@@ -979,6 +985,11 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException {
+        if (null == con) {
+            setAttributeAndReturnUser(name, value, userId, context, false);
+            return;
+        }
+
         if (value == null) {
             deleteAttribute(name, userId, context, con);
         } else {
@@ -1011,10 +1022,7 @@ public class RdbUserStorage extends UserStorage {
         }
         User retval = null;
         Connection con = DBPool.pickupWriteable(context);
-        boolean rollback = false;
         try {
-            Databases.startTransaction(con);
-            rollback = true;
             if (value == null) {
                 deleteAttribute(name, userId, context, con);
             } else {
@@ -1023,17 +1031,7 @@ public class RdbUserStorage extends UserStorage {
             if (returnUser) {
                 retval = getUser(context, con, new int[] { userId })[0];
             }
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (null != con) {
-                if (rollback) {
-                    Databases.rollback(con);
-                }
-                Databases.autocommit(con);
-            }
             DBPool.closeWriterSilent(context, con);
         }
         return retval;
@@ -1365,6 +1363,7 @@ public class RdbUserStorage extends UserStorage {
                      */
                     stringBuilder.append(" AND guestCreatedBy=0");
                 }
+                stringBuilder.append(" ORDER BY id;");
                 stmt = con.prepareStatement(stringBuilder.toString());
                 stmt.setInt(1, context.getContextId());
                 stmt.setString(2, pattern);
@@ -1380,7 +1379,7 @@ public class RdbUserStorage extends UserStorage {
             try {
                 if (userId < 0 && considerAliases) {
                     UserAliasStorage alias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
-                    int retUserId = alias.getUserId(context.getContextId(), pattern);
+                    int retUserId = alias.getUserId(context.getContextId(), email);
                     if (retUserId > 0) {
                         userId = retUserId;
                     }
@@ -1389,7 +1388,22 @@ public class RdbUserStorage extends UserStorage {
                     //FIXME: javadoc claims to return null if not found...
                     throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
                 }
-                return getUser(context, con, new int[] { userId })[0];
+                User user = getUser(context, con, new int[] { userId })[0];
+                if (!includeGuests && user.getCreatedBy() != 0) {
+                    //FIXME: javadoc claims to return null if not found...
+                    throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
+                }
+                if (excludeUsers && user.getCreatedBy() <= 0) {
+                    //FIXME: javadoc claims to return null if not found...
+                    throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
+                }
+                return user;
+            } catch (OXException e) {
+                if (com.openexchange.groupware.ldap.UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                    //FIXME: javadoc claims to return null if not found...
+                    throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
+                }
+                throw e;
             } finally {
                 closeSQLStuff(result, stmt);
             }

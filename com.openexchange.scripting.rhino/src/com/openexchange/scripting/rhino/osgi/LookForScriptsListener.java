@@ -49,6 +49,7 @@
 
 package com.openexchange.scripting.rhino.osgi;
 
+import static com.openexchange.scripting.rhino.SharedScope.SHARED_SCOPE;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -60,11 +61,16 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.slf4j.Logger;
-import static com.openexchange.scripting.rhino.SharedScope.*;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.scripting.rhino.libs.Console;
 import com.openexchange.scripting.rhino.require.RequireSupport;
 
+/**
+ *
+ * {@link LookForScriptsListener}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
 public class LookForScriptsListener implements BundleListener {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(LookForScriptsListener.class);
@@ -95,7 +101,7 @@ public class LookForScriptsListener implements BundleListener {
 			HashMap<String, Object> additionalModules = new HashMap<String, Object>();
 			additionalModules.put("osgi", new OSGiSupport(bundle.getBundleContext(), SHARED_SCOPE));
 
-			RequireSupport.initialize(serviceScope, cx, new BundleJSBundle(bundle), additionalModules);
+			RequireSupport.initialize(serviceScope, new BundleJSBundle(bundle), additionalModules);
 			Console.initialize(serviceScope, bundle.getSymbolicName());
 
 			cx.evaluateReader(serviceScope, r, bundle.getSymbolicName()+"/main.js", 1, null);
@@ -105,7 +111,9 @@ public class LookForScriptsListener implements BundleListener {
 			LOGGER.error("", t);
 		} finally {
 			try {
-				r.close();
+                if (r != null) {
+                    r.close();
+                }
 			} catch (IOException e) {
 				// Ignore
 			}

@@ -164,7 +164,7 @@ h1 {
                         </li>
                         </#list>
                         <#list day.appointments as appointment>
-                        <li class="colorLabel-${appointment.colorLabel}">
+                        <li>
                           <span class="time">${appointment.format("HH:mm", appointment.startDate)}</span>
                           <span class="text colorLabel-${appointment.colorLabel}">${appointment.title}</span>
                         </li>

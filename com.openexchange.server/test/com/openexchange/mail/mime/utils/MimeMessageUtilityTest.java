@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.mime.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import javax.mail.MessagingException;
 import javax.mail.Part;
@@ -59,6 +62,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -66,7 +71,6 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.utils.MessageUtility;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
-import static org.junit.Assert.*;
 
 /**
  * {@link MimeMessageUtilityTest}
@@ -76,6 +80,7 @@ import static org.junit.Assert.*;
  * @since 7.6.1
  */
 @RunWith(PowerMockRunner.class)
+@PrepareForTest({MimeMessageUtility.class})
 public class MimeMessageUtilityTest {
     private static final String ATTACHMENT_WRONG_FOUND = "Attachment found where none should be";
     private static final String TESTFILE_RTF = "testfile; filename=randomfile.rtf";
@@ -131,6 +136,14 @@ public class MimeMessageUtilityTest {
 
         assertEquals("Subject nor properly unfolded/decoded.", "Potwierdzenie zam\u00f3wienia", s);
     }
+
+     @Test
+     public void testForBug55229() {
+        String s = "=?iso-2022-jp?B?GyRCJE8kNyQ0JEAkKyVGJTklSCEnfGIbKEI=?=";
+        s = MimeMessageUtility.decodeEnvelopeSubject(s);
+
+        assertTrue("Subject nor properly unfolded/decoded", MessageUtility.containsNoUnknown(s));
+     }
 
          @Test
      public void testForBug36072_AddressUnfolding() {
@@ -293,5 +306,43 @@ public class MimeMessageUtilityTest {
     private static void setContentTypePlainText(BODYSTRUCTURE bs) {
         bs.type = "plain";
         bs.subtype = "text";
+    }
+    
+    @Test
+    public void testReplaceWithComma_MissingParameter() {
+        String result = MimeMessageUtility.replaceWithComma(null);
+        assertTrue("result not null, like expected", result == null);
+    }
+    
+    @Test
+    public void testReplaceWithComma_failedCheckReplaceWithComma() {
+        PowerMockito.stub(PowerMockito.method(MimeMessageUtility.class, "checkReplaceWithComma")).toReturn(false);
+        String address = "address";
+        String result = MimeMessageUtility.replaceWithComma(address);
+        assertTrue("result not like expected", result == address);
+    }
+    
+    @Test
+    public void testReplaceWithComma_MatcherFailed() {
+        PowerMockito.stub(PowerMockito.method(MimeMessageUtility.class, "checkReplaceWithComma")).toReturn(true);
+        String address = "address";
+        String result = MimeMessageUtility.replaceWithComma(address);
+        assertTrue("result not like expected", result == address);
+    }
+    
+    @Test
+    public void testReplaceWithComma_OneAddress() {
+        PowerMockito.stub(PowerMockito.method(MimeMessageUtility.class, "checkReplaceWithComma")).toReturn(true);
+        String address = ".address;";
+        String result = MimeMessageUtility.replaceWithComma(address);
+        assertTrue("result not like expected", result.equals(".address,"));
+    }
+    
+    @Test
+    public void testReplaceWithComma_MultipleAddresses() {
+        PowerMockito.stub(PowerMockito.method(MimeMessageUtility.class, "checkReplaceWithComma")).toReturn(true);
+        String address = ".address;.addressTwo";
+        String result = MimeMessageUtility.replaceWithComma(address);
+        assertTrue("result not like expected", result.equals(".address,.addressTwo"));
     }
 }

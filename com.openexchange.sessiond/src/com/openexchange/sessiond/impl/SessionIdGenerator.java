@@ -50,7 +50,6 @@
 package com.openexchange.sessiond.impl;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
  * {@link SessionIdGenerator} - The session ID generator
@@ -67,52 +66,41 @@ public abstract class SessionIdGenerator {
         super();
     }
 
-    private static String implementingClassName;
-
     /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends SessionIdGenerator> implementingClass;
-
-    /**
-     * Creates a new instance implementing the group storage interface.
+     * Gets the session ID generator.
      *
-     * @param context Context.
-     * @return an instance implementing the group storage interface.
-     * @throws OXException if the instance can't be created.
+     * @return The session ID generator.
      */
-    public static SessionIdGenerator getInstance() throws OXException {
-        try {
-            return getImplementingClass().getConstructor().newInstance();
-        } catch (final Exception exc) {
-            throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(exc);
-        }
+    public static SessionIdGenerator getInstance() {
+        return UUIDSessionIdGenerator.getInstance();
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Proxy method to get the implementing class.
+     * Creates a new session identifier.
      *
-     * @return the class implementing this interface.
-     * @throws ClassNotFoundException if the class can't be loaded.
+     * @param loginName The login name associated with the new session
+     * @return The session identifier
+     * @throws OXException If creating the session identifier fails
      */
-    private synchronized static Class<? extends SessionIdGenerator> getImplementingClass() throws ClassNotFoundException {
-        if (implementingClassName == null) {
-            implementingClass = UUIDSessionIdGenerator.class;
-        }
+    public abstract String createSessionId(String loginName) throws OXException;
 
-        if (null == implementingClass) {
-            implementingClass = Class.forName(implementingClassName).asSubclass(SessionIdGenerator.class);
-        }
-        return implementingClass;
-    }
+    /**
+     * Creates a new secret identifier.
+     *
+     * @param loginName The login name associated with the new session
+     * @return The secret identifier
+     * @throws OXException If creating the secret identifier fails
+     */
+    public abstract String createSecretId(String loginName) throws OXException;
 
-    public static void setImplementClassName(final String implementClassName) {
-        implementingClassName = implementClassName;
-    }
-
-    public abstract String createSessionId(String userId, String data) throws OXException;
-
-    public abstract String createSecretId(String userId, String data) throws OXException;
-
+    /**
+     * Creates a random identifier.
+     *
+     * @return The random identifier
+     * @throws OXException If creating the random identifier fails
+     */
     public abstract String createRandomId() throws OXException;
+
 }

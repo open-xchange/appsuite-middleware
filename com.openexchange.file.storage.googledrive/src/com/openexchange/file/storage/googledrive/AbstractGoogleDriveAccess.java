@@ -102,7 +102,7 @@ public abstract class AbstractGoogleDriveAccess {
     protected String getRootFolderId() throws OXException {
         String rootFolderId = rootFolderIdentifier;
         if (null == rootFolderId) {
-            String key = "com.openexchange.file.storage.googledrive.rootFolderId";
+            String key = "com.openexchange.file.storage.googledrive.rootFolderId/" + account.getId();
             rootFolderId = (String) session.getParameter(key);
             if (null == rootFolderId) {
                 try {
@@ -155,7 +155,7 @@ public abstract class AbstractGoogleDriveAccess {
             if (hasInvalidGrant(e)) {
                 return createInvalidAccessTokenException();
             }
-            return OAuthExceptionCodes.OAUTH_ERROR.create(e.getMessage(), e);
+            return OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         }
 
         if (SC_UNAUTHORIZED == e.getStatusCode()) {

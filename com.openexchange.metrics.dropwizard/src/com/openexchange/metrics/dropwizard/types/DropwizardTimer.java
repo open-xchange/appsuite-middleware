@@ -51,6 +51,7 @@ package com.openexchange.metrics.dropwizard.types;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import com.codahale.metrics.Snapshot;
 import com.openexchange.exception.OXException;
 import com.openexchange.metrics.exceptions.MetricExceptionCode;
@@ -94,6 +95,16 @@ public class DropwizardTimer implements Timer {
         } catch (Exception e) {
             throw MetricExceptionCode.ERROR_WHILE_TIMING.create(e);
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Timer#timeSupplier(java.util.function.Supplier)
+     */
+    @Override
+    public <T> T timeSupplier(Supplier<T> event) {
+        return delegate.timeSupplier(event);
     }
 
     /*

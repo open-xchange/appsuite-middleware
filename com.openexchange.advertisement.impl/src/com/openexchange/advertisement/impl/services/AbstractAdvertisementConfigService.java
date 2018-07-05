@@ -58,7 +58,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.json.ImmutableJSONArray;
 import org.json.ImmutableJSONObject;
 import org.json.JSONException;
@@ -78,11 +77,11 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
 /**
@@ -253,7 +252,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 LOG.warn("Invalid advertisement configuration data with id {}", configId);
                 // Invalid advertisement data. Fallback to reseller and package
             } finally {
-                DBUtils.closeSQLStuff(result, stmt);
+                Databases.closeSQLStuff(result, stmt);
                 dbService.backReadOnly(con);
             }
 
@@ -276,7 +275,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
             if (result.next()) {
                 try {
                     int configId = result.getInt(1);
-                    DBUtils.closeSQLStuff(result, stmt);
+                    Databases.closeSQLStuff(result, stmt);
                     stmt = con.prepareStatement(SQL_SELECT_CONFIG);
                     stmt.setInt(1, configId);
                     result = stmt.executeQuery();
@@ -292,7 +291,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         } catch (SQLException e) {
             throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
             dbService.backReadOnly(con);
         }
     }
@@ -341,7 +340,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                         stmt.setInt(2, configId);
                         if (stmt.executeUpdate() == 0) {
                             // Nothing to update. Insert new row instead.
-                            DBUtils.closeSQLStuff(stmt);
+                            Databases.closeSQLStuff(stmt);
                             String reseller = null;
                             try {
                                 reseller = getReseller(ctxId);
@@ -396,7 +395,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
             } catch (SQLException e) {
                 return new ConfigResult(ConfigResultType.ERROR, AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage()));
             } finally {
-                DBUtils.closeSQLStuff(result, stmt);
+                Databases.closeSQLStuff(result, stmt);
                 dbService.backWritable(con);
             }
 
@@ -449,12 +448,12 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
             if (result.next()) {
 
                 int configId = Integer.valueOf(result.getString(1));
-                DBUtils.closeSQLStuff(result, stmt);
+                Databases.closeSQLStuff(result, stmt);
                 if (config == null) {
                     stmt = con.prepareStatement(SQL_DELETE_CONFIG);
                     stmt.setInt(1, configId);
                     stmt.execute();
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     stmt = con.prepareStatement(SQL_DELETE_MAPPING);
                     stmt.setInt(1, configId);
                     stmt.execute();
@@ -465,7 +464,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     stmt.setInt(2, configId);
                     if (0 == stmt.executeUpdate()) {
                         // Nothing to update. Create new one instead
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                         stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
                         stmt.setString(1, reseller);
                         stmt.setString(2, config);
@@ -475,7 +474,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                             throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create("Insert operation failed to retrieve generated key.");
                         }
                         int resultConfigId = result.getInt(1);
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                         stmt = con.prepareStatement(SQL_UPDATE_MAPPING);
                         stmt.setInt(1, resultConfigId);
                         stmt.setString(2, reseller);
@@ -488,7 +487,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 }
 
             } else {
-                DBUtils.closeSQLStuff(result, stmt);
+                Databases.closeSQLStuff(result, stmt);
                 if (config == null) {
                     readOnly = true;
                     return ConfigResultType.IGNORED;
@@ -502,7 +501,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create("Insert operation failed to retrieve generated key.");
                 }
                 int resultConfigId = result.getInt(1);
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
                 stmt = con.prepareStatement(SQL_INSERT_MAPPING);
                 stmt.setString(1, reseller);
                 stmt.setString(2, pack);
@@ -521,7 +520,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         } catch (SQLException e) {
             throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
             if (readOnly) {
                 dbService.backWritableAfterReading(con);
             } else {

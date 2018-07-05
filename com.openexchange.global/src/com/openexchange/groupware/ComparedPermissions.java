@@ -118,6 +118,7 @@ public abstract class ComparedPermissions<P, GP extends P> {
 
     protected abstract boolean areEqual(P p1, P p2);
 
+    @SuppressWarnings("unchecked")
     protected void calc() throws OXException {
         if (newPermissions == null) {
             newGuests = Collections.emptyList();
@@ -130,16 +131,16 @@ public abstract class ComparedPermissions<P, GP extends P> {
             modifiedUsers = Collections.emptyList();
             hasChanges = false;
             return;
-        } else {
-            newGuests = new LinkedList<>();
-            addedGuests = new LinkedHashMap<>();
-            addedUsers = new LinkedHashMap<>();
-            addedGroups = new LinkedList<>();
-            removedGuests = new LinkedList<>();
-            removedUsers = new LinkedList<>();
-            modifiedUsers = new LinkedList<>();
-            modifiedGuests = new LinkedHashMap<>();
         }
+
+        newGuests = new LinkedList<>();
+        addedGuests = new LinkedHashMap<>();
+        addedUsers = new LinkedHashMap<>();
+        addedGroups = new LinkedList<>();
+        removedGuests = new LinkedList<>();
+        removedUsers = new LinkedList<>();
+        modifiedUsers = new LinkedList<>();
+        modifiedGuests = new LinkedHashMap<>();
 
         /*
          * Calculate added permissions
@@ -156,9 +157,9 @@ public abstract class ComparedPermissions<P, GP extends P> {
                 newGuests.add((GP) permission);
             } else {
                 if (isGroupPermission(permission)) {
-                    newGroups.put(getEntityId(permission), permission);
+                    newGroups.put(Integer.valueOf(getEntityId(permission)), permission);
                 } else {
-                    newUsers.put(getEntityId(permission), permission);
+                    newUsers.put(Integer.valueOf(getEntityId(permission)), permission);
                 }
             }
         }
@@ -175,9 +176,9 @@ public abstract class ComparedPermissions<P, GP extends P> {
                 }
 
                 if (isGroupPermission(permission)) {
-                    oldGroups.put(getEntityId(permission), permission);
+                    oldGroups.put(Integer.valueOf(getEntityId(permission)), permission);
                 } else {
-                    oldUsers.put(getEntityId(permission), permission);
+                    oldUsers.put(Integer.valueOf(getEntityId(permission)), permission);
                 }
             }
         }
@@ -204,24 +205,24 @@ public abstract class ComparedPermissions<P, GP extends P> {
          */
         for (P newPermission : newUsers.values()) {
             int entityId = getEntityId(newPermission);
-            P oldPermission = oldUsers.get(entityId);
+            P oldPermission = oldUsers.get(Integer.valueOf(entityId));
             if (!areEqual(newPermission, oldPermission)) {
                 permissionsChanged = true;
                 boolean isGuest = isGuestUser(entityId);
                 if (oldPermission == null) {
                     if (isGuest) {
-                        addedGuests.put(entityId, newPermission);
+                        addedGuests.put(Integer.valueOf(entityId), newPermission);
                     } else {
-                        addedUsers.put(entityId, newPermission);
+                        addedUsers.put(Integer.valueOf(entityId), newPermission);
                     }
                 } else if (isGuest) {
-                    modifiedGuests.put(entityId, newPermission);
+                    modifiedGuests.put(Integer.valueOf(entityId), newPermission);
                 }
             }
         }
 
         for (P newPermission : newGroups.values()) {
-            P oldPermission = oldGroups.get(getEntityId(newPermission));
+            P oldPermission = oldGroups.get(Integer.valueOf(getEntityId(newPermission)));
             if (!areEqual(newPermission, oldPermission)) {
                 permissionsChanged = true;
                 addedGroups.add(newPermission);
@@ -232,15 +233,16 @@ public abstract class ComparedPermissions<P, GP extends P> {
          * Calculate removed guest permissions
          */
         for (Integer removed : removedUserIds) {
-            if (isGuestUser(removed)) {
-                removedGuests.add(oldUsers.get(removed));
+            P removedUser = oldUsers.get(removed);
+            if (isGuestUser(removed.intValue())) {
+                removedGuests.add(removedUser);
             }
-            removedUsers.add(oldUsers.get(removed));
+            removedUsers.add(removedUser);
         }
 
-        for (Integer id : newUsers.keySet()) {
-            if (oldUsers.containsKey(id)) {
-                modifiedUsers.add(newUsers.get(id));
+        for (Map.Entry<Integer, P> entry : newUsers.entrySet()) {
+            if (oldUsers.containsKey(entry.getKey())) {
+                modifiedUsers.add(entry.getValue());
             }
         }
 

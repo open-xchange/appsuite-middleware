@@ -52,6 +52,7 @@ package com.openexchange.share.impl.cleanup;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
@@ -93,14 +94,14 @@ public class PeriodicCleaner implements Runnable {
     public void run() {
         long start = System.currentTimeMillis();
         try {
-            List<Integer> contextIDs = services.getService(ContextService.class).getAllContextIds();
-            int size = contextIDs.size();
-            LOG.info("Periodic share cleanup task starting, going to check {} contexts...", I(size));
+            List<Integer> distinctContextsPerSchema = services.getService(ContextService.class).getDistinctContextsPerSchema();
+            int size = distinctContextsPerSchema.size();
+            LOG.info("Periodic share cleanup task starting, going to check {} schemas...", I(size));
             long logTimeDistance = TimeUnit.SECONDS.toMillis(10);
             long lastLogTime = start;
             int i = 0;
-            for (Integer ctxId : contextIDs) {
-                int contextID = ctxId.intValue();
+            for (Integer representativeCtxId : distinctContextsPerSchema) {
+                int representativeContextId = representativeCtxId.intValue();
                 for (int retry = 0; retry < 3; retry++) {
                     if (false == active.get()) {
                         LOG.info("Periodic share cleanup task stopping.");
@@ -113,16 +114,15 @@ public class PeriodicCleaner implements Runnable {
                         lastLogTime = now;
                     }
                     try {
-                        cleanupContext(contextID);
+                        cleanupSchema(representativeContextId);
                         break;
                     } catch (OXException e) {
                         if (Category.CATEGORY_TRY_AGAIN.equals(e.getCategory()) && retry < 3) {
                             long delay = 10000 + retry * 20000;
-                            LOG.debug("Error during periodic share cleanup task for context {}: {}; trying again in {}ms...",
-                                I(contextID), e.getMessage(), L(delay));
+                            LOG.debug("Error during periodic share cleanup task for schema of context {}: {}; trying again in {}ms...", I(representativeContextId), e.getMessage(), L(delay));
                             Thread.sleep(delay);
                         } else {
-                            LOG.error("Error during periodic share cleanup task for context {}: {}", I(contextID), e.getMessage(), e);
+                            LOG.error("Error during periodic share cleanup task for schema of context {}: {}", I(representativeContextId), e.getMessage(), e);
                             break;
                         }
                     }
@@ -146,21 +146,26 @@ public class PeriodicCleaner implements Runnable {
     }
 
     /**
-     * Synchronously cleans obsolete shares and corresponding guest user remnants for a context.
+     * Synchronously cleans obsolete shares and corresponding guest user remnants for a schema.
      *
      * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param guestExpiry the timespan (in milliseconds) after which an unused guest user can be deleted permanently
+     * @param representativeContextId The context ID located in target schema
+     * @param guestExpiry the time span (in milliseconds) after which an unused guest user can be deleted permanently
      */
-    private void cleanupContext(int contextID) throws OXException {
-        // Execute context- and resulting guest cleanup tasks in current thread
+    private void cleanupSchema(int representativeContextId) throws OXException {
+        // Execute schema- and resulting guest cleanup tasks in current thread
         try {
-            List<GuestCleanupTask> guestCleanupTasks = new ContextCleanupTask(services, contextID, guestExpiry).call();
-            for (GuestCleanupTask guestCleanupTask : guestCleanupTasks) {
+            Map<Integer, List<GuestCleanupTask>> guestCleanupTasks = new SchemaCleanupTask(services, representativeContextId, guestExpiry).call();
+            for (Map.Entry<Integer, List<GuestCleanupTask>> guestCleanupTasksEntry : guestCleanupTasks.entrySet()) {
                 if (false == active.get()) {
                     return;
                 }
-                guestCleanupTask.call();
+                for (GuestCleanupTask guestCleanupTask : guestCleanupTasksEntry.getValue()) {
+                    if (false == active.get()) {
+                        return;
+                    }
+                    guestCleanupTask.call();
+                }
             }
         } catch (Exception e) {
             if (OXException.class.isInstance(e)) {

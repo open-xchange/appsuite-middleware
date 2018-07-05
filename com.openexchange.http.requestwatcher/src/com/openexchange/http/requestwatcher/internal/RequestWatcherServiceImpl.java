@@ -52,7 +52,9 @@ package com.openexchange.http.requestwatcher.internal;
 import static com.eaio.util.text.HumanTime.exactly;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -170,7 +172,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         private final String propSessionId = LogProperties.Name.SESSION_SESSION_ID.getName();
 
         /**
-         * Initializes a new {@link RunnableImplementation}.
+         * Initializes a new {@link Watcher}.
          */
         Watcher(ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry, int requestMaxAge) {
             super();
@@ -194,13 +196,16 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     // Debug logging
                     if (debugEnabled) {
                         sb.setLength(0);
+                        List<Object> args = new ArrayList<>();
                         for (RequestRegistryEntry entry : requestRegistry) {
-                            sb.append(lineSeparator).append("RegisteredThreads:").append(lineSeparator).append("    age: ").append(entry.getAge()).append(" ms").append(
+                            sb.append("{}RegisteredThreads:{}    age: ").append(entry.getAge()).append(" ms").append(
                                 ", thread: ").append(entry.getThreadInfo());
+                            args.add(lineSeparator);
+                            args.add(lineSeparator);
                         }
                         final String entries = sb.toString();
                         if (!entries.isEmpty()) {
-                            LOG.debug(sb.toString());
+                            LOG.debug(sb.toString(), args.toArray(new Object[args.size()]));
                         }
                     }
 
@@ -248,29 +253,33 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
             }
 
             // Append log properties from the ThreadLocal to logBuilder
-            if (false == appendLogProperties(entry, logBuilder)) {
+            List<Object> args = new ArrayList<>();
+            if (false == appendLogProperties(entry, logBuilder, args)) {
                 // Turns out to be an invalid registry entry -- already interrupted at this point
                 return true;
             }
 
             // Check if request's thread is supposed to be interrupted
             if (interrupt) {
-                logBuilder.append(lineSeparator).append("Associated thread will be interrupted!");
-                LOG.info(logBuilder.toString(), trace);
+                logBuilder.append("{}").append("Associated thread will be interrupted!");
+                args.add(lineSeparator);
+                args.add(trace);
+                LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
                 entry.getThread().interrupt();
                 return true;
             }
 
             // Non-interrupted entry
-            LOG.info(logBuilder.toString(), trace);
+            args.add(trace);
+            LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
             return false;
         }
 
         private boolean interrupt(StackTraceElement[] trace, RequestRegistryEntry entry) {
-            StackTraceElement traceElement = trace[0];
-
-            // Kept in socket read and exceeded doubled max. request age
             /*-
+            StackTraceElement traceElement = trace[0];
+            
+            // Kept in socket read and exceeded doubled max. request age
             if (traceElement.isNativeMethod() && "socketRead0".equals(traceElement.getMethodName()) && entry.getAge() > (requestMaxAge << 1)) {
                 return true;
             }
@@ -280,7 +289,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
             return false;
         }
 
-        private boolean appendLogProperties(RequestRegistryEntry entry, StringBuilder logBuilder) {
+        private boolean appendLogProperties(RequestRegistryEntry entry, StringBuilder logBuilder, List<Object> args) {
             Map<String, String> propertyMap = entry.getPropertyMap();
             if (null != propertyMap) {
                 // Sort the properties for readability
@@ -298,7 +307,8 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         sorted.put(propertyName, value);
                     }
                 }
-                logBuilder.append(" Request's properties:").append(lineSeparator);
+                logBuilder.append(" Request's properties:{}");
+                args.add(lineSeparator);
 
                 // And add them to the logBuilder
                 Iterator<Entry<String, String>> it = sorted.entrySet().iterator();
@@ -308,7 +318,8 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     logBuilder.append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
                     while (it.hasNext()) {
                         propertyEntry = it.next();
-                        logBuilder.append(lineSeparator).append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
+                        logBuilder.append("{}").append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
+                        args.add(lineSeparator);
                     }
                 }
             }

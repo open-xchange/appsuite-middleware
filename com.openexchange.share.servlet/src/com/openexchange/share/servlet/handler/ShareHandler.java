@@ -49,6 +49,7 @@
 
 package com.openexchange.share.servlet.handler;
 
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
@@ -86,5 +87,16 @@ public interface ShareHandler {
      * @throws OXException If the attempt to resolve given share fails
      */
     ShareHandlerReply handle(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException;
+
+    /**
+     * Handles the "share not found" case.
+     *
+     * @param request The associated HTTP request
+     * @param response The associated HTTP response
+     * @param status The share status
+     * @return {@link ShareHandlerReply#ACCEPT} if handled, {@link ShareHandlerReply#NEUTRAL}, otherwise
+     * @throws IOException
+     */
+    ShareHandlerReply handleNotFound(HttpServletRequest request, HttpServletResponse response, String status) throws IOException;
 
 }

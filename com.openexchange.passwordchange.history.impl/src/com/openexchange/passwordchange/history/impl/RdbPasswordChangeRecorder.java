@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
@@ -67,9 +68,9 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.PasswordChangeRecorder;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.SortField;
 import com.openexchange.passwordchange.history.SortOrder;
 import com.openexchange.server.ServiceExceptionCode;
@@ -85,11 +86,11 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdbPasswordChangeRecorder.class);
 
-    private static final String GET_DATA       = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY ";
+    private static final String GET_DATA = "SELECT created, source, ip FROM user_password_history WHERE cid=? AND uid=? ORDER BY ";
     private static final String GET_HISTORY_ID = "SELECT id FROM user_password_history WHERE cid=? AND uid=?";
 
     private static final String CLEAR_FOR_ID_IN = "DELETE FROM user_password_history WHERE id IN (";
-    private static final String CLEAR_FOR_USER  = "DELETE FROM user_password_history WHERE cid=? AND uid=?";
+    private static final String CLEAR_FOR_USER = "DELETE FROM user_password_history WHERE cid=? AND uid=?";
 
     private static final String INSERT_DATA = "INSERT INTO user_password_history (cid, uid, source, ip, created) VALUES (?,?,?,?,?)";
 
@@ -126,10 +127,10 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
                 builder.append(SortOrder.DESC);
             } else {
                 // User send fields
-                for (SortField field : fieldNames.keySet()) {
-                    builder.append(fieldToTable(field));
+                for (Entry<SortField, SortOrder> field : fieldNames.entrySet()) {
+                    builder.append(fieldToTable(field.getKey()));
                     builder.append(' ');
-                    builder.append(fieldNames.get(field));
+                    builder.append(field.getValue());
                     builder.append(',');
                 }
                 // Remove last ','
@@ -169,31 +170,7 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
         DatabaseService dbService = getService(DatabaseService.class);
         ConfigViewFactory cascade = getService(ConfigViewFactory.class);
 
-        // Get writable connection
-        Connection con = dbService.getWritable(contextID);
-        PreparedStatement stmt = null;
-        try {
-
-            // Write info
-            stmt = con.prepareStatement(INSERT_DATA);
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, userID);
-            stmt.setString(3, info.getClient());
-            if (null == info.getIP()) {
-                stmt.setNull(4, Types.VARCHAR);
-            } else {
-                stmt.setString(4, info.getIP());
-            }
-            stmt.setLong(5, System.currentTimeMillis());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw PasswordChangeRecorderException.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            dbService.backWritable(contextID, con);
-        }
-
-        // Clean up data, too
+        // Get limit for the user and check if the password change needs to be saved
         ConfigView view = cascade.getView(userID, contextID);
         ComposedConfigProperty<Integer> property = view.property(PasswordChangeRecorderProperties.LIMIT.getFQPropertyName(), Integer.class);
         Integer limit;
@@ -206,6 +183,32 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
             limit = PasswordChangeRecorderProperties.LIMIT.getDefaultValue(Integer.class);
         }
 
+        if (0 < limit.intValue()) {
+            // Get writable connection
+            Connection con = dbService.getWritable(contextID);
+            PreparedStatement stmt = null;
+            try {
+
+                // Write info
+                stmt = con.prepareStatement(INSERT_DATA);
+                stmt.setInt(1, contextID);
+                stmt.setInt(2, userID);
+                stmt.setString(3, info.getClient());
+                if (null == info.getIP()) {
+                    stmt.setNull(4, Types.VARCHAR);
+                } else {
+                    stmt.setString(4, info.getIP());
+                }
+                stmt.setLong(5, System.currentTimeMillis());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw PasswordChangeRecorderException.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                dbService.backWritable(contextID, con);
+            }
+        }
+        // Clean up data, too
         try {
             clear(userID, contextID, limit.intValue());
         } catch (Exception e) {

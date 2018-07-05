@@ -51,12 +51,11 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 
@@ -79,10 +78,11 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        Connection con = Database.getNoTimeout(cid, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
 
             // Drop foreign key
             String foreignKey = Tools.existsForeignKey(con, "infostore", new String[] {"cid", "id"}, INFOSTORE_DOCUMENT, new String[] {"cid", "infostore_id"});
@@ -95,15 +95,16 @@ public class InfostorePrimaryKeyUpdateTask extends UpdateTaskAdapter {
             }
 
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
-            Database.backNoTimeout(cid, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 

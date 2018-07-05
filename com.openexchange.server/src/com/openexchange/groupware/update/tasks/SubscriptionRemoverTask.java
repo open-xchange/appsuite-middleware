@@ -53,7 +53,7 @@ import static com.openexchange.tools.sql.DBUtils.tablesExist;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -61,8 +61,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -95,26 +93,33 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection con = ds.getForUpdateTask(contextId);
-
+        Connection con = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
         try {
             if (!tablesExist(con, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools")) {
                 return;
             }
 
+            con.setAutoCommit(false);
+            rollback = true;
+
             stmt = con.prepareStatement("DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;");
             stmt.setString(1, subscriptionSourceId);
             stmt.executeUpdate();
-        } catch (final SQLException x) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
-            if (con != null) {
-                ds.backForUpdateTask(contextId, con);
+            Databases.closeSQLStuff(stmt);
+            if (rollback) {
+                Databases.rollback(con);
             }
+            Databases.autocommit(con);
         }
     }
 

@@ -52,10 +52,9 @@ package com.openexchange.dav.push.mixins;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.dav.push.apn.DAVApnOptions;
+import com.openexchange.dav.push.apn.DAVApnOptionsProvider;
 import com.openexchange.dav.push.subscribe.PushSubscribeFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.pns.transport.apn.ApnOptions;
-import com.openexchange.pns.transport.apn.ApnOptionsProvider;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.SingleResourcePropertyMixin;
@@ -73,7 +72,7 @@ public class PushTransports extends SingleResourcePropertyMixin {
     /**
      * Initializes a new {@link PushTransports}.
      *
-     * @param <code>false</code> The push subscribe factory
+     * @param factory The push subscribe factory
      */
     public PushTransports(PushSubscribeFactory factory) {
         super(DAVProtocol.CALENDARSERVER_NS.getURI(), "push-transports");
@@ -114,15 +113,8 @@ public class PushTransports extends SingleResourcePropertyMixin {
         if (null == clientId) {
             return null;
         }
-        ApnOptionsProvider optionsProvider = factory.getApnOptionsProvider();
-        if (null == optionsProvider) {
-            return null;
-        }
-        ApnOptions options = optionsProvider.getOptions(clientId);
-        if (null != options && DAVApnOptions.class.isInstance(options)) {
-            return (DAVApnOptions) options;
-        }
-        return null;
+        DAVApnOptionsProvider optionsProvider = factory.getApnOptionsProvider();
+        return null != optionsProvider ? optionsProvider.getOptions(clientId) : null;
     }
 
 }

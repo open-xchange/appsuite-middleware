@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The chronos API bundle
+Bundle-SymbolicName: com.openexchange.chronos
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.ajax.fileholder,
+ com.openexchange.exception,
+ com.openexchange.groupware.notify.hostname,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.osgi.util,
+ com.openexchange.quota,
+ com.openexchange.search,
+ com.openexchange.search.internal.operands,
+ com.openexchange.session,
+ com.openexchange.tools.arrays,
+ com.openexchange.tools.id,
+ javax.mail.internet,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.slf4j
+Export-Package: com.openexchange.chronos,
+ com.openexchange.chronos.exception,
+ com.openexchange.chronos.service,
+ org.dmfs.rfc5545,
+ org.dmfs.rfc5545.calendarmetrics
+Bundle-ClassPath: .,
+ lib/rfc5545-datetime-0.2.4.jar

@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,13 +40,26 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import javax.activation.*;
-import java.util.*;
-import java.io.*;
-import com.sun.mail.util.LineOutputStream;
-import com.sun.mail.util.LineInputStream;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Map;
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.IllegalWriteException;
+import javax.mail.MessageAware;
+import javax.mail.MessageContext;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.MultipartDataSource;
 import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.LineInputStream;
+import com.sun.mail.util.LineOutputStream;
 import com.sun.mail.util.PropUtil;
 
 /**
@@ -298,7 +311,8 @@ public class MimeMultipart extends Multipart {
      * boundary and creates MimeBodyParts for each part of the stream.
      *
      * @param	ds	DataSource, can be a MultipartDataSource
-     * @exception	MessagingException for failures
+     * @exception	ParseException for failures parsing the message
+     * @exception	MessagingException for other failures
      */
     public MimeMultipart(DataSource ds) throws MessagingException {
 	super();
@@ -365,6 +379,7 @@ public class MimeMultipart extends Multipart {
      *
      * @return		number of parts
      */
+    @Override
     public synchronized int getCount() throws MessagingException {
 	parse();
 	return super.getCount();
@@ -377,7 +392,8 @@ public class MimeMultipart extends Multipart {
      * @return		the Part
      * @exception       MessagingException if no such BodyPart exists
      */
-    public synchronized BodyPart getBodyPart(int index)
+    @Override
+    public synchronized BodyPart getBodyPart(int index) 
 			throws MessagingException {
 	parse();
 	return super.getBodyPart(index);
@@ -416,6 +432,7 @@ public class MimeMultipart extends Multipart {
      *			implementation does not support modification
      *			of existing values
      */
+    @Override
     public boolean removeBodyPart(BodyPart part) throws MessagingException {
 	parse();
 	return super.removeBodyPart(part);
@@ -433,6 +450,7 @@ public class MimeMultipart extends Multipart {
      *			of existing values
      * @exception	MessagingException for other failures
      */
+    @Override
     public void removeBodyPart(int index) throws MessagingException {
 	parse();
 	super.removeBodyPart(index);
@@ -448,6 +466,7 @@ public class MimeMultipart extends Multipart {
      *			of existing values
      * @exception       MessagingException for other failures
      */
+    @Override
     public synchronized void addBodyPart(BodyPart part)
 		throws MessagingException {
 	parse();
@@ -468,6 +487,7 @@ public class MimeMultipart extends Multipart {
      *			of existing values
      * @exception       MessagingException for other failures
      */
+    @Override
     public synchronized void addBodyPart(BodyPart part, int index)
 				throws MessagingException {
 	parse();
@@ -611,7 +631,8 @@ public class MimeMultipart extends Multipart {
      * The {@link #initializeProperties} method is called before
      * parsing the data.
      *
-     * @exception	MessagingException for failures
+     * @exception	ParseException for failures parsing the message
+     * @exception	MessagingException for other failures
      * @since	JavaMail 1.2
      */
     protected synchronized void parse() throws MessagingException {
@@ -645,7 +666,7 @@ public class MimeMultipart extends Multipart {
 	}
 	if (boundary == null && !ignoreMissingBoundaryParameter &&
 		!ignoreExistingBoundaryParameter)
-	    throw new MessagingException("Missing boundary parameter");
+	    throw new ParseException("Missing boundary parameter");
 
 	try {
 	    // Skip and save the preamble
@@ -711,7 +732,7 @@ public class MimeMultipart extends Multipart {
 		if (allowEmpty)
 		    return;
 		else
-		    throw new MessagingException("Missing start boundary");
+		    throw new ParseException("Missing start boundary");
 	    }
 
 	    // save individual boundary bytes for comparison later
@@ -763,7 +784,7 @@ public class MimeMultipart extends Multipart {
 			;
 		    if (line == null) {
 			if (!ignoreMissingEndBoundary)
-			    throw new MessagingException(
+			    throw new ParseException(
 					"missing multipart end boundary");
 			// assume there's just a missing end boundary
 			complete = false;
@@ -811,7 +832,7 @@ public class MimeMultipart extends Multipart {
 		    if (inSize < bl) {
 			// hit EOF
 			if (!ignoreMissingEndBoundary)
-			    throw new MessagingException(
+			    throw new ParseException(
 					"missing multipart end boundary");
 			if (sin != null)
 			    end = sin.getPosition();

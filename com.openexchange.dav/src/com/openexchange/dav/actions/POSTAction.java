@@ -54,13 +54,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
+import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.attachments.AttachmentUtils;
 import com.openexchange.dav.internal.ShareHelper;
-import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.dav.resources.CommonResource;
+import com.openexchange.dav.resources.DAVObjectResource;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.webdav.action.ReplayWebdavRequest;
@@ -99,7 +99,7 @@ public class POSTAction extends DAVAction {
      * Tries to handle a common <code>POST</code> request. This includes:
      * <ul>
      * <li>attachment-related actions on {@link CommonResource}s</li>
-     * <li>sharing-related actions on {@link CommonFolderCollection}s</li>
+     * <li>sharing-related actions on {@link FolderCollection}s</li>
      * </ul>
      *
      * @param request The WebDAV request
@@ -110,33 +110,33 @@ public class POSTAction extends DAVAction {
         WebdavResource resource = request.getResource();
         if (null != resource) {
             String action = request.getParameter("action");
-            if (Strings.isNotEmpty(action) && CommonResource.class.isInstance(resource)) {
+            if (Strings.isNotEmpty(action) && DAVObjectResource.class.isInstance(resource)) {
                 /*
                  * handle special attachment action
                  */
                 return handleAction(request, response);
             }
             String contentType = getContentType(request);
-            if (("application/davsharing+xml".equals(contentType)) && CommonFolderCollection.class.isInstance(resource)) {
+            if (("application/davsharing+xml".equals(contentType)) && FolderCollection.class.isInstance(resource)) {
                 request = new ReplayWebdavRequest(request);
                 Element rootElement = optRootElement(request, DAVProtocol.DAV_NS, "share-resource");
                 if (null != rootElement) {
                     /*
                      * handle WebDAV share request
                      */
-                    ShareHelper.shareResource((CommonFolderCollection<?>) resource, rootElement);
+                    ShareHelper.shareResource((FolderCollection<?>) resource, rootElement);
                     response.setStatus(HttpServletResponse.SC_NO_CONTENT);
                     return true;
                 }
             }
-            if ("text/xml".equals(contentType) && CommonFolderCollection.class.isInstance(resource)) {
+            if ("text/xml".equals(contentType) && FolderCollection.class.isInstance(resource)) {
                 request = new ReplayWebdavRequest(request);
                 Element rootElement = optRootElement(request, DAVProtocol.CALENDARSERVER_NS, "share");
                 if (null != rootElement) {
                     /*
                      * handle calendarserver share request
                      */
-                    ShareHelper.share((CommonFolderCollection<?>) resource, rootElement);
+                    ShareHelper.share((FolderCollection<?>) resource, rootElement);
                     response.setStatus(HttpServletResponse.SC_OK);
                     return true;
                 }
@@ -177,15 +177,17 @@ public class POSTAction extends DAVAction {
          * write back response
          */
         response.setContentType(resource.getContentType());
-        byte[] buffer = new byte[1024];
         OutputStream outputStream = null;
         InputStream inputStream = null;
         try {
             inputStream = resource.getBody();
             outputStream = response.getOutputStream();
-            int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
+            if (inputStream != null) {
+                int buflen = 65536;
+                byte[] buffer = new byte[buflen];
+                for (int length; (length = inputStream.read(buffer, 0, buflen)) > 0;) {
+                    outputStream.write(buffer, 0, length);
+                }
             }
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (IOException e) {
@@ -199,7 +201,7 @@ public class POSTAction extends DAVAction {
         /*
          * get targeted resource & attachment related parameters
          */
-        CommonResource<?> resource = requireResource(request, CommonResource.class);
+        DAVObjectResource<?> resource = requireResource(request, DAVObjectResource.class);
         String contentType = getContentType(request);
         String fileName = AttachmentUtils.parseFileName(request);
         String[] recurrenceIDs = Strings.splitByComma(request.getParameter("rid"));
@@ -207,11 +209,11 @@ public class POSTAction extends DAVAction {
         /*
          * save attachment
          */
-        AttachmentMetadata metadata = null;
+        int attachmenId;
         InputStream inputStream = null;
         try {
             inputStream = request.getBody();
-            metadata = resource.addAttachment(inputStream, contentType, fileName, size, recurrenceIDs)[0];
+            attachmenId = resource.addAttachment(inputStream, contentType, fileName, size, recurrenceIDs)[0];
         } catch (IOException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } catch (OXException e) {
@@ -226,14 +228,14 @@ public class POSTAction extends DAVAction {
         response.setContentType(resource.getContentType());
         response.setHeader("Content-Location", resource.getUrl().toString());
         response.setHeader("ETag", resource.getETag());
-        response.setHeader("Cal-Managed-ID", String.valueOf(metadata.getId()));
+        response.setHeader("Cal-Managed-ID", String.valueOf(attachmenId));
     }
 
     private void removeAttachment(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
         /*
          * get targeted resource & attachment related parameters
          */
-        CommonResource<?> resource = requireResource(request, CommonResource.class);
+        DAVObjectResource<?> resource = requireResource(request, DAVObjectResource.class);
         String managedId = request.getParameter("managed-id");
         if (Strings.isEmpty(managedId)) {
             throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
@@ -260,7 +262,7 @@ public class POSTAction extends DAVAction {
         /*
          * get targeted resource & attachment related parameters
          */
-        CommonResource<?> resource = requireResource(request, CommonResource.class);
+        DAVObjectResource<?> resource = requireResource(request, DAVObjectResource.class);
         String contentType = getContentType(request);
         String fileName = AttachmentUtils.parseFileName(request);
         long size = getContentLength(request);
@@ -277,11 +279,10 @@ public class POSTAction extends DAVAction {
         /*
          * update attachment
          */
-        AttachmentMetadata metadata = null;
         InputStream inputStream = null;
         try {
             inputStream = request.getBody();
-            metadata = resource.updateAttachment(attachmentId, inputStream, contentType, fileName, size);
+            attachmentId = resource.updateAttachment(attachmentId, inputStream, contentType, fileName, size);
         } catch (IOException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } catch (OXException e) {
@@ -296,7 +297,7 @@ public class POSTAction extends DAVAction {
         response.setContentType(resource.getContentType());
         response.setHeader("Content-Location", resource.getUrl().toString());
         response.setHeader("ETag", resource.getETag());
-        response.setHeader("Cal-Managed-ID", String.valueOf(metadata.getId()));
+        response.setHeader("Cal-Managed-ID", String.valueOf(attachmentId));
     }
 
 }

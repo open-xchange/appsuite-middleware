@@ -15,6 +15,10 @@ var customFileName = false;
 var scriptName = path.basename(process.argv[1]);
 var scriptUsage = "Usage: $>node " + scriptName + " <BASE_FOLDER> [<NAME_OF_JSONFILE>]";
 var scriptExample = "Example: $>node " + scriptName + " http_api/";
+var swagger = require('swagger-tools').specs.v2;
+var util = require('util');
+
+var debug=false; 
 
 // check if mandatory command line arguments are missing
 if(process.argv.length < 3) {
@@ -28,7 +32,7 @@ var baseFolder = process.argv[2];
 
 if(process.argv.length >= 4) {
 	var value = process.argv[3];
-	if(isValidFileName(value)) {
+	if(isValidFileName(value) && !value.includes("debug")) {
 		if(value.indexOf(".json", value.length - ".json".length) !== -1)
 			jsonFileName = value;
 		else
@@ -37,6 +41,15 @@ if(process.argv.length >= 4) {
 		customFileName = true;
 	}
 }
+
+process.argv.forEach((val, index) => {
+  if(val.includes("debug")) {
+  	debug = true;
+  	console.log('!!! debug enabled !!!');
+
+  }
+  	
+});
 
 try {
 	// load index.yaml (starting point) of the base folder
@@ -109,6 +122,62 @@ try {
 				else
 					console.log(jsonFileName + " written successfully!");
 				
+				var jsonPath = path.join(process.cwd(), baseFolder, jsonFileName);
+
+				console.log("Validating json definition at '" + jsonPath + "' ...")
+				
+				var swaggerDefinition = require(jsonPath);
+				swagger.validate(swaggerDefinition, function (err, result) {
+				  if (err) {
+				    throw err;
+				  }
+
+				  if (typeof result !== 'undefined') {
+				    if (result.errors.length > 0) {
+				      console.log('The Swagger document is invalid...');
+
+				      console.log('');
+
+				      console.log('Errors');
+				      console.log('------');
+
+				      result.errors.forEach(function (err) {
+				        console.log('#/' + err.path.join('/') + ': ' + err.message);
+				        if(debug) {
+				        	console.log("   ===> " + util.inspect(err, {showHidden: false, depth: null, colors: true}));
+
+				        	console.log(" ")
+				        }
+				      });
+
+				      console.log('');
+				    }
+
+				    if (result.warnings.length > 0) {
+				      console.log('Warnings');
+				      console.log('--------');
+
+				      result.warnings.forEach(function (warn) {
+				        console.log('#/' + warn.path.join('/') + ': ' + warn.message);
+				      });
+				    }
+
+
+
+				    if (result.errors.length > 0) {
+
+				    	if(!debug) {
+				    		console.log('You can add --debug in order to get detailed information about the faulty definitions');
+
+				    	}
+				    	console.log('\r\nOutput file: ' + jsonPath)
+				    	process.exit(1);
+				    }
+				  } else {
+				    console.log('Swagger document is valid');
+				  }
+				});
+
 				drawInfo();
 			});
 		})

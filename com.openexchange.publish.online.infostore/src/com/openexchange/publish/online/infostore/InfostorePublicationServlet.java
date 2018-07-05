@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
@@ -62,6 +61,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -75,7 +75,6 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.online.infostore.util.InfostorePublicationUtils;
 import com.openexchange.publish.tools.PublicationSession;
-import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
@@ -140,7 +139,7 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private final Pattern SPLIT = Pattern.compile("/");
 
-    private void handle(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    private void handle(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             String[] path = SPLIT.split(req.getRequestURI(), 0);
             Context ctx = getContext(path);
@@ -154,6 +153,9 @@ public class InfostorePublicationServlet extends HttpServlet {
 
             // Existing and enabled as well
             DocumentMetadata document = InfostorePublicationUtils.loadDocumentMetadata(publication, this.fileAccessFactory);
+            if(document == null) {
+                throw new Exception("Unable to load document metadata");
+            }
             InputStream is = loadContent(publication);
             configureHeaders(document, req, resp);
             write(is, resp);
@@ -210,32 +212,24 @@ public class InfostorePublicationServlet extends HttpServlet {
         return publication.getConfiguration().get(SELF_DESTRUCT) == Boolean.TRUE;
     }
 
-    private final boolean isIE(final HttpServletRequest req) {
-        final String userAgent = req.getHeader("User-Agent");
-        return null != userAgent && userAgent.contains("MSIE");
-    }
-
-
-    private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
-        final String fileName = document.getFileName();
-        if(fileName != null) {
-            resp.setHeader("Content-Disposition", "attachment; filename=\""
-                + Helper.encodeFilename(fileName, "UTF-8", isIE(req)) + "\"");
-        }
+    private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) {
+        StringBuilder builder = new StringBuilder(32).append("attachment");
+        String fileName = document.getFileName();
+        DownloadUtility.appendFilenameParameter(fileName, document.getFileMIMEType(), req.getHeader("User-Agent"), builder);
+        resp.setHeader("Content-Disposition", builder.toString());
     }
 
     private void write(final InputStream is, final HttpServletResponse resp) throws IOException {
-        ServletOutputStream out = null;
         try {
             int buflen = 65536;
             byte[] buf = new byte[buflen];
-            for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
-                if (null == out) {
-                    out = resp.getOutputStream();
-                }
-                out.write(buf, 0, read);
-            }
-            if (null != out) {
+            int read = is.read(buf, 0, buflen);
+            if (read > 0) {
+                ServletOutputStream out = resp.getOutputStream();
+                do {
+                    out.write(buf, 0, read);
+                    read = is.read(buf, 0, buflen);
+                } while (read > 0);
                 out.flush();
             }
         } finally {

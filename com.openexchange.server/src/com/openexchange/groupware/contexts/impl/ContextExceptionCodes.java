@@ -91,7 +91,6 @@ public enum ContextExceptionCodes implements DisplayableOXExceptionCode {
      * The context %d is located in server with id %d
      */
     LOCATED_IN_ANOTHER_SERVER("The context %d is located in server with id %d", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 12);
-    ;
 
     /**
      * (Log) Message of the exception.

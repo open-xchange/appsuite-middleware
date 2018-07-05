@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,9 +40,13 @@
 
 package com.sun.mail.handlers;
 
-import java.io.*;
-import java.awt.*;
-import javax.activation.*;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataSource;
 
 /**
  * DataContentHandler for image/gif.
@@ -52,10 +56,12 @@ public class image_gif extends handler_base {
 	new ActivationDataFlavor(Image.class, "image/gif", "GIF Image")
     };
 
+    @Override
     protected ActivationDataFlavor[] getDataFlavors() {
 	return myDF;
     }
 
+    @Override
     public Object getContent(DataSource ds) throws IOException {
 	InputStream is = ds.getInputStream();
 	try {
@@ -86,6 +92,7 @@ public class image_gif extends handler_base {
     /**
      * Write the object to the output stream, using the specified MIME type.
      */
+    @Override
     public void writeTo(Object obj, String type, OutputStream os)
 			throws IOException {
 	if (!(obj instanceof Image))

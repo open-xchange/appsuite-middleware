@@ -51,13 +51,11 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -79,26 +77,28 @@ public class AddOAuthColumnToMailAccountTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection con = null;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con = dbService.getForUpdateTask(contextId);
             con.setAutoCommit(false);
+            rollback = true;
+
             Column column = new Column("oauth", "INT(10) UNSIGNED DEFAULT NULL");
             for (String table : new String[] { "user_transport_account", "user_mail_account" }) {
                 Tools.addColumns(con, table, new Column[] { column });
             }
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
 
     }

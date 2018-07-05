@@ -55,6 +55,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
@@ -84,7 +85,7 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
     private static final String DOMAIN_NAME = "com.openexchange.metrics";
 
     private final ManagementService managementService;
-    private final Map<MetricType, MetricMBeanRegisterer> mbeanCreators;
+    private final Map<MetricType, BiFunction<Metric, MetricDescriptor, MetricMBean>> mbeanCreators;
     private final List<ObjectName> registeredNames;
 
     /**
@@ -92,48 +93,19 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
      * 
      * @param managementService The {@link ManagementService}
      */
-    public AbstractMetricServiceListener(ManagementService managementService, final MetricMBeanFactory mbeanFactory) {
+    public AbstractMetricServiceListener(ManagementService managementService, MetricMBeanFactory mbeanFactory) {
         super();
         this.managementService = managementService;
 
-        Map<MetricType, MetricMBeanRegisterer> c = new HashMap<>();
-        c.put(MetricType.COUNTER, new MetricMBeanRegisterer() {
-
-            @Override
-            public MetricMBean register(Metric metric, MetricDescriptor metricDescriptor) {
-                return mbeanFactory.counter((Counter) metric, metricDescriptor);
-            }
-        });
-        c.put(MetricType.TIMER, new MetricMBeanRegisterer() {
-
-            @Override
-            public MetricMBean register(Metric metric, MetricDescriptor metricDescriptor) {
-                return mbeanFactory.timer((Timer) metric, metricDescriptor);
-            }
-        });
-        c.put(MetricType.METER, new MetricMBeanRegisterer() {
-
-            @Override
-            public MetricMBean register(Metric metric, MetricDescriptor metricDescriptor) {
-                return mbeanFactory.meter((Meter) metric, metricDescriptor);
-            }
-        });
-        c.put(MetricType.HISTOGRAM, new MetricMBeanRegisterer() {
-
-            @Override
-            public MetricMBean register(Metric metric, MetricDescriptor metricDescriptor) {
-                return mbeanFactory.histogram((Histogram) metric, metricDescriptor);
-            }
-        });
-        c.put(MetricType.GAUGE, new MetricMBeanRegisterer() {
-
-            @Override
-            public MetricMBean register(Metric metric, MetricDescriptor metricDescriptor) {
-                return mbeanFactory.gauge((Gauge<?>) metric, metricDescriptor);
-            }
-        });
+        Map<MetricType, BiFunction<Metric, MetricDescriptor, MetricMBean>> c = new HashMap<>();
+        c.put(MetricType.COUNTER, (metric, metricDescriptor) -> mbeanFactory.counter((Counter) metric, metricDescriptor));
+        c.put(MetricType.TIMER, (metric, metricDescriptor) -> mbeanFactory.timer((Timer) metric, metricDescriptor));
+        c.put(MetricType.METER, (metric, metricDescriptor) -> mbeanFactory.meter((Meter) metric, metricDescriptor));
+        c.put(MetricType.HISTOGRAM, (metric, metricDescriptor) -> mbeanFactory.histogram((Histogram) metric, metricDescriptor));
+        c.put(MetricType.GAUGE, (metric, metricDescriptor) -> mbeanFactory.gauge((Gauge<?>) metric, metricDescriptor));
         mbeanCreators = Collections.unmodifiableMap(c);
-        registeredNames = Collections.synchronizedList(new LinkedList<ObjectName>());
+
+        registeredNames = Collections.synchronizedList(new LinkedList<>());
     }
 
     /**
@@ -157,14 +129,14 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
      * @throws OXException if the MBean for the specified {@link Metric} cannot be registered
      */
     protected void registerMBean(Metric metric, MetricDescriptor metricDescriptor) {
-        MetricMBeanRegisterer registerer = mbeanCreators.get(metricDescriptor.getMetricType());
+        BiFunction<Metric, MetricDescriptor, MetricMBean> registerer = mbeanCreators.get(metricDescriptor.getMetricType());
         if (registerer == null) {
             LOG.warn("No metric type mbean registerer for '{}' was found.", metricDescriptor.getMetricType());
             return;
         }
         try {
             ObjectName objectName = getObjectName(metricDescriptor);
-            managementService.registerMBean(objectName, registerer.register(metric, metricDescriptor));
+            managementService.registerMBean(objectName, registerer.apply(metric, metricDescriptor));
             registeredNames.add(objectName);
         } catch (MalformedObjectNameException | OXException e) {
             LOG.warn("Unable to register MBean for metric {}", metricDescriptor.getName(), e);

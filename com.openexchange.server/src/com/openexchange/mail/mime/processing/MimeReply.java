@@ -387,7 +387,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                         /*
                          * Message holds header 'Reply-To'
                          */
-                        tmpSet.addAll(Arrays.asList(MimeMessageConverter.getAddressHeader(unfold(replyTo[0]))));
+                        tmpSet.addAll(Arrays.asList(MimeMessageUtility.getAddressHeader(unfold(replyTo[0]))));
                         fromAdded = false;
                     }
                 }
@@ -671,6 +671,8 @@ public final class MimeReply extends AbstractMimeProcessing {
             }
             // Copy security setting
             replyMail.setSecurityResult(originalMsg.getSecurityResult());
+            // Copy authenticity setting
+            replyMail.setAuthenticityResult(originalMsg.getAuthenticityResult());
 
             return replyMail;
         } catch (final MessagingException e) {
@@ -725,7 +727,7 @@ public final class MimeReply extends AbstractMimeProcessing {
         if (addrs == null) {
             return new HashSet<InternetAddress>(0);
         }
-        final Set<InternetAddress> set = new HashSet<InternetAddress>(Arrays.asList(addrs));
+        final Set<InternetAddress> set = new LinkedHashSet<InternetAddress>(Arrays.asList(addrs));
         /*
          * Remove all addresses from set which are contained in filter
          */
@@ -784,6 +786,14 @@ public final class MimeReply extends AbstractMimeProcessing {
                     replyPrefix = HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString());
                 } else {
                     replyPrefix = new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
+                }
+            }
+            if (isHtml) {
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (null != htmlService) {
+                    String wellFormedHtmlDoc = htmlService.getWellFormedHTMLDocument(textBuilder.toString());
+                    textBuilder.setLength(0);
+                    textBuilder.append(wellFormedHtmlDoc);
                 }
             }
             /*-
@@ -1072,8 +1082,9 @@ public final class MimeReply extends AbstractMimeProcessing {
      */
 
     private static final Pattern PATTERN_HTML_START = Pattern.compile("<html[^>]*?>", Pattern.CASE_INSENSITIVE);
-
     private static final Pattern PATTERN_HTML_END = Pattern.compile("</html>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BODY_START = Pattern.compile("<body[^>]*?>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BODY_END = Pattern.compile("</body>", Pattern.CASE_INSENSITIVE);
 
     private static final String BLOCKQUOTE_START =
         "<blockquote type=\"cite\" style=\"position: relative; margin-left: 0px; padding-left: 10px; border-left: solid 1px blue;\">\n";
@@ -1081,39 +1092,52 @@ public final class MimeReply extends AbstractMimeProcessing {
     private static final String BLOCKQUOTE_END = "</blockquote>\n<br>&nbsp;";
 
     private static String citeHtml(final String htmlContent) {
-        Matcher m = PATTERN_HTML_START.matcher(htmlContent);
-        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
-        final StringBuilder sb = new StringBuilder(htmlContent.length());
+        StringBuffer sb = new StringBuffer(htmlContent.length());
+
+        // Inject blockquote start
+        Matcher m = PATTERN_BODY_START.matcher(htmlContent);
         if (m.find()) {
-            mr.appendLiteralReplacement(sb, BLOCKQUOTE_START);
+            m.appendReplacement(sb, "$0" + BLOCKQUOTE_START);
+            m.appendTail(sb);
         } else {
-            sb.append(BLOCKQUOTE_START);
+            m = PATTERN_HTML_START.matcher(htmlContent);
+            if (m.find()) {
+                m.appendReplacement(sb, "$0" + BLOCKQUOTE_START);
+                m.appendTail(sb);
+            } else {
+                sb.append(BLOCKQUOTE_START);
+                sb.append(htmlContent);
+            }
         }
-        mr.appendTail(sb);
 
-        final String s = sb.toString();
-        m = PATTERN_HTML_END.matcher(s);
-        mr.resetTo(m, s);
-
+        // Inject blockquote end
+        String s = sb.toString();
         sb.setLength(0);
+        m = PATTERN_BODY_END.matcher(s);
         if (m.find()) {
-            mr.appendLiteralReplacement(sb, BLOCKQUOTE_END);
-            final int matcherEnd = m.end();
-            if (matcherEnd < s.length()) {
-                final String tail = s.substring(matcherEnd);
-                if (!isEmpty(tail) && hasContent(tail)) {
-                    sb.append(BLOCKQUOTE_START);
-                    sb.append(tail);
-                    sb.append(BLOCKQUOTE_END);
+            m.appendReplacement(sb, BLOCKQUOTE_END + "$0");
+            m.appendTail(sb);
+        } else {
+            m = PATTERN_HTML_END.matcher(s);
+            if (m.find()) {
+                m.appendReplacement(sb, BLOCKQUOTE_END + "$0");
+                int matcherEnd = m.end();
+                if (matcherEnd < s.length()) {
+                    final String tail = s.substring(matcherEnd);
+                    if (!isEmpty(tail) && hasContent(tail)) {
+                        sb.append(BLOCKQUOTE_START);
+                        sb.append(tail);
+                        sb.append(BLOCKQUOTE_END);
+                    } else {
+                        m.appendTail(sb);
+                    }
                 } else {
-                    mr.appendTail(sb);
+                    m.appendTail(sb);
                 }
             } else {
-                mr.appendTail(sb);
+                m.appendTail(sb);
+                sb.append(BLOCKQUOTE_END);
             }
-        } else {
-            mr.appendTail(sb);
-            sb.append(BLOCKQUOTE_END);
         }
         return sb.toString();
     }

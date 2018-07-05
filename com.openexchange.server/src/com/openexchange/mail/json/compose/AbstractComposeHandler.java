@@ -66,10 +66,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
@@ -658,8 +658,15 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
 
     protected Map<String, ReferencedMailPart> loadMultipleRefs(Map<String, String> groupedSeqIDs, MailPath parentMsgRef, MailPath originalMsgRef, Set<String> contentIds, MailAccess<?, ?> access, ComposeContext context) throws OXException {
         MailMessage referencedMail = access.getMessageStorage().getMessage(parentMsgRef.getFolder(), parentMsgRef.getMailID(), false);
+        MailMessage originalMessage = null;
         if (null == referencedMail) {
-            throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(parentMsgRef.getMailID(), parentMsgRef.getFolder());
+            if (null != originalMsgRef) {
+                referencedMail = access.getMessageStorage().getMessage(originalMsgRef.getFolder(), originalMsgRef.getMailID(), false);
+                originalMessage = referencedMail;
+            }
+            if (null == referencedMail) {
+                throw MailExceptionCode.REFERENCED_MAIL_NOT_FOUND.create(parentMsgRef.getMailID(), parentMsgRef.getFolder());
+            }
         }
         referencedMail.setAccountId(access.getAccountId());
 
@@ -691,7 +698,9 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                 }
 
                 if (!retries.isEmpty()) {
-                    MailMessage originalMessage = access.getMessageStorage().getMessage(originalMsgRef.getFolder(), originalMsgRef.getMailID(), false);
+                    if (null == originalMessage) {
+                        originalMessage = access.getMessageStorage().getMessage(originalMsgRef.getFolder(), originalMsgRef.getMailID(), false);
+                    }
                     if (null != originalMessage) {
                         originalMessage.setAccountId(access.getAccountId());
                         MultipleMailPartHandler handler2 = new MultipleMailPartHandler(retries, false);

@@ -114,9 +114,10 @@ public interface MailAccountStorageService {
      * @param fullNames The full names to set
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @return <code>true</code> if names were changed as a result of this call; otherwise <code>false</code>
      * @throws OXException If invalidation fails
      */
-    void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException;
+    boolean setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException;
 
     /**
      * Sets specified names for specified mail account.
@@ -126,9 +127,10 @@ public interface MailAccountStorageService {
      * @param names The names to set
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @return <code>true</code> if names were changed as a result of this call; otherwise <code>false</code>
      * @throws OXException If invalidation fails
      */
-    void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException;
+    boolean setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException;
 
     /**
      * Propagates given event for specified mail account.

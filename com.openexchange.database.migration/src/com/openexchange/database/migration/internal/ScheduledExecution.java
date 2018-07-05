@@ -53,11 +53,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import liquibase.resource.ResourceAccessor;
 import com.openexchange.database.migration.DBMigration;
 import com.openexchange.database.migration.DBMigrationCallback;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationState;
+import liquibase.resource.ResourceAccessor;
 
 
 /**

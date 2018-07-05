@@ -49,14 +49,12 @@
 
 package com.openexchange.drive.checksum.rdb;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -85,12 +83,12 @@ public class DirectoryChecksumsAddUserAndETagColumnTask extends UpdateTaskAdapte
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService dbService = DriveServiceLookup.getService(DatabaseService.class);
-        Connection connection = dbService.getForUpdateTask(contextID);
-        boolean committed = false;
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
             connection.setAutoCommit(false);
+            rollback = true;
+
             if (false == Tools.columnExists(connection, "directoryChecksums", "user")) {
                 deleteDirectoryChecksums(connection);
             }
@@ -99,21 +97,18 @@ public class DirectoryChecksumsAddUserAndETagColumnTask extends UpdateTaskAdapte
             }
             Tools.checkAndAddColumns(connection, "directoryChecksums",
                 new Column("user", "INT4 UNSIGNED DEFAULT NULL"), new Column("etag", "VARCHAR(255) DEFAULT NULL"));
+
             connection.commit();
-            committed = true;
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connection);
-            if (committed) {
-                dbService.backForUpdateTask(contextID, connection);
-            } else {
-                dbService.backForUpdateTaskAfterReading(contextID, connection);
+            if (rollback) {
+                rollback(connection);
             }
+            autocommit(connection);
         }
     }
 

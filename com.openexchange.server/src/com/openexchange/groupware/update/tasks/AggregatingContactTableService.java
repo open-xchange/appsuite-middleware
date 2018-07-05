@@ -55,16 +55,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
-
 
 /**
  * Note: This one does not use foreign key constraints on prg_contact.userfield20,
@@ -72,7 +69,7 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class AggregatingContactTableService  extends AbstractCreateTableImpl implements UpdateTaskV2 {
+public class AggregatingContactTableService extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
     private static final String AGGREGATING_CONTACTS = "aggregatingContacts";
 
@@ -81,7 +78,7 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
                     "contributor BINARY(16) NOT NULL, " +
         		    "aggregator BINARY(16) NOT NULL," +
         		    "state TINYINT NOT NULL" +
-        		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        		") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
     }
 
     @Override
@@ -101,15 +98,14 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        createTable(AGGREGATING_CONTACTS, getTableSQL(), contextId);
+        createTable(AGGREGATING_CONTACTS, getTableSQL(), params);
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AggregatingContactTableService.class);
         logger.info("UpdateTask ''{}'' successfully performed!", AggregatingContactTableService.class.getSimpleName());
     }
 
     @Override
     public String[] requiredTables() {
-        return new String[] { };
+        return new String[] {};
     }
 
     @Override
@@ -117,35 +113,31 @@ public class AggregatingContactTableService  extends AbstractCreateTableImpl imp
         return new String[] { AGGREGATING_CONTACTS };
     }
 
-    private void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection writeCon = ds.getWritable(contextId);
+    private void createTable(String tablename, String sqlCreate, PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
         PreparedStatement stmt = null;
         try {
-            if (tableExists(writeCon, tablename)) {
+            if (tableExists(con, tablename)) {
                 return;
             }
-            stmt = writeCon.prepareStatement(sqlCreate);
+            stmt = con.prepareStatement(sqlCreate);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
-            ds.backWritable(contextId, writeCon);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
-    private boolean tableExists(final Connection con, final String table) throws SQLException {
-        final DatabaseMetaData metaData = con.getMetaData();
+    private boolean tableExists(Connection con, String table) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
-        boolean retval = false;
         try {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+            return (rs.next() && rs.getString("TABLE_NAME").equals(table));
         } finally {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
-        return retval;
     }
 
 }

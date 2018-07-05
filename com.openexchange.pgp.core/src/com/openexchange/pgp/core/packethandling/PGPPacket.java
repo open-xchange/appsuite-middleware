@@ -55,7 +55,7 @@ import org.bouncycastle.bcpg.Packet;
  * {@link PGPPacket} represents a wrapper around a BouncyCastle PGP Message Packet
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public class PGPPacket {
 
@@ -64,7 +64,7 @@ public class PGPPacket {
 
     /**
      * Initializes a new {@link PGPPacket}.
-     * 
+     *
      * @param bcPacket
      * @param bcPacketHeader
      */

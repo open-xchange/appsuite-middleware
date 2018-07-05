@@ -61,7 +61,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
 import com.openexchange.admin.rmi.utils.URIDefaults;
 import com.openexchange.admin.rmi.utils.URIParser;
@@ -572,9 +572,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private Integer folderTree;
 
     private boolean folderTreeSet = false;
-    
+
     private String driveFolderMode;
-    
+
     private boolean driveFolderModeSet = false;
 
     private Map<String, String> guiPreferences;
@@ -590,7 +590,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private String primaryAccountName;
 
     private boolean primaryAccountNameSet = false;
-    
+
     private boolean convertDriveUserFolders = false;
 
     /**
@@ -4260,11 +4260,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         }
         return ht;
     }
-    
+
     public void setConvertDriveUserFolders(boolean convertDriveUserFolders) {
         this.convertDriveUserFolders = convertDriveUserFolders;
     }
-    
+
     public boolean isConvertDriveUserFolders() {
         return convertDriveUserFolders;
     }
@@ -4450,7 +4450,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      */
     @Deprecated
     final public void addExtension(final OXUserExtensionInterface extension) {
-        getAllExtensionsAsHash().put(extension.getClass().getName(), (OXCommonExtension) extension);
+        getAllExtensionsAsHash().put(extension.getClass().getName(), extension);
     }
 
     /**
@@ -4460,7 +4460,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public ArrayList<OXUserExtensionInterface> getExtensions() {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
-        for (final OXCommonExtension commoninterface : getAllExtensionsAsHash().values()) {
+        for (final OXCommonExtensionInterface commoninterface : getAllExtensionsAsHash().values()) {
             retval.add((OXUserExtensionInterface) commoninterface);
         }
         return retval;
@@ -4483,8 +4483,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      */
     @Deprecated
     final public OXUserExtensionInterface removeExtensionByIndex(final int index) {
-        final ArrayList<OXCommonExtension> retval = new ArrayList<OXCommonExtension>(getAllExtensionsAsHash().values());
-        final OXCommonExtension commonExtensionInterface = retval.get(index);
+        final ArrayList<OXCommonExtensionInterface> retval = new ArrayList<OXCommonExtensionInterface>(getAllExtensionsAsHash().values());
+        final OXCommonExtensionInterface commonExtensionInterface = retval.get(index);
         return (OXUserExtensionInterface) getAllExtensionsAsHash().remove(commonExtensionInterface.getClass().getName());
     }
 
@@ -4501,7 +4501,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Deprecated
     final public ArrayList<OXUserExtensionInterface> getExtensionbyName(final String extname) {
         final ArrayList<OXUserExtensionInterface> retval = new ArrayList<OXUserExtensionInterface>();
-        for (final OXCommonExtension ext : getAllExtensionsAsHash().values()) {
+        for (final OXCommonExtensionInterface ext : getAllExtensionsAsHash().values()) {
             if (extname.equals(ext.getClass().getName())) {
                 retval.add((OXUserExtensionInterface) ext);
             }
@@ -4720,21 +4720,21 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     public boolean isFolderTreeSet() {
         return folderTreeSet;
     }
-    
-    
+
+
     public String getDriveFolderMode() {
         return driveFolderMode;
     }
-    
+
     public void setDriveFolderMode(String driveFolderMode) {
         this.driveFolderModeSet = true;
         this.driveFolderMode = driveFolderMode;
     }
-    
+
     public boolean isDriveFolderModeSet() {
         return driveFolderModeSet;
     }
-    
+
     /**
      * Sets a generic user attribute
      */

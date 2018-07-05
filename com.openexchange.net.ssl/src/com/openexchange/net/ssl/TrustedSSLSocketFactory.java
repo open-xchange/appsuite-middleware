@@ -51,6 +51,7 @@ package com.openexchange.net.ssl;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
@@ -62,6 +63,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -195,54 +197,57 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
 
     @Override
     public Socket createSocket() throws IOException {
-        Socket socket = this.adapteeFactory.createSocket();
-        return setProperties(socket);
+        Socket socket = adapteeFactory.createSocket();
+        return setProperties(socket, null);
     }
 
     @Override
     public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
-        Socket socket = this.adapteeFactory.createSocket(s, host, port, autoClose);
-        return setProperties(socket);
+        Socket socket = adapteeFactory.createSocket(s, host, port, autoClose);
+        return setProperties(socket, new InetSocketAddress(host, port));
     }
 
     @Override
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
-        Socket socket = this.adapteeFactory.createSocket(host, port);
-        return setProperties(socket);
+        Socket socket = adapteeFactory.createSocket(host, port);
+        return setProperties(socket, new InetSocketAddress(host, port));
     }
 
     @Override
     public Socket createSocket(InetAddress host, int port) throws IOException {
-        Socket socket = this.adapteeFactory.createSocket(host, port);
-        return setProperties(socket);
+        Socket socket = adapteeFactory.createSocket(host, port);
+        return setProperties(socket, new InetSocketAddress(host, port));
     }
 
     @Override
     public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException {
-        Socket socket = this.adapteeFactory.createSocket(host, port, localHost, localPort);
-        return setProperties(socket);
+        Socket socket = adapteeFactory.createSocket(host, port, localHost, localPort);
+        return setProperties(socket, new InetSocketAddress(host, port));
     }
 
     @Override
     public Socket createSocket(InetAddress address, int port, InetAddress localHost, int localPort) throws IOException {
-        Socket socket = this.adapteeFactory.createSocket(address, port, localHost, localPort);
-        return setProperties(socket);
+        Socket socket = adapteeFactory.createSocket(address, port, localHost, localPort);
+        return setProperties(socket, new InetSocketAddress(address, port));
     }
 
-    private Socket setProperties(Socket socket) {
+    private Socket setProperties(Socket socket, InetSocketAddress endpoint) {
         if (!(socket instanceof SSLSocket)) {
             return socket;
         }
 
         SSLSocket sslSocket = (SSLSocket) socket;
-//            String[] supportedProtocols = sslSocket.getSupportedProtocols();
-//            String[] supportedCipherSuites = sslSocket.getSupportedCipherSuites();
+        // String[] supportedProtocols = sslSocket.getSupportedProtocols();
+        // String[] supportedCipherSuites = sslSocket.getSupportedCipherSuites();
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         sslSocket.setEnabledProtocols(sslConfigService.getSupportedProtocols());
         sslSocket.setEnabledCipherSuites(sslConfigService.getSupportedCipherSuites());
         sslSocket.setUseClientMode(true);
-        sslSocket.addHandshakeCompletedListener(this);
-        return new DelegatingSSLSocket(sslSocket);
+        if (LOG.isDebugEnabled()) {
+            sslSocket.addHandshakeCompletedListener(this);
+        }
+        HostnameVerifier hostnameVerifier = sslConfigService.isVerifyHostname() ? new com.openexchange.net.ssl.apache.DefaultHostnameVerifier() : null;
+        return new DelegatingSSLSocket(sslSocket, endpoint, hostnameVerifier);
     }
 
     @Override
@@ -250,4 +255,5 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
         Object arg = new Object() { @Override public String toString() { return event.getSocket().getInetAddress().getHostAddress(); }};
         LOG.debug("Successfully handshaked with host {}", arg);
     }
+
 }

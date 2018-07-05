@@ -569,6 +569,11 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         }
 
         @Override
+        public String toString() {
+            return name + "=" + value;
+        }
+
+        @Override
         public int compareTo(final Parameter other) {
             if (this == other) {
                 return 0;
@@ -676,6 +681,11 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         abstract String getValue();
 
         abstract void appendRFC2045String(String name, StringBuilder sb);
+
+        @Override
+        public String toString() {
+            return getValue();
+        }
     }
 
     private static class DirectValue extends Value {

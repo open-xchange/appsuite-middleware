@@ -50,6 +50,8 @@
 package com.openexchange.pns;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -80,6 +82,14 @@ public interface PushNotificationTransport {
      * @throws OXException If given notification cannot be transported
      */
     void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException;
+
+    /**
+     * Transports multiple notifications to the service provider.
+     *
+     * @param notifications The notifications with their corresponding push matches to transport
+     * @throws OXException If given notification cannot be transported
+     */
+    void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException;
 
     /**
      * Gets this service's identifier.

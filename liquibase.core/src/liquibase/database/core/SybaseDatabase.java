@@ -1,21 +1,20 @@
 package liquibase.database.core;
 
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-
-import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Encapsulates Sybase ASE database support.

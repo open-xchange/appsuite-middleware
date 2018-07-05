@@ -49,12 +49,9 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
-import com.openexchange.ajax.container.TmpFileFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -80,7 +77,7 @@ public class DocumentDeltaAction extends AbstractFileAction {
 
         InputStream documentStream = null;
         InputStream requestStream = null;
-        OutputStream deltaOut = null;
+        ThresholdFileHolder fileHolder = null;
         try {
             final RdiffService rdiff = Services.getRdiffService();
             if (null == rdiff) {
@@ -94,16 +91,14 @@ public class DocumentDeltaAction extends AbstractFileAction {
             // Read in signature
             final List<ChecksumPair> signatures = rdiff.readSignatures(requestStream);
             // Create delta against document and write it directly to HTTP output stream
-            final TmpFileFileHolder fileHolder = new TmpFileFileHolder();
-            deltaOut = new FileOutputStream(fileHolder.getTmpFile());
-            rdiff.createDeltas(signatures, documentStream, deltaOut);
-            deltaOut.flush();
+            fileHolder = new ThresholdFileHolder();
+            rdiff.createDeltas(signatures, documentStream, fileHolder.asOutputStream());
             // Return FileHolder result
-            return new AJAXRequestResult(fileHolder, "file");
-        } catch (final IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
+            fileHolder = null;
+            return requestResult;
         } finally {
-            Streams.close(documentStream, requestStream, deltaOut);
+            Streams.close(documentStream, requestStream, fileHolder);
         }
     }
 

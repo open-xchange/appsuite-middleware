@@ -51,7 +51,6 @@ package com.openexchange.rest.services.database.sql;
 
 import com.openexchange.database.AbstractCreateTableImpl;
 
-
 /**
  * {@link CreateServiceSchemaLockTable}
  *
@@ -66,16 +65,16 @@ public class CreateServiceSchemaLockTable extends AbstractCreateTableImpl {
 
     @Override
     public String[] tablesToCreate() {
-        return new String[]{"serviceSchemaMigrationLock"};
+        return new String[] { "serviceSchemaMigrationLock" };
     }
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[]{"CREATE TABLE `serviceSchemaMigrationLock` (" + 
+        return new String[] { "CREATE TABLE `serviceSchemaMigrationLock` (" + 
             "  `module` varchar(128) NOT NULL DEFAULT ''," + 
             "  `expires` bigint(20) DEFAULT NULL," + 
-            "  PRIMARY KEY (`module`)" + 
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"};
+            "  PRIMARY KEY (`module`)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;" 
+        };
     }
-
 }

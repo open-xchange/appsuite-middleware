@@ -64,6 +64,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.infostore.FileMetadata;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
@@ -422,6 +423,20 @@ public class IDBasedFolderAccessFolderLoader implements PublicationDataLoaderSer
         @Override
         public void setOriginalFolderId(long id) {
             documentMetadata.setOriginalFolderId(id);
+        }
+
+        @Override
+        public void setSequenceNumber(long sequenceNumber) {
+            documentMetadata.setSequenceNumber(sequenceNumber);
+        }
+
+        public InfostoreFolderPath getOriginFolderPath() {
+            return documentMetadata.getOriginFolderPath();
+        }
+
+        @Override
+        public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
+            documentMetadata.setOriginFolderPath(originFolderPath);
         }
     }
 

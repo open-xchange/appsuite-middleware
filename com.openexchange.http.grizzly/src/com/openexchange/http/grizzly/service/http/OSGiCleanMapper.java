@@ -99,12 +99,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.osgi.service.http.HttpContext;
-
-import javax.servlet.Servlet;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.servlet.Servlet;
 import org.glassfish.grizzly.http.server.HttpHandler;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Context mapper.
@@ -155,32 +153,80 @@ public class OSGiCleanMapper {
      * @return First matching alias, or <code>null</code> if no match has been found.
      */
     public static String map(String resource, boolean cutAfterSlash) {
-        String result;
         String match = resource;
         while (true) {
             int i = 0;
             if (cutAfterSlash) {
                 i = match.lastIndexOf('/');
                 if (i == -1) {
-                    result = null;
-                    break;
+                    return null;
+                }
+
+                if (i == 0) {
+                    match = "/";
                 } else {
-                    if (i == 0) {
-                        match = "/";
-                    } else {
-                        match = resource.substring(0, i);
-                    }
+                    match = resource.substring(0, i);
                 }
             }
             if (containsAlias(match)) {
-                result = match;
-                break;
+                return match;
             } else if (i == 0) {
-                result = null;
-                break;
+                return null;
             }
         }
-        return result;
+    }
+
+    /**
+     * Performs full match of requested URI to registered HTTP handler if any.
+     *
+     * @param resource      Resource to look-up
+     * @return First matching HTTP handler, or <code>null</code> if no match has been found.
+     */
+    public static HttpHandler map2HttpHandler(String resource) {
+        return null == resource ? null : registrations.get(resource);
+    }
+
+    /**
+     * Performs mapping of requested URI to registered HTTP handler if any.
+     * <p/>
+     * Works in two modes:
+     * <ul>
+     * <li>Full match - Checks for full match of resource (cutAfterSlash == false),</li>
+     * <li>Reducing match - Checks {@link String#substring(int, int)} (0, {@link String#lastIndexOf(String)} ('/'))
+     * for match (cutAfterSlash == true).</li>
+     * </ul>
+     *
+     * @param resource      Resource to be mapped.
+     * @param cutAfterSlash Should cut off after last '/' before looking up.
+     * @return First matching HTTP handler, or <code>null</code> if no match has been found.
+     */
+    public static HttpHandlerMatch map2HttpHandler(String resource, boolean cutAfterSlash) {
+        if (null == resource) {
+            return null;
+        }
+
+        String match = resource;
+        while (true) {
+            int i = 0;
+            if (cutAfterSlash) {
+                i = match.lastIndexOf('/');
+                if (i == -1) {
+                    return null;
+                }
+
+                if (i == 0) {
+                    match = "/";
+                } else {
+                    match = resource.substring(0, i);
+                }
+            }
+            HttpHandler httpHandler = registrations.get(match);
+            if (null != httpHandler) {
+                return new HttpHandlerMatch(httpHandler, match);
+            } else if (i == 0) {
+                return null;
+            }
+        }
     }
 
     /**
@@ -248,14 +294,15 @@ public class OSGiCleanMapper {
      * @param alias Alias to unregister.
      */
     public void recycleRegistrationData(String alias) {
-        if (containsAlias(alias)) {
+        if (null != alias) {
             // global cleanup
-            aliasTree.remove(alias);
-            HttpHandler handler = registrations.remove(alias);
-            handler.destroy();
+            if (aliasTree.remove(alias)) {
+                HttpHandler handler = registrations.remove(alias);
+                handler.destroy();
 
-            // local cleanup
-            localAliases.remove(alias);
+                // local cleanup
+                localAliases.remove(alias);
+            }
         }
     }
 

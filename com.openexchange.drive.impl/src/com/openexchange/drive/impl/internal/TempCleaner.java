@@ -89,8 +89,9 @@ public class TempCleaner implements Runnable {
      * Initializes and starts a new cleaner run in the background if needed.
      *
      * @param session The sync session
+     * @param forceFreeUp <code>true</code> to forcibly free up used space, <code>false</code> to only free up space old/unused data
      */
-    public static void cleanUpIfNeeded(SyncSession session) {
+    public static void cleanUpIfNeeded(SyncSession session, boolean forceFreeUp) {
         Object parameter = session.getServerSession().getParameter(PARAM_LAST_CLEANER_RUN);
         if (null != parameter && Long.class.isInstance(parameter)) {
             long lastCleanerRun = ((Long)parameter).longValue();
@@ -100,7 +101,7 @@ public class TempCleaner implements Runnable {
                 LOG.warn("The configured interval of '{}' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.", interval);
                 interval = MILLIS_PER_HOUR;
             }
-            if (System.currentTimeMillis() - lastCleanerRun < interval) {
+            if (false == forceFreeUp && System.currentTimeMillis() - lastCleanerRun < interval) {
                 LOG.debug("Cleaner interval time of '{}' not yet exceeded, not starting new run for session {}", interval, session);
                 return;
             }
@@ -119,8 +120,11 @@ public class TempCleaner implements Runnable {
                 LOG.warn("The configured maximum age of '{}' is smaller than the allowed minimum of one hour. Falling back to '1h' instead.", maxAge);
                 maxAge = MILLIS_PER_HOUR;
             }
-            long minimumTimestamp = System.currentTimeMillis() - maxAge;
-            if (null != tempFolder.getCreationDate() &&  minimumTimestamp <= tempFolder.getCreationDate().getTime()) {
+            long minimumTimestamp = System.currentTimeMillis();
+            if (false == forceFreeUp) {
+                minimumTimestamp -= maxAge;
+            }
+            if (null != tempFolder.getCreationDate() && minimumTimestamp <= tempFolder.getCreationDate().getTime()) {
                 LOG.debug("'.drive' was created within 'max age' interval, nothing to do.");
                 return;
             }

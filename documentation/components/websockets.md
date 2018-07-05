@@ -62,7 +62,7 @@ As a Web Socket is made cluster-wide accessible, Hazelcast is used to manage the
 ## Installation
 
 1. Install the "open-xchange-websockets-grizzly" package
-2. Enable the [com.openexchange.websockets.enabled](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.websockets.enabled) property.
+2. Enable the [com.openexchange.websockets.enabled](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.websockets.enabled) property.
    That property is responsive to [config-cascade](http://oxpedia.org/wiki/index.php?title=ConfigCascade). Hence it can be specified for user, context, context-set or server scope.
    For instance, create file `websockets.properties` in Open-Xchange configuration directory (`/opt/open-xchange/etc`) and add line `com.openexchange.websockets.enabled=true` to globally enabled Web Sockets.
 
@@ -70,23 +70,23 @@ As a Web Socket is made cluster-wide accessible, Hazelcast is used to manage the
 
 ### Enable/disable
 
-As already outlined above, the config-cascade-aware property [com.openexchange.websockets.enabled](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.websockets.enabled)controls whether a Web Socket is allowed to be created for a certain user.
+As already outlined above, the config-cascade-aware property [com.openexchange.websockets.enabled](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.websockets.enabled)controls whether a Web Socket is allowed to be created for a certain user.
 
 ### Remote communication
 
 The following settings control buffering and queueing of Web Socket messages that are supposed to be transferred to a remote cluster member:
 
-* [com.openexchange.websockets.grizzly.remote.delayDuration](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.websockets.grizzly.remote.delayDuration)  
+* [com.openexchange.websockets.grizzly.remote.delayDuration](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.websockets.grizzly.remote.delayDuration)  
   The time in milliseconds a message (that is supposed to be transferred to a remote cluster member)
   is queued in buffer to await equal message that arrive during that time.  
   Default 1000ms
-* [com.openexchange.websockets.grizzly.remote.maxDelayDuration](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.websockets.grizzly.remote.maxDelayDuration)  
+* [com.openexchange.websockets.grizzly.remote.maxDelayDuration](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.websockets.grizzly.remote.maxDelayDuration)  
   The time in milliseconds a "remote" message is at max. queued in buffer to await
   equal message that arrive during that time. So, even is there was an equal
   message recently, message is flushed from queue to avoid holding back a
   message forever in case there are frequent equal messages.  
   Default 3000ms
-* [com.openexchange.websockets.grizzly.remote.timerFrequency](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.websockets.grizzly.remote.timerFrequency)  
+* [com.openexchange.websockets.grizzly.remote.timerFrequency](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.websockets.grizzly.remote.timerFrequency)  
   The frequency/delay in milliseconds when the buffering queue will be checked for due
   "remote" messages (the ones exceeding delayDuration in queue).  
   Default 500ms

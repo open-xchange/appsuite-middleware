@@ -17,12 +17,10 @@
 
 package org.quartz.examples.example1;
 
+import static org.quartz.DateBuilder.evenMinuteDate;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
-import static org.quartz.DateBuilder.*;
-
 import java.util.Date;
-
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;

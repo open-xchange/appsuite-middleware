@@ -1,19 +1,18 @@
 package liquibase.change.core;
 
-import liquibase.change.DatabaseChange;
+import java.util.ArrayList;
+import java.util.List;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.RollbackImpossibleException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertStatement;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @DatabaseChange(name="loadUpdateData",
         description = "Loads or updates data from a CSV file into an existing table. Differs from loadData by issuing a SQL batch that checks for the existence of a record. If found, the record is UPDATEd, else the record is INSERTed. Also, generates DELETE statements for a rollback.\n" +

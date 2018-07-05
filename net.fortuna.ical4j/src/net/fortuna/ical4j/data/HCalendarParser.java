@@ -40,7 +40,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -49,16 +48,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-
-import net.fortuna.ical4j.model.CalendarException;
-import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.Date;
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.Parameter;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.parameter.Value;
-import net.fortuna.ical4j.model.property.Version;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,6 +59,14 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import net.fortuna.ical4j.model.CalendarException;
+import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Date;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.parameter.Value;
+import net.fortuna.ical4j.model.property.Version;
 
 /**
  * A {@link CalendarParser} that parses XHTML documents that include calendar data marked up with the hCalendar
@@ -134,10 +131,10 @@ import org.xml.sax.SAXParseException;
  * </p>
  */
 public class HCalendarParser implements CalendarParser {
-    
+
     private static final Log LOG = LogFactory.getLog(HCalendarParser.class);
-    
-    private static final DocumentBuilderFactory BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
+
+    private static final DocumentBuilderFactory BUILDER_FACTORY;
     private static final XPath XPATH = XPathFactory.newInstance().newXPath();
     private static final XPathExpression XPATH_METHOD;
     private static final XPathExpression XPATH_VEVENTS;
@@ -165,8 +162,11 @@ public class HCalendarParser implements CalendarParser {
     private static final SimpleDateFormat HCAL_DATE_TIME_FORMAT = new SimpleDateFormat(HCAL_DATE_TIME_PATTERN);
 
     static {
-        BUILDER_FACTORY.setNamespaceAware(true);
-        BUILDER_FACTORY.setIgnoringComments(true);
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory = safeDbf(factory);
+        factory.setNamespaceAware(true);
+        factory.setIgnoringComments(true);
+        BUILDER_FACTORY = factory;
 
         XPATH_METHOD = compileExpression("//*[contains(@class, 'method')]");
         XPATH_VEVENTS = compileExpression("//*[contains(@class, 'vevent')]");
@@ -190,6 +190,46 @@ public class HCalendarParser implements CalendarParser {
         XPATH_ATTACH = compileExpression(".//*[contains(@class, 'attach')]");
     }
 
+    private static DocumentBuilderFactory safeDbf(DocumentBuilderFactory dbf) {
+        if (null == dbf) {
+            return dbf;
+        }
+
+        // From http://stackoverflow.com/questions/26488319/how-to-prevent-xml-injection-like-xml-bomb-and-xxe-attack
+        String FEATURE = null;
+        try {
+            // This is the PRIMARY defense. If DTDs (doctypes) are disallowed, almost all XML entity attacks are prevented
+            // Xerces 2 only - http://xerces.apache.org/xerces2-j/features.html#disallow-doctype-decl
+            FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
+            dbf.setFeature(FEATURE, true);
+
+            // If you can't completely disable DTDs, then at least do the following:
+            // Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-general-entities
+            // Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-general-entities
+            FEATURE = "http://xml.org/sax/features/external-general-entities";
+            dbf.setFeature(FEATURE, false);
+
+            // Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-parameter-entities
+            // Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-parameter-entities
+            FEATURE = "http://xml.org/sax/features/external-parameter-entities";
+            dbf.setFeature(FEATURE, false);
+
+            // and these as well, per Timothy Morgan's 2014 paper: "XML Schema, DTD, and Entity Attacks" (see reference below)
+            dbf.setXIncludeAware(false);
+            dbf.setExpandEntityReferences(false);
+
+            // And, per Timothy Morgan: "If for some reason support for inline DOCTYPEs are a requirement, then
+            // ensure the entity settings are disabled (as shown above) and beware that SSRF attacks
+            // (http://cwe.mitre.org/data/definitions/918.html) and denial
+            // of service attacks (such as billion laughs or decompression bombs via "jar:") are a risk."
+
+        } catch (ParserConfigurationException e) {
+            LOG.warn("ParserConfigurationException was thrown. The feature '" + FEATURE + "' is probably not supported by your XML processor.", e);
+        }
+
+        return dbf;
+    }
+
     private static XPathExpression compileExpression(String expr) {
         try {
             return XPATH.compile(expr);
@@ -201,6 +241,7 @@ public class HCalendarParser implements CalendarParser {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void parse(InputStream in, ContentHandler handler) throws IOException, ParserException {
         parse(new InputSource(in), handler);
     }
@@ -208,6 +249,7 @@ public class HCalendarParser implements CalendarParser {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void parse(Reader in, ContentHandler handler) throws IOException, ParserException {
         parse(new InputSource(in), handler);
     }
@@ -248,16 +290,18 @@ public class HCalendarParser implements CalendarParser {
         ArrayList elements = new ArrayList();
         for (int i = 0; i < nodes.getLength(); i++) {
             Node n = nodes.item(i);
-            if (n instanceof Element)
-                elements.add((Element) n);
+            if (n instanceof Element) {
+                elements.add(n);
+            }
         }
         return elements;
     }
 
     private static Element findElement(XPathExpression expr, Object context) throws ParserException {
         Node n = findNode(expr, context);
-        if (n == null || (!(n instanceof Element)))
+        if (n == null || (!(n instanceof Element))) {
             return null;
+        }
         return (Element) n;
     }
 
@@ -290,8 +334,9 @@ public class HCalendarParser implements CalendarParser {
         // vcalendar element. In this case, we should probably only process
         // that element and log a warning about skipping the others.
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Building calendar");
+        }
 
         handler.startCalendar();
 
@@ -323,8 +368,9 @@ public class HCalendarParser implements CalendarParser {
     }
 
     private void buildEvent(Element element, ContentHandler handler) throws ParserException {
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Building event");
+        }
 
         handler.startComponent(Component.VEVENT);
 
@@ -359,11 +405,13 @@ public class HCalendarParser implements CalendarParser {
     }
 
     private void buildProperty(Element element, String propName, ContentHandler handler) throws ParserException {
-        if (element == null)
+        if (element == null) {
             return;
+        }
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Building property " + propName);
+        }
 
         String className = className(propName);
         String elementName = element.getLocalName().toLowerCase();
@@ -375,52 +423,64 @@ public class HCalendarParser implements CalendarParser {
             // instead of the contents of the element, which instead provide a
             // human presentable version of the value."
             value = element.getAttribute("title");
-            if (StringUtils.isBlank(value))
+            if (StringUtils.isBlank(value)) {
                 throw new ParserException("Abbr element '" + className + "' requires a non-empty title", -1);
-            if (LOG.isDebugEnabled())
+            }
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Setting value '" + value + "' from title attribute");
+            }
         } else if (isHeaderElement(elementName)) {
             // try title first. if that's not set, fall back to text content.
             value = element.getAttribute("title");
             if (!StringUtils.isBlank(value)) {
-                if (LOG.isDebugEnabled())
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Setting value '" + value + "' from title attribute");
+                }
             } else {
                 value = getTextContent(element);
-                if (LOG.isDebugEnabled())
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Setting value '" + value + "' from text content");
+                }
             }
         } else if (elementName.equals("a") && isUrlProperty(propName)) {
             value = element.getAttribute("href");
-            if (StringUtils.isBlank(value))
+            if (StringUtils.isBlank(value)) {
                 throw new ParserException("A element '" + className + "' requires a non-empty href", -1);
-            if (LOG.isDebugEnabled())
+            }
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Setting value '" + value + "' from href attribute");
+            }
         } else if (elementName.equals("img")) {
             if (isUrlProperty(propName)) {
                 value = element.getAttribute("src");
-                if (StringUtils.isBlank(value))
+                if (StringUtils.isBlank(value)) {
                     throw new ParserException("Img element '" + className + "' requires a non-empty src", -1);
-                if (LOG.isDebugEnabled())
+                }
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Setting value '" + value + "' from src attribute");
+                }
             } else {
                 value = element.getAttribute("alt");
-                if (StringUtils.isBlank(value))
+                if (StringUtils.isBlank(value)) {
                     throw new ParserException("Img element '" + className + "' requires a non-empty alt", -1);
-                if (LOG.isDebugEnabled())
+                }
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Setting value '" + value + "' from alt attribute");
+                }
             }
         } else {
             value = getTextContent(element);
             if (!StringUtils.isBlank(value)) {
-                if (LOG.isDebugEnabled())
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("Setting value '" + value + "' from text content");
+                }
             }
         }
 
         if (StringUtils.isBlank(value)) {
-            if (LOG.isDebugEnabled())
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Skipping property with empty value");
+            }
             return;
         }
 
@@ -433,11 +493,12 @@ public class HCalendarParser implements CalendarParser {
                 Date date = icalDate(value);
                 value = date.toString();
 
-                if (!(date instanceof DateTime))
+                if (!(date instanceof DateTime)) {
                     try {
                         handler.parameter(Parameter.VALUE, Value.DATE.getValue());
                     } catch (Exception e) {
                     }
+                }
             } catch (ParseException e) {
                 throw new ParserException("Malformed date value for element '" + className + "'", -1, e);
             }
@@ -445,11 +506,12 @@ public class HCalendarParser implements CalendarParser {
 
         if (isTextProperty(propName)) {
             String lang = element.getAttributeNS(XMLConstants.XML_NS_URI, "lang");
-            if (!StringUtils.isBlank(lang))
+            if (!StringUtils.isBlank(lang)) {
                 try {
                     handler.parameter(Parameter.LANGUAGE, lang);
                 } catch (Exception e) {
                 }
+            }
         }
 
         // XXX: other parameters?
@@ -509,11 +571,14 @@ public class HCalendarParser implements CalendarParser {
             try {
                 // for some reason Date's pattern matches yyyy-MM-dd, so
                 // don't check it if we find -
-                if (original.indexOf('-') == -1)
+                if (original.indexOf('-') == -1) {
                     return new Date(original);
+                }
             } catch (Exception e) {
             }
-            return new Date(HCAL_DATE_FORMAT.parse(original));
+            synchronized (HCAL_DATE_FORMAT) {
+                return new Date(HCAL_DATE_FORMAT.parse(original));
+            }
         }
 
         try {
@@ -526,8 +591,9 @@ public class HCalendarParser implements CalendarParser {
 
         String normalized = null;
 
-        if (LOG.isDebugEnabled())
+        if (LOG.isDebugEnabled()) {
             LOG.debug("normalizing date-time " + original);
+        }
 
         // 2002-10-09T19:00:00Z
         if (original.charAt(original.length() - 1) == 'Z') {
@@ -543,7 +609,10 @@ public class HCalendarParser implements CalendarParser {
             normalized = original;
         }
 
-        DateTime dt = new DateTime(HCAL_DATE_TIME_FORMAT.parse(normalized));
+        DateTime dt;
+        synchronized (HCAL_DATE_TIME_FORMAT) {
+            dt = new DateTime(HCAL_DATE_TIME_FORMAT.parse(normalized));
+        }
 
         // hCalendar does not specify a representation for timezone ids
         // or any other sort of timezone information. the best it does is

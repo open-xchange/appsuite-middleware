@@ -205,6 +205,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                     // created above:
                     //
                     env.put("com.sun.jndi.rmi.factory.socket", csf);
+                    final JMXServiceURL rmiUrl = new JMXServiceURL("rmi", hostname, jmxPort);
                     // Manually creates and binds a JMX RMI Connector Server stub with the
                     // registry created above: the port we pass here is the port that can
                     // be specified in "service:jmx:rmi://"+hostname+":"+port - where the
@@ -219,7 +220,6 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                     // We can't use the JMXConnectorServerFactory because of
                     // http://bugs.sun.com/view_bug.do?bug_id=5107423
                     //
-                    final JMXServiceURL rmiUrl = new JMXServiceURL("rmi", hostname, jmxPort);
                     cs = new RMIConnectorServer(rmiUrl, env, stub, mbs) {
 
                         @Override

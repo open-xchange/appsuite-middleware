@@ -49,7 +49,6 @@
 
 package com.openexchange.snippet.json;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,9 +57,9 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.action.Method;
 import com.openexchange.snippet.json.action.SnippetAction;
-import com.openexchange.snippet.SnippetService;
 
 /**
  * {@link SnippetActionFactory}
@@ -104,11 +103,6 @@ public class SnippetActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

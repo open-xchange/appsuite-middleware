@@ -132,8 +132,13 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 AJAXRequestResult result;
                 if (inlineIfPossible && document.getSize() > 0 && document.getSize() <= DEFAULT_IN_MEMORY_THRESHOLD) {
                     ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-                    fileHolder.write(document.getData());
-                    result = new AJAXRequestResult(fileHolder, "file");
+                    try {
+                        fileHolder.write(document.getData());
+                        result = new AJAXRequestResult(fileHolder, "file");
+                        fileHolder = null;
+                    } finally {
+                        Streams.close(fileHolder);
+                    }
                 } else {
                     long size = document.getSize();
                     if (false == document.getFile().isAccurateSize()) {
@@ -143,11 +148,15 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                     FileHolder fileHolder = document.isRepetitive() ?
                         new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName()) :
                         new FileHolder(bufferedInputStreamFor(document.getData()), size, document.getMimeType(), document.getName());
-
-                    if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                        fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
+                    try {
+                        if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
+                            fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
+                        }
+                        result = new AJAXRequestResult(fileHolder, "file");
+                        fileHolder = null;
+                    } finally {
+                        Streams.close(fileHolder);
                     }
-                    result = new AJAXRequestResult(fileHolder, "file");
                 }
 
                 if (null != document.getEtag()) {
@@ -166,8 +175,13 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         AJAXRequestResult result;
         if (inlineIfPossible && metadata.getFileSize() > 0 && metadata.getFileSize() <= DEFAULT_IN_MEMORY_THRESHOLD) {
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            fileHolder.write(fileAccess.getDocument(request.getId(), request.getVersion()));
-            result = new AJAXRequestResult(fileHolder, "file");
+            try {
+                fileHolder.write(fileAccess.getDocument(request.getId(), request.getVersion()));
+                result = new AJAXRequestResult(fileHolder, "file");
+                fileHolder = null;
+            } finally {
+                Streams.close(fileHolder);
+            }
         } else {
             InputStreamClosure isClosure = getDocumentStream(request.getSession(), request.getId(), request.getVersion());
             long size = metadata.getFileSize();
@@ -175,10 +189,15 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 size = -1;
             }
             FileHolder fileHolder = new FileHolder(isClosure, size, metadata.getFileMIMEType(), metadata.getFileName());
-            if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
+            try {
+                if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
+                    fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
+                }
+                result = new AJAXRequestResult(fileHolder, "file");
+                fileHolder = null;
+            } finally {
+                Streams.close(fileHolder);
             }
-            result = new AJAXRequestResult(fileHolder, "file");
         }
         createAndSetETag(metadata, request, result);
         setLastModified(metadata, result);

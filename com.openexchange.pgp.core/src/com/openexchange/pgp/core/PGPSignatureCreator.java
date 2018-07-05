@@ -70,7 +70,7 @@ import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
  * {@link PGPSignatureCreator} - Wrapper for creating PGP signatures
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public class PGPSignatureCreator {
 

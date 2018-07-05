@@ -60,6 +60,7 @@ import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AsciiReader;
@@ -68,7 +69,6 @@ import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link JsonCacheServiceImpl}
@@ -136,7 +136,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, false, con);
         }
     }
@@ -156,7 +156,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             Database.back(contextId, true, con);
         }
     }
@@ -187,7 +187,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             stmt.setString(3, id);
             rs = stmt.executeQuery();
             final boolean update = rs.next();
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             /*
              * Update or insert
@@ -227,7 +227,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, true, con);
         }
     }
@@ -283,7 +283,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                     update = false;
                 }
             }
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             stmt = null;
             rs = null;
             /*
@@ -333,7 +333,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             Database.back(contextId, true, con);
         }
     }
@@ -345,7 +345,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
         ResultSet rs = null;
         boolean transactional = false;
         try {
-            DBUtils.startTransaction(con);
+            Databases.startTransaction(con);
             transactional = true;
             /*
              * Perform INSERT or UPDATE
@@ -356,7 +356,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             stmt.setString(3, id);
             rs = stmt.executeQuery();
             final boolean update = rs.next();
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             final long now = System.currentTimeMillis();
             if (!update) {
@@ -378,7 +378,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
                     return true;
                 }
             }
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = con.prepareStatement("UPDATE jsonCache SET inProgress=1, inProgressSince=? WHERE cid=? AND user=? AND id=? AND inProgress=0");
             stmt.setLong(1, now);
             stmt.setInt(2, contextId);
@@ -389,18 +389,18 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             return updated;
         } catch (final SQLException e) {
             if (transactional) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             if (transactional) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (transactional) {
-                DBUtils.autocommit(con);
+                Databases.autocommit(con);
             }
             Database.back(contextId, true, con);
         }
@@ -412,7 +412,7 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
         PreparedStatement stmt = null;
         boolean transactional = false;
         try {
-            DBUtils.startTransaction(con);
+            Databases.startTransaction(con);
             transactional = true;
             stmt = con.prepareStatement("UPDATE jsonCache SET inProgress=0 WHERE cid=? AND user=? AND id=?");
             stmt.setInt(1, contextId);
@@ -422,18 +422,18 @@ public final class JsonCacheServiceImpl implements JsonCacheService {
             con.commit();
         } catch (final SQLException e) {
             if (transactional) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             if (transactional) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             if (transactional) {
-                DBUtils.autocommit(con);
+                Databases.autocommit(con);
             }
             Database.back(contextId, true, con);
         }

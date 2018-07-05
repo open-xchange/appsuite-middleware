@@ -49,16 +49,15 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -66,7 +65,6 @@ import com.openexchange.groupware.update.ProgressState;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Creates an initial empty filestore usage entry for every context that currently did not uploaded anything. The new quota counting
@@ -93,13 +91,15 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
         ProgressState state = params.getProgressState();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        final Connection con = dbService.getForUpdateTask(contextId);
-        int[] contextIDs = dbService.getContextsInSameSchema(contextId);
+        final Connection con = params.getConnection();
+        int[] contextIDs = params.getContextsInSameSchema();
+
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             state.setTotal(contextIDs.length);
             for (int i = 0; i < contextIDs.length; i++) {
                 if (isFilestoreUsageMissing(con, contextIDs[i])) {
@@ -107,13 +107,16 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
                 }
                 state.setState(i);
             }
+
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
         }
     }
 

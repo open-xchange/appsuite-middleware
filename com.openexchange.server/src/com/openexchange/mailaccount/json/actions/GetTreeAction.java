@@ -73,8 +73,6 @@ import com.openexchange.tools.session.ServerSession;
 @OAuthAction(MailAccountOAuthConstants.OAUTH_READ_SCOPE)
 public final class GetTreeAction extends AbstractMailAccountTreeAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetTreeAction.class);
-
     public static final String ACTION = "get_tree";
 
     /**

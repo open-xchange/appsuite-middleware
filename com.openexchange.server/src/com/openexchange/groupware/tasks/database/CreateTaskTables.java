@@ -110,7 +110,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "number_of_attachments INT1 UNSIGNED NOT NULL,"
        + "PRIMARY KEY (cid,id),"
        + "INDEX (cid,last_modified)"
-       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createTaskFolderTable = "CREATE TABLE task_folder ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -121,7 +121,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "INDEX (cid,folder),"
        + "FOREIGN KEY (cid, id) REFERENCES task (cid, id),"
        + "FOREIGN KEY (cid, folder) REFERENCES oxfolder_tree (cid, fuid)"
-     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createTaskParticipantTable = "CREATE TABLE task_participant ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -133,16 +133,16 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid,task,user),"
        + "FOREIGN KEY (cid, task) REFERENCES task (cid, id),"
        + "FOREIGN KEY (cid,user) REFERENCES user (cid,id)"
-       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createTaskEParticipantTable = "CREATE TABLE task_eparticipant ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "task INT4 UNSIGNED NOT NULL,"
-       + "mail VARCHAR(255) NOT NULL,"
+       + "mail VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
        + "display_name VARCHAR(255),"
        + "PRIMARY KEY (cid,task,mail),"
        + "FOREIGN KEY (cid,task) REFERENCES task (cid,id)"
-       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createTaskRemovedParticipantTable = "CREATE TABLE task_removedparticipant ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -156,7 +156,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "INDEX (cid,folder),"
        + "FOREIGN KEY (cid, task) REFERENCES task (cid, id),"
        + "FOREIGN KEY (cid,user) REFERENCES user(cid,id)"
-       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createDelTaskTable = "CREATE TABLE del_task ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -198,7 +198,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "number_of_attachments INT1 UNSIGNED NOT NULL,"
        + "PRIMARY KEY (cid,id),"
        + "INDEX (cid,last_modified)"
-       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createDelTaskFolderTable = "CREATE TABLE del_task_folder ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -208,7 +208,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid,id,folder),"
        + "INDEX (cid,folder),"
        + "FOREIGN KEY (cid, id) REFERENCES del_task (cid, id)"
-       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     private static final String createDelTaskParticipantTable = "CREATE TABLE del_task_participant ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -219,17 +219,17 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "description VARCHAR(255),"
        + "PRIMARY KEY (cid,task,user),"
        + "FOREIGN KEY (cid, task) REFERENCES del_task (cid, id)"
-       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     // TODO drop this table with the upcoming major release after 7.8.0.
     private static final String createDelTaskEParticipantTable = "CREATE TABLE del_task_eparticipant ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "task INT4 UNSIGNED NOT NULL,"
-       + "mail VARCHAR(255) NOT NULL,"
+       + "mail VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
        + "display_name VARCHAR(255),"
        + "PRIMARY KEY (cid,task,mail),"
        + "FOREIGN KEY (cid, task) REFERENCES del_task (cid, id)"
-       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
     /**
      * Initializes a new {@link CreateTaskTables}.

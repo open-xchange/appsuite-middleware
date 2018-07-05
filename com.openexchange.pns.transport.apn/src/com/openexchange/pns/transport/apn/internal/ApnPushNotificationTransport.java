@@ -49,14 +49,14 @@
 
 package com.openexchange.pns.transport.apn.internal;
 
-import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.osgi.framework.BundleContext;
@@ -97,7 +97,6 @@ import javapns.notification.Payload;
 import javapns.notification.PayloadPerDevice;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
-import javapns.notification.PushedNotifications;
 
 /**
  * {@link ApnPushNotificationTransport}
@@ -115,6 +114,9 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     private static final int STATUS_INVALID_TOKEN_SIZE = 5;
 
     private static final int STATUS_INVALID_TOKEN = 8;
+
+    /** The maximum number of simultaneously transported payloads per request */
+    private static final int TRANSPORT_CHUNK_SIZE = 100;
 
     // ---------------------------------------------------------------------------------------------------------------
 
@@ -171,6 +173,14 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     // ---------------------------------------------------------------------------------------------------------
 
     private ApnOptions getHighestRankedApnOptionsFor(String client) throws OXException {
+        ApnOptions options = optHighestRankedApnOptionsFor(client);
+        if (null == options) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create("No options found for client: " + client);
+        }
+        return options;
+    }
+
+    private ApnOptions optHighestRankedApnOptionsFor(String client) {
         List<RankedService<ApnOptionsProvider>> list = trackedProviders.getSnapshot();
         for (RankedService<ApnOptionsProvider> rankedService : list) {
             ApnOptions options = rankedService.service.getOptions(client);
@@ -178,7 +188,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
                 return options;
             }
         }
-        throw PushExceptionCodes.UNEXPECTED_ERROR.create("No options found for client: " + client);
+        return null;
     }
 
     private Map<String, ApnOptions> getAllHighestRankedApnOptions() {
@@ -197,9 +207,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     @Override
     public boolean servesClient(String client) throws OXException {
         try {
-            return null != getHighestRankedApnOptionsFor(client);
-        } catch (OXException x) {
-            return false;
+            return null != optHighestRankedApnOptionsFor(client);
         } catch (RuntimeException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -255,63 +263,91 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     }
 
     @Override
-    public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
-        if (null != notification && null != matches) {
-            // Create payloads for each match
-            Map<String, List<PayloadPerDevice>> clientPayloads = getPayloads(notification, matches);
-
-            // Transport them
-            for (Map.Entry<String, List<PayloadPerDevice>> clientPayload : clientPayloads.entrySet()) {
-                PushedNotifications notifications = null;
-                try {
-                    // Send to devices
-                    ApnOptions options = getHighestRankedApnOptionsFor(clientPayload.getKey());
-                    final List<PayloadPerDevice> payloads = clientPayload.getValue();
-                    notifications = Push.payloads(options.getKeystore(), options.getPassword(), options.isProduction(), payloads);
-
-                    // Log it
-                    Object ostr = new Object() {
-
-                        @Override
-                        public String toString() {
-                            StringBuilder sb = new StringBuilder(payloads.size() * 16);
-                            for (PayloadPerDevice payloadPerDevice : payloads) {
-                                sb.append(payloadPerDevice.getDevice().getToken()).append(", ");
-                            }
-                            sb.setLength(sb.length() - 2);
-                            return sb.toString();
-                        }
-                    };
-                    LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to device(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
-                } catch (CommunicationException e) {
-                    LOG.warn("error submitting push notifications", e);
-                } catch (KeystoreException e) {
-                    LOG.warn("error submitting push notifications", e);
-                } catch (OXException e) {
-                    LOG.warn("error submitting push notifications", e);
-                }
-
-                processNotificationResults(notification, notifications);
+    public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
+        if (null == notifications || notifications.isEmpty()) {
+            return;
+        }
+        /*
+         * generate message payloads for all matches of all notifications, associated to targeted client
+         */
+        Map<String, List<Entry<PushMatch, PayloadPerDevice>>> payloadsPerClient = new HashMap<String, List<Entry<PushMatch, PayloadPerDevice>>>();
+        for (Map.Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
+            for (Entry<PushMatch, PayloadPerDevice> payload : getPayloadsPerDevice(entry.getKey(), entry.getValue()).entrySet()) {
+                String client = payload.getKey().getClient();
+                com.openexchange.tools.arrays.Collections.put(payloadsPerClient, client, payload);
             }
+        }
+        /*
+         * perform transport to devices of each client
+         */
+        for (Entry<String, List<Entry<PushMatch, PayloadPerDevice>>> entry : payloadsPerClient.entrySet()) {
+            transport(entry.getKey(), entry.getValue());
         }
     }
 
-    private void processNotificationResults(PushNotification notification, PushedNotifications pushedNotifications) {
-        if (null != pushedNotifications && !pushedNotifications.isEmpty()) {
-            for (PushedNotification pushedNotification : pushedNotifications) {
-                if (pushedNotification.isSuccessful()) {
-                    LOG.debug("{}", pushedNotification);
-                } else {
-                    LOG.warn("Unsuccessful push notification: {}", pushedNotification);
-                    if (null != pushedNotification.getResponse()) {
-                        int status = pushedNotification.getResponse().getStatus();
-                        if (STATUS_INVALID_TOKEN == status || STATUS_INVALID_TOKEN_SIZE == status) {
-                            Device device = pushedNotification.getDevice();
-                            boolean removed = removeSubscription(notification, device);
-                            if (removed) {
-                                LOG.info("Removed subscription for device with token: {}.", device.getToken());
-                            }
-                            LOG.debug("Could not remove subscriptions for device with token: {}.", device.getToken());
+    private static List<PayloadPerDevice> getPayloadsPerDevice(List<Entry<PushMatch, PayloadPerDevice>> payloads) {
+        List<PayloadPerDevice> payloadsPerDevice = new ArrayList<PayloadPerDevice>(payloads.size());
+        for (Entry<PushMatch, PayloadPerDevice> entry : payloads) {
+            payloadsPerDevice.add(entry.getValue());
+        }
+        return payloadsPerDevice;
+    }
+
+    private void transport(String client, List<Entry<PushMatch, PayloadPerDevice>> payloads) {
+        List<PushedNotification> notifications = null;
+        try {
+            notifications = transport(getHighestRankedApnOptionsFor(client), getPayloadsPerDevice(payloads));
+        } catch (CommunicationException | KeystoreException | OXException e) {
+            LOG.warn("error submitting push notifications", e);
+        }
+        processNotificationResults(notifications, payloads);
+    }
+
+    private List<PushedNotification> transport(ApnOptions options, List<PayloadPerDevice> payloads) throws CommunicationException, KeystoreException {
+        List<PushedNotification> results = new ArrayList<PushedNotification>(payloads.size());
+        for (int i = 0; i < payloads.size(); i += TRANSPORT_CHUNK_SIZE) {
+            int length = Math.min(payloads.size(), i + TRANSPORT_CHUNK_SIZE) - i;
+            results.addAll(Push.payloads(options.getKeystore(), options.getPassword(), options.isProduction(), payloads.subList(i, i + length)));
+        }
+        return results;
+    }
+
+    private static PushMatch findMatching(Device device, List<Entry<PushMatch, PayloadPerDevice>> payloads) {
+        if (null != device) {
+            for (Entry<PushMatch, PayloadPerDevice> entry : payloads) {
+                if (device.equals(entry.getValue().getDevice())) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
+    }
+
+    private void processNotificationResults(List<PushedNotification> notifications, List<Entry<PushMatch, PayloadPerDevice>> payloads) {
+        if (null == notifications || notifications.isEmpty()) {
+            return;
+        }
+        for (PushedNotification notification : notifications) {
+            if (notification.isSuccessful()) {
+                LOG.debug("{}", notification);
+                continue;
+            }
+            LOG.info("Unsuccessful push notification: {}", notification);
+            if (null != notification.getResponse()) {
+                int status = notification.getResponse().getStatus();
+                if (STATUS_INVALID_TOKEN == status || STATUS_INVALID_TOKEN_SIZE == status) {
+                    PushMatch pushMatch = findMatching(notification.getDevice(), payloads);
+                    if (null != pushMatch) {
+                        boolean removed = removeSubscription(pushMatch);
+                        if (removed) {
+                            LOG.info("Removed subscription for device with token: {}.", pushMatch.getToken());
+                        }
+                        LOG.debug("Could not remove subscriptions for device with token: {}.", pushMatch.getToken());
+                    } else {
+                        Device device = notification.getDevice();
+                        int removed = removeSubscriptions(device);
+                        if (0 < removed) {
+                            LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
                         }
                     }
                 }
@@ -319,48 +355,56 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         }
     }
 
-    private Map<String, List<PayloadPerDevice>> getPayloads(PushNotification notification, Collection<PushMatch> matches) throws OXException {
-        Map<String, List<PayloadPerDevice>> clientPayloads = new LinkedHashMap<>(matches.size());
-        for (PushMatch match : matches) {
-            String client = match.getClient();
-            PushMessageGenerator generator = generatorRegistry.getGenerator(client);
-            if (null == generator) {
-                throw PushExceptionCodes.NO_SUCH_GENERATOR.create(client);
-            }
-
-            Message<?> message = generator.generateMessageFor(ID, notification);
-
-            List<PayloadPerDevice> payloads = clientPayloads.get(client);
-            if (null == payloads) {
-                payloads = new LinkedList<>();
-                clientPayloads.put(client, payloads);
-            }
-
-            Object object = message.getMessage();
-            if (object instanceof Payload) {
-                addCheckPayload((Payload) object, match, payloads);
-            } else if (object instanceof Map) {
-                try {
-                    addCheckPayload(toPayload((Map<String, Object>) object), match, payloads);
-                } catch (JSONException e) {
-                    throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create(e, e.getMessage());
-                }
-            } else {
-                throw PushExceptionCodes.UNSUPPORTED_MESSAGE_CLASS.create(null == object ? "null" : object.getClass().getName());
-            }
+    @Override
+    public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
+        if (null != notification && null != matches) {
+            List<PushMatch> pushMatches = new ArrayList<PushMatch>(matches);
+            transport(Collections.singletonMap(notification, pushMatches));
         }
-        return clientPayloads;
     }
 
-    private void addCheckPayload(Payload payload, PushMatch match, List<PayloadPerDevice> payloads) throws OXException {
+    private Map<PushMatch, PayloadPerDevice> getPayloadsPerDevice(PushNotification notification, Collection<PushMatch> matches) throws OXException {
+        Map<PushMatch, PayloadPerDevice> payloadsPerDevice = new HashMap<PushMatch, PayloadPerDevice>(matches.size());
+        for (PushMatch match : matches) {
+            PayloadPerDevice payloadPerDevice = getPayloadPerDevice(notification, match);
+            if (null != payloadPerDevice) {
+                payloadsPerDevice.put(match, payloadPerDevice);
+            }
+        }
+        return payloadsPerDevice;
+    }
+
+    private PayloadPerDevice getPayloadPerDevice(PushNotification notification, PushMatch match) throws OXException {
+        PushMessageGenerator generator = generatorRegistry.getGenerator(match.getClient());
+        if (null == generator) {
+            throw PushExceptionCodes.NO_SUCH_GENERATOR.create(match.getClient());
+        }
+        Message<?> message = generator.generateMessageFor(ID, notification);
+        return getPayloadPerDevice(getPayload(message.getMessage()), match);
+    }
+
+    private Payload getPayload(Object messageObject) throws OXException {
+        if (messageObject instanceof Payload) {
+            return (Payload) messageObject;
+        }
+        if (messageObject instanceof Map) {
+            try {
+                return toPayload((Map<String, Object>) messageObject);
+            } catch (JSONException e) {
+                throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create(e, e.getMessage());
+            }
+        }
+        throw PushExceptionCodes.UNSUPPORTED_MESSAGE_CLASS.create(null == messageObject ? "null" : messageObject.getClass().getName());
+    }
+
+    private PayloadPerDevice getPayloadPerDevice(Payload payload, PushMatch match) throws OXException {
         int payloadLength = PushNotifications.getPayloadLength(payload.toString());
         // Check payload length
         if (payloadLength > ApnsConstants.APNS_MAX_PAYLOAD_SIZE) {
             throw PushExceptionCodes.MESSAGE_TOO_BIG.create(ApnsConstants.APNS_MAX_PAYLOAD_SIZE, payloadLength);
         }
-
         try {
-            payloads.add(new PayloadPerDevice(payload, match.getToken()));
+            return new PayloadPerDevice(payload, match.getToken());
         } catch (InvalidDeviceTokenFormatException e) {
             LOG.warn("Invalid device token: '{}', removing from subscription store.", match.getToken(), e);
             try {
@@ -372,6 +416,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
                 LOG.error("Failed to remove subscription for invalid token {}", match.getToken(), x);
             }
         }
+        return null;
     }
 
     private Payload toPayload(Map<String, Object> message) throws JSONException {
@@ -476,22 +521,15 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         return 0;
     }
 
-    private boolean removeSubscription(PushNotification notification, Device device) {
-        if (null == device || null == device.getToken() || null == device.getLastRegister()) {
-            LOG.warn("Unsufficient device information to remove subscriptions for: {}", device);
-            return false;
-        }
-
+    private boolean removeSubscription(PushMatch match) {
         try {
-            DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
-                .contextId(notification.getContextId())
-                .token(device.getToken())
+            DefaultPushSubscription subscription = DefaultPushSubscription.builder()
+                .contextId(match.getContextId())
+                .token(match.getToken())
                 .transportId(ID)
-                .userId(notification.getUserId());
-
-            DefaultPushSubscription subscriptionDesc = builder.build();
-
-            return subscriptionRegistry.unregisterSubscription(subscriptionDesc);
+                .userId(match.getUserId())
+            .build();
+            return subscriptionRegistry.unregisterSubscription(subscription);
         } catch (OXException e) {
             LOG.error("Error removing subscription", e);
         }

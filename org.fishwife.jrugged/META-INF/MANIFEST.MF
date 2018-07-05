@@ -4,7 +4,7 @@ Bundle-Name: JRugged Java Library
 Bundle-SymbolicName: org.fishwife.jrugged
 Bundle-Version: 3.2.2
 Bundle-Vendor: Comcast Interactive Media, LLC.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: lib/jrugged-core-3.2.2.jar,
  .
 Export-Package: org.fishwife.jrugged,

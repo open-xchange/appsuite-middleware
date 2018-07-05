@@ -98,7 +98,7 @@ class TicketRenewalTimer implements Runnable {
         schedule(principal.getClientSubject(), principal.getDelegateSubject());
     }
 
-    private void schedule(Subject clientSubject, Subject delegateSubject) throws OXException {
+    private void schedule(final Subject clientSubject, Subject delegateSubject) throws OXException {
         OXException exc = null;
         int clientSubjectExpires;
         try {
@@ -118,10 +118,22 @@ class TicketRenewalTimer implements Runnable {
         if (Integer.MAX_VALUE == ticketExpiresInSeconds && null != exc) {
             throw exc;
         }
-        if (LOG.isDebugEnabled()) {
-            Calendar cal = new GregorianCalendar(TimeZones.UTC, Locale.ENGLISH);
-            cal.add(Calendar.SECOND, ticketExpiresInSeconds);
-            LOG.debug("Ticket for {} expires at {}. Running timer in {} seconds.", getName(clientSubject), cal.getTime(), I(ticketExpiresInSeconds));
+        {
+            Object name = new Object() {
+                @Override
+                public String toString() {
+                    return getName(clientSubject);
+                }
+            };
+            Object time = new Object() {
+                @Override
+                public String toString() {
+                    Calendar cal = new GregorianCalendar(TimeZones.UTC, Locale.ENGLISH);
+                    cal.add(Calendar.SECOND, ticketExpiresInSeconds);
+                    return cal.getTime().toString();
+                }
+            };
+            LOG.debug("Ticket for {} expires at {}. Running timer in {} seconds.", name, time, I(ticketExpiresInSeconds));
         }
         scheduled = timerService.schedule(this, ticketExpiresInSeconds, TimeUnit.SECONDS);
     }

@@ -56,7 +56,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
@@ -173,9 +175,9 @@ public class ReplicationMonitor {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
-                    LOG.warn("", e);
                     if (10 == tries) {
-                        // Do a fall back to the master.
+                        // Consumed all available retry attempts. Do a fall back to the master.
+                        LOG.warn("", e);
                         clientTransaction = -1;
                     } else {
                         try {
@@ -185,6 +187,9 @@ public class ReplicationMonitor {
                             LOG.error("", e2);
                         }
                         retval = null;
+                        // Wait with expontential back-off
+                        long nanosToWait = TimeUnit.NANOSECONDS.convert((tries * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                        LockSupport.parkNanos(nanosToWait);
                     }
                 }
             }
@@ -209,6 +214,9 @@ public class ReplicationMonitor {
                 final OXException e1 = createException(assign, true, e);
                 LOG.warn("", e1);
             }
+        }
+        if (null == retval) {
+            throw createException(assign, write, null);
         }
         return retval;
     }
@@ -265,6 +273,7 @@ public class ReplicationMonitor {
         }
 
         // Apply state
+        boolean wasHeartbeatEnabled = state.isHeartbeatEnabled();
         if (con instanceof StateAware) {
             StateAware stateAware = (StateAware) con;
             ConnectionState connectionState = stateAware.getConnectionState();
@@ -280,9 +289,11 @@ public class ReplicationMonitor {
             try {
                 pool.back(con);
             } catch (final PoolingException e) {
-                Databases.close(con);
-                final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
-                LOG.error("", e1);
+                if (!wasHeartbeatEnabled) {
+                    Databases.close(con);
+                    final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
+                    LOG.error("", e1);
+                }
             }
         }
     }

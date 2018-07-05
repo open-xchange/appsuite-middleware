@@ -53,28 +53,28 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.calendar.printing.CPAppointment;
+import com.openexchange.calendar.printing.CPEvent;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class CPPartition {
 
-    private List<CPAppointment> appointments = new LinkedList<CPAppointment>();
+    private List<CPEvent> appointments = new LinkedList<CPEvent>();
 
     private Map<String, String> metaData = new HashMap<String, String>();
 
     private List<CPFormattingInformation> formattingInformation = new LinkedList<CPFormattingInformation>();
 
-    public void addAppointment(CPAppointment appointment) {
+    public void addAppointment(CPEvent appointment) {
         appointments.add(appointment);
     }
 
-    public void setAppointment(List<CPAppointment> appointments) {
+    public void setAppointment(List<CPEvent> appointments) {
         this.appointments = appointments;
     }
 
-    public List<CPAppointment> getAppointments() {
+    public List<CPEvent> getAppointments() {
         return appointments;
     }
 

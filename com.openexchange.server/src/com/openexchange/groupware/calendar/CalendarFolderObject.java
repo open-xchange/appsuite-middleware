@@ -49,11 +49,11 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.io.Serializable;
+import com.openexchange.groupware.container.FolderObject;
 import gnu.trove.TCollections;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.io.Serializable;
-import com.openexchange.groupware.container.FolderObject;
 
 /**
  * CalendarFolderObject The CalendarFolderObject represents the sets of folders a user may have access to. This is cached by the calendar

@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -564,15 +565,7 @@ public final class PushManagerRegistry implements PushListenerService {
         return unregisterPermanentListenerFor(session.getUserId(), session.getContextId(), clientId);
     }
 
-    /**
-     * Unregisters the permanent listener for specified push user
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param clientId The client identifier
-     * @return <code>true</code> on successful unregistration; otherwise <code>false</code>
-     * @throws OXException If unregistration fails
-     */
+    @Override
     public boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws OXException {
         if (!PushUtility.allowedClient(clientId, null, false)) {
             /*
@@ -942,7 +935,7 @@ public final class PushManagerRegistry implements PushListenerService {
             }
 
             @Override
-            public T next() {
+            public T next() throws NoSuchElementException {
                 return iterator.next();
             }
 

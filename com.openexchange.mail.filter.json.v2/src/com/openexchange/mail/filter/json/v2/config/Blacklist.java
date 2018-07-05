@@ -80,10 +80,8 @@ public class Blacklist {
      * @return true if the blacklist of the {@link BasicGroup} contains the given value, otherwise false.
      */
     public boolean isBlacklisted(BasicGroup basic, String value) {
-        if (blackmap.containsKey(basic.name())) {
-            return blackmap.get(basic.name()).contains(value);
-        }
-        return false;
+        Set<String> set = blackmap.get(basic.name());
+        return null == set ? false : set.contains(value);
     }
 
     /**
@@ -96,14 +94,11 @@ public class Blacklist {
      * @return true if the blacklist of the specific {@link Field} contains the given value, otherwise false.
      */
     public boolean isBlacklisted(BasicGroup basic, String element, Field field, String value) {
-        String key = key(basic, element, field);
-        if (blackmap.containsKey(key)) {
-            return blackmap.get(key).contains(value);
-        }
-        return false;
+        Set<String> set = blackmap.get(key(basic, element, field));
+        return null == set ? false : set.contains(value);
     }
 
-    private static final String DOT = ".";
+    private static final char DOT = '.';
 
     /**
      * Creates a key which is used by this Blacklist
@@ -114,7 +109,7 @@ public class Blacklist {
      * @return The key for this triplet
      */
     public static String key(BasicGroup basic, String element, Field field) {
-        return basic.name() + DOT + element + DOT + field.name();
+        return new StringBuilder(basic.name()).append(DOT).append(element).append(DOT).append(field.name()).toString();
     }
 
     /**
@@ -126,10 +121,7 @@ public class Blacklist {
      * @return A set of blacklisted values or null
      */
     public Set<String> get(BasicGroup basic, String element, Field field) {
-        if (element == null) {
-            return blackmap.get(basic.name());
-        }
-        return blackmap.get(key(basic, element, field));
+        return element == null ? blackmap.get(basic.name()) : blackmap.get(key(basic, element, field));
     }
 
 }

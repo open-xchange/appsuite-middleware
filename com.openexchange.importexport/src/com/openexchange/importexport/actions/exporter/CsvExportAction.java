@@ -57,7 +57,15 @@ import com.openexchange.importexport.formats.Format;
 @DispatcherNotes(defaultFormat="file")
 public class CsvExportAction extends ContactExportAction {
 
-	private Exporter exporter;
+	private final Exporter exporter;
+
+    /**
+     * Initializes a new {@link CsvExportAction}.
+     */
+    public CsvExportAction() {
+        super();
+        exporter = new CSVContactExporter();
+    }
 
 	@Override
 	public Format getFormat() {
@@ -66,9 +74,6 @@ public class CsvExportAction extends ContactExportAction {
 
 	@Override
 	public Exporter getExporter() {
-		if(this.exporter == null){
-			exporter = new CSVContactExporter();
-		}
 		return exporter;
 	}
 

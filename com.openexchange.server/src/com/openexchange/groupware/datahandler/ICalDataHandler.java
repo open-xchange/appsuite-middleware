@@ -49,50 +49,30 @@
 
 package com.openexchange.groupware.datahandler;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.Generic;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.java.Streams;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ICalDataHandler}
@@ -101,9 +81,27 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public abstract class ICalDataHandler implements DataHandler {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalInsertDataHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ICalDataHandler.class);
 
     private static final int LIMIT = 1048576;
+
+    protected final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link ICalDataHandler}.
+     *
+     * @param services The {@link ServiceLookup}
+     *
+     */
+    public ICalDataHandler(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    @Override
+    public String[] getRequiredArguments() {
+        return new String[0];
+    }
 
     protected void insertTasks(final Session session, final int taskFolder, final List<Task> tasks, final JSONArray folderAndIdArray) throws OXException, JSONException {
         final TasksSQLInterface taskSql = new TasksSQLImpl(session);
@@ -114,244 +112,36 @@ public abstract class ICalDataHandler implements DataHandler {
         }
     }
 
-    protected void insertAppointments(final Session session, final int calendarFolder, final Context ctx, final List<CalendarDataObject> appointments, Confirm confirm, final JSONArray folderAndIdArray) throws OXException, JSONException, OXException {
-        final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(
-            session);
-        for (final CalendarDataObject appointment : appointments) {
-            appointment.setContext(ctx);
-            if (confirm != null) {
-                setConfirmation(session, appointment, confirm);
-            }
-            String uid;
-            int objectId = 0;
-            if (appointment.containsUid() && (uid = appointment.getUid()) != null) {
-                objectId = appointmentSql.resolveUid(uid);
-            }
-
-            if (objectId != 0) {
-                try {
-                    if (confirm == null) {
-                        confirm = new Confirm(CalendarDataObject.ACCEPT, null);
-                    } else {
-                        updateOwnParticipantStatus(session, ctx, objectId, confirm, appointmentSql);
-                    }
-                    appointment.setObjectID(objectId);
-                    appointment.setIgnoreConflicts(true);
-                    updateAppointment(appointment, calendarFolder, appointmentSql);
-                    folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(DataFields.ID, objectId));
-                } catch (final OXException e) {
-                    if (e.isGeneric(Generic.NO_PERMISSION)) {
-                        handleWithoutPermission(session, appointment, calendarFolder, confirm, appointmentSql);
-                    } else {
-                        throw e;
-                    }
-                }
-            } else {
-                appointment.setParentFolderID(calendarFolder);
-                appointment.setIgnoreConflicts(true);
-                appointmentSql.insertAppointmentObject(appointment);
-                folderAndIdArray.put(new JSONObject().put(FolderChildFields.FOLDER_ID, calendarFolder).put(
-                    DataFields.ID,
-                    appointment.getObjectID()));
-            }
-        }
-    }
-
-    private void updateAppointment(final CalendarDataObject appointment, final int calendarFolder, final AppointmentSQLInterface appointmentSql) throws OXException {
-        try {
-            final CalendarDataObject loadAppointment = appointmentSql.getObjectById(appointment.getObjectID(), calendarFolder);
-            if (loadAppointment.getSequence() >= appointment.getSequence()) {
-                throw OXCalendarExceptionCodes.OUTDATED_SEQUENCE.create();
-            }
-        } catch (final SQLException e) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
-        }
-
-        appointmentSql.updateAppointmentObject(appointment, calendarFolder, new Date());
-    }
-
-    private void handleWithoutPermission(final Session session, final CalendarDataObject appointment, final int calendarFolder, final Confirm confirm, final AppointmentSQLInterface appointmentSql) throws OXException {
-        appointment.removeUid();
-        appointment.removeObjectID();
-        appointment.setParentFolderID(calendarFolder);
-
-        boolean found = false;
-        if (appointment.getUsers() != null) {
-            for (UserParticipant up : appointment.getUsers()) {
-                if (up.getIdentifier() == session.getUserId()) {
-                    up.setConfirm(confirm.getConfirm());
-                    up.setConfirmMessage(confirm.getConfirmMessage());
-                }
-            }
-        }
-        if (!found) {
-            UserParticipant self = new UserParticipant(session.getUserId());
-            self.setConfirm(confirm.getConfirm());
-            self.setConfirmMessage(confirm.getConfirmMessage());
-            ArrayList<UserParticipant> ups = new ArrayList<UserParticipant>();
-            ups.add(self);
-            if (appointment.getUsers() != null) {
-                for (UserParticipant up : appointment.getUsers()) {
-                    ups.add(up);
-                }
-            }
-            appointment.setUsers(ups);
-        }
-
-        appointmentSql.insertAppointmentObject(appointment);
-    }
-
-    private void updateOwnParticipantStatus(final Session session, final Context ctx, final int objectId, final Confirm confirm, final AppointmentSQLInterface appSql) throws OXException, OXException {
-        final FolderObject calendarFolder = new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(), FolderObject.CALENDAR);
-        try {
-            final CalendarDataObject loadedObject = appSql.getObjectById(objectId, calendarFolder.getObjectID());
-            final UserParticipant[] users = loadedObject.getUsers();
-            boolean found = false;
-            for (final UserParticipant user : users) {
-                if (user.getIdentifier() == session.getUserId()) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found) {
-                try {
-                    appSql.setUserConfirmation(objectId, calendarFolder.getObjectID(), session.getUserId(), confirm.getConfirm(), confirm.getConfirmMessage());
-                } catch (final OXException e) {
-                    throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create("Error during confirmation update.");
-                }
-            } else {
-                throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create("Object already exists, but user is not participant.");
-            }
-
-        } catch (final SQLException e) {
-            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * @param appointment
-     * @param confirm
-     */
-    private void setConfirmation(final Session session, final CalendarDataObject appointment, final Confirm confirm) {
-        final Participant[] participants = appointment.getParticipants();
-        if (null != participants) {
-            for (final Participant participant : participants) {
-                if (participant.getType() == Participant.USER) {
-                    final UserParticipant user = (UserParticipant) participant;
-                    if (user.getIdentifier() == session.getUserId()) {
-                        user.setConfirm(confirm.getConfirm());
-                        if (confirm.getConfirmMessage() != null) {
-                            user.setConfirmMessage(confirm.getConfirmMessage());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    protected List<CalendarDataObject> parseAppointmentStream(final Context ctx, final ICalParser iCalParser, final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors, final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException, ConversionError {
-        final InputStream inputStream = inputStreamCopy.getInputStream();
-        try {
-            return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
-        } finally {
-            Streams.close(inputStream);
-        }
-    }
-
     protected List<Task> parseTaskStream(final Context ctx, final ICalParser iCalParser, final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors, final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException, ConversionError {
         final InputStream inputStream = inputStreamCopy.getInputStream();
         try {
             return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
         } finally {
-            Streams.close(inputStream);
+            safeClose(inputStream);
         }
     }
 
     protected static InputStreamCopy copyStream(final InputStream orig, final long size) throws OXException {
         try {
-            return new InputStreamCopy(orig, (size <= 0 || size > LIMIT));
+            return new InputStreamCopy(orig, "openexchange-ical-", (size <= 0 || size > LIMIT));
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         }
     }
 
-    protected static final class InputStreamCopy {
-
-        private static final int DEFAULT_BUF_SIZE = 0x2000;
-
-        private static final String FILE_PREFIX = "openexchange-ical-";
-
-        private byte[] bytes;
-
-        private File file;
-
-        private final long size;
-
-        public InputStreamCopy(final InputStream orig, final boolean createFile) throws IOException {
-            super();
-            if (createFile) {
-                size = copy2File(orig);
-            } else {
-                size = copy2ByteArr(orig);
+    /**
+     * Closes a {@link Closeable} save. In case of an error while closing, the error will be logged instead of being thrown
+     * so that possible earlier errors won't be 'overriden'
+     *
+     * @param closeable The {@link Closeable}
+     */
+    protected static void safeClose(Closeable closeable) {
+        if (null != closeable) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                LOGGER.debug("Error while closing.", e);
             }
-        }
-
-        public InputStream getInputStream() throws IOException {
-            return bytes == null ? (file == null ? null : (new BufferedInputStream(new FileInputStream(file), DEFAULT_BUF_SIZE))) : (new UnsynchronizedByteArrayInputStream(
-                bytes));
-        }
-
-        public long getSize() {
-            return size;
-        }
-
-        public void close() {
-            if (file != null) {
-                if (file.exists()) {
-                    file.delete();
-                }
-                file = null;
-            }
-            if (bytes != null) {
-                bytes = null;
-            }
-        }
-
-        private int copy2ByteArr(final InputStream in) throws IOException {
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-            final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-            int len;
-            while ((len = in.read(bbuf)) > 0) {
-                out.write(bbuf, 0, len);
-            }
-            out.flush();
-            this.bytes = out.toByteArray();
-            return bytes.length;
-        }
-
-        private long copy2File(final InputStream in) throws IOException {
-            long totalBytes = 0;
-            {
-                final File tmpFile = File.createTempFile(FILE_PREFIX, null, new File(
-                    ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
-                tmpFile.deleteOnExit();
-                OutputStream out = null;
-                try {
-                    out = new BufferedOutputStream(new FileOutputStream(tmpFile), DEFAULT_BUF_SIZE);
-                    final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-                    int len;
-                    while ((len = in.read(bbuf)) > 0) {
-                        out.write(bbuf, 0, len);
-                        totalBytes += len;
-                    }
-                    out.flush();
-                } finally {
-                    Streams.close(out);
-                }
-                file = tmpFile;
-            }
-            return totalBytes;
         }
     }
 
@@ -361,10 +151,9 @@ public abstract class ICalDataHandler implements DataHandler {
      *
      * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
      */
-    protected class Confirm {
+    protected static class Confirm {
 
         private final int confirm;
-
         private final String confirmMessage;
 
         public Confirm(final int confirm, final String confirmMessage) {

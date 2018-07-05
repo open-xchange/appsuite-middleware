@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,14 +40,23 @@
 
 package com.sun.mail.smtp;
 
-import java.io.*;
-import java.util.*;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
-import javax.security.sasl.*;
-import javax.security.auth.callback.*;
 import javax.mail.MessagingException;
-
-import com.sun.mail.util.*;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.sasl.RealmCallback;
+import javax.security.sasl.RealmChoiceCallback;
+import javax.security.sasl.Sasl;
+import javax.security.sasl.SaslClient;
+import javax.security.sasl.SaslException;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.MailLogger;
 
 /**
  * This class contains a single method that does authentication using
@@ -84,6 +93,7 @@ public class SMTPSaslAuthenticator implements SaslAuthenticator {
 	this.host = host;
     }
 
+    @Override
     public boolean authenticate(String[] mechs, final String realm,
 				final String authzid, final String u,
 				final String p) throws MessagingException {
@@ -98,6 +108,7 @@ public class SMTPSaslAuthenticator implements SaslAuthenticator {
 
 	SaslClient sc;
 	CallbackHandler cbh = new CallbackHandler() {
+	    @Override
 	    public void handle(Callback[] callbacks) {
 		if (logger.isLoggable(Level.FINE))
 		    logger.fine("SASL callback length: " + callbacks.length);

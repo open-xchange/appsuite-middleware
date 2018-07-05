@@ -52,7 +52,6 @@ package com.openexchange.capabilities;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;

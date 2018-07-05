@@ -1,5 +1,6 @@
 package com.openexchange.subscribe;
 
+import static org.junit.Assert.assertEquals;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -7,10 +8,6 @@ import java.util.Date;
 import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.subscribe.parser.MicroformatAppointmentParser;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 public class MicroformatAppointmentParserTest {    public Date defaultStartDate;

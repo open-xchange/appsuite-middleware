@@ -91,25 +91,18 @@
 
 package com.openexchange.http.grizzly.service.http;
 
-import org.glassfish.grizzly.servlet.FilterChainFactory;
-import org.glassfish.grizzly.servlet.FilterConfigImpl;
-import org.glassfish.grizzly.servlet.ServletConfigImpl;
-import org.glassfish.grizzly.servlet.WebappContext;
-import org.osgi.service.http.HttpContext;
-import javax.servlet.Filter;
-import javax.servlet.FilterConfig;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import java.lang.String;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
+import org.glassfish.grizzly.http.server.EmptyReadLock;
+import org.glassfish.grizzly.http.server.EmptyWriteLock;
+import org.glassfish.grizzly.servlet.FilterChainFactory;
+import org.glassfish.grizzly.servlet.ServletConfigImpl;
 import org.glassfish.grizzly.servlet.ServletHandler;
+import org.glassfish.grizzly.servlet.WebappContext;
+import org.osgi.service.http.HttpContext;
 
 /**
  * OSGi customized {@link ServletHandler}.
@@ -121,7 +114,9 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OSGiServletHandler.class);
 
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    //private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private static final EmptyReadLock READ_LOCK = EmptyReadLock.getInstance();
+    private static final EmptyWriteLock WRITE_LOCK = EmptyWriteLock.getInstance();
     private HttpContext httpContext;
     private String servletPath;
 
@@ -167,7 +162,8 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
      */
     @Override
     public ReentrantReadWriteLock.ReadLock getProcessingLock() {
-        return lock.readLock();
+        //return lock.readLock();
+        return READ_LOCK;
     }
 
     /**
@@ -175,7 +171,8 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
      */
     @Override
     public ReentrantReadWriteLock.WriteLock getRemovalLock() {
-        return lock.writeLock();
+        // return lock.writeLock();
+        return WRITE_LOCK;
     }
 
     protected void setServletPath(final String path) {

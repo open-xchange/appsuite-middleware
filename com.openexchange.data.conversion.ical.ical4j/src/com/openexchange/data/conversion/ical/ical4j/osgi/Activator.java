@@ -50,20 +50,18 @@
 package com.openexchange.data.conversion.ical.ical4j.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
-import com.openexchange.data.conversion.ical.ical4j.ICal4JITipEmitter;
-import com.openexchange.data.conversion.ical.ical4j.ICal4JITipParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
-import com.openexchange.data.conversion.ical.itip.ITipEmitter;
-import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
@@ -74,6 +72,8 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Activator extends HousekeepingActivator {
+
+    private static final String ICAL_UPDATE_TIMEZONES = "com.openexchange.ical.updateTimezones";
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -87,15 +87,27 @@ public class Activator extends HousekeepingActivator {
         Participants.userResolver = userResolver;
         CreatedBy.userResolver = userResolver;
 
+        Reloadable reloadable = new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                String updateTimezones = configService.getProperty(ICAL_UPDATE_TIMEZONES, "true");
+                System.setProperty("net.fortuna.ical4j.timezone.update.enabled", updateTimezones);
+            }
+
+            @Override
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties(ICAL_UPDATE_TIMEZONES);
+            }
+        };
         ConfigurationService configurationService = getService(ConfigurationService.class);
-        String updateTimezones = configurationService.getProperty("com.openexchange.ical.updateTimezones", "true");
-        System.setProperty("net.fortuna.ical4j.timezone.update.enabled", updateTimezones);
+        reloadable.reloadConfiguration(configurationService);
+        registerService(Reloadable.class, reloadable);
 
         final OXResourceResolver resourceResolver = new OXResourceResolver();
         track(ResourceService.class, new ResourceServiceTrackerCustomizer(context, resourceResolver));
         Participants.resourceResolver = resourceResolver;
 
-        track(CalendarCollectionService.class, new CalendarServiceTracker(context));
         track(GroupService.class, new GroupServiceTracker(context));
         openTrackers();
 
@@ -103,7 +115,5 @@ public class Activator extends HousekeepingActivator {
         parser.setLimit(configurationService.getIntProperty("com.openexchange.import.ical.limit", -1));
 		registerService(ICalParser.class, parser, null);
         registerService(ICalEmitter.class, new ICal4JEmitter(), null);
-        registerService(ITipParser.class, new ICal4JITipParser(), null);
-        registerService(ITipEmitter.class, new ICal4JITipEmitter(), null);
     }
 }

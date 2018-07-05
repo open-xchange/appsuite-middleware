@@ -63,10 +63,10 @@ public class CapabilityHandlerTest {
 
     @Mock
     private ConfigurationService configService;
-
+    
     private ContextReport contextReport;
     private Report report;
-    private final CapabilityHandler capabilityHandlerTest = new CapabilityHandler();
+    private CapabilityHandler capabilityHandlerTest = new CapabilityHandler();
 
     private final String CAPS1 = "active_sync, autologin, boxcom, caldav, calendar, carddav, client-onboarding, collect_email_addresses, conflict_handling, contacts, delegate_tasks";
     private final String CAPS2 = "active_sync, autologin, boxcom, caldav, calendar, carddav, client-onboarding, collect_email_addresses, conflict_handling, contacts";
@@ -231,6 +231,7 @@ public class CapabilityHandlerTest {
                 return createPotentialInfostoreReturn(1, 1, 1, 1, null, 0);
             }
 
+
         };
 
         PowerMockito.mockStatic(Services.class);
@@ -238,15 +239,15 @@ public class CapabilityHandlerTest {
         PowerMockito.when(Services.getService(InfostoreInformationService.class)).thenReturn(informationService);
         ServerServiceRegistry serverServiceRegistry = PowerMockito.mock(ServerServiceRegistry.class);
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
-
+        
         ContextService contextService = PowerMockito.mock(ContextService.class);
         PowerMockito.when(serverServiceRegistry.getService(ContextService.class)).thenReturn(contextService);
-
+        
         Map<PoolAndSchema, List<Integer>> poolContextMap = new HashMap<>();
         PoolAndSchema poolAndSchema = new PoolAndSchema(4, "testSchema");
         poolContextMap.put(poolAndSchema, Arrays.asList(15));
         PowerMockito.when(contextService.getSchemaAssociationsFor(Matchers.anyList())).thenReturn(poolContextMap);
-
+        
         this.initReport("extended");
         initTenantMapForReport();
         addCapSToReport(report, CAPS1);
@@ -341,15 +342,15 @@ public class CapabilityHandlerTest {
         PowerMockito.when(Services.getService(InfostoreInformationService.class)).thenReturn(informationService);
         ServerServiceRegistry serverServiceRegistry = PowerMockito.mock(ServerServiceRegistry.class);
         PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
-
+        
         ContextService contextService = PowerMockito.mock(ContextService.class);
         PowerMockito.when(serverServiceRegistry.getService(ContextService.class)).thenReturn(contextService);
-
+        
         Map<PoolAndSchema, List<Integer>> poolContextMap = new HashMap<>();
         PoolAndSchema poolAndSchema = new PoolAndSchema(4, "testSchema");
         poolContextMap.put(poolAndSchema, Arrays.asList(15, 20));
         PowerMockito.when(contextService.getSchemaAssociationsFor(Matchers.anyList())).thenReturn(poolContextMap);
-
+        
         this.initReport("extended");
         initTenantMapForReport();
         addCapSToReport(report, CAPS1);
@@ -511,7 +512,7 @@ public class CapabilityHandlerTest {
     }
 
     //-------------------Helpers-------------------
-
+    
     private void initWrongDataForLocks() {
         try {
             copyFileUsingStream(new File(reportStoringLocks.getStorageFolderPath() + "/filelock_test_wrong.init"), new File(reportStoringLocks.getStorageFolderPath() + "/" + reportStoringLocks.getUUID() + "_-853702361.part"));

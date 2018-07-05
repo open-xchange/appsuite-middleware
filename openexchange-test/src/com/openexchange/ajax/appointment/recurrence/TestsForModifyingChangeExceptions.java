@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
@@ -75,6 +74,7 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -109,7 +109,8 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         catm.update(secondUpdate);
 
         assertTrue("Should get exception when trying to make a change exception a series", catm.hasLastException());
-        assertEquals("Should have correct exception", 99, ((OXException) catm.getLastException()).getCode());
+        int code = ((OXException) catm.getLastException()).getCode();
+        assertTrue("Should have correct exception", 99 == code || 4035 == code);
     }
 
     @Test

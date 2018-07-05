@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Mobility Configuration SMS transport
 Bundle-SymbolicName: com.openexchange.eas.provisioning.action.sms
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.mobile.configuration.json.action.sms.osgi.ActionActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
@@ -15,6 +15,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.mobile.configuration.json.container,
  com.openexchange.mobile.configuration.json.servlet,
  com.openexchange.osgi,
+ com.openexchange.server,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j

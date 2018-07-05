@@ -50,10 +50,6 @@
 package com.openexchange.imap.command;
 
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.getFetchCommand;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import java.util.Collection;
 import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
@@ -70,7 +66,10 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.UID;
-
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * {@link MailMessageFillerIMAPCommand} - Fills a given collection of messages.
@@ -92,12 +91,21 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
     private final boolean uid;
     private final String fullname;
     private final int index;
+    private final boolean examineHasAttachmentUserFlags;
 
     /**
      * Initializes a new {@link MailMessageFillerIMAPCommand}.
+     *
+     * @param messages The messages to fill
+     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
+     * @param fp The fetch profile to use
+     * @param serverInfo The IMAP server information deduced from configuration
+     * @param imapFolder The IMAP folder providing connected protocol
+     * @throws MessagingException If initialization fails
      */
-    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, IMAPFolder imapFolder) throws MessagingException {
+    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, IMAPFolder imapFolder) throws MessagingException {
         super(imapFolder);
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -180,7 +188,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
                 try {
                     IDMailMessage idm = (IDMailMessage) message;
                     idm.setAccountId(accountId);
-                    MailMessageFetchIMAPCommand.handleFetchRespone(idm, fetchResponse, fullname);
+                    MailMessageFetchIMAPCommand.handleFetchRespone(idm, fetchResponse, fullname, examineHasAttachmentUserFlags);
                 } catch (OXException e) {
                     /*
                      * Discard corrupt message

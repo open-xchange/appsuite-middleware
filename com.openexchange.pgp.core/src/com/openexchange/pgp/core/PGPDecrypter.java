@@ -55,8 +55,10 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
+import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
 import org.bouncycastle.openpgp.PGPObjectFactory;
 import org.bouncycastle.openpgp.PGPOnePassSignature;
@@ -68,21 +70,57 @@ import org.bouncycastle.openpgp.PGPSecretKey;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPUtil;
+import org.bouncycastle.openpgp.operator.PGPDataDecryptor;
+import org.bouncycastle.openpgp.operator.PublicKeyDataDecryptorFactory;
 import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
+import com.openexchange.exception.OXException;
 import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 
 /**
  * {@link PGPDecrypter} - Wrapper for providing stream based PGP decryption
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public class PGPDecrypter {
 
     private final PGPKeyRetrievalStrategy keyRetrievalStrategy;
     private static final int BUFFERSIZE = 1024;
+    private MDCValidationMode mdcValidationMode = MDCValidationMode.WARN_ON_MISSING;
+
+    public enum MDCValidationMode {
+
+        /**
+         * gently - Returns a warning-result if no MDC package was found for integrity verification
+         */
+        WARN_ON_MISSING,
+
+        /**
+         * Strict - Throws an exception if no MDC package was found for integrity verification
+         */
+        FAIL_ON_MISSING,
+    };
+
+    public static class PGPDataContainer {
+
+        private final PGPPrivateKey privateKey;
+        private final PGPPublicKeyEncryptedData data;
+
+        private PGPDataContainer(PGPPrivateKey privateKey, PGPPublicKeyEncryptedData data) {
+            this.privateKey = privateKey;
+            this.data = data;
+        }
+
+        public PGPPrivateKey getPrivateKey() {
+            return privateKey;
+        }
+
+        public PGPPublicKeyEncryptedData getData() {
+            return data;
+        }
+    }
 
     /**
      * Initializes a new {@link PGPDecrypter}.
@@ -90,6 +128,7 @@ public class PGPDecrypter {
      * @param keyRetrievalStrategy A strategy for retrieving public and private PGP keys in order to decrypt data and verify signatures
      */
     public PGPDecrypter(PGPKeyRetrievalStrategy keyRetrievalStrategy) {
+        keyRetrievalStrategy = Objects.requireNonNull(keyRetrievalStrategy, "keyRetrievalStrategy must not be null");
         this.keyRetrievalStrategy = keyRetrievalStrategy;
     }
 
@@ -113,6 +152,33 @@ public class PGPDecrypter {
             }
         };
     }
+
+    /**
+     * Internal method to retrieve a private key. This retrieves the first key suitable for a PGPEncryptedData object.
+     *
+     * @param encryptedDataList A list of encrypted data packets to retrieve the key for.
+     * @param userID The ID of the user to get a key for
+     * @param password The user's password of the key
+     * @return The first suitable decoded private key for a PGPEncryptedData object
+     * @throws OXException if no key was found
+     * @throws Exception
+     */
+    private PGPDataContainer getDataContainer(PGPEncryptedDataList encryptedDataList, String userID, char[] password) throws Exception {
+        //Processing decrypted data
+        PGPPrivateKey privateKey = null;
+        PGPPublicKeyEncryptedData encryptedData = null;
+        Iterator<PGPPublicKeyEncryptedData> encryptedDataListIterator = encryptedDataList.getEncryptedDataObjects();
+        while (encryptedDataListIterator.hasNext()) {
+            encryptedData = encryptedDataListIterator.next();
+            privateKey = getPrivateKey(encryptedData, userID, password);
+            if (privateKey != null) {
+                break;
+            }
+        }
+        return new PGPDataContainer(privateKey, encryptedData);
+    }
+
+
 
     /**
      * Internal method to retrieve a private key
@@ -139,58 +205,133 @@ public class PGPDecrypter {
     }
 
     /**
+     * Get a list of keyIds from an EncryptedDataList Padded with "("
+     *
+     * @param encryptedDataList
+     * @return formatted list of 8 digit hex key Ids
+     */
+    private String getMissingKeyIds(PGPEncryptedDataList encryptedDataList) {
+        StringBuilder sb = new StringBuilder();
+        Iterator<PGPPublicKeyEncryptedData> dataListIterator = encryptedDataList.getEncryptedDataObjects();
+        PGPPublicKeyEncryptedData encryptedData = null;
+        sb.append(" ( ");
+        while (dataListIterator.hasNext()) {
+            encryptedData = dataListIterator.next();
+            String keyId = Long.toHexString(encryptedData.getKeyID()).substring(8).toUpperCase();
+            if (!sb.toString().contains(keyId)) { // avoid repeats
+                if (sb.length() > 8) {
+                    sb.append(", "); // already more than one added
+                }
+                sb.append("0x");
+                sb.append(keyId);
+            }
+        }
+        sb.append(" )");
+        return (sb.toString());
+    }
+
+    /**
+     * Extracts PGP encrypted data from an decoder InputStream
+     *
+     * @param decoderStream the PGP InputStream to extract the PGP encrypted data from.
+     * @return The PGP encrypted data extracted from the PGP stream
+     * @throws IOException
+     * @throws OXException
+     */
+    private PGPEncryptedDataList getPGPEncryptedData(InputStream decoderStream) throws IOException, OXException {
+
+        PGPObjectFactory pgpObjectFactory = new PGPObjectFactory(decoderStream, new BcKeyFingerprintCalculator());
+
+        //reading first part of the stream
+        Object firstObject = pgpObjectFactory.nextObject();
+        if (firstObject == null) {
+            throw PGPCoreExceptionCodes.NO_PGP_DATA_FOUND.create();
+        }
+
+        PGPEncryptedDataList encryptedDataList;
+        //the first object might be a PGP marker packet.
+        if (firstObject instanceof PGPEncryptedDataList) {
+            encryptedDataList = (PGPEncryptedDataList) firstObject;
+        } else {
+            encryptedDataList = (PGPEncryptedDataList) pgpObjectFactory.nextObject();
+        }
+
+        if (encryptedDataList == null) {
+            //No encrypted data found (i.e if a signature was supplied)
+            throw PGPCoreExceptionCodes.NO_PGP_DATA_FOUND.create();
+        }
+        return encryptedDataList;
+    }
+
+    /**
+     * Decrypts the given data
+     *
+     * @param publicKeyEncryptedData The data to decrypt
+     * @return The InputStream to the decrypted clear text data
+     * @throws PGPException
+     */
+    private InputStream decrypt(PGPDataContainer publicKeyEncryptedData) throws PGPException {
+        return publicKeyEncryptedData.getData().getDataStream(getDecryptionFactory(publicKeyEncryptedData));
+    }
+
+    /**
+     * Controls whether or not to treat a key, fetched from a {@link PGPKeyRetrievalStrategy}, as found.
+     *
+     * @param key The key to check
+     * @return true, if the key should be considered as found, false if it should be considered as not found.
+     */
+    protected boolean keyFound(PGPPrivateKey key) {
+        return key != null;
+    }
+
+    /**
+     * Creates a factory for creating a {@link PGPDataDecryptor}
+     *
+     * @param publicKeyEncryptedData The data to decrypt with the factory.
+     * @return A factory able to decrypt the given PGP data
+     */
+    protected PublicKeyDataDecryptorFactory getDecryptionFactory(PGPDataContainer publicKeyEncryptedData) {
+        return new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(publicKeyEncryptedData.getPrivateKey());
+    }
+
+    /**
+     * Defines how to handle missing MDC (Modification detection code) packages.
+     *
+     * @param mdcValidationMode
+     * @return this
+     */
+    public PGPDecrypter setMDCValidationMode(MDCValidationMode mdcValidationMode) {
+        this.mdcValidationMode = mdcValidationMode;
+        return this;
+    }
+
+    /**
      * Decrypts data
      *
-     * @param input The input stream to read the data from
+     * @param input The input stream to read the PGP data from
      * @param output The output stream to write the decoded data to
      * @param userID The PGP user identity of the user who want's to decode the data
      * @param password The password of the user's key which will be retrieved using the given strategy
      * @return A list of Signature verification results, or an empty list, if the encrypted data was not signed
      * @throws Exception
      */
-    public List<PGPSignatureVerificationResult> decrypt(InputStream input, OutputStream output, String userID, char[] password) throws Exception {
-        List<PGPSignatureVerificationResult> ret = new ArrayList<>();
+    public PGPDecryptionResult decrypt(InputStream input, OutputStream output, String userID, char[] password) throws Exception {
+        List<PGPSignatureVerificationResult> signatureVerificationResults = new ArrayList<>();
+        MDCVerificationResult mdcVerificationResult  = null;
         try (InputStream decoderStream = PGPUtil.getDecoderStream(input)) {
-            PGPObjectFactory pgpObjectFactory = new PGPObjectFactory(decoderStream, new BcKeyFingerprintCalculator());
 
-            //reading first part of the stream
-            Object firstObject = pgpObjectFactory.nextObject();
-            if (firstObject == null) {
-                throw PGPCoreExceptionCodes.NO_PGP_DATA_FOUND.create();
-            }
+            //Gets a list of PGP data from the stream
+            PGPEncryptedDataList encryptedDataList = getPGPEncryptedData(decoderStream);
 
-            PGPEncryptedDataList encryptedDataList;
-            //the first object might be a PGP marker packet.
-            if (firstObject instanceof PGPEncryptedDataList) {
-                encryptedDataList = (PGPEncryptedDataList) firstObject;
-            } else {
-                encryptedDataList = (PGPEncryptedDataList) pgpObjectFactory.nextObject();
-            }
-
-            if(encryptedDataList == null) {
-                //No encrypted data found (i.e if a signature was supplied)
-                throw PGPCoreExceptionCodes.NO_PGP_DATA_FOUND.create();
-            }
-
-            //Processing decrypted data
-            PGPPrivateKey privateKey = null;
-            PGPPublicKeyEncryptedData encryptedData = null;
-            Iterator<PGPPublicKeyEncryptedData> encryptedDataListIterator = encryptedDataList.getEncryptedDataObjects();
-            while (encryptedDataListIterator.hasNext()) {
-                encryptedData = encryptedDataListIterator.next();
-                privateKey = getPrivateKey(encryptedData, userID, password);
-                if (privateKey != null) {
-                    break;
-                }
-            }
-
-            if (privateKey == null) {
+            //Get the public key encrypted data for the given user's private key
+            PGPDataContainer publicKeyEncryptedData = getDataContainer(encryptedDataList, userID, password);
+            if(!keyFound(publicKeyEncryptedData.getPrivateKey())) {
                 throw PGPCoreExceptionCodes.PRIVATE_KEY_NOT_FOUND.create(userID + getMissingKeyIds(encryptedDataList));
             }
 
-            InputStream clearDataStream = encryptedData.getDataStream(new JcePublicKeyDataDecryptorFactoryBuilder().setProvider("BC").build(privateKey));
-
-            //Processing pgp data
+            //Decrypting the data
+            InputStream clearDataStream = decrypt(publicKeyEncryptedData);
+            //Processing decrypted pgp data
             PGPObjectFactory plainFact = new PGPObjectFactory(clearDataStream, new BcKeyFingerprintCalculator());
             Object pgpObject = plainFact.nextObject();
             PGPOnePassSignatureList onePassSignatureList = null;
@@ -257,46 +398,31 @@ public class PGPDecrypter {
                         PGPSignature signature = signatureList.get(0);
                         if (signatureInitialized) {
                             //Verify signatures
-                            ret.add(new PGPSignatureVerificationResult(signature, onePassSignature.verify(signature)));
+                            signatureVerificationResults.add(new PGPSignatureVerificationResult(signature, onePassSignature.verify(signature)));
                         }
                         else if (!signatureVerificationKeyFound) {
                             //Key not found for verifying the signature; KeyRetrievalStrategy is responsible for logging this;
-                            ret.add(new PGPSignatureVerificationResult(signature, false, true));
+                            signatureVerificationResults.add(new PGPSignatureVerificationResult(signature, false, true));
                         }
                     }
                     pgpObject = plainFact.nextObject();
                 }
             }
 
-            if(encryptedData.isIntegrityProtected() && !encryptedData.verify()) {
-            	throw PGPCoreExceptionCodes.PGP_EXCEPTION.create("Integrity check of the message failed.");
+            //Perform integrity/MDC validation
+            mdcVerificationResult = MDCVerificationResult.createFrom(publicKeyEncryptedData);
+            if(mdcVerificationResult.isPresent()) {
+                if(!mdcVerificationResult.verified){
+                    throw PGPCoreExceptionCodes.PGP_EXCEPTION.create("Integrity check of the message failed.");
+                }
+            }
+            else {
+               if(mdcValidationMode == MDCValidationMode.FAIL_ON_MISSING) {
+                    throw PGPCoreExceptionCodes.PGP_EXCEPTION.create("Itegrity protection not found.");
+               }
             }
         }
         output.flush();
-        return ret;
-    }
-
-    /**
-     * Get a list of keyIds from an EncryptedDataList
-     * Padded with "("
-     * @param encryptedDataList
-     * @return formatted list of 8 digit hex key Ids
-     */
-    private String getMissingKeyIds (PGPEncryptedDataList encryptedDataList) {
-        StringBuilder sb = new StringBuilder();
-        Iterator<PGPPublicKeyEncryptedData> dataListIterator = encryptedDataList.getEncryptedDataObjects();
-        PGPPublicKeyEncryptedData encryptedData = null;
-        sb.append(" ( ");
-        while (dataListIterator.hasNext()) {
-            encryptedData = dataListIterator.next();
-            String keyId = Long.toHexString(encryptedData.getKeyID()).substring(8).toUpperCase();
-            if (!sb.toString().contains(keyId)) { // avoid repeats
-                if (sb.length() > 8) sb.append(", "); // already more than one added
-                sb.append("0x");
-                sb.append(keyId);
-            }
-        }
-        sb.append(" )");
-        return (sb.toString());
+        return new PGPDecryptionResult(signatureVerificationResults, mdcVerificationResult);
     }
 }

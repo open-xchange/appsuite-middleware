@@ -61,6 +61,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -106,10 +107,11 @@ public final class BoxAccountAccess implements CapabilityAware {
     public void connect() throws OXException {
         OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry registry = service.get(KnownApi.BOX_COM.getFullName());
-        OAuthAccess boxAccess = registry.get(session.getContextId(), session.getUserId());
+        int accountId = OAuthUtil.getAccountId(account.getConfiguration());
+        OAuthAccess boxAccess = registry.get(session.getContextId(), session.getUserId(), accountId);
         if (boxAccess == null) {
             BoxOAuthAccess access = new BoxOAuthAccess(account, session);
-            boxAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), access);
+            boxAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), accountId, access);
             if (null == boxAccess) {
                 access.initialize();
                 boxAccess = access;

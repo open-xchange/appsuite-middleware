@@ -36,12 +36,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.WeakHashMap;
-
+import org.apache.commons.lang.builder.EqualsBuilder;
 import net.fortuna.ical4j.util.CompatibilityHints;
 import net.fortuna.ical4j.util.Dates;
 import net.fortuna.ical4j.util.TimeZones;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
 
 /**
  * $Id$

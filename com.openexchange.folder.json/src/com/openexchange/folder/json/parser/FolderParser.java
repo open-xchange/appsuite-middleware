@@ -51,6 +51,7 @@ package com.openexchange.folder.json.parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -60,9 +61,13 @@ import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
+import com.openexchange.folder.json.FolderFieldRegistry;
+import com.openexchange.folderstorage.BasicGuestPermission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.java.Enums;
@@ -172,6 +177,8 @@ public final class FolderParser {
                 }
             }
 
+            folder.setProperties(parseProperties(folderJsonObject));
+
             return folder;
         } catch (final JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
@@ -216,14 +223,14 @@ public final class FolderParser {
             /*
              * parse as guest permission entity
              */
-            ParsedGuestPermission parsedGuestPermission = new ParsedGuestPermission();
+            BasicGuestPermission parsedGuestPermission = new BasicGuestPermission();
             parsedGuestPermission.setRecipient(ShareTool.parseRecipient(jsonObject, timeZone));
             permission = parsedGuestPermission;
         } else {
             /*
              * parse as already known permission entity
              */
-            ParsedPermission parsedPermission = new ParsedPermission();
+            Permission parsedPermission = new BasicPermission();
             if (false == jsonObject.has(FolderField.ENTITY.getName())) {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
             }
@@ -250,6 +257,23 @@ public final class FolderParser {
         permission.setDeletePermission(permissionBits[3]);
         permission.setAdmin(permissionBits[4] > 0 ? true : false);
         return permission;
+    }
+
+    /**
+     * Parses arbitrary folder field properties from the supplied JSON object. Any registered folder field (as supplied via the
+     * {@link FolderFieldRegistry}) is considered.
+     *
+     * @param folderJsonObject The JSON representation of the folder as sent by the client
+     * @return A map of parsed folder properties, or <code>null</code> if no folder field properties were parsed
+     */
+    private static Map<com.openexchange.folderstorage.FolderField, FolderProperty> parseProperties(JSONObject folderJsonObject) {
+        Map<com.openexchange.folderstorage.FolderField, FolderProperty> properties = new HashMap<com.openexchange.folderstorage.FolderField, FolderProperty>();
+        for (com.openexchange.folderstorage.FolderField field : FolderFieldRegistry.getInstance().getPairs()) {
+            if (folderJsonObject.has(field.getName())) {
+                properties.put(field, field.parse(folderJsonObject.opt(field.getName())));
+            }
+        }
+        return properties.isEmpty() ? null : properties;
     }
 
 }

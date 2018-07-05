@@ -59,8 +59,10 @@ import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareExceptionMessages;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
@@ -128,14 +130,14 @@ public class ShareServlet extends AbstractShareServlet {
             // Extract share from path info
             String pathInfo = request.getPathInfo();
             if (pathInfo == null) {
-                sendNotFound(response, translator);
+                sendNotFound(request, response, translator);
                 return;
             }
 
             List<String> paths = ShareServletUtils.splitPath(pathInfo);
             if (paths.isEmpty()) {
                 LOG.debug("No share found at '{}'", pathInfo);
-                sendNotFound(response, translator);
+                sendNotFound(request, response, translator);
                 return;
             }
 
@@ -145,7 +147,7 @@ public class ShareServlet extends AbstractShareServlet {
                     String userAgent = request.getHeader("User-Agent");
                     if (userAgentBlacklist.isBlacklisted(userAgent)) {
                         LOG.info("User-Agent black-listed: '{}'", userAgent);
-                        sendNotFound(response, translator, ShareServletStrings.SHARE_NOT_ACCESSIBLE, "client_blacklisted");
+                        sendNotFound(request, response, translator, ShareServletStrings.SHARE_NOT_ACCESSIBLE, "client_blacklisted");
                         return;
                     }
                 }
@@ -154,7 +156,7 @@ public class ShareServlet extends AbstractShareServlet {
             GuestInfo guest = ShareServiceLookup.getService(ShareService.class, true).resolveGuest(paths.get(0));
             if (guest == null) {
                 LOG.debug("No guest with token '{}' found at '{}'", paths.get(0), pathInfo);
-                sendNotFound(response, translator);
+                sendNotFound(request, response, translator);
                 return;
             }
 
@@ -187,7 +189,7 @@ public class ShareServlet extends AbstractShareServlet {
                 if (invalidTarget) {
                     List<TargetProxy> otherTargets = moduleSupport.listTargets(contextId, guestId);
                     if (otherTargets.isEmpty()) {
-                        sendNotFound(response, translator);
+                        sendNotFound(request, response, translator);
                         return;
                     }
 
@@ -212,7 +214,14 @@ public class ShareServlet extends AbstractShareServlet {
             e.send(response);
         } catch (OXException e) {
             if (ShareExceptionCodes.INVALID_TOKEN.equals(e) || ShareExceptionCodes.UNKNOWN_SHARE.equals(e)) {
-                sendNotFound(response, translator);
+                sendNotFound(request, response, translator);
+            } else if (SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.equals(e)){
+                LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
+                LoginLocation location = new LoginLocation()
+                    .status("internal_error")
+                    .loginType(LoginType.MESSAGE)
+                    .message(MessageType.ERROR, translator.translate(ShareExceptionMessages.SHARE_NOT_AVAILABLE_MSG));
+                LoginLocationRegistry.getInstance().putAndRedirect(location, response);
             } else {
                 LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
                 LoginLocation location = new LoginLocation()
@@ -246,32 +255,44 @@ public class ShareServlet extends AbstractShareServlet {
     /**
      * Sends a redirect with an {@link ShareServletStrings#SHARE_NOT_FOUND appropriate error message} for a not found share.
      *
+     * @param request The HTTP servlet request
      * @param response The HTTP servlet response to redirect
      * @param translator The translator
      */
-    private static void sendNotFound(HttpServletResponse response, Translator translator) throws IOException {
-        sendNotFound(response, translator, ShareServletStrings.SHARE_NOT_FOUND, "not_found");
+    private void sendNotFound(HttpServletRequest request, HttpServletResponse response, Translator translator) throws IOException {
+        sendNotFound(request, response, translator, ShareServletStrings.SHARE_NOT_FOUND, "not_found");
     }
 
     /**
      * Sends a redirect with an appropriate error message for a not found share.
      *
+     * @param request The HTTP servlet request
      * @param response The HTTP servlet response to redirect
      * @param translator The translator
      * @param displayMessage The message displayed to the user
      * @param status The status to signal
      */
-    private static void sendNotFound(HttpServletResponse response, Translator translator, String displayMessage, String status) throws IOException {
+    private void sendNotFound(HttpServletRequest request, HttpServletResponse response, Translator translator, String displayMessage, String status) throws IOException {
+        /*
+         * send handler-specific "not found" if appropriate
+         */
+        for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
+            if (ShareHandlerReply.ACCEPT.equals(handler.handleNotFound(request, response, status))) {
+                return;
+            }
+        }
+        /*
+         * send generic "not found" (via web interface) by default
+         */
         LoginLocation location = new LoginLocation()
             .status(status)
             .parameter("status", status)
             .loginType(LoginType.MESSAGE)
             .message(MessageType.ERROR, translator.translate(displayMessage));
         LoginLocationRegistry.getInstance().putAndRedirect(location, response);
-        return;
     }
 
-    private TargetProxy applyFallbackPathMatching(List<TargetProxy> targets, String path) {
+    private static TargetProxy applyFallbackPathMatching(List<TargetProxy> targets, String path) {
         final int prime = 31;
         for (TargetProxy proxy : targets) {
             ShareTarget target = proxy.getTarget();

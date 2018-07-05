@@ -2,24 +2,19 @@
 
 Name:          open-xchange-admin
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 35
+%define        ox_release 10
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -76,121 +71,12 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-
+. /opt/open-xchange/lib/oxfunctions.sh
 if [ ${1:-0} -eq 2 ]; then
     # only when updating
-    . /opt/open-xchange/lib/oxfunctions.sh
 
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
-
-    ##
-    ## start update from < 6.21
-    ##
-    CONFFILES="AdminDaemon.properties Group.properties ModuleAccessDefinitions.properties RMI.properties Resource.properties Sql.properties mpasswd plugin/hosting.properties"
-    for FILE in ${CONFFILES}; do
-	ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc $FILE
-    done
-    ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc User.properties AdminUser.properties
-
-    ofile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
-    pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-    if [ -e $ofile ]; then
-        oval=$(ox_read_property JAVA_OXCMD_OPTS $ofile)
-        if [ -n "$oval" ]; then
-           ox_set_property JAVA_OXCMD_OPTS "$oval" $pfile
-        else
-           ox_set_property JAVA_OXCMD_OPTS "-Djava.net.preferIPv4Stack=true" $pfile
-        fi
-        rm -f $ofile
-    fi
-
-    # SoftwareChange_Request-1118
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/AdminDaemon.properties
-    ox_remove_property TOOL_STORAGE $pfile
-
-    ofile=/opt/open-xchange/etc/AdminDaemon.properties
-    pfile=/opt/open-xchange/etc/rmi.properties
-    if ox_exists_property BIND_ADDRESS $ofile; then
-	oval=$(ox_read_property BIND_ADDRESS $ofile)
-	if [ -n "$oval" ]; then
-	   ox_set_property com.openexchange.rmi.host $oval $pfile
-	fi
-	ox_remove_property BIND_ADDRESS $ofile
-    fi
-
-    ofile=/opt/open-xchange/etc/RMI.properties
-    if [ -e $ofile ]; then
-	oval=$(ox_read_property RMI_PORT $ofile)
-	if [ -n "$oval" ]; then
-	   ox_set_property com.openexchange.rmi.port $oval $pfile
-	fi
-	rm -f $ofile
-    fi
-
-    # SoftwareChange_Request-1091
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/AdminUser.properties
-    ox_remove_property CREATE_HOMEDIRECTORY $pfile
-    ox_remove_property HOME_DIR_ROOT $pfile
-    pfile=/opt/open-xchange/etc/AdminDaemon.properties
-    ox_remove_property USER_PROP $pfile
-    ox_remove_property GROUP_PROP $pfile
-    ox_remove_property RESOURCE_PROP $pfile
-    ox_remove_property RMI_PROP $pfile
-    ox_remove_property SQL_PROP $pfile
-    ox_remove_property MASTER_AUTH_FILE $pfile
-    ox_remove_property ACCESS_COMBINATIONS_FILE $pfile
-
-    # SoftwareChange_Request-1100
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/AdminDaemon.properties
-    ox_remove_property SERVER_NAME $pfile
-    ##
-    ## end update from < 6.21
-    ##
-
-    # SoftwareChange_Request-1846
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/AdminUser.properties
-    ox_add_property SENT_MAILFOLDER_EN_GB SentMail $pfile
-    ox_add_property TRASH_MAILFOLDER_EN_GB Trash $pfile
-    ox_add_property DRAFTS_MAILFOLDER_EN_GB Drafts $pfile
-    ox_add_property SPAM_MAILFOLDER_EN_GB Spam $pfile
-    ox_add_property CONFIRMED_SPAM_MAILFOLDER_EN_GB confirmed-spam $pfile
-    ox_add_property CONFIRMED_HAM_MAILFOLDER_EN_GB confirmed-ham $pfile
-
-    # SoftwareChange_Request-1831
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
-
-	if grep -E "projects" $pfile > /dev/null; then
-	   ptmp=${pfile}.$$
-
-	   sed -e 's;projects *,;;g' -e 's;, *projects;;g' $pfile > $ptmp
-
-	   if [ -s $ptmp ]; then
-	      cp $ptmp $pfile
-	   fi
-	   rm -f $ptmp
-	fi
-
-    # SoftwareChange_Request-2074
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
-    for key in rssbookmarks rssportal forum pinboardwrite; do
-        if grep -E $key $pfile > /dev/null; then
-            ptmp=${pfile}.$$
-
-            sed -e "s;$key *,;;g" -e "s;, *$key;;g" $pfile > $ptmp
-
-            if [ -s $ptmp ]; then
-                cp $ptmp $pfile
-            fi
-            rm -f $ptmp
-        fi
-    done
 
     # SoftwareChange_Request-2197
     ox_add_property SCHEMA_MOVE_MAINTENANCE_REASON 1431655765 /opt/open-xchange/etc/plugin/hosting.properties
@@ -225,16 +111,8 @@ if [ ${1:-0} -eq 2 ]; then
     fi
     rm $TMPFILE
 
-    # SoftwareChange_Request-2323
-    VALUE=$(ox_read_property SENT_MAILFOLDER_EN_GB /opt/open-xchange/etc/AdminUser.properties)
-    if [ "SentMail" == "$VALUE" ]; then
-        ox_set_property SENT_MAILFOLDER_EN_GB "Sent Mail" /opt/open-xchange/etc/AdminUser.properties
-    fi
-
     # SoftwareChange_Request-2382
     ox_add_property MASTER_ACCOUNT_OVERRIDE false /opt/open-xchange/etc/AdminDaemon.properties
-
-    ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 
     # SoftwareChange_Request-2535
     # ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
@@ -268,7 +146,17 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-4170
     ox_add_property LOCK_ON_WRITE_CONTEXT_INTO_PAYLOAD_DB false /opt/open-xchange/etc/plugin/hosting.properties
+
+    # SoftwareChange_Request-4351
+    PFILE=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    expression='# webdavxml (interface for OXtender for Microsoft Outlook, used by KDE for synchronization)'
+    $(contains "^${expression}$" $PFILE) && sed -i "s/^${expression}$/${expression} [DEPRECATED]/" $PFILE
+
+    # SoftwareChange_Request-147
+    ox_remove_property CREATE_CONTEXT_USE_UNIT /opt/open-xchange/etc/plugin/hosting.properties
+
 fi
+ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -292,70 +180,28 @@ fi
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
-* Tue Jun 26 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-06-21 (4801)
-* Mon Jun 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-06-25 (4791)
-* Fri Jun 08 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-06-11 (4771)
-* Tue Jun 05 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-06-06 (4773)
-* Tue May 22 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-05-28 (4758)
-* Mon Apr 30 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-05-07 (4685)
-* Mon Apr 30 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-04-30 (4691)
-* Fri Apr 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-04-23 (4670)
-* Thu Apr 12 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-04-12 (4674)
+* Fri Jun 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.10.0 release
+* Wed Jun 27 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.10.0 release
+* Mon Jun 25 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.10.0 release
+* Mon Jun 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.0 release
+* Fri May 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth preview of 7.10.0 release
+* Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth preview of 7.10.0 release
 * Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-04-03 (4642)
-* Fri Mar 23 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-03-26 (4619)
-* Mon Mar 12 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-03-12 (4602)
-* Mon Feb 26 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-02-26 (4583)
-* Mon Jan 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-02-05 (4555)
-* Mon Jan 15 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-01-22 (4538)
-* Tue Jan 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-01-08 (4516)
-* Fri Dec 08 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for Patch 2017-12-11 (4473)
-* Thu Nov 16 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-11-20 (4441)
-* Tue Nov 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-11-15 (4448)
-* Wed Oct 25 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-10-30 (4415)
-* Mon Oct 23 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-10-29 (4425)
-* Mon Oct 16 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-10-16 (4394)
-* Wed Sep 27 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-10-02 (4377)
-* Thu Sep 21 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-09-22 (4373)
-* Tue Sep 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-09-18 (4354)
-* Fri Sep 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-09-04 (4328)
-* Mon Aug 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-08-21 (4318)
-* Tue Aug 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-08-07 (4304)
-* Mon Jul 17 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-07-24 (4285)
-* Mon Jul 03 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-07-10 (4257)
-* Wed Jun 21 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-06-26 (4233)
-* Tue Jun 06 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-06-08 (4180)
+Fourth preview of 7.10.0 release
+* Tue Feb 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Third preview of 7.10.0 release
+* Fri Feb 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.0 release
+* Fri Dec 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.0 release
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

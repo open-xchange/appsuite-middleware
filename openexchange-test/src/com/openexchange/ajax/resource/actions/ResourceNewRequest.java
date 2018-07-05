@@ -85,7 +85,7 @@ public final class ResourceNewRequest extends AbstractResourceRequest<ResourceNe
     public ResourceNewRequest(final Resource createMe, final boolean failOnError) throws JSONException {
         super();
         this.failOnError = failOnError;
-        resourceJSON = ResourceWriter.writeResource(createMe);
+        resourceJSON = createMe != null ? ResourceWriter.writeResource(createMe) : null;
     }
 
     public ResourceNewRequest(final Resource resource) throws JSONException {

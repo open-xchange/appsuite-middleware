@@ -51,12 +51,11 @@ package com.openexchange.realtime.presence.subscribe.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -76,10 +75,10 @@ public class RemoveRealtimePresenceTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        Connection connection = params.getConnection();
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(connection);
+            Databases.startTransaction(connection);
             rollback = true;
 
             if (Tools.tableExists(connection, "presenceSubscriptions")) {
@@ -92,10 +91,9 @@ public class RemoveRealtimePresenceTableTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(connection);
+                Databases.rollback(connection);
             }
-            DBUtils.autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
+            Databases.autocommit(connection);
         }
     }
 
@@ -103,6 +101,5 @@ public class RemoveRealtimePresenceTableTask extends UpdateTaskAdapter {
     public String[] getDependencies() {
         return new String[] { "com.openexchange.realtime.presence.subscribe.database.AddPrimaryKeyTaskV2" };
     }
-
 
 }

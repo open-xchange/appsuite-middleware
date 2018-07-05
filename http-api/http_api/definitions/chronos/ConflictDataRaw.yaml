@@ -1,0 +1,15 @@
+type: object
+title: Conflict
+description: A conflict.
+properties:
+  hard_conflict: 
+    type: boolean
+    description: Defines whether the conflict is a hard conflict or not.
+  conflicting_attendees:
+    type: array
+    description: An array of conflicting attendees.
+    items:
+      $ref: "#/definitions/Attendee"
+  event:
+    description: The conflicting event.
+    $ref: "#/definitions/EventData"

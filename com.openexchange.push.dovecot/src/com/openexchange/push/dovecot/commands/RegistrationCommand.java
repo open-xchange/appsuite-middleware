@@ -52,8 +52,6 @@ package com.openexchange.push.dovecot.commands;
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import org.slf4j.Logger;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.BadCommandException;
@@ -133,10 +131,16 @@ public class RegistrationCommand implements ProtocolCommand {
             return Boolean.TRUE;
         } else if (response.isBAD()) {
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-            throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+            if (null != imapFolder) {
+                LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+            }
+            throw new BadCommandException(response);
         } else if (response.isNO()) {
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-            throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+            if (null != imapFolder) {
+                LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+            }
+            throw new CommandFailedException(response);
         } else {
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
             protocol.handleResult(response);

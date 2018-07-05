@@ -58,6 +58,8 @@ import com.openexchange.file.storage.CacheAware;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.FolderPath;
+import com.openexchange.file.storage.OriginAwareFileStorageFolder;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FolderID;
 
@@ -66,7 +68,7 @@ import com.openexchange.file.storage.composition.FolderID;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class IDManglingFolder implements TypeAware, CacheAware {
+public class IDManglingFolder implements TypeAware, CacheAware, OriginAwareFileStorageFolder {
 
     /**
      * Create a new {@link FileStorageFolder} instance delegating all regular calls to the supplied folder, but returning the unique ID
@@ -256,6 +258,14 @@ public class IDManglingFolder implements TypeAware, CacheAware {
     @Override
     public String toString() {
         return "IDManglingFolder [id=" + id + ", delegateId=" + delegate.getId() + ", name=" + delegate.getName() + "]";
+    }
+
+    @Override
+    public FolderPath getOrigin() {
+        if (delegate instanceof OriginAwareFileStorageFolder) {
+            return ((OriginAwareFileStorageFolder) delegate).getOrigin();
+        }
+        return null;
     }
 
 }

@@ -49,15 +49,14 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import org.slf4j.Logger;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -71,7 +70,7 @@ import com.openexchange.groupware.update.WorkingLevel;
  * {@link ContactsAddDepartmentIndex4AutoCompleteSearch}
  *
  * (Re-)adds department index in prg_contacts for "auto-complete" queries
- * 
+ *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
@@ -98,23 +97,26 @@ public class ContactsAddDepartmentIndex4AutoCompleteSearch extends UpdateTaskAda
     public void perform(PerformParameters params) throws OXException {
         Logger log = org.slf4j.LoggerFactory.getLogger(ContactsAddDepartmentIndex4AutoCompleteSearch.class);
         log.info("Performing update task {}", ContactsAddDepartmentIndex4AutoCompleteSearch.class.getSimpleName());
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
-        boolean committed = false;
+
+        Connection connection = params.getConnection();
+        boolean rollback = false;
         try {
             connection.setAutoCommit(false);
+            rollback = true;
+
             createIndexIfNeeded(log, connection, new String[] { "cid", "field19" }, "department");
+
             connection.commit();
-            committed = true;
+            rollback = false;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (false == committed) {
-                rollback(connection);
+            if (rollback) {
+                Databases.rollback(connection);
             }
             autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
         }
         log.info("{} successfully performed.", ContactsAddDepartmentIndex4AutoCompleteSearch.class.getSimpleName());
     }

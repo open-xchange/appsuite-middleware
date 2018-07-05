@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The *DAV subscribe bundle for web.de
+Bundle-SymbolicName: com.openexchange.subscribe.dav.web.de
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.server,
+ com.openexchange.subscribe,
+ com.openexchange.subscribe.dav,
+ com.openexchange.tools.session,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.subscribe.dav.web.de.osgi.WebDeSubscribeActivator

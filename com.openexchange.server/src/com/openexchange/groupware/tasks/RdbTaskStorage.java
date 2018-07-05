@@ -51,7 +51,6 @@ package com.openexchange.groupware.tasks;
 
 import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -160,7 +159,7 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
-            closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
         }
     }
 
@@ -211,6 +210,7 @@ public class RdbTaskStorage extends TaskStorage {
      */
     @Override
     public TaskIterator search(final Context ctx, final int userId, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws OXException {
+        // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, true, true, null));
@@ -264,7 +264,7 @@ public class RdbTaskStorage extends TaskStorage {
     }
 
     /**
-     * Counts the tasks in a folder.
+     * Counts the number of tasks located in given folder.
      *
      * @param ctx Context.
      * @param folderId unique identifier of the folder.
@@ -275,8 +275,9 @@ public class RdbTaskStorage extends TaskStorage {
      * @throws OXException if an error occurs.
      */
     private int countTasks(final Context ctx, final int folderId, final boolean onlyOwn, final int userId, final boolean noPrivate) throws OXException {
-        final Connection con = DBPool.pickup(ctx);
-        int number = 0;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        Connection con = DBPool.pickup(ctx);
         try {
             final StringBuilder sql = new StringBuilder(COUNT_TASKS);
             if (onlyOwn) {
@@ -285,25 +286,22 @@ public class RdbTaskStorage extends TaskStorage {
             if (noPrivate) {
                 sql.append(NO_PRIVATE);
             }
-            final PreparedStatement stmt = con.prepareStatement(sql.toString());
+
+            stmt = con.prepareStatement(sql.toString());
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
             if (onlyOwn) {
                 stmt.setInt(pos++, userId);
             }
-            final ResultSet result = stmt.executeQuery();
-            if (result.next()) {
-                number = result.getInt(1);
-            }
-            result.close();
-            stmt.close();
+            result = stmt.executeQuery();
+            return result.next() ? result.getInt(1) : 0;
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
+            Databases.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }
-        return number;
     }
 
     @Override
@@ -345,7 +343,7 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
-            closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
         }
     }
 
@@ -405,7 +403,7 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
         return exists;
     }
@@ -440,7 +438,7 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
         if (null == task) {
             throw TaskExceptionCode.TASK_NOT_FOUND.create(I(taskId), I(ctx.getContextId()));
@@ -495,7 +493,7 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
-            closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(null, stmt);
         }
     }
 
@@ -666,7 +664,7 @@ public class RdbTaskStorage extends TaskStorage {
                 throw TaskExceptionCode.NO_COUNT_RESULT.create();
             }
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
         return retval;
     }

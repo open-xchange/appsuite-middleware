@@ -111,7 +111,6 @@ import org.junit.runners.Suite;
     com.openexchange.mail.structure.Bug16174StructureTest.class,
     com.openexchange.mail.structure.Bug18846StructureTest.class,
     com.openexchange.mail.structure.Bug18981StructureTest.class,
-    com.openexchange.mail.structure.Bug19471StructureTest.class,
     com.openexchange.mail.structure.Bug20425_StructureTest.class,
     com.openexchange.mail.structure.Bug22735_StructureTest.class,
     com.openexchange.mail.structure.Bug23037_StructureTest.class,

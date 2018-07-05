@@ -83,7 +83,7 @@ public class ConfigJSlobReloadable implements Reloadable {
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForFiles("upsell-appsuite.properties", "appsuite.properties");
+        return Reloadables.getInterestsForAll();
     }
 
 }

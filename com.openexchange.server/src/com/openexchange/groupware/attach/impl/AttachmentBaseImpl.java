@@ -50,10 +50,7 @@
 package com.openexchange.groupware.attach.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -70,7 +67,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.activation.FileTypeMap;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
@@ -98,11 +94,11 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -112,6 +108,8 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
@@ -125,13 +123,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     private static final AtomicReference<AttachmentQuotaProvider> QUOTA_PROVIDER_REF = new AtomicReference<AttachmentQuotaProvider>();
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentBaseImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentBaseImpl.class);
 
     private static final AttachmentQueryCatalog QUERIES = new AttachmentQueryCatalog();
 
-    private final ThreadLocal<Context> contextHolder = new ThreadLocal<Context>();
+    private static final ThreadLocal<Context> contextHolder = new ThreadLocal<Context>();
 
-    private final ThreadLocal<List<String>> fileIdRemoveList = new ThreadLocal<List<String>>();
+    private static final ThreadLocal<List<String>> fileIdRemoveList = new ThreadLocal<List<String>>();
 
     private final TIntObjectMap<List<AttachmentListener>> moduleListeners = new TIntObjectHashMap<List<AttachmentListener>>();
 
@@ -143,6 +141,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     public AttachmentBaseImpl(final DBProvider provider) {
         super(provider);
+    }
+
+    public AttachmentBaseImpl(AttachmentBaseImpl attachmentBase) {
+        super();
+        moduleListeners.putAll(attachmentBase.moduleListeners);
+        moduleAuthorizors.putAll(attachmentBase.moduleAuthorizors);
     }
 
     public static void setQuotaProvider(AttachmentQuotaProvider quotaProvider) {
@@ -273,6 +277,32 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     @Override
+    public SortedSet<String> getAttachmentFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+        final SortedSet<String> retval = new TreeSet<String>();
+        Connection readCon = null;
+        final String selectfileid = "SELECT file_id FROM prg_attachment WHERE file_id is not null AND cid=? AND created_by=?";
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            readCon = getReadConnection(ctx);
+            stmt = readCon.prepareStatement(selectfileid);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, user.getId());
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                retval.add(rs.getString(1));
+            }
+        } catch (final SQLException e) {
+            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } finally {
+            close(stmt, rs);
+            releaseReadConnection(ctx, readCon);
+        }
+        return retval;
+    }
+
+    @Override
     public TimedResult<AttachmentMetadata> getAttachments(final Session session, final int folderId, final int attachedId, final int moduleId, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
         return getAttachments(session, folderId, attachedId, moduleId, QUERIES.getFields(), null, ASC, ctx, user, userConfig);
     }
@@ -305,8 +335,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             final String folderField;
             switch (moduleId) {
             case 1:
-                join = " LEFT JOIN prg_dates AS aux ON (pa.cid = aux.cid AND pa.attached = aux.intfield01)";
-                folderField = "aux.fid";
+                if (isLegacyCalendarStorage(ctx.getContextId())) {
+                    join = " LEFT JOIN prg_dates AS aux ON (pa.cid = aux.cid AND pa.attached = aux.intfield01)";
+                    folderField = "aux.fid";
+                } else {
+                    join = " LEFT JOIN calendar_event AS aux ON (pa.cid = aux.cid AND pa.attached = aux.id AND 0 = aux.account)";
+                    folderField = "aux.folder";
+                }
                 break;
             case 4:
                 join = " LEFT JOIN task_folder AS aux ON (pa.cid = aux.cid AND pa.attached = aux.id)";
@@ -361,6 +396,11 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             Integer.valueOf(moduleId),
             Integer.valueOf(attachedId),
             Integer.valueOf(ctx.getContextId())));
+    }
+
+    private static boolean isLegacyCalendarStorage(int contextId) throws OXException {
+        UpdateStatus updateStatus = Updater.getInstance().getStatus(contextId);
+        return false == updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask");
     }
 
     @Override
@@ -921,28 +961,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return System.currentTimeMillis();
     }
 
-    private long countAttachmentsInContext(final int contextId) throws OXException {
-        final DatabaseService databaseService = ServerServiceRegistry.getServize(DatabaseService.class);
-        if (null == databaseService) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
-        }
-
-        final Connection con = databaseService.getReadOnly(contextId);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT count(id) FROM prg_attachment WHERE cid=?");
-            stmt.setInt(1, contextId);
-            rs = stmt.executeQuery();
-            return rs.next() ? rs.getLong(1) : 0;
-        } catch (final SQLException e) {
-            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(contextId, con);
-        }
-    }
-
     private void checkCharacters(final AttachmentMetadata attachment) throws OXException {
         final StringBuilder errors = new StringBuilder();
         boolean invalid = false;
@@ -1225,7 +1243,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 SearchIterators.close(delegate);
                 return;
             }
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (null != readCon) {
                 releaseReadConnection(ctx, readCon);
             }
@@ -1273,7 +1291,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 if (mode.equals(FetchMode.CLOSE_LATER)) {
                     return;
                 } else if (mode.equals(FetchMode.CLOSE_IMMEDIATELY)) {
-                    closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     releaseReadConnection(ctx, readCon);
                     stmt = null;
                     readCon = null;
@@ -1282,7 +1300,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                     while (rs.next()) {
                         values.add(nextFromResult(rs));
                     }
-                    closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                     releaseReadConnection(ctx, readCon);
                     stmt = null;
                     readCon = null;
@@ -1313,6 +1331,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = con.prepareStatement(DBUtils.getIN(QUERIES.getSelectNewestCreationDate(), attachedIds.length) + " GROUP BY attached");
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());

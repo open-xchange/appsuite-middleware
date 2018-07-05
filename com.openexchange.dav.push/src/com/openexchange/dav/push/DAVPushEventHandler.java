@@ -53,6 +53,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,6 +67,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.pns.DefaultPushNotification;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationService;
+import com.openexchange.pns.PushPriority;
 import com.openexchange.session.Session;
 
 /**
@@ -83,6 +85,7 @@ public class DAVPushEventHandler implements EventHandler {
         "com/openexchange/groupware/folder/*",
         "com/openexchange/groupware/contact/*",
         "com/openexchange/groupware/appointment/*",
+        "com/openexchange/groupware/event/*",
         "com/openexchange/groupware/task/*",
     };
 
@@ -129,14 +132,16 @@ public class DAVPushEventHandler implements EventHandler {
         int contextId = event.getContextId();
         for (Map.Entry<Integer, Set<Integer>> entry : affectedUsers.entrySet()) {
             int userId = entry.getKey().intValue();
-            pushNotifications.add(getPushNotification(contextId, userId, rootTopic, timestamp, priority, clientToken));
+            Set<String> topics = new HashSet<String>();
+            topics.add(rootTopic);
             for (Integer folderId : entry.getValue()) {
-                String folderTopic = DAVPushUtility.getFolderTopic(clientId, folderId.toString());
-                pushNotifications.add(getPushNotification(contextId, userId, folderTopic, timestamp, priority, clientToken));
+                topics.add(DAVPushUtility.getFolderTopic(clientId, folderId.toString()));
+            }
+            for (String topic : topics) {
+                pushNotifications.add(getPushNotification(contextId, userId, topic, timestamp, priority, clientToken));
             }
         }
-
-        notificationService.handle(pushNotifications);
+        notificationService.handle(pushNotifications, PushPriority.LOW);
     }
 
     private static DefaultPushNotification getPushNotification(int contextId, int userId, String topic, Long timestamp, Integer priority, String clientToken) {

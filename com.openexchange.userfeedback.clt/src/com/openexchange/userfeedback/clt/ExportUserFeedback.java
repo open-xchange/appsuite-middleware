@@ -64,33 +64,17 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.client.ClientConfig;
-import com.openexchange.cli.AbstractRestCLI;
 
 /**
- * 
+ *
  * {@link ExportUserFeedback}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
-public class ExportUserFeedback extends AbstractRestCLI<Void> {
+public class ExportUserFeedback extends AbstractUserFeedback {
 
-    private static final String END_LONG = "end-time";
-    private static final String END_SHORT = "e";
-
-    private static final String START_LONG = "start-time";
-    private static final String START_SHORT = "s";
-
-    private static final String CONTEXT_GROUP_LONG = "context-group";
-    private static final String CONTEXT_GROUP_SHORT = "g";
-    private static final String CONTEXT_GROUP_DEFAULT = "default";
-
-    private static final String TYPE_LONG = "type";
-    private static final String TYPE_SHORT = "t";
-    private static final String TYPE_DEFAULT = "star-rating-v1";
-
-    private static final String ENDPOINT_LONG = "api-root";
-    private static final String ENDPOINT_DEFAULT = "http://localhost:8009/userfeedback/v1/export";
+    private static final String EXPORT_PATH = "export";
 
     private static final String COLUMN_DELIMITER_LONG = "delimiter";
     private static final char COLUMN_DELIMITER_DEFAULT = ';';
@@ -108,12 +92,9 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption(TYPE_SHORT, TYPE_LONG, true, "The feedback type to export. Default: 'star-rating-v1'.");
-        options.addOption(CONTEXT_GROUP_SHORT, CONTEXT_GROUP_LONG, true, "The context group identifying the global DB where the feedback is stored. Default: 'default'.");
-        options.addOption(START_SHORT, START_LONG, true, "Start time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given after this time is exported. If not set, all feedback up to -e is exported.");
-        options.addOption(END_SHORT, END_LONG, true, "End time in seconds since 1970-01-01 00:00:00 UTC. Only feedback given before this time is exported. If not set, all feedback since -s is exported.");
-        options.addOption(null, ENDPOINT_LONG, true, "URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1'");
+        addGenericOptions(options);
         options.addOption(null, COLUMN_DELIMITER_LONG, true, "The column delimiter used. Default: " + COLUMN_DELIMITER_DEFAULT);
+        options.addOption(null, ENDPOINT_LONG, true, " URL to an alternative HTTP API endpoint. Example: 'https://192.168.0.1:8443/userfeedback/v1/export/'");
     }
 
     @Override
@@ -126,12 +107,12 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
 
     @Override
     protected String getName() {
-        return "exportuserfeedback [OPTIONS] output_file";
+        return "exportuserfeedback -U myUser:myPassword [OPTIONS] output_file";
     }
 
     @Override
     protected String getHeader() {
-        return "exportuserfeedback [-t type] [-g ctx_grp] [-U myUser:myPassword] [-s time] [-e time] [--delimiter ,] output_file\n" + "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
+        return "exportuserfeedback -U myUser:myPassword [-t type] [-g ctx_grp] [-s time] [-e time] [--delimiter ,] output_file\n" + "exportuserfeedback -s 1487348317 /tmp/feedback.csv";
     }
 
     @Override
@@ -152,7 +133,11 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
 
     private void setFilePath(CommandLine cmd) {
         String pathStr = cmd.getArgs()[0];
-        String normalizedPath = FilenameUtils.normalize(pathStr).replaceFirst("^~", System.getProperty("user.home"));
+        String normalize = FilenameUtils.normalize(pathStr);
+        if(normalize == null) {
+            throw new IllegalArgumentException("Normalized destination file is null!!");
+        }
+        String normalizedPath = normalize.replaceFirst("^~", System.getProperty("user.home"));
         Path tmpPath = Paths.get(normalizedPath).normalize();
         path = Paths.get(tmpPath.toUri());
     }
@@ -172,6 +157,7 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
     @Override
     protected WebTarget getEndpoint(CommandLine cmd) {
         String endpoint = cmd.getOptionValue(ENDPOINT_LONG, ENDPOINT_DEFAULT);
+        endpoint = addPathIfRequired(endpoint, EXPORT_PATH);
         try {
             URI uri = new URI(endpoint);
 
@@ -199,10 +185,5 @@ public class ExportUserFeedback extends AbstractRestCLI<Void> {
             System.exit(1);
         }
         return null;
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
     }
 }

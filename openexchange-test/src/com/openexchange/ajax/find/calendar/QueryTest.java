@@ -60,6 +60,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -99,13 +100,13 @@ public class QueryTest extends CalendarFindTest {
         facets.add(createActiveFieldFacet(LOCATION, "location", randomSubstring(appointment.getLocation())));
         facets.add(createActiveFieldFacet(DESCRIPTION, "description", randomSubstring(appointment.getNote())));
         facets.add(createActiveFacet(RANGE, "one_month", "range", "one_month"));
-        facets.add(createActiveFacet(STATUS, "accepted", "status", "accepted"));
+        facets.add(createActiveFacet(STATUS, "ACCEPTED", "status", "ACCEPTED"));
         facets.add(createActiveFacet(RECURRING_TYPE, "single", "type", "single"));
         facets.add(createActiveFacet(PARTICIPANT, String.valueOf(getClient().getValues().getUserId()), "users", String.valueOf(getClient().getValues().getUserId())));
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(facets);
         assertTrue("no appointments found", 0 < documents.size());
-        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+        assertNotNull("appointment not found", findByProperty(documents, "summary", appointment.getTitle()));
     }
 
     @Test
@@ -115,7 +116,7 @@ public class QueryTest extends CalendarFindTest {
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(SUBJECT, "subject", randomSubstring(appointment.getTitle()))));
         assertTrue("no appointments found", 0 < documents.size());
-        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+        assertNotNull("appointment not found", findByProperty(documents, "summary", appointment.getTitle()));
     }
 
     @Test
@@ -125,7 +126,7 @@ public class QueryTest extends CalendarFindTest {
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(SUBJECT, "subject", "")));
         assertTrue("no appointments found", 0 < documents.size());
-        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+        assertNotNull("appointment not found", findByProperty(documents, "summary", appointment.getTitle()));
     }
 
     @Test
@@ -145,29 +146,7 @@ public class QueryTest extends CalendarFindTest {
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(DESCRIPTION, "description", randomSubstring(appointment.getNote()))));
         assertTrue("no appointments found", 0 < documents.size());
-        assertNotNull("appointment not found", findByProperty(documents, "note", appointment.getNote()));
-    }
-
-    @Test
-    public void testFilterRange() throws Exception {
-        Appointment soonAppointment = randomPrivateAppointment();
-        soonAppointment.setStartDate(TimeTools.D("tomorrow at noon"));
-        soonAppointment.setEndDate(TimeTools.D("tomorrow at noon"));
-        soonAppointment = manager.insert(soonAppointment);
-        Appointment lateAppointment = randomPrivateAppointment();
-        lateAppointment.setStartDate(TimeTools.D("in 8 months"));
-        lateAppointment.setEndDate(TimeTools.D("in 8 months"));
-        lateAppointment = manager.insert(lateAppointment);
-
-        List<PropDocument> oneMonthDocuments = query(Collections.singletonList(createActiveFacet(RANGE, "one_month", "range", "one_month")));
-        assertTrue("no appointments found", 0 < oneMonthDocuments.size());
-        assertNotNull("expected appointment not found", findByProperty(oneMonthDocuments, "title", soonAppointment.getTitle()));
-        assertNull("unexpected appointment found", findByProperty(oneMonthDocuments, "title", lateAppointment.getTitle()));
-
-        List<PropDocument> oneYearDocuments = query(Collections.singletonList(createActiveFacet(RANGE, "one_year", "range", "one_year")));
-        assertTrue("no appointments found", 0 < oneYearDocuments.size());
-        assertNotNull("expected appointment not found", findByProperty(oneYearDocuments, "title", lateAppointment.getTitle()));
-        assertNotNull("expected appointment not found", findByProperty(oneYearDocuments, "title", soonAppointment.getTitle()));
+        assertNotNull("appointment not found", findByProperty(documents, "description", appointment.getNote()));
     }
 
     @Test
@@ -185,33 +164,33 @@ public class QueryTest extends CalendarFindTest {
         noneAppointment = manager.insert(noneAppointment);
         manager.confirm(noneAppointment, Appointment.NONE, "none");
 
-        List<PropDocument> acceptDocuments = query(Collections.singletonList(createActiveFacet(STATUS, "accepted", "status", "accepted")));
+        List<PropDocument> acceptDocuments = query(Collections.singletonList(createActiveFacet(STATUS, "ACCEPTED", "status", "ACCEPTED")));
         assertTrue("no appointments found", 0 < acceptDocuments.size());
-        assertNotNull("accepted appointment not found", findByProperty(acceptDocuments, "title", acceptedAppointment.getTitle()));
-        assertNull("declined appointment found", findByProperty(acceptDocuments, "title", declinedAppointment.getTitle()));
-        assertNull("tentative appointment found", findByProperty(acceptDocuments, "title", tentativeAppointment.getTitle()));
-        assertNull("no status appointment found", findByProperty(acceptDocuments, "title", noneAppointment.getTitle()));
+        assertNotNull("accepted appointment not found", findByProperty(acceptDocuments, "summary", acceptedAppointment.getTitle()));
+        assertNull("declined appointment found", findByProperty(acceptDocuments, "summary", declinedAppointment.getTitle()));
+        assertNull("tentative appointment found", findByProperty(acceptDocuments, "summary", tentativeAppointment.getTitle()));
+        assertNull("no status appointment found", findByProperty(acceptDocuments, "summary", noneAppointment.getTitle()));
 
-        List<PropDocument> declineDocuments = query(Collections.singletonList(createActiveFacet(STATUS, "declined", "status", "declined")));
+        List<PropDocument> declineDocuments = query(Collections.singletonList(createActiveFacet(STATUS, "DECLINED", "status", "DECLINED")));
         assertTrue("no appointments found", 0 < declineDocuments.size());
-        assertNull("accepted appointment found", findByProperty(declineDocuments, "title", acceptedAppointment.getTitle()));
-        assertNotNull("declined appointment not found", findByProperty(declineDocuments, "title", declinedAppointment.getTitle()));
-        assertNull("tentative appointment found", findByProperty(declineDocuments, "title", tentativeAppointment.getTitle()));
-        assertNull("no status appointment found", findByProperty(declineDocuments, "title", noneAppointment.getTitle()));
+        assertNull("accepted appointment found", findByProperty(declineDocuments, "summary", acceptedAppointment.getTitle()));
+        assertNotNull("declined appointment not found", findByProperty(declineDocuments, "summary", declinedAppointment.getTitle()));
+        assertNull("tentative appointment found", findByProperty(declineDocuments, "summary", tentativeAppointment.getTitle()));
+        assertNull("no status appointment found", findByProperty(declineDocuments, "summary", noneAppointment.getTitle()));
 
-        List<PropDocument> tentativeDocuments = query(Collections.singletonList(createActiveFacet(STATUS, "tentative", "status", "tentative")));
+        List<PropDocument> tentativeDocuments = query(Collections.singletonList(createActiveFacet(STATUS, "TENTATIVE", "status", "TENTATIVE")));
         assertTrue("no appointments found", 0 < declineDocuments.size());
-        assertNull("accepted appointment found", findByProperty(tentativeDocuments, "title", acceptedAppointment.getTitle()));
-        assertNull("declined appointment found", findByProperty(tentativeDocuments, "title", declinedAppointment.getTitle()));
-        assertNotNull("tentative appointment not found", findByProperty(tentativeDocuments, "title", tentativeAppointment.getTitle()));
-        assertNull("no status appointment found", findByProperty(tentativeDocuments, "title", noneAppointment.getTitle()));
+        assertNull("accepted appointment found", findByProperty(tentativeDocuments, "summary", acceptedAppointment.getTitle()));
+        assertNull("declined appointment found", findByProperty(tentativeDocuments, "summary", declinedAppointment.getTitle()));
+        assertNotNull("tentative appointment not found", findByProperty(tentativeDocuments, "summary", tentativeAppointment.getTitle()));
+        assertNull("no status appointment found", findByProperty(tentativeDocuments, "summary", noneAppointment.getTitle()));
 
-        List<PropDocument> noStatusDocuments = query(Collections.singletonList(createActiveFacet(STATUS, "none", "status", "none")));
+        List<PropDocument> noStatusDocuments = query(Collections.singletonList(createActiveFacet(STATUS, "NEEDS-ACTION", "status", "NEEDS-ACTION")));
         assertTrue("no appointments found", 0 < declineDocuments.size());
-        assertNull("accepted appointment found", findByProperty(noStatusDocuments, "title", acceptedAppointment.getTitle()));
-        assertNull("declined appointment found", findByProperty(noStatusDocuments, "title", declinedAppointment.getTitle()));
-        assertNull("tentative appointment found", findByProperty(noStatusDocuments, "title", tentativeAppointment.getTitle()));
-        assertNotNull("no status appointment not found", findByProperty(noStatusDocuments, "title", noneAppointment.getTitle()));
+        assertNull("accepted appointment found", findByProperty(noStatusDocuments, "summary", acceptedAppointment.getTitle()));
+        assertNull("declined appointment found", findByProperty(noStatusDocuments, "summary", declinedAppointment.getTitle()));
+        assertNull("tentative appointment found", findByProperty(noStatusDocuments, "summary", tentativeAppointment.getTitle()));
+        assertNotNull("no status appointment not found", findByProperty(noStatusDocuments, "summary", noneAppointment.getTitle()));
     }
 
     @Test
@@ -224,13 +203,13 @@ public class QueryTest extends CalendarFindTest {
 
         List<PropDocument> singleDocuments = query(Collections.singletonList(createActiveFacet(RECURRING_TYPE, "single", "type", "single")));
         assertTrue("no appointments found", 0 < singleDocuments.size());
-        assertNotNull("single appointment not found", findByProperty(singleDocuments, "title", appointment.getTitle()));
-        assertNull("recurring appointment found", findByProperty(singleDocuments, "title", recurringAppointment.getTitle()));
+        assertNotNull("single appointment not found", findByProperty(singleDocuments, "summary", appointment.getTitle()));
+        assertNull("recurring appointment found", findByProperty(singleDocuments, "summary", recurringAppointment.getTitle()));
 
         List<PropDocument> recurringDocuments = query(Collections.singletonList(createActiveFacet(RECURRING_TYPE, "series", "type", "series")));
         assertTrue("no appointments found", 0 < recurringDocuments.size());
-        assertNull("single appointment found", findByProperty(recurringDocuments, "title", appointment.getTitle()));
-        assertNotNull("recurring appointment not found", findByProperty(recurringDocuments, "title", recurringAppointment.getTitle()));
+        assertNull("single appointment found", findByProperty(recurringDocuments, "summary", appointment.getTitle()));
+        assertNotNull("recurring appointment not found", findByProperty(recurringDocuments, "summary", recurringAppointment.getTitle()));
     }
 
     @Test
@@ -239,9 +218,9 @@ public class QueryTest extends CalendarFindTest {
         Appointment appointment = randomPrivateAppointment();
         appointment.addParticipant(participant);
         appointment = manager.insert(appointment);
-        List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(PARTICIPANT, participant.getEmailAddress(), "participants", participant.getEmailAddress())));
+        List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(PARTICIPANT, participant.getEmailAddress(), "participant", participant.getEmailAddress())));
         assertTrue("no appointments found", 0 < documents.size());
-        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+        assertNotNull("appointment not found", findByProperty(documents, "summary", appointment.getTitle()));
     }
 
     @Test
@@ -255,7 +234,7 @@ public class QueryTest extends CalendarFindTest {
         appointment = manager.insert(appointment);
         List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(PARTICIPANT, String.valueOf(userParticipant.getIdentifier()), "users", String.valueOf(userParticipant.getIdentifier()))));
         assertTrue("no appointments found", 0 < documents.size());
-        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+        assertNotNull("appointment not found", findByProperty(documents, "summary", appointment.getTitle()));
     }
 
     @Test
@@ -274,7 +253,6 @@ public class QueryTest extends CalendarFindTest {
         Calendar originStartDate = TimeTools.createCalendar(userTimeZone);
         Calendar originEndDate = (Calendar) originStartDate.clone();
         originEndDate.add(Calendar.HOUR_OF_DAY, 1);
-        Calendar expectedStartDate = TimeTools.createCalendar(responseTimeZone);
         Appointment appointment = randomPrivateAppointment();
         appointment.setStartDate(originStartDate.getTime());
         appointment.setEndDate(originEndDate.getTime());
@@ -283,13 +261,14 @@ public class QueryTest extends CalendarFindTest {
 
         List<PropDocument> documents = query(Collections.singletonList(createActiveFieldFacet(SUBJECT, "subject", randomSubstring(appointment.getTitle()))), Collections.singletonMap("timezone", responseTimeZone.getID()));
         assertTrue("no appointments found", 0 < documents.size());
-        PropDocument document = findByProperty(documents, "title", appointment.getTitle());
+        PropDocument document = findByProperty(documents, "summary", appointment.getTitle());
         assertNotNull("appointment not found", document);
 
-        Date d = new Date(Long.parseLong(document.getProps().get("start_date").toString()));
-        Calendar responseStartDate = Calendar.getInstance(responseTimeZone);
-        responseStartDate.setTime(d);
-        assertEquals(expectedStartDate, responseStartDate);
+        Map<?, ?> startDateObject = (Map<?, ?>) document.getProps().get("startDate");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone(String.valueOf(startDateObject.get("tzid"))));
+        Date responseStartDate = dateFormat.parse(String.valueOf(startDateObject.get("value")));
+        assertEquals(originStartDate.getTimeInMillis(), responseStartDate.getTime());
     }
 
     @Test
@@ -304,12 +283,12 @@ public class QueryTest extends CalendarFindTest {
         SimpleFacet globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.CALENDAR, t1 + " " + t3));
         List<PropDocument> documents = query(Collections.singletonList(createActiveFacet(globalFacet)));
         assertTrue("no appointments found", 0 < documents.size());
-        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+        assertNotNull("appointment not found", findByProperty(documents, "summary", appointment.getTitle()));
 
         globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.CALENDAR, "\"" + t1 + " " + t2 + "\""));
         documents = query(Collections.singletonList(createActiveFacet(globalFacet)));
         assertTrue("no appointments found", 0 < documents.size());
-        assertNotNull("appointment not found", findByProperty(documents, "title", appointment.getTitle()));
+        assertNotNull("appointment not found", findByProperty(documents, "summary", appointment.getTitle()));
 
         globalFacet = (SimpleFacet) findByType(CommonFacetType.GLOBAL, autocomplete(Module.CALENDAR, "\"" + t1 + " " + t3 + "\""));
         documents = query(Collections.singletonList(createActiveFacet(globalFacet)));
@@ -328,7 +307,6 @@ public class QueryTest extends CalendarFindTest {
         appointments[0] = manager.insert(randomAppointment(folders[0].getObjectID()));
         appointments[1] = manager.insert(randomAppointment(folders[1].getObjectID()));
         appointments[2] = manager2.insert(randomAppointment(folders[2].getObjectID()));
-
         for (int i = 0; i < 3; i++) {
             FolderType folderType = typesInOrder[i];
             List<Facet> facets = autocomplete(Module.CALENDAR, "");
@@ -338,13 +316,13 @@ public class QueryTest extends CalendarFindTest {
             PropDocument[] foundDocs = new PropDocument[3];
             for (PropDocument doc : docs) {
                 Map<String, Object> props = doc.getProps();
-                if (appointments[0].getTitle().equals(props.get("title"))) {
+                if (appointments[0].getTitle().equals(props.get("summary"))) {
                     foundDocs[0] = doc;
                     continue;
-                } else if (appointments[1].getTitle().equals(props.get("title"))) {
+                } else if (appointments[1].getTitle().equals(props.get("summary"))) {
                     foundDocs[1] = doc;
                     continue;
-                } else if (appointments[2].getTitle().equals(props.get("title"))) {
+                } else if (appointments[2].getTitle().equals(props.get("summary"))) {
                     foundDocs[2] = doc;
                     continue;
                 }

@@ -60,4 +60,5 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public interface AdditionalFolderField extends AdditionalField<FolderObject> {
 
+    // Marker interface
 }

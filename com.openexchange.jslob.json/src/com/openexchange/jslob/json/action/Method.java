@@ -49,9 +49,9 @@
 
 package com.openexchange.jslob.json.action;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.java.Strings;
 
 /**
@@ -70,7 +70,7 @@ public enum Method {
         for (final Method method : values) {
             m.put(method.name(), method);
         }
-        MAP = Collections.unmodifiableMap(m);
+        MAP = ImmutableMap.copyOf(m);
     }
 
     /**

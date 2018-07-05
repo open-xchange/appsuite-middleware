@@ -51,14 +51,11 @@ package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Date;
-
 import org.json.JSONException;
 import org.junit.Test;
-
 import com.openexchange.ajax.importexport.actions.ICalExportRequest;
 import com.openexchange.ajax.importexport.actions.ICalExportResponse;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;

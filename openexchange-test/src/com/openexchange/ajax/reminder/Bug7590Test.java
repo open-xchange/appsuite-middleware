@@ -84,6 +84,7 @@ public class Bug7590Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -91,9 +92,11 @@ public class Bug7590Test extends AbstractAJAXSession {
         tz = client.getValues().getTimeZone();
         folderId = client.getValues().getPrivateAppointmentFolder();
         calendar = TimeTools.createCalendar(tz);
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
         appointment = createAppointment();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

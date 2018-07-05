@@ -49,15 +49,15 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Attributes;
@@ -68,7 +68,6 @@ import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderPermissionAddGuestGroup}
@@ -108,11 +107,11 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         log.info("Performing update task {}", FolderPermissionAddGuestGroup.class.getSimpleName());
         ProgressState progress = params.getProgressState();
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        Connection connection = params.getConnection();
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
-            int[] contextIDs = Database.getContextsInSameSchema(params.getContextId());
+            int[] contextIDs = params.getContextsInSameSchema();
             progress.setTotal(contextIDs.length);
             for (int i = 0; i < contextIDs.length; i++) {
                 progress.setState(i);
@@ -129,7 +128,6 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
                 rollback(connection);
             }
             autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
         }
         log.info("{} successfully performed.", FolderPermissionAddGuestGroup.class.getSimpleName());
     }
@@ -182,7 +180,7 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
              */
             return stmt.executeBatch();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -198,7 +196,7 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

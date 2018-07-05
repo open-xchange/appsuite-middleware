@@ -36,9 +36,8 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.StringTokenizer;
-import net.fortuna.ical4j.util.Dates;
-
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import net.fortuna.ical4j.util.Dates;
 
 /**
  * $Id$
@@ -427,10 +426,10 @@ public class Dur implements Comparable, Serializable {
             // return Boolean.valueOf(isNegative()).compareTo(Boolean.valueOf(arg0.isNegative()));
             // for pre-java 1.5 compatibility..
             if (isNegative()) {
-                return Integer.MIN_VALUE;
+                return -1;
             }
             else {
-                return Integer.MAX_VALUE;
+                return 1;
             }
         }
         else if (getWeeks() != arg0.getWeeks()) {

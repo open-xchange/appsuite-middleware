@@ -49,6 +49,11 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.dav.DAVProtocol.CALENDARSERVER_NS;
+import static com.openexchange.dav.DAVProtocol.CAL_NS;
+import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.java.Autoboxing.I;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
@@ -57,15 +62,27 @@ import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
+import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.reports.FilteringResource;
+import com.openexchange.chronos.Availability;
+import com.openexchange.chronos.ical.ICalExceptionCodes;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.CalendarAvailabilityService;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.resources.DAVCollection;
-import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
@@ -75,7 +92,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  *
  * A scheduling Inbox collection contains copies of incoming scheduling
  * messages. These can be requests sent by an Organizer, or replies sent by an
- * Attendee in response to a request.  The scheduling Inbox collection is also
+ * Attendee in response to a request. The scheduling Inbox collection is also
  * used to manage scheduling privileges.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -89,13 +106,13 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
      */
     public ScheduleInboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleInboxURL.SCHEDULE_INBOX));
-        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory));
+        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VAVAILABILITY));
     }
 
     @Override
     public Permission[] getPermissions() {
         return new Permission[] {
-            new DefaultPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(
+            new BasicPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(
                 Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS, false))
         };
     }
@@ -106,8 +123,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
     }
 
     @Override
-    public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
-    }
+    public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {}
 
     @Override
     public String getDisplayName() throws WebdavProtocolException {
@@ -120,20 +136,16 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
     }
 
     @Override
-    public void delete() throws WebdavProtocolException {
-    }
+    public void delete() throws WebdavProtocolException {}
 
     @Override
-    public void setLanguage(String language) throws WebdavProtocolException {
-    }
+    public void setLanguage(String language) throws WebdavProtocolException {}
 
     @Override
-    public void setLength(Long length) throws WebdavProtocolException {
-    }
+    public void setLength(Long length) throws WebdavProtocolException {}
 
     @Override
-    public void setContentType(String type) throws WebdavProtocolException {
-    }
+    public void setContentType(String type) throws WebdavProtocolException {}
 
     @Override
     public String getSource() throws WebdavProtocolException {
@@ -141,8 +153,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
     }
 
     @Override
-    public void setSource(String source) throws WebdavProtocolException {
-    }
+    public void setSource(String source) throws WebdavProtocolException {}
 
     @Override
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
@@ -169,4 +180,87 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
         return Collections.emptyList();
     }
 
+    @Override
+    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
+        if ("calendar-availability".equals(name) && (CALENDARSERVER_NS.getURI().equals(namespace) || CAL_NS.getURI().equals(namespace))) {
+            try {
+                return exportCalendarAvailability(namespace);
+            } catch (OXException e) {
+                throw protocolException(getUrl(), e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected void internalPutProperty(WebdavProperty property) throws WebdavProtocolException {
+        if (null != property && "calendar-availability".equals(property.getName()) &&
+            (CALENDARSERVER_NS.getURI().equals(property.getNamespace()) || CAL_NS.getURI().equals(property.getNamespace()))) {
+            try {
+                importCalendarAvailability(property);
+            } catch (OXException e) {
+                throw protocolException(getUrl(), e);
+            }
+        }
+    }
+
+    /**
+     * Imports the calendar availability from the supplied WebDAV property.
+     *
+     * @param property The WebDAV property to import the calendar availability from, or <code>null</code> to delete the user's previously defined availability
+     */
+    private void importCalendarAvailability(WebdavProperty property) throws OXException {
+        Availability calendarAvailability;
+        if (null == property || Strings.isEmpty(property.getValue())) {
+            calendarAvailability = null;
+        } else {
+            InputStream inputStream = null;
+            try {
+                inputStream = Streams.newByteArrayInputStream(property.getValue().getBytes(Charsets.UTF_8));
+                calendarAvailability = getFactory().getService(ICalService.class).importICal(inputStream, null).getAvailability();
+            } finally {
+                Streams.close(inputStream);
+            }
+        }
+        CalendarSession calendarSession = getFactory().getService(CalendarService.class).init(getFactory().getSession());
+        CalendarAvailabilityService availabilityService = getFactory().getService(CalendarAvailabilityService.class);
+        if (null == calendarAvailability || null == calendarAvailability.getAvailable() || calendarAvailability.getAvailable().isEmpty()) {
+            availabilityService.deleteAvailability(calendarSession);
+        } else {
+            availabilityService.setAvailability(calendarSession, calendarAvailability);
+        }
+    }
+
+    /**
+     * Exports the calendar availability of the current session's user into a WebDAV property.
+     *
+     * @param namespace The target namespace for the WebDAV property
+     * @return The exported calendar availability, or <code>null</code> if none is defined
+     */
+    private WebdavProperty exportCalendarAvailability(String namespace) throws OXException {
+        CalendarSession calendarSession = getFactory().getService(CalendarService.class).init(getFactory().getSession());
+        CalendarAvailabilityService availabilityService = getFactory().getService(CalendarAvailabilityService.class);
+        Availability calendarAvailability = availabilityService.getAvailability(calendarSession);
+        if (null == calendarAvailability || null == calendarAvailability.getAvailable() || calendarAvailability.getAvailable().isEmpty()) {
+            WebdavProperty property = new WebdavProperty(namespace, "calendar-availability");
+            property.setXML(true);
+            property.setValue("");
+            return property;
+            //            return null;
+        }
+        InputStream inputStream = null;
+        try {
+            inputStream = getFactory().getService(ICalService.class).exportICal(null).add(calendarAvailability).getClosingStream();
+            WebdavProperty property = new WebdavProperty(namespace, "calendar-availability");
+            property.setXML(true);
+            property.setValue("<![CDATA[" + Streams.stream2string(inputStream, Charsets.UTF_8_NAME) + "]]>");
+            return property;
+        } catch (IOException e) {
+            LOG.warn("Error getting calendar availability for user '{}' in context '{}'",
+                I(getFactory().getSession().getUserId()), I(getFactory().getSession().getContextId()), e);
+            throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(inputStream);
+        }
+    }
 }

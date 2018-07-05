@@ -84,17 +84,16 @@ import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.LIST;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.sql.grammar.UPDATE;
+import com.openexchange.subscribe.AdministrativeSubscriptionStorage;
 import com.openexchange.subscribe.EncryptedField;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.SubscriptionStorage;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - deleteAllSubscriptionsForUser
  */
-public class SubscriptionSQLStorage implements SubscriptionStorage {
+public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage {
 
     private final DBProvider dbProvider;
     private final DBTransactionPolicy txPolicy;
@@ -247,7 +246,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -737,5 +736,35 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 
         storageService.update(customizationNote.subscription.getContext(), configId, update);
 
+    }
+
+    @Override
+    public List<Subscription> getSubscriptionsForContext(Context ctx, String sourceId, Connection con) throws OXException {
+        if (null == con) {
+            return getSubscriptionsForContext(ctx, sourceId);
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT id, folder_id, last_update, created, user_id, enabled, configuration_id, source_id FROM subscriptions WHERE cid=? AND source_id = ?");
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setString(2, sourceId);
+            rs = stmt.executeQuery();
+            return parseResultSet(rs, ctx, con);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private List<Subscription> getSubscriptionsForContext(Context ctx, String sourceId) throws OXException {
+        Connection con = dbProvider.getReadConnection(ctx);
+        try {
+            return getSubscriptionsForContext(ctx, sourceId, con);
+        } finally {
+            dbProvider.releaseReadConnection(ctx, con);
+        }
     }
 }

@@ -53,14 +53,14 @@ import static com.openexchange.html.internal.HtmlServiceImpl.PATTERN_URL_SOLE;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.regex.Matcher;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.internal.jericho.JerichoHandler;
+import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import net.htmlparser.jericho.Attribute;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
-import com.openexchange.html.internal.HtmlServiceImpl;
-import com.openexchange.html.internal.jericho.JerichoHandler;
-import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 
 /**
  * {@link UrlReplacerJerichoHandler}

@@ -58,27 +58,38 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import com.google.common.collect.ImmutableList;
 
 /**
- * This ssl socket factory creates a ssl context that trusts all certificates and uses then this context to create a ssl socket factory that
- * will trust all certificates.
+ * This SSL socket factory creates an SSL context that trusts all certificates and
+ * then uses that context to create an SSL socket factory, which will trust all certificates.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
 
     /**
-     * This factory will trust all certificates.
+     * Gets a new trust-all SSL socket factory.
+     *
+     * @return A new trust-all SSL socket factory
      */
+    public static SSLSocketFactory getDefault() {
+        return new TrustAllSSLSocketFactory();
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------
+
+    /** This factory will trust all certificates. */
     private final SSLSocketFactory factory;
 
     /**
-     * This constructor creates a ssl context with the TrustAllManager and uses the ssl socket factory from this ssl context.
+     * This constructor creates an SSL context with the <tt>TrustAllManager</tt> and uses the SSL socket factory from that SSL context.
      */
     protected TrustAllSSLSocketFactory() {
         super();
@@ -91,15 +102,6 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
         } catch (final KeyManagementException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
-    }
-
-    /**
-     * Gets a new trust-all SSL socket factory.
-     *
-     * @return A new trust-all SSL socket factory
-     */
-    public static SSLSocketFactory getDefault() {
-        return new TrustAllSSLSocketFactory();
     }
 
     @Override
@@ -142,33 +144,32 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
         return checkProtocols(factory.createSocket(address, port, localAddress, localPort));
     }
 
-    private static Socket checkProtocols(final Socket socket) {
+    private static final List<String> PROTOCOLS_TO_ADD = ImmutableList.of("SSLv3", "SSLv2", "TLSv1", "TLSv1.1", "TLSv1.2", "SSLv2.3");
+
+    private static Socket checkProtocols(Socket socket) {
         if (!(socket instanceof SSLSocket)) {
             return socket;
         }
 
         SSLSocket sslSocket = (SSLSocket) socket;
-        tryAddProtocol("SSLv3", sslSocket);
-        tryAddProtocol("SSLv2", sslSocket);
-        tryAddProtocol("TLSv1", sslSocket);
-        tryAddProtocol("TLSv1.1", sslSocket);
-        tryAddProtocol("TLSv1.2", sslSocket);
-        tryAddProtocol("SSLv2.3", sslSocket);
-        return new DelegatingSSLSocket(sslSocket);
-    }
 
-    private static boolean tryAddProtocol(final String protocol, final SSLSocket sslSocket) {
-        final Set<String> protocols = new LinkedHashSet<String>(Arrays.asList(sslSocket.getEnabledProtocols()));
-        if (protocols.add(protocol)) {
+        // Get socket's enabled protocols
+        Set<String> enabledProtocols = new LinkedHashSet<String>(Arrays.asList(sslSocket.getEnabledProtocols()));
+
+        // Add the protocols, which should be added, with respect to already enabled ones
+        boolean somethingAdded = false;
+        for (String protocol : PROTOCOLS_TO_ADD) {
+            somethingAdded |= enabledProtocols.add(protocol);
+        }
+        if (somethingAdded) {
             try {
-                sslSocket.setEnabledProtocols(protocols.toArray(new String[0]));
+                sslSocket.setEnabledProtocols(enabledProtocols.toArray(new String[enabledProtocols.size()]));
             } catch (final IllegalArgumentException e) {
-                // Unable to add specified protocol
-                return false;
+                // Unable to add specified protocols
             }
         }
-        // Already included or has been successfully added
-        return true;
+
+        return new DelegatingSSLSocket(sslSocket);
     }
 
 }

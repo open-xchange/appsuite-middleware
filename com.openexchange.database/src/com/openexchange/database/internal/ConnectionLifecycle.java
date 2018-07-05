@@ -58,9 +58,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -69,6 +69,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
 import com.openexchange.database.internal.reloadable.GenericReloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
 
@@ -81,6 +82,45 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
      * SQL command for checking the connection.
      */
     private static final String TEST_SELECT = "SELECT 1 AS test";
+
+    private static final AtomicReference<Field> openStatementsField = new AtomicReference<Field>(null);
+
+    private static Field getOpenStatementsField() {
+        Field openStatementsField = ConnectionLifecycle.openStatementsField.get();
+        if (null == openStatementsField) {
+            synchronized (ConnectionLifecycle.class) {
+                openStatementsField = ConnectionLifecycle.openStatementsField.get();
+                if (null == openStatementsField) {
+                    try {
+                        openStatementsField = com.mysql.jdbc.ConnectionImpl.class.getDeclaredField("openStatements");
+                        openStatementsField.setAccessible(true);
+                        ConnectionLifecycle.openStatementsField.set(openStatementsField);
+                    } catch (NoSuchFieldException e) {
+                        // Unable to retrieve openStatements content.
+                        return null;
+                    } catch (SecurityException e) {
+                        // Unable to retrieve openStatements content.
+                        return null;
+                    }
+                }
+            }
+        }
+        return openStatementsField;
+    }
+
+    static final class FastThrowable extends Throwable {
+
+        FastThrowable() {
+            super("tracked closed connection");
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------
 
     private final String url;
     private final Properties info;
@@ -102,8 +142,8 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         Statement stmt = null;
         ResultSet result = null;
         try {
-            retval = !con.isClosed();
-            if (data.getTimeDiff() > checkTime) {
+            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(con, true);
+            if (retval && data.getLastPacketDiffFallbackToTimeDiff() > checkTime) {
                 stmt = con.createStatement();
                 result = stmt.executeQuery(TEST_SELECT);
                 if (result.next()) {
@@ -131,7 +171,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         final Iterator<Object> iter = withoutTimeout.keySet().iterator();
         while (iter.hasNext()) {
             final Object test = iter.next();
-            if (String.class.isAssignableFrom(test.getClass()) && ((String) test).toLowerCase().endsWith("timeout")) {
+            if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
                 iter.remove();
             }
         }
@@ -142,7 +182,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
     public boolean deactivate(final PooledData<Connection> data) {
         boolean retval = true;
         try {
-            retval = !data.getPooled().isClosed();
+            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(data.getPooled(), true);;
         } catch (final SQLException e) {
             retval = false;
         }
@@ -202,8 +242,13 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         final Connection con = data.getPooled();
         boolean retval = true;
         try {
-            if (con.isClosed()) {
-                ConnectionPool.LOG.error("Found closed connection.");
+            MysqlUtils.ClosedState closedState = MysqlUtils.isClosed(con, true);
+            if (MysqlUtils.ClosedState.OPEN != closedState) {
+                if (MysqlUtils.ClosedState.EXPLICITLY_CLOSED == closedState) {
+                    ConnectionPool.LOG.error("Found closed connection.", new FastThrowable());
+                } else {
+                    ConnectionPool.LOG.error("Found internally closed connection.", new FastThrowable());
+                }
                 retval = false;
             } else if (!con.getAutoCommit()) {
                 final OXException dbe = DBPoolingExceptionCodes.NO_AUTOCOMMIT.create();
@@ -223,17 +268,14 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                     addTrace(dbe, data);
                     String openStatement = "";
                     if (con instanceof com.mysql.jdbc.ConnectionImpl) {
-                        try {
-                            com.mysql.jdbc.ConnectionImpl impl = ((com.mysql.jdbc.ConnectionImpl) con);
-                            Field openStatementsField = impl.getClass().getSuperclass().getDeclaredField("openStatements");
-                            openStatementsField.setAccessible(true);
-
-                            Map<Statement, Statement> open = (Map<Statement, Statement>) openStatementsField.get(impl);
-                            for (Entry<Statement, Statement> entry : open.entrySet()) {
-                                openStatement = entry.getKey().toString();
-                            }
-                        } catch (NoSuchFieldException nsfe) {
+                        Field openStatementsField = getOpenStatementsField();
+                        if (null == openStatementsField) {
                             // Unable to retrieve openStatements content. Just log that there is an open statement...
+                        } else {
+                            CopyOnWriteArrayList<Statement> open = (CopyOnWriteArrayList<Statement>) openStatementsField.get(con);
+                            for (Statement statement : open) {
+                                openStatement = statement.toString();
+                            }
                         }
                     }
                     ConnectionPool.LOG.error(openStatement, dbe);

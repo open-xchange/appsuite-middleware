@@ -2,24 +2,19 @@
 
 Name:          open-xchange-subscribe
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-oauth
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 35
+%define        ox_release 10
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -29,18 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend subscribe extension
 Autoreqprov:   no
 Requires:      open-xchange-oauth >= @OXVERSION@
-Provides:      open-xchange-subscribe-crawler = %{version}
-Obsoletes:     open-xchange-subscribe-crawler < %{version}
-Provides:      open-xchange-subscribe-json = %{version}
-Obsoletes:     open-xchange-subscribe-json < %{version}
-Provides:      open-xchange-subscribe-linkedin = %{version}
-Obsoletes:     open-xchange-subscribe-linkedin < %{version}
-Provides:      open-xchange-subscribe-microformats = %{version}
-Obsoletes:     open-xchange-subscribe-microformats < %{version}
-Provides:      open-xchange-subscribe-msn = %{version}
-Obsoletes:     open-xchange-subscribe-msn < %{version}
-Provides:      open-xchange-subscribe-yahoo = %{version}
-Obsoletes:     open-xchange-subscribe-yahoo < %{version}
 
 %description
 Adds the feature to subscribe to third party services or
@@ -67,125 +50,10 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    CONFFILES="crawler.properties linkedinsubscribe.properties microformatSubscription.properties yahoosubscribe.properties"
-    for FILE in ${CONFFILES}; do
-        ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
-    done
-
-    #SoftwareChange_Request-1318
-    pfile=/opt/open-xchange/etc/microformatSubscription.properties
-    if ! ox_exists_property com.openexchange.subscribe.microformats.allowedHosts $pfile; then
-        ox_set_property com.openexchange.subscribe.microformats.allowedHosts '' $pfile
-    fi
-
-    #SoftwareChange_Request-1284
-    pfile=/opt/open-xchange/etc/crawler.properties
-    for prop in com.openexchange.subscribe.crawler.yahoocom \
-                com.openexchange.subscribe.xing; do
-        if ox_exists_property $prop $pfile; then
-            ox_remove_property $prop $pfile
-        fi
-    done
-
-    #SoftwareChange_Request-1091
-    pfile=/opt/open-xchange/etc/crawler.properties
-    if grep -E '^com.openexchange.subscribe.crawler.path.*/' $pfile >/dev/null; then
-        ox_set_property com.openexchange.subscribe.crawler.path crawlers $pfile
-    fi
-
-    # SoftwareChange_Request-1501
-    # updated by SoftwareChange_Request-1710
-    FILES=( crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties microformatSubscription.properties microformatSubscription.properties yahoosubscribe.properties )
-    NEWPROPS=( com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.xing.autorunInterval com.openexchange.subscribe.crawler.webde.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval com.openexchange.subscribe.crawler.t-online.de.autorunInterval com.openexchange.subscribe.crawler.gmx.de.autorunInterval com.openexchange.subscribe.crawler.msn.de.autorunInterval com.openexchange.subscribe.crawler.suncontacts.autorunInterval com.openexchange.subscribe.crawler.suncalendar.autorunInterval com.openexchange.subscribe.crawler.suntasks.autorunInterval com.openexchange.subscribe.microformats.contacts.http.autorunInterval com.openexchange.subscribe.microformats.infostore.http.autorunInterval com.openexchange.subscribe.socialplugin.yahoo.autorunInterval )
-    for I in $(seq 1 ${#NEWPROPS[@]}); do
-        NEWPROP=${NEWPROPS[$I-1]}
-        PFILE=/opt/open-xchange/etc/${FILES[$I-1]}
-        if ! ox_exists_property $NEWPROP $PFILE; then
-            ox_set_property $NEWPROP 1d $PFILE
-        fi
-    done
-
-    # SoftwareChange_Request-1613
-    pfile=/opt/open-xchange/etc/crawler.properties
-    if ! ox_exists_property com.openexchange.subscribe.xing $pfile; then
-        ox_set_property com.openexchange.subscribe.xing true $pfile
-    fi
-
-    #SoftwareChange_Request-1623
-    PFILE=/opt/open-xchange/etc/crawler.properties
-    NEWPROPS=( com.openexchange.subscribe.crawler.gmx.de com.openexchange.subscribe.crawler.yahoocom com.openexchange.subscribe.crawler.web.de )
-    for I in $(seq 1 ${#NEWPROPS[@]}); do
-        NEWPROP=${NEWPROPS[$I-1]}
-        if ! ox_exists_property $NEWPROP $PFILE; then
-            ox_set_property $NEWPROP true $PFILE
-        fi
-    done
-
-    #SoftwareChange_Request-1710
-    pfile=/opt/open-xchange/etc/crawler.properties
-    for prop in com.openexchange.subscribe.crawler.gmx.com com.openexchange.subscribe.crawler.gmx; do
-        if ox_exists_property ${prop}.autorunInterval $pfile; then
-            ox_remove_property ${prop}.autorunInterval $pfile
-        fi
-        if ox_exists_property $prop $pfile; then
-            ox_remove_property $prop $pfile
-        fi
-    done
-
-    #SoftwareChange_Request-1800
-    pfile=/opt/open-xchange/etc/crawler.properties
-    for prop in com.openexchange.subscribe.crawler.updatepath com.openexchange.subscribe.crawler.updatedfile com.openexchange.subscribe.crawler.updateinterval com.openexchange.subscribe.crawler.enableautoupdate com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled; do
-        if ox_exists_property $prop $pfile; then
-            ox_remove_property $prop $pfile
-        fi
-    done
-
-    #SoftwareChange_Request-1847
-    ox_move_config_file /opt/open-xchange/etc/crawlers /opt/open-xchange/etc/crawlers XING.yml xing.yml
-
-    find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
-        ox_update_permissions "$i" open-xchange:root 644
-    done
-    ox_update_permissions "/opt/open-xchange/etc/crawlers" open-xchange:root 755
-
-    #SoftwareChange_Request-2145
-    pfile=/opt/open-xchange/etc/crawler.properties
-    for prop in com.openexchange.subscribe.crawler.googlemail com.openexchange.subscribe.crawler.google.calendar com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval; do
-        if ox_exists_property $prop $pfile; then
-            ox_remove_property $prop $pfile
-        fi
-    done
-
-    # SoftwareChange_Request-2147
-    pfile=/opt/open-xchange/etc/crawler.properties
-    for prop in com.openexchange.subscribe.xing com.openexchange.subscribe.xing.autorunInterval; do
-        if ox_exists_property $prop $pfile; then
-            ox_remove_property $prop $pfile
-        fi
-    done
-
     # SoftwareChange_Request-2470
     ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
 
-    # SoftwareChange_Request-2670
-    rm -f /opt/open-xchange/etc/crawlers/t-online.yml
-    ox_remove_property com.openexchange.subscribe.crawler.t-online.de $pfile
-    ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval $pfile
-
-    # SoftwareChange_Request-2865
-    ox_remove_property com.openexchange.subscribe.crawler.yahoocom /opt/open-xchange/etc/crawler.properties
-    ox_remove_property com.openexchange.subscribe.crawler.gmx.autorunInterval /opt/open-xchange/etc/crawler.properties
-    ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval /opt/open-xchange/etc/crawler.properties
-    ox_add_property com.openexchange.subscribe.crawler.web.de.autorunInterval 1d /opt/open-xchange/etc/crawler.properties
-    VALUE=$( ox_read_property com.openexchange.subscribe.crawler.webde.autorunInterval /opt/open-xchange/etc/crawler.properties )
-    if [ "" != "$VALUE" ]; then
-        ox_set_property com.openexchange.subscribe.crawler.web.de.autorunInterval "$VALUE" /opt/open-xchange/etc/crawler.properties
-    fi
-    ox_remove_property com.openexchange.subscribe.crawler.webde.autorunInterval /opt/open-xchange/etc/crawler.properties
-
     # SoftwareChange_Request-2942
-    ox_add_property com.openexchange.subscribe.google.calendar.autorunInterval 1d /opt/open-xchange/etc/googlesubscribe.properties
-    ox_add_property com.openexchange.subscribe.google.contact.autorunInterval 1d /opt/open-xchange/etc/googlesubscribe.properties
     ox_add_property com.openexchange.subscribe.socialplugin.xing.autorunInterval 1d /opt/open-xchange/etc/xingsubscribe.properties
 fi
 
@@ -199,10 +67,6 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
-%attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
-%config(noreplace) /opt/open-xchange/etc/crawler.properties
-%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/googlesubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
 %config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
@@ -210,70 +74,28 @@ fi
 %doc docs/
 
 %changelog
-* Tue Jun 26 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-06-21 (4801)
-* Mon Jun 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-06-25 (4791)
-* Fri Jun 08 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-06-11 (4771)
-* Tue Jun 05 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-06-06 (4773)
-* Tue May 22 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-05-28 (4758)
-* Mon Apr 30 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-05-07 (4685)
-* Mon Apr 30 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-04-30 (4691)
-* Fri Apr 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-04-23 (4670)
-* Thu Apr 12 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-04-12 (4674)
+* Fri Jun 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.10.0 release
+* Wed Jun 27 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.10.0 release
+* Mon Jun 25 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.10.0 release
+* Mon Jun 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.0 release
+* Fri May 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Sixth preview of 7.10.0 release
+* Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth preview of 7.10.0 release
 * Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-04-03 (4642)
-* Fri Mar 23 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-03-26 (4619)
-* Mon Mar 12 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-03-12 (4602)
-* Mon Feb 26 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-02-26 (4583)
-* Mon Jan 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-02-05 (4555)
-* Mon Jan 15 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-01-22 (4538)
-* Tue Jan 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-01-08 (4516)
-* Fri Dec 08 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for Patch 2017-12-11 (4473)
-* Thu Nov 16 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-11-20 (4441)
-* Tue Nov 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-11-15 (4448)
-* Wed Oct 25 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-10-30 (4415)
-* Mon Oct 23 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-10-29 (4425)
-* Mon Oct 16 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-10-16 (4394)
-* Wed Sep 27 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-10-02 (4377)
-* Thu Sep 21 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-09-22 (4373)
-* Tue Sep 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-09-18 (4354)
-* Fri Sep 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-09-04 (4328)
-* Mon Aug 14 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-08-21 (4318)
-* Tue Aug 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-08-07 (4304)
-* Mon Jul 17 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-07-24 (4285)
-* Mon Jul 03 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-07-10 (4257)
-* Wed Jun 21 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-06-26 (4233)
-* Tue Jun 06 2017 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2017-06-08 (4180)
+Fourth preview of 7.10.0 release
+* Tue Feb 20 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Third preview of 7.10.0 release
+* Fri Feb 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.0 release
+* Fri Dec 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.0 release
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

@@ -136,7 +136,7 @@ public class UpdaterImpl extends Updater {
     @Override
     public void unblock(String schemaName, int poolId, int contextId) throws OXException {
         SchemaUpdateState schema = SchemaStore.getInstance().getSchema(poolId, schemaName);
-        SchemaStore.getInstance().unlockSchema(schema, contextId, false);
+        SchemaStore.getInstance().unlockSchema(schema, false);
     }
 
     @Override
@@ -155,7 +155,7 @@ public class UpdaterImpl extends Updater {
 
     @Override
     public UpdateTaskV2[] getAvailableUpdateTasks() {
-        final List<UpdateTaskV2> retval = UpdateTaskCollection.getInstance().getListWithoutExcludes();
+        List<UpdateTaskV2> retval = UpdateTaskCollection.getInstance().getListWithoutExcludes();
         return retval.toArray(new UpdateTaskV2[retval.size()]);
     }
 

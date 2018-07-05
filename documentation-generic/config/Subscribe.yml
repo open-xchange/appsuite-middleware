@@ -57,28 +57,6 @@ properties:
       file: googlesubscribe.properties
       packageName: open-xchange-subscribe
       tags: ["Google", "Contact", "Subscribe"]
-    - key: com.openexchange.subscribe.socialplugin.linkedin
-      description: |
-        Enable/disable LinkedIn subscribe service.
-      defaultValue: true
-      version:
-      reloadable: true
-      configcascadeAware: true
-      related: 
-      file: linkedinsubscribe.properties
-      packageName: open-xchange-linkedin
-      tags: ["LinkedIn", "Contact", "Subscribe"]
-    - key: com.openexchange.subscribe.socialplugin.linkedin.autorunInterval
-      description: |
-        Defines the subscription refresh autorun interval for LinkedIn.
-      defaultValue: 1d
-      version:
-      reloadable: true
-      configcascadeAware: true
-      related: 
-      file: linkedinsubscribe.properties
-      packageName: open-xchange-linkedin
-      tags: ["LinkedIn", "Contact", "Subscribe"]
     - key: com.openexchange.subscribe.mslive.contact.autorunInterval
       description: |
         Defines the subscription refresh autorun interval for MS Live.

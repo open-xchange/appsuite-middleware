@@ -50,13 +50,11 @@
 package com.openexchange.subscribe.json.actions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -78,7 +76,7 @@ public class ListSourcesAction extends AbstractSubscribeSourcesAction {
 
     private static final String[] FIELDS = new String[] { "id", "displayName", "icon", "module", "formDescription" };
 
-    private static final Set<String> IGNOREES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("com.openexchange.subscribe.crawler.gmx")));
+    private static final Set<String> IGNOREES = ImmutableSet.of("com.openexchange.subscribe.crawler.gmx");
 
     @Override
     public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException {

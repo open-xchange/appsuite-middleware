@@ -62,7 +62,6 @@ import javax.mail.FetchProfile.Item;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.threadsort.MessageInfo;
@@ -82,7 +81,6 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
-
 
 /**
  * {@link Conversations} - Utility class.
@@ -123,12 +121,12 @@ public final class Conversations {
      * @param fields The fields to add
      * @return The <i>"by envelope"</i> fetch profile
      */
-    public static FetchProfile getFetchProfileConversationByEnvelope(MailField... fields) {
+    public static FetchProfile getFetchProfileConversationByEnvelope(boolean considerUserFlags, MailField... fields) {
         FetchProfile fp = newFetchProfile(true);
         if (null != fields) {
             for (MailField field : fields) {
                 if (!MimeStorageUtility.isEnvelopeField(field)) {
-                    MimeStorageUtility.addFetchItem(fp, field);
+                    MimeStorageUtility.addFetchItem(fp, field, considerUserFlags);
                 }
             }
         }
@@ -141,14 +139,14 @@ public final class Conversations {
      * @param fields The fields to add
      * @return The <i>"by headers"</i> fetch profile
      */
-    public static FetchProfile getFetchProfileConversationByHeaders(MailField... fields) {
+    public static FetchProfile getFetchProfileConversationByHeaders(boolean considerUserFlags, MailField... fields) {
         FetchProfile fp = newFetchProfile(false);
         if (null != fields) {
             for (MailField field : fields) {
                 if (MailField.RECEIVED_DATE.equals(field)) {
                     fp.add(MailMessageFetchIMAPCommand.INTERNALDATE);
                 } else {
-                    MimeStorageUtility.addFetchItem(fp, field);
+                    MimeStorageUtility.addFetchItem(fp, field, considerUserFlags);
                 }
             }
         }
@@ -198,11 +196,12 @@ public final class Conversations {
      * @param fetchProfile The fetch profile
      * @param serverInfo The IMAP server information
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<Conversation> conversationsFor(IMAPFolder imapFolder, int lookAhead, OrderDirection order, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean byEnvelope) throws MessagingException {
-        final List<MailMessage> messages = messagesFor(imapFolder, lookAhead, order, fetchProfile, serverInfo, byEnvelope);
+    public static List<Conversation> conversationsFor(IMAPFolder imapFolder, int lookAhead, OrderDirection order, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean byEnvelope, boolean examineHasAttachmentUserFlags) throws MessagingException {
+        final List<MailMessage> messages = messagesFor(imapFolder, lookAhead, order, fetchProfile, serverInfo, byEnvelope, examineHasAttachmentUserFlags);
         if (null == messages || messages.isEmpty()) {
             return Collections.<Conversation> emptyList();
         }
@@ -222,11 +221,12 @@ public final class Conversations {
      * @param fetchProfile The fetch profile
      * @param serverInfo The IMAP server information
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
+     * @param examineHasAttachmentUserFlags Hwther has-attachment user flags should be considered
      * @return The messages with conversation information (References, In-Reply-To, Message-Id)
      * @throws MessagingException If a messaging error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, final boolean byEnvelope) throws MessagingException {
+    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, final boolean byEnvelope, final boolean examineHasAttachmentUserFlags) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -278,7 +278,7 @@ public final class Conversations {
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (r[j] instanceof FetchResponse) {
-                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId());
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId(), examineHasAttachmentUserFlags);
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);
@@ -303,10 +303,12 @@ public final class Conversations {
                         return Collections.<Conversation> emptyList();
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);

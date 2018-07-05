@@ -53,6 +53,7 @@ import static com.openexchange.file.storage.SecretAwareFileStorageAccountManager
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,16 +68,25 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountDeleteListener;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthAccountStorage;
+import com.openexchange.oauth.OAuthConstants;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link AbstractOAuthFileStorageService}
@@ -84,7 +94,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractOAuthFileStorageService implements AccountAware, OAuthAccountDeleteListener {
+public abstract class AbstractOAuthFileStorageService implements AccountAware, OAuthAccountDeleteListener, FileStorageAccountDeleteListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOAuthFileStorageService.class);
 
@@ -174,6 +184,8 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     @Override
     public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+        Integer iUserId = Integer.valueOf(user);
+        Integer iContextId = Integer.valueOf(cid);
         try {
             List<FileStorageAccount> toDelete = new LinkedList<FileStorageAccount>();
             FakeSession session = new FakeSession(null, user, cid);
@@ -188,23 +200,120 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             FileStorageAccountManager accountManager = getAccountManager();
             OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
             OAuthAccessRegistry registry = registryService.get(api.getServiceId());
-            for (FileStorageAccount deleteMe : toDelete) {
-                accountManager.deleteAccount(deleteMe, session);
-                LOG.info("Deleted {} file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), api.getName(), deleteMe.getId(), user, cid);
-                boolean purged = registry.purgeUserAccess(session.getContextId(), session.getUserId());
-                if (purged) {
-                    LOG.info("Removed {} OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", api.getName(), deleteMe.getId(), user, cid);
-                }
-            }
 
+            // Pass the connection and the hint about the scopes to the FileStorageAccountManager
+            // as a session parameter.
+            session.setParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, eventProps.get(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES));
+            session.setParameter("__file.storage.delete.connection", con);
+            try {
+                for (FileStorageAccount deleteMe : toDelete) {
+                    accountManager.deleteAccount(deleteMe, session);
+                    LOG.info("Deleted {} file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), api.getName(), deleteMe.getId(), iUserId, iContextId);
+                    boolean purged = registry.purgeUserAccess(session.getContextId(), session.getUserId(), id);
+                    if (purged) {
+                        LOG.info("Removed {} OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", api.getName(), deleteMe.getId(), iUserId, iContextId);
+                    }
+                }
+            } finally {
+                session.setParameter("__file.storage.delete.connection", null);
+                session.setParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, null);
+            }
         } catch (Exception e) {
-            LOG.warn("Could not delete possibly existing {} accounts associated with deleted OAuth account {} for user {} in context {}", api.getName(), id, user, cid, e);
+            LOG.warn("Could not delete possibly existing {} accounts associated with deleted OAuth account {} for user {} in context {}", api.getName(), Integer.valueOf(id), iUserId, iContextId, e);
         }
     }
 
     @Override
     public List<FileStorageAccount> getAccounts(Session session) throws OXException {
         return getAccounts0(session, true);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageAccountDeleteListener#onBeforeFileStorageAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
+     */
+    @Override
+    public void onBeforeFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection con) throws OXException {
+        // nothing to do
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageAccountDeleteListener#onAfterFileStorageAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
+     */
+    @Override
+    public void onAfterFileStorageAccountDeletion(Session session, int id, Map<String, Object> eventProps, Connection con) throws OXException {
+        if (!updateScopes(session)) {
+            return;
+        }
+
+        // Retrieve the OAuth account id that is linked with the file storage account that was deleted.
+        Object value = eventProps.get("account");
+        if (value == null) {
+            LOG.debug("Not OAuth account information was found");
+            return;
+        }
+
+        int accountId;
+        try {
+            accountId = Integer.parseInt((String) value);
+        } catch (NumberFormatException e) {
+            LOG.debug("Not OAuth account information was found");
+            return;
+        }
+
+        session.setParameter("__file.storage.delete.connection", con);
+        try {
+            OAuthAccountStorage storage = services.getService(OAuthAccountStorage.class);
+            OAuthAccount account;
+            try {
+                account = storage.getAccount(session, accountId);
+            } catch (OXException e) {
+                if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
+                    LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", accountId, session.getUserId(), session.getContextId());
+                    return;
+                }
+                throw e;
+            }
+            // Get the enabled scopes...
+            Set<OAuthScope> scopes = new HashSet<>();
+            for (OAuthScope scope : account.getEnabledScopes()) {
+                scopes.add(scope);
+            }
+            // ...and remove the 'drive' scope.
+            scopes.remove(getScope());
+            if (scopes.size() == 0) {
+                return;
+            }
+            eventProps.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
+            // Update the account
+            storage.updateAccount(session, accountId, eventProps);
+        } finally {
+            session.setParameter("__file.storage.delete.connection", null);
+        }
+    }
+
+    /**
+     * Fetches the optional updateScopes session parameter and evaluates it's value
+     * 
+     * @param session the session
+     * @return The value of the optional 'updateScopes' session parameter. Returns <code>true</code> as fall-back.
+     */
+    private boolean updateScopes(Session session) {
+        Object updateScopesValue = session.getParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES);
+        if (updateScopesValue == null) {
+            return true;
+        }
+        if (updateScopesValue instanceof Boolean) {
+            return (boolean) updateScopesValue;
+        }
+        if (updateScopesValue instanceof String) {
+            return Boolean.valueOf((String) updateScopesValue);
+        }
+        return true;
     }
 
     /**
@@ -225,16 +334,20 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * @throws OXException if an error is occurred
      */
     protected FileStorageAccount getAccountAccess(Session session, String accountId) throws OXException {
-        final FileStorageAccount account;
-        {
-            final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
-            if (null == compositeAccountManager) {
-                account = getAccountManager0().getAccount(accountId, session);
-            } else {
-                account = compositeAccountManager.getAccountManager(accountId, session).getAccount(accountId, session);
+        final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
+        if (null == compositeAccountManager) {
+            FileStorageAccountManager manager = getAccountManager0();
+            if (null == manager) {
+                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
             }
+            return manager.getAccount(accountId, session);
+        } else {
+            FileStorageAccountManager manager = compositeAccountManager.getAccountManager(accountId, session);
+            if (null == manager) {
+                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
+            }
+            return manager.getAccount(accountId, session);
         }
-        return account;
     }
 
     /**
@@ -305,4 +418,34 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         FileStorageAccountManagerLookupService lookupService = services.getService(FileStorageAccountManagerLookupService.class);
         return lookupService.getAccountManagerFor(getId());
     }
+
+    /**
+     * Retrieves a {@link Session} for the specified user in the specified context
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The {@link Session} or <code>null</code> if none exists
+     */
+    private Session getUserSession(final int userId, final int contextId) {
+        // Firstly let's see if the currently active session matches the one we need here and prefer that one.
+        final SessionHolder sessionHolder = services.getService(SessionHolder.class);
+        if (sessionHolder != null) {
+            final Session session = sessionHolder.getSessionObject();
+            if (session != null && session.getUserId() == userId && session.getContextId() == contextId) {
+                return session;
+            }
+        }
+        final SessiondService service = services.getService(SessiondService.class);
+        if (null == service) {
+            return null;
+        }
+        return service.getAnyActiveSessionForUser(userId, contextId);
+    }
+
+    /**
+     * Returns the {@link OAuthScope} for this provider
+     * 
+     * @return the {@link OAuthScope} for this provider
+     */
+    protected abstract OAuthScope getScope();
 }

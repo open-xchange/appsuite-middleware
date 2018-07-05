@@ -1229,7 +1229,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         }
     }
 
-    private final class ActiveTaskWatcher implements Runnable {
+    private static final class ActiveTaskWatcher implements Runnable {
         private final ReentrantLock lock = new ReentrantLock(true);
         private final Condition notEmpty = lock.newCondition();
         private final ConcurrentMap<Long, TaskInfo> tasks;
@@ -1908,7 +1908,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         // Almost the same code as shutdown()
         final SecurityManager security = System.getSecurityManager();
         if (security != null) {
-            java.security.AccessController.checkPermission(shutdownPerm);
+            security.checkPermission(shutdownPerm);
         }
 
         boolean fullyTerminated = false;
@@ -2590,11 +2590,10 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Deletes tracked temporary files.
      */
     static void deleteTempFiles() {
-        String[] tempFiles = LogProperties.getAndRemoveTempFiles();
+        File[] tempFiles = LogProperties.getAndRemoveTempFiles();
         if (null != tempFiles) {
-            for (String path : tempFiles) {
-                File f = new File(path);
-                f.delete();
+            for (File path : tempFiles) {
+                path.delete();
             }
         }
     }

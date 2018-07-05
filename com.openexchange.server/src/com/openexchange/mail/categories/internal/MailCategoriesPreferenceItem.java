@@ -65,6 +65,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.server.ServiceLookup;
@@ -78,7 +79,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class MailCategoriesPreferenceItem implements PreferencesItemService {
+public class MailCategoriesPreferenceItem implements PreferencesItemService, ConfigTreeEquivalent {
 
     /** The service listing */
     final ServiceLookup lookupService;
@@ -201,7 +202,10 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
                     boolean featureEnabled = config.getBoolean(FIELD_FEATURE_ENABLED);
                     if (!service.isForced(session)) {
-                        service.enable(session, featureEnabled);
+                        boolean isFeatureEnabled = service.isEnabled(session);
+                        if (isFeatureEnabled != featureEnabled) {
+                            service.enable(session, featureEnabled);
+                        }
                     }
 
                     JSONArray mailCategories = getType(config.get(FIELD_LIST), JSONArray.class, setting.getSingleValue(), setting.getName());
@@ -243,9 +247,19 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
             @Override
             public int getId() {
-                return -1;
+                return NO_ID;
             }
         };
+    }
+
+    @Override
+    public String getConfigTreePath() {
+        return "modules/mail/categories";
+    }
+
+    @Override
+    public String getJslobPath() {
+        return "io.ox/mail//categories";
     }
 
 }

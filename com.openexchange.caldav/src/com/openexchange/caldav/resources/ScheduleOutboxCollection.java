@@ -49,44 +49,41 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.dav.DAVProtocol.CAL_NS;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.CDATA;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
-import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.FreeBusyInformation;
-import com.openexchange.dav.mixins.PrincipalURL;
-import com.openexchange.dav.mixins.ResourceId;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.FreeBusyData;
+import com.openexchange.chronos.FreeBusyTime;
+import com.openexchange.chronos.ical.CalendarExport;
+import com.openexchange.chronos.ical.ICalExceptionCodes;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.FreeBusyResult;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
-import com.openexchange.freebusy.FreeBusyData;
-import com.openexchange.freebusy.service.FreeBusyService;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -102,12 +99,12 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public class ScheduleOutboxCollection extends DAVCollection {
 
-    private static final String CALDAV_NS = CaldavProtocol.CAL_NS.getURI();
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScheduleOutboxCollection.class);
 
     private final GroupwareCaldavFactory factory;
 
-    private List<FreeBusyInformation> freeBusyRequest = null;
+    private List<FreeBusyData> freeBusyRequest;
+    private CalendarSession calendarSession;
 
     /**
      * Initializes a new {@link ScheduleOutboxCollection}.
@@ -119,10 +116,17 @@ public class ScheduleOutboxCollection extends DAVCollection {
         this.factory = factory;
     }
 
+    private CalendarSession getCalendarSession() throws OXException {
+        if (null == calendarSession) {
+            calendarSession = factory.requireService(CalendarService.class).init(factory.getSession());
+        }
+        return calendarSession;
+    }
+
     @Override
     public Permission[] getPermissions() {
         return new Permission[] {
-            new DefaultPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(
+            new BasicPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(
                 Permission.CREATE_OBJECTS_IN_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS, false))
         };
     }
@@ -155,136 +159,69 @@ public class ScheduleOutboxCollection extends DAVCollection {
         return new ByteArrayInputStream(outputStream.toByteArray());
     }
 
-    private List<FreeBusyInformation> parseFreeBusyRequest(InputStream inputStream) throws WebdavProtocolException {
+    private List<FreeBusyData> parseFreeBusyRequest(InputStream inputStream) throws WebdavProtocolException {
         try {
-            return factory.getIcalParser().parseFreeBusy(inputStream, TimeZone.getTimeZone("UTC"), factory.getContext(),
-                new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
-        } catch (ConversionError e) {
+            ICalService iCalService = getFactory().requireService(ICalService.class);
+            ICalParameters parameters = iCalService.initParameters();
+            ImportedCalendar calendarImport = iCalService.importICal(inputStream, parameters);
+            return calendarImport.getFreeBusyDatas();
+        } catch (OXException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 
     private Element getScheduleResponse() {
-        Element scheduleResponse = new Element("schedule-response", CALDAV_NS);
+        Element scheduleResponse = new Element("schedule-response", CAL_NS);
         if (null != freeBusyRequest) {
-            for (FreeBusyInformation freeBusyInformation : freeBusyRequest) {
-                String[] requestedAttendees = freeBusyInformation.getAttendees();
-                String[] resolvedAttendees = resolveCalendarUsers(requestedAttendees);
-                Map<String, FreeBusyData> freeBusy = null;
+            for (FreeBusyData freeBusyData : freeBusyRequest) {
+                Map<Attendee, FreeBusyResult> freeBusyPerAttendee;
                 try {
-                    freeBusy = factory.requireService(FreeBusyService.class).getMergedFreeBusy(factory.getSession(),
-                        Arrays.asList(resolvedAttendees), freeBusyInformation.getStartDate(), freeBusyInformation.getEndDate());
+                    freeBusyPerAttendee = getCalendarSession().getFreeBusyService().getFreeBusy(getCalendarSession(), freeBusyData.getAttendees(), new Date(freeBusyData.getStartDate().getTimestamp()), new Date(freeBusyData.getEndDate().getTimestamp()), true);
                 } catch (OXException e) {
                     LOG.error("error getting free/busy information", e);
+                    continue;
                 }
-                if (null != freeBusy) {
-                    for (int i = 0; i < requestedAttendees.length; i++) {
-                        scheduleResponse.addContent(getResponse(requestedAttendees[i], freeBusyInformation.getUid(), freeBusy.get(resolvedAttendees[i])));
-                    }
+                for (Attendee attendee : freeBusyData.getAttendees()) {
+                    scheduleResponse.addContent(getResponse(freeBusyData, attendee, freeBusyPerAttendee.get(attendee).getFreeBusyTimes()));
                 }
             }
         }
         return scheduleResponse;
     }
 
-    private String[] resolveCalendarUsers(String[] attendees) {
-        String[] resolvedAttendees = new String[attendees.length];
-        for (int i = 0; i < attendees.length; i++) {
-            /*
-             * try principal URL
-             */
-            PrincipalURL principalURL = PrincipalURL.parse(attendees[i]);
-            if (null != principalURL) {
-                resolvedAttendees[i] = String.valueOf(principalURL.getPrincipalID());
-                continue;
-            }
-            /*
-             * try resource ID
-             */
-            ResourceId resourceId = ResourceId.parse(attendees[i]);
-            if (null != resourceId) {
-                resolvedAttendees[i] = String.valueOf(resourceId.getPrincipalID());
-                continue;
-            }
-            /*
-             * try e-mail address
-             */
-            try {
-                URI uri = new URI(attendees[i]);
-                String specificPart = uri.getSchemeSpecificPart();
-                if (false == Strings.isEmpty(specificPart)) {
-                    String mail = null;
-                    if ("mailto".equalsIgnoreCase(uri.getScheme())) {
-                        /*
-                         * mailto-scheme -> e-mail address
-                         */
-                        mail = uri.getSchemeSpecificPart();
-                    } else {
-                        /*
-                         * try and parse value as quoted internet address (best effort)
-                         */
-                        try {
-                            mail = new QuotedInternetAddress(specificPart).getAddress();
-                        } catch (AddressException e) {
-                            // ignore
-                        }
-                    }
-                    /*
-                     * add iCal participant if parsed successfully
-                     */
-                    if (Strings.isNotEmpty(mail)) {
-                        resolvedAttendees[i] = IDNA.toIDN(mail);
-                        continue;
-                    }
-                }
-            } catch (URISyntaxException e) {
-                LOG.error("error parsing attendee URL", e);
-            }
-            /*
-             * take over attendee as-is
-             */
-            resolvedAttendees[i] = attendees[i];
-        }
-        return resolvedAttendees;
-    }
-
-    private Element getResponse(String attendee, String uid, FreeBusyData freeBusyData) {
-        Element response = new Element("response", CALDAV_NS);
+    private Element getResponse(FreeBusyData requestedData, Attendee attendee, List<FreeBusyTime> freeBusyTimes) {
+        Element response = new Element("response", CAL_NS);
         /*
          * prepare recipient
          */
-        Element recipient = new Element("recipient", CALDAV_NS);
+        Element recipient = new Element("recipient", CAL_NS);
         response.addContent(recipient);
         Element href = new Element("href", Protocol.DAV_NS);
-        href.addContent(attendee);
+        href.addContent(attendee.getUri());
         recipient.addContent(href);
         /*
          * prepare request status
          */
-        Element requestStatus = new Element("request-status", CALDAV_NS);
+        Element requestStatus = new Element("request-status", CAL_NS);
         response.addContent(requestStatus);
-        if (null != freeBusyData) {
-            /*
-             * add freebusy info for this entity
-             */
-            final Element calendarData = new Element("calendar-data", CALDAV_NS);
-            response.addContent(calendarData);
-            try {
-                if (false == freeBusyData.hasData() && freeBusyData.hasWarnings()) {
-                    requestStatus.addContent("3.7;Invalid calendar user");
-                } else {
-                    calendarData.addContent(new CDATA(getVFreeBusy(uid, freeBusyData, attendee)));
-                    requestStatus.addContent("2.0;Success");
-                }
-            } catch (OXException e) {
-                LOG.warn("error getting freebusy", e);
-                requestStatus.addContent("5.1;Service unavailable");
-            }
-        } else {
+        if (null == freeBusyTimes) {
             /*
              * no info for this entity
              */
             requestStatus.addContent("3.7;Invalid calendar user");
+        } else {
+            /*
+             * add freebusy info for this entity
+             */
+            Element calendarData = new Element("calendar-data", CAL_NS);
+            response.addContent(calendarData);
+            try {
+                calendarData.addContent(new CDATA(getVFreeBusyReply(requestedData, attendee, freeBusyTimes)));
+                requestStatus.addContent("2.0;Success");
+            } catch (OXException e) {
+                LOG.warn("error getting freebusy", e);
+                requestStatus.addContent("5.1;Service unavailable");
+            }
         }
         /*
          * add response description
@@ -295,22 +232,34 @@ public class ScheduleOutboxCollection extends DAVCollection {
         return response;
     }
 
-    private String getVFreeBusy(String uid, FreeBusyData freeBusyData, String attendee) throws OXException {
+    private String getVFreeBusyReply(FreeBusyData requestedData, Attendee attendee, List<FreeBusyTime> freeBusyTimes) throws OXException {
         /*
-         * generate free busy information
+         * generate free busy data
          */
-        FreeBusyInformation fbInfo = new FreeBusyInformation();
-        fbInfo.setAttendee(attendee);
-        fbInfo.setUid(uid);
-        fbInfo.setFreeBusyIntervals(freeBusyData.getIntervals());
-        fbInfo.setUid(uid);
-        fbInfo.setStartDate(freeBusyData.getFrom());
-        fbInfo.setEndDate(freeBusyData.getUntil());
+        FreeBusyData freeBusyData = new FreeBusyData();
+        freeBusyData.setAttendees(Collections.singletonList(attendee));
+        freeBusyData.setUid(requestedData.getUid());
+        freeBusyData.setStartDate(requestedData.getStartDate());
+        freeBusyData.setEndDate(requestedData.getEndDate());
+        freeBusyData.setOrganizer(requestedData.getOrganizer());
+        freeBusyData.setFreeBusyTimes(freeBusyTimes);
         /*
          * serialize as free/busy reply
          */
-        return factory.getIcalEmitter().writeFreeBusyReply(
-                fbInfo, factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
+        InputStream inputStream = null;
+        try {
+            ICalService iCalService = getFactory().requireService(ICalService.class);
+            ICalParameters parameters = iCalService.initParameters();
+            CalendarExport calendarExport = iCalService.exportICal(parameters);
+            calendarExport.setMethod("REPLY");
+            calendarExport.add(freeBusyData);
+            inputStream = calendarExport.getClosingStream();
+            return Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
+        } catch (IOException e) {
+            throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(inputStream);
+        }
     }
 
     @Override
@@ -330,27 +279,22 @@ public class ScheduleOutboxCollection extends DAVCollection {
 
     @Override
     public void delete() throws WebdavProtocolException {
+        throw DAVProtocol.protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
     @Override
     public void setLanguage(String language) throws WebdavProtocolException {
+        // no-op
     }
 
     @Override
     public void setLength(Long length) throws WebdavProtocolException {
+        // no-op
     }
 
     @Override
     public void setContentType(String type) throws WebdavProtocolException {
-    }
-
-    @Override
-    public String getSource() throws WebdavProtocolException {
-        return null;
-    }
-
-    @Override
-    public void setSource(String source) throws WebdavProtocolException {
+        // no-op
     }
 
     @Override

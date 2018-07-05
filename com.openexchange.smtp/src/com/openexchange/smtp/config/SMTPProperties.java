@@ -49,9 +49,11 @@
 
 package com.openexchange.smtp.config;
 
-import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.transport.config.ITransportProperties;
@@ -104,6 +106,8 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
 
     private String cipherSuites;
 
+    private String primaryAdressHeader;
+
     /**
      * Initializes a new {@link SMTPProperties}
      */
@@ -114,49 +118,68 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
 
     @Override
     protected void loadProperties0() throws OXException {
-        final StringBuilder logBuilder = new StringBuilder(1024);
-        logBuilder.append("\nLoading global SMTP properties...\n");
+        StringBuilder logBuilder = new StringBuilder(1024);
+        List<Object> args = new ArrayList<Object>(32);
+        String lineSeparator = Strings.getLineSeparator();
+
+        logBuilder.append("{}Loading global SMTP properties...{}");
+        args.add(lineSeparator);
+        args.add(lineSeparator);
 
         final ConfigurationService configuration = Services.getService(ConfigurationService.class);
         {
             final String smtpLocalhostStr = configuration.getProperty("com.openexchange.smtp.smtpLocalhost").trim();
             smtpLocalhost = (smtpLocalhostStr == null) || (smtpLocalhostStr.length() == 0) || "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
-            logBuilder.append("\tSMTP Localhost: ").append(smtpLocalhost).append('\n');
+            logBuilder.append("    SMTP Localhost: {}{}");
+            args.add(smtpLocalhost);
+            args.add(lineSeparator);
         }
 
         {
             final String smtpAuthStr = configuration.getProperty("com.openexchange.smtp.smtpAuthentication", "false").trim();
             smtpAuth = Boolean.parseBoolean(smtpAuthStr);
-            logBuilder.append("\tSMTP Authentication: ").append(smtpAuth).append('\n');
+            logBuilder.append("    SMTP Authentication: {}{}");
+            args.add(smtpAuth);
+            args.add(lineSeparator);
         }
 
         {
             final String sendPartialStr = configuration.getProperty("com.openexchange.smtp.sendPartial", "false").trim();
             sendPartial = Boolean.parseBoolean(sendPartialStr);
-            logBuilder.append("\tSend Partial: ").append(sendPartial).append('\n');
+            logBuilder.append("    Send Partial: {}{}");
+            args.add(sendPartial);
+            args.add(lineSeparator);
         }
 
         {
             final String smtpEnvFromStr = configuration.getProperty("com.openexchange.smtp.setSMTPEnvelopeFrom", "false").trim();
             smtpEnvelopeFrom = Boolean.parseBoolean(smtpEnvFromStr);
-            logBuilder.append("\tSet SMTP ENVELOPE-FROM: ").append(smtpEnvelopeFrom).append('\n');
+            logBuilder.append("    Set SMTP ENVELOPE-FROM: {}{}");
+            args.add(smtpEnvelopeFrom);
+            args.add(lineSeparator);
         }
 
         {
             final String tmp = configuration.getProperty("com.openexchange.smtp.logTransport", "false").trim();
             logTransport = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tLog transport: ").append(logTransport).append('\n');
+            logBuilder.append("    Log transport: {}{}");
+            args.add(logTransport);
+            args.add(lineSeparator);
         }
 
         {
             final String smtpAuthEncStr = configuration.getProperty("com.openexchange.smtp.smtpAuthEnc", "UTF-8").trim();
-            if (Charset.isSupported(smtpAuthEncStr)) {
+            if (CharsetDetector.isValid(smtpAuthEncStr)) {
                 smtpAuthEnc = smtpAuthEncStr;
-                logBuilder.append("\tSMTP Auth Encoding: ").append(smtpAuthEnc).append('\n');
+                logBuilder.append("    SMTP Auth Encoding: ").append(smtpAuthEnc).append('\n');
+                args.add(smtpAuthEnc);
+                args.add(lineSeparator);
             } else {
                 smtpAuthEnc = "UTF-8";
-                logBuilder.append("\tSMTP Auth Encoding: Unsupported charset \"").append(smtpAuthEncStr).append("\". Setting to fallback ").append(
-                    smtpEnvelopeFrom).append('\n');
+                logBuilder.append("    SMTP Auth Encoding: Unsupported charset \"{}\". Setting to fallback {}{}");
+                args.add(smtpAuthEncStr);
+                args.add(smtpAuthEnc);
+                args.add(lineSeparator);
             }
         }
 
@@ -164,11 +187,15 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             final String smtpTimeoutStr = configuration.getProperty("com.openexchange.smtp.smtpTimeout", "5000").trim();
             try {
                 smtpTimeout = Integer.parseInt(smtpTimeoutStr);
-                logBuilder.append("\tSMTP Timeout: ").append(smtpTimeout).append('\n');
+                logBuilder.append("    SMTP Timeout: {}{}");
+                args.add(smtpTimeout);
+                args.add(lineSeparator);
             } catch (final NumberFormatException e) {
                 smtpTimeout = 5000;
-                logBuilder.append("\tSMTP Timeout: Invalid value \"").append(smtpTimeoutStr).append("\". Setting to fallback ").append(
-                    smtpTimeout).append('\n');
+                logBuilder.append("    SMTP Timeout: Invalid value \"{}\". Setting to fallback {}{}");
+                args.add(smtpTimeoutStr);
+                args.add(smtpTimeout);
+                args.add(lineSeparator);
 
             }
         }
@@ -177,26 +204,42 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             final String smtpConTimeoutStr = configuration.getProperty("com.openexchange.smtp.smtpConnectionTimeout", "10000").trim();
             try {
                 smtpConnectionTimeout = Integer.parseInt(smtpConTimeoutStr);
-                logBuilder.append("\tSMTP Connection Timeout: ").append(smtpConnectionTimeout).append('\n');
+                logBuilder.append("    SMTP Connection Timeout: {}{}");
+                args.add(smtpConnectionTimeout);
+                args.add(lineSeparator);
             } catch (final NumberFormatException e) {
                 smtpConnectionTimeout = 10000;
-                logBuilder.append("\tSMTP Connection Timeout: Invalid value \"").append(smtpConTimeoutStr).append("\". Setting to fallback ").append(
-                    smtpConnectionTimeout).append('\n');
+                logBuilder.append("    SMTP Connection Timeout: Invalid value \"{}\". Setting to fallback {}{}");
+                args.add(smtpConTimeoutStr);
+                args.add(smtpConnectionTimeout);
+                args.add(lineSeparator);
 
             }
         }
 
         sslProtocols = configuration.getProperty("com.openexchange.smtp.ssl.protocols", "SSLv3 TLSv1").trim();
-        logBuilder.append("\tSupported SSL protocols: ").append(sslProtocols).append("\n");
+        logBuilder.append("    Supported SSL protocols: {}{}");
+        args.add(sslProtocols);
+        args.add(lineSeparator);
 
         {
             final String tmp = configuration.getProperty("com.openexchange.smtp.ssl.ciphersuites", "").trim();
             this.cipherSuites = Strings.isEmpty(tmp) ? null : tmp;
-            logBuilder.append("\tSupported SSL cipher suites: ").append(null == this.cipherSuites ? "<default>" : cipherSuites).append("\n");
+            logBuilder.append("    Supported SSL cipher suites: {}{}");
+            args.add(null == this.cipherSuites ? "<default>" : cipherSuites);
+            args.add(lineSeparator);
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.smtp.setPrimaryAddressHeader", "").trim();
+            primaryAdressHeader = (tmp == null) || (tmp.length() == 0) || "null".equalsIgnoreCase(tmp) ? null : tmp;
+            logBuilder.append("    Primary address header: {}{}");
+            args.add(primaryAdressHeader);
+            args.add(lineSeparator);
         }
 
         logBuilder.append("Global SMTP properties successfully loaded!");
-        LOG.info(logBuilder.toString());
+        LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
     }
 
     @Override
@@ -211,6 +254,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         logTransport = false;
         sslProtocols = "SSLv3 TLSv1";
         cipherSuites = null;
+        primaryAdressHeader = null;
     }
 
     @Override
@@ -268,4 +312,8 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
         return cipherSuites;
     }
 
+    @Override
+    public String getPrimaryAddressHeader() {
+        return primaryAdressHeader;
+    }
 }

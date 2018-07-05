@@ -85,7 +85,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.importexport.Bug17392Test.class,
     com.openexchange.ajax.importexport.Bug20360Test_UmlautBreaksImport.class,
     com.openexchange.ajax.importexport.Bug20738Test.class,
-    com.openexchange.ajax.importexport.ICalExportTest.class,
     com.openexchange.ajax.importexport.ICalImportExportServletTest.class,
     com.openexchange.ajax.importexport.VCardImportExportServletTest.class,
     com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest.class,
@@ -96,7 +95,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.mail.CopyMailWithManagerTest.class,
     com.openexchange.ajax.mail.CopyTest.class,
     com.openexchange.ajax.mail.NewMailTest.class,
-    com.openexchange.ajax.mail.ThreadSortTest.class,
     com.openexchange.ajax.mail.addresscollector.ConfigurationTest.class,
     com.openexchange.ajax.mail.addresscollector.MailTest.class,
     com.openexchange.ajax.mail.netsol.NetsolTestEmptyTrash.class,
@@ -121,19 +119,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.voipnow.ClientDetailsTest.class,
     com.openexchange.ajax.voipnow.ExtensionDetailsTest.class,
     com.openexchange.ajax.voipnow.NewCallTest.class,
-    com.openexchange.webdav.FreeBusyTest.class,
-    com.openexchange.webdav.ICalTest.class,
-    com.openexchange.webdav.xml.appointment.Bug12338Test.class,
-    com.openexchange.webdav.xml.appointment.Bug19014Test_HugeCalendarsProvokeOOM.class,
-    com.openexchange.webdav.xml.appointment.FreeBusyTest.class,
-    com.openexchange.webdav.xml.appointment.PermissionTest.class,
-    com.openexchange.webdav.xml.appointment.recurrence.Bug10859Test2.class,
-    com.openexchange.webdav.xml.appointment.recurrence.ChangeExceptionTest.class,
-    com.openexchange.webdav.xml.contact.Bug15051Test.class,
-    com.openexchange.webdav.xml.contact.PermissionTest.class,
-    com.openexchange.webdav.xml.folder.PermissionTest.class,
-    com.openexchange.webdav.xml.task.PermissionTest.class,
-
 })
 public class LostAndFoundInterfaceTests {
 

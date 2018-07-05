@@ -68,7 +68,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class CacheEventServiceActivator extends HousekeepingActivator {
 
-    private volatile CacheEventServiceImpl service;
+    private CacheEventServiceImpl service;
 
     /**
      * Initializes a new {@link CacheEventServiceActivator}.
@@ -83,24 +83,43 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
-        logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
-        CacheEventServiceLookup.set(this);
-        CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)));
-        this.service = service;
-        registerService(CacheEventService.class, service);
-        registerService(Reloadable.class, service);
-        try {
-            track(ManagementService.class, new ManagementRegisterer(service, context));
-            openTrackers();
-        } catch (Throwable t) {
-            t.printStackTrace();
+    protected synchronized void handleAvailability(Class<?> clazz) {
+        if (ThreadPoolService.class.equals(clazz)) {
+            CacheEventServiceImpl service = this.service;
+            if (null != service) {
+                service.setThreadPoolService(getService(ThreadPoolService.class));
+            }
         }
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void handleUnavailability(Class<?> clazz) {
+        if (ThreadPoolService.class.equals(clazz)) {
+            CacheEventServiceImpl service = this.service;
+            if (null != service) {
+                service.setThreadPoolService(null);
+            }
+        }
+    }
+
+    @Override
+    protected synchronized void startBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
+        logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
+
+        CacheEventServiceLookup.set(this);
+        CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)), getService(ThreadPoolService.class));
+        this.service = service;
+
+        track(ManagementService.class, new ManagementRegisterer(service, context));
+        openTrackers();
+
+        registerService(CacheEventService.class, service);
+        registerService(Reloadable.class, service);
+    }
+
+    @Override
+    protected synchronized void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
         logger.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         CacheEventServiceImpl service = this.service;

@@ -51,7 +51,8 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDate;
 import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
-import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.*;
+import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.isDateTime;
+import static com.openexchange.data.conversion.ical.ical4j.internal.ParserTools.parseDateConsideringDateType;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;

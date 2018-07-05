@@ -49,15 +49,27 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 import com.openexchange.groupware.container.UserParticipant;
 
 /**
  * TaskInternalParticipant.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InternalParticipant extends TaskParticipant {
+public class InternalParticipant extends TaskParticipant implements Serializable {
+
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 6300127692940891584L;
 
     /**
      * An empty set of participants for tasks.
@@ -77,9 +89,10 @@ public class InternalParticipant extends TaskParticipant {
 
     /**
      * Default constructor.
+     * 
      * @param user User.
      * @param groupId unique identifier of the group if this participant is
-     * added through a group.
+     *            added through a group.
      */
     public InternalParticipant(final UserParticipant user, final Integer groupId) {
         super();
@@ -118,6 +131,7 @@ public class InternalParticipant extends TaskParticipant {
 
     /**
      * Sets the private folder of the user.
+     * 
      * @param folderId unique identifier of the folder.
      */
     final void setFolderId(final int folderId) {
@@ -147,6 +161,7 @@ public class InternalParticipant extends TaskParticipant {
 
     /**
      * Sets the confirm message.
+     * 
      * @param confirmMessage new confirm message.
      */
     final void setConfirmMessage(final String confirmMessage) {
@@ -169,8 +184,7 @@ public class InternalParticipant extends TaskParticipant {
         if (!(obj instanceof InternalParticipant)) {
             return false;
         }
-        return getIdentifier() == ((InternalParticipant) obj)
-            .getIdentifier();
+        return getIdentifier() == ((InternalParticipant) obj).getIdentifier();
     }
 
     /**
@@ -185,8 +199,7 @@ public class InternalParticipant extends TaskParticipant {
      */
     @Override
     public String toString() {
-        return "TaskParticipant: " + getIdentifier() + ", Group: " + groupId
-            + ", Folder: " + getFolderId();
+        return "TaskParticipant: " + getIdentifier() + ", Group: " + groupId + ", Folder: " + getFolderId();
     }
 
     /**
@@ -194,5 +207,19 @@ public class InternalParticipant extends TaskParticipant {
      */
     void setGroupId(final Integer groupId) {
         this.groupId = groupId;
+    }
+
+    public InternalParticipant deepClone() {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(this);
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            return (InternalParticipant) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            org.slf4j.LoggerFactory.getLogger(InternalParticipant.class).error("Unable to create a deep clone of the participant with id {} in folder {}. Will return original participant.", this.user.getIdentifier(), this.user.getPersonalFolderId(), e);
+            return this;
+        }
     }
 }

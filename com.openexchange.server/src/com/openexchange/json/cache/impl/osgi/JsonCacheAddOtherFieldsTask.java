@@ -49,18 +49,13 @@
 
 package com.openexchange.json.cache.impl.osgi;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -85,25 +80,28 @@ public final class JsonCacheAddOtherFieldsTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int cid = params.getContextId();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection con = dbService.getForUpdateTask(cid);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            DBUtils.startTransaction(con);
+            con.setAutoCommit(false);
+            rollback = true;
+
             Tools.checkAndAddColumns(con, "jsonCache", new Column[] { new Column("inProgressSince", "bigint(64) DEFAULT NULL") });
             Tools.checkAndAddColumns(con, "jsonCache", new Column[] { new Column("lastUpdate", "bigint(64) DEFAULT NULL") });
             Tools.checkAndAddColumns(con, "jsonCache", new Column[] { new Column("took", "bigint(64) DEFAULT 0") });
             Tools.checkAndAddColumns(con, "jsonCache", new Column[] { new Column("size", "bigint(64) DEFAULT 0") });
+
             con.commit();
-        } catch (final SQLException e) {
-            rollback(con);
+            rollback = false;
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            rollback(con);
+        } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
-            Database.backNoTimeout(cid, true, con);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 }

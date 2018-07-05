@@ -64,6 +64,7 @@ import com.openexchange.database.tx.AbstractDBAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
@@ -194,11 +195,13 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
         for(final Metadata m : fields) {
             if (Metadata.META_LITERAL.getId() == m.getId()) {
                 setMeta(index++, stmt, doc);
+            } else if (Metadata.ORIGIN_LITERAL.getId() == m.getId()) {
+                setOriginPath(index++, stmt, doc);
             } else {
                 stmt.setObject(index++, process(m, m.doSwitch(get)));
             }
         }
-        for(final Object o : additional) {
+        for (Object o : additional) {
             stmt.setObject(index++, o);
         }
         return index;
@@ -214,6 +217,15 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
             return Long.valueOf(((Date) value).getTime());
         case Metadata.LAST_MODIFIED:
             return (value != null) ? Long.valueOf(((Date) value).getTime()) : Long.valueOf(System.currentTimeMillis());
+        }
+    }
+
+    private final void setOriginPath(int parameterIndex, final PreparedStatement stmt, final DocumentMetadata doc) throws SQLException {
+        InfostoreFolderPath folderPath = doc.getOriginFolderPath();
+        if (null == folderPath) {
+            stmt.setNull(parameterIndex, java.sql.Types.VARCHAR); // origin
+        } else {
+            stmt.setString(parameterIndex, folderPath.toString()); // origin
         }
     }
 

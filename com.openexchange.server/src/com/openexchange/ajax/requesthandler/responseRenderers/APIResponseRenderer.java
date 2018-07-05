@@ -60,6 +60,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
+import com.google.json.JsonSanitizer;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.SessionServlet;
@@ -71,6 +72,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.java.UnsynchronizedStringWriter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -364,7 +366,11 @@ public class APIResponseRenderer implements ResponseRenderer {
         writer.write(JS_FRAGMENT_PART2);
         writer.write(callback);
         writer.write("\"])(");
-        ResponseWriter.write(response, new EscapingWriter(writer), localeFrom(req));
+        {
+            UnsynchronizedStringWriter sink = new UnsynchronizedStringWriter(128);
+            ResponseWriter.write(response, sink, localeFrom(req));
+            writer.write(JsonSanitizer.sanitize(sink.toString()));
+        }
         writer.write(JS_FRAGMENT_PART3);
     }
 
@@ -396,111 +402,6 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static boolean isRespondWithHTML(final HttpServletRequest req) {
         return Boolean.parseBoolean(req.getParameter("respondWithHTML"));
-    }
-
-    /**
-     * Escapes <tt>"&lt;/"</tt> char sequence to <tt>"&lt;\/"</tt>.
-     *
-     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-     */
-    private static final class EscapingWriter extends Writer {
-
-        private int prev;
-        private final Writer writer;
-
-        protected EscapingWriter(final Writer writer) {
-            super();
-            this.writer = writer;
-            prev = 0;
-        }
-
-        @Override
-        public void write(final int c) throws IOException {
-            if ('<' == c) {
-                prev = c;
-            } else if ('/' == c) {
-                if (prev > 0) {
-                    //  </   -->   <\/
-                    writer.write("<\\/");
-                    prev = 0;
-                } else {
-                    writer.write(c);
-                }
-            } else {
-                if (prev > 0) {
-                    writer.write('<');
-                    prev = 0;
-                }
-                writer.write(c);
-            }
-        }
-
-        @Override
-        public void write(final char[] cbuf) throws IOException {
-            write(cbuf, 0, cbuf.length);
-        }
-
-        @Override
-        public void write(final char[] cbuf, final int off, final int len) throws IOException {
-            for (int i = off, end = off + len; i < end; i++) {
-                write(cbuf[i]);
-            }
-        }
-
-        @Override
-        public void write(final String str) throws IOException {
-            write(str, 0, str.length());
-        }
-
-        @Override
-        public void write(final String str, final int off, final int len) throws IOException {
-            for (int i = off, end = off + len; i < end; i++) {
-                write(str.charAt(i));
-            }
-        }
-
-        @Override
-        public Writer append(final CharSequence csq) throws IOException {
-            if (csq == null) {
-                write("null");
-            } else {
-                write(csq.toString());
-            }
-            return this;
-        }
-
-        @Override
-        public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
-            CharSequence cs = (csq == null ? "null" : csq);
-            write(cs.subSequence(start, end).toString());
-            return this;
-        }
-
-        @Override
-        public Writer append(final char c) throws IOException {
-            write(c);
-            return this;
-        }
-
-        @Override
-        public void flush() throws IOException {
-            if ('<' == prev) {
-                writer.write('<');
-                prev = '\0';
-            }
-            writer.flush();
-        }
-
-        @Override
-        public void close() throws IOException {
-            writer.close();
-        }
-
-        @Override
-        public String toString() {
-            return writer.toString();
-        }
-
     }
 
 }

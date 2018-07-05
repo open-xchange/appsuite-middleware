@@ -49,16 +49,9 @@
 
 package com.openexchange.user.json.actions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import javax.activation.MimetypesFileTypeMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -75,10 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.guest.GuestService;
-import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;

@@ -54,16 +54,6 @@ import java.io.InputStream;
 import javax.activation.DataHandler;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
-import net.freeutils.tnef.Attr;
-import net.freeutils.tnef.CompressedRTFInputStream;
-import net.freeutils.tnef.MAPIProp;
-import net.freeutils.tnef.MAPIProps;
-import net.freeutils.tnef.RawInputStream;
-import net.freeutils.tnef.TNEFInputStream;
-import net.freeutils.tnef.TNEFUtils;
-import net.htmlparser.jericho.Renderer;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
@@ -85,6 +75,16 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.openexchange.tools.tnef.TNEF2ICal;
+import net.freeutils.tnef.Attr;
+import net.freeutils.tnef.CompressedRTFInputStream;
+import net.freeutils.tnef.MAPIProp;
+import net.freeutils.tnef.MAPIProps;
+import net.freeutils.tnef.RawInputStream;
+import net.freeutils.tnef.TNEFInputStream;
+import net.freeutils.tnef.TNEFUtils;
+import net.htmlparser.jericho.Renderer;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
 
 /**
  * {@link TextFinder} - Looks-up the primary text content of a message.

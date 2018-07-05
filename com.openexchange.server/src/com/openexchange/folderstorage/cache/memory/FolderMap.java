@@ -55,8 +55,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
-import com.googlecode.concurrentlinkedhashmap.Weighers;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
@@ -97,7 +96,7 @@ public final class FolderMap {
      */
     public FolderMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit, final int userId, final int contextId) {
         super();
-        map = new ConcurrentLinkedHashMap.Builder<Key, Wrapper>().maximumWeightedCapacity(maxCapacity).weigher(Weighers.entrySingleton()).build();
+        map = CacheBuilder.newBuilder().maximumSize(maxCapacity).<Key, Wrapper> build().asMap();
         this.maxLifeMillis = (int) unit.toMillis(maxLifeUnits);
         this.contextId = contextId;
         this.userId = userId;

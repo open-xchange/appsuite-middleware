@@ -57,6 +57,8 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageGuestPermission;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.infostore.osgi.Services;
+import com.openexchange.folderstorage.BasicGuestPermission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
@@ -169,13 +171,13 @@ public final class FolderParser {
         }
         List<Permission> permissions = new ArrayList<Permission>(fileStoragePermissions.size());
         for (FileStoragePermission fileStoragePermission : fileStoragePermissions) {
-            ParsedPermission permission;
+            Permission permission;
             if (FileStorageGuestPermission.class.isInstance(fileStoragePermission)) {
-                ParsedGuestPermission guestPermission = new ParsedGuestPermission();
+                BasicGuestPermission guestPermission = new BasicGuestPermission();
                 guestPermission.setRecipient(((FileStorageGuestPermission) fileStoragePermission).getRecipient());
                 permission = guestPermission;
             } else {
-                permission = new ParsedPermission();
+                permission = new BasicPermission();
             }
             permission.setEntity(fileStoragePermission.getEntity());
             permission.setGroup(fileStoragePermission.isGroup());

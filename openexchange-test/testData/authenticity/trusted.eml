@@ -1,0 +1,124 @@
+Delivered-To: test.user@gmail.com
+Received: by 10.79.192.84 with SMTP id h20csp3960698ivj;
+        Wed, 18 Oct 2017 05:31:01 -0700 (PDT)
+X-Google-Smtp-Source: ABhQp+QiFqWapVsL89ipMo4HhM9h+2nES8ThH8mxLUqeGgyQr7j2uhidFABKZaKKHLHUXAoqhWCC
+X-Received: by 10.223.131.166 with SMTP id 35mr6591157wre.84.1508329860890;
+        Wed, 18 Oct 2017 05:31:00 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1508329860; cv=none;
+        d=google.com; s=arc-20160816;
+        b=Tik5F2P+6mOBluMfUztETjjhiiDupFGCJ6Vd90QqQ/g8dHQb1oRjjdIrgixc0d1feI
+         MQaWD0ADIYvkIs2pHnpRtf/fW4u3lRokQkfn2UBPIc24X9T8QGMSmMjX3oQS5AG+WO8y
+         7qErE9aLC1fyrhLNNZ4MtBEJYhvhjIaTmNRMYF2RBGUIBvaCVf6uHe5VAgrJNr+/dqt+
+         lES3f7Bkk5UgaPXH8ixChMRdXyTnHBGn/2L8JQrTwh4CvWsfmdGzb2oPkkZp4FoWIT5f
+         cYogDJKhXsUTRlIKZV64rZ/+ORG7ADf40NiFbXqaQb4zNRoUhDW++T1QT5tk/8PE49Yj
+         6YOA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=importance:content-transfer-encoding:mime-version:subject
+         :message-id:to:from:date:dkim-signature:dkim-signature
+         :dkim-signature:arc-authentication-results;
+        bh=bS2sjbuDg4LIgILI69SPHkAA+boLoJVabZ/jhnCIJss=;
+        b=uA4YF3cTfcKri7Zo6dVMbe/Z+qFNa5JfU6QiAM5mj2mUWZZtwhi1eBz3AgJdJz0YId
+         xy96vtBcKG8L7+6MzQF+Tyu+8C7bxgNUaVfn1Gri138N1H1nYa7uRrt5aekj7YVLE/bV
+         eaSmFreZDugKrDnaIfe9RTJPz5e62WkG7V8TzCctW9UOfx6vW/mXfPtLkMrLkl7RdcoW
+         S0JMKAC5r/0gtGY20Rt+HE6bKVTthNICSCmYh4ceLKKUJhBX3SghFbvo9oGiSQrpFErL
+         v/hmmUO+BlEMa8sJw2sQsci6Z6EH5qOW5FX4APCPCaHngtabvnZxwvBd1ylvXmmUAzMn
+         /d1A==
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@open-xchange.com header.s=201705 header.b=VvWVD9kg;
+       dkim=pass header.i=@open-xchange.com header.s=201705 header.b=0WC5u+VZ;
+       dkim=pass header.i=@open-xchange.com header.s=201705 header.b=doOaQjgp;
+       spf=pass (google.com: domain of test.user@open-xchange.com designates 87.191.39.187 as permitted sender) smtp.mailfrom=test.user@open-xchange.com;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=open-xchange.com
+Return-Path: <support@open-xchange.com>
+Received: from mx2.open-xchange.com (alcatraz.open-xchange.com. [87.191.39.187])
+        by mx.google.com with ESMTPS id l7si9255473wrg.340.2017.10.18.05.31.00
+        for <test.user@gmail.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 18 Oct 2017 05:31:00 -0700 (PDT)
+Received-SPF: pass (google.com: domain of test.user@open-xchange.com designates 87.191.39.187 as permitted sender) client-ip=87.191.39.187;
+Authentication-Results: open-xchange.authenticity.test;
+       dkim=pass header.i=@open-xchange.com header.s=201705 header.b=VvWVD9kg;
+       spf=pass (google.com: domain of support@open-xchange.com designates 87.191.39.187 as permitted sender) smtp.mailfrom=support@open-xchange.com;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=open-xchange.com
+Received: by mx2.open-xchange.com (Postfix, from userid 1001)
+  id D35B86A454; Wed, 18 Oct 2017 14:30:59 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=open-xchange.com;
+  s=201705; t=1508329859;
+  bh=bS2sjbuDg4LIgILI69SPHkAA+boLoJVabZ/jhnCIJss=;
+  h=Date:From:To:Subject:From;
+  b=VvWVD9kgIojxZ1/mdXUXhPnrTyu975zAaasZYcoSwlRaSpqOOzcNiflrCy9x87YGE
+   hzk/wnyvuQ4s+I5hSAzBIA81/sg6x95Oj6TjwnnSQF4usqZ/Vye4PBu6RpsV/SC6Oq
+   Hci+/sJxAtathGuPW3iltlTsfqBGbPK//6c0+3di1FtUzPzhvBn8pnNAh6Do9vcIZj
+   OlvunawqtT2nVi0+blhQrpnm6cyZlM+8WbHdn1sKNuwM3tjgsPmp1m6WkZJY9939FJ
+   rVkrBDZMMkfRAufrPUL1iG5LA0d4XvHAqwgKxIF3UiQjVtuzbaxNLxk2QU5nrBc35/
+   TS2HjQkuKVESA==
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on mx2.open-xchange.com
+X-Spam-Level:
+X-Spam-Status: No, score=-104.7 required=5.0 tests=ALL_TRUSTED,AWL,BAYES_00,
+  DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,USER_IN_WHITELIST autolearn=ham
+  autolearn_force=no version=3.4.0
+Received: from localhost (localhost.localdomain [127.0.0.1])
+  by mx2.open-xchange.com (Postfix) with ESMTP id 4A5546A44E
+  for <test.user@gmail.com>; Wed, 18 Oct 2017 14:30:58 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=open-xchange.com;
+  s=201705; t=1508329858;
+  bh=bS2sjbuDg4LIgILI69SPHkAA+boLoJVabZ/jhnCIJss=;
+  h=Date:From:To:Subject:From;
+  b=0WC5u+VZbloj5Gd9kqn/gapK/U7gKeRkVRudzHUlRuHTYn34mSyamKRih2PtznwJ2
+   nol1jwoMKbIJUcq7rz7Y/mLcjWUlK/IFeRI2MgRXnCyztBI0SN0VkBlpkqiA6pfZnW
+   bTAquAwjiBthaP3D2MIwTGTkpcqK9CKlzWsa/EOOpSEk8WwrFMduzHcYbiw0L1vl0l
+   au8yUxeJtz6G5baUrtLez2cBKgahNIMgmScCbITxUNWRVialT9HuTJmclrLQDwAlaQ
+   /yzLx6YNdwBXCOW9e1C1xW2i0rqMyqnVXLFRgqVZf6XtbjU2poWRyv33nG+thH5GmB
+   e081txmduhlVQ==
+Received: from [127.0.0.1] (helo=mx2.open-xchange.com)
+  by localhost with ESMTP (eXpurgate 4.1.8)
+  (envelope-from <test.user@open-xchange.com>)
+  id 59e74982-034f-7f000001272a-7f000001e868-1
+  for <test.user@gmail.com>; Wed, 18 Oct 2017 14:30:58 +0200
+Received: from open-xchange.com (imap.open-xchange.com [10.20.30.10])
+  (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+  (No client certificate requested)
+  by mx2.open-xchange.com (Postfix) with ESMTPS id E903E6A43B
+  for <test.user@gmail.com>; Wed, 18 Oct 2017 14:30:57 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=open-xchange.com;
+  s=201705; t=1508329857;
+  bh=bS2sjbuDg4LIgILI69SPHkAA+boLoJVabZ/jhnCIJss=;
+  h=Date:From:To:Subject:From;
+  b=doOaQjgp05zpWYlCZrSaAsGtWfXoCXRIu06uydNzXWH7wq5YLAQqfNr1GXGNwprZ3
+   eplMImMseFrgfhb9ys8qyTUIarmLBPDpQSw0LHqlXnoZQj1RY4FB8zg01gWV/MM1kA
+   uIMqj1uIhRCLLOPKsqT4+kuykzmYfpMScF8hxWu4UiRnGxCcuFeijIvItb+8gvsxSv
+   KZnAaTNjkWUOvSZDSTRPv/73JYSW0nTCCjHgkKvjCqhYoRo0ak/lpHHQbuwUfDYmNS
+   1iPwutblfdv9TW+CnpqcrFIdCwTlPmaPJXF6qfUOPfZ7WO3WbD0tvhW2MGCX+XyEcz
+   CcjcWCViwyOBA==
+Received: from localhost (localhost [127.0.0.1])
+  by open-xchange.com (Postfix) with ESMTP id DA7873C1AAB
+  for <test.user@gmail.com>; Wed, 18 Oct 2017 14:30:57 +0200 (CEST)
+Received: from open-xchange.com ([127.0.0.1])
+  by localhost (imap.open-xchange.com [127.0.0.1]) (amavisd-new, port 10024)
+  with ESMTP id 90PjSgblNLjM for <test.user@gmail.com>;
+  Wed, 18 Oct 2017 14:30:57 +0200 (CEST)
+Received: from null (appsuite-dev-gw2.open-xchange.com [10.20.30.222])
+  (using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+  (No client certificate requested)
+  by open-xchange.com (Postfix) with ESMTPSA id CBB7C3C1AA9
+  for <test.user@gmail.com>; Wed, 18 Oct 2017 14:30:57 +0200 (CEST)
+Date: Wed, 18 Oct 2017 14:29:42 +0200 (CEST)
+From: Test User <support@open-xchange.com>
+To: Test User <test.user@gmail.com>
+Message-ID: <722513036.173.1508329782322@appsuite-dev.open-xchange.com>
+Subject: Auth Test
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Priority: 3
+Importance: Medium
+X-Mailer: Open-Xchange Mailer v7.10.0-Rev0
+X-Originating-Client: open-xchange-appsuite
+X-purgate-ID: 151428::1508329858-0000034F-C0192F36/14/0
+X-purgate-type: clean.almost-empty
+X-purgate-size: 11
+X-purgate-Ad: Categorized by eleven eXpurgate (R) http://www.eleven.de
+X-purgate: This mail is considered clean (visit http://www.eleven.de for further information)
+X-purgate: clean
+
+Hi! Test.

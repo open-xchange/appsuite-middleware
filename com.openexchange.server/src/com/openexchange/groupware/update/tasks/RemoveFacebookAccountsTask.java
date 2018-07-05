@@ -56,7 +56,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -65,7 +64,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Removes all facebook related account information (OAuth and messaging)
@@ -75,35 +73,28 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
 
-    private static final String OAUTH_ID = "com.openexchange.oauth.facebook";
-
-    private static final String MESSAGING_ID = "com.openexchange.messaging.facebook";
-
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        final Connection con = ds.getForUpdateTask(contextId);
-        boolean rb = false;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
-            rb = true;
+            rollback = true;
 
             removeOAuthAccounts(con);
             removeMessagingAccounts(con);
 
             con.commit();
-            rb = false;
-        } catch (final SQLException x) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rb) {
+            if (rollback) {
                 Databases.rollback(con);
             }
-            if (con != null) {
-                Databases.autocommit(con);
-                ds.backForUpdateTask(contextId, con);
-            }
+            Databases.autocommit(con);
         }
     }
 
@@ -121,7 +112,7 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
 
         PreparedStatement stmt = con.prepareStatement("DELETE FROM oauthAccounts WHERE serviceId = ?");
         try {
-            stmt.setString(1, OAUTH_ID);
+            stmt.setString(1, "com.openexchange.oauth.facebook");
             stmt.executeUpdate();
         } finally {
             stmt.close();
@@ -151,7 +142,7 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT account, confId, user, cid FROM messagingAccount WHERE serviceId = ?");
-            stmt.setString(1, MESSAGING_ID);
+            stmt.setString(1, "com.openexchange.messaging.facebook");
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return Collections.emptyList();
@@ -192,7 +183,7 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
             stmt = writeCon.prepareStatement("DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?");
             stmt.setInt(1, data[3]);
             stmt.setInt(2, data[2]);
-            stmt.setString(3, MESSAGING_ID);
+            stmt.setString(3, "com.openexchange.messaging.facebook");
             stmt.setInt(4, data[0]);
             stmt.executeUpdate();
             stmt.close();

@@ -49,18 +49,18 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.RdbContextStorage;
 import com.openexchange.groupware.update.Attributes;
@@ -98,13 +98,15 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int ctxId = params.getContextId();
         final ProgressState progress = params.getProgressState();
-        final Connection con = Database.getNoTimeout(ctxId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             startTransaction(con);
+            rollback = true;
+
             Exception re = null;
-            final int[] contextIds = Database.getContextsInSameSchema(ctxId);
+            final int[] contextIds = params.getContextsInSameSchema();
             progress.setTotal(contextIds.length);
             int pos = 0;
             for (final int contextId : contextIds) {
@@ -122,13 +124,16 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
                     }
                 }
             }
+
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
             autocommit(con);
-            Database.backNoTimeout(ctxId, true, con);
         }
     }
 
@@ -232,7 +237,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
         ResultSet result = null;
         final List<OCLPermission> retval = new ArrayList<OCLPermission>();
         try {
-            stmt = con.prepareStatement("SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system FROM oxfolder_permissions WHERE cid=? AND fuid=?");
+            stmt = con.prepareStatement("SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system,type,sharedParentFolder FROM oxfolder_permissions WHERE cid=? AND fuid=?");
             stmt.setInt(1, ctxId);
             stmt.setInt(2, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
             result = stmt.executeQuery();
@@ -243,6 +248,9 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
                 p.setFolderAdmin(result.getInt(6) > 0 ? true : false);
                 p.setGroupPermission(result.getInt(7) > 0 ? true : false);
                 p.setSystem(result.getInt(8));
+                p.setType(FolderPermissionType.getType(result.getInt(9)));
+                int legator = result.getInt(10);
+                p.setPermissionLegator(legator == 0 ? null : String.valueOf(legator));
                 retval.add(p);
             }
         } finally {

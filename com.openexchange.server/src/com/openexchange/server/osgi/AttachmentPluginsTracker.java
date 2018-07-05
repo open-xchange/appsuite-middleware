@@ -78,20 +78,21 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
         SpecificServiceChooser<T> chooser = getChooser(module);
         if(chooser == null) {
             LOG.warn("Can't register services for module {} in tracker {}", module, getClass().getName());
+            return;
         }
-        if(contextId == null && folderId == null) {
+        if (contextId == null && folderId == null) {
             chooser.removeForEverything(tracked);
             return;
         }
-        if(contextId != null && folderId != null) {
+        if (contextId != null && folderId != null) {
             chooser.removeForContextAndFolder(tracked, contextId, folderId);
             return;
         }
-        if(contextId != null) {
+        if (contextId != null) {
             chooser.removeForContext(tracked, contextId);
             return;
         }
-        if(folderId != null) {
+        if (folderId != null) {
             chooser.removeForFolder(tracked, folderId);
         }
     }

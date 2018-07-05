@@ -92,10 +92,10 @@ public class ETagCorrectionHandler extends RequestHandler2 {
     @Override
     public void afterResponse(Request<?> request, Response<?> response) {
         Object awsResponse = response.getAwsResponse();
-        if (null != awsResponse && ObjectMetadata.class.isInstance(awsResponse)) {
+        if (ObjectMetadata.class.isInstance(awsResponse)) {
             ObjectMetadata metadata = (ObjectMetadata) awsResponse;
             Map<String, Object> headers = metadata.getRawMetadata();
-            if (null != headers && headers.containsKey("Etag")) {
+            if (null != headers) {
                 String etag = (String) headers.get("Etag");
                 if (null != etag) {
                     metadata.setHeader(Headers.ETAG, etag.replace("\"", ""));

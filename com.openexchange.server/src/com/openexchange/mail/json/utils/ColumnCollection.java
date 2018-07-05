@@ -49,10 +49,10 @@
 
 package com.openexchange.mail.json.utils;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.List;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link ColumnCollection} - A column collection.

@@ -1,10 +1,9 @@
 package liquibase.logging;
 
-import liquibase.exception.ServiceNotFoundException;
-import liquibase.servicelocator.ServiceLocator;
-
 import java.util.HashMap;
 import java.util.Map;
+import liquibase.exception.ServiceNotFoundException;
+import liquibase.servicelocator.ServiceLocator;
 
 public class LogFactory {
     private static Map<String, Logger> loggers = new HashMap<String, Logger>();

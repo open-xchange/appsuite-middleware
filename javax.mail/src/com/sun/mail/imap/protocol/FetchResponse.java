@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,10 +40,17 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.io.*;
-import java.util.*;
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
+import static com.sun.mail.imap.Utility.toUpperCase;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.util.ASCIIUtility;
 
 /**
  * This class represents a FETCH response obtained from the input stream
@@ -248,15 +255,14 @@ public class FetchResponse extends IMAPResponse {
     private final static char[] TEXT = {'.','T','E','X','T'};
 
     private void parse() throws ParsingException {
-	skipSpaces();
-	if (buffer[index] != '(')
+	if (!isNextNonSpace('('))
 	    throw new ParsingException(
 		"error in FETCH parsing, missing '(' at index " + index);
 
-	List<Item> v = new ArrayList<Item>();
+	List<Item> v = new ArrayList<>();
 	Item i = null;
+	skipSpaces();
 	do {
-	    index++; // skip '(', or SPACE
 
 	    if (index >= size)
 		throw new ParsingException(
@@ -269,9 +275,8 @@ public class FetchResponse extends IMAPResponse {
 		throw new ParsingException(
 		    "error in FETCH parsing, unrecognized item at index " +
 		    index + ", starts with \"" + next20() + "\"");
-	} while (buffer[index] != ')');
+	} while (!isNextNonSpace(')'));
 
-	index++; // skip ')'
 	items = v.toArray(new Item[v.size()]);
     }
 
@@ -280,7 +285,7 @@ public class FetchResponse extends IMAPResponse {
      */
     private String next20() {
 	if (index + 20 > size)
-	    return ASCIIUtility.toString(buffer, index, index + size);
+	    return ASCIIUtility.toString(buffer, index, size);
 	else
 	    return ASCIIUtility.toString(buffer, index, index + 20) + "...";
     }
@@ -345,6 +350,10 @@ public class FetchResponse extends IMAPResponse {
 	    if (match(MODSEQ.name))
 		return new MODSEQ(this);
 	    break;
+	case 'S': case 's':
+	    if (match(SNIPPET.name))
+	    return new SNIPPET(this);
+        break;
 	default: 
 	    break;
 	}
@@ -399,7 +408,7 @@ public class FetchResponse extends IMAPResponse {
 	for (int i = 0, j = index; i < len;)
 	    // IMAP tokens are case-insensitive. We store itemNames in
 	    // uppercase, so convert operand to uppercase before comparing.
-	    if (Character.toUpperCase((char)buffer[j++]) !=
+	    if (toUpperCase((char)buffer[j++]) !=
 		    itemName.charAt(i++))
 		return false;
 	index += len;

@@ -1,6 +1,0 @@
-requests:
-  - MailPictureRequest.yaml
-  - ContactPictureRequest.yaml
-  - UserPictureRequest.yaml
-  - FileMp3coverRequest.yaml
-  - MfilePictureRequest.yaml

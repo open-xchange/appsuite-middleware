@@ -1,11 +1,10 @@
 package liquibase.executor.jvm;
 
-import liquibase.exception.DatabaseException;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
+import liquibase.exception.DatabaseException;
 
 /**
  * Simple adapter for PreparedStatementSetter that applies

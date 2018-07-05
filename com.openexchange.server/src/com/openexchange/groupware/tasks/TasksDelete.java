@@ -51,13 +51,17 @@ package com.openexchange.groupware.tasks;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.Set;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.session.Session;
 
@@ -85,6 +89,9 @@ public class TasksDelete implements DeleteListener {
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         switch (event.getType()) {
+        case DeleteEvent.TYPE_CONTEXT:
+            deleteContext(event, writeCon);
+            break;
         case DeleteEvent.TYPE_USER:
             deleteUser(event, writeCon);
             break;
@@ -95,6 +102,33 @@ public class TasksDelete implements DeleteListener {
         case DeleteEvent.TYPE_RESOURCE_GROUP:
             break;
         default:
+        }
+    }
+
+    /**
+     * Delete a context from tasks module.
+     */
+    private void deleteContext(DeleteEvent event, Connection writeCon) throws OXException {
+        Context ctx = event.getContext();
+        Statement stmt = null;
+        try {
+            stmt = writeCon.createStatement();
+
+            stmt.addBatch("DELETE FROM del_task_eparticipant WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM del_task_participant WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM del_task_folder WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM del_task WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM task_removedparticipant WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM task_eparticipant WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM task_participant WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM task_folder WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM task WHERE cid=" + ctx.getContextId());
+
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -173,13 +207,13 @@ public class TasksDelete implements DeleteListener {
                     // removeUserFromParticipants()
                     foldStor.deleteFolder(ctx, con, taskId, folderId, type);
                 } else if (ctx.getMailadmin() == userId || StorageType.DELETED == type || null == folder) {
-                    TaskLogic.removeTask(session, ctx, con, folderId, taskId, type);
+                    TaskLogic.removeTask(session, ctx, con, folderId, taskId, type, false);
                 } else if (Tools.isFolderPublic(folder)) {
                     foldStor.deleteFolder(ctx, con, taskId, folderId, type);
                     final Folder aFolder = new Folder(folderId, destUser);
                     foldStor.insertFolder(ctx, con, taskId, aFolder, type);
                 } else if (Tools.isFolderPrivate(folder)) {
-                    TaskLogic.removeTask(session, ctx, con, folderId, taskId, type);
+                    TaskLogic.removeTask(session, ctx, con, folderId, taskId, type, false);
                 } else {
                     throw TaskExceptionCode.UNIMPLEMENTED.create();
                 }

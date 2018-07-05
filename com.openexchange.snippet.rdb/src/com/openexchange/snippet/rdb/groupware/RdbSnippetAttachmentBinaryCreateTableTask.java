@@ -55,15 +55,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.snippet.rdb.Services;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbSnippetAttachmentBinaryCreateTableTask}
@@ -96,14 +94,8 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
 
     @Override
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
-        int contextId = params.getContextId();
-        DatabaseService ds = getService(DatabaseService.class);
-        Connection writeCon = ds.getForUpdateTask(contextId);
-        try {
-            createTable(RdbSnippetTables.getSnippetAttachmentBinaryName(), RdbSnippetTables.getSnippetAttachmentBinaryTable(), writeCon);
-        } finally {
-            ds.backForUpdateTask(contextId, writeCon);
-        }
+        Connection writeCon = params.getConnection();
+        createTable(RdbSnippetTables.getSnippetAttachmentBinaryName(), RdbSnippetTables.getSnippetAttachmentBinaryTable(), writeCon);
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetAttachmentBinaryCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", RdbSnippetAttachmentBinaryCreateTableTask.class.getSimpleName());
     }
@@ -119,21 +111,19 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
     private boolean tableExists(final Connection con, final String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
-        boolean retval = false;
         try {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+            return (rs.next() && rs.getString("TABLE_NAME").equals(table));
         } finally {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
-        return retval;
     }
 
     @Override
@@ -144,14 +134,6 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
     @Override
     public String[] tablesToCreate() {
         return new String[] { RdbSnippetTables.getSnippetAttachmentBinaryName() };
-    }
-
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        try {
-            return Services.getService(clazz);
-        } catch (final RuntimeException e) {
-            throw new OXException(e);
-        }
     }
 
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.tools.mappings;
 
+import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 
 /**
@@ -99,12 +101,51 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
 	 */
 	O getDifferences(final O original, final O update) throws OXException;
 
+    /**
+     * Determines the differences between one object and another one. Only <i>set</i> properties in the second object are considered.
+     *
+     * @param original The original object
+     * @param update The updated object
+     * @return The different fields, or an empty array if there are no differences
+     */
+    E[] getDifferentFields(O original, O update);
+
+    /**
+     * Determines the differences between one object and another one. Only <i>set</i> properties in the second object are considered.
+     *
+     * @param original The original object
+     * @param update The updated object
+     * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
+     * @param ignoredFields Fields to ignore when determining the differences
+     * @return The different fields, or an empty set if there are no differences
+     */
+    Set<E> getDifferentFields(O original, O update, boolean considerUnset, E... ignoredFields);
+
 	/**
-	 * Gets an array of all mapped fields that are set in the supplied object.
-	 *
-	 * @param object the object
-	 * @return the set fields
-	 */
+     * Gets an array of all mapped fields that are set in the supplied object.
+     *
+     * @param object The object
+     * @return The set fields
+     */
 	E[] getAssignedFields(O object);
+
+    /**
+     * Copies data from on object to another. Only <i>set</i> fields are transferred.
+     *
+     * @param from The source object
+     * @param to The destination object, or <code>null</code> to copy into a newly created instance
+     * @param fields The fields to copy, or <code>null</code> to copy all known field mappings
+     * @return The copied object
+     */
+    O copy(O from, O to, E... fields) throws OXException;
+
+    /**
+     * Copies the data from a list of objects into a list of new objects. Only <i>set</i> fields are transferred.
+     *
+     * @param objects The source objects to copy
+     * @param fields The fields to copy, or <code>null</code> to copy all known field mappings
+     * @return The copied list of objects
+     */
+    List<O> copy(List<O> objects, E... fields) throws OXException;
 
 }

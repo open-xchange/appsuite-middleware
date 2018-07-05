@@ -50,6 +50,13 @@
 package com.openexchange.database.migration.internal;
 
 import java.sql.Connection;
+import org.osgi.framework.FrameworkUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationExceptionCodes;
+import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
+import com.openexchange.exception.OXException;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -59,13 +66,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import org.osgi.framework.FrameworkUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.database.migration.DBMigration;
-import com.openexchange.database.migration.DBMigrationExceptionCodes;
-import com.openexchange.database.migration.resource.accessor.BundleResourceAccessor;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link LiquibaseHelper}

@@ -50,8 +50,6 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import static com.openexchange.server.services.ServerServiceRegistry.getInstance;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -63,10 +61,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletionService;
+import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptions;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -92,6 +90,8 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link ListPerformer} - Serves the <code>LIST</code> request.
@@ -607,10 +607,10 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 addWarning(warnings.iterator().next());
             }
         } catch (final OXException e) {
-            if (OXExceptions.isUserInput(e) || OXExceptions.isPermissionDenied(e)) {
-                LOG.debug("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+            if (DispatcherServlet.ignore(e)) {
+                LOG.debug("Batch loading of folders failed. Fall-back to one-by-one loading.", e);
             } else {
-                LOG.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
+                LOG.warn("Batch loading of folders failed. Fall-back to one-by-one loading.", e);
             }
             folders = null;
         }
@@ -628,7 +628,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             try {
                 subfolder = folderStorage.getFolder(treeId, id, newParameters);
             } catch (final OXException e) {
-                if (OXExceptions.isUserInput(e) || OXExceptions.isPermissionDenied(e)) {
+                if (DispatcherServlet.ignore(e)) {
                     LOG.debug("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName(), e);
                 } else {
                     LOG.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName());

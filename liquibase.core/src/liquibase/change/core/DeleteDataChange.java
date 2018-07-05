@@ -1,6 +1,8 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChange;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;

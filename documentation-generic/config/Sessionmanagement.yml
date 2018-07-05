@@ -1,0 +1,27 @@
+feature_name: Sessionmanagement 
+feature_description: |
+    See [[https://documentation.open-xchange.com/{{version}}/middleware/components/sessionmanagement.html]] for more informations.
+properties:
+  - key: com.openexchange.session.management.globalLookup
+    description: |
+      Search for user sessions in session storage and other cluster members
+    defaultValue: true
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: sessionmanagement.properties
+    packageName: open-xchange-core
+    tags: ["Session", "Sessionmanagement"]
+  - key: com.openexchange.session.management.clientBlacklist
+    description: |
+      A comma-separated list of identifiers of blacklisted clients. Those sessions will not be listed.
+      E.g. com.openexchange.session.management.clientBlacklist=open-xchange-mailapp, open-xchange-appsuite
+    defaultValue: 
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: sessionmanagement.properties
+    packageName: open-xchange-core
+    tags: ["Session", "Sessionmanagement"]

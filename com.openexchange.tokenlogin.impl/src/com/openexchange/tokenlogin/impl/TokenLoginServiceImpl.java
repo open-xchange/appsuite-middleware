@@ -345,7 +345,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     @Override
-    public Session redeemToken(String token, String appSecret, String optClientIdentifier, String optAuthId, String optHash, String optClientIp) throws OXException {
+    public Session redeemToken(String token, String appSecret, String optClientIdentifier, String optAuthId, String optHash, String optClientIp, String optUserAgent) throws OXException {
         final TokenLoginSecret tokenLoginSecret = Strings.isEmpty(appSecret) ? null : getTokenLoginSecret(appSecret);
         if (null == tokenLoginSecret) {
             throw TokenLoginExceptionCodes.TOKEN_REDEEM_DENIED.create();
@@ -395,6 +395,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
         parameter.setAuthId(Strings.isEmpty(optAuthId) ? session.getAuthId() : optAuthId);
         // Hash value
         parameter.setHash(Strings.isEmpty(optHash) ? session.getHash() : optHash);
+        parameter.setUserAgent(Strings.isEmpty(optUserAgent) ? (String) session.getParameter(Session.PARAM_USER_AGENT) : optUserAgent);
         // Add & return session
         return sessiondService.addSession(parameter);
     }

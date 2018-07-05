@@ -92,7 +92,7 @@ public class NoneIPChecker implements IPChecker {
     @Override
     public void handleChangedIp(String current, String previous, Session session, IPCheckConfiguration configuration) throws OXException {
         boolean whiteListedClient = IPCheckers.isWhitelistedClient(session, configuration);
-        IPCheckers.updateIPAddress(current, session, false, whiteListedClient);
+        IPCheckers.updateIPAddress(current, session, whiteListedClient);
     }
 
 }

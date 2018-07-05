@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.customizer.folder;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -60,6 +58,8 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 
 /**

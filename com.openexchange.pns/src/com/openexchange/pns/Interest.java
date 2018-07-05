@@ -87,6 +87,10 @@ public class Interest {
             return null;
         }
 
+        if (0 == topics.length) {
+            return Collections.emptyList();
+        }
+
         return interestsFor(Arrays.asList(topics));
     }
 
@@ -235,7 +239,7 @@ public class Interest {
         StartsWithChecker(String prefix) {
             super();
             if (false == prefix.endsWith(":")) {
-                throw new IllegalArgumentException("No a valid wild-card topic: " + prefix);
+                throw new IllegalArgumentException("Not a valid wild-card topic: " + prefix);
             }
             this.prefix = prefix;
         }

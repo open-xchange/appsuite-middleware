@@ -665,6 +665,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         tmp = paramContainer.getStringParam("embedded");
         final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        tmp = paramContainer.getStringParam("sanitize");
+        final boolean sanitize = (tmp == null || "1".equals(tmp) || Boolean.parseBoolean(tmp));
         tmp = paramContainer.getStringParam("process_plain_text");
         boolean asMarkup = (tmp == null || (!"0".equals(tmp) && Boolean.parseBoolean(tmp)));
         tmp = paramContainer.getStringParam("includePlainText");
@@ -746,6 +748,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             MessageWriterParams params = MessageWriterParams.builder(mail.getAccountId(), mail, session)
                                                             .setDisplayMode(displayMode)
                                                             .setEmbedded(embedded)
+                                                            .setSanitize(sanitize)
                                                             .setAsMarkup(asMarkup)
                                                             .setSizePolicy(sizePolicy)
                                                             .setIncludePlainText(includePlainText)

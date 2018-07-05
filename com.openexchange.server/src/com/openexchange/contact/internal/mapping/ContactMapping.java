@@ -50,7 +50,6 @@
 package com.openexchange.contact.internal.mapping;
 
 import java.util.Comparator;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 

@@ -49,11 +49,9 @@
 
 package com.openexchange.drive;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link DriveAction}
@@ -83,12 +81,12 @@ public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAct
 
     static final String PARAMETER_DATA = "data";
 
-    static final Set<String> PARAMETER_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
+    static final Set<String> PARAMETER_NAMES = ImmutableSet.of(
         PARAMETER_PATH, PARAMETER_TOTAL_LENGTH, PARAMETER_OFFSET, PARAMETER_CONTENT_TYPE, PARAMETER_ERROR, PARAMETER_QUARANTINE,
         PARAMETER_MODIFIED, PARAMETER_CREATED, PARAMETER_RESET, PARAMETER_LENGTH, PARAMETER_STOP, PARAMETER_ACKNOWLEDGE,
         PARAMETER_DIRECT_LINK, PARAMETER_DIRECT_LINK_FRAGMENTS, PARAMETER_PREVIEW_LINK, PARAMETER_THUMBNAIL_LINK, PARAMETER_DATA,
         PARAMETER_ROOT
-    })));
+    );
 
     /**
      * Gets the action.

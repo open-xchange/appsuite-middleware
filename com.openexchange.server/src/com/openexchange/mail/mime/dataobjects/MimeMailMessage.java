@@ -94,7 +94,6 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
      */
     public MimeMailMessage(final MimeMessage msg) throws OXException {
         super();
-        // TODO: this.mailPart = MIMEMessageConverter.convertPart(msg);
         mailPart = new MimeMailPart(msg);
     }
 

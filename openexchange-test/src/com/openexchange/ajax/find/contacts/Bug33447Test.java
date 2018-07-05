@@ -84,7 +84,7 @@ public class Bug33447Test extends ContactsFindTest {
         AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.CONTACTS.getIdentifier(), options);
         AutocompleteResponse autocompleteResponse = getClient().execute(autocompleteRequest);
 
-        FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), DisplayItems.convert(contact).getDisplayName());
+        FacetValue foundFacetValue = findByDisplayName(autocompleteResponse.getFacets(), DisplayItems.convert(contact, getClient().getValues().getLocale(), i18nServiceRegistry).getDisplayName());
         assertNotNull("no facet value found for: " + contact.getEmail1(), foundFacetValue);
         ActiveFacet activeFacet = createActiveFacet(ContactsFacetType.CONTACT, foundFacetValue.getId(), foundFacetValue.getFilter());
         List<PropDocument> documents = query(Module.CONTACTS, Collections.singletonList(activeFacet), options);

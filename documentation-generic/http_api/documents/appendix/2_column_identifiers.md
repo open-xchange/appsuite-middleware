@@ -83,10 +83,11 @@ specific field data of single or multiple objects.
 | 313 | capabilities |Number|Bit mask containing information about mailing system capabilites, as described in [capabilities](#capabilities).|
 | 314 | subscribed |Boolean|Indicates whether this folder should appear in folder tree or not. Note: Standard folders cannot be unsubscribed.|
 | 315 | subscr_subflds |Boolean|Indicates whether subfolders should appear in folder tree or not.|
-| 316 | standard_folder_type |Number|Indicates the default folder type. Zero for non-default folder. See [Standard folder types](#standard-folder-types)|
+| 316 | standard\_folder_type |Number|Indicates the default folder type. Zero for non-default folder. See [Standard folder types](#standard-folder-types)|
 | 317 | supported_capabilities |Array|Each element is a String identifying a supported folder capability as described in [supported capabilities](#supported-capabilities). Only applicable for non-mail folders. Read Only, Since 7.4.0.|
 | 318 | account_id |String|Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder. Since 7.8.0.|
 | 319 | folder_name |String|The raw and therefore untranslated name of this folder|
+| 320 | origin |String|The folder's origin path. Since 7.10.0|
 | 3010 | com.openexchange.publish.publicationFlag |Boolean|Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin, since 6.14.|
 | 3020 | com.openexchange.subscribe.subscriptionFlag |Boolean|Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin, since 6.14.|
 | 3030 | com.openexchange.folderstorage.displayName |String|Provides the display of the folder's owner. Read Only, Since 6.20.|
@@ -113,10 +114,10 @@ specific field data of single or multiple objects.
 |ID   | Name  |	Type  |	Value  |
 |:----|:------|:------|:-------|
 |200 | title| String | Short description.|
-|201 | start_date| Date | or Time	Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time)|
-|202 | end_date| Date | or Time	Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time)|
+|201 | start_date| Date or Time | Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time)|
+|202 | end_date| Date or Time |	Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time)|
 |203 | note| String | Long description.|
-|204 | alarm| Number | or Time	Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|
+|204 | alarm| Number or Time | Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|
 |209 | recurrence_type| Number | Specifies the type of the recurrence for a task sequence. See [Task sequence type](#task-sequence-type)|
 |212 | days| Number | Specifies which days of the week are part of a sequence. The value is a bitfield with bit 0 indicating sunday, bit 1 indicating monday and so on. May be present if recurrence_type > 1. If allowed but not present, the value defaults to 127 (all 7 days).|
 |213 | day_in_month| Number | Specifies which day of a month is part of the sequence. Counting starts with 1. If the field "days" is also present, only days selected by that field are counted. If the number is bigger than the number of available days, the last available day is selected. Present if and only if recurrence_type > 2.|
@@ -131,9 +132,9 @@ specific field data of single or multiple objects.
 |224 | organizer| String | Contains the email address of the appointment organizer which is not necessarily an internal user. Not implemented for tasks.|
 |225 | sequence| Number | iCal sequence number. Not implemented for tasks. Must be incremented on update. Will be incremented by the server, if not set.|
 |226 | confirmations| Array | Each element represents a confirming participant as described in [Confirming participant](#confirming-participant). This can be internal and external user. Not implemented for tasks.|
-|227 | organizerId| Number | Contains the userIId of the appointment organizer if it is an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
+|227 | organizerId| Number | Contains the userId of the appointment organizer if it is an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
 |228 | principal| String | Contains the email address of the appointment principal which is not necessarily an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
-|229 | principalId| Number | Contains the userIId of the appointment principal if it is an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
+|229 | principalId| Number | Contains the userId of the appointment principal if it is an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
 |401 | full_time| Boolean | True if the event is a whole day appointment or task, false otherwise.|
 
 ### Task sequence type
@@ -411,16 +412,20 @@ specific field data of single or multiple objects.
 ||attachments | Array | Each element is an attachment as described in [Attachment](#attachment). The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.|
 ||nested_msgs | Array | Each element is a mail object as described in this table, except for fields id, folder_id and attachment.|
 ||truncated | boolean | true/false if the mail content was trimmed. Since v7.6.1|
-||source | String | RFC822 source of the mail. Only present for action=get&attach_src=true|
+||source | String | RFC822 source of the mail. Only present for ``action=get&attach_src=true``|
 ||cid | String | The value of the "Content-ID" header, if the header is present.|
 |654 | original_id | String | The original mail identifier (e.g. if fetched from "virtual/all" folder).|
-|655 | original_folder_id | String | The original folder identifier (e.g. if fetched from "virtual/all" folder).|
-|656 | content_type | String | The Content-Type of a mail; e.g. multipart/mixed; boundary="-0123456abcdefg--".|
+|655 | original\_folder_id | String | The original folder identifier (e.g. if fetched from "virtual/all" folder).|
+|656 | content_type | String | The Content-Type of a mail; e.g. ``multipart/mixed; boundary="-0123456abcdefg--"``.|
 |657 | answered | String | Special field to sort mails by answered status.|
 |658 | forwarded | String | Special field to sort mails by forwarded status. Note that mail service needs either support a \Forwarded system flag or a $Forwarded user flag |
 |659 | draft | String | Special field to sort mails by draft flag.|
 |660 | flagged | String | Special field to sort mails by flagged status.|
 |661 | date | String | The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header). Supposed to be the replacement for ``sent_date`` (609) or ``received_date`` (610) to let the Open-Xchange Middleware decide based on configuration for ``com.openexchange.mail.preferSentDate`` property what to consider. Supported at both - ``columns`` parameter and ``sort`` parameter.|
+|662 | text\_preview\_if_available | String | A mail's text preview. Only returned if immediately available from mail server. An empty string signals that mail has no body content. ``NULL`` signals not available.|
+|663 | text_preview | String | A mail's text preview. An empty string signals that mail has no body content. Might be slow.|
+|664 | authenticity | JSON | The light-weighted version of the authenticity status result, i.e. the status string.|
+|665 | authenticity | JSON | The heavy-weighted version of the authenticity status results as described in MailData.|
 
 ### Mail system flags
 
@@ -465,6 +470,7 @@ specific field data of single or multiple objects.
 |:----|:------|:------|:-------|
 |108 | object_permissions | Array | Each element is an object described in [Object Permission object](#object-permission-object) (preliminary, available with 7.8.0). |
 |109 | shareable | Boolean | (read-only) Indicates if the item can be shared (preliminary, available with 7.8.0). |
+|712 | origin | String | The file's origin path. Since 7.10.0. |
 |700 | title | String | Title |
 |701 | url | String | Link/URL |
 |702 | filename | String | Displayed filename of the document. |
@@ -473,7 +479,7 @@ specific field data of single or multiple objects.
 |705 | version | Number | Version number of the document. New documents start at 1. Every update increments the version by 1. |
 |706 | description | String | Description |
 |707 | locked_until | Time | The time until which this item will presumably be locked. Only set if the document is currently locked, 0 otherwise. |
-|708 | file_md5sum | String | MD5Sum of the document. Not yet implemented, so this is currently always empty. |
+|708 | file_md5sum | String | MD5Sum of the document, if available. |
 |709 | version_comment | String | A version comment is used to file a changelog for the file. |
 |710 | current_version | Boolean | “true” if this version is the current version “false” otherwise. Note: This is not writeable |
 |711 | number_of_versions | Number | The number of all versions of the infoitem. Note: This is not writeable. |

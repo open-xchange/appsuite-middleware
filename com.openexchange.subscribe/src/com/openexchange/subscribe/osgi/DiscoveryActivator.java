@@ -60,7 +60,6 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.osgi.tools.WhiteboardGenericConfigurationStorageService;
 import com.openexchange.folder.FolderService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
@@ -77,7 +76,6 @@ import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.database.SubscriptionUserDeleteListener;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
-import com.openexchange.subscribe.internal.CalendarFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.DocumentMetadataHolderFolderUpdaterStrategy;
@@ -120,7 +118,6 @@ public class DiscoveryActivator extends HousekeepingActivator {
         final List<FolderUpdaterService<?>> folderUpdaters = new ArrayList<FolderUpdaterService<?>>(5);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
-        folderUpdaters.add(new StrategyFolderUpdaterService<CalendarDataObject>(new CalendarFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Task>(new TaskFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<DocumentMetadataHolder>(new DocumentMetadataHolderFolderUpdaterStrategy(
             users,

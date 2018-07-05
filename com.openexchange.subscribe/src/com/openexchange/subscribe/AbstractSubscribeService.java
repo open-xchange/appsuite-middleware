@@ -71,6 +71,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -399,7 +400,8 @@ public abstract class AbstractSubscribeService implements SubscribeService {
      */
     @Override
     public SearchIterator<?> loadContent(Subscription subscription) throws OXException {
-        return new SearchIteratorDelegator(getContent(subscription));
+        Collection<?> collection = getContent(subscription);
+        return null == collection ? SearchIterators.emptyIterator() : new SearchIteratorDelegator(collection);
     }
 
     private static String getSubscriptionSourceId(final Subscription subscription) {
@@ -484,14 +486,16 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
     public void checkUpdate(final Subscription subscription) throws OXException {
-        if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
+        Session session = subscription.getSession();
+        if (null != session && session.getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
             return;
         }
         throw SubscriptionErrorMessage.PERMISSION_DENIED.create();
     }
 
     public void checkDelete(final Subscription subscription) throws OXException {
-        if (subscription.getSession().getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
+        Session session = subscription.getSession();
+        if (null != session && session.getUserId() == subscription.getUserId() || isFolderAdmin(subscription)) {
             return;
         }
         throw SubscriptionErrorMessage.PERMISSION_DENIED.create();

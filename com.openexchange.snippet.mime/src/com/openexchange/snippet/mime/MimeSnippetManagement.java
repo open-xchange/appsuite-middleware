@@ -88,6 +88,7 @@ import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder.ThresholdFileHolderInputStream;
 import com.openexchange.config.ConfigurationService;
@@ -122,17 +123,17 @@ import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.session.Session;
-import com.openexchange.snippet.mime.groupware.QuotaMode;
-import com.openexchange.snippet.utils.SnippetUtils;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
+import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
+import com.openexchange.snippet.mime.groupware.QuotaMode;
+import com.openexchange.snippet.utils.SnippetUtils;
 
 /**
  * {@link MimeSnippetManagement}
@@ -308,7 +309,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
     @Override
     public int getOwnSnippetsCount() throws OXException {
         AccountQuota quota = getQuota();
-        return (int) quota.getQuota(QuotaType.AMOUNT).getUsage();
+        return null == quota ? 0 : (int) quota.getQuota(QuotaType.AMOUNT).getUsage();
     }
 
     @Override
@@ -410,8 +411,9 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 stmt = null;
             }
             Pair<MimeMessage, Long> messageAndSize = createMimeMessage(identifier, file);
-            com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges(messageAndSize.getFirst());
-            return createSnippet(identifier, creator, displayName, module, type, shared, messageAndSize.getFirst());
+            MimeMessage mimeMessage = messageAndSize.getFirst();
+            com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges(mimeMessage);
+            return createSnippet(identifier, creator, displayName, module, type, shared, mimeMessage);
         } catch (SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (MessagingException e) {
@@ -540,14 +542,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
         final ContentType contentType = isEmpty(header) ? ContentType.DEFAULT_CONTENT_TYPE : new ContentType(header);
         snippet.setContent(MessageUtility.readMimePart(part, contentType));
         // Read message's headers
-        @SuppressWarnings("unchecked") final Enumeration<Header> others = mimeMessage.getAllHeaders();
+        Enumeration<Header> others = mimeMessage.getAllHeaders();
         while (others.hasMoreElements()) {
             final Header hdr = others.nextElement();
             snippet.put(hdr.getName(), MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue()));
         }
     }
 
-    private static final Set<String> IGNORABLES = new HashSet<String>(Arrays.asList(Snippet.PROP_MISC));
+    private static final Set<String> IGNORABLES = ImmutableSet.of(Snippet.PROP_MISC);
 
     private static String encode(String value) {
         try {
@@ -828,7 +830,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
 
                 // Copy remaining to updateMessage; this action includes unnamed properties
-                @SuppressWarnings("unchecked") final Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
+                Enumeration<Header> nonMatchingHeaders = storageMessage.getNonMatchingHeaders(propNames.toArray(new String[0]));
                 final Set<String> propertyNames = Property.getPropertyNames();
                 while (nonMatchingHeaders.hasMoreElements()) {
                     final Header hdr = nonMatchingHeaders.nextElement();
@@ -996,7 +998,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 if (difference > 0 && null != quota) {
                     Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
                     if (null != sizeQuota && (sizeQuota.isExceeded() || sizeQuota.willExceed(difference))) {
-                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(Integer.valueOf(bytesToReadableString(sizeQuota.getLimit())));
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_SIGNATURES.create(bytesToReadableString(sizeQuota.getLimit()));
                     }
                 }
 

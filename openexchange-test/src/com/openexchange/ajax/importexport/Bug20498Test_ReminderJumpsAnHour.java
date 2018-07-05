@@ -4,7 +4,7 @@ package com.openexchange.ajax.importexport;
 import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.TimeZone;
-import org.junit.Ignore;
+import java.util.concurrent.TimeUnit;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
@@ -20,7 +20,7 @@ import com.openexchange.groupware.importexport.ImportResult;
 public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
 
     @Rule
-    public TestRule timeout = new DisableOnDebug(new Timeout(2000000000));
+    public TestRule timeout = new DisableOnDebug(new Timeout(2000000000, TimeUnit.MILLISECONDS));
 
     // @formatter:off
     public String ical =
@@ -97,70 +97,6 @@ public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
         alarm.setTime(actual.getStartDate());
         alarm.add(Calendar.DAY_OF_YEAR, -4);
         assertEquals("Wrong alarm value.", (actual.getStartDate().getTime() - alarm.getTimeInMillis()) / 60000L, actual.getAlarm());
-    }
-
-    @Ignore
-    @Test
-    public void testReminderEightMinutesBefore() throws Exception {
-        ICalImportRequest importRequest = new ICalImportRequest(folder.getObjectID(), ical.replace("-P2W", "-P8M"));
-        ICalImportResponse importResponse = getClient().execute(importRequest);
-
-        ImportResult[] imports = importResponse.getImports();
-        assertEquals(1, imports.length);
-        int id = Integer.parseInt(imports[0].getObjectId());
-        TimeZone tz = getClient().getValues().getTimeZone();
-
-        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
-
-        assertEquals(8, actual.getAlarm());
-    }
-
-    @Ignore
-    @Test
-    public void testReminderEightMinutesBeforeCorrectly() throws Exception {
-        ICalImportRequest importRequest = new ICalImportRequest(folder.getObjectID(), ical.replace("-P2W", "-PT8M"));
-        ICalImportResponse importResponse = getClient().execute(importRequest);
-
-        ImportResult[] imports = importResponse.getImports();
-        assertEquals(1, imports.length);
-        int id = Integer.parseInt(imports[0].getObjectId());
-        TimeZone tz = getClient().getValues().getTimeZone();
-
-        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
-
-        assertEquals(8, actual.getAlarm());
-    }
-
-    @Ignore
-    @Test
-    public void testReminderSixteenHoursBefore() throws Exception {
-        ICalImportRequest importRequest = new ICalImportRequest(folder.getObjectID(), ical.replace("-P2W", "-P16H"));
-        ICalImportResponse importResponse = getClient().execute(importRequest);
-
-        ImportResult[] imports = importResponse.getImports();
-        assertEquals(1, imports.length);
-        int id = Integer.parseInt(imports[0].getObjectId());
-        TimeZone tz = getClient().getValues().getTimeZone();
-
-        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
-
-        assertEquals(16 * 60, actual.getAlarm());
-    }
-
-    @Ignore
-    @Test
-    public void testReminderSixteenHoursBeforeCorrectly() throws Exception {
-        ICalImportRequest importRequest = new ICalImportRequest(folder.getObjectID(), ical.replace("-P2W", "-PT16H"));
-        ICalImportResponse importResponse = getClient().execute(importRequest);
-
-        ImportResult[] imports = importResponse.getImports();
-        assertEquals(1, imports.length);
-        int id = Integer.parseInt(imports[0].getObjectId());
-        TimeZone tz = getClient().getValues().getTimeZone();
-
-        Appointment actual = getClient().execute(new GetRequest(folder.getObjectID(), id)).getAppointment(tz);
-
-        assertEquals(16 * 60, actual.getAlarm());
     }
 
     @Test

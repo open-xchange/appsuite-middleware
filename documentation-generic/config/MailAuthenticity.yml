@@ -1,0 +1,227 @@
+feature_name: Mail Authenticity
+properties:
+    - key: com.openexchange.mail.authenticity.enabled
+      description: |
+        Defines whether the mail authenticity core feature is enabled.
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.threshold
+      description: |
+        Specifies the date threshold. Only messages having received date equal to or after that date are considered.
+      defaultValue: 0
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.authServId
+      description: |
+        Specifies the authserv-id identifiers to consider, see https://tools.ietf.org/html/rfc7601#section-2.2.
+        Only Authentication-Results headers with this ID will be considered; also allows wildcards like <code>*</code> (any string) or
+        <code>?</code> (any character).
+
+        This option is mandatory.
+      defaultValue: 
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.logRawHeaders
+      description: |
+        Specifies whether the raw headers of the mail messages will be logged in the DEBUG level
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.considerDMARCPolicy
+      description: |
+        Defines whether the policy of the DMARC mechanism will be considered when determining the overall result. 
+        If this property is enabled, then in case the DMARC mechanism defines a policy and that policy is 'NONE', 
+        then the DMARC mechanism result will not be taken into consideration and will not influence the overall result.
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.trusted.tenants
+      description: |
+        A comma separated list of tenants.
+      defaultValue: 
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+        - "com.openexchange.mail.authenticity.trusted.[tenant].config"
+        - "com.openexchange.mail.authenticity.trusted.[tenant].image.[imageId]"
+        - "com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage"
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.trusted.[tenant].config
+      description: |
+        A comma separated list of trusted mail address configurations. 
+        Each configuration consists of a trusted mail address and an optional imageId separated by a colon (<code>address[:imageId]</code>). 
+        The mail address allows wildcards like <code>*</code> (any string) or
+        <code>?</code> (any character).
+
+        Here are some valid mail address configurations provided that an image with id 'img1' is also configured:
+        <pre>
+        support@sub.domain.com
+        support@sub.domain.com:img1
+        support@sub?.domain.com:img1
+        support@*.domain.com
+        support@*.domain.com:img1
+        </pre>
+        
+        Note:  
+        The <code>[tenant]</code> must either be replaced with a tenant identifier or must be omitted (e.g. for single tenant systems).
+
+        A complete configuration example for two tenants could look like this:
+        <pre>
+        com.openexchange.mail.authenticity.trusted.tenants = myhost1, myhost2
+
+        com.openexchange.mail.authenticity.trusted.myhost1.image.1 = http://myhost1/imgs/icon.png
+        com.openexchange.mail.authenticity.trusted.myhost1.fallbackImage = /images/fallback.jpg
+        com.openexchange.mail.authenticity.trusted.myhost1.config = support@*.myhost1.com, support@*.myhost1.de:1
+
+        com.openexchange.mail.authenticity.trusted.myhost2.image.1 = http://myhost2/imgs/icon.png
+        com.openexchange.mail.authenticity.trusted.myhost2.config = support@*.myhost2.com:1, support@otherdomain.com
+        </pre>
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+        - "com.openexchange.mail.authenticity.trusted.tenants"
+        - "com.openexchange.mail.authenticity.trusted.[tenant].image.[imageId]"
+        - "com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage"
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.trusted.[tenant.]image.[imageId]
+      description: |
+        For each tenant a set of images can be configured which is to be shown by clients for trusted mail addresses.
+
+        Note:  
+        The <code>[tenant]</code> must either be replaced with a tenant identifier or must be omitted (e.g. for single tenant systems).  
+        The <code>[imageId]</code> must be a tenant unique identifier. E.g. an ascending number.
+
+        For example:
+        <pre>
+        com.openexchange.mail.authenticity.trusted.image.1 = http://www.myhost2.com/images/icon.jpg
+
+        com.openexchange.mail.authenticity.trusted.myhost1.image.1 = http://www.myhost1.com/images/icon.png
+        com.openexchange.mail.authenticity.trusted.myhost1.image.2 = http://www.myhost1.com/images/icon2.png
+
+        com.openexchange.mail.authenticity.trusted.myhost2.image.1 = http://www.myhost2.com/images/icon.jpg
+        </pre>
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related:
+        - "com.openexchange.mail.authenticity.trusted.tenants"
+        - "com.openexchange.mail.authenticity.trusted.[tenant].config"
+        - "com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage"
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage
+      description: |
+        For each tenant a fallback image can be configured which is shown by the client for trusted mail addresses without a configured image.
+
+        Note:  
+        The <code>[tenant]</code> must either be replaced with a tenant identifier or must be omitted (e.g. for single tenant systems).
+
+        For example:
+        <pre>
+        com.openexchange.mail.authenticity.trusted.fallbackImage = /images/fallback.png
+        com.openexchange.mail.authenticity.trusted.myhost1.fallbackImage = http://www.myhost1.com/images/fallback.png
+        com.openexchange.mail.authenticity.trusted.myhost2.fallbackImage = http://www.myhost2.com/images/fallback.jpg
+        </pre>
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+        - "com.openexchange.mail.authenticity.trusted.tenants"
+        - "com.openexchange.mail.authenticity.trusted.[tenant].image.[imageId]"
+        - "com.openexchange.mail.authenticity.trusted.[tenant].config"
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.custom.rules.filename
+      description: |
+        Defines the name of a yml file containing custom rules to apply after the normal processing. 
+        This can for example be used to create a white-listing for known wrong configured mail environments.
+        
+        The yaml file must be placed next to this property. 
+        For example in case the name of the yml file is <code>myCustomRules.yml</code> then the value of this property should be <code>myCustomRules</code>
+        
+        The yml file must follow the following structure:
+        <pre>
+        custom_rules:
+          rule_name1:
+            spf_status: (PASS | FAIL | NEUTRAL | NONE) {,(PASS | FAIL | NEUTRAL | NONE)} | ANY
+            spf_domain: <domain>
+            dkim_status: (PASS | FAIL | NEUTRAL | NONE) {,(PASS | FAIL | NEUTRAL | NONE)} | ANY
+            dkim_domain: <domain>
+            from_domain: <domain>
+            result: PASS | FAIL | NEUTRAL | NONE
+          rule_name2:
+            [...]
+        </pre>
+        
+        All fields are optional but either a spf or dkim field pair must be present. The result field can also be omitted, it then falls back to <code>PASS</code>.
+        If a status field is set, then the corresponding domain field must also be set.
+        
+        For example a config that set the overall result to <code>PASS</code> for a result which only has a domain mismatch (e.g. because of a bad configuration) could look like this:
+        
+        <pre>
+        custom_rules:
+          rule_for_domain_xyz:
+            spf_status: PASS
+            spf_domain: xyz.com
+            dkim_status: PASS
+            dkim_domain: xyz.com
+            from_domain: other.com
+            result: PASS
+        </pre>
+
+        Another example using both mutiple stati at once and the <code>ANY</code> group which maps to all known stati:
+        
+        <pre>
+        custom_rules:
+          rule_for_domain_xyz:
+            spf_status: PASS, NEUTRAL, NONE
+            spf_domain: xyz.com
+            dkim_status: ANY
+            dkim_domain: xyz.com
+            from_domain: other.com
+            result: PASS
+        </pre>
+        
+        Please note that custom rules should be used with care, because they overrule the mail authenticity definitions and could open attack vectors for phishing attacks.
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]      
+
+
+

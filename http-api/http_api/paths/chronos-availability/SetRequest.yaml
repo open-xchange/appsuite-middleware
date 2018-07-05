@@ -1,0 +1,22 @@
+/chronos/availability?action=set:
+  put:
+    operationId: setAvailability
+    tags:
+      - Chronos
+    summary: Sets/Overwrites the availability of the user. If an empty payload is sent, then the availability of the user is deleted/unset.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object containing the availability's data.
+        required: true
+        schema:
+          type: object
+          $ref: "#/definitions/AvailabilityData"
+    responses:
+      200:
+        description: |
+          'If the availability of the user was successfully set, then an empty JSON object is returned to indicate that.
+          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).'

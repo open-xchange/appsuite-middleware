@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive Server Bundle
 Bundle-SymbolicName: com.openexchange.drive.impl
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.drive.impl.osgi.DriveActivator
 Bundle-ClassPath: .,
  lib/jacksum.jar
@@ -14,6 +14,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.tools,
  com.openexchange.capabilities,
+ com.openexchange.clientinfo,
  com.openexchange.cluster.timer,
  com.openexchange.config,
  com.openexchange.config.cascade,
@@ -31,6 +32,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.file.storage.search,
  com.openexchange.filemanagement,
  com.openexchange.folderstorage,
+ com.openexchange.folderstorage.database.contentType,
  com.openexchange.folderstorage.type,
  com.openexchange.group,
  com.openexchange.groupware.contact,
@@ -68,6 +70,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.tools.codec,
  com.openexchange.tools.io,
  com.openexchange.tools.iterator,
+ com.openexchange.tools.oxfolder,
  com.openexchange.tools.session,
  com.openexchange.tools.sql,
  com.openexchange.tools.strings,

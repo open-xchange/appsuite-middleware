@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -65,7 +66,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * {@link PublicFolderMovePermissionTest}

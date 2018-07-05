@@ -953,9 +953,10 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             if (schemaSelectStrategy.getStrategy().equals("automatic")) {
                 return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic();
             } else if (schemaSelectStrategy.getStrategy().equals("in-memory")) {
-                return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.inMemory();
+                // Fall-back to "automatic"
+                return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic();
             } else {
-                throw new InvalidDataException_Exception("Invalid parameter value for schema-select-strategy. Possible values: \"automatic\", \"in-memory\"");
+                throw new InvalidDataException_Exception("Invalid parameter value for schema-select-strategy. Possible value: \"automatic\"");
             }
         }
 
@@ -1782,12 +1783,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
 
-        Integer itg = db.getClusterWeight();
-        if (itg != null) {
-            ret.setClusterWeight(itg);
-        }
-
-        itg = db.getCurrentUnits();
+        Integer itg = db.getCurrentUnits();
         if (itg != null) {
             ret.setCurrentUnits(itg);
         }
@@ -2103,7 +2099,6 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             return null;
         }
         final Database soapDatabase = new Database();
-        soapDatabase.setClusterWeight(database.getClusterWeight());
         soapDatabase.setCurrentUnits(database.getCurrentUnits());
         soapDatabase.setDriver(database.getDriver());
         soapDatabase.setId(database.getId());
@@ -2207,12 +2202,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
 
-        Integer itg = db.getClusterWeight();
-        if (itg != null) {
-            ret.setClusterWeight(itg);
-        }
-
-        itg = db.getCurrentUnits();
+        Integer itg = db.getCurrentUnits();
         if (itg != null) {
             ret.setCurrentUnits(itg);
         }

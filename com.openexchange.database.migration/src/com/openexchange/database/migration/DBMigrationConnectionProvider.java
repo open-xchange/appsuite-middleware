@@ -61,22 +61,39 @@ public interface DBMigrationConnectionProvider {
 
     /**
      * Gets a database connection to perform the migration on.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>:<br>
+     * Do not forget to ensure obtained connection is orderly pushed back to this instance using either {@link #back(Connection)} or {@link #backAfterReading(Connection)} method.
+     * </div>
+     * <p>
+     * Example:
+     * <pre>
+     *  Connection con = provider.get();
+     *  try {
+     *     ...
+     *  } finally {
+     *     provider.back(con); // or provider.backAfterReading(con) if connection is known to be used for read-only purpose
+     *  }
+     * </pre>
      *
      * @return The connection
      */
     Connection get() throws OXException;
 
     /**
-     * Returns the database connection.
+     * Releases the previously obtained database connection that was used for <b>read-write</b> operations.
      *
-     * @param connection The connection to return
+     * @param connection The connection to release
+     * @see #get()
      */
     void back(Connection connection);
 
     /**
-     * Returns the database connection that was solely used for reading.
+     * Releases the previously obtained database connection that was used for <b>read-only</b> operations.
      *
-     * @param connection The connection to return
+     * @param connection The connection to release
+     * @see #get()
      */
     void backAfterReading(Connection connection);
 

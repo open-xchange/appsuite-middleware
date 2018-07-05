@@ -49,15 +49,13 @@
 
 package com.openexchange.file.storage.rdb.groupware;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -67,7 +65,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
 
 /**
  * {@link FileStorageRdbDeleteListener}
@@ -95,6 +95,7 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
             int userId = event.getId();
 
             class AccountAndService {
+
                 final int accountId;
                 final String serviceId;
 
@@ -122,10 +123,10 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
                         accounts.add(new AccountAndService(rs.getInt(2), rs.getString(3)));
                     }
                 } finally {
-                    DBUtils.closeSQLStuff(rs);
+                    Databases.closeSQLStuff(rs);
                 }
             }
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
 
             // Invalidate cache
@@ -172,7 +173,7 @@ public final class FileStorageRdbDeleteListener implements DeleteListener {
         } catch (final RuntimeException e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

@@ -118,14 +118,16 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
     private final OSGiMainHandler mainHttpHandler;
     private final List<FilterAndPath> initialFilters;
     private final Map<Bundle, OSGiMainHandler> httpHandlers;
+    private final boolean supportHierachicalLookupOnNotFound;
 
-    public HttpServiceFactory(HttpServer httpServer, List<FilterAndPath> initialFilters, Bundle bundle) {
+    public HttpServiceFactory(HttpServer httpServer, List<FilterAndPath> initialFilters, boolean supportHierachicalLookupOnNotFound, Bundle bundle) {
         super();
+        this.supportHierachicalLookupOnNotFound = supportHierachicalLookupOnNotFound;
         Map<Bundle, OSGiMainHandler> httpHandlers = new HashMap<>(128, 0.9F);
         this.httpHandlers = httpHandlers;
         List<FilterAndPath> filters = new CopyOnWriteArrayList<>(initialFilters);
         this.initialFilters = filters;
-        mainHttpHandler = new OSGiMainHandler(filters, bundle);
+        mainHttpHandler = new OSGiMainHandler(filters, supportHierachicalLookupOnNotFound, bundle);
         httpServer.getServerConfiguration().addHttpHandler(mainHttpHandler, "/");
         httpHandlers.put(bundle, mainHttpHandler);
     }
@@ -166,9 +168,9 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
     public synchronized HttpService getService(final Bundle bundle, final ServiceRegistration<HttpService> serviceRegistration) {
         LOG.debug("Bundle: {}, is getting HttpService with serviceRegistration: {}", bundle, serviceRegistration);
 
-        OSGiMainHandler mainHttpHandler = new OSGiMainHandler(initialFilters, bundle);
-        httpHandlers.put(bundle, mainHttpHandler);
-        return new HttpServiceImpl(mainHttpHandler, bundle);
+        OSGiMainHandler bundleHttpHandler = new OSGiMainHandler(initialFilters, supportHierachicalLookupOnNotFound, bundle);
+        httpHandlers.put(bundle, bundleHttpHandler);
+        return new HttpServiceImpl(bundleHttpHandler, bundle);
     }
 
     @Override

@@ -60,6 +60,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExtension;
 import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
@@ -572,6 +573,16 @@ public final class UserizedFolderImpl implements UserizedFolder {
     @Override
     public void setAltNames(final boolean altNames) {
         this.altNames = altNames;
+    }
+
+    @Override
+    public FolderPath getOriginPath() {
+        return folder.getOriginPath();
+    }
+
+    @Override
+    public void setOriginPath(FolderPath originPath) {
+        folder.setOriginPath(originPath);
     }
 
 }

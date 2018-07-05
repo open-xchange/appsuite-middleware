@@ -476,35 +476,42 @@ public final class GetAction extends AbstractMailAction {
     private ThresholdFileHolder getMimeSource(final MailMessage mail, final MimeFilter mimeFilter) throws OXException, MessagingException, IOException {
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         try {
-            mail.writeTo(fileHolder.asOutputStream());
-        } catch (final OXException e) {
-            if (!MailExceptionCode.NO_CONTENT.equals(e)) {
-                throw e;
-            }
-            LOG.debug("", e);
-            fileHolder = new ThresholdFileHolder();
-            fileHolder.write(new byte[0]);
-        }
-        // Filter
-        if (null != mimeFilter) {
-            InputStream is = fileHolder.getStream();
             try {
-                // Store to MIME message
-                MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
-                // Clean-up
-                Streams.close(is);
-                is = null;
-                fileHolder.close();
-                // Filter MIME message
-                MimeMessageConverter.saveChanges(mimeMessage);
-                mimeMessage = mimeFilter.filter(mimeMessage);
+                mail.writeTo(fileHolder.asOutputStream());
+            } catch (final OXException e) {
+                if (!MailExceptionCode.NO_CONTENT.equals(e)) {
+                    throw e;
+                }
+                LOG.debug("", e);
+                Streams.close(fileHolder);
                 fileHolder = new ThresholdFileHolder();
-                mimeMessage.writeTo(fileHolder.asOutputStream());
-            } finally {
-                Streams.close(is);
+                fileHolder.writeZeroBytes();
             }
+
+            // Filter
+            if (null != mimeFilter) {
+                InputStream is = fileHolder.getStream();
+                try {
+                    // Store to MIME message
+                    MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
+                    // Clean-up
+                    Streams.close(is); is = null;
+                    Streams.close(fileHolder);
+                    // Filter MIME message
+                    MimeMessageConverter.saveChanges(mimeMessage);
+                    mimeMessage = mimeFilter.filter(mimeMessage);
+                    fileHolder = new ThresholdFileHolder();
+                    mimeMessage.writeTo(fileHolder.asOutputStream());
+                } finally {
+                    Streams.close(is);
+                }
+            }
+            ThresholdFileHolder retval = fileHolder;
+            fileHolder = null;
+            return retval;
+        } finally {
+            Streams.close(fileHolder);
         }
-        return fileHolder;
     }
 
     private static final String formatMessageHeaders(final Iterator<Map.Entry<String, String>> iter) {

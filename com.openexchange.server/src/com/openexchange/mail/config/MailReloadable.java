@@ -59,9 +59,9 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.DefaultInterests.Builder;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.DefaultInterests.Builder;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 

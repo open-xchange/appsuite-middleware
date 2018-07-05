@@ -49,15 +49,14 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -80,9 +79,12 @@ public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         ProgressState progress = params.getProgressState();
-        Connection con = Database.getNoTimeout(params.getContextId(), true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             startTransaction(con);
+            rollback = true;
+
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "updateTask", "uuid")) {
                 throw UpdateExceptionCodes.COLUMN_NOT_FOUND.create("uuid");
@@ -92,16 +94,18 @@ public class MakeUUIDPrimaryForUpdateTaskTable extends UpdateTaskAdapter {
 
             Tools.modifyColumns(con, "updateTask", new Column("uuid", "BINARY(16) NOT NULL"));
             Tools.createPrimaryKeyIfAbsent(con, "updateTask", new String[] { "cid", "uuid" });
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             autocommit(con);
-            Database.backNoTimeout(params.getContextId(), true, con);
         }
     }
 

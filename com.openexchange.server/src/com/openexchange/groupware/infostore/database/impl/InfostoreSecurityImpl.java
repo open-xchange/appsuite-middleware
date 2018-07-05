@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -80,6 +78,8 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 public class InfostoreSecurityImpl extends DBService implements InfostoreSecurity {
 

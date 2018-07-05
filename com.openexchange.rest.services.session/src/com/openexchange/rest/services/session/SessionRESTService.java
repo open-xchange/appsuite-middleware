@@ -57,7 +57,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
@@ -65,6 +67,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  *
@@ -89,6 +93,29 @@ public class SessionRESTService {
     }
 
     /**
+     * Checks if the given session is a guest-session
+     *
+     * @param session The session
+     * @return True, if the session is a guest session, false otherwise
+     * @throws OXException
+     */
+    private boolean isGuest(Session session) throws OXException {
+        if (session != null) {
+
+            if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                return true;
+            }
+
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+            if (serverSession != null) {
+                User user = serverSession.getUser();
+                return user != null && user.isGuest();
+            }
+        }
+        return false;
+    }
+
+    /**
      * <pre>
      * GET /preliminary/session/v1/get/{session}
      * </pre>
@@ -98,17 +125,33 @@ public class SessionRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public JSONObject all(@PathParam("session") String session) throws OXException {
-        SessiondService sessiondService = services.getOptionalService(SessiondService.class);
-        if (null == sessiondService) {
-            throw ServiceExceptionCode.absentService(SessiondService.class);
-        }
-
         try {
-            Session ses = sessiondService.getSession(session);
-            if(ses != null){
-                return new JSONObject(4).put("context", ses.getContextId()).put("user", ses.getUserId());
+            SessiondService sessiondService = services.getOptionalService(SessiondService.class);
+            if (null == sessiondService) {
+                throw ServiceExceptionCode.absentService(SessiondService.class);
             }
-            return new JSONObject();
+
+            Session ses = sessiondService.getSession(session);
+            if (ses == null) {
+                // No such session...
+                return new JSONObject(0);
+            }
+
+            // Basic user information
+            JSONObject jResponse = new JSONObject(6).put("context", ses.getContextId()).put("user", ses.getUserId());
+
+            // Add "guest" flag
+            boolean isGuest = isGuest(ses);
+            jResponse.put("guest", isGuest);
+
+            // Add crypto session identifier
+            CryptographicServiceAuthenticationFactory cryptoAuthenticationFactory = services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
+            if (cryptoAuthenticationFactory != null) {
+                String cryptoSessionId = cryptoAuthenticationFactory.getSessionValueFrom(ses);
+                jResponse.put("cryptoSessionId", cryptoSessionId);
+            }
+
+            return jResponse;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

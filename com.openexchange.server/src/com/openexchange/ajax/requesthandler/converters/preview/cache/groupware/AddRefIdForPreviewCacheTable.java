@@ -49,12 +49,9 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -76,11 +73,10 @@ public class AddRefIdForPreviewCacheTable extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int ctxId = params.getContextId();
-        final Connection con = Database.getNoTimeout(ctxId, true);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            startTransaction(con);
+            Databases.startTransaction(con);
             rollback = true;
             if (!Tools.columnExists(con, "preview", "refId")) {
                 Tools.addColumns(con, "preview", new Column("refId", "varchar(255) CHARACTER SET latin1 DEFAULT NULL"));
@@ -93,10 +89,9 @@ public class AddRefIdForPreviewCacheTable extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                rollback(con);
+                Databases.rollback(con);
             }
-            autocommit(con);
-            Database.backNoTimeout(ctxId, true, con);
+            Databases.autocommit(con);
         }
     }
 

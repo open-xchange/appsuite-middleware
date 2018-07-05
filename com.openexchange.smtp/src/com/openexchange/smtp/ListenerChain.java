@@ -49,7 +49,7 @@
 
 package com.openexchange.smtp;
 
-import java.util.List;
+import java.util.Iterator;
 import javax.mail.Address;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
@@ -110,33 +110,52 @@ public class ListenerChain implements MailTransportListener {
     }
 
     @Override
+    public boolean checkSettings(SecuritySettings securitySettings, Session session) throws OXException {
+        Iterator<MailTransportListener> iterator = this.listeners.iterator();
+        if (false == iterator.hasNext()) {
+            return false;
+        }
+
+        do {
+            MailTransportListener listener = iterator.next();
+            if (listener.checkSettings(securitySettings, session)) {
+                return true;
+            }
+        } while (iterator.hasNext());
+
+        return false;
+    }
+
+    @Override
     public Result onBeforeMessageTransport(MimeMessage message, Address[] recipients, SecuritySettings securitySettings, Session session) throws OXException {
-        List<MailTransportListener> listeners = this.listeners.getServiceList();
-        if (null == listeners || listeners.isEmpty()) {
+        Iterator<MailTransportListener> iterator = this.listeners.iterator();
+        if (false == iterator.hasNext()) {
             return new ChainResult(message, recipients, Reply.NEUTRAL);
         }
 
-        for (MailTransportListener listener : listeners) {
+        do {
+            MailTransportListener listener = iterator.next();
             Result result = listener.onBeforeMessageTransport(message, recipients, securitySettings, session);
             Reply reply = result.getReply();
             if (Reply.NEUTRAL != reply) {
                 return result;
             }
-        }
+        } while (iterator.hasNext());
 
         return new ChainResult(message, recipients, Reply.NEUTRAL);
     }
 
     @Override
     public void onAfterMessageTransport(MimeMessage message, Exception exception, Session session) throws OXException {
-        List<MailTransportListener> listeners = this.listeners.getServiceList();
-        if (null == listeners || listeners.isEmpty()) {
+        Iterator<MailTransportListener> iterator = this.listeners.iterator();
+        if (false == iterator.hasNext()) {
             return;
         }
 
-        for (MailTransportListener listener : listeners) {
+        do {
+            MailTransportListener listener = iterator.next();
             listener.onAfterMessageTransport(message, exception, session);
-        }
+        } while (iterator.hasNext());
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------

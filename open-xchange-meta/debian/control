@@ -3,7 +3,7 @@ Section: web
 Priority: optional
 Maintainer: Carsten Hoeger <choeger@open-xchange.com>
 Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1)
-Standards-Version: 3.8.4
+Standards-Version: 3.9.8
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-meta-oxucs
@@ -59,11 +59,6 @@ Architecture: all
 Depends: open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas | open-xchange-meta-ui-appsuite, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-gui | open-xchange-meta-ui-appsuite
 Description: The Open-Xchange Meta package for Business Mobility
 
-Package: open-xchange-meta-outlook
-Architecture: all
-Depends: open-xchange-outlook-updater, open-xchange-outlook-updater-oxtender2, open-xchange-usm, open-xchange-folder-json
-Description: The Open-Xchange Meta package for Outlook OXtender
-
 ##
 ## virtual packages
 ##
@@ -91,3 +86,15 @@ Architecture: all
 Provides: open-xchange-meta-backend
 Depends: open-xchange, open-xchange-core, open-xchange-imap, open-xchange-pop3, open-xchange-smtp, open-xchange-calendar-printing, open-xchange-gui-wizard-plugin, open-xchange-report-client
 Description: The Open-Xchange Meta package for OX6 backend packages
+
+##
+## transitional packages
+##
+
+Package: open-xchange-linkedin
+Architecture: all
+Section: oldlibs
+Priority: extra
+Description: Empty transitional package.
+ This package can be removed as the integration of Open-Xchange with LinkedIn
+ was discontinued.

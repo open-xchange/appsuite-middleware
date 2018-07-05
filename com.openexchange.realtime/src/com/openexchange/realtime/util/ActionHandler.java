@@ -68,17 +68,17 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * An {@link ActionHandler} inspects (via introspection) a class and looks for public methods in this form:
- * 
- * public void handleSomething(Stanza stanza) 
+ *
+ * public void handleSomething(Stanza stanza)
  * or
  * public void handleSomething(Stanza stanza, Map<String, Object> options)
- * 
+ *
  * these methods may also return a boolean if they like:
- * 
- * public void handleSomething(Stanza stanza) 
+ *
+ * public void handleSomething(Stanza stanza)
  * or
  * public void handleSomething(Stanza stanza, Map<String, Object> options)
- * 
+ *
  * "Something" being the variable part. Methods may then be referenced by a message that looks like this:
  * {
  *    element: "message",
@@ -89,10 +89,10 @@ import com.openexchange.threadpool.ThreadPoolService;
  *    to: ...,
  *    session: "...
  *  }
- *  
- *  With "something" being the name of the method to call (or rather the name of the method is handle + the data of the "action" element of the stanza) 
+ *
+ *  With "something" being the name of the method to call (or rather the name of the method is handle + the data of the "action" element of the stanza)
  *  The method may then use the Stanzas payload trees retrieval methods e.g. {@link Stanza#getPayloadTrees(ElementPath)} to retrieve additional data
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ActionHandler {
@@ -102,7 +102,7 @@ public class ActionHandler {
     public ActionHandler(Class<?> klass) {
         for (Method method: klass.getMethods()) {
             boolean accessible = Modifier.isPublic(method.getModifiers());
-            
+
             if (accessible && method.getName().startsWith("handle")) {
                 Class<?>[] parameterTypes = method.getParameterTypes();
                 if (parameterTypes.length > 0) {
@@ -118,7 +118,7 @@ public class ActionHandler {
             }
         }
     }
-    
+
     /**
      * Have the ActionHandler choose an appropriate method for the given stanza and calls it on the given handler.
      * @return true when a method is found and it in turn didn't return true, false if either no matching method was found or the method returned false
@@ -134,7 +134,11 @@ public class ActionHandler {
     public boolean callMethod(Object handler, Stanza stanza, Map<String, Object> options) throws OXException {
         Collection<PayloadTree> payloads = stanza.getPayloadTrees(new ElementPath("action"));
         for (PayloadTree payloadTree : payloads) {
-            String name = payloadTree.getRoot().getData().toString();
+            Object tmp = payloadTree.getRoot().getData();
+            if (tmp == null) {
+                return false;
+            }
+            String name = tmp.toString();
             if (options == null) {
                 Method method = methods.get(name.toLowerCase());
                 if (method != null) {
@@ -142,17 +146,17 @@ public class ActionHandler {
                 }
                 options = new HashMap<String, Object>();
             }
-            
+
             Method method = methodsWithProperties.get(name.toLowerCase());
             if (method != null) {
                 return invoke(method, handler, stanza, options);
             }
         }
-        
+
         return false;
     }
-    
-    
+
+
     private boolean invoke(final Method method, final Object handler, final Stanza stanza, final Map<String, Object> options) throws OXException {
         try {
             if (isAsynchronous(method)) {
@@ -162,19 +166,19 @@ public class ActionHandler {
                     @Override
                     public Void call() throws Exception {
                         if (options != null) {
-                            method.invoke(handler, new Object[]{stanza, options}); 
+                            method.invoke(handler, new Object[]{stanza, options});
                         } else {
                             method.invoke(handler, new Object[]{stanza});
                         }
                         return null;
                     }
-                    
+
                 });
                 return true;
             } else {
                 Object result = null;
                 if (options != null) {
-                    result = method.invoke(handler, new Object[]{stanza, options}); 
+                    result = method.invoke(handler, new Object[]{stanza, options});
                 } else {
                     result = method.invoke(handler, new Object[]{stanza});
                 }
@@ -206,7 +210,7 @@ public class ActionHandler {
         return new PayloadTree(
             PayloadTreeNode.builder()
             .withPayload(
-                new PayloadElement(methodName, "json", null, "action") 
+                new PayloadElement(methodName, "json", null, "action")
             ).build()
         );
     }

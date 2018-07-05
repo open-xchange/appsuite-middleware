@@ -57,10 +57,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.DefaultInterests.Builder;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
-import com.openexchange.config.DefaultInterests.Builder;
 import com.openexchange.exception.OXException;
 
 /**

@@ -50,6 +50,7 @@
 package com.openexchange.groupware.reminder.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -59,8 +60,11 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ReminderWriter;
+import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
@@ -69,6 +73,7 @@ import com.openexchange.groupware.reminder.json.ReminderActionFactory;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
@@ -110,26 +115,6 @@ public final class RangeAction extends AbstractReminderAction {
             final List<ReminderObject> reminders = reminderService.getArisingReminder(session, session.getContext(), user, end);
             final JSONArray jsonResponseArray = new JSONArray();
             for (ReminderObject reminder : reminders) {
-                if (reminder.isRecurrenceAppointment()) {
-                    try {
-                        if (!getLatestRecurringReminder(session, tz, end, reminder)) {
-                            final ReminderObject nextReminder = getNextRecurringReminder(session, tz, reminder);
-                            if (nextReminder != null) {
-                                reminderService.updateReminder(req.getSession(), nextReminder);
-                            } else {
-                                reminderService.deleteReminder(req.getSession(), reminder);
-                            }
-                            continue;
-                        }
-                    } catch (final OXException e) {
-                        if (e.isGeneric(Generic.NOT_FOUND)) {
-                            LOG.warn("Cannot load target object of this reminder.", e);
-                            deleteReminderSafe(req.getSession(), reminder, user.getId(), reminderService);
-                        } else {
-                            LOG.error("Can not calculate recurrence of appointment {}{}{}", reminder.getTargetId(), ':', session.getContextId(), e);
-                        }
-                    }
-                }
                 try {
                     if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
                         final JSONObject jsonReminderObj = new JSONObject(12);
@@ -144,9 +129,34 @@ public final class RangeAction extends AbstractReminderAction {
                     deleteReminderSafe(req.getSession(), reminder, user.getId(), reminderService);
                 }
             }
+
+
+            addEventReminder(session, jsonResponseArray, reminderWriter, end);
+
             return new AJAXRequestResult(jsonResponseArray, "json");
         } catch (final OXException e) {
             throw e;
+        }
+    }
+
+    /**
+     * Adds event reminder to the response array
+     *
+     * @param session The user session
+     * @param jsonResponseArray The response array
+     * @param reminderWriter The {@link ReminderWriter} to use
+     * @param until The upper limit of query
+     * @throws JSONException
+     * @throws OXException
+     */
+    private void addEventReminder(Session session, JSONArray jsonResponseArray, ReminderWriter reminderWriter, Date until) throws JSONException, OXException {
+        CalendarService calService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
+        CalendarSession calSession = calService.init(session);
+        calSession.set(CalendarParameters.PARAMETER_RANGE_END, until);
+
+        List<AlarmTrigger> alarmTrigger = calService.getAlarmTriggers(calSession, Collections.singleton("DISPLAY"));
+        for (AlarmTrigger trigger : alarmTrigger) {
+            convertAlarmTrigger2Reminder(calSession, trigger, reminderWriter, jsonResponseArray);
         }
     }
 

@@ -53,8 +53,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
@@ -107,7 +107,7 @@ public class InfostoreFileServletTest {
         MockitoAnnotations.initMocks(this);
 
         InfostoreFileServlet.setFileFactory(this.idBasedFileAccessFactory);
-        PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(idBasedFileAccess);
+        PowerMockito.when(this.idBasedFileAccessFactory.createAccess(ArgumentMatchers.any(Session.class))).thenReturn(idBasedFileAccess);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class InfostoreFileServletTest {
     @Test
     public void testLoadMetadata_Fine_ReturnMetadata() throws OXException {
         File file = PowerMockito.mock(File.class);
-        PowerMockito.when(idBasedFileAccess.getFileMetadata(Matchers.anyString(), Matchers.anyString())).thenReturn(file);
+        PowerMockito.when(idBasedFileAccess.getFileMetadata(ArgumentMatchers.anyString(), ArgumentMatchers.isNull())).thenReturn(file);
 
         DocumentMetadata loadMetadata = this.infostoreFileServlet.loadMetadata(this.publication, 1);
 
@@ -135,7 +135,7 @@ public class InfostoreFileServletTest {
 
     @Test(expected = OXException.class)
     public void testLoadMetadata_getFileMetadataThrowsOXException_ReturnOXException() throws OXException {
-        PowerMockito.when(idBasedFileAccess.getFileMetadata(Matchers.anyString(), Matchers.anyString())).thenThrow(InfostoreExceptionCodes.DELETE_FAILED.create());
+        PowerMockito.when(idBasedFileAccess.getFileMetadata(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenThrow(InfostoreExceptionCodes.DELETE_FAILED.create());
 
         DocumentMetadata loadMetadata = this.infostoreFileServlet.loadMetadata(this.publication, 1);
 
@@ -144,7 +144,7 @@ public class InfostoreFileServletTest {
 
     @Test(expected = OXException.class)
     public void testLoadMetadata_getFileMetadataThrowsOXException_ReturnOXExceptionfd() throws OXException {
-        PowerMockito.when(idBasedFileAccess.getFileMetadata(Matchers.anyString(), Matchers.anyString())).thenThrow(InfostoreExceptionCodes.NOT_EXIST.create());
+        PowerMockito.when(idBasedFileAccess.getFileMetadata(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenThrow(InfostoreExceptionCodes.NOT_EXIST.create());
 
         DocumentMetadata loadMetadata = this.infostoreFileServlet.loadMetadata(this.publication, 1);
 

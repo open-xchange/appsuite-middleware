@@ -52,7 +52,7 @@ package com.openexchange.caldav.mixins;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.dav.mixins.PrincipalURL;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
@@ -70,7 +70,7 @@ public class Invite extends SingleXMLPropertyMixin {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Invite.class);
 
-    private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
     private final GroupwareCaldavFactory factory;
 
     /**
@@ -79,7 +79,7 @@ public class Invite extends SingleXMLPropertyMixin {
      * @param factory The CalDAV factory
      * @param collection The collection
      */
-    public Invite(GroupwareCaldavFactory factory, CommonFolderCollection<?> collection) {
+    public Invite(GroupwareCaldavFactory factory, FolderCollection<?> collection) {
         super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "invite");
         this.factory = factory;
         this.collection = collection;
@@ -87,28 +87,29 @@ public class Invite extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        if (null == collection || null == collection.getFolder() || null == collection.getFolder().getPermissions()) {
+        if (null == collection || null == collection.getFolder() || null == collection.getFolder().getPermissions() ||
+            null == collection.getFolder().getSupportedCapabilities() || false == collection.getFolder().getSupportedCapabilities().contains("permissions")) {
             return null;
         }
-        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         Permission[] permissions = collection.getFolder().getPermissions();
         for (Permission permission : permissions) {
             try {
                 if (permission.isAdmin()) {
-                    StringBuilder.append("<CS:organizer>").append(getEntityElements(permission)).append("</CS:organizer>");
+                    stringBuilder.append("<CS:organizer>").append(getEntityElements(permission)).append("</CS:organizer>");
                 } else if (impliesReadPermissions(permission)) {
-                    StringBuilder.append("<CS:user>").append(getEntityElements(permission)).append("<CS:invite-accepted/>")
+                    stringBuilder.append("<CS:user>").append(getEntityElements(permission)).append("<CS:invite-accepted/>")
                         .append("<CS:access><CS:read");
                     if (impliesReadWritePermissions(permission)) {
-                        StringBuilder.append("-write");
+                        stringBuilder.append("-write");
                     }
-                    StringBuilder.append("/></CS:access></CS:user>");
+                    stringBuilder.append("/></CS:access></CS:user>");
                 }
             } catch (OXException e) {
                 LOG.warn("error resolving permission entity from '{}'", collection.getFolder(), e);
             }
         }
-        return StringBuilder.toString();
+        return stringBuilder.toString();
     }
 
     private String getEntityElements(Permission permission) throws OXException {

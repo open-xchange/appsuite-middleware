@@ -374,7 +374,20 @@ properties:
     related: 
     file: contact.properties
     packageName: open-xchange-core
-    tags: ["Contact"] 
+    tags: ["Contact"]
+  - key: com.openexchange.contact.showDepartments
+    description: |
+      Defines whether the departments will be shown as part of the display name. This only affects results that are found under the Global Address Book
+
+      JSLob: io.ox/contacts//showDepartment
+    defaultValue: false
+    version: 7.10.0
+    reloadable: true
+    configcascadeAware: false
+    related: 
+    file: contact.properties
+    packageName: open-xchange-core
+    tags: ["Contact", "Find"]
   - key: com.openexchange.contactcollector.enabled
     description: |
       Whether enabled or disabled regardless of bundle start-up.
@@ -396,4 +409,4 @@ properties:
     related: 
     file: contactcollector.properties
     packageName: open-xchange-core
-    tags: ["Contact"]   
+    tags: ["Contact"]

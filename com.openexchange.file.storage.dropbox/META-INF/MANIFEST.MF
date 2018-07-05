@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage Dropbox Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.dropbox
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.dropbox.core,
  com.dropbox.core.http,
  com.dropbox.core.v2,
@@ -33,10 +33,12 @@ Import-Package: com.dropbox.core,
  com.openexchange.oauth.access,
  com.openexchange.oauth.association,
  com.openexchange.oauth.association.spi,
+ com.openexchange.oauth.dropbox,
  com.openexchange.oauth.impl,
  com.openexchange.oauth.impl.access.impl,
  com.openexchange.oauth.scope,
  com.openexchange.osgi,
+ com.openexchange.rest.client.httpclient,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
@@ -47,6 +49,7 @@ Import-Package: com.dropbox.core,
  com.openexchange.tools.session,
  com.openexchange.tools.ssl,
  com.openexchange.tx,
+ com.openexchange.version,
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
@@ -71,6 +74,7 @@ Import-Package: com.dropbox.core,
  org.apache.http.client.params,
  org.apache.http.client.protocol,
  org.apache.http.client.utils,
+ org.apache.http.concurrent,
  org.apache.http.conn,
  org.apache.http.conn.params,
  org.apache.http.conn.routing,
@@ -93,6 +97,7 @@ Import-Package: com.dropbox.core,
  org.apache.http.io,
  org.apache.http.message,
  org.apache.http.params,
+ org.apache.http.pool,
  org.apache.http.protocol,
  org.apache.http.util,
  org.osgi.framework,

@@ -33,11 +33,9 @@ package net.fortuna.ical4j.model;
 
 import java.io.Serializable;
 import java.util.Calendar;
-
-import net.fortuna.ical4j.util.Numbers;
-
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import net.fortuna.ical4j.util.Numbers;
 
 /**
  * $Id$

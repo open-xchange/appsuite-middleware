@@ -1,0 +1,49 @@
+type: object
+properties:
+  uid: 
+    type: string
+    description: The uid of the alarm.
+  action:
+    type: string
+    description: The action of the alarm.
+  acknowledged:
+    type: integer
+    format: int64
+    description: The time of the acknowledgement.
+  trigger:
+    type: object
+    title: Trigger
+    description: The trigger of the alarm.
+    properties:
+        duration:
+            type: string
+            description: The duration of the trigger relative to the related field. See rfc 5545 chapter 3.3.6. for more informations about durations.
+        related:
+            type: string
+            description: Defines whether the trigger is related to the startDate or the endDate.
+            default: START
+            enum: 
+             - START
+             - END
+        dateTime:
+            type: string
+            description: Defines an absolute date for the alarm. The value is a date-time value in utc timezone as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z"
+  attachments:
+    type: array
+    description: An array of attachments.
+    items:
+      $ref: "#/definitions/ChronosAttachment"
+  attendees:
+    type: array
+    description: An array of attendees.
+    items: 
+      $ref: "#/definitions/Attendee"
+  summary:
+    type: string
+    description: The summary of this alarm.
+  description: 
+    type: string
+    description: The description of this alarm.
+  extendedProperties:
+    type: string
+    description: A JSONObect of extended properties of this alarm.

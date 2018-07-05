@@ -49,12 +49,12 @@
 
 package com.openexchange.download.limit.storage;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import com.openexchange.database.Databases;
 import com.openexchange.download.limit.FileAccess;
 import com.openexchange.download.limit.exceptions.LimitExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -126,7 +126,7 @@ public class RdbFileAccessStorage {
         } catch (final SQLException e) {
             throw LimitExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -156,7 +156,7 @@ public class RdbFileAccessStorage {
         } catch (final SQLException e) {
             throw LimitExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -209,7 +209,7 @@ public class RdbFileAccessStorage {
         } catch (final SQLException e) {
             throw LimitExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(result, statement);
+            Databases.closeSQLStuff(result, statement);
         }
         return new FileAccess(contextId, userId, start, end, 0, 0);
     }

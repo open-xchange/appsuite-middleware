@@ -49,7 +49,8 @@
 
 package com.openexchange.tools.oxfolder;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,7 +58,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -66,17 +67,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -224,6 +222,7 @@ public class OXFolderDependentDeleter {
             deletePublications(con, cid, Module.getModuleString(module, -1), chunk);
             deleteSubscriptions(con, cid, chunk);
             deleteObjectPermissions(con, cid, module, chunk);
+            deleteFolderProperties(con, cid, chunk);
         }
     }
 
@@ -231,11 +230,11 @@ public class OXFolderDependentDeleter {
         if (0 == entityIDs.length) {
             return entityIDs;
         }
-        TIntList guestIDs = new TIntArrayList(entityIDs.length);
+        TIntSet guestIDs = new TIntHashSet(entityIDs.length);
         /*
          * build statement
          */
-        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT id FROM user where cid=? AND id");
+        StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user where cid=? AND id");
         if (1 == entityIDs.length) {
             stringBuilder.append("=?");
         } else {
@@ -265,17 +264,17 @@ public class OXFolderDependentDeleter {
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         return guestIDs.toArray();
     }
 
     private static List<Integer> getObjectPermissionEntities(Connection con, Context context, int module, List<Integer> folderIDs, boolean includeGroups) throws OXException {
-        List<Integer> entityIDs = new ArrayList<Integer>();
+        Set<Integer> entityIDs = new LinkedHashSet<>();
         /*
          * prepare statement
          */
-        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT permission_id FROM object_permission WHERE cid=? AND module=? AND folder_id");
+        StringBuilder stringBuilder = new StringBuilder("SELECT permission_id FROM object_permission WHERE cid=? AND module=? AND folder_id");
         if (1 == folderIDs.size()) {
             stringBuilder.append("=?");
         } else {
@@ -308,9 +307,9 @@ public class OXFolderDependentDeleter {
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
-        return entityIDs;
+        return new ArrayList<>(entityIDs);
     }
 
     private static int deletePublications(Connection connection, int cid, String module, List<Integer> entities) throws SQLException {
@@ -420,24 +419,26 @@ public class OXFolderDependentDeleter {
     }
 
     /**
-     * Gets the identifiers of all permission entities found in a specific folder.
+     * Deletes all properties on the specific folder for all users
      *
-     * @param folder The folder to get the permission entities for
-     * @param includeGroups <code>true</code> to also include group permissions, <code>false</code>, otherwise
-     * @return The entity IDs, or an empty list if none were found
+     * @param connection The {@link Connection} to use
+     * @param contextId The ID of the context the folder belongs to
+     * @param folderIDs The folder to be deleted
+     * @throws SQLException In case folder can't be deleted
+     * @return See {@link PreparedStatement#executeUpdate()}
      */
-    private static Set<Integer> getPermissionEntities(FolderObject folder, boolean includeGroups) {
-        List<OCLPermission> permissions = folder.getPermissions();
-        if (null == permissions) {
-            return Collections.emptySet();
-        }
-        Set<Integer> entityIDs = new HashSet<Integer>(permissions.size());
-        for (OCLPermission permission : permissions) {
-            if (includeGroups || false == permission.isGroupPermission()) {
-                entityIDs.add(I(permission.getEntity()));
+    private static int deleteFolderProperties(Connection connection, int contextId, List<Integer> folderIDs) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("DELETE FROM oxfolder_user_property WHERE cid=? AND fuid");
+        appendPlaceholdersForWhere(stringBuilder, folderIDs.size()).append(';');
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextId);
+            for (Integer entity : folderIDs) {
+                stmt.setInt(parameterIndex++, entity.intValue());
             }
+            return stmt.executeUpdate();
         }
-        return entityIDs;
     }
 
     private static StringBuilder appendPlaceholdersForWhere(StringBuilder stringBuilder, int count) {

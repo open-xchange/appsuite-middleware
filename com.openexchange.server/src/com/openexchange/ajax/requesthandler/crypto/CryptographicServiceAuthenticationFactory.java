@@ -81,6 +81,25 @@ public interface CryptographicServiceAuthenticationFactory {
     String createAuthenticationFrom(AJAXRequestData requestData) throws OXException;
 
     /**
+     * Parses the authentication information from a given {@link Session} and the given data
+     *
+     * @param session The session to obtain required authentication information from
+     * @param data additional data to construct the actual authentication information from, or null in order to fall back to {@link #getAuthTokenFromSession(Session)}
+     * @return The authentication information obtained from the given {@link Session} and data, or null if the given parameters do not contain all necessary and not authentication is attached to the given session.
+     * @throws OXException
+     */
+    String createAuthenticationFrom(Session session, String data) throws OXException;
+
+    /**
+     * Gets the cryptographic session identifier from the given {@link Session}
+     *
+     * @param session  The session to get the cryptographic session identifier for
+     * @return The value operating as cryptographic session identifier
+     * @throws OXException
+     */
+    String getSessionValueFrom(Session session) throws OXException;
+
+    /**
      * Gets the authentication token for specified session
      *
      * @param session The session
@@ -96,4 +115,5 @@ public interface CryptographicServiceAuthenticationFactory {
      * @return The token value
      */
     String getTokenValueFromString(String string);
+
 }

@@ -49,16 +49,13 @@
 
 package com.openexchange.publish.microformats;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.infostore.DefaultDocumentMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.microformats.tools.InfostoreTemplateUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

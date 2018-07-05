@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,27 +40,63 @@
 
 package com.sun.mail.imap;
 
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
-import java.util.Hashtable;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.logging.Level;
-import java.io.*;
-import java.nio.channels.SocketChannel;
-
-import javax.mail.*;
-import javax.mail.event.*;
-import javax.mail.internet.*;
-import javax.mail.search.*;
-
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.protocol.*;
+import javax.mail.FetchProfile;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.FolderClosedException;
+import javax.mail.FolderNotFoundException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.Quota;
+import javax.mail.ReadOnlyFolderException;
+import javax.mail.StoreClosedException;
+import javax.mail.UIDFolder;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.FolderEvent;
+import javax.mail.event.MailEvent;
+import javax.mail.event.MessageChangedEvent;
+import javax.mail.event.MessageCountListener;
+import javax.mail.internet.MimeMessage;
+import javax.mail.search.FlagTerm;
+import javax.mail.search.SearchException;
+import javax.mail.search.SearchTerm;
+import com.sun.mail.iap.BadCommandException;
+import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.Literal;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.iap.ResponseHandler;
+import com.sun.mail.imap.protocol.FLAGS;
+import com.sun.mail.imap.protocol.FetchItem;
+import com.sun.mail.imap.protocol.FetchResponse;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.IMAPResponse;
+import com.sun.mail.imap.protocol.Item;
+import com.sun.mail.imap.protocol.ListInfo;
+import com.sun.mail.imap.protocol.MODSEQ;
+import com.sun.mail.imap.protocol.MailboxInfo;
+import com.sun.mail.imap.protocol.MessageSet;
+import com.sun.mail.imap.protocol.Status;
+import com.sun.mail.imap.protocol.UID;
+import com.sun.mail.imap.protocol.UIDSet;
+import com.sun.mail.util.CRLFOutputStream;
+import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
 
 /**
  * This class implements an IMAP folder. <p>
@@ -277,6 +313,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     					// the server
     private long uidvalidity = -1;	// UIDValidity
     private long uidnext = -1;		// UIDNext
+    private boolean uidNotSticky = false;	// RFC 4315
     private volatile long highestmodseq = -1;	// RFC 4551 - CONDSTORE
     private boolean doExpungeNotification = true; // used in expunge handler
 
@@ -381,7 +418,64 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 */ 
 	public static final FetchProfileItem INTERNALDATE = 
 		new FetchProfileItem("INTERNALDATE");
-    }
+
+    } // End of class FetchProfileItem
+
+    /**
+     * A fetch profile item for fetching snippets (aka text previews).
+     * <p>
+     * This inner class extends the <code>FetchProfile.Item</code>
+     * class to add new FetchProfile item types, specific to IMAPFolders.
+     *
+     * @see FetchProfile
+     */
+    public static class SnippetFetchProfileItem extends FetchProfile.Item {
+
+        /**
+         * This is the fuzzy Snippets item for a message's text preview.
+         */
+        public static final SnippetFetchProfileItem SNIPPETS = new SnippetFetchProfileItem("FUZZY");
+        
+        /**
+         * This is the lazy fuzzy Snippets item for a message's text preview.
+         */
+        public static final SnippetFetchProfileItem SNIPPETS_LAZY = new SnippetFetchProfileItem("LAZY=FUZZY");
+
+        private final String algorithmName;
+
+        /**
+         * Initializes a new {@link SnippetFetchProfileItem}.
+         * 
+         * @param algorithName The algorithm name; e.g. <code>"FUZZY"</code>
+         */
+        protected SnippetFetchProfileItem(String algorithmName) {
+            super("SNIPPETS");
+            checkAlgorithmName(algorithmName);
+            this.algorithmName = Utility.toUpperCase(algorithmName);
+        }
+
+        /**
+         * Checks specified algorithm name
+         *
+         * @param algoritmhName The algorithm name to check
+         * @throws IllegalArgumentException If algorithm name is invalid
+         */
+        protected void checkAlgorithmName(String algorithmName) {
+            if (null == algorithmName) {
+                throw new IllegalArgumentException("The algorithm name must not be null.");
+            }
+        }
+
+        /**
+         * Gets the algorithm name; e.g. <code>"FUZZY"</code> or <code>"LAZY=FUZZY"</code>
+         *
+         * @return The algorithm name
+         */
+        public String getAlgoritmhName() {
+            return algorithmName;
+        }
+
+    } // End of class SnippetFetchProfileItem
 
     /**
      * Constructor used to create a possibly non-existent folder.
@@ -397,13 +491,14 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	super(store);
 	if (fullName == null)
 	    throw new NullPointerException("Folder name is null");
-	this.fullName = fullName;
+	String fn = fullName;
 	this.separator = separator;
 	logger = new MailLogger(this.getClass(),
-				"DEBUG IMAP", store.getSession());
-	connectionPoolLogger = ((IMAPStore)store).getConnectionPoolLogger();
-	explicitCloseForReusedProtocol = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".explicitCloseForReusedProtocol", true);
-	issueNoopToKeepConnectionAlive = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".issueNoopToKeepConnectionAlive", true);
+				"DEBUG IMAP", store.getSession().getDebug(), store.getSession().getDebugOut());
+	connectionPoolLogger = store.getConnectionPoolLogger();
+	Properties properties = store.getSession().getProperties();
+    explicitCloseForReusedProtocol = PropUtil.getBooleanProperty(properties, "mail." + store.name + ".explicitCloseForReusedProtocol", true);
+	issueNoopToKeepConnectionAlive = PropUtil.getBooleanProperty(properties, "mail." + store.name + ".issueNoopToKeepConnectionAlive", true);
 
 	/*
 	 * Work around apparent bug in Exchange.  Exchange
@@ -418,12 +513,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 */
 	this.isNamespace = false;
 	if (separator != UNKNOWN_SEPARATOR && separator != '\0') {
-	    int i = this.fullName.indexOf(separator);
-	    if (i > 0 && i == this.fullName.length() - 1) {
-		this.fullName = this.fullName.substring(0, i);
+	    int i = fn.indexOf(separator);
+	    if (i > 0 && i == fn.length() - 1) {
+		fn = fn.substring(0, i);
 		this.isNamespace = true;
 	    }
 	}
+	this.fullName = fn;
 
 	// if we were given a value, override default chosen above
 	if (isNamespace != null)
@@ -512,6 +608,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    } catch (ConnectionException cex) {
 		// Oops, lost connection
 		throw new FolderClosedException(this, cex.getMessage(), cex);
+	    } catch (CommandFailedException cxf) {
+	    throw handleCommandFailedException(cxf);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
@@ -549,7 +647,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	 */
 	if (name == null) {
 	    try {
-		name = 	fullName.substring(
+		String fullName = this.fullName;
+        name = 	fullName.substring(
 			    fullName.lastIndexOf(getSeparator()) + 1
 			);
 	    } catch (MessagingException mex) { }
@@ -560,6 +659,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     /**
      * Get the fullname of this folder.
      */
+    @Override
     public String getFullName() {
 	return fullName;	
     }
@@ -571,7 +671,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     public synchronized Folder getParent() throws MessagingException {
 	char c = getSeparator();
 	int index;
-	if ((index = fullName.lastIndexOf(c)) != -1)
+	String fullName = this.fullName;
+    if ((index = fullName.lastIndexOf(c)) != -1)
 	    return ((IMAPStore)store).newIMAPFolder(
 			    fullName.substring(0, index), c);
 	else
@@ -600,20 +701,22 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
 	if (li != null) {
 	    int i = findName(li, lname);
-	    fullName = li[i].name;
-	    separator = li[i].separator;
+	    ListInfo listInfo = li[i];
+        String fullName = listInfo.name;
+	    separator = listInfo.separator;
 	    int len = fullName.length();
 	    if (separator != '\0' && len > 0 &&
 		    fullName.charAt(len - 1) == separator) {
 		fullName = fullName.substring(0, len - 1);
 	    }
+	    this.fullName = fullName;
 	    type = 0;
-	    if (li[i].hasInferiors)
+	    if (listInfo.hasInferiors)
 		type |= HOLDS_FOLDERS;
-	    if (li[i].canOpen)
+	    if (listInfo.canOpen)
 		type |= HOLDS_MESSAGES;
 	    exists = true;
-	    attributes = li[i].attrs;
+	    attributes = listInfo.attrs;
 	} else {
 	    exists = opened;
 	    attributes = null;
@@ -632,14 +735,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	// if the name contains a wildcard, there might be more than one
 	for (i = 0; i < li.length; i++) {
 	    if (li[i].name.equals(lname))
-		break;
+	        return i;
 	}
-	if (i >= li.length) {	// nothing matched exactly
-	    // XXX - possibly should fail?  But what if server
-	    // is case insensitive and returns the preferred
-	    // case of the name here?
-	    i = 0;		// use first one
-	}
+	// nothing matched exactly
+	// XXX - possibly should fail?  But what if server
+	// is case insensitive and returns the preferred
+	// case of the name here?
+	i = 0;		// use first one
 	return i;
     }
 
@@ -867,7 +969,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    keepConnectionAlive(true);
 		} catch (ConnectionException cex) {
 		    throw new FolderClosedException(this, cex.getMessage(), cex);
-		} catch (ProtocolException pex) {
+		} catch (CommandFailedException cxf) {
+            throw handleCommandFailedException(cxf);
+        } catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
 		}
 		return recent > 0 ? true : false;
@@ -912,7 +1016,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    return false;
 	} catch (ConnectionException cex) {
 	    throw new StoreClosedException(store, cex.getMessage());
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
     }
@@ -1064,7 +1170,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    mi = protocol.examine(fullName, rd);
 		else
 		    mi = protocol.select(fullName, rd);
-	    } catch (CommandFailedException cex) {
+	    } catch (CommandFailedException cxf) {
 		/*
 		 * Handle SELECT or EXAMINE failure.
 		 * Try to figure out why the operation failed so we can
@@ -1078,7 +1184,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    if ((type & HOLDS_MESSAGES) == 0)
 			throw new MessagingException(
 			    "folder cannot contain messages");
-		    throw new MessagingException(cex.getMessage(), cex);
+		    throw handleCommandFailedException(cxf);
 
 		} finally {
 		    // folder not open, don't keep this information
@@ -1092,12 +1198,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    } catch (ProtocolException pex) {
 		// got a BAD or a BYE; connection may be bad, close it
 		try {
-		    protocol.logout();
-		} catch (ProtocolException pex2) {
-		    // ignore
+		    throw logoutAndThrow(pex.getMessage(), pex);
 		} finally {
 		    releaseProtocol(false);
-		    throw new MessagingException(pex.getMessage(), pex);
 		}
 	    }
 
@@ -1106,24 +1209,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			((IMAPStore)store).allowReadOnlySelect()) {
 		    ;		// all ok, allow it
 		} else {	// otherwise, it's an error
-		    try {
-			// close mailbox and return connection
-			protocol.close();
-			releaseProtocol(true);
-		    } catch (ProtocolException pex) {
-			// something went wrong, close connection
-			try {
-			    protocol.logout();
-			} catch (ProtocolException pex2) {
-			    // ignore
-			} finally {
-			    releaseProtocol(false);
-			}
-		    } finally {
-			throw new ReadOnlyFolderException(this,
-				      "Cannot open in desired mode");
-		    }
-
+		    ReadOnlyFolderException ife = new ReadOnlyFolderException(
+			    this, "Cannot open in desired mode");
+		    throw cleanupAndThrow(ife);
 		}
             }
 
@@ -1137,6 +1225,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    recent = mi.recent;
 	    uidvalidity = mi.uidvalidity;
 	    uidnext = mi.uidnext;
+	    uidNotSticky = mi.uidNotSticky;
 	    highestmodseq = mi.highestmodseq;
 
 	    // Create the message cache of appropriate size
@@ -1181,6 +1270,55 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	return openEvents;
     }
 
+    private MessagingException cleanupAndThrow(MessagingException ife) {
+	try {
+	    try {
+		// close mailbox and return connection
+		protocol.close();
+		releaseProtocol(true);
+	    } catch (ProtocolException pex) {
+		// something went wrong, close connection
+		try {
+		    addSuppressed(ife, logoutAndThrow(pex.getMessage(), pex));
+		} finally {
+		    releaseProtocol(false);
+		}
+	    }
+	} catch (Throwable thr) {
+	    addSuppressed(ife, thr);
+	}
+	return ife;
+    }
+
+    private MessagingException logoutAndThrow(String why, ProtocolException t) {
+	MessagingException ife = new MessagingException(why, t);
+	try {
+	    protocol.logout();
+	} catch (Throwable thr) {
+	    addSuppressed(ife, thr);
+	}
+	return ife;
+    }
+
+    private void addSuppressed(Throwable ife, Throwable thr) {
+	if (isRecoverable(thr)) {
+	    ife.addSuppressed(thr);
+	} else {
+	    thr.addSuppressed(ife);
+	    if (thr instanceof Error) {
+		throw (Error) thr;
+	    }
+	    if (thr instanceof RuntimeException) {
+		throw (RuntimeException) thr;
+	    }
+	    throw new RuntimeException("unexpected exception", thr);
+	}
+    }
+
+    private boolean isRecoverable(Throwable t) {
+	return (t instanceof Exception) || (t instanceof LinkageError);
+    }
+
     /**
      * Prefetch attributes, based on the given FetchProfile.
      */
@@ -1214,7 +1352,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    fitems = protocol.getFetchItems();
 	}
 
-	StringBuffer command = new StringBuffer();
+    StringBuilder command = new StringBuilder();
 	boolean first = true;
 	boolean allHeaders = false;
 
@@ -1262,7 +1400,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	}
 
     // Special fetch items
-    boolean xdovecot = protocol.getCapabilities().containsKey("XDOVECOT");
+    Map<String, String> capabilities = protocol.getCapabilities();
+    boolean xdovecot = capabilities.containsKey("XDOVECOT");
+    boolean hasSnippets = capabilities.containsKey("SNIPPET=FUZZY");
     for (FetchProfile.Item item : fp.getItems()) {
         if ("ORIGINAL-MAILBOX".equals(item.name())) {
             if (xdovecot) {
@@ -1277,6 +1417,11 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
         } else if ("ORIGINAL-UID".equals(item.name())) {
             if (xdovecot) {
                 command.append(first ? "X-REAL-UID" : " X-REAL-UID");
+                first = false;
+            }
+        } else if (item instanceof SnippetFetchProfileItem) {
+            if (hasSnippets) {
+                command.append(first ? "SNIPPET" : " SNIPPET").append(" (").append(((SnippetFetchProfileItem) item).getAlgoritmhName()).append(')');
                 first = false;
             }
         }
@@ -1392,8 +1537,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    } else if (msg != null)
 			msg.handleFetchItem(item, hdrs, allHeaders);
 		}
-		if (msg != null)
+		if (msg != null) {
 		    msg.handleExtensionFetchItems(f.getExtensionItems());
+		}
 
 		// If this response contains any unsolicited FLAGS
 		// add it to the unsolicited response vector
@@ -1442,12 +1588,12 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * requested headers.
      */
     private String createHeaderCommand(String[] hdrs, boolean isRev1) {
-	StringBuffer sb;
+    StringBuilder sb;
 
 	if (isRev1)
-	    sb = new StringBuffer("BODY.PEEK[HEADER.FIELDS (");
+	    sb = new StringBuilder("BODY.PEEK[HEADER.FIELDS (");
 	else
-	    sb = new StringBuffer("RFC822.HEADER.LINES (");
+	    sb = new StringBuilder("RFC822.HEADER.LINES (");
 
 	for (int i = 0; i < hdrs.length; i++) {
 	    if (i > 0)
@@ -1485,7 +1631,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		p.storeFlags(ms, flag, value);
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedException(this, cex.getMessage(), cex);
-	    } catch (ProtocolException pex) {
+	    } catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+        } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
 	}
@@ -1633,7 +1781,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                 }
             }
                 }
-	    } catch (ProtocolException pex) {
+	    } catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+        } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    } finally {
 		// cleanup if we haven't already
@@ -1727,6 +1877,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                     MailboxInfo minfo = p.examine(fullName);
                     p.close();
                     return minfo.total;
+                } catch (CommandFailedException cxf) {
+                    // Give up.
+                    throw handleCommandFailedException(cxf);
                 } catch (ProtocolException pex) {
                     // Give up.
                     throw new MessagingException(pex.getMessage(), pex);
@@ -1735,6 +1888,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
                 }
             } catch (ConnectionException cex) {
                 throw new StoreClosedException(store, cex.getMessage());
+            } catch (CommandFailedException cxf) {
+                throw handleCommandFailedException(cxf);
             } catch (ProtocolException pex) {
                 throw new MessagingException(pex.getMessage(), pex);
             }
@@ -1759,7 +1914,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    return total;
 		} catch (ConnectionException cex) {
 		    throw new FolderClosedException(this, cex.getMessage(), cex);
-		} catch (ProtocolException pex) {
+		} catch (CommandFailedException cxf) {
+            throw handleCommandFailedException(cxf);
+        } catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
 		}
 	    }
@@ -1781,7 +1938,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		MailboxInfo minfo = p.examine(fullName);
 		p.close();
 		return minfo.total;
-	    } catch (ProtocolException pex) {
+	    } catch (CommandFailedException cxf) {
+	    // Give up.
+        throw handleCommandFailedException(cxf);
+        } catch (ProtocolException pex) {
 		// Give up.
 		throw new MessagingException(pex.getMessage(), pex);
 	    } finally {
@@ -1789,7 +1949,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 	} catch (ConnectionException cex) {
 	    throw new StoreClosedException(store, cex.getMessage());
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
     }
@@ -1797,6 +1959,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     /**
      * Get the new message count.
      */
+    @Override
     public synchronized int getNewMessageCount() throws MessagingException {
 	synchronized (messageCacheLock) {
 	    if (opened) {
@@ -1807,7 +1970,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    return recent;
 		} catch (ConnectionException cex) {
 		    throw new FolderClosedException(this, cex.getMessage(), cex);
-		} catch (ProtocolException pex) {
+		} catch (CommandFailedException cxf) {
+            throw handleCommandFailedException(cxf);
+        } catch (ProtocolException pex) {
 		    throw new MessagingException(pex.getMessage(), pex);
 		}
 	    }
@@ -1829,7 +1994,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		MailboxInfo minfo = p.examine(fullName);
 		p.close();
 		return minfo.recent;
-	    } catch (ProtocolException pex) {
+	    } catch (CommandFailedException cxf) {
+	    // Give up.
+        throw handleCommandFailedException(cxf);
+        } catch (ProtocolException pex) {
 		// Give up.
 		throw new MessagingException(pex.getMessage(), pex);
 	    } finally {
@@ -1837,7 +2005,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 	} catch (ConnectionException cex) {
 	    throw new StoreClosedException(store, cex.getMessage());
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
     }
@@ -1862,7 +2032,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		return -1;
 	    } catch (ConnectionException cex) {
 		throw new StoreClosedException(store, cex.getMessage());
-	    } catch (ProtocolException pex) {
+	    } catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+        } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
 	}
@@ -1878,7 +2050,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 	} catch (ConnectionException cex) {
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+	    // Shouldn't happen
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    // Shouldn't happen
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
@@ -1907,7 +2082,10 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 	} catch (ConnectionException cex) {
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+	    // Shouldn't happen
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    // Shouldn't happen
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
@@ -1954,6 +2132,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	return messageCache.getMessage(msgnum);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized Message[] getMessages() throws MessagingException {
 	/*
@@ -1971,6 +2152,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     /**
      * Append the given messages into this folder.
      */
+    @Override
     public synchronized void appendMessages(Message[] msgs)
 				throws MessagingException {
 	checkExists(); // verify that self exists
@@ -2150,7 +2332,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     }
 
     /**
-     * Copy the specified messages from this folder, to the
+     * Move the specified messages from this folder, to the
      * specified destination.
      *
      * Depends on the MOVE extension
@@ -2168,14 +2350,14 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     }
 
     /**
-     * Copy the specified messages from this folder, to the
+     * Move the specified messages from this folder, to the
      * specified destination.
      * Return array of AppendUID objects containing
      * UIDs of these messages in the destination folder.
      * Each element of the returned array corresponds to
      * an element of the <code>msgs</code> array.  A null
      * element means the server didn't return UID information
-     * for the copied message.  <p>
+     * for the moved message.  <p>
      *
      * Depends on the MOVE extension
      * (<A HREF="http://www.ietf.org/rfc/rfc6851.txt">RFC 6851</A>)
@@ -2183,8 +2365,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * UIDPLUS extension
      * (<A HREF="http://www.ietf.org/rfc/rfc4315.txt">RFC 4315</A>).
      *
-     * @param	msgs	the messages to copy
-     * @param	folder	the folder to copy the messages to
+     * @param	msgs	the messages to move
+     * @param	folder	the folder to move the messages to
      * @return		array of AppendUID objects
      * @exception	MessagingException for failures
      * @since	JavaMail 1.5.4
@@ -2227,7 +2409,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			    folder.getFullName() + " does not exist"
 			   );
 		    else 
-			throw new MessagingException(cfx.getMessage(), cfx);
+		    throw handleCommandFailedException(cfx);
 		} catch (ConnectionException cex) {
 		    throw new FolderClosedException(this, cex.getMessage(), cex);
 		} catch (ProtocolException pex) {
@@ -2367,7 +2549,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 			folder.getFullName() + " does not exist"
 		       );
 		else 
-		    throw new MessagingException(cfx.getMessage(), cfx);
+		    throw handleCommandFailedException(cfx);
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
@@ -2420,7 +2602,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    throw new IllegalStateException(
 			"Cannot expunge READ_ONLY folder: " + fullName);
 		else
-		    throw new MessagingException(cfx.getMessage(), cfx);
+		    throw handleCommandFailedException(cfx);
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
@@ -2592,7 +2774,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
 	} catch (CommandFailedException cfx) {
 	    // unsupported charset or search criterion
-	    throw new MessagingException(cfx.getMessage(), cfx);
+	    throw handleCommandFailedException(cfx);
 	} catch (SearchException sex) {
 	    // too complex for IMAP
 	    throw new MessagingException(sex.getMessage(), sex);
@@ -2642,12 +2824,16 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	} catch (ConnectionException cex) {
             // Oops, the store or folder died on us.
             throwClosedException(cex);
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	} finally {
             releaseStoreProtocol(p);
         }
 
+	if (status == null)
+	    throw new MessagingException("Cannot obtain UIDValidity");
 	return status.uidvalidity;
     }
 
@@ -2669,7 +2855,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * @exception	MessagingException for failures
      * @since	JavaMail 1.3.3
      */
-    // Not a UIDFolder method, but still useful
+    @Override
     public synchronized long getUIDNext() throws MessagingException {
 	if (opened) // we already have this information
 	    return uidnext;
@@ -2687,12 +2873,16 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	} catch (ConnectionException cex) {
             // Oops, the store or folder died on us.
             throwClosedException(cex);
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	} finally {
             releaseStoreProtocol(p);
         }
 
+	if (status == null)
+	    throw new MessagingException("Cannot obtain UIDNext");
 	return status.uidnext;
     }
 
@@ -2732,7 +2922,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 	} catch(ConnectionException cex) {
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
 
@@ -2770,6 +2962,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
         }
     } catch(ConnectionException cex) {
         throw new FolderClosedException(this, cex.getMessage(),cex);
+    } catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
     } catch (ProtocolException pex) {
         throw new MessagingException(pex.getMessage(), pex);
     }
@@ -2823,7 +3017,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 	} catch(ConnectionException cex) {
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
     }
@@ -2865,12 +3061,32 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		}
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedException(this, cex.getMessage(), cex);
+	    } catch (CommandFailedException cxf) {
+	    throw handleCommandFailedException(cxf);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
 	}
 
 	return uid;
+    }
+
+    /**
+     * Servers that support the UIDPLUS extension
+     * (<A HREF="http://www.ietf.org/rfc/rfc4315.txt">RFC 4315</A>)
+     * may indicate that this folder does not support persistent UIDs;
+     * that is, UIDVALIDITY will be different each time the folder is
+     * opened.  Only valid when the folder is open.
+     *
+     * @return	true if UIDs are not sticky
+     * @exception	MessagingException for failures
+     * @exception	IllegalStateException	if the folder isn't open
+     * @see "RFC 4315"
+     * @since	JavaMail 1.6.0
+     */
+    public synchronized boolean getUIDNotSticky() throws MessagingException {
+	checkOpened();
+	return uidNotSticky;
     }
 
     /**
@@ -2920,12 +3136,16 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	} catch (ConnectionException cex) {
             // Oops, the store or folder died on us.
             throwClosedException(cex);
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	} finally {
             releaseStoreProtocol(p);
         }
 
+	if (status == null)
+	    throw new MessagingException("Cannot obtain HIGHESTMODSEQ");
 	return status.highestmodseq;
     }
 
@@ -2960,7 +3180,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    }
 	} catch(ConnectionException cex) {
 	    throw new FolderClosedException(this, cex.getMessage(), cex);
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
     }
@@ -3280,6 +3502,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    "Folder already being watched by another IdleManager");
 	    Boolean started = (Boolean)doOptionalCommand("IDLE not supported",
 		new ProtocolCommand() {
+		    @Override
 		    public Object doCommand(IMAPProtocol p)
 			    throws ProtocolException {
 			// if the IdleManager is already watching this folder,
@@ -3395,6 +3618,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    } catch (ConnectionException cex) {
 		// Oops, the folder died on us.
 		throw new FolderClosedException(this, cex.getMessage(), cex);
+	    } catch (CommandFailedException cxf) {
+	    throw handleCommandFailedException(cxf);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
@@ -3503,11 +3728,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      *					ID extension
      * @since	JavaMail 1.5.1
      */
+    @SuppressWarnings("unchecked")
     public Map<String, String> id(final Map<String, String> clientParams)
 				throws MessagingException {
 	checkOpened();
 	return (Map<String,String>)doOptionalCommand("ID not supported",
 	    new ProtocolCommand() {
+		@Override
 		public Object doCommand(IMAPProtocol p)
 			throws ProtocolException {
 		    return p.id(clientParams);
@@ -3527,7 +3754,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      * @exception MessagingException	for errors
      * @since	JavaMail 1.5.2
      */
-    public long getStatusItem(String item) throws MessagingException {
+    public synchronized long getStatusItem(String item)
+				throws MessagingException {
 	if (!opened) {
 	    checkExists();
 
@@ -3537,7 +3765,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		p = getStoreProtocol();	// XXX
 		String[] items = { item };
 		status = p.status(fullName, items);
-		return status.getItem(item);
+		return status != null ? status.getItem(item) : -1;
 	    } catch (BadCommandException bex) {
 		// doesn't support STATUS, probably vanilla IMAP4 ..
 		// Could EXAMINE, SEARCH for UNREAD messages and
@@ -3545,6 +3773,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		return -1;
 	    } catch (ConnectionException cex) {
 		throw new StoreClosedException(store, cex.getMessage());
+	    } catch (CommandFailedException cxf) {
+	    throw handleCommandFailedException(cxf);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    } finally {
@@ -3653,6 +3883,13 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    // EXPUNGE response.
 
 	    int seqnum = ir.getNumber();
+	    if (seqnum > realTotal) {
+		// A message was expunged that we never knew about.
+		// Exchange will do this.  Just ignore the notification.
+		// (Alternatively, we could simulate an EXISTS for the
+		// expunged message before expunging it.)
+		return;
+	    }
 	    Message[] msgs = null;
 	    if (doExpungeNotification && hasMessageCountListener) {
 		// save the Message object first; can't look it
@@ -3826,6 +4063,26 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     }
 
     /**
+     * Creates an appropriate 'messaging' exception for given <tt>CommandFailedException</tt> instance.
+     *
+     * @param cfx The <tt>CommandFailedException</tt> instance to handle
+     * @return The appropriate 'messaging' exception
+     */
+    protected static MessagingException handleCommandFailedException(CommandFailedException cfx) {
+        if (null == cfx) {
+            return null;
+        }
+        String message = cfx.getMessage();
+        if (com.sun.mail.iap.ResponseCode.NONEXISTENT == cfx.getKnownResponseCode()) {
+            // Apparently something that does not exist
+            if (message != null && com.openexchange.java.Strings.asciiLowerCase(message).indexOf("mailbox") >= 0) {
+                return new javax.mail.FolderNotFoundException(null, message, cfx);
+            }
+        }
+        return new MessagingException(message, cfx);
+    }
+
+    /**
      * Return the IMAPProtocol object for this folder. <p>
      *
      * This method will block if necessary to wait for an IDLE
@@ -3957,7 +4214,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	} catch (ConnectionException cex) {
             // Oops, the store or folder died on us.
             throwClosedException(cex);
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
 	return null;
@@ -3972,7 +4231,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	} catch (ConnectionException cex) {
             // Oops, the store or folder died on us.
             throwClosedException(cex);
-	} catch (ProtocolException pex) {
+	} catch (CommandFailedException cxf) {
+        throw handleCommandFailedException(cxf);
+    } catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	}
 	return null;

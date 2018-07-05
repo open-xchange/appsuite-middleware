@@ -64,19 +64,6 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
-import net.fortuna.ical4j.model.Property;
-import net.freeutils.tnef.Attachment;
-import net.freeutils.tnef.Attr;
-import net.freeutils.tnef.CompressedRTFInputStream;
-import net.freeutils.tnef.MAPIProp;
-import net.freeutils.tnef.MAPIProps;
-import net.freeutils.tnef.RawInputStream;
-import net.freeutils.tnef.TNEFInputStream;
-import net.freeutils.tnef.TNEFUtils;
-import net.freeutils.tnef.mime.ContactHandler;
-import net.freeutils.tnef.mime.RawDataSource;
-import net.freeutils.tnef.mime.ReadReceiptHandler;
-import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CharsetDetector;
@@ -106,6 +93,19 @@ import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.tnef.TNEF2ICal;
+import net.fortuna.ical4j.model.Property;
+import net.freeutils.tnef.Attachment;
+import net.freeutils.tnef.Attr;
+import net.freeutils.tnef.CompressedRTFInputStream;
+import net.freeutils.tnef.MAPIProp;
+import net.freeutils.tnef.MAPIProps;
+import net.freeutils.tnef.RawInputStream;
+import net.freeutils.tnef.TNEFInputStream;
+import net.freeutils.tnef.TNEFUtils;
+import net.freeutils.tnef.mime.ContactHandler;
+import net.freeutils.tnef.mime.RawDataSource;
+import net.freeutils.tnef.mime.ReadReceiptHandler;
+import net.freeutils.tnef.mime.TNEFMime;
 
 /**
  * {@link StructureMailMessageParser} - A callback parser to parse instances of {@link MailMessage} by invoking the <code>handleXXX()</code>
@@ -609,9 +609,11 @@ public final class StructureMailMessageParser {
                         part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                         {
                             final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);
-                            final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
-                            if (summary != null) {
-                                part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                            if (null != vEvent) {
+                                final Property summary = vEvent.getProperties().getProperty(net.fortuna.ical4j.model.Property.SUMMARY);
+                                if (summary != null) {
+                                    part.setFileName(new StringBuilder(MimeUtility.encodeText(summary.getValue().replaceAll("\\s", "_"), MailProperties.getInstance().getDefaultMimeCharset(), "Q")).append(".ics").toString());
+                                }
                             }
                         }
                         /*

@@ -51,8 +51,6 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -77,6 +75,7 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -114,7 +113,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             stmt.setInt(3, groupId);
             stmt.executeUpdate();
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -142,8 +141,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             stmt.setInt(6, gidNumber);
             stmt.executeUpdate();
         } finally {
-            closeSQLStuff(result);
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
     }
 
@@ -163,7 +161,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 grp.setName(ident);
                 grp.setDisplayname(disp);
             }
-            final Integer []members = getMembers(ctx, i(grp.getId()), con);
+            final Integer[] members = getMembers(ctx, i(grp.getId()), con);
             if (members != null) {
                 grp.setMembers(members);
             }
@@ -171,8 +169,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.error("SQL Error", sql);
             throw new StorageException(sql.toString());
         } finally {
-            closeSQLStuff(rs);
-            closeSQLStuff(prep_list);
+            Databases.closeSQLStuff(rs, prep_list);
         }
         return grp;
     }
@@ -194,7 +191,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.error("SQL Error", sql);
             throw new StorageException(sql.toString());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -249,14 +246,14 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             con.commit();
         } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            rollback(con);
+            Databases.rollback(con);
             throw AdminCache.parseDataTruncation(dt);
         } catch (SQLException sql) {
             log.error("SQL Error", sql);
-            rollback(con);
+            Databases.rollback(con);
             throw new StorageException(sql.toString());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             pushConnectionforContext(con, ctxId);
         }
     }
@@ -326,14 +323,14 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.info("Group {} changed!", groupId);
         } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            rollback(con);
+            Databases.rollback(con);
             throw AdminCache.parseDataTruncation(dt);
         } catch (SQLException e) {
             log.error("SQL Error", e);
-            rollback(con);
+            Databases.rollback(con);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             pushConnectionforContext(con, ctxId);
         }
     }
@@ -364,7 +361,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             groupId = IDGenerator.getId(ctxId, com.openexchange.groupware.Types.PRINCIPAL, con);
             con.commit();
             int gidNumber = -1;
-            if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1")) > 0) {
+            if (Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1")) > 0) {
                 gidNumber = IDGenerator.getId(ctxId, com.openexchange.groupware.Types.GID_NUMBER, con);
                 con.commit();
             }
@@ -398,14 +395,14 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.info("Group {} created!", groupId);
         } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
-            rollback(con);
+            Databases.rollback(con);
             throw AdminCache.parseDataTruncation(dt);
         } catch (SQLException sql) {
             log.error("SQL Error", sql);
-            rollback(con);
+            Databases.rollback(con);
             throw new StorageException(sql.toString());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             pushConnectionforContext(con, ctxId);
         }
         return groupId;
@@ -426,12 +423,13 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             tool.existsGroup(ctx, groups);
+            com.openexchange.groupware.contexts.Context gwContext = ContextStorage.getInstance().getContext(ctxId);
             con.setAutoCommit(false);
             for (Group group : groups) {
                 int groupId = i(group.getId());
                 // let the groupware api know that the group will be deleted
                 OXFolderAdminHelper.propagateGroupModification(groupId, con, con, ctxId);
-                DeleteRegistry.getInstance().fireDeleteEvent(new DeleteEvent(this, groupId, DeleteEvent.TYPE_GROUP, ctxId), con, con);
+                DeleteRegistry.getInstance().fireDeleteEvent(DeleteEvent.createDeleteEventForGroupDeletion(this, groupId, gwContext), con, con);
 
                 final List<Integer> members = new LinkedList<Integer>();
                 {
@@ -446,7 +444,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                             members.add(Integer.valueOf(rs3.getInt(1)));
                         }
                     } finally {
-                        closeSQLStuff(rs3, stmt3);
+                        Databases.closeSQLStuff(rs3, stmt3);
                     }
                 }
 
@@ -470,7 +468,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 final String NAME_OXCACHE = "oxcache";
                 final BundleContext context = AdminCache.getBundleContext();
                 if (null != context) {
-                    final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
+                    final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                    ;
                     if (null != cacheService) {
                         try {
                             final int contextId = ctx.getId().intValue();
@@ -494,7 +493,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             }
             con.commit();
 
-            com.openexchange.groupware.contexts.Context gwContext = ContextStorage.getInstance().getContext(ctxId);
             for (Group group : groups) {
                 try {
                     DeleteEvent delev = DeleteEvent.createDeleteEventForGroupDeletion(this, i(group.getId()), gwContext);
@@ -506,15 +504,15 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             }
         } catch (SQLException e) {
             log.error("SQL Error", e);
-            rollback(con);
+            Databases.rollback(con);
             throw new StorageException(e.toString());
         } catch (OXException e) {
             log.error("Internal Error", e);
-            rollback(con);
+            Databases.rollback(con);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(stmt1);
-            closeSQLStuff(stmt2);
+            Databases.closeSQLStuff(stmt1);
+            Databases.closeSQLStuff(stmt2);
             pushConnectionforContext(con, ctxId);
         }
     }
@@ -529,10 +527,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             stmt.executeUpdate();
         } catch (SQLException e) {
             log.error("SQL Error", e);
-            rollback(con);
+            Databases.rollback(con);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -547,10 +545,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             stmt.executeUpdate();
         } catch (SQLException e) {
             log.error("SQL Error", e);
-            rollback(con);
+            Databases.rollback(con);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -594,7 +592,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             pushConnectionforContext(con, i(ctx.getId()), true);
         }
     }
@@ -657,8 +655,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(result);
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(result);
+            Databases.closeSQLStuff(stmt);
             pushConnectionforContext(con, ctxId, true);
         }
     }
@@ -696,10 +694,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             con.commit();
         } catch (SQLException e) {
             log.error("SQL Error", e);
-            rollback(con);
+            Databases.rollback(con);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             pushConnectionforContext(con, ctxId);
         }
     }

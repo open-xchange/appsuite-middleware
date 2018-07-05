@@ -51,6 +51,7 @@ package com.openexchange.push.udp;
 
 import static com.openexchange.push.udp.PushChannels.ChannelType.EXTERNAL;
 import static com.openexchange.push.udp.PushChannels.ChannelType.INTERNAL;
+import java.nio.charset.StandardCharsets;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -293,7 +294,7 @@ public class PushOutputQueue implements Runnable {
             final StringBuilder sb = new StringBuilder();
             sb.append("OK\1");
             try {
-                channels.makeAndSendPackage(sb.toString().getBytes(), registerObject.getHostAddress(), registerObject.getPort(), EXTERNAL);
+                channels.makeAndSendPackage(sb.toString().getBytes(StandardCharsets.UTF_8), registerObject.getHostAddress(), registerObject.getPort(), EXTERNAL);
             } catch (final Exception exc) {
                 LOG.error("createRegisterPackage", exc);
             }
@@ -329,7 +330,7 @@ public class PushOutputQueue implements Runnable {
                     sb.append('\1');
                     sb.append(data);
 
-                    final byte b[] = sb.toString().getBytes();
+                    final byte b[] = sb.toString().getBytes(StandardCharsets.UTF_8);
                     if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
                         channels.makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort(), INTERNAL);
                     } else {

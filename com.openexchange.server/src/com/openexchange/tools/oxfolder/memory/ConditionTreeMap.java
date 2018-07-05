@@ -49,13 +49,6 @@
 
 package com.openexchange.tools.oxfolder.memory;
 
-import gnu.trove.EmptyTIntSet;
-import gnu.trove.TIntCollection;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -83,9 +76,17 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
+import gnu.trove.EmptyTIntSet;
+import gnu.trove.TIntCollection;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link ConditionTreeMap} - Stores context-related condition trees for individual entities (users/groups).
@@ -738,7 +739,12 @@ public final class ConditionTreeMap {
         // Put to cache asynchronously with a separate list
         if (cacheEnabled) {
             final List<FolderObject> tmp = new ArrayList<FolderObject>(loaded);
-            ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
+            ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
+            if (threadPoolService == null) {
+                LOG.debug("The Thread Pool Service is absent (probably due to server shutdown.");
+                return;
+            }
+            threadPoolService.submit(new AbstractTask<Void>() {
 
                 @Override
                 public Void call() throws Exception {
@@ -989,7 +995,7 @@ public final class ConditionTreeMap {
         }
     }
 
-    private final class NewTreeCallable implements Callable<ConditionTree> {
+    private static final class NewTreeCallable implements Callable<ConditionTree> {
 
         protected NewTreeCallable() {
             super();

@@ -110,7 +110,7 @@ public final class Databases {
             try {
                 closeable.close();
             } catch (Exception e) {
-                LOG.error("", e);
+                LOG.error("Failed to close {}", closeable.getClass().getName(), e);
             }
         }
     }
@@ -138,7 +138,7 @@ public final class Databases {
             try {
                 result.close();
             } catch (SQLException e) {
-                LOG.error("", e);
+                LOG.error("Failed to close result-set", e);
             }
         }
     }
@@ -166,7 +166,7 @@ public final class Databases {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                LOG.error("", e);
+                LOG.error("Failed to close statement", e);
             }
         }
     }
@@ -238,6 +238,9 @@ public final class Databases {
      * @throws SQLException if starting the transaction fails.
      */
     public static void startTransaction(Connection con) throws SQLException {
+        if (null == con) {
+            return;
+        }
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
@@ -258,11 +261,9 @@ public final class Databases {
             return;
         }
         try {
-            if (!con.isClosed()) {
-                con.rollback();
-            }
+            con.rollback();
         } catch (SQLException e) {
-            LOG.error("", e);
+            LOG.error("Failed to perform a roll-back.", e);
         }
     }
 
@@ -276,11 +277,9 @@ public final class Databases {
             return;
         }
         try {
-            if (!con.isClosed()) {
-                con.setAutoCommit(true);
-            }
+            con.setAutoCommit(true);
         } catch (SQLException e) {
-            LOG.error("", e);
+            LOG.error("Failed to set auto-commit mode", e);
         }
     }
 
@@ -306,15 +305,22 @@ public final class Databases {
     }
 
     /**
-     * Extends a SQL statement with enough ? characters in the last IN argument.
+     * Extends an SQL statement with enough <code>'?'</code> characters in the last <code>IN</code> argument.
      *
-     * @param sql SQL statement ending with "IN (";
-     * @param length number of entries.
-     * @return the ready to use SQL statement.
+     * @param sql The SQL statement ending with <code>"IN ("</code>
+     * @param length The number of entries.
+     * @return The ready to use SQL statement.
+     * @throws IllegalArgumentException If <code>sql</code> is <code>null</code> <i>OR</i> <code>length</code> is less than or equal to <code>0</code> (zero)
      */
     public static String getIN(String sql, int length) {
+        if (null == sql) {
+            throw new IllegalArgumentException("SQL statement must not be null");
+        }
+        if (length <= 0) {
+            throw new IllegalArgumentException("length must be positive");
+        }
         StringBuilder retval = new StringBuilder(sql);
-        for (int i = 0; i < length; i++) {
+        for (int i = length; i-- > 0;) {
             retval.append("?,");
         }
         retval.setCharAt(retval.length() - 1, ')');
@@ -529,10 +535,10 @@ public final class Databases {
      * @return The connection's character set
      * @throws SQLException In case the character set cannot be determined
      */
-    public static String getCharacterSet(final Connection connection) throws SQLException {
+    public static String getCharacterSet(Connection connection) throws SQLException {
         String schemaName = connection.getCatalog();
         if (null == schemaName) {
-            LOG.warn("Unable to derive schema name for connection {}, evaluating character dynamically.", connection);
+            LOG.warn("Unable to derive schema name for connection {}, evaluating character set dynamically.", connection);
             return readCharacterSet(connection);
         }
         try {
@@ -557,8 +563,7 @@ public final class Databases {
      * @throws SQLException In case the character set cannot be determined
      */
     private static String readCharacterSet(Connection connection) throws SQLException {
-        try (PreparedStatement stmt = connection.prepareStatement("SHOW VARIABLES LIKE 'character_set_connection';");
-            ResultSet resultSet = stmt.executeQuery()) {
+        try (PreparedStatement stmt = connection.prepareStatement("SHOW VARIABLES LIKE 'character_set_connection';"); ResultSet resultSet = stmt.executeQuery()) {
             if (false == resultSet.next()) {
                 throw new SQLException("Unable to determine 'character_set_connection'");
             }
@@ -568,4 +573,22 @@ public final class Databases {
         }
     }
 
+    /**
+     * Checks whether the specified {@link Connection} is in a transaction mode.
+     * 
+     * @param connection The {@link Connection}
+     * @return <code>true</code> if the {@link Connection} is in a transaction mode; <code>false</code> otherwise
+     * @throws SQLException In case any SQL error occurs
+     * @throws IllegalArgumentException if the {@link Connection} is <code>null</code>
+     * @throws IllegalStateException if the {@link Connection} is already closed
+     */
+    public static boolean isInTransaction(Connection connection) throws SQLException {
+        if (connection == null) {
+            throw new IllegalArgumentException("The connection can not be 'null'.");
+        }
+        if (connection.isClosed()) {
+            throw new IllegalStateException("The connection is already closed.");
+        }
+        return false == connection.getAutoCommit();
+    }
 }

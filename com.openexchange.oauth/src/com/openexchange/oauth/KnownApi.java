@@ -51,6 +51,19 @@ package com.openexchange.oauth;
 
 import java.util.Collection;
 import java.util.Collections;
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.BoxApi;
+import org.scribe.builder.api.CopyApi;
+import org.scribe.builder.api.DropBoxApi;
+import org.scribe.builder.api.FlickrApi;
+import org.scribe.builder.api.Google2Api;
+import org.scribe.builder.api.LinkedInApi;
+import org.scribe.builder.api.MsLiveConnectApi;
+import org.scribe.builder.api.TumblrApi;
+import org.scribe.builder.api.TwitterApi;
+import org.scribe.builder.api.VkontakteApi;
+import org.scribe.builder.api.XingApi;
+import org.scribe.builder.api.YahooApi;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -60,64 +73,66 @@ public enum KnownApi implements API {
     /**
      * Twitter
      */
-    TWITTER("Twitter", "com.openexchange.oauth.twitter", "twitter"),
+    TWITTER("Twitter", "com.openexchange.oauth.twitter", new String[] { "twitter" }, TwitterApi.class),
     /**
      * LinkedIn
      */
-    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin", "linkedin"),
+    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin", new String[] { "linkedin" }, LinkedInApi.class),
     /**
      * Other/unknown
      */
-    OTHER("Other", "com.openexchange.oauth.other", "other"),
+    OTHER("Other", "com.openexchange.oauth.other", new String[] { "other" }, Api.class),
     /**
      * MSN
      */
-    MSN("MSN", "com.openexchange.oauth.msn", "msn"),
+    MSN("MSN", "com.openexchange.oauth.msn", new String[] { "msn" }, MsLiveConnectApi.class),
     /**
      * Yahoo
      */
-    YAHOO("Yahoo", "com.openexchange.oauth.yahoo", "yahoo"),
+    YAHOO("Yahoo", "com.openexchange.oauth.yahoo", new String[] { "yahoo" }, YahooApi.class),
     /**
      * Tumblr
      */
-    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr", "tumblr"),
+    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr", new String[] { "tumblr" }, TumblrApi.class),
     /**
      * Flickr
      */
-    FLICKR("Flickr", "com.openexchange.oauth.flickr", "flickr"),
+    FLICKR("Flickr", "com.openexchange.oauth.flickr", new String[] { "flickr" }, FlickrApi.class),
     /**
      * Dropbox
      */
-    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox", "dropbox"),
+    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox", new String[] { "dropbox" }, DropBoxApi.class),
     /**
      * XING
      */
-    XING("XING", "com.openexchange.oauth.xing", "xing"),
+    XING("XING", "com.openexchange.oauth.xing", new String[] { "xing" }, XingApi.class),
     /**
      * vkontakte
      */
-    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte", "vkontakte"),
+    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte", new String[] { "vkontakte" }, VkontakteApi.class),
     /**
      * Google
      */
-    GOOGLE("Google", "com.openexchange.oauth.google", "google"),
+    GOOGLE("Google", "com.openexchange.oauth.google", new String[] { "google" }, Google2Api.class),
     /**
      * Box.com
      */
-    BOX_COM("Box.com", "com.openexchange.oauth.boxcom", "boxcom"),
+    BOX_COM("Box.com", "com.openexchange.oauth.boxcom", new String[] { "boxcom" }, BoxApi.class),
     /**
      * Microsoft Live Connect
      */
-    MS_LIVE_CONNECT("Microsoft Live Connect", "com.openexchange.oauth.msliveconnect", "msliveconnect"),
+    MS_LIVE_CONNECT("MS Live", "Microsoft Live Connect", "com.openexchange.oauth.msliveconnect", new String[] { "msliveconnect" }, MsLiveConnectApi.class),
     /**
      * Copy.com
      */
-    COPY_COM("Copy.com", "com.openexchange.oauth.copycom", "copycom"),
+    COPY_COM("Copy.com", "com.openexchange.oauth.copycom", new String[] { "copycom" }, CopyApi.class),
     ;
 
     private final String serviceId;
     private final String name;
+    private final String displayName;
     private final Collection<String> aliases;
+    private final Class<? extends Api> apiClass;
 
     /**
      * Initializes a new {@link KnownApi}.
@@ -125,9 +140,30 @@ public enum KnownApi implements API {
      * @param shortName The short name of the API
      * @param fullName The full name of the API
      */
-    private KnownApi(String shortName, String fullName, String... aliases) {
+    private KnownApi(String shortName, String fullName, String[] aliases, Class<? extends Api> apiClass) {
         name = shortName;
         serviceId = fullName;
+        this.apiClass = apiClass;
+        this.displayName = null;
+        if (null == aliases || aliases.length == 0) {
+            this.aliases = Collections.emptyList();
+        } else {
+            this.aliases = ImmutableList.copyOf(aliases);
+        }
+    }
+
+    /**
+     * Initializes a new {@link KnownApi}.
+     *
+     * @param displayName An optional display name
+     * @param shortName The short name of the API
+     * @param fullName The full name of the API
+     */
+    private KnownApi(String displayName, String shortName, String fullName, String[] aliases, Class<? extends Api> apiClass) {
+        this.displayName = displayName;
+        name = shortName;
+        serviceId = fullName;
+        this.apiClass = apiClass;
 
         if (null == aliases || aliases.length == 0) {
             this.aliases = Collections.emptyList();
@@ -160,7 +196,11 @@ public enum KnownApi implements API {
      *
      * @return The short name
      */
+    @Override
     public String getShortName() {
+        if (displayName != null) {
+            return displayName;
+        }
         return name;
     }
 
@@ -171,6 +211,15 @@ public enum KnownApi implements API {
      */
     public String getFullName() {
         return serviceId;
+    }
+
+    /**
+     * Gets the apiClass
+     *
+     * @return The apiClass
+     */
+    public Class<? extends Api> getApiClass() {
+        return apiClass;
     }
 
     /**

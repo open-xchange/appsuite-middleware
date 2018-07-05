@@ -170,10 +170,6 @@ public final class JSONPathElement {
             } else {
                 retval = jCurrent.get(name);
             }
-            if (retval instanceof JSONValue) {
-                // Not a leaf
-                return null;
-            }
             return retval;
         } catch (final JSONException e) {
             return null;
@@ -181,47 +177,49 @@ public final class JSONPathElement {
     }
 
     private static final class Entry {
-    	private Entry parent = null;
-    	private final JSONObject object;
-    	private final JSONPathElement name;
 
-    	public Entry(JSONPathElement name, JSONObject object, Entry parent) {
-    		this.name = name;
-    		this.object = object;
-    		this.parent = parent;
-    	}
+        private Entry parent = null;
+        private final JSONObject object;
+        private final JSONPathElement pathElem;
 
-		public void removeIfEmpty() {
-			if (parent == null) {
-				return;
-			}
-			try {
-				boolean removed = false;
-				if (isInstance(name.name, JSONArray.class, parent.object) && parent.object.getJSONArray(name.name).getJSONObject(name.index).length() == 0) {
-					removeOne(parent.object.getJSONArray(name.name), name.index);
-					if (parent.object.getJSONArray(name.name).length() == 0) {
-						parent.object.remove(name.name);
-					}
-					removed = true;
-				} else if (parent.object.getJSONObject(name.name).length() == 0){
-					parent.object.remove(name.name);
-					removed = true;
-				}
-				if (!removed) {
-					return;
-				}
-			} catch (JSONException x) {
+        public Entry(JSONPathElement pathElem, JSONObject object, Entry parent) {
+            this.pathElem = pathElem;
+            this.object = object;
+            this.parent = parent;
+        }
 
-			}
-			if (parent != null) {
-				parent.removeIfEmpty();
-			}
-		}
+        public void removeIfEmpty() {
+            if (parent == null) {
+                return;
+            }
+            try {
+                boolean removed = false;
+                String name = pathElem.getName();
+                if (isInstance(name, JSONArray.class, parent.object) && parent.object.getJSONArray(name).getJSONObject(pathElem.getIndex()).length() == 0) {
+                    removeOne(parent.object.getJSONArray(name), pathElem.getIndex());
+                    if (parent.object.getJSONArray(name).length() == 0) {
+                        parent.object.remove(name);
+                    }
+                    removed = true;
+                } else if (parent.object.getJSONObject(name).length() == 0) {
+                    parent.object.remove(name);
+                    removed = true;
+                }
+                if (!removed) {
+                    return;
+                }
+            } catch (JSONException x) {
+                // Ignore
+            }
+            if (parent != null) {
+                parent.removeIfEmpty();
+            }
+        }
     }
 
-	public static Object remove(List<JSONPathElement> jPath, JSONObject jObject) {
-		JSONObject jCurrent = jObject;
-		Entry entry = new Entry(null, jObject, null);
+    public static Object remove(List<JSONPathElement> jPath, JSONObject jObject) {
+        JSONObject jCurrent = jObject;
+        Entry entry = new Entry(null, jObject, null);
 
         final int msize = jPath.size() - 1;
         for (int i = 0; i < msize; i++) {
@@ -275,36 +273,22 @@ public final class JSONPathElement {
                 // Not a leaf
                 return null;
             }
-        	entry.removeIfEmpty();
+            entry.removeIfEmpty();
             return retval;
         } catch (final JSONException e) {
             return null;
         }
-	}
+    }
 
-
-    private static void removeOne(JSONArray jsonArray, int theIndex) {
-    	List<Object> purged = new ArrayList<Object>(jsonArray.length());
-    	for(int i = 0, size = jsonArray.length(); i < size; i++) {
-    		if (i != theIndex) {
-    			try {
-					purged.add(jsonArray.get(i));
-				} catch (JSONException e) {
-				}
-    		}
-    	}
-
-    	jsonArray.reset();
-    	for(Object p: purged) {
-    		jsonArray.put(p);
-    	}
-
-	}
-
-	private static boolean isInstance(final String name, final Class<? extends JSONValue> clazz, final JSONObject jsonObject) {
-        if (!jsonObject.hasAndNotNull(name)) {
-            return false;
+    static void removeOne(JSONArray jsonArray, int theIndex) {
+        try {
+            jsonArray.remove(theIndex);
+        } catch (JSONException e) {
+            // Ignore
         }
+    }
+
+    static boolean isInstance(final String name, final Class<? extends JSONValue> clazz, final JSONObject jsonObject) {
         return clazz.isInstance(jsonObject.opt(name));
     }
 

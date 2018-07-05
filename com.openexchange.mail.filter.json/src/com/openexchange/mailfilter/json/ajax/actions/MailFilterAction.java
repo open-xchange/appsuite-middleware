@@ -49,9 +49,6 @@
 
 package com.openexchange.mailfilter.json.ajax.actions;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
@@ -61,6 +58,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.JSONMatchType;
@@ -207,7 +205,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         return jsonObject;
     }
 
-    private static final Set<String> MUST_NOT_BE_EMPTY = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("values")));
+    private static final Set<String> MUST_NOT_BE_EMPTY = ImmutableSet.of("values");
 
     private void checkJsonValue(final JSONValue jValue, final String name, final JSONValue parent) throws OXException {
         if (null != jValue) {
@@ -368,7 +366,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
     }
 
     private Integer getUniqueId(final JSONObject json) throws OXException {
-        if (json.has("id") && !json.isNull("id")) {
+        if (json.hasAndNotNull("id")) {
             try {
                 return Integer.valueOf(json.getInt("id"));
             } catch (final JSONException e) {

@@ -49,10 +49,10 @@
 
 package com.openexchange.data.conversion.ical.ical4j;
 
+import com.openexchange.data.conversion.ical.ICalItem;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.Uid;
-import com.openexchange.data.conversion.ical.ICalItem;
 
 /**
  *

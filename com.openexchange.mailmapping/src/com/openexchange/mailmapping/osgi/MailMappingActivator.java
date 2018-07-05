@@ -56,7 +56,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.mailmapping.MailResolver;
+import com.openexchange.mailmapping.MailResolverService;
 import com.openexchange.mailmapping.impl.DefaultMailMappingService;
+import com.openexchange.mailmapping.impl.MailResolverServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -85,6 +87,12 @@ public class MailMappingActivator extends HousekeepingActivator {
         Dictionary<String, Object> props = new Hashtable<String, Object>(2);
         props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
         registerService(MailResolver.class, new DefaultMailMappingService(this), props);
+
+        MailResolverServiceImpl osgiMailMappingService = new MailResolverServiceImpl();
+        track(MailResolver.class, osgiMailMappingService);
+        openTrackers();
+
+        registerService(MailResolverService.class, osgiMailMappingService);
     }
 
 }

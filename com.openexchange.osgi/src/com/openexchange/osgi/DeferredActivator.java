@@ -65,6 +65,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.annotation.OptionalService;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.osgi.console.DeferredActivatorServiceStateLookup;
 import com.openexchange.osgi.console.ServiceStateLookup;
@@ -140,6 +141,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             this.stopOnUnavailability = stopOnUnavailability;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public S addingService(ServiceReference<S> reference) {
             S service = super.addingService(reference);
@@ -292,6 +294,8 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      */
     protected abstract void handleAvailability(final Class<?> clazz);
 
+    private static final String MARKER = " ---=== /!\\ ===--- ";
+
     /**
      * Initializes this deferred activator's members.
      *
@@ -310,10 +314,14 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
                 throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
             }
-            if (LOG.isDebugEnabled()) {
+            {
+                String sep = Strings.getLineSeparator();
                 for (Class<?> trackedService : classes) {
                     if (null == trackedService.getAnnotation(SingletonService.class) && trackedService.getName().startsWith("com.openexchange.")) {
-                        LOG.debug("{} tracks needed service {} that is not annotated as a {}", getClass().getName(), trackedService.getName(), SingletonService.class.getSimpleName());
+                        LOG.debug("{}{}\t{} tracks needed service {} that is not annotated as a {}{}", sep, sep, getClass().getName(), trackedService.getName(), SingletonService.class.getSimpleName(), sep);
+                    }
+                    if (null != trackedService.getAnnotation(OptionalService.class)) {
+                        LOG.warn("{}{}\t{}{} tracks optional service {} as needed service, which is not guaranteed to appear. Potentially this activator will therefore not start.{}{}", sep, sep, MARKER, getClass().getName(), trackedService.getName(), MARKER, sep);
                     }
                 }
             }

@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange HTML Bundle
 Bundle-SymbolicName: com.openexchange.html
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/jTidy.jar
 Import-Package: com.google.common.annotations,
@@ -149,7 +149,6 @@ Import-Package: com.google.common.annotations,
  org.htmlcleaner,
  org.json,
  org.jsoup,
- org.jsoup.examples,
  org.jsoup.helper,
  org.jsoup.nodes,
  org.jsoup.parser,
@@ -191,5 +190,6 @@ Import-Package: com.google.common.annotations,
  org.xml.sax.helpers,
  org.xmlpull.v1
 Export-Package: com.openexchange.html,
- com.openexchange.html.tools
+ com.openexchange.html.tools,
+ com.openexchange.html.whitelist
 Bundle-Activator: com.openexchange.html.osgi.HTMLServiceActivator

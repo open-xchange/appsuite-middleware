@@ -54,8 +54,8 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.ServiceListing;
-import com.openexchange.pns.PushSubscriptionProvider;
 import com.openexchange.pns.PushSubscriptionListener;
+import com.openexchange.pns.PushSubscriptionProvider;
 
 /**
  * {@link PushSubscriptionProviderTracker}

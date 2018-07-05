@@ -67,13 +67,13 @@ import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Executor;
 import com.openexchange.contact.storage.rdb.sql.Table;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tools.mappings.Mapping;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Deduplicator}
@@ -150,9 +150,9 @@ public class Deduplicator {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(connection);
+                Databases.rollback(connection);
             }
-            DBUtils.autocommit(connection);
+            Databases.autocommit(connection);
             if (dryRun) {
                 databaseService.backReadOnly(contextID, connection);
             } else {
@@ -234,7 +234,7 @@ public class Deduplicator {
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
         }
         return contactsPerHash;
     }
@@ -316,7 +316,7 @@ public class Deduplicator {
             }
             return stmt.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -510,9 +510,9 @@ public class Deduplicator {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(connection);
+                Databases.rollback(connection);
             }
-            DBUtils.autocommit(connection);
+            Databases.autocommit(connection);
             databaseService.backWritable(contextID, connection);
         }
     }

@@ -54,9 +54,9 @@ import java.rmi.RemoteException;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRemote;
-import com.openexchange.auth.rmi.RemoteAuthenticator;
 
 /**
  * {@link ListBrandings}

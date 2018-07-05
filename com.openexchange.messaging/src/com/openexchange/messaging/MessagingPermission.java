@@ -145,6 +145,20 @@ public interface MessagingPermission extends Cloneable {
     public void setSystem(int system);
 
     /**
+     * Gets this folder permission's type.
+     *
+     * @return This folder permission's type.
+     */
+    public MessagingFolderPermissionType getType();
+
+    /**
+     * Sets this folder permission's type.
+     *
+     * @param type This folder permission's type.
+     */
+    public void setType(MessagingFolderPermissionType type);
+
+    /**
      * Checks if this folder permission's entity is a group.
      *
      * @return <code>true</code> if this folder permission's entity is a group; otherwise <code>false</code>

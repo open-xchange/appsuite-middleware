@@ -56,12 +56,11 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.outlook.osgi.Services;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Insert} - SQL for inserting a virtual folder.
@@ -79,12 +78,6 @@ public final class Insert {
 
     private static final String SQL_INSERT =
         "INSERT INTO virtualTree (cid, tree, user, folderId, parentId, name, modifiedBy, lastModified, shadow) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    private static final String SQL_INSERT_PERM =
-        "INSERT INTO virtualPermission (cid, tree, user, folderId, entity, groupFlag, fp, orp, owp, odp, adminFlag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    private static final String SQL_INSERT_SUBS =
-        "INSERT INTO virtualSubscription (cid, tree, user, folderId, subscribed) VALUES (?, ?, ?, ?, ?)";
 
     /**
      * Inserts specified folder.
@@ -104,16 +97,16 @@ public final class Insert {
             insertFolder(cid, tree, user, folder, con);
             con.commit(); // COMMIT
         } catch (final SQLException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }
@@ -173,55 +166,9 @@ public final class Insert {
              */
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         // TODO: Wanna insert permission data if non-null and not empty?
-        final Permission[] permissions = folder.getPermissions();
-        if (false && null != permissions && permissions.length > 0) {
-            try {
-                stmt = con.prepareStatement(SQL_INSERT_PERM);
-                for (final Permission p : permissions) {
-                    int pos = 1;
-                    stmt.setInt(pos++, cid);
-                    stmt.setInt(pos++, tree);
-                    stmt.setInt(pos++, user);
-                    stmt.setString(pos++, folderId);
-                    stmt.setInt(pos++, p.getEntity());
-                    stmt.setInt(pos++, p.isGroup() ? 1 : 0);
-                    stmt.setInt(pos++, p.getFolderPermission());
-                    stmt.setInt(pos++, p.getReadPermission());
-                    stmt.setInt(pos++, p.getWritePermission());
-                    stmt.setInt(pos++, p.getDeletePermission());
-                    stmt.setInt(pos++, p.isAdmin() ? 1 : 0);
-                    stmt.setInt(pos++, p.getSystem());
-                    stmt.addBatch();
-                }
-                stmt.executeBatch();
-            } catch (final SQLException e) {
-                debugSQL(stmt);
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
-        }
-        if (false) {
-            // TODO: Wanna insert subscription data
-            try {
-                stmt = con.prepareStatement(SQL_INSERT_SUBS);
-                int pos = 1;
-                stmt.setInt(pos++, cid);
-                stmt.setInt(pos++, tree);
-                stmt.setInt(pos++, user);
-                stmt.setString(pos++, folderId);
-                stmt.setInt(pos, folder.isSubscribed() ? 1 : 0);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                debugSQL(stmt);
-                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
-        }
     }
 
     private static boolean isConstraintViolation(final SQLException sqlException) {

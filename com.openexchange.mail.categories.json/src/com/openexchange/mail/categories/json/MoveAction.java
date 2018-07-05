@@ -56,9 +56,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailObjectParameter;
@@ -73,10 +70,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "move", description = "Move given mails to the given category", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
-    @Parameter(name = "category_id", description = "The category identifier"),
-}, responseDescription = "Response: Empty")
 public class MoveAction extends AbstractCategoriesAction {
 
     private static final String CATEGORY_ID_PARAMETER = "category_id";

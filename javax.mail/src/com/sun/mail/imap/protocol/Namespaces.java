@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,8 +40,10 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.*;
-import com.sun.mail.iap.*;
+import java.util.ArrayList;
+import java.util.List;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
 
 /**
  * This class and its inner class represent the response to the
@@ -77,11 +79,13 @@ public class Namespaces {
 	public Namespace(Response r) throws ProtocolException {
 	    // Namespace_Element = "(" string SP (<"> QUOTED_CHAR <"> / nil)
 	    //		*(Namespace_Response_Extension) ")"
-	    if (r.readByte() != '(')
+	    if (!r.isNextNonSpace('('))
 		throw new ProtocolException(
 					"Missing '(' at start of Namespace");
 	    // first, the prefix
-	    prefix = BASE64MailboxDecoder.decode(r.readString());
+	    prefix = r.readString();
+	    if (!r.supportsUtf8())
+		prefix = BASE64MailboxDecoder.decode(prefix);
 	    r.skipSpaces();
 	    // delimiter is a quoted character or NIL
 	    if (r.peekByte() == '"') {
@@ -101,16 +105,16 @@ public class Namespaces {
 		delimiter = 0;
 	    }
 	    // at end of Namespace data?
-	    if (r.peekByte() != ')') {
-		// otherwise, must be a Namespace_Response_Extension
-		//    Namespace_Response_Extension = SP string SP
-		//	    "(" string *(SP string) ")"
-		r.skipSpaces();
-		r.readString();
-		r.skipSpaces();
-		r.readStringList();
-	    }
-	    if (r.readByte() != ')')
+	    if (r.isNextNonSpace(')'))
+		return;
+
+	    // otherwise, must be a Namespace_Response_Extension
+	    //    Namespace_Response_Extension = SP string SP
+	    //	    "(" string *(SP string) ")"
+	    r.readString();
+	    r.skipSpaces();
+	    r.readStringList();
+	    if (!r.isNextNonSpace(')'))
 		throw new ProtocolException("Missing ')' at end of Namespace");
 	}
     };
@@ -149,16 +153,13 @@ public class Namespaces {
      * Parse out one of the three sets of namespaces.
      */
     private Namespace[] getNamespaces(Response r) throws ProtocolException {
-	r.skipSpaces();
 	//    Namespace = nil / "(" 1*( Namespace_Element) ")"
-	if (r.peekByte() == '(') {
-	    List<Namespace> v = new ArrayList<Namespace>();
-	    r.readByte();
+	if (r.isNextNonSpace('(')) {
+	    List<Namespace> v = new ArrayList<>();
 	    do {
 		Namespace ns = new Namespace(r);
 		v.add(ns);
-	    } while (r.peekByte() != ')');
-	    r.readByte();
+	    } while (!r.isNextNonSpace(')'));
 	    return v.toArray(new Namespace[v.size()]);
 	} else {
 	    String s = r.readAtom();

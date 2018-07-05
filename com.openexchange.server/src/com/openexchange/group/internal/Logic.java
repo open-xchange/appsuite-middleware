@@ -49,8 +49,6 @@
 
 package com.openexchange.group.internal;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.Date;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -61,6 +59,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  *

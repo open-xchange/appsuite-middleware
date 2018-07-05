@@ -59,10 +59,11 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
-import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 
 /**
  * This abstract class contains all the common options between all command line tools
+ * 
  * @author cutmasta,d7
  *
  */
@@ -73,67 +74,67 @@ public abstract class BasicCommandlineOptions {
     /**
      * Used when username/password credentials were not correct!
      */
-    public static final int SYSEXIT_INVALID_CREDENTIALS=101;
+    public static final int SYSEXIT_INVALID_CREDENTIALS = 101;
 
     /**
      * Used when the requested context does not exists on the server!
      */
-    public static final int SYSEXIT_NO_SUCH_CONTEXT=102;
+    public static final int SYSEXIT_NO_SUCH_CONTEXT = 102;
 
     /**
      * Used when wrong data was sent to the server!
      */
-    public static final int SYSEXIT_INVALID_DATA=103;
+    public static final int SYSEXIT_INVALID_DATA = 103;
 
     /**
      * Used when an option is missing to execute the cmd tool!
      */
-    public static final int SYSEXIT_MISSING_OPTION=104;
+    public static final int SYSEXIT_MISSING_OPTION = 104;
 
     /**
      * Used when a communication problem was encountered
      */
-    public static final int SYSEXIT_COMMUNICATION_ERROR =105;
+    public static final int SYSEXIT_COMMUNICATION_ERROR = 105;
 
     /**
      * Used when a storage problem was encountered on the server!
      */
-    public static final int SYSEXIT_SERVERSTORAGE_ERROR =106;
+    public static final int SYSEXIT_SERVERSTORAGE_ERROR = 106;
 
     /**
      * Used when a remote server problem was encountered !
      */
-    public static final int SYSEXIT_REMOTE_ERROR =107;
+    public static final int SYSEXIT_REMOTE_ERROR = 107;
 
     /**
      * Used when an user does not exists
      */
-    public static final int SYSEXIT_NO_SUCH_USER =108;
+    public static final int SYSEXIT_NO_SUCH_USER = 108;
 
     /**
      * Used when an unknown option was passed to the cmd tool!
      */
-    public static final int SYSEXIT_ILLEGAL_OPTION_VALUE=109;
+    public static final int SYSEXIT_ILLEGAL_OPTION_VALUE = 109;
 
     /**
      * Used when a context already exists
      */
-    public static final int SYSEXIT_CONTEXT_ALREADY_EXISTS=110;
+    public static final int SYSEXIT_CONTEXT_ALREADY_EXISTS = 110;
 
     /**
      * Used when an unknown option was passed to the cmd tool!
      */
-    public static final int SYSEXIT_UNKNOWN_OPTION=111;
+    public static final int SYSEXIT_UNKNOWN_OPTION = 111;
 
     /**
      * Used when a group does not exists
      */
-    public static final int SYSEXIT_NO_SUCH_GROUP =112;
+    public static final int SYSEXIT_NO_SUCH_GROUP = 112;
 
     /**
      * Used when a resource does not exists
      */
-    public static final int SYSEXIT_NO_SUCH_RESOURCE =113;
+    public static final int SYSEXIT_NO_SUCH_RESOURCE = 113;
 
     public static final int SYSEXIT_UNABLE_TO_PARSE = 114;
 
@@ -142,19 +143,19 @@ public abstract class BasicCommandlineOptions {
      */
     public static final int SYSEXIT_NO_SUCH_PUBLICATION = 115;
 
-    protected static final int DEFAULT_CONTEXT=1;
-    protected static final char OPT_NAME_CONTEXT_SHORT='c';
-    protected static final String OPT_NAME_CONTEXT_LONG="contextid";
-    protected static final char OPT_NAME_CONTEXT_NAME_SHORT='N';
-    protected static final String OPT_NAME_CONTEXT_NAME_LONG="contextname";
-    protected static final String OPT_NAME_CONTEXT_NAME_DESCRIPTION="context name";
-    protected static final String OPT_NAME_CONTEXT_DESCRIPTION="The id of the context";
-    protected static final char OPT_NAME_ADMINUSER_SHORT='A';
-    protected static final String OPT_NAME_ADMINUSER_LONG="adminuser";
-    protected static final char OPT_NAME_ADMINPASS_SHORT='P';
-    protected static final String OPT_NAME_ADMINPASS_LONG="adminpass";
-    protected static final String OPT_NAME_ADMINPASS_DESCRIPTION="Admin password";
-    protected static final String OPT_NAME_ADMINUSER_DESCRIPTION="Admin username";
+    protected static final int DEFAULT_CONTEXT = 1;
+    protected static final char OPT_NAME_CONTEXT_SHORT = 'c';
+    protected static final String OPT_NAME_CONTEXT_LONG = "contextid";
+    protected static final char OPT_NAME_CONTEXT_NAME_SHORT = 'N';
+    protected static final String OPT_NAME_CONTEXT_NAME_LONG = "contextname";
+    protected static final String OPT_NAME_CONTEXT_NAME_DESCRIPTION = "context name";
+    protected static final String OPT_NAME_CONTEXT_DESCRIPTION = "The id of the context";
+    protected static final char OPT_NAME_ADMINUSER_SHORT = 'A';
+    protected static final String OPT_NAME_ADMINUSER_LONG = "adminuser";
+    protected static final char OPT_NAME_ADMINPASS_SHORT = 'P';
+    protected static final String OPT_NAME_ADMINPASS_LONG = "adminpass";
+    protected static final String OPT_NAME_ADMINPASS_DESCRIPTION = "Admin password";
+    protected static final String OPT_NAME_ADMINUSER_DESCRIPTION = "Admin username";
     protected static final String OPT_NAME_SEARCHPATTERN_LONG = "searchpattern";
     protected static final char OPT_NAME_SEARCHPATTERN = 's';
     protected static final String OPT_NAME_IGNORECASE_LONG = "ignorecase";
@@ -169,14 +170,13 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_EXCLUDEUSERS_LONG = "excludeusers";
     protected static final String OPT_NAME_EXCLUDEUSERS_DESCRIPTION = "Exclude users, only show guests";
 
-    private static final String[] ENV_OPTIONS = new String[] {
-        "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT", "ADMIN_PASSWORD", "NEW_USER_PASSWORD" };
+    private static final String[] ENV_OPTIONS = new String[] { "RMI_HOSTNAME", "COMMANDLINE_TIMEZONE", "COMMANDLINE_DATEFORMAT", "ADMIN_PASSWORD", "NEW_USER_PASSWORD" };
 
-    protected static String RMI_HOSTNAME           = "rmi://localhost:1099/";
-    protected static String COMMANDLINE_TIMEZONE   = "GMT";
+    protected static String RMI_HOSTNAME = "rmi://localhost:1099/";
+    protected static String COMMANDLINE_TIMEZONE = "GMT";
     protected static String COMMANDLINE_DATEFORMAT = "yyyy-MM-dd";
-    protected static String ADMIN_PASSWORD         = null;
-    protected static String NEW_USER_PASSWORD      = null;
+    protected static String ADMIN_PASSWORD = null;
+    protected static String NEW_USER_PASSWORD = null;
 
     protected CLIOption contextOption = null;
     protected CLIOption contextNameOption = null;
@@ -193,33 +193,33 @@ public abstract class BasicCommandlineOptions {
 
     public BasicCommandlineOptions() {
         super();
-        for( final String opt : ENV_OPTIONS ) {
+        for (final String opt : ENV_OPTIONS) {
             setEnvConfigOption(opt);
         }
     }
 
-    public static final Hashtable<String,String> getEnvOptions() {
+    public static final Hashtable<String, String> getEnvOptions() {
         final Hashtable<String, String> opts = new Hashtable<String, String>();
-        for( final String opt : ENV_OPTIONS ) {
+        for (final String opt : ENV_OPTIONS) {
             try {
                 final Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
-                String val = (String)f.get(null);
+                String val = (String) f.get(null);
                 // to be able to print also opts set to null, override with empty string
-                if( val == null ) {
+                if (val == null) {
                     val = "<NOT SET>";
                 }
                 opts.put(opt, val);
             } catch (final SecurityException e) {
-                System.err.println("unable to get commandline option \""+opt+"\"");
+                System.err.println("unable to get commandline option \"" + opt + "\"");
                 e.printStackTrace();
             } catch (final NoSuchFieldException e) {
-                System.err.println("unable to get commandline option \""+opt+"\"");
+                System.err.println("unable to get commandline option \"" + opt + "\"");
                 e.printStackTrace();
             } catch (final IllegalArgumentException e) {
-                System.err.println("unable to get commandline option \""+opt+"\"");
+                System.err.println("unable to get commandline option \"" + opt + "\"");
                 e.printStackTrace();
             } catch (final IllegalAccessException e) {
-                System.err.println("unable to get commandline option \""+opt+"\"");
+                System.err.println("unable to get commandline option \"" + opt + "\"");
                 e.printStackTrace();
             }
         }
@@ -230,71 +230,71 @@ public abstract class BasicCommandlineOptions {
         final String property = System.getProperties().getProperty(opt);
         final String env = System.getenv(opt);
         String setOpt = null;
-        if (null != env && env.trim().length()>0) {
+        if (null != env && env.trim().length() > 0) {
             setOpt = env;
-        } else if (null != property && property.trim().length()>0) {
+        } else if (null != property && property.trim().length() > 0) {
             setOpt = property;
         }
-        if( setOpt != null ) {
-            if( opt.equals("RMI_HOSTNAME") ) {
+        if (setOpt != null) {
+            if (opt.equals("RMI_HOSTNAME")) {
                 setRMI_HOSTNAME(setOpt);
             } else {
                 try {
                     final Field f = BasicCommandlineOptions.class.getDeclaredField(opt);
                     f.set(this, setOpt);
                 } catch (final SecurityException e) {
-                    System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
+                    System.err.println("unable to set commandline option for \"" + opt + "\" to \"" + setOpt + "\"");
                     e.printStackTrace();
                 } catch (final NoSuchFieldException e) {
-                    System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
+                    System.err.println("unable to set commandline option for \"" + opt + "\" to \"" + setOpt + "\"");
                     e.printStackTrace();
                 } catch (final IllegalArgumentException e) {
-                    System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
+                    System.err.println("unable to set commandline option for \"" + opt + "\" to \"" + setOpt + "\"");
                     e.printStackTrace();
                 } catch (final IllegalAccessException e) {
-                    System.err.println("unable to set commandline option for \""+opt+"\" to \"" + setOpt+ "\"");
+                    System.err.println("unable to set commandline option for \"" + opt + "\" to \"" + setOpt + "\"");
                     e.printStackTrace();
                 }
             }
         }
     }
 
-    protected final void printServerException(final Exception e, final AdminParser parser){
-        String output = "";
+    protected final void printServerException(final Exception e, final AdminParser parser) {
+        StringBuilder output = new StringBuilder();
         final String msg = e.getMessage();
-        if( parser != null && parser.checkNoNewLine() ) {
-            if( msg != null ) {
-                output = "Server response: " + msg.replace("\n", "");
+        if (parser != null && parser.checkNoNewLine()) {
+            if (msg != null) {
+                output.append("Server response: ").append(msg.replace("\n", ""));
             } else {
-                output += e.toString();
-            }
-            for(final StackTraceElement ste : e.getStackTrace() ) {
-                output += ": " + ste.toString().replace("\n", "");
-            }
-        } else {
-            if( msg != null ) {
-                output = "Server response:\n "+msg+'\n';
-            } else {
-                output += e.toString() + "\n";
+                output.append(e.toString());
             }
             for (final StackTraceElement ste : e.getStackTrace()) {
-                output += "\tat " + ste.toString() + "\n";
+                output.append(": ").append(ste.toString().replace("\n", ""));
+            }
+        } else {
+            if (msg != null) {
+                output.append("Server response:\n " + msg + '\n');
+            } else {
+                output.append(e.toString()).append("\n");
+            }
+            for (final StackTraceElement ste : e.getStackTrace()) {
+                output.append("\tat ").append(ste.toString()).append("\n");
             }
         }
-        System.err.println(output);
+        System.err.println(output.toString());
     }
 
     //    protected final void printNotBoundResponse(final NotBoundException nbe){
     //        System.err.println("RMI module "+nbe.getMessage()+" not available on server");
     //    }
 
-    protected final void printError(final String msg, final AdminParser parser){
+    protected final void printError(final String msg, final AdminParser parser) {
         String output = null;
-        if( parser == null ) {
+        if (parser == null) {
             output = msg;
         } else {
             if (parser.checkNoNewLine()) {
-                output =  msg.replace("\n", "");
+                output = msg.replace("\n", "");
             } else {
                 output = msg;
             }
@@ -302,12 +302,12 @@ public abstract class BasicCommandlineOptions {
         System.err.println("Error: " + output);
     }
 
-    protected final void printServerResponse(final String msg){
-        System.err.println("Server response:\n "+msg+"\n");
+    protected final void printServerResponse(final String msg) {
+        System.err.println("Server response:\n " + msg + "\n");
     }
 
-    protected final void printInvalidInputMsg(final String msg){
-        System.err.println("Invalid input detected: "+msg);
+    protected final void printInvalidInputMsg(final String msg) {
+        System.err.println("Invalid input detected: " + msg);
     }
 
     /**
@@ -322,22 +322,42 @@ public abstract class BasicCommandlineOptions {
      * @param data
      * @throws InvalidDataException
      */
-    protected final void doCSVOutput(final List<String> columns, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
+    protected final void doCSVOutput(List<String> columns, ArrayList<ArrayList<String>> data) throws InvalidDataException {
+        doCSVOutput(columns, false, data);
+    }
+
+    /**
+     * Prints out the given data as csv output.
+     * The first ArrayList contains the columns which describe the following data lines.<br><br>
+     *
+     * Example output:<br><br>
+     * username,email,mycolumn<br>
+     * testuser,test@test.org,mycolumndata<br>
+     *
+     * @param columns
+     * @param data
+     * @throws InvalidDataException
+     */
+    protected final void doCSVOutput(List<String> columns, boolean continuation, ArrayList<ArrayList<String>> data) throws InvalidDataException {
         // first prepare the columns line
-        StringBuilder sb = new StringBuilder();
-        for (final String column_entry : columns) {
-            sb.append(column_entry);
-            sb.append(",");
-        }
-        if(sb.length()>0) {
-            // remove last ","
-            sb.deleteCharAt(sb.length()-1);
+        StringBuilder sb;
+        if (false == continuation) {
+            sb = new StringBuilder();
+            for (final String column_entry : columns) {
+                sb.append(column_entry);
+                sb.append(",");
+            }
+            if (sb.length() > 0) {
+                // remove last ","
+                sb.deleteCharAt(sb.length() - 1);
+            }
+
+            // print the columns line
+            System.out.println(sb.toString());
         }
 
-        // print the columns line
-        System.out.println(sb.toString());
         if (data != null && !data.isEmpty()) {
-            if (columns.size()!=data.get(0).size()) {
+            if (columns.size() != data.get(0).size()) {
                 throw new InvalidDataException("Number of columnnames and number of columns in data object must be the same");
             }
 
@@ -345,16 +365,16 @@ public abstract class BasicCommandlineOptions {
             for (final ArrayList<String> data_list : data) {
                 sb = new StringBuilder();
                 for (final String data_column : data_list) {
-                    if(data_column!=null){
+                    if (data_column != null) {
                         sb.append("\"");
                         sb.append(data_column.replaceAll("\"", "\"\""));
                         sb.append("\"");
                     }
                     sb.append(",");
                 }
-                if(sb.length()>0){
+                if (sb.length() > 0) {
                     // remove trailing ","
-                    sb.deleteCharAt(sb.length()-1);
+                    sb.deleteCharAt(sb.length() - 1);
                 }
                 // print out data line with linessbreak
                 System.out.println(sb.toString());
@@ -364,11 +384,11 @@ public abstract class BasicCommandlineOptions {
 
     protected final void setRMI_HOSTNAME(final String rmi_hostname) {
         String host = rmi_hostname;
-        if(!host.startsWith("rmi://")){
-            host = "rmi://"+host;
+        if (!host.startsWith("rmi://")) {
+            host = "rmi://" + host;
         }
-        if(!host.endsWith("/")){
-            host = host+"/";
+        if (!host.endsWith("/")) {
+            host = host + "/";
         }
         RMI_HOSTNAME = host;
 
@@ -376,7 +396,7 @@ public abstract class BasicCommandlineOptions {
 
     protected final CLIOption setLongOpt(final AdminParser admp, final String longopt, final String description, final boolean hasarg, final boolean required) {
 
-        final CLIOption retval = admp.addOption(longopt, longopt, description, required,hasarg);
+        final CLIOption retval = admp.addOption(longopt, longopt, description, required, hasarg);
         //        //OptionBuilder.withLongOpt( longopt ).withDescription( description ).withValueSeparator( '=' ).create();
         //        if (hasarg) {
         //            retval.hasArg();
@@ -409,17 +429,17 @@ public abstract class BasicCommandlineOptions {
         return retval;
     }
 
-    protected final CLIOption setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final boolean required) {
+    protected final CLIOption setShortLongOpt(final AdminParser admp, final char shortopt, final String longopt, final String argdescription, final String description, final boolean required) {
         final CLIOption retval = admp.addOption(shortopt, longopt, argdescription, description, required);
         return retval;
     }
 
-    protected final CLIOption setShortLongOpt(final AdminParser admp,final char shortopt, final String longopt, final String description, final boolean hasarg, final NeededQuadState required) {
-        final CLIOption retval = admp.addOption(shortopt,longopt, longopt, description, required, hasarg);
+    protected final CLIOption setShortLongOpt(final AdminParser admp, final char shortopt, final String longopt, final String description, final boolean hasarg, final NeededQuadState required) {
+        final CLIOption retval = admp.addOption(shortopt, longopt, longopt, description, required, hasarg);
         return retval;
     }
 
-    protected final CLIOption setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final NeededQuadState required) {
+    protected final CLIOption setShortLongOptWithDefault(final AdminParser admp, final char shortopt, final String longopt, final String description, final String defaultvalue, final boolean hasarg, final NeededQuadState required) {
         final StringBuilder desc = new StringBuilder();
         desc.append(description);
         desc.append(". Default: ");
@@ -428,7 +448,7 @@ public abstract class BasicCommandlineOptions {
         return setShortLongOpt(admp, shortopt, longopt, desc.toString(), hasarg, required);
     }
 
-    protected final CLIOption setShortLongOptWithDefault(final AdminParser admp,final char shortopt, final String longopt, final String argdescription, final String description, final String defaultvalue, final boolean required) {
+    protected final CLIOption setShortLongOptWithDefault(final AdminParser admp, final char shortopt, final String longopt, final String argdescription, final String description, final String defaultvalue, final boolean required) {
         final StringBuilder desc = new StringBuilder();
         desc.append(description);
         desc.append(". Default: ");
@@ -438,11 +458,11 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected final void setContextOption(final AdminParser admp, final NeededQuadState needed) {
-        this.contextOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, needed);
+        this.contextOption = setShortLongOpt(admp, OPT_NAME_CONTEXT_SHORT, OPT_NAME_CONTEXT_LONG, OPT_NAME_CONTEXT_DESCRIPTION, true, needed);
     }
 
     protected final void setContextNameOption(final AdminParser admp, final NeededQuadState needed) {
-        this.contextNameOption = setShortLongOpt(admp,OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, needed);
+        this.contextNameOption = setShortLongOpt(admp, OPT_NAME_CONTEXT_NAME_SHORT, OPT_NAME_CONTEXT_NAME_LONG, OPT_NAME_CONTEXT_NAME_DESCRIPTION, true, needed);
     }
 
     // ------------------------------------------------------------------------------------- //
@@ -452,7 +472,7 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected void setAdminPassOption(final AdminParser admp, final String nameAdminPassLong, final String description) {
-        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, nameAdminPassLong, description, true, NeededQuadState.possibly);
+        this.adminPassOption = setShortLongOpt(admp, OPT_NAME_ADMINPASS_SHORT, nameAdminPassLong, description, true, NeededQuadState.possibly);
     }
 
     // ------------------------------------------------------------------------------------- //
@@ -476,53 +496,35 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected void setAdminUserOption(final AdminParser admp, final String nameAdminUserLong, final String description) {
-        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, nameAdminUserLong, description, true, NeededQuadState.possibly);
+        this.adminUserOption = setShortLongOpt(admp, OPT_NAME_ADMINUSER_SHORT, nameAdminUserLong, description, true, NeededQuadState.possibly);
     }
 
     // ------------------------------------------------------------------------------------- //
 
-    protected final void setSearchPatternOption(final AdminParser admp){
-        this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, NeededQuadState.notneeded);
+    protected final void setSearchPatternOption(final AdminParser admp) {
+        this.searchOption = setShortLongOpt(admp, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, NeededQuadState.notneeded);
     }
 
-    protected final void setIgnoreCaseOption(final AdminParser admp){
-        this.ignoreCaseOption = setShortLongOpt(admp,OPT_NAME_IGNORECASE, OPT_NAME_IGNORECASE_LONG, "Whether to perform look-up case-insensitive", false, NeededQuadState.notneeded);
+    protected final void setIgnoreCaseOption(final AdminParser admp) {
+        this.ignoreCaseOption = setShortLongOpt(admp, OPT_NAME_IGNORECASE, OPT_NAME_IGNORECASE_LONG, "Whether to perform look-up case-insensitive", false, NeededQuadState.notneeded);
     }
 
     protected final int testStringAndGetIntOrDefault(final String test, final int defaultvalue) throws NumberFormatException {
-        final int retval;
-        if (null != test) {
-            retval = Integer.parseInt(test);
-        } else {
-            retval = defaultvalue;
-        }
-        return retval;
+        return null != test ? Integer.parseInt(test) : defaultvalue;
     }
 
     protected final String testStringAndGetStringOrDefault(final String test, final String defaultvalue) {
-        final String retval;
-        if (null != test) {
-            retval = test;
-        } else {
-            retval = defaultvalue;
-        }
-        return retval;
+        return null != test ? test : defaultvalue;
     }
 
     protected final boolean testStringAndGetBooleanOrDefault(final String test, final boolean defaultvalue) {
-        final boolean retval;
-        if (null != test) {
-            retval = Boolean.parseBoolean(test);
-        } else {
-            retval = defaultvalue;
-        }
-        return retval;
+        return null != test ? Boolean.parseBoolean(test) : defaultvalue;
     }
 
     /**
      *
      */
-    protected void setDefaultCommandLineOptions(final AdminParser admp){
+    protected void setDefaultCommandLineOptions(final AdminParser admp) {
         setContextOption(admp, NeededQuadState.needed);
         setAdminUserOption(admp);
         setAdminPassOption(admp);
@@ -600,15 +602,15 @@ public abstract class BasicCommandlineOptions {
     private final int longestLine(final ArrayList<ArrayList<String>> data, final String[] columnnames, final int column) throws InvalidDataException {
         //long start = System.currentTimeMillis();
         int max = columnnames[column].length();
-        for(int row=0; row<data.size(); row++) {
+        for (int row = 0; row < data.size(); row++) {
             final ArrayList<String> arrayList = data.get(row);
             if (columnnames.length != arrayList.size()) {
                 throw new InvalidDataException("The sizes of columnnames and the columns in line " + row + " of the data aren't equal");
             }
             final String value = arrayList.get(column);
-            if( value != null ) {
+            if (value != null) {
                 final int curLength = arrayList.get(column).length();
-                if( curLength > max ) {
+                if (curLength > max) {
                     max = curLength;
                 }
             }
@@ -617,20 +619,26 @@ public abstract class BasicCommandlineOptions {
         return max;
     }
 
-    protected void doOutput(final String[] columnsizesandalignments, final String[] columnnames, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
+    protected void doOutput(String[] columnsizesandalignments, String[] columnnames, ArrayList<ArrayList<String>> data) throws InvalidDataException {
+        doOutput(columnsizesandalignments, columnnames, false, data);
+    }
+
+    protected void doOutput(String[] columnsizesandalignments, String[] columnnames, boolean continuation, ArrayList<ArrayList<String>> data) throws InvalidDataException {
         if (columnsizesandalignments.length != columnnames.length) {
             throw new InvalidDataException("The sizes of columnsizes and columnnames aren't equal");
         }
-        final int[] columnsizes = new int[columnsizesandalignments.length];
-        final char[] alignments = new char[columnsizesandalignments.length];
-        final StringBuilder formatsb = new StringBuilder();
+
+        int[] columnsizes = new int[columnsizesandalignments.length];
+        char[] alignments = new char[columnsizesandalignments.length];
+
+        StringBuilder formatsb = new StringBuilder();
         for (int i = 0; i < columnsizesandalignments.length; i++) {
             // fill up part
             try {
                 columnsizes[i] = Integer.parseInt(columnsizesandalignments[i].substring(0, columnsizesandalignments[i].length() - 1));
             } catch (final NumberFormatException e) {
                 // there's no number, so use longest line as alignment value
-                columnsizes[i] = longestLine(data,columnnames,i);
+                columnsizes[i] = longestLine(data, columnnames, i);
             }
             alignments[i] = columnsizesandalignments[i].charAt(columnsizesandalignments[i].length() - 1);
 
@@ -650,7 +658,11 @@ public abstract class BasicCommandlineOptions {
         }
         formatsb.deleteCharAt(formatsb.length() - 1);
         formatsb.append('\n');
-        System.out.format(formatsb.toString(), (Object[]) columnnames);
+
+        if (false == continuation) {
+            System.out.format(formatsb.toString(), (Object[]) columnnames);
+        }
+
         for (final ArrayList<String> row : data) {
             if (row.size() != columnsizesandalignments.length) {
                 throw new InvalidDataException("The size of one of the rows isn't correct");
@@ -667,7 +679,7 @@ public abstract class BasicCommandlineOptions {
     protected final void printExtensionsError(final ExtendableDataObject obj) {
         //+ loop through extensions and check for errors
         if (obj != null && obj.getAllExtensionsAsHash() != null) {
-            for (final OXCommonExtension obj_extension : obj.getAllExtensionsAsHash().values()) {
+            for (final OXCommonExtensionInterface obj_extension : obj.getAllExtensionsAsHash().values()) {
                 if (obj_extension.getExtensionError() != null) {
                     printServerResponse(obj_extension.getExtensionError());
                 }

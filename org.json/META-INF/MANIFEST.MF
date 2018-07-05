@@ -4,7 +4,7 @@ Bundle-Name: JSON.org JSON Bundle
 Bundle-SymbolicName: org.json
 Bundle-Version: 2.0.0
 Bundle-Vendor: JSON.org
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.json
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
@@ -15,5 +15,11 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
  com.google.common.base,
- com.google.common.collect
+ com.google.common.collect,
+ com.google.json,
+ org.apache.commons.codec,
+ org.apache.commons.codec.binary,
+ org.osgi.framework,
+ org.osgi.util.tracker
 Bundle-ClassPath: .
+Bundle-Activator: org.json.osgi.JSONActivator

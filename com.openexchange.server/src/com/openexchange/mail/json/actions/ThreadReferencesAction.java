@@ -81,7 +81,6 @@ import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ThreadReferencesAction}
@@ -137,7 +136,6 @@ public class ThreadReferencesAction extends AbstractMailAction {
             }
         }
 
-        ServerSession session = req.getSession();
         int sortCol = req.getSortFieldFor(sort);
         FullnameArgument fullnameArgument = MailFolderUtility.prepareMailFolderParam(folderId);
         MailSortField sortField = MailSortField.getField(sortCol);

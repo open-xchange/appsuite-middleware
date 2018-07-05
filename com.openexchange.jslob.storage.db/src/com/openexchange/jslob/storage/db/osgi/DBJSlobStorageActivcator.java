@@ -81,6 +81,7 @@ import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableService;
 import com.openexchange.jslob.storage.db.groupware.DBJSlobCreateTableTask;
 import com.openexchange.jslob.storage.db.groupware.DBJSlobIncreaseBlobSizeTask;
 import com.openexchange.jslob.storage.db.groupware.JSlobDBDeleteListener;
+import com.openexchange.jslob.storage.db.groupware.JsonStorageTableUtf8Mb4UpdateTask;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -117,7 +118,7 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
              * Register services for table creation
              */
             registerService(CreateTableService.class, new DBJSlobCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBJSlobCreateTableTask(this), new DBJSlobIncreaseBlobSizeTask(this)));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBJSlobCreateTableTask(), new DBJSlobIncreaseBlobSizeTask(), new JsonStorageTableUtf8Mb4UpdateTask()));
             /*
              * Register delete listener
              */

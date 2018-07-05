@@ -69,7 +69,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -169,7 +168,12 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                     return;
                 }
 
-                final AJAXRequestResult result = factory.createActionService(action).perform(data, session);
+                AJAXActionService actionService = factory.createActionService(action);
+                if(actionService == null) {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action.");
+                    return;
+                }
+                final AJAXRequestResult result = actionService.perform(data, session);
                 response.setData(result.getResultObject());
                 response.setTimestamp(result.getTimestamp());
                 final Collection<OXException> warnings = result.getWarnings();
@@ -200,9 +204,9 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             }
         }
         try {
-            if (isFileUpload || (req.getParameter("respondWithHTML") != null && req.getParameter("respondWithHTML").equalsIgnoreCase("true")) ) {
+            String callback = req.getParameter("callback");
+            if ((isFileUpload || (req.getParameter("respondWithHTML") != null && req.getParameter("respondWithHTML").equalsIgnoreCase("true"))) && (action != null || callback != null)) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-                String callback = req.getParameter("callback");
                 if(callback == null) {
                     callback = action;
                 }
@@ -283,7 +287,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
          * Pass all parameters to AJAX request object
          */
         {
-            @SuppressWarnings("unchecked") final Set<Entry<String, String[]>> entrySet = req.getParameterMap().entrySet();
+            final Set<Entry<String, String[]>> entrySet = req.getParameterMap().entrySet();
             for (final Entry<String, String[]> entry : entrySet) {
                 retval.putParameter(entry.getKey(), entry.getValue()[0]);
             }
@@ -321,26 +325,6 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             }
         }
         return retval;
-    }
-
-    private static boolean startsWith(final char startingChar, final String toCheck) {
-        if (null == toCheck) {
-            return false;
-        }
-        final int len = toCheck.length();
-        if (len <= 0) {
-            return false;
-        }
-        int i = 0;
-        if (Strings.isWhitespace(toCheck.charAt(i))) {
-            do {
-                i++;
-            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
-        }
-        if (i >= len) {
-            return false;
-        }
-        return startingChar == toCheck.charAt(i);
     }
 
 }

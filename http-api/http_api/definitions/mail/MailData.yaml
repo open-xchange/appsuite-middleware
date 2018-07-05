@@ -1,6 +1,15 @@
 type: object
 properties:
   $ref: ./RawMailData.yaml
+  nested_msgs:
+    type: array
+    description: An array containing additional mails that are attached to this mail.
+    items: 
+      type: object
+      description: A mail that is attached to another mail.
+      title: NestedMailData
+      properties:
+        $ref: ./RawMailData.yaml
   security_info:
     type: array
     description: Information if mail is encrypted or signed.  Requires Guard
@@ -11,5 +20,80 @@ properties:
     description: Information regarding signature verification or decryption type after processed by Guard
     items:
       $ref: "#/definitions/GuardSecurityResult"
+  authenticity:
+    type: object
+    description: Informations about the authenticity of the sender domain.
+    title: AuthenticationResult
+    properties:
+      dmarc:
+        type: object
+        description: The DMARC authentication results
+        properties:
+          result:
+            type: string
+            description: The result of the mechanism
+          reason:
+            type: string
+            description: The reason of the status
+          from_domain:
+            type: string
+            description: The origin domain of the sender
+      dkim:
+        type: object
+        description: The DKIM authentication results
+        properties:
+          result:
+            type: string
+            description: The result of the mechanism
+          reason:
+            type: string
+            description: The reason of the status
+          from_domain:
+            type: string
+            description: The origin domain of the sender
+      spf:
+        type: object
+        description: The SPF authentication results
+        properties:
+          result:
+            type: string
+            description: The result of the mechanism
+          reason:
+            type: string
+            description: The reason of the status
+          from_domain:
+            type: string
+            description: The origin domain of the sender
+      unconsidered_results:
+        type: array
+        description: A list of unconsidered results
+        items:
+          type: object
+          title: MechanismResult
+          description: The result of a single mechanism. The raw key/value pairs of each unconsidered mechanism/result are contained in this object.
+          properties:
+            result:
+              type: string
+              description: The result of the unconsidered mechanism
+            mechanism:
+              type: string
+              description: The identifier of the unconsidered mechanism
+      trusted:
+        type: boolean
+        description: |
+          Defines whether the sender is a trusted sender. 
+      image:
+        type: string
+        description: |
+          In case the result is positive and the mail address of the sender is a trusted mail address this field contains the uid of the image if one exists. 
+          The image can be obtained from the image module.
+      from_domain:
+        type: string
+        description: The from domain
+      status:
+        type: string
+        description: The overall authenticity status
+        enum: ["pass", "neutral", "fail", "not-analyzed"]
+
 
 

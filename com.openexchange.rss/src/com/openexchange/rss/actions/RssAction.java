@@ -82,7 +82,7 @@ import com.openexchange.rss.osgi.Services;
 import com.openexchange.rss.preprocessors.RssPreprocessor;
 import com.openexchange.rss.preprocessors.SanitizingPreprocessor;
 import com.openexchange.rss.util.RssProperties;
-import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
+import com.openexchange.rss.util.TimeoutHttpURLFeedFetcher;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.syndication.feed.synd.SyndContent;
@@ -122,7 +122,7 @@ public class RssAction implements AJAXActionService {
 
     // ------------------------------------------------------------------------------------------------------------------------------
 
-    private final TimoutHttpURLFeedFetcher fetcher;
+    private final TimeoutHttpURLFeedFetcher fetcher;
     private final HashMapFeedInfoCache     feedCache;
 
     /**
@@ -130,7 +130,7 @@ public class RssAction implements AJAXActionService {
      */
     public RssAction() {
         feedCache = new HashMapFeedInfoCache();
-        fetcher = new TimoutHttpURLFeedFetcher(10000, 30000, feedCache);
+        fetcher = new TimeoutHttpURLFeedFetcher(10000, 30000, feedCache);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class RssAction implements AJAXActionService {
             List<URL> urls = getUrls(request);
             feeds = getAcceptedFeeds(urls, warnings);
         } catch (IllegalArgumentException | MalformedURLException e) {
-            throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
+            throw AjaxExceptionCodes.INVALID_PARAMETER.create(e, e.getMessage());
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
@@ -352,7 +352,7 @@ public class RssAction implements AJAXActionService {
             } catch (IllegalArgumentException e) {
                 String exceptionMessage = e.getMessage();
                 if (!"Invalid document".equals(exceptionMessage)) {
-                    throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, exceptionMessage);
+                    throw AjaxExceptionCodes.INVALID_PARAMETER.create(e, exceptionMessage);
                 }
                 // There is no parser for current document
                 LOG.warn("Could not load RSS feed from: {}", url);

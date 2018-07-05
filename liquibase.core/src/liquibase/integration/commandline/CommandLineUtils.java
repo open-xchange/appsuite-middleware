@@ -1,5 +1,13 @@
 package liquibase.integration.commandline;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.util.Properties;
+import javax.xml.parsers.ParserConfigurationException;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -11,20 +19,14 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.diff.output.report.DiffToReport;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.sql.*;
-import java.util.*;
 
 /**
  * Common Utilitiy methods used in the CommandLine application and the Maven plugin.

@@ -61,20 +61,20 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.PasswordChangeRecorder;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
 import com.openexchange.user.UserService;
 
 /**
- * {@link PasswordChangeTrackerRegistryImpl} - Implementation of {@link PasswordChangeRecorderRegistryService} as an {@link ServiceTrackerCustomizer}
+ * {@link PasswordChangeRecorderRegistryServiceImpl} - Implementation of {@link PasswordChangeRecorderRegistryService} as an {@link ServiceTrackerCustomizer}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
 public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTrackerCustomizer<PasswordChangeRecorder, PasswordChangeRecorder>, PasswordChangeRecorderRegistryService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeRecorderRegistryServiceImpl.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PasswordChangeRecorderRegistryServiceImpl.class);
 
     private final ConcurrentMap<String, PasswordChangeRecorder> recorders;
     private final BundleContext context;
@@ -82,7 +82,11 @@ public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTracker
     private final UserService userService;
 
     /**
-     * Initializes a new {@link PasswordChangeTrackerRegistryImpl}.
+     * Initializes a new {@link PasswordChangeRecorderRegistryServiceImpl}.
+     * 
+     * @param context The {@link BundleContext}
+     * @param viewFactory The {@link ConfigViewFactory}
+     * @param userService The {@link UserService}
      */
     public PasswordChangeRecorderRegistryServiceImpl(BundleContext context, ConfigViewFactory viewFactory, UserService userService) {
         super();
@@ -105,7 +109,7 @@ public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTracker
 
         String symbolicName = recorder.getSymbolicName();
         if (Strings.isEmpty(symbolicName)) {
-            LOG.debug("Could not add recorder for name {}", symbolicName);
+            LOGGER.debug("Could not add recorder for name {}", symbolicName);
             return false;
         }
 
@@ -119,7 +123,7 @@ public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTracker
      */
     public void unregister(String symbolicName) {
         if (false == Strings.isEmpty(symbolicName)) {
-            LOG.debug("Try to remove recorder with name {}", symbolicName);
+            LOGGER.debug("Try to remove recorder with name {}", symbolicName);
             this.recorders.remove(symbolicName);
         }
     }
@@ -159,7 +163,7 @@ public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTracker
             }
         }
         if (null == enabled || !enabled.booleanValue()) {
-            throw PasswordChangeRecorderException.DISABLED.create(userId, contextId);
+            throw PasswordChangeRecorderException.DISABLED.create(Integer.valueOf(userId), Integer.valueOf(contextId));
         }
 
         // Recorder name
@@ -174,13 +178,13 @@ public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTracker
         }
         if (Strings.isEmpty(recorderName)) {
             recorderName = PasswordChangeRecorderProperties.RECORDER.getDefaultValue(String.class);
-            LOG.debug("No recorder found. Falling back to default value");
+            LOGGER.debug("No recorder found. Falling back to default value");
         }
 
         PasswordChangeRecorder recorder = getRecorder(recorderName);
         if (null == recorder) {
             // If no recorder available, there should be no tracking
-            LOG.debug("Could not load {} for user {} in context {}", recorderName, userId, contextId);
+            LOGGER.debug("Could not load {} for user {} in context {}", recorderName, Integer.valueOf(userId), Integer.valueOf(contextId));
             throw PasswordChangeRecorderException.MISSING_RECORDER.create(recorderName);
         }
         return recorder;
@@ -196,7 +200,7 @@ public class PasswordChangeRecorderRegistryServiceImpl implements ServiceTracker
             return recorder;
         }
 
-        LOG.warn("Could not add {}. A recorder with symbolic name '{}' already exists", recorder.getClass().getName(), recorder.getSymbolicName());
+        LOGGER.warn("Could not add {}. A recorder with symbolic name '{}' already exists", recorder.getClass().getName(), recorder.getSymbolicName());
         context.ungetService(reference);
         return null;
     }

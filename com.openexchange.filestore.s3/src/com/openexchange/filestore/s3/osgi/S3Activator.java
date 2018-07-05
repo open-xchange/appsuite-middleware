@@ -49,10 +49,17 @@
 
 package com.openexchange.filestore.s3.osgi;
 
+import org.osgi.framework.ServiceReference;
+import com.amazonaws.metrics.AwsSdkMetrics;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
+import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
+import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
+import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link S3Activator}
@@ -70,15 +77,34 @@ public class S3Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
         logger.info("Starting bundle: com.openexchange.filestore.s3");
-        ConfigurationService configService = getService(ConfigurationService.class);
-        S3FileStorageFactory factory = new S3FileStorageFactory(configService);
+
+        final LeanConfigurationService config = getService(LeanConfigurationService.class);
+        track(MetricService.class, new SimpleRegistryListener<MetricService>() {
+            @Override
+            public void added(ServiceReference<MetricService> ref, MetricService service) {
+                // Check for metric collection
+                boolean metricCollection = config.getBooleanProperty(S3FileStoreProperty.metricCollection);
+                if (metricCollection) {
+                    // Enable metric collection by overriding the default metrics
+                    AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(service, config));
+                }
+            }
+
+            @Override
+            public void removed(ServiceReference<MetricService> ref, MetricService service) {
+                AwsSdkMetrics.setMetricCollector(null);
+            }
+        });
+        openTrackers();
+
+        S3FileStorageFactory factory = new S3FileStorageFactory(this);
         registerService(FileStorageProvider.class, factory);
     }
 
@@ -86,6 +112,9 @@ public class S3Activator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
         logger.info("Stopping bundle: com.openexchange.filestore.s3");
+
+        AwsSdkMetrics.setMetricCollector(null);
+
         super.stopBundle();
     }
 }

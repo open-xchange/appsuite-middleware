@@ -83,7 +83,11 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         if (contextId == NO_CONTEXT) {
             return NO_PROPERTY;
         }
-        return get(property, services.getService(ContextService.class).getContext(contextId), userId);
+        ContextService contextService = services.getService(ContextService.class);
+        if (contextService == null) {
+            return NO_PROPERTY;
+        }
+        return get(property, contextService.getContext(contextId), userId);
     }
 
     @Override
@@ -91,7 +95,11 @@ public abstract class AbstractContextBasedConfigProvider implements ConfigProvid
         if (contextId == NO_CONTEXT) {
             return Collections.emptyList();
         }
-        return getAllPropertyNamesFor(services.getService(ContextService.class).getContext(contextId), userId);
+        ContextService contextService = services.getService(ContextService.class);
+        if (contextService == null) {
+            return Collections.emptyList();
+        }
+        return getAllPropertyNamesFor(contextService.getContext(contextId), userId);
     }
 
     /**

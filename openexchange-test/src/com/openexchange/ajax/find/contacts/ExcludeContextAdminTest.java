@@ -102,7 +102,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
         List<ActiveFacet> activeFacets = new LinkedList<ActiveFacet>();
         activeFacets.add(createQuery(adminContact.getDisplayName()));
         List<PropDocument> documents = query(activeFacets, false);
-        PropDocument adminDoc = findByProperty(documents, "display_name", DisplayItems.convert(adminContact).getDisplayName());
+        PropDocument adminDoc = findByProperty(documents, "display_name", DisplayItems.convert(adminContact, getClient().getValues().getLocale(), i18nServiceRegistry).getDisplayName());
         assertNull("admin contact was included in query response", adminDoc);
     }
 
@@ -121,7 +121,7 @@ public class ExcludeContextAdminTest extends AbstractFindTest {
 
         String prefix = adminContact.getDisplayName().substring(0, 3);
         List<Facet> facets = autocomplete(prefix, true);
-        FacetValue found = findByDisplayName(facets, DisplayItems.convert(adminContact).getDisplayName());
+        FacetValue found = findByDisplayName(facets, DisplayItems.convert(adminContact, getClient().getValues().getLocale(), i18nServiceRegistry).getDisplayName());
         assertNotNull("admin contact was not included in autocomplete response", found);
 
         List<ActiveFacet> activeFacets = new LinkedList<ActiveFacet>();

@@ -128,4 +128,15 @@ public interface PushListenerService {
      */
     boolean unregisterPermanentListenerFor(Session session, String clientId) throws OXException;
 
+    /**
+     * Unregisters the permanent listener for specified push user
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param clientId The client identifier
+     * @return <code>true</code> on successful unregistration; otherwise <code>false</code>
+     * @throws OXException If unregistration fails
+     */
+    boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws OXException;
+
 }

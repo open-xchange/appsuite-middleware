@@ -49,9 +49,9 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,7 +61,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -69,8 +69,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CheckForPresetMessageFormatInJSLob} - Check for possibly preset message format preference in JSLob and aligns the DB value accordingly.
@@ -96,9 +94,7 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection con = dbService.getForUpdateTask(contextID);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             startTransaction(con);
@@ -118,7 +114,6 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            dbService.backForUpdateTask(contextID, con);
         }
     }
 
@@ -146,7 +141,7 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
 
             stmt.executeBatch();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -179,7 +174,7 @@ public class CheckForPresetMessageFormatInJSLob extends UpdateTaskAdapter {
             } while (rs.next());
             return results;
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

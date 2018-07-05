@@ -50,11 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TObjectProcedure;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -66,12 +62,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.json.JSONException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 
 /**
  * {@link OXFolderBatchLoader}
@@ -206,7 +208,7 @@ public final class OXFolderBatchLoader {
                     // Compose statement
                     final int[] currentIds = com.openexchange.tools.arrays.Arrays.extract(folderIds, i, IN_LIMIT);
                     final String sql = getIN(
-                        "SELECT parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag,fuid,meta FROM #TABLE# WHERE cid=? AND fuid IN (",
+                        "SELECT parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag,fuid,meta,origin FROM #TABLE# WHERE cid=? AND fuid IN (",
                         currentIds.length);
                     stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(sql).replaceFirst(table));
                     int pos = 1;
@@ -226,6 +228,12 @@ public final class OXFolderBatchLoader {
                         folderObj.setLastModified(new Date(rs.getLong(7)));
                         folderObj.setModifiedBy(parseStringValue(rs.getString(8), ctx));
                         folderObj.setPermissionFlag(rs.getInt(9));
+                        String sFolderPath = rs.getString(14);
+                        if (rs.wasNull()) {
+                            folderObj.setOriginPath(null);
+                        } else {
+                            folderObj.setOriginPath(FolderPathObject.parseFrom(sFolderPath));
+                        }
                         final int defaultFolder = rs.getInt(11);
                         if (rs.wasNull()) {
                             folderObj.setDefaultFolder(false);
@@ -247,7 +255,7 @@ public final class OXFolderBatchLoader {
                         folders.put(fuid, folderObj);
                     }
                 } finally {
-                    closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
             if (loadSubfolderList) {
@@ -309,7 +317,7 @@ public final class OXFolderBatchLoader {
                 try {
                     final int[] currentIds = com.openexchange.tools.arrays.Arrays.extract(folderIds, i, IN_LIMIT);
                     final String sql = getIN(
-                        "SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system,fuid FROM #TABLE# WHERE cid=? AND fuid IN (",
+                        "SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system,fuid,type,sharedParentFolder FROM #TABLE# WHERE cid=? AND fuid IN (",
                         currentIds.length);
                     stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(sql).replaceFirst(table));
                     int pos = 1;
@@ -328,13 +336,17 @@ public final class OXFolderBatchLoader {
                         p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
                         p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
                         p.setSystem(rs.getInt(8)); // system
+                        p.setType(FolderPermissionType.getType(rs.getInt(10))); // type
+                        int legator = rs.getInt(11);
+                        p.setPermissionLegator(legator==0 ? null : String.valueOf(legator)); // permission legator
                         list.add(p);
                     }
                     stmt.close();
+                    rs.close();
                     rs = null;
                     stmt = null;
                 } finally {
-                    closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
             return ret;
@@ -400,7 +412,7 @@ public final class OXFolderBatchLoader {
 		                ret.get(rs.getInt(2)).add(I(rs.getInt(1)));
 		            }
 		        } finally {
-		        	closeSQLStuff(rs, stmt);
+		            Databases.closeSQLStuff(rs, stmt);
 		        }
             }
             return ret;

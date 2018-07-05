@@ -68,10 +68,12 @@ public class UpdateProcess implements Runnable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateProcess.class);
 
-    private final int contextId;
+    private final int optContextId;
     private final SchemaStore schemaStore = SchemaStore.getInstance();
     private final Queue<TaskInfo> failures;
     private final boolean throwExceptionOnFailure;
+    private final int poolId;
+    private final String schema;
 
     /**
      * Initializes a new {@link UpdateProcess} w/o tracing failures.
@@ -91,7 +93,36 @@ public class UpdateProcess implements Runnable {
      */
     public UpdateProcess(int contextId, boolean traceFailures, boolean throwExceptionOnFailure) {
         super();
-        this.contextId = contextId;
+        this.optContextId = contextId;
+        this.failures = traceFailures ? new ConcurrentLinkedQueue<TaskInfo>() : null;
+        this.throwExceptionOnFailure = throwExceptionOnFailure;
+        poolId = 0;
+        schema = null;
+    }
+
+    /**
+     * Initializes a new {@link UpdateProcess} w/o tracing failures.
+     *
+     * @param poolId The identifier of the database pool in which the schema resides
+     * @param schema The database schema that is supposed to be updated
+     */
+    public UpdateProcess(int poolId, String schema) {
+        this(poolId, schema, false, false);
+    }
+
+    /**
+     * Initializes a new {@link UpdateProcess}.
+     *
+     * @param poolId The identifier of the database pool in which the schema resides
+     * @param schema The database schema that is supposed to be updated
+     * @param traceFailures <code>true</code> to trace failures available via {@link #getFailures()}; otherwise <code>false</code>
+     * @param throwExceptionOnFailure Whether to throw an exception if a task failed
+     */
+    public UpdateProcess(int poolId, String schema, boolean traceFailures, boolean throwExceptionOnFailure) {
+        super();
+        optContextId = 0;
+        this.schema = schema;
+        this.poolId = poolId;
         this.failures = traceFailures ? new ConcurrentLinkedQueue<TaskInfo>() : null;
         this.throwExceptionOnFailure = throwExceptionOnFailure;
     }
@@ -128,13 +159,25 @@ public class UpdateProcess implements Runnable {
      * @throws OXException If update attempt fails
      */
     public boolean runUpdate() throws OXException {
+        int contextId = optContextId;
+        if (contextId > 0) {
+            // Load schema
+            SchemaUpdateState state = schemaStore.getSchema(contextId);
+            if (!UpdateTaskCollection.getInstance().needsUpdate(state)) {
+                // Already been updated before by previous thread
+                return false;
+            }
+            new UpdateExecutor(state, contextId, null).execute(failures, throwExceptionOnFailure);
+            return true;
+        }
+
         // Load schema
-        SchemaUpdateState state = schemaStore.getSchema(contextId);
+        SchemaUpdateState state = schemaStore.getSchema(poolId, schema);
         if (!UpdateTaskCollection.getInstance().needsUpdate(state)) {
             // Already been updated before by previous thread
             return false;
         }
-        new UpdateExecutor(state, contextId, null).execute(failures, throwExceptionOnFailure);
+        new UpdateExecutor(state, null).execute(failures, throwExceptionOnFailure);
         return true;
     }
 }

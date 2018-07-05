@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -60,7 +59,6 @@ import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.WorkingLevel;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
 
 
@@ -72,24 +70,23 @@ import com.openexchange.tools.update.Tools;
  */
 public class DropVersionTableTask extends UpdateTaskAdapter {
 
-    private final String TABLE = "version";
+    /**
+     * Initializes a new {@link DropVersionTableTask}.
+     */
+    public DropVersionTableTask() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        Connection con = null;
-        DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection con = params.getConnection();
         try {
-            con = ds.getForUpdateTask(contextId);
+            String TABLE = "version";
             if (Tools.tableExists(con, TABLE)) {
                 Tools.dropTable(con, TABLE);
             }
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (null != con) {
-                ds.backForUpdateTask(contextId, con);
-            }
         }
     }
 

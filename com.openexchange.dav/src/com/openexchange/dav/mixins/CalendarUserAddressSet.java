@@ -52,7 +52,8 @@ package com.openexchange.dav.mixins;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.mail.internet.AddressException;
+import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;
@@ -72,6 +73,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
     /**
      * Initializes a new {@link CalendarUserAddressSet}.
      *
+     * @param contextID The context identifier
      * @param user The user
      */
     public CalendarUserAddressSet(int contextID, User user) {
@@ -81,6 +83,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
     /**
      * Initializes a new {@link CalendarUserAddressSet}.
      *
+     * @param contextID The context identifier
      * @param group The group
      */
     public CalendarUserAddressSet(int contextID, Group group) {
@@ -90,6 +93,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
     /**
      * Initializes a new {@link CalendarUserAddressSet}.
      *
+     * @param contextID The context identifier
      * @param resource The resource
      */
     public CalendarUserAddressSet(int contextID, Resource resource) {
@@ -99,10 +103,16 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
     private static List<String> getAddresses(int contextID, User user) {
         List<String> addresses = new ArrayList<String>(3);
         if (Strings.isNotEmpty(user.getMail())) {
-            try {
-                addresses.add("mailto:" + javax.mail.internet.idn.IDNA.toACE(user.getMail()));
-            } catch (AddressException e) {
-                org.slf4j.LoggerFactory.getLogger(CalendarUserAddressSet.class).warn("Error generating calendar user address", e);
+            addresses.add(CalendarUtils.getURI(user.getMail()));
+        }
+        if (null != user.getAliases()) {
+            for (String alias : user.getAliases()) {
+                if (Strings.isNotEmpty(alias)) {
+                    String address = CalendarUtils.getURI(alias);
+                    if (false == addresses.contains(address)) {
+                        addresses.add(address);
+                    }
+                }
             }
         }
         addresses.add(PrincipalURL.forUser(user.getId()));
@@ -115,7 +125,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
      *
      * @param addresses The possible calendar user address URLs
      */
-    public CalendarUserAddressSet(List<String> addresses) {
+    private CalendarUserAddressSet(List<String> addresses) {
         super(DAVProtocol.CAL_NS.getURI(), "calendar-user-address-set");
         this.addresses = addresses;
     }

@@ -66,9 +66,9 @@ public enum PasswordChangeRecorderProperties implements Property {
      * If set to <code>true</code> a history is saved.<br>
      * If set to <code>false</code> no history is saved.
      * <p>
-     * Default is <code>false</code>.
+     * Default is <code>true</code>.
      */
-    ENABLE("enabled", Boolean.FALSE),
+    ENABLE("enabled", Boolean.TRUE),
 
     /**
      * The recorder that takes care of the password change history.<br>
@@ -101,10 +101,7 @@ public enum PasswordChangeRecorderProperties implements Property {
     }
 
     @Override
-    public <T> T getDefaultValue(Class<T> clazz) {
-        if (defaultValue.getClass().isAssignableFrom(clazz)) {
-            return clazz.cast(defaultValue);
-        }
-        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 }

@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,20 +40,27 @@
 
 package javax.mail;
 
-import java.lang.reflect.*;
-import java.io.*;
-import java.net.*;
-import java.security.*;
-import java.util.Enumeration;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Constructor;
+import java.net.InetAddress;
+import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.logging.Level;
 import java.util.concurrent.Executor;
-
-import javax.activation.*;
-
+import java.util.logging.Level;
+import javax.mail.osgi.BundleResourceLoader;
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.MailLogger;
 
@@ -76,18 +83,24 @@ import com.sun.mail.util.MailLogger;
  * Each <code>javamail.</code><i>X</i> resource file is searched for using
  * three methods in the following order:
  * <ol>
- *  <li> <code>java.home/lib/javamail.</code><i>X</i> </li>
+ *  <li> <code><i>java.home</i>/<i>conf</i>/javamail.</code><i>X</i> </li>
  *  <li> <code>META-INF/javamail.</code><i>X</i> </li>
  *  <li> <code>META-INF/javamail.default.</code><i>X</i> </li>
  * </ol>
  * <p>
+ * (Where <i>java.home</i> is the value of the "java.home" System property
+ * and <i>conf</i> is the directory named "conf" if it exists,
+ * otherwise the directory named "lib"; the "conf" directory was
+ * introduced in JDK 1.9.)
+ * <p>
  * The first method allows the user to include their own version of the
- * resource file by placing it in the <code>lib</code> directory where the
+ * resource file by placing it in the <i>conf</i> directory where the
  * <code>java.home</code> property points.  The second method allows an
  * application that uses the JavaMail APIs to include their own resource
  * files in their application's or jar file's <code>META-INF</code>
  * directory.  The <code>javamail.default.</code><i>X</i> default files
- * are part of the JavaMail <code>mail.jar</code> file. <p>
+ * are part of the JavaMail <code>mail.jar</code> file and should not be
+ * supplied by users. <p>
  *
  * File location depends upon how the <code>ClassLoader</code> method
  * <code>getResource</code> is implemented.  Usually, the
@@ -182,18 +195,30 @@ import com.sun.mail.util.MailLogger;
 
 public final class Session {
 
+    /** Holds the currently active bundle */
+    static final java.util.concurrent.atomic.AtomicReference<org.osgi.framework.Bundle> BUNDLE_HOLDER = new java.util.concurrent.atomic.AtomicReference<>(null);
+
+    /**
+     * Sets the currently active bundle.
+     * 
+     * @param bundle The bundle to set or <code>null</code>
+     */
+    public static void setActiveBundle(org.osgi.framework.Bundle bundle) {
+        BUNDLE_HOLDER.set(bundle);
+    }
+
     private final Properties props;
     private final Authenticator authenticator;
     private final Hashtable<URLName, PasswordAuthentication> authTable
-	    = new Hashtable<URLName, PasswordAuthentication>();
+	    = new Hashtable<>();
     private boolean debug = false;
     private PrintStream out;			// debug output stream
     private MailLogger logger;
-    private final Vector<Provider> providers = new Vector<Provider>();
+    private final Vector<Provider> providers = new Vector<>();
     private final Hashtable<String, Provider> providersByProtocol
-	    = new Hashtable<String, Provider>();
+	    = new Hashtable<>();
     private final Hashtable<String, Provider> providersByClassName
-	    = new Hashtable<String, Provider>();
+	    = new Hashtable<>();
     private final Properties addressMap = new Properties();
 						// maps type to protocol
     // the queue of events to be delivered, if mail.event.scope===session
@@ -201,6 +226,31 @@ public final class Session {
 
     // The default session.
     private static Session defaultSession = null;
+
+    private static final String confDir;
+
+    static {
+	String dir = null;
+	try {
+	    dir = AccessController.doPrivileged(
+		new PrivilegedAction<String>() {
+		    @Override
+		    public String run() {
+			String home = System.getProperty("java.home");
+			String newdir = home + File.separator + "conf";
+			File conf = new File(newdir);
+			if (conf.exists())
+			    return newdir + File.separator;
+			else
+			    return home + File.separator +
+				    "lib" + File.separator;
+		    }
+		});
+	} catch (Exception ex) {
+	    // ignore any exceptions
+	}
+	confDir = dir;
+    }
 
     // Constructor is not public
     private Session(Properties props, Authenticator authenticator) {
@@ -211,7 +261,7 @@ public final class Session {
 	    debug = true;
 
 	initLogger();
-	logger.log(Level.CONFIG, "JavaMail version {0}", "1.5.6");
+	logger.log(Level.CONFIG, "JavaMail version {0}", "1.6.1");
 
 	// get the Class associated with the Authenticator
 	Class<?> cl;
@@ -383,7 +433,7 @@ public final class Session {
 	this.debug = debug;
 	initLogger();
 	logger.log(Level.CONFIG, "setDebug: JavaMail version {0}",
-				    "1.5.6");
+				    "1.6.1");
     }
 
     /**
@@ -914,48 +964,46 @@ public final class Session {
      */
     private void loadProviders(Class<?> cl) {
 	StreamLoader loader = new StreamLoader() {
+	    @Override
 	    public void load(InputStream is) throws IOException {
 		loadProvidersFromStream(is);
 	    }
 	};
 
-	// load system-wide javamail.providers from the <java.home>/lib dir
+	// load system-wide javamail.providers from the
+	// <java.home>/{conf,lib} directory
 	try {
-	    String res = System.getProperty("java.home") + 
-				File.separator + "lib" + 
-				File.separator + "javamail.providers";
-	    loadFile(res, loader);
-	} catch (SecurityException sex) {
-	    logger.log(Level.CONFIG, "can't get java.home", sex);
-	}
+	    if (confDir != null)
+		loadFile(confDir + "javamail.providers", loader);
+	} catch (SecurityException ex) {}
 
 	// load the META-INF/javamail.providers file supplied by an application
 	loadAllResources("META-INF/javamail.providers", cl, loader);
 
 	// load default META-INF/javamail.default.providers from mail.jar file
-	loadResource("/META-INF/javamail.default.providers", cl, loader);
+	loadResource("/META-INF/javamail.default.providers", cl, loader, true);
 
 	if (providers.size() == 0) {
 	    logger.config("failed to load any providers, using defaults");
 	    // failed to load any providers, initialize with our defaults
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imap", "com.sun.mail.imap.IMAPStore",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.1"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imaps", "com.sun.mail.imap.IMAPSSLStore",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.1"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3", "com.sun.mail.pop3.POP3Store",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.1"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3s", "com.sun.mail.pop3.POP3SSLStore",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.1"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtp", "com.sun.mail.smtp.SMTPTransport",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.1"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtps", "com.sun.mail.smtp.SMTPSSLTransport",
-			"Oracle", "1.5.6"));
+			"Oracle", "1.6.1"));
 	}
 
 	if (logger.isLoggable(Level.CONFIG)) {
@@ -979,6 +1027,8 @@ public final class Session {
 
 		if (currLine.startsWith("#"))
 		    continue;
+		if (currLine.trim().length() == 0)
+		    continue;	// skip blank line
 		Provider.Type type = null;
 		String protocol = null, className = null;
 		String vendor = null, version = null;
@@ -1042,26 +1092,24 @@ public final class Session {
     // map is loaded last since its entries will override the previous ones
     private void loadAddressMap(Class<?> cl) {
 	StreamLoader loader = new StreamLoader() {
+	    @Override
 	    public void load(InputStream is) throws IOException {
 		addressMap.load(is);
 	    }
 	};
 
 	// load default META-INF/javamail.default.address.map from mail.jar
-	loadResource("/META-INF/javamail.default.address.map", cl, loader);
+	loadResource("/META-INF/javamail.default.address.map", cl, loader, true);
 
 	// load the META-INF/javamail.address.map file supplied by an app
 	loadAllResources("META-INF/javamail.address.map", cl, loader);
 
-	// load system-wide javamail.address.map from the <java.home>/lib dir
+	// load system-wide javamail.address.map from the
+	// <java.home>/{conf,lib} directory
 	try {
-	    String res = System.getProperty("java.home") + 
-				File.separator + "lib" + 
-				File.separator + "javamail.address.map";
-	    loadFile(res, loader);
-	} catch (SecurityException sex) {
-	    logger.log(Level.CONFIG, "can't get java.home", sex);
-	}
+	    if (confDir != null)
+		loadFile(confDir + "javamail.address.map", loader);
+	} catch (SecurityException ex) {}
 
 	if (addressMap.isEmpty()) {
 	    logger.config("failed to load address map, using defaults");
@@ -1116,7 +1164,8 @@ public final class Session {
     /**
      * Load from the named resource.
      */
-    private void loadResource(String name, Class<?> cl, StreamLoader loader) {
+    private void loadResource(String name, Class<?> cl, StreamLoader loader,
+				boolean expected) {
 	InputStream clis = null;
 	try {
 	    clis = getResourceAsStream(cl, name);
@@ -1125,9 +1174,9 @@ public final class Session {
 		logger.log(Level.CONFIG, "successfully loaded resource: {0}",
 					    name);
 	    } else {
-		/*
-		logger.log(Level.CONFIG, "not loading resource: {0}", name);
-		*/
+		if (expected)
+		    logger.log(Level.WARNING,
+				    "expected resource not found: {0}", name);
 	    }
 	} catch (IOException e) {
 	    logger.log(Level.CONFIG, "Exception loading resource", e);
@@ -1144,7 +1193,8 @@ public final class Session {
     /**
      * Load all of the named resource.
      */
-    private void loadAllResources(String name, Class<?> cl, StreamLoader loader) {
+    private void loadAllResources(String name, Class<?> cl,
+	    StreamLoader loader) {
 	boolean anyLoaded = false;
 	try {
 	    URL[] urls;
@@ -1198,7 +1248,7 @@ public final class Session {
 	    /*
 	    logger.config("!anyLoaded");
 	    */
-	    loadResource("/" + name, cl, loader);
+	    loadResource("/" + name, cl, loader, false);
 	}
     }
 
@@ -1209,6 +1259,7 @@ public final class Session {
     static ClassLoader getContextClassLoader() {
 	return AccessController.doPrivileged(
 		new PrivilegedAction<ClassLoader>() {
+		    @Override
 		    public ClassLoader run() {
 			ClassLoader cl = null;
 			try {
@@ -1226,9 +1277,15 @@ public final class Session {
 	try {
 	    return AccessController.doPrivileged(
 		    new PrivilegedExceptionAction<InputStream>() {
+			@Override
 			public InputStream run() throws IOException {
 			    try {
-				return c.getResourceAsStream(name);
+			    org.osgi.framework.Bundle bundle = BUNDLE_HOLDER.get();
+			    if (null == bundle) {
+			        return c.getResourceAsStream(name);
+                }
+			    InputStream in = new BundleResourceLoader(bundle).getResourceAsStream(name.startsWith("/") ? name.substring(1) : name);
+				return null == in ? c.getResourceAsStream(name) : in;
 			    } catch (RuntimeException e) {
 				// gracefully handle ClassLoader bugs (Tomcat)
 				IOException ioex = new IOException(
@@ -1246,6 +1303,7 @@ public final class Session {
 
     private static URL[] getResources(final ClassLoader cl, final String name) {
 	return AccessController.doPrivileged(new PrivilegedAction<URL[]>() {
+	    @Override
 	    public URL[] run() {
 		URL[] ret = null;
 		try {
@@ -1263,6 +1321,7 @@ public final class Session {
 
     private static URL[] getSystemResources(final String name) {
 	return AccessController.doPrivileged(new PrivilegedAction<URL[]>() {
+	    @Override
 	    public URL[] run() {
 		URL[] ret = null;
 		try {
@@ -1283,6 +1342,7 @@ public final class Session {
 	try {
 	    return AccessController.doPrivileged(
 		    new PrivilegedExceptionAction<InputStream>() {
+			@Override
 			public InputStream run() throws IOException {
 			    return url.openStream();
 			}

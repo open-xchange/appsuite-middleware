@@ -2,18 +2,17 @@ Source: open-xchange-core
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), java7-jdk | java7-sdk, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@)
-Standards-Version: 3.8.4
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 9), lsb-release, ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@)
+Standards-Version: 3.9.6
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-core
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@), open-xchange-system
+Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@), open-xchange-system (>= @OXVERSION@)
 Pre-Depends: dpkg (>= 1.15.7.2)
-Breaks: open-xchange-rest (<< 7.6.2-4), open-xchange-oauth (<< 7.8.3)
-Replaces: open-xchange-cache, open-xchange-calendar, open-xchange-charset, open-xchange-config-cascade, open-xchange-config-cascade-context, open-xchange-config-cascade-user, open-xchange-configread, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-file-storage, open-xchange-file-storage-composition, open-xchange-file-storage-config, open-xchange-file-storage-generic, open-xchange-file-storage-infostore, open-xchange-file-storage-json, open-xchange-folder-json, open-xchange-frontend-uwa, open-xchange-frontend-uwa-json, open-xchange-global, open-xchange-html, open-xchange-i18n, open-xchange-itip-json, open-xchange-jcharset, open-xchange-logging, open-xchange-management, open-xchange-modules-json, open-xchange-modules-model, open-xchange-modules-storage, open-xchange-monitoring, open-xchange-proxy, open-xchange-proxy-servlet, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-push, open-xchange-push-udp, open-xchange-secret, open-xchange-secret-recovery, open-xchange-secret-recovery-json, open-xchange-secret-recovery-mail, open-xchange-server, open-xchange-sessiond, open-xchange-settings-extensions, open-xchange-sql, open-xchange-templating, open-xchange-templating-base, open-xchange-threadpool, open-xchange-tx, open-xchange-user-json, open-xchange-xml, open-xchange-control, open-xchange-passwordchange-servlet, open-xchange-publish (<< 6.21.0-0), open-xchange-messaging (<< 7.2.1-0), open-xchange-subscribe (<< 6.21.0-0), open-xchange (<< 6.21.0-0), open-xchange-cluster-discovery-mdns (<< 7.4.0), open-xchange-cluster-discovery-static (<< 7.4.0), open-xchange-rest (<< 7.6.2-4), open-xchange-oauth (<< 7.8.3)
-Conflicts: open-xchange-cache, open-xchange-calendar, open-xchange-charset, open-xchange-config-cascade, open-xchange-config-cascade-context, open-xchange-config-cascade-user, open-xchange-configread, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-file-storage, open-xchange-file-storage-composition, open-xchange-file-storage-config, open-xchange-file-storage-generic, open-xchange-file-storage-infostore, open-xchange-file-storage-json, open-xchange-folder-json, open-xchange-frontend-uwa, open-xchange-frontend-uwa-json, open-xchange-global, open-xchange-html, open-xchange-i18n, open-xchange-itip-json, open-xchange-jcharset, open-xchange-logging, open-xchange-management, open-xchange-modules-json, open-xchange-modules-model, open-xchange-modules-storage, open-xchange-monitoring, open-xchange-proxy, open-xchange-proxy-servlet, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-push, open-xchange-push-udp, open-xchange-secret, open-xchange-secret-recovery, open-xchange-secret-recovery-json, open-xchange-secret-recovery-mail, open-xchange-server, open-xchange-sessiond, open-xchange-settings-extensions, open-xchange-sql, open-xchange-templating, open-xchange-templating-base, open-xchange-threadpool, open-xchange-tx, open-xchange-user-json, open-xchange-xml, open-xchange-control, open-xchange-passwordchange-servlet, open-xchange-publish (<< 6.21.0-0), open-xchange-messaging (<< 7.2.1-0), open-xchange-subscribe (<< 6.21.0-0), open-xchange (<< 6.21.0-0), open-xchange-cluster-discovery-mdns (<< 7.4.0), open-xchange-cluster-discovery-static (<< 7.4.0)
-Provides: open-xchange-cache, open-xchange-calendar, open-xchange-charset, open-xchange-config-cascade, open-xchange-config-cascade-context, open-xchange-config-cascade-user, open-xchange-configread, open-xchange-contactcollector, open-xchange-conversion, open-xchange-conversion-engine, open-xchange-conversion-servlet, open-xchange-crypto, open-xchange-data-conversion-ical4j, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-file-storage, open-xchange-file-storage-composition, open-xchange-file-storage-config, open-xchange-file-storage-generic, open-xchange-file-storage-infostore, open-xchange-file-storage-json, open-xchange-folder-json, open-xchange-frontend-uwa, open-xchange-frontend-uwa-json, open-xchange-global, open-xchange-html, open-xchange-i18n, open-xchange-itip-json, open-xchange-jcharset, open-xchange-logging, open-xchange-management, open-xchange-modules-json, open-xchange-modules-model, open-xchange-modules-storage, open-xchange-monitoring, open-xchange-proxy, open-xchange-proxy-servlet, open-xchange-publish-basic, open-xchange-publish-infostore-online, open-xchange-push, open-xchange-push-udp, open-xchange-secret, open-xchange-secret-recovery, open-xchange-secret-recovery-json, open-xchange-secret-recovery-mail, open-xchange-server, open-xchange-sessiond, open-xchange-settings-extensions, open-xchange-sql, open-xchange-templating, open-xchange-templating-base, open-xchange-threadpool, open-xchange-tx, open-xchange-user-json, open-xchange-xml, open-xchange-control, open-xchange-passwordchange-servlet
+Breaks: open-xchange-oauth (<< 7.8.3), open-xchange-freebusy (<< 7.10.0)
+Replaces: open-xchange-messaging (<< 7.2.1-0), open-xchange-oauth (<< 7.8.3), open-xchange-freebusy (<< 7.10.0)
+Conflicts: open-xchange-messaging (<< 7.2.1-0)
 Description: The essential core of an Open-Xchange backend
  This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
  modules of Open-Xchange: Mail, Calendar, Contacts, Tasks and InfoStore. Additionally the following functionalities are installed with this
@@ -27,20 +26,3 @@ Description: The essential core of an Open-Xchange backend
  * auto configuration for external email accounts
  * encrypted storing of passwords for integrated social accounts
  * and a lot more
-
-Package: open-xchange-log4j
-Priority: extra
-Architecture: all
-Depends: ${misc:Depends}
-Pre-Depends: open-xchange-core (>= @OXVERSION@)
-Section: oldlibs
-Description: Log4J logging transitional package
- Open-Xchange used either Java Util logging or Log4J logging framework. Logging
- through Java Util logging was the default while the package open-xchange-log4j
- installed logging through Log4J framework. Starting with the 7.4.2 release
- both frameworks are replaced with the SLF4J logging API and its best
- implementation Logback.
- This transitional package tries to migrate the Log4J configuration to an
- according configuration for Logback during upgrade process. This applies only
- to additionally configured logger levels. After upgrade this package can be
- safely removed.

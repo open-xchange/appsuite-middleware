@@ -34,7 +34,6 @@ package net.fortuna.ical4j.data;
 import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.Writer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

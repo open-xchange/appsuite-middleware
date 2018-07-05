@@ -157,9 +157,6 @@ gblPathParamConfigNode:
     - modules/olox20
     - modules/olox20/active
     - modules/olox20/module
-    - modules/com.openexchange.oxupdater
-    - modules/com.openexchange.oxupdater/module
-    - modules/com.openexchange.oxupdater/active
     - modules/com.openexchange.passwordchange
     - modules/com.openexchange.passwordchange/showStrength
     - modules/com.openexchange.passwordchange/minLength
@@ -239,6 +236,26 @@ gblQueryParamMailColumns:
   type: string
   description: A comma-separated list of either columns or header names to return, like "600,601,X-Custom-Header". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).
   required: true
+gblQueryParamMailHeaders:
+  name: headers
+  in: query
+  type: string
+  description: A comma-separated list of header names to return, like "From,X-Custom-Header". This parameter can be used in addition to the columns parameter.
+  required: false
+gblQueryParamMailUnseen:
+  name: unseen
+  in: query
+  type: boolean
+  description: If `true` only mails without the `\Seen` flag are returned.
+  required: false
+  default: false
+gblQueryParamMailDeleted:
+  name: deleted
+  in: query
+  type: boolean
+  description: If `false` only mails without the `\Deleted` flag are returned.
+  required: false
+  default: true
 gblQueryParamInfostoreFolder:
   name: folder
   in: query
@@ -305,4 +322,124 @@ glbQueryParamsCryptoAuth:
   type: string
   description: Authentication token used for Guard in order to decrypt or sign items.  Required if the token is not attached to the session and the decrypt flag was sent.
   required: false
+glbQueryParamsRampUp:
+  in: formData
+  name: rampup
+  type: boolean
+  description: Determines whether client specific rampup data should be returned with a successfull login request or not.
+  required: false
+glbQueryParamsRampUpFor:
+  in: formData
+  name: rampupFor
+  type: string
+  description: Optional client identifier which is used to retrieve the rampup data.
+  required: false
+glbQueryParamsAllowEnqueue:
+  in: query
+  name: allow_enqueue
+  type: boolean
+  description: Optional flag that specifies whether the request is allowed for being submitted to job queue.
+  required: false
+  default: false
 
+# Chronos parameters
+QueryParamChronosFolder:
+  name: folder
+  in: query
+  type: string
+  description: ID of the folder who contains the events.
+  required: true
+QueryParamChronosID:
+  name: id
+  in: query
+  type: string
+  description: ID of the event.
+  required: true
+QueryParamChronosRecurrenceID:
+  name: recurrenceId
+  in: query
+  type: string
+  description: The recurrence identifier.
+  required: false
+QueryParamChronosRecurrenceRange:
+  name: recurrenceRange
+  in: query
+  type: string
+  description: The targeted range specified with the recurrence id.
+  required: false
+QueryParamChronosFields:
+  name: fields
+  in: query
+  type: string
+  description: A comma-separated list of field identifiers.
+  required: false
+QueryParamChronosOrder:
+  name: order
+  in: query
+  type: string
+  description: The sort order to apply, either <code>ASC</code> for ascending, or <code>DESC</code> for descending.
+  required: false
+QueryParamChronosSort:
+  name: sort
+  in: query
+  type: string
+  description: Specifies the field for sorting the results.
+  required: false
+QueryParamChronosCheckConflicts:
+  name: checkConflicts
+  in: query
+  type: boolean
+  default: false
+  description: Whether to check for conflicts or not.
+  required: false
+QueryParamChronosExpand:
+  name: expand
+  in: query
+  type: boolean
+  default: false
+  description: Defines if event series should be extended or not.
+  required: false
+QueryParamChronosNotification:
+  name: sendInternalNotifications
+  in: query
+  type: boolean
+  description: Specifies that attendees should be notified about the changes when saving a meeting or not.
+  required: false
+  default: false
+ChronosFromTimeRange:
+  name: from
+  in: query
+  type: string
+  description: Lower inclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which start on or after this date are returned.
+  required: true
+ChronosUntilTimeRange:
+  name: until
+  in: query
+  type: string
+  description: Upper exclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which end before this date are returned.
+  required: true
+QueryParamChronosSchedJoulesLanguage:
+  in: query
+  name: language
+  type: string
+  description: |
+    The language/locale to translate the results to. If none is provided then the locale of the user's session will be used. 
+    If that one is not available then falls back to 'en'.
+  required: false
+QueryParamChronosExtendedEntities:
+  in: query
+  name: extendedEntities
+  type: boolean
+  description: |
+    If set to 'true' attendees of internal users will be extended by a 'contact' field, which contains some of the contact fields of this user.
+  required: false
+  default: false
+QueryParamChronosUpdateCache:
+  name: updateCache
+  in: query
+  type: boolean
+  description: |
+    If set to 'true' the cache will be forced to be updated (e. g. by contacting the underlying external account)
+  required: false
+  default: false
+  

@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange bundle with implementation for handling guests over multiple contexts
 Bundle-SymbolicName: com.openexchange.guest.impl
-Bundle-Version: 7.8.4
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Version: 7.10.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.guest.impl.osgi.GuestImplActivator
 Bundle-ClassPath: .
 Import-Package: com.openexchange.caching,

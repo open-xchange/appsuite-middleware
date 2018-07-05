@@ -5,7 +5,7 @@ Bundle-SymbolicName: javapns.notification.management
 Eclipse-BuddyPolicy: registered
 Bundle-Version: 2.3.3
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/javapans-jdk16-2.4.0.jar
 Import-Package: javax.crypto,

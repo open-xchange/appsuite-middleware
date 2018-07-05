@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Single Sign-On Bundle
 Bundle-SymbolicName: com.openexchange.sso
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -12,12 +12,12 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.json,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util, 
+ com.fasterxml.jackson.core.util,
+ com.google.common.collect,
  com.openexchange.ajax,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.dispatcher,
- com.openexchange.documentation,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,

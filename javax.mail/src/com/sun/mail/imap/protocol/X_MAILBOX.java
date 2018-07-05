@@ -40,7 +40,7 @@
 
 package com.sun.mail.imap.protocol;
 
-import com.sun.mail.iap.*;
+import com.sun.mail.iap.ParsingException;
 
 /**
  * This class represents the X-MAILBOX data item

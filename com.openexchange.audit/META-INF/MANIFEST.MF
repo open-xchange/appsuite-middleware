@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Audit Bundle
 Bundle-SymbolicName: com.openexchange.audit
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.audit.osgi.AuditActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: ch.qos.logback.classic,
  ch.qos.logback.classic.boolex,
  ch.qos.logback.classic.db,
@@ -66,6 +66,7 @@ Import-Package: ch.qos.logback.classic,
  ch.qos.logback.core.util,
  com.openexchange.ajax.login,
  com.openexchange.api2,
+ com.openexchange.chronos,
  com.openexchange.config,
  com.openexchange.contact,
  com.openexchange.event,
@@ -92,6 +93,7 @@ Import-Package: ch.qos.logback.classic,
  com.openexchange.user,
  org.apache.commons.lang;version="2.6.0",
  org.apache.commons.logging,
+ org.dmfs.rfc5545,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j

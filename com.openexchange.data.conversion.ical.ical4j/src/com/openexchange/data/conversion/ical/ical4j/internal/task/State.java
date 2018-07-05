@@ -51,13 +51,11 @@ package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
 import java.util.List;
 import java.util.TimeZone;
-
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
-
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.component.VToDo;

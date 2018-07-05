@@ -49,23 +49,20 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
 
 /**
  * {@link ResourceClearDelTablesTask}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class ResourceClearDelTablesTask extends UpdateTaskAdapter {
@@ -81,43 +78,40 @@ public class ResourceClearDelTablesTask extends UpdateTaskAdapter {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
-     */
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection con = dbService.getForUpdateTask(ctxId);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             for (String column : OBSOLETE_COLUMNS) {
                 int type = Tools.getColumnType(con, TABLE, column);
                 if (!Tools.hasDefaultValue(con, TABLE, column)) {
                     stmt = con.prepareStatement("ALTER TABLE " + TABLE + " ALTER " + column + " SET DEFAULT ?");
                     switch (type) {
-                    case java.sql.Types.CHAR:
-                    case java.sql.Types.VARCHAR:
-                        stmt.setString(1, "");
-                        break;
-                    case java.sql.Types.DATE:
-                    case java.sql.Types.TIMESTAMP:
-                        stmt.setDate(1, new java.sql.Date(0));
-                        break;
-                    case java.sql.Types.TINYINT:
-                    case java.sql.Types.BOOLEAN:
-                        stmt.setInt(1, 0);
-                        break;
-                    case java.sql.Types.BLOB:
-                    case -1:
-                        stmt.cancel();
-                        stmt.close();
-                        continue;
-                    default:
-                        stmt.setInt(1, -1);
-                        break;
+                        case java.sql.Types.CHAR:
+                        case java.sql.Types.VARCHAR:
+                            stmt.setString(1, "");
+                            break;
+                        case java.sql.Types.DATE:
+                        case java.sql.Types.TIMESTAMP:
+                            stmt.setDate(1, new java.sql.Date(0));
+                            break;
+                        case java.sql.Types.TINYINT:
+                        case java.sql.Types.BOOLEAN:
+                            stmt.setInt(1, 0);
+                            break;
+                        case java.sql.Types.BLOB:
+                        case -1:
+                            stmt.cancel();
+                            stmt.close();
+                            continue;
+                        default:
+                            stmt.setInt(1, -1);
+                            break;
                     }
                     stmt.executeUpdate();
                     stmt.close();
@@ -129,43 +123,42 @@ public class ResourceClearDelTablesTask extends UpdateTaskAdapter {
                 } else {
                     stmt = con.prepareStatement("UPDATE " + TABLE + " SET " + column + " = ?");
                     switch (type) {
-                    case java.sql.Types.CHAR:
-                    case java.sql.Types.VARCHAR:
-                        stmt.setString(1, "");
-                        break;
-                    case java.sql.Types.DATE:
-                    case java.sql.Types.TIMESTAMP:
-                        stmt.setDate(1, new java.sql.Date(0));
-                        break;
-                    case java.sql.Types.TINYINT:
-                    case java.sql.Types.BOOLEAN:
-                        stmt.setInt(1, 0);
-                        break;
-                    default:
-                        stmt.setInt(1, -1);
-                        break;
+                        case java.sql.Types.CHAR:
+                        case java.sql.Types.VARCHAR:
+                            stmt.setString(1, "");
+                            break;
+                        case java.sql.Types.DATE:
+                        case java.sql.Types.TIMESTAMP:
+                            stmt.setDate(1, new java.sql.Date(0));
+                            break;
+                        case java.sql.Types.TINYINT:
+                        case java.sql.Types.BOOLEAN:
+                            stmt.setInt(1, 0);
+                            break;
+                        default:
+                            stmt.setInt(1, -1);
+                            break;
                     }
                     stmt.executeUpdate();
                     stmt.close();
                 }
             }
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(con);
             closeSQLStuff(stmt);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
-     */
     @Override
     public String[] getDependencies() {
         return new String[0];

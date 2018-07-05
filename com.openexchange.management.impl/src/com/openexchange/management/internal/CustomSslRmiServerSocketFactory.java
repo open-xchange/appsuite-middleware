@@ -124,7 +124,6 @@ public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFac
             @Override
             public Socket accept() throws IOException {
                 final Socket socket = super.accept();
-                boolean error = true;
                 try {
                     SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(socket, socket.getInetAddress().getHostName(), socket.getPort(), true);
                     sslSocket.setUseClientMode(false);
@@ -142,12 +141,11 @@ public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFac
                     boolean needClientAuth = getNeedClientAuth();
                     sslSocket.setNeedClientAuth(needClientAuth);
 
-                    error = false;
-                    return sslSocket;
+                    SSLSocket returnMe = sslSocket;
+                    sslSocket = null; // AVOid premature closing
+                    return returnMe;
                 } finally {
-                    if (error) {
-                        Streams.close(socket);
-                    }
+                    Streams.close(socket);
                 }
             }
         };

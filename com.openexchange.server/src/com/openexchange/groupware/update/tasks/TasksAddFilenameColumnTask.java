@@ -49,16 +49,13 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -80,24 +77,27 @@ public class TasksAddFilenameColumnTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextID = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection connection = dbService.getForUpdateTask(contextID);
-        Column filenameColumn = new Column("filename", "VARCHAR(255) DEFAULT NULL");
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            connection.setAutoCommit(false);
-            Tools.checkAndAddColumns(connection, "task", filenameColumn);
-            Tools.checkAndAddColumns(connection, "del_task", filenameColumn);
-            connection.commit();
+            con.setAutoCommit(false);
+            rollback = true;
+
+            Column filenameColumn = new Column("filename", "VARCHAR(255) DEFAULT NULL");
+            Tools.checkAndAddColumns(con, "task", filenameColumn);
+            Tools.checkAndAddColumns(con, "del_task", filenameColumn);
+
+            con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connection);
-            dbService.backForUpdateTask(contextID, connection);
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
     }
 }

@@ -50,7 +50,6 @@
 package com.openexchange.logging.osgi;
 
 import javax.management.ObjectName;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
@@ -200,21 +199,18 @@ public class LogbackConfigurationMBeanRegisterer implements ServiceTrackerCustom
 
         @Override
         public void bundleChanged(BundleEvent event) {
-            if (BundleEvent.STARTED == event.getType()) {
-                Bundle bundle = event.getBundle();
-                if (null != bundle && "com.openexchange.java-commons.logback-extensions".equals(bundle.getSymbolicName())) {
-                    synchronized (registerer) {
-                        LogstashSocketAppender logstashSocketAppender = LogstashSocketAppender.getInstance();
-                        if (null == logstashSocketAppender) {
-                            LOGGER.warn("Logstash socket appender has been enabled, but not initialized. Please ensure bundle \"com.openexchange.java-commons.logback-extensions\" ('logback-extensions') is orderly started");
-                        } else {
-                            try {
-                                ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
-                                managementService.registerMBean(logstashConfName, logstashSocketAppender);
-                                registerer.logstashConfName = logstashConfName;
-                            } catch (Exception e) {
-                                LOGGER.warn("Failed to register MBean for logstash socket appender.", e);
-                            }
+            if (BundleEvent.STARTED == event.getType() && "com.openexchange.java-commons.logback-extensions".equals(event.getBundle().getSymbolicName())) {
+                synchronized (registerer) {
+                    LogstashSocketAppender logstashSocketAppender = LogstashSocketAppender.getInstance();
+                    if (null == logstashSocketAppender) {
+                        LOGGER.warn("Logstash socket appender has been enabled, but not initialized. Please ensure bundle \"com.openexchange.java-commons.logback-extensions\" ('logback-extensions') is orderly started");
+                    } else {
+                        try {
+                            ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
+                            managementService.registerMBean(logstashConfName, logstashSocketAppender);
+                            registerer.logstashConfName = logstashConfName;
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to register MBean for logstash socket appender.", e);
                         }
                     }
                 }

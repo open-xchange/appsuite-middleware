@@ -68,15 +68,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.htmlparser.jericho.Attribute;
-import net.htmlparser.jericho.Attributes;
-import net.htmlparser.jericho.CharacterReference;
-import net.htmlparser.jericho.EndTag;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.HTMLElements;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.StartTag;
-import net.htmlparser.jericho.Tag;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.css.CSSMatcher;
@@ -87,6 +78,15 @@ import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.Attributes;
+import net.htmlparser.jericho.CharacterReference;
+import net.htmlparser.jericho.EndTag;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.HTMLElements;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.StartTag;
+import net.htmlparser.jericho.Tag;
 
 /**
  * {@link FilterJerichoHandler}
@@ -429,20 +429,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
             } else {
                 if (checkMaxContentSize(content.length())) {
-                    //    if (content instanceof Segment ? ((Segment) content).isWhiteSpace() : isWhiteSpace(content)) {
-                    //        htmlBuilder.append(content);
-                    //    } else {
-                    //        /*-
-                    //         * Should we re-encode prior to appending?
-                    //         * E.g. "<" ==> "&lt;"
-                    //         *
-                    //         * htmlBuilder.append(CharacterReference.reencode(content));
-                    //         */
-                    //        htmlBuilder.append(content);
-                    //    }
-
                     htmlBuilder.append(content);
-
                 }
             }
         }
@@ -648,6 +635,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     prependWidthHeightToStyleIfAbsent(mapFor("width", width + "px", "height", height + "px"), attrMap);
                 }
             }
+            String src = attrMap.get("src");
+            if (Strings.isNotEmpty(src) && false == isInlineImage(src) && (src.indexOf('<') >= 0 || src.indexOf('\n') >= 0 || src.indexOf('\r') >= 0)) {
+                // Invalid <img> tag
+                return;
+            }
         } else if (HTMLElementName.TABLE == tagName) {
             addTableTag(attrMap);
         } else if (HTMLElementName.TD == tagName || HTMLElementName.TH == tagName) {
@@ -712,7 +704,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                     // return;
                                 }
                             } else {
-                                if (replaceUrls && uriAttributes.contains(attribute)) {
+                                if (replaceUrls && uriAttributes.contains(attr)) {
                                     attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
                                 } else {
                                     attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
@@ -740,7 +732,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                                 // return;
                                             }
                                         } else {
-                                            if (replaceUrls && uriAttributes.contains(attribute)) {
+                                            if (replaceUrls && uriAttributes.contains(attr)) {
                                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(checkPossibleURL(val))).append('"');
                                             } else {
                                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
@@ -876,18 +868,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 // Need to prepend width & height
                 style = generateStyleString(styleNvps) + " " + style;
             }
-
-            // Filter out existing entries
-            /*-
-             *
-            Map<String, Set<String>> styleMap = new HashMap<>(this.styleMap);
-            styleMap.keySet().removeAll(styleNvps.keySet());
-            CSSMatcher.checkCSSElements(cssBuffer.append(style), styleMap, true);s
-            style = cssBuffer.toString();
-            cssBuffer.setLength(0);
-            style = generateStyleString(styleNvps) + " " + style;
-             *
-             */
         }
         attrMap.put("style", style);
     }

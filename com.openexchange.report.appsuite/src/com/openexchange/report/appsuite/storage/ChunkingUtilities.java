@@ -1,6 +1,8 @@
 
 package com.openexchange.report.appsuite.storage;
 
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -66,7 +68,7 @@ public class ChunkingUtilities {
             }
             // Load and parse the existing data first into an Own JSONObject
             String content = sc.useDelimiter("\\Z").next();
-            Map<String, Object> storedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
+            @SuppressWarnings("unchecked") Map<String, Object> storedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
             // Merge the data of the two files into dataToStore
             mergeNewValuesWithStoredValues(storedData, data);
         } catch (FileNotFoundException e) {
@@ -91,10 +93,11 @@ public class ChunkingUtilities {
         return fileLock;
     }
 
+    @SuppressWarnings("unchecked")
     private static void mergeNewValuesWithStoredValues(Map<String, Object> storedCounts, Map<String, Object> additionalCounts) {
         if (storedCounts.get(Report.CONTEXTS) != null && additionalCounts.get(Report.CONTEXTS) != null) {
-            Long additionalContexts = Long.parseLong(String.valueOf(storedCounts.get(Report.CONTEXTS)));
-            additionalCounts.put(Report.CONTEXTS, Long.parseLong(String.valueOf(additionalCounts.get(Report.CONTEXTS))) + additionalContexts);
+            long additionalContexts = Long.parseLong(String.valueOf(storedCounts.get(Report.CONTEXTS)));
+            additionalCounts.put(Report.CONTEXTS, L(Long.parseLong(String.valueOf(additionalCounts.get(Report.CONTEXTS))) + additionalContexts));
         }
         for (Map.Entry<String, Object> entry : storedCounts.entrySet()) {
             String key = entry.getKey();
@@ -104,17 +107,17 @@ public class ChunkingUtilities {
                 continue;
             }
             if (entry.getValue() instanceof Integer || entry.getValue() instanceof Long) {
-                Long value = additionalCounts.get(key) instanceof Integer ? Long.parseLong(String.valueOf(additionalCounts.get(key))) : (Long) additionalCounts.get(key);
-                Long storedValue = Long.parseLong(String.valueOf(entry.getValue()));
+                long value = additionalCounts.get(key) instanceof Integer ? Long.parseLong(String.valueOf(additionalCounts.get(key))) : ((Long) additionalCounts.get(key)).longValue();
+                long storedValue = Long.parseLong(String.valueOf(entry.getValue()));
                 if (!StringUtils.containsIgnoreCase(key, "context") && !key.equals(Report.TOTAL)) {
-                    additionalCounts.put(key, value + storedValue);
+                    additionalCounts.put(key, L(value + storedValue));
                 } else if (key.equals(Report.TOTAL)) {
-                    additionalCounts.put(Report.TOTAL, value + storedValue);
-                    additionalCounts.put(Report.CONTEXT_USERS_AVG, (Long) additionalCounts.get(Report.TOTAL) / (Long) additionalCounts.get(Report.CONTEXTS));
-                } else if (key.equals(Report.CONTEXT_USERS_MAX) && storedValue > (Long) additionalCounts.get(Report.CONTEXT_USERS_MAX)) {
-                    additionalCounts.put(Report.CONTEXT_USERS_MAX, storedValue);
-                } else if (key.equals(Report.CONTEXT_USERS_MIN) && storedValue < (Long) additionalCounts.get(Report.CONTEXT_USERS_MIN) || (Long) additionalCounts.get(Report.CONTEXT_USERS_MIN) == 0l) {
-                    additionalCounts.put(Report.CONTEXT_USERS_MIN, storedValue);
+                    additionalCounts.put(Report.TOTAL, L(value + storedValue));
+                    additionalCounts.put(Report.CONTEXT_USERS_AVG, L((l((Long) additionalCounts.get(Report.TOTAL))) / (l((Long) additionalCounts.get(Report.CONTEXTS)))));
+                } else if (key.equals(Report.CONTEXT_USERS_MAX) && storedValue > l((Long) additionalCounts.get(Report.CONTEXT_USERS_MAX))) {
+                    additionalCounts.put(Report.CONTEXT_USERS_MAX, L(storedValue));
+                } else if (key.equals(Report.CONTEXT_USERS_MIN) && storedValue < l((Long) additionalCounts.get(Report.CONTEXT_USERS_MIN)) || l((Long) additionalCounts.get(Report.CONTEXT_USERS_MIN)) == 0l) {
+                    additionalCounts.put(Report.CONTEXT_USERS_MIN, L(storedValue));
                 }
             } else if (entry.getValue() instanceof HashMap) {
                 mergeNewValuesWithStoredValues((HashMap<String, Object>) entry.getValue(), (HashMap<String, Object>) additionalCounts.get(entry.getKey()));

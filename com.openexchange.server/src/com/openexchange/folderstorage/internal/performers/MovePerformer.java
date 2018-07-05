@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
@@ -69,6 +70,7 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -166,11 +168,60 @@ final class MovePerformer extends AbstractPerformer {
         super(user, context, folderStorageDiscoverer);
     }
 
-    void doMoveReal(final Folder folder, final FolderStorage folderStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage) throws OXException {
-        // if (folderStorage.equals(realParentStorage) && newRealParentStorage.equals(realParentStorage)) {
-        // throw FolderExceptionErrorMessage.MOVE_NOT_PERMITTED.create(new Object[0]);
-        // }
+    void doMoveReal(final Folder folder, final FolderStorage folderStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder) throws OXException {
+        List<Permission> permissionsToUpdate = null;
+        if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+            permissionsToUpdate = adjustPermission(folder, folder, newRealParentStorage);
+        }
+
         folderStorage.updateFolder(folder, storageParameters);
+        if (permissionsToUpdate != null && !permissionsToUpdate.isEmpty()) {
+            folder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
+            storageParameters.getDecorator().put("permissions", "inherit");
+            folderStorage.updateFolder(folder, storageParameters);
+        }
+    }
+
+    private List<Permission> adjustPermission(Folder newFolder, Folder originalFolder, FolderStorage newRealParentStorage) throws OXException {
+        Permission[] permissions = originalFolder.getPermissions();
+        List<Permission> addParentLinkPermission = addParentLinkPermission(newFolder, newRealParentStorage);
+        // permissions can be null
+        if (null == permissions) {
+            return addParentLinkPermission;
+        }
+        List<Permission> cleanedPermissions = new ArrayList<>(permissions.length);
+        for(Permission perm : permissions){
+            if (perm.getType() != FolderPermissionType.INHERITED) {
+                // Skip all inherited permissions
+                cleanedPermissions.add(perm);
+            }
+        }
+        cleanedPermissions.addAll(addParentLinkPermission);
+        return cleanedPermissions;
+    }
+
+    /**
+     * Return a list of permissions which must be inherited from the parent folder
+     *
+     * @param folder The folder to check
+     * @param newRealParentStorage The storage of the folder
+     * @return A list of {@link Permission}s
+     * @throws OXException
+     */
+    private List<Permission> addParentLinkPermission(Folder folder, FolderStorage newRealParentStorage) throws OXException {
+        List<Permission> result = new ArrayList<>();
+        Folder parent = newRealParentStorage.getFolder(folder.getTreeID(), folder.getParentID(), storageParameters);
+        for (Permission perm : parent.getPermissions()) {
+            if (perm.getType() == FolderPermissionType.INHERITED || perm.getType() == FolderPermissionType.LEGATOR) {
+                Permission cloned = (Permission) perm.clone();
+                cloned.setType(FolderPermissionType.INHERITED);
+                if(perm.getType() == FolderPermissionType.LEGATOR) {
+                    cloned.setPermissionLegator(folder.getParentID());
+                }
+                result.add(cloned);
+            }
+        }
+        return result;
     }
 
     void doMoveVirtual(final Folder folder, final FolderStorage virtualStorage, final FolderStorage realStorage, final FolderStorage realParentStorage, final FolderStorage newRealParentStorage, final Folder storageFolder, final Collection<FolderStorage> openedStorages) throws OXException {
@@ -256,7 +307,18 @@ final class MovePerformer extends AbstractPerformer {
          */
         final String oldParent = storageFolder.getParentID();
         if (virtualStorage.equals(realStorage)) {
+            List<Permission> permissionsToUpdate = null;
+            if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+                permissionsToUpdate = adjustPermission(folder, storageFolder, newRealParentStorage);
+            }
             virtualStorage.updateFolder(folder, storageParameters);
+            if (folder.getID() != null && permissionsToUpdate != null && !permissionsToUpdate.isEmpty()) {
+                folder.setPermissions(permissionsToUpdate.toArray(new Permission[permissionsToUpdate.size()]));
+                storageParameters.getDecorator().put("permissions", "inherit");
+                storageParameters.setTimeStamp(folder.getLastModified());
+                virtualStorage.updateFolder(folder, storageParameters);
+            }
+
         } else {
             final String treeId = folder.getTreeID();
             /*

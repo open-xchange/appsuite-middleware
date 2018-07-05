@@ -1,7 +1,22 @@
 <#include "notify.common.button.tmpl">
 
 <style>
-    body { margin: 16px; max-width: 700px; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont,
+            "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+        max-width: 700px;
+        margin: 16px;
+    }
+
+    .container {
+        font-size: 16px;
+        padding: 16px;
+        border-radius: 4px;
+        background-color: #f5f5f5;
+        color: #424242;
+        border: 1px solid #eee;
+        margin-bottom: 16px;
+    }
 
     .base,
     .base table {
@@ -14,37 +29,38 @@
     }
 
     .item {
-        border: white 8px solid;
-		vertical-align: top;
+      border: 8px solid transparent;
+      vertical-align: top;
     }
 
-    .item--image {
+    .item-image {
         display: block;
         border: 0;
         max-width: 100%;
     }
 
-    .base--row {
+    .base-row {
         vertical-align: top;
         margin: auto;
     }
 
-    .base .item--text {
-        font-family: arial, sans-serif;
-        font-size: 14px;
-        color: #333;
+    .base .item-text {
+
+        font-size: 12px;
         padding-top: 10px;
         text-align: center;
         max-width: 100px;
         text-overflow: ellipsis;
         overflow: hidden;
+        font-weight: bold;
+        color: #555;
     }
 
-    .item--row {
+    .item-row {
         vertical-align: top;
     }
 
-    .item--image {
+    .item-image {
        -moz-box-sizing: border-box;
         -webkit-box-sizing: border-box;
         box-sizing: border-box;
@@ -68,8 +84,11 @@
             box-sizing: border-box;
         }
         .item table,
-        .item--image {
+        .item-image {
             width: 100%;
+        }
+        .wrap {
+            padding: 8px;
         }
     }
 
@@ -81,63 +100,69 @@
             float: none;
             border-left: 0;
         }
-        .item--row {
+        .item-row {
             display: table-cell;
             width: 60%;
         }
-        .item--row:first-child {
+        .item-row:first-child {
             width: 40%;
         }
-        .base .item--text {
+        .base .item-text {
             padding-left: 8px;
         }
         body {
             margin: 12px;
         }
+        .wrap {
+            padding: 4px;
+        }
     }
 </style>
 
-<p>
-  ${intro}
-</p>
-<table class="base">
-  <tr>
-    <td>
-      <table>
-        <tr class="base--row">
-          <#list previews?keys as key>
-            <td class="item">
-              <table>
-                <tr class="item--row">
-                  <td align="left"><img class="item--image" src="${previews[key]}" alt="" /></td>
-                </tr>
-                <tr class="item--row">
-                  <td align="left" class="item--text">
-                    ${filenames[key]}
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </#list>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
-<p style="clear:both">
-  <#if more?has_content>${more}</#if>
-</p>
-<p>
-  <@styledButton link=link>${link_text}</@styledButton>
-</p>
-<#if password?has_content>
-  <p>
-    ${password}
-  </p>
-</#if>
-<#if expiration?has_content>
-  <p>
-    ${expiration}
-  </p>
-</#if>
-<hr>
+
+<div class="container">
+    <p class="intro">
+      ${intro}
+    </p>
+    <table class="base">
+      <tr>
+        <td>
+          <table>
+            <tr class="base-row">
+              <#list previews?keys as key>
+                <td class="item">
+                  <table>
+                    <tr class="item-row">
+                      <td align="left"><img class="item-image" src="${previews[key]}" alt="" /></td>
+                    </tr>
+                    <tr class="item-row">
+                      <td align="left" class="item-text">
+                        ${filenames[key]}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </#list>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <p style="clear:both">
+      <#if more?has_content>${more}</#if>
+    </p>
+    <p>
+      <@styledButton link=link>${link_text}</@styledButton>
+    </p>
+    <#if password?has_content>
+      <p>
+        ${password}
+      </p>
+    </#if>
+    <#if expiration?has_content>
+      <p>
+        ${expiration}
+      </p>
+    </#if>
+</div>
+

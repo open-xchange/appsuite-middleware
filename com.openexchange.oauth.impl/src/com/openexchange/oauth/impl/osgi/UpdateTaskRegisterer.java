@@ -58,6 +58,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.oauth.impl.internal.groupware.DropForeignKeyFromOAuthAccountTask;
+import com.openexchange.oauth.impl.internal.groupware.OAuthAccountsTableUtf8Mb4UpdateTask;
+import com.openexchange.oauth.impl.internal.groupware.OAuthAddIdentityColumnTaskV2;
 import com.openexchange.oauth.impl.internal.groupware.OAuthAddScopeColumnTask;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
@@ -67,26 +70,36 @@ import com.openexchange.oauth.impl.internal.groupware.RenameMigrateLinkedInServi
  * Is notified about the {@link DatabaseService} and registers then the {@link OAuthCreateTableTask}.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
     private final BundleContext context;
-
     private ServiceRegistration<UpdateTaskProviderService> registration;
 
+    /**
+     * Initializes a new {@link UpdateTaskRegisterer}.
+     *
+     * @param context The bundle context
+     */
     public UpdateTaskRegisterer(final BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public DatabaseService addingService(final ServiceReference<DatabaseService> reference) {
-        final DatabaseService dbService = context.getService(reference);
+    public synchronized DatabaseService addingService(final ServiceReference<DatabaseService> reference) {
+        DatabaseService dbService = context.getService(reference);
         registration = context.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask(dbService)), new OAuthCreateTableTask2(dbService), new OAuthAddScopeColumnTask(dbService), new RenameMigrateLinkedInServiceIdUpdateTask(dbService));
+                //@formatter:off
+                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask()), new OAuthCreateTableTask2(), 
+                    new OAuthAddScopeColumnTask(), new RenameMigrateLinkedInServiceIdUpdateTask(), 
+                    new DropForeignKeyFromOAuthAccountTask(), new OAuthAddIdentityColumnTaskV2(), 
+                    new OAuthAccountsTableUtf8Mb4UpdateTask());
+                //@formatter:on
             }
         }, null);
         return dbService;
@@ -98,8 +111,11 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<Data
     }
 
     @Override
-    public void removedService(final ServiceReference<DatabaseService> reference, final DatabaseService service) {
-        registration.unregister();
+    public synchronized void removedService(final ServiceReference<DatabaseService> reference, final DatabaseService service) {
+        if (null != registration) {
+            registration.unregister();
+            registration = null;
+        }
         context.ungetService(reference);
     }
 }

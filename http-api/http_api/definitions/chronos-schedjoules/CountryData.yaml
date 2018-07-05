@@ -1,0 +1,26 @@
+type: object
+properties:
+  country_id:
+    type: integer
+    description: The country's unique identifier
+  name:
+    type: string
+    description: The country's name
+  iso_3166:
+    type: string
+    description: The country's ISO 3166 code
+  icon:
+    type: string
+    description: An icon with the country's flag
+  icon_etag:
+    type: string
+    description: The eTag for the country's icon
+  name_translation:
+    type: string
+    description: The translated name of the country
+  translation_url:
+    type: string
+    description: The translation translation URL
+  page_id:
+    type: integer
+    description: The root page for the country

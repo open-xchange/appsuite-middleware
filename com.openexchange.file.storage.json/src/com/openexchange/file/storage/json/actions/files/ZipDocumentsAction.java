@@ -86,40 +86,22 @@ public class ZipDocumentsAction extends AbstractFileAction {
 
     @Override
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
-        // Get IDs
+        // Get/parse IDs
         List<IdVersionPair> idVersionPairs;
-        {
-            String value = request.getParameter("body");
-            if (Strings.isEmpty(value)) {
-                idVersionPairs = request.getIdVersionPairs();
+        try {
+            Object data = request.getRequestData().getData();
+            if (data instanceof JSONArray) {
+                idVersionPairs = parsePairs((JSONArray) data);
             } else {
-                try {
-                    JSONArray jsonArray = new JSONArray(value);
-                    int len = jsonArray.length();
-                    idVersionPairs = new ArrayList<IdVersionPair>(len);
-                    for (int i = 0; i < len; i++) {
-                        JSONObject tuple = jsonArray.getJSONObject(i);
-
-                        // Identifier
-                        String id = tuple.optString(Param.ID.getName(), null);
-
-                        // Folder
-                        String folderId = tuple.optString(Param.FOLDER_ID.getName(), null);
-
-                        // Version
-                        String version = tuple.optString(Param.VERSION.getName(), FileStorageFileAccess.CURRENT_VERSION);
-
-                        // Check validity
-                        if (null == id && null == folderId) {
-                            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("body", "Invalid resource identifier: " + tuple);
-                        }
-
-                        idVersionPairs.add(new IdVersionPair(id, version, folderId));
-                    }
-                } catch (JSONException e) {
-                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "body", e.getMessage());
+                String value = request.getParameter("body");
+                if (Strings.isEmpty(value)) {
+                    idVersionPairs = request.getIdVersionPairs();
+                } else {
+                    idVersionPairs = parsePairs(new JSONArray(value));
                 }
             }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "body", e.getMessage());
         }
 
         boolean recursive;
@@ -178,6 +160,31 @@ public class ZipDocumentsAction extends AbstractFileAction {
 
         ajaxRequestData.setFormat("file");
         return new AJAXRequestResult(fileHolder, "file");
+    }
+
+    private List<IdVersionPair> parsePairs(JSONArray jPairs) throws JSONException, OXException {
+        int len = jPairs.length();
+        List<IdVersionPair> idVersionPairs = new ArrayList<IdVersionPair>(len);
+        for (int i = 0; i < len; i++) {
+            JSONObject tuple = jPairs.getJSONObject(i);
+
+            // Identifier
+            String id = tuple.optString(Param.ID.getName(), null);
+
+            // Folder
+            String folderId = tuple.optString(Param.FOLDER_ID.getName(), null);
+
+            // Version
+            String version = tuple.optString(Param.VERSION.getName(), FileStorageFileAccess.CURRENT_VERSION);
+
+            // Check validity
+            if (null == id && null == folderId) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("body", "Invalid resource identifier: " + tuple);
+            }
+
+            idVersionPairs.add(new IdVersionPair(id, version, folderId));
+        }
+        return idVersionPairs;
     }
 
 }

@@ -71,7 +71,7 @@ public class Services {
 
     /**
      * Sets the service lookup.
-     * 
+     *
      * @param serviceLookup The service lookup or <code>null</code>
      */
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
@@ -80,7 +80,7 @@ public class Services {
 
     /**
      * Gets the service lookup.
-     * 
+     *
      * @return The service lookup or <code>null</code>
      */
     public static ServiceLookup getServiceLookup() {
@@ -89,7 +89,7 @@ public class Services {
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service
      * @throws IllegalStateException If an error occurs while returning the demanded service
@@ -104,15 +104,12 @@ public class Services {
 
     /**
      * (Optionally) Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> if absent
      */
     public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
     }
 }

@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
+import java.util.Date;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
@@ -15,8 +16,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
-
-import java.util.Date;
 
 public class MissingTableChangeGenerator implements MissingObjectChangeGenerator {
     @Override

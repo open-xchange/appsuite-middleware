@@ -57,6 +57,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import org.osgi.framework.BundleContext;
@@ -231,6 +232,15 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
         }
 
         return false;
+    }
+
+    @Override
+    public void transport(Map<PushNotification, List<PushMatch>> notifications) throws OXException {
+        if (null != notifications && 0 < notifications.size()) {
+            for (Entry<PushNotification, List<PushMatch>> entry : notifications.entrySet()) {
+                transport(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     @Override

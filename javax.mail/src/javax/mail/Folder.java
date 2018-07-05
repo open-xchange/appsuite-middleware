@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,13 +40,20 @@
 
 package javax.mail;
 
-import java.io.*;
-import java.lang.*;
 import java.util.Vector;
-import java.util.StringTokenizer;
 import java.util.concurrent.Executor;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.ConnectionListener;
+import javax.mail.event.FolderEvent;
+import javax.mail.event.FolderListener;
+import javax.mail.event.MailEvent;
+import javax.mail.event.MessageChangedEvent;
+import javax.mail.event.MessageChangedListener;
+import javax.mail.event.MessageCountEvent;
+import javax.mail.event.MessageCountListener;
+import javax.mail.event.MessageRecentEvent;
+import javax.mail.event.MessageRecentListener;
 import javax.mail.search.SearchTerm;
-import javax.mail.event.*;
 
 /**
  * Folder is an abstract class that represents a folder for mail
@@ -115,7 +122,7 @@ import javax.mail.event.*;
  * @author Bill Shannon
  */
 
-public abstract class Folder {
+public abstract class Folder implements AutoCloseable {
 
     /**
      * The parent store.
@@ -192,7 +199,7 @@ public abstract class Folder {
     public URLName getURLName() throws MessagingException {
 	URLName storeURL = getStore().getURLName();
 	String fullname = getFullName();
-	StringBuffer encodedName = new StringBuffer();
+	StringBuilder encodedName = new StringBuilder();
 
 	if (fullname != null) {
 	    /*
@@ -644,6 +651,29 @@ public abstract class Folder {
      * @see 		javax.mail.event.ConnectionEvent
      */
     public abstract void close(boolean expunge) throws MessagingException;
+
+    /**
+     * Close this Folder and expunge deleted messages. <p>
+     *
+     * A CLOSED ConnectionEvent is delivered to any ConnectionListeners
+     * registered on this Folder. Note that the folder is closed even
+     * if this method terminates abnormally by throwing a
+     * MessagingException. <p>
+     *
+     * This method supports the {@link java.lang.AutoCloseable AutoCloseable}
+     * interface. <p>
+     *
+     * This implementation calls <code>close(true)</code>.
+     *
+     * @exception	IllegalStateException if this folder is not opened
+     * @exception       MessagingException for other failures
+     * @see 		javax.mail.event.ConnectionEvent
+     * @since		JavaMail 1.6
+     */
+    @Override
+    public void close() throws MessagingException {
+	close(true);
+    }
 
     /**
      * Indicates whether this Folder is in the 'open' state.
@@ -1685,6 +1715,7 @@ public abstract class Folder {
 	q.enqueue(event, v);
     }
 
+    @Override
     protected void finalize() throws Throwable {
 	try {
 	    q.terminateQueue();
@@ -1699,6 +1730,7 @@ public abstract class Folder {
      * the default toString() behavior.
      */
 
+    @Override
     public String toString() {
 	String s = getFullName();
 	if (s != null)

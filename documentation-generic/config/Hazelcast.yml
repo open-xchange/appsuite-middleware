@@ -320,30 +320,6 @@ properties:
       file: hazelcast.properties
       packageName: open-xchange-core
       tags: ["Hazelcast", "Monitoring"]
-    - key: com.openexchange.hazelcast.jmxDetailed
-      description: |
-        Specifies whether detailed JMX monitoring is enabled or not, i.e. detailed information about entries in distributed data structures. 
-        Only taken into account if [[com.openexchange.hazelcast.jmx]] is set to <code>true</code>.
-      defaultValue: false
-      version:
-      reloadable: false
-      configcascadeAware: false
-      related: com.openexchange.hazelcast.jmx 
-      file: hazelcast.properties
-      packageName: open-xchange-core
-      tags: ["Hazelcast", "Monitoring"]
-    - key: com.openexchange.hazelcast.jmxDetailed
-      description: |
-        Specifies whether detailed JMX monitoring is enabled or not, i.e. detailed information about entries in distributed data structures. 
-        Only taken into account if [[com.openexchange.hazelcast.jmx]] is set to <code>true</code>.
-      defaultValue: false
-      version:
-      reloadable: false
-      configcascadeAware: false
-      related: com.openexchange.hazelcast.jmx 
-      file: hazelcast.properties
-      packageName: open-xchange-core
-      tags: ["Hazelcast", "Monitoring"]
     - key: com.openexchange.hazelcast.memcache.enabled
       description: |
         Enables or disables Hazelcast's internal Memcache client request listener service. This should normally be set to <code>false</code>, as it's not needed by the backend.

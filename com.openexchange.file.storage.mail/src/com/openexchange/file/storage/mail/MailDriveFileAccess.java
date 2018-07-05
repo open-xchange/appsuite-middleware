@@ -358,7 +358,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                         return Collections.<File> emptyList();
                     }
 
-                    List<File> files = new LinkedList<File>();
+                    List<File> files = new LinkedList<>();
                     int limit = 100;
                     int offset = 1;
 
@@ -435,7 +435,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                         SortTerm[] sortTerms = MailDriveSortUtility.getSortTerms(sort, order);
                         int[] seqNums = null == sortTerms ? null : MailDriveSortUtility.performEsortAndGetSeqNums(sortTerms, null, range.from, range.to, folder);
                         if (null != seqNums) {
-                            List<File> files = new ArrayList<File>(seqNums.length);
+                            List<File> files = new ArrayList<>(seqNums.length);
                             boolean closeMailAccess = false;
                             int i = 0;
                             try {
@@ -499,7 +499,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                     }
 
                     // Manual chunk-wise fetch & sort in-app
-                    List<File> files = new LinkedList<File>();
+                    List<File> files = new LinkedList<>();
                     int limit = 100;
                     int offset = 1;
 
@@ -565,7 +565,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                         return Collections.<File> emptyList();
                     }
 
-                    List<File> files = new LinkedList<File>();
+                    List<File> files = new LinkedList<>();
                     int limit = 100;
                     int offset = 1;
 
@@ -623,9 +623,9 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
             return new FileTimedResult(Collections.<File> emptyList());
         }
 
-        final Map<FullName, List<UidAndIndex>> uids = new HashMap<FullName, List<UidAndIndex>>(6, 0.9f);
+        final Map<FullName, List<UidAndIndex>> uids = new HashMap<>(6, 0.9f);
         {
-            Map<String, FullName> checkedFolders = new HashMap<String, FullName>(6, 0.9f);
+            Map<String, FullName> checkedFolders = new HashMap<>(6, 0.9f);
             int i = 0;
             for (IDTuple id : ids) {
                 String folderId = id.getFolder();
@@ -638,7 +638,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
 
                 List<UidAndIndex> l = uids.get(fullName);
                 if (null == l) {
-                    l = new ArrayList<UidAndIndex>();
+                    l = new ArrayList<>();
                     uids.put(fullName, l);
                 }
 
@@ -687,7 +687,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                                 Map<Long, Integer> indexes;
                                 {
                                     long[] grabMe = new long[cSize];
-                                    indexes = new HashMap<Long, Integer>(cSize, 0.9f);
+                                    indexes = new HashMap<>(cSize, 0.9f);
                                     for (int k = offset; k < end; k++) {
                                         UidAndIndex uidi = uids.get(k);
                                         grabMe[k] = uidi.uid;
@@ -765,7 +765,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
 
             @Override
             protected List<File> doPerform(IMAPStore imapStore, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException, MessagingException, IOException {
-                List<File> files = new LinkedList<File>();
+                List<File> files = new LinkedList<>();
 
                 for (FullName fullName : fullNames) {
                     if (fullName.isNotDefaultFolder()) {
@@ -821,7 +821,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
             files = files.subList(start, toIndex);
         }
 
-        return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+        return new SearchIteratorAdapter<>(files.iterator(), files.size());
     }
 
     @Override
@@ -835,7 +835,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
             return Collections.emptyMap();
         }
         FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
-        Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
+        Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
         for (String folderId : folderIds) {
             Date lastModifiedDate = folderAccess.getFolder(folderId).getLastModifiedDate();
             sequenceNumbers.put(folderId, null != lastModifiedDate ? Long.valueOf(lastModifiedDate.getTime()) : null);
@@ -951,7 +951,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
         }
 
         int length = elements.length;
-        List<E> list = new ArrayList<E>(length);
+        List<E> list = new ArrayList<>(length);
         for (int i = 0, k = length; k-- > 0; i++) {
             E elem = elements[i];
             if (null != elem) {

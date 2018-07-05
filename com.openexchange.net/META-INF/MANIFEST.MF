@@ -2,15 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Network Utilities Bundle
 Bundle-SymbolicName: com.openexchange.net
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
  com.google.common.net,
  com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.log,
  com.sun.net,
  com.sun.net.ssl,
  javax.crypto,

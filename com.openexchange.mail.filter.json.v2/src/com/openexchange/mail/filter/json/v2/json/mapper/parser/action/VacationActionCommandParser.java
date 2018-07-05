@@ -52,6 +52,7 @@ package com.openexchange.mail.filter.json.v2.json.mapper.parser.action;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -60,6 +61,8 @@ import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.base.CharMatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -71,7 +74,6 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSON
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
 import com.openexchange.mail.json.parser.MessageParser;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -83,6 +85,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class VacationActionCommandParser extends AbstractActionCommandParser {
+
+    private static final Logger LOG = LoggerFactory.getLogger(VacationActionCommandParser.class);
 
     /**
      * Initializes a new {@link VacationActionCommandParser}.
@@ -104,7 +108,9 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
         final JSONArray addresses = jsonObject.optJSONArray(VacationActionField.addresses.getFieldName());
         if (null != addresses) {
             arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.addresses));
-            arrayList.add(CommandParserJSONUtil.coerceToStringList(addresses));
+            List<String> addressesList = CommandParserJSONUtil.coerceToStringList(addresses);
+            validateAddresses(addressesList, true);
+            arrayList.add(addressesList);
         }
         final String subjectFieldname = VacationActionField.subject.getFieldName();
         if (jsonObject.has(subjectFieldname)) {
@@ -132,7 +138,7 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
                 // Get string
                 String fromStr = jsonObject.getString(fromFieldName);
                 try {
-                    new QuotedInternetAddress(fromStr, strict);
+                    InternetAddressUtil.validateInternetAddress(fromStr, strict);
                     from = fromStr;
                 } catch (AddressException e) {
                     throw OXJSONExceptionCodes.INVALID_VALUE.create(from, VacationActionField.from.getFieldName());
@@ -190,7 +196,7 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
      * @throws OXException if the string cannot be decoded
      */
     private String encode(String string, VacationActionField field) throws OXException {
-        if (CharMatcher.ASCII.matchesAllOf(string)) {
+        if (CharMatcher.ascii().matchesAllOf(string)) {
             return string;
         }
         try {
@@ -219,6 +225,25 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
             return MimeUtility.decodeText(utf8);
         } catch (UnsupportedEncodingException e) {
             throw CommandParserExceptionCodes.UNABLE_TO_DECODE.create(field.name(), "Vacation");
+        }
+    }
+
+    /**
+     * Validates the specified addresses and removes any that fail validation
+     * 
+     * @param addresses The addresses to validate
+     * @param strict Whether or not to use strict mode
+     */
+    private void validateAddresses(List<String> addresses, boolean strict) {
+        Iterator<String> iterator = addresses.iterator();
+        while (iterator.hasNext()) {
+            String address = iterator.next();
+            try {
+                InternetAddressUtil.validateInternetAddress(address, strict);
+            } catch (AddressException e) {
+                LOG.debug("The address '{}' is invalid. Ignoring", address, e);
+                iterator.remove();
+            }
         }
     }
 }

@@ -1,108 +1,251 @@
 feature_name: Calendar
 properties:
-    - key: CACHED_ITERATOR_FAST_FETCH
+    - key: com.openexchange.calendar.schedjoules.enabled
       description: |
-        By enabling this option you can define the numbers of 
-        pre fetched results with the parameter [[MAX_PRE_FETCH]].
-
-        This means that MAX_PRE_FETCH results are gathered in one
-        SQL query instead of MAX_PRE_FETCH single SQL queries.
-        Normally higher values result in more performance if this
-        option is enabled.
+        Configures if the <i>schedjoules</i> calendar provider is available for a user or not. 
       defaultValue: true
-      version:
-      reloadable: false
-      configcascadeAware: false
-      related: MAX_PRE_FETCH
-      file: calendar.properties
-      packageName: open-xchange-core
-      tags: ["Calendar", "Cache"]
-    - key: MAX_PRE_FETCH
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe"]
+    - key: com.openexchange.calendar.schedjoules.maxAccounts
       description: |
-        By enabling the option [[CACHED_ITERATOR_FAST_FETCH]] you
-        can define the numbers of pre fetched results with
-        this parameter.
-          
-        This means that MAX_PRE_FETCH results are gathered in one
-        SQL query instead of MAX_PRE_FETCH single SQL queries.
-        Normally higher values result in more performance if this
-        option is enabled.
+        Defines the maximum number of allowed accounts or subscriptions for a user within the <i>schedjoules</i> calendar provider. A value of <code>0</code> disables the limit.
       defaultValue: 20
-      version:
-      reloadable: false
-      configcascadeAware: false
-      related: CACHED_ITERATOR_FAST_FETCH
-      file: calendar.properties
-      packageName: open-xchange-core
-      tags: ["Calendar","Limit", "Cache"]
-    - key: CHECK_AND_REMOVE_PAST_REMINDERS
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Limit"]
+    - key: com.openexchange.calendar.ical.enabled
       description: |
-        If this option is enabled no event is triggered
-        and no mail will be sent if the reminder is in
-        the past relative to the start date.
+        Configures if the <i>ical</i> calendar provider is available for a user or not. 
       defaultValue: true
-      version:
-      reloadable: false
-      configcascadeAware: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
       related:
-      file: calendar.properties
-      packageName: open-xchange-core
-      tags: ["Calendar","Mail", "Event"]
-    - key: CHECK_AND_AVOID_SOLO_REMINDER_TRIGGER_EVENTS
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe"]
+    - key: com.openexchange.calendar.ical.maxAccounts
       description: |
-        This option prevents the trigger and mail sending
-        if only a reminder has been changed. If the application
-        should inform about each change no matter what has been
-        changed in the object this option should be disabled.
+        Defines the maximum number of allowed accounts or subscriptions for a user within the <i>ical</i> calendar provider. A value of <code>0</code> disables the limit.
+      defaultValue: 20
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Limit"]
+    - key: com.openexchange.calendar.google.enabled
+      description: |
+        Configures if the <i>google</i> calendar provider is available for a user or not. 
       defaultValue: true
-      version:
-      reloadable: false
-      configcascadeAware: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
       related:
-      file: calendar.properties
-      packageName: open-xchange-core
-      tags: ["Calendar","Mail", "Event"]
-    - key: MAX_OPERATIONS_IN_RECURRENCE_CALCULATIONS
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe"]
+    - key: com.openexchange.calendar.google.maxAccounts
       description: |
-        This options specifies a maximum count of loop iterations
-        for a given recurrence pattern. When this limit is reached
-        the server stops processing the recurrence pattern and spews
-        out lots of error information. A value equal to or less than
-        zero omits this property; meaning no limit on processing the
-        recurrence pattern.
-      defaultValue: 49950
-      version:
-      reloadable: false
-      configcascadeAware: false
+        Defines the maximum number of allowed accounts or subscriptions for a user within the <i>google</i> calendar provider. A value of <code>0</code> disables the limit.
+      defaultValue: 20
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
       related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Limit"]
+    - key: com.openexchange.calendar.maxEventResults
+      description: |
+        Defines a maximum number of event in event results. The intention of this limit is to prevent out of memory situations.
+      defaultValue: 1000
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Limit"]
-    - key: com.openexchange.calendar.seriesconflictlimit
+    - key: com.openexchange.calendar.maxAttendeesPerEvent
       description: |
-        This boolean option switches on/off the limitation for the
-        conflict search for a series to 1 year in the future. This
-        means, that a new/changed series will not conflict with
-        appointments which are later than one year after the
-        creation/change of the appointment.
-      defaultValue: true
-      version:
+        Defines a maximum number of attendees per event. The intention of this limit is to prevent out of memory situations.
+      defaultValue: 1000
+      version: 7.10.0
       reloadable: false
-      configcascadeAware: false
-      related:
+      configcascadeAware: true
+      related: 
       file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Calendar","Limit", "Appointment"]
-    - key: com.openexchange.calendar.undefinedstatusconflict
+      tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.maxAlarmsPerEvent
       description: |
-        This boolean option switches on/off, if an appointment
-        should conflict for a user if he/she has not yet accepted
-        or denied the appointment.
+        Defines a maximum number of alarms per event. The intention of this limit is to prevent out of memory situations.
+      defaultValue: 100
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.provider.google.refreshInterval
+      description: |
+        Defines the refresh interval in minutes for the google calendar provider.
+        If the value is < 0 the default of one day will be used.
+      defaultValue: 10
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Google"]
+    - key: com.openexchange.calendar.provider.google.retryOnErrorInterval
+      description: |
+        Defines the time in seconds to wait for the next request to google in case an error occurred.
+        The minimum is 2 seconds.
+      defaultValue: 1800
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Google"]
+    - key: com.openexchange.calendar.migration.batchSize
+      description: |
+        Configures the batch size used when performing the update task com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask. 
+      defaultValue: 500
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.migration.maxTombstoneAgeInMonths
+      description: |
+        Configures the maximum age of 'tombstone' calendar data that is considered when performing the update task com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask. 
+      defaultValue: 12
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.migration.intermediateCommits
+      description: |
+        Controls whether to perform intermediate database COMMITs after each batch during the update task
+        com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask or to have a big database transaction for
+        the whole update task.
+        
+        The reason for this is that big transactions are not handled well by MySQL Galera setups, therefore it is more safe to
+        have smaller chunk-wise COMMITS to ensure correctness. However, chunk-wise COMMITS come with a higher duration. 
       defaultValue: true
-      version:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.calendar.migration.batchSize
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.useLegacyStorage
+      description: |
+        Forcibly re-enables usage of the 'legacy' tables for the calendar storage. 
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.replayToLegacyStorage
+      description: |
+        Enables or disables the 'replaying' mode for the calendar storage that is entered automatically after migration. 
+      defaultValue: true
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.migration.purgeLegacyData
+      description: |
+        Manually activates an update task for purging legacy data after the calendar migration took place.  
+      defaultValue: false
+      version: 7.10.0
       reloadable: false
       configcascadeAware: false
-      related:
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.resolveGroupAttendees
+      description: |
+         Defines whether newly added group attendees should be resolved to their individual members implicitly, without preserving the group reference, or not. 
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Group"]
+    - key: com.openexchange.calendar.maxConflictsPerRecurrence
+      description: |
+         Defines the maximum number of calculated conflicts between two recurring event series. 
+      defaultValue: 5
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.maxAttendeesPerConflict
+      description: |
+         Defines the maximum number of attendees to indicate per conflict. 
+      defaultValue: 5
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.maxConflicts
+      description: |
+         Configures the overall maximum number of conflicts to return. 
+      defaultValue: 100
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.skipExternalAttendeeURIChecks
+      description: |
+         Controls whether checks of (external) attendee URIs are disabled or not. 
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar"]

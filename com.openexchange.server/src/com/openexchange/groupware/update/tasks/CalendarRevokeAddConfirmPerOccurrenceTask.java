@@ -49,17 +49,14 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -84,33 +81,29 @@ public class CalendarRevokeAddConfirmPerOccurrenceTask extends UpdateTaskAdapter
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextID = params.getContextId();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
-        final Connection connnection = dbService.getForUpdateTask(contextID);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            connnection.setAutoCommit(false);
+            con.setAutoCommit(false);
             rollback = true;
 
             final Column occurrenceColumn = new Column("occurrence", "INT(10) unsigned NOT NULL DEFAULT '0'");
 
-            Tools.checkAndDropColumns(connnection, "prg_dates_members", occurrenceColumn);
-            Tools.checkAndDropColumns(connnection, "del_dates_members", occurrenceColumn);
+            Tools.checkAndDropColumns(con, "prg_dates_members", occurrenceColumn);
+            Tools.checkAndDropColumns(con, "del_dates_members", occurrenceColumn);
 
-            Tools.checkAndDropColumns(connnection, "dateExternal", occurrenceColumn);
-            Tools.checkAndDropColumns(connnection, "delDateExternal", occurrenceColumn);
+            Tools.checkAndDropColumns(con, "dateExternal", occurrenceColumn);
+            Tools.checkAndDropColumns(con, "delDateExternal", occurrenceColumn);
 
-            connnection.commit();
+            con.commit();
             rollback = false;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                rollback(connnection);
+                rollback(con);
             }
-            autocommit(connnection);
-            Database.backNoTimeout(contextID, true, connnection);
+            autocommit(con);
         }
     }
 

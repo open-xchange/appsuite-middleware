@@ -50,12 +50,10 @@
 package com.openexchange.rest.services.database.osgi;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.services.database.DatabaseRESTService;
 import com.openexchange.rest.services.database.internal.DatabaseEnvironment;
@@ -64,7 +62,7 @@ import com.openexchange.rest.services.database.sql.CreateServiceSchemaLockTable;
 import com.openexchange.rest.services.database.sql.CreateServiceSchemaLockTableTask;
 import com.openexchange.rest.services.database.sql.CreateServiceSchemaVersionTable;
 import com.openexchange.rest.services.database.sql.CreateServiceSchemaVersionTableTask;
-import com.openexchange.rest.services.database.sql.SetDBEngineUpdateTask;
+import com.openexchange.rest.services.database.sql.ServiceSchemaConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.rest.services.database.transactions.InMemoryTransactionKeeper;
 import com.openexchange.timer.TimerService;
 
@@ -82,29 +80,16 @@ public class DatabaseRESTActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
         final InMemoryTransactionKeeper txKeeper = new InMemoryTransactionKeeper();
         final DBVersionChecker versionChecker = new DBVersionChecker();
 
-        getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                txKeeper.tick(System.currentTimeMillis());
-            }
-        }, 2, 1, TimeUnit.MINUTES);
+        getService(TimerService.class).scheduleAtFixedRate(() -> txKeeper.tick(System.currentTimeMillis()), 2, 1, TimeUnit.MINUTES);
 
         registerService(DatabaseRESTService.class, new DatabaseRESTService(this, new DatabaseEnvironment(txKeeper, versionChecker)));
 
         registerService(CreateTableService.class, new CreateServiceSchemaVersionTable());
         registerService(CreateTableService.class, new CreateServiceSchemaLockTable());
 
-        registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
-
-            @Override
-            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(new CreateServiceSchemaVersionTableTask(getService(DatabaseService.class)), new CreateServiceSchemaLockTableTask(getService(DatabaseService.class)), new SetDBEngineUpdateTask());
-            }
-        });
+        registerService(UpdateTaskProviderService.class, () -> Arrays.asList(new CreateServiceSchemaVersionTableTask(getService(DatabaseService.class)), new CreateServiceSchemaLockTableTask(getService(DatabaseService.class)), new ServiceSchemaConvertUtf8ToUtf8mb4UpdateTask()));
     }
 }

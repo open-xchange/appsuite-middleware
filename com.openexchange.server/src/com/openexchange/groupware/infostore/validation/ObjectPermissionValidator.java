@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.infostore.validation;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.sql.Connection;
 import java.util.ArrayList;

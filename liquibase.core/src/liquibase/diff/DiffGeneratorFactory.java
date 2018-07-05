@@ -1,14 +1,21 @@
 package liquibase.diff;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.snapshot.*;
-
-import java.util.*;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.EmptyDatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 
 public class DiffGeneratorFactory {
 

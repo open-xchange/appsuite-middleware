@@ -49,16 +49,16 @@
 
 package com.openexchange.subscribe.external.parser;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.external.ExternalSubscriptionSource;
 import com.openexchange.subscribe.microformats.parser.HTMLMicroformatParserFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

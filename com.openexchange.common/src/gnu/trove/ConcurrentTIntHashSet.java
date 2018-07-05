@@ -49,15 +49,15 @@
 
 package gnu.trove;
 
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link ConcurrentTIntHashSet}

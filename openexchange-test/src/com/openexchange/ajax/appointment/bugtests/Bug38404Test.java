@@ -61,6 +61,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.test.CalendarTestManager;
 
 /**
@@ -78,6 +79,7 @@ public class Bug38404Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -118,7 +120,7 @@ public class Bug38404Test extends AbstractAJAXSession {
             }
         }
 
-        Appointment[] all = ctm2.all(getClient2().getValues().getPrivateAppointmentFolder(), D("11.08.2015 08:00"), D("11.08.2015 09:00"));
+        Appointment[] all = ctm2.all(getClient2().getValues().getPrivateAppointmentFolder(), D("11.08.2015 00:00", TimeZones.UTC), D("12.08.2015 00:00", TimeZones.UTC));
         int exceptionId = 0;
         for (Appointment app : all) {
             if (app.getRecurrenceID() == appointment.getObjectID() && app.getRecurrenceID() != app.getObjectID()) {
@@ -178,6 +180,7 @@ public class Bug38404Test extends AbstractAJAXSession {
         assertEquals("Wrong end.", D("11.08.2015 09:00"), loaded.getEndDate());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -106,7 +106,7 @@ public class I18nImpl implements I18nService {
 
     @Override
     public boolean hasKey(String context, String key) {
-        return context == null ? hasKey(key) : null;
+        return context == null ? hasKey(key) : false;
     }
 
     @Override

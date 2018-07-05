@@ -53,9 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.i18n.tools.TemplateToken;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link CreationDateReplacement} - Creation date replacement.
@@ -95,7 +93,7 @@ public final class CreationDateReplacement extends AbstractDateReplacement {
         if (d == null) {
             return d;
         }
-        final Calendar helper = Calendar.getInstance(ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone("UTC"), Locale.ENGLISH);
+        final Calendar helper = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
         helper.setTime(d);
         helper.set(Calendar.SECOND, 0);
         helper.set(Calendar.MILLISECOND, 0);

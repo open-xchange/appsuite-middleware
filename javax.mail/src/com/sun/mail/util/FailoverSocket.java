@@ -76,8 +76,6 @@ public class FailoverSocket extends Socket {
         PropUtil.getBooleanSystemProperty("mail.socket.debug", false),
         System.out);
 
-    private static final int DEFAULT_CONNECT_TIMEOUT = 1000;
-
     // ----------------------------------------------------------------------------------------------------
 
     private final Socket socket;
@@ -112,12 +110,22 @@ public class FailoverSocket extends Socket {
         int maxRetries = PropUtil.getIntProperty(props, prefix + ".multiAddress.maxRetries", 3);
 
         // Establish socket (with fail-over behavior)
-        this.socket = connectToNext(0, Math.min(maxRetries, selector.length()));
+        this.socket = connectToNext(0, Math.min(maxRetries, selector.length()), null);
     }
 
-    private Socket connectToNext(int retryCount, int maxRetries) throws IOException {
+    private Socket connectToNext(int retryCount, int maxRetries, com.sun.mail.util.SocketConnectException previousConnectError) throws IOException {
         // Grab the IP address to use
         InetAddress addressToUse = selector.currentAddress();
+        if (null == addressToUse) {
+            if (null != previousConnectError) {
+                // Selector provides no further IP addresses to use
+                throw previousConnectError;
+            }
+
+            // Selector provides no IP address at all
+            InetAddress address = InetAddress.getAllByName(host)[0];
+            return SocketFetcher.getSocket(address, host, port, props, prefix, useSSL);
+        }
 
         // Try to establish a socket connection
         try {
@@ -137,7 +145,7 @@ public class FailoverSocket extends Socket {
                 logger.finer("Failed to connect to " + e.getHost() + " (address " + e.getAddress() + "), port " + e.getPort() + ". Retrying in " + TimeUnit.NANOSECONDS.toMicros(backoffNanos) + " microseconds");
             }
             LockSupport.parkNanos(backoffNanos);
-            return connectToNext(retry, maxRetries);
+            return connectToNext(retry, maxRetries, e);
         }
     }
 

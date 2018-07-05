@@ -51,12 +51,11 @@ package com.openexchange.filestore.s3.internal;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -412,13 +411,15 @@ public enum S3ExceptionCode implements DisplayableOXExceptionCode {
     /**
      * The bucket POST must contain the specified field name. If it is specified, please check the order of the fields.
      */
-    UserKeyMustBeSpecified("The bucket POST must contain the specified field name. If it is specified, please check the order of the"
-        + " fields.", CATEGORY_ERROR, 79),
-
+    UserKeyMustBeSpecified("The bucket POST must contain the specified field name. If it is specified, please check the order of the fields.", CATEGORY_ERROR, 79),
     /**
-     * The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
+     * The S3 storage responds with "Bad Request". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
      */
     BadRequest(S3ExceptionMessages.BadRequest_MSG, CATEGORY_ERROR, 80),
+    /**
+     * Failed to create a bucket for name "%1$s" using region "%2$s"
+     */
+    BUCKET_CREATION_FAILED(S3ExceptionMessages.BUCKET_CREATION_FAILED, CATEGORY_CONFIGURATION, 81);
 
     ;
 
@@ -429,7 +430,7 @@ public enum S3ExceptionCode implements DisplayableOXExceptionCode {
 
     private static final Map<String, S3ExceptionCode> MAP;
     static {
-        final Map<String, S3ExceptionCode> m = new HashMap<String, S3ExceptionCode>(100);
+        ImmutableMap.Builder<String, S3ExceptionCode> m = ImmutableMap.builder();
         m.put(toLowerCase("AccessDenied"), AccessDenied);
         m.put(toLowerCase("AccountProblem"), AccountProblem);
         m.put(toLowerCase("AmbiguousGrantByEmailAddress"), AmbiguousGrantByEmailAddress);
@@ -507,7 +508,7 @@ public enum S3ExceptionCode implements DisplayableOXExceptionCode {
         m.put(toLowerCase("UnexpectedContent"), UnexpectedContent);
         m.put(toLowerCase("UnresolvableGrantByEmailAddress"), UnresolvableGrantByEmailAddress);
         m.put(toLowerCase("UserKeyMustBeSpecified"), UserKeyMustBeSpecified);
-        MAP = Collections.unmodifiableMap(m);
+        MAP = m.build();
     }
 
     /**

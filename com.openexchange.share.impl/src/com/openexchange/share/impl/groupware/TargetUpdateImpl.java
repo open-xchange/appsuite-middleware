@@ -50,6 +50,8 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -58,10 +60,15 @@ import java.util.Map.Entry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
+import com.openexchange.folderstorage.FolderPermissionType;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.osgi.Tools;
@@ -69,6 +76,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.HandlerParameters;
+import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.core.groupware.FolderTargetProxy;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.user.UserService;
 
@@ -82,7 +92,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
 
     private final HandlerParameters parameters;
 
-    public TargetUpdateImpl(Session session, Connection writeCon, ServiceLookup services, ModuleHandlerRegistry handlers) throws OXException {
+    public TargetUpdateImpl(Session session, Connection writeCon, ServiceLookup services, ModuleExtensionRegistry<ModuleHandler> handlers) throws OXException {
         super(services, handlers);
         parameters = new HandlerParameters();
         parameters.setSession(session);
@@ -113,21 +123,96 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
     protected void updateFolders(List<TargetProxy> proxies) throws OXException {
         FolderService folderService = getFolderService();
         for (TargetProxy proxy : proxies) {
-            UserizedFolder folder = ((FolderTargetProxy) proxy).getFolder();
-            AbstractFolder toUpdate = new AbstractFolder() {
+            FolderTargetProxy folderTargetProxy = ((FolderTargetProxy) proxy);
+            UserizedFolder folder = folderTargetProxy.getFolder();
+            FolderUpdate folderUpdate = new FolderUpdate();
+            folderUpdate.setTreeID(folder.getTreeID());
+            folderUpdate.setID(folder.getID());
+            folderUpdate.setPermissions(folder.getPermissions());
+            folderService.updateFolder(folderUpdate, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
 
-                private static final long serialVersionUID = -842650996626709735L;
+            if (folder.getContentType().getModule() == FolderObject.INFOSTORE) {
+                // Add permission to sub folders
+                FolderResponse<UserizedFolder[]> folderObjects = folderService.getSubfolders(folder.getTreeID(), folder.getID(), true, parameters.getSession(), parameters.getFolderServiceDecorator());
 
-                @Override
-                public boolean isGlobalID() {
-                    return false;
+                List<Permission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
+                List<Permission> removedPermissions = folderTargetProxy.getRemovedPermissions();
+
+                FolderServiceDecorator folderServiceDecorator;
+                try {
+                    folderServiceDecorator = parameters.getFolderServiceDecorator().clone();
+                } catch (CloneNotSupportedException e) {
+                    // should never occur
+                    folderServiceDecorator = parameters.getFolderServiceDecorator();
                 }
-            };
-            toUpdate.setTreeID(folder.getTreeID());
-            toUpdate.setPermissions(folder.getPermissions());
-            toUpdate.setID(folder.getID());
-            folderService.updateFolder(toUpdate, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
+                for (UserizedFolder fol : folderObjects.getResponse()) {
+                    updateSubfolder(folderService, fol, appliedPermissions, removedPermissions, folderServiceDecorator);
+                }
+            }
         }
+    }
+
+    private void updateSubfolder(FolderService folderService, UserizedFolder fol, List<Permission> appliedPermissions, List<Permission> removedPermissions, FolderServiceDecorator folderServiceDecorator) throws OXException {
+        prepareInheritedPermissions(fol, appliedPermissions, removedPermissions);
+        folderService.updateFolder(fol, fol.getLastModifiedUTC(), parameters.getSession(), folderServiceDecorator);
+
+        FolderResponse<UserizedFolder[]> folderObjects = folderService.getSubfolders(fol.getTreeID(), fol.getID(), true, parameters.getSession(), parameters.getFolderServiceDecorator());
+        for(UserizedFolder subFolder : folderObjects.getResponse()) {
+            updateSubfolder(folderService, subFolder, appliedPermissions, removedPermissions, folderServiceDecorator);
+        }
+
+
+    }
+
+    private static UserizedFolder prepareInheritedPermissions(UserizedFolder folder, List<Permission> added, List<Permission> removed) {
+        Permission[] originalPermissions = folder.getPermissions();
+        if (null == originalPermissions) {
+            originalPermissions = new Permission[0];
+        }
+
+        List<Permission> filtered = new ArrayList<>(added.size());
+        for (Permission add : added) {
+            if(add.getType() == FolderPermissionType.LEGATOR) {
+                Permission clone = (Permission) add.clone();
+                clone.setPermissionLegator(folder.getParentID());
+                clone.setType(FolderPermissionType.INHERITED);
+                filtered.add(clone);
+            }
+        }
+
+        for (Permission rem : removed) {
+            if(rem.getType() == FolderPermissionType.LEGATOR) {
+                rem.setPermissionLegator(String.valueOf(folder.getParentID()));
+            }
+            rem.setType(FolderPermissionType.INHERITED);
+        }
+
+        List<Permission> permissions = new ArrayList<>(originalPermissions.length + filtered.size());
+        Collections.addAll(permissions, originalPermissions);
+        permissions.addAll(filtered);
+        permissions = removePermissions(permissions, removed);
+        folder.setPermissions(permissions.toArray(new Permission[permissions.size()]));
+        return folder;
+    }
+
+    protected static List<Permission> removePermissions(List<Permission> origPermissions, List<Permission> toRemove) {
+        if (origPermissions == null || origPermissions.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Permission> newPermissions = new ArrayList<Permission>(origPermissions);
+        Iterator<Permission> it = newPermissions.iterator();
+        while (it.hasNext()) {
+            Permission permission = it.next();
+            for (Permission removable : toRemove) {
+                if (permission.isGroup() == removable.isGroup() && permission.getEntity() == removable.getEntity()) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+
+        return newPermissions;
     }
 
     @Override
@@ -135,18 +220,10 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         FolderService folderService = getFolderService();
         for (TargetProxy proxy : proxies) {
             UserizedFolder folder = ((FolderTargetProxy) proxy).getFolder();
-            AbstractFolder toTouch = new AbstractFolder() {
-
-                private static final long serialVersionUID = -842650996626709735L;
-
-                @Override
-                public boolean isGlobalID() {
-                    return false;
-                }
-            };
-            toTouch.setTreeID(folder.getTreeID());
-            toTouch.setID(folder.getID());
-            folderService.updateFolder(toTouch, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
+            FolderUpdate folderUpdate = new FolderUpdate();
+            folderUpdate.setTreeID(folder.getTreeID());
+            folderUpdate.setID(folder.getID());
+            folderService.updateFolder(folderUpdate, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
         }
     }
 
@@ -193,7 +270,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                     folderTarget.getFolder(),
                     parameters.getSession(),
                     parameters.getFolderServiceDecorator());
-                FolderTargetProxy proxy = new FolderTargetProxy(folderTarget.getModule(), folder);
+                FolderTargetProxy proxy = new FolderTargetProxy(folderTarget, folder);
                 if (checkPermissions && !canShareFolder(folder)) {
                     throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(
                         parameters.getUser().getId(),
@@ -233,6 +310,38 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
 
     private <T> T getService(Class<T> clazz) throws OXException {
         return Tools.requireService(clazz, services);
+    }
+
+    private static final class FolderUpdate extends AbstractFolder implements SetterAwareFolder {
+
+        private static final long serialVersionUID = -8615729293509593034L;
+
+        private boolean containsSubscribed;
+
+        /**
+         * Initializes a new {@link FolderUpdate}.
+         */
+        public FolderUpdate() {
+            super();
+            subscribed = true;
+        }
+
+        @Override
+        public boolean isGlobalID() {
+            return false;
+        }
+
+        @Override
+        public void setSubscribed(boolean subscribed) {
+            super.setSubscribed(subscribed);
+            containsSubscribed = true;
+        }
+
+        @Override
+        public boolean containsSubscribed() {
+            return containsSubscribed;
+        }
+
     }
 
 }

@@ -49,12 +49,11 @@
 
 package com.openexchange.mail.mime;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
-
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ContentTypeTest}
@@ -62,6 +61,7 @@ import static org.junit.Assert.*;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContentTypeTest {
+
     /**
      * Initializes a new {@link ContentTypeTest}.
      */
@@ -69,8 +69,8 @@ public class ContentTypeTest {
         super();
     }
 
-         @Test
-     public void testTruncatedNameParameter() {
+    @Test
+    public void testTruncatedNameParameter() {
         try {
             String hdr = "application/pdf; name=The New York Times - Breaking News, World News & Multimedia.loc.pdf";
             com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
@@ -85,8 +85,8 @@ public class ContentTypeTest {
         }
     }
 
-         @Test
-     public void testWithCurlyBraces() {
+    @Test
+    public void testWithCurlyBraces() {
         try {
             String hdr = "{\"application/octet-stream\"}; name=\"6N1911.pdf\"";
             com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
@@ -101,8 +101,8 @@ public class ContentTypeTest {
         }
     }
 
-         @Test
-     public void testMalformedHeaderValue() {
+    @Test
+    public void testMalformedHeaderValue() {
         try {
             String hdr = "=?windows-1252?q?application/pdf; name=\"blatt8.pdf\"";
             com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr);
@@ -114,6 +114,42 @@ public class ContentTypeTest {
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testBug56740() {
+        try {
+            String hdr = "t,text/html";
+            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr, true);
+            fail("Content-Type string \"t,text/html\" should no pass strict parsing");
+            contentType.setBaseType("foo/bar"); // To keep IDE happy
+        } catch (Exception e) {
+            assertTrue(e instanceof OXException);
+            OXException oxe = (OXException) e;
+            assertTrue(oxe.equalsCode(20, "MSG"));
+        }
+
+        try {
+            String hdr = "t/@,image/svg+xml";
+            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr, true);
+            fail("Content-Type string \"t/@,image/svg+xml\" should no pass strict parsing");
+            contentType.setBaseType("foo/bar"); // To keep IDE happy
+        } catch (Exception e) {
+            assertTrue(e instanceof OXException);
+            OXException oxe = (OXException) e;
+            assertTrue(oxe.equalsCode(20, "MSG"));
+        }
+
+        try {
+            String hdr = "text/plain;,text/html";
+            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr, true);
+            fail("Content-Type string \"text/plain;,text/html\" should no pass strict parsing");
+            contentType.setBaseType("foo/bar"); // To keep IDE happy
+        } catch (Exception e) {
+            assertTrue(e instanceof OXException);
+            OXException oxe = (OXException) e;
+            assertTrue(oxe.equalsCode(20, "MSG"));
         }
     }
 

@@ -67,10 +67,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
-import ch.qos.logback.classic.util.LogbackMDCAdapter;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import ch.qos.logback.classic.util.LogbackMDCAdapter;
 
 /**
  * {@link LogProperties} - Provides thread-local log properties.
@@ -291,9 +292,23 @@ public final class LogProperties {
          */
         LOGIN_VERSION("com.openexchange.login.version"),
         /**
+         * The resolved login name, which is supposed to be looked-up in '<code>login2user</code>' table
+         * <p>
+         * com.openexchange.login.resolvedLogin
+         */
+        LOGIN_RESOLVED_LOGIN("com.openexchange.login.resolvedLogin"),
+        /**
          * com.openexchange.hostname
          */
         HOSTNAME("com.openexchange.hostname"),
+        /**
+         * com.openexchange.localhost.ipAddress
+         */
+        LOCALHOST_IP_ADDRESS("com.openexchange.localhost.ipAddress"),
+        /**
+         * com.openexchange.localhost.version
+         */
+        LOCALHOST_VERSION("com.openexchange.localhost.version"),
 
         ;
 
@@ -342,7 +357,7 @@ public final class LogProperties {
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
-    private static final ThreadLocal<Map<String, Object>> TMP_FILES = new ThreadLocal<Map<String, Object>>();
+    private static final ThreadLocal<Map<File, Object>> TMP_FILES = new ThreadLocal<Map<File, Object>>();
 
     private static final Object PRESENT = new Object();
 
@@ -351,8 +366,8 @@ public final class LogProperties {
      *
      * @return The removed temporary file property or <code>null</code>
      */
-    public static String[] getTempFiles() {
-        Map<String, Object> map = TMP_FILES.get();
+    public static File[] getTempFiles() {
+        Map<File, Object> map = TMP_FILES.get();
         if (map == null) {
             return null;
         }
@@ -360,7 +375,7 @@ public final class LogProperties {
         if (size <= 0) {
             return null;
         }
-        return map.keySet().toArray(new String[size]);
+        return map.keySet().toArray(new File[size]);
     }
 
     /**
@@ -368,8 +383,8 @@ public final class LogProperties {
      *
      * @return The removed temporary file property or <code>null</code>
      */
-    public static String[] getAndRemoveTempFiles() {
-        Map<String, Object> map = TMP_FILES.get();
+    public static File[] getAndRemoveTempFiles() {
+        Map<File, Object> map = TMP_FILES.get();
         if (map == null) {
             return null;
         }
@@ -377,7 +392,7 @@ public final class LogProperties {
         if (size <= 0) {
             return null;
         }
-        String[] pathNames = map.keySet().toArray(new String[size]);
+        File[] pathNames = map.keySet().toArray(new File[size]);
         map.clear();
         return pathNames;
     }
@@ -385,30 +400,32 @@ public final class LogProperties {
     /**
      * Adds given temporary file.
      *
-     * @param file The temporary file
-     */
-    public static void addTempFile(File file) {
-        if (null != file) {
-            addTempFile(file.getPath());
-        }
-    }
-
-    /**
-     * Adds given denoted temporary file.
-     *
      * @param pathName The denoted temporary file
      */
     public static void addTempFile(String pathName) {
         if (Strings.isEmpty(pathName)) {
             return;
         }
-        Map<String, Object> oldMap = TMP_FILES.get();
+
+        addTempFile(new File(pathName));
+    }
+
+    /**
+     * Adds given denoted temporary file.
+     *
+     * @param file The temporary file
+     */
+    public static void addTempFile(File file) {
+        if (null == file) {
+            return;
+        }
+        Map<File, Object> oldMap = TMP_FILES.get();
         if (oldMap == null) {
-            Map<String, Object> newMap = new HashMap<String, Object>(4, 0.9F);
+            Map<File, Object> newMap = new HashMap<File, Object>(4, 0.9F);
             TMP_FILES.set(newMap);
-            newMap.put(pathName, PRESENT);
+            newMap.put(file, PRESENT);
         } else {
-            oldMap.put(pathName, PRESENT);
+            oldMap.put(file, PRESENT);
         }
     }
 
@@ -419,7 +436,10 @@ public final class LogProperties {
      */
     public static void removeTempFile(File file) {
         if (null != file) {
-            removeTempFile(file.getPath());
+            Map<File, Object> map = TMP_FILES.get();
+            if (map != null) {
+                map.remove(file);
+            }
         }
     }
 
@@ -432,17 +452,14 @@ public final class LogProperties {
         if (Strings.isEmpty(pathName)) {
             return;
         }
-        Map<String, Object> map = TMP_FILES.get();
-        if (map != null) {
-            map.remove(pathName);
-        }
+        removeTempFile(new File(pathName));
     }
 
     /**
      * Removes all temporary files.
      */
     public static void removeAllTempFiles() {
-        Map<String, Object> map = TMP_FILES.get();
+        Map<File, Object> map = TMP_FILES.get();
         if (map != null) {
             map.clear();
         }
@@ -801,7 +818,7 @@ public final class LogProperties {
         return new Props();
     }
 
-    private static final Set<String> SANITIZE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("password", "epassword")));
+    private static final Set<String> SANITIZE = ImmutableSet.of("password", "epassword");
     private static final String REPLACEMENT = "xxx";
 
     /**
@@ -825,6 +842,11 @@ public final class LogProperties {
         if (Strings.isEmpty(queryString)) {
             return queryString;
         }
+
+        if (Strings.asciiLowerCase(queryString).indexOf("password=", 0) < 0) {
+            return queryString;
+        }
+
         String[] pairs = Strings.splitByAmps(queryString);
         StringBuilder sb = new StringBuilder(queryString.length());
         boolean first = true;

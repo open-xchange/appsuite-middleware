@@ -299,7 +299,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
         query.put(SITE_NAME, site);
 
         final Collection<Publication> result = getStorage().search(ctx, getTarget().getId(), query);
-        if (result.isEmpty()) {
+        if (null == result || result.isEmpty()) {
             return null;
         }
 
@@ -317,7 +317,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
 
     @Override
     protected SecurityStrategy getSecurityStrategy() {
-        return FOLDER_ADMIN_ONLY;
+        return FOLDER_ADMIN_ONLY.get();
     }
 
     private static final class OptionalTemplatingTarget extends PublicationTarget implements UserSpecificPublicationTarget {

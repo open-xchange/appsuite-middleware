@@ -50,6 +50,7 @@
 package com.openexchange.drive.impl.internal;
 
 import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
+import java.sql.Connection;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,9 +58,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveSession;
@@ -69,6 +73,8 @@ import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.FolderStats;
 import com.openexchange.drive.NotificationParameters;
+import com.openexchange.drive.RestoreContent;
+import com.openexchange.drive.TrashContent;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
@@ -88,13 +94,22 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FolderPath;
+import com.openexchange.file.storage.OriginAwareFileStorageFolder;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
+import com.openexchange.folderstorage.FolderResponse;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Reference;
 import com.openexchange.session.Session;
 import com.openexchange.share.LinkUpdate;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.Entities;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link DriveUtilityImpl}
@@ -102,6 +117,19 @@ import com.openexchange.share.notification.Entities;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DriveUtilityImpl implements DriveUtility {
+
+    static final Logger LOG = LoggerFactory.getLogger(DriveUtilityImpl.class);
+
+    private static final String MODIFIED_BY = "modified_by";
+    private static final String CREATED_BY = "created_by";
+    private static final String MODIFIED = "modified";
+    private static final String CREATED = "created";
+    private static final String NAME = "name";
+    private static final String CHECKSUM = "checksum";
+    private static final String PATH = "path";
+    private static final String ORIGIN = "origin";
+    private static final String DIRECTORIES = "directories";
+    private static final String FILES = "files";
 
     private static final DriveUtility instance = new DriveUtilityImpl();
 
@@ -161,8 +189,8 @@ public class DriveUtilityImpl implements DriveUtility {
         try {
             for (FileStorageFolder subfolder : folders) {
                 JSONObject jsonObject = new JsonDirectoryMetadata(syncSession, subfolder).build(false);
-                jsonObject.put("path", syncSession.getStorage().getPath(subfolder.getId()));
-                jsonObject.put("name", subfolder.getName());
+                jsonObject.put(PATH, syncSession.getStorage().getPath(subfolder.getId()));
+                jsonObject.put(NAME, subfolder.getName());
                 metadata.add(jsonObject);
             }
         } catch (JSONException e) {
@@ -200,8 +228,8 @@ public class DriveUtilityImpl implements DriveUtility {
             public JSONObject call() throws OXException {
                 JSONObject jsonObject = new JSONObject(2);
                 try {
-                    jsonObject.put("directories", getDirectorySharesMetadata(syncSession));
-                    jsonObject.put("files", getFileSharesMetadata(syncSession));
+                    jsonObject.put(DIRECTORIES, getDirectorySharesMetadata(syncSession));
+                    jsonObject.put(FILES, getFileSharesMetadata(syncSession));
                 } catch (JSONException e) {
                     throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
@@ -443,7 +471,7 @@ public class DriveUtilityImpl implements DriveUtility {
         syncSession.trace("Folder [" + directoryVersion + "] moved successfully.");
     }
 
-    private JSONArray getFileSharesMetadata(SyncSession session) throws OXException, JSONException {
+    JSONArray getFileSharesMetadata(SyncSession session) throws OXException, JSONException {
         List<FileStorageCapability> specialCapabilites = new ArrayList<FileStorageCapability>();
         List<Field> fields = new ArrayList<File.Field>();
         fields.addAll(DriveConstants.FILE_FIELDS);
@@ -459,14 +487,14 @@ public class DriveUtilityImpl implements DriveUtility {
         JSONArray jsonArray = new JSONArray(files.size());
         for (File file : files) {
             JSONObject jsonObject = new JsonFileMetadata(session, file).build(fileStorageCapabilities);
-            jsonObject.put("path", session.getStorage().getPath(file.getFolderId()));
-            jsonObject.put("checksum", ChecksumProvider.getChecksum(session, file).getChecksum());
+            jsonObject.put(PATH, session.getStorage().getPath(file.getFolderId()));
+            jsonObject.put(CHECKSUM, ChecksumProvider.getChecksum(session, file).getChecksum());
             jsonArray.put(jsonObject);
         }
         return jsonArray;
     }
 
-    private JSONArray getDirectorySharesMetadata(SyncSession session) throws OXException, JSONException {
+    JSONArray getDirectorySharesMetadata(SyncSession session) throws OXException, JSONException {
         List<FileStorageFolder> folders = session.getStorage().getSharedFolders();
         if (null == folders || 0 == folders.size()) {
             return new JSONArray(0);
@@ -480,40 +508,40 @@ public class DriveUtilityImpl implements DriveUtility {
         for (int i = 0; i < folderIDs.size(); i++) {
             FileStorageFolder folder = folders.get(i);
             JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
-            jsonObject.put("checksum", checksums.get(i).getChecksum());
-            jsonObject.put("path", session.getStorage().getPath(folder.getId()));
-            jsonObject.put("name", folder.getName());
+            jsonObject.put(CHECKSUM, checksums.get(i).getChecksum());
+            jsonObject.put(PATH, session.getStorage().getPath(folder.getId()));
+            jsonObject.put(NAME, folder.getName());
             jsonArray.put(jsonObject);
         }
         return jsonArray;
     }
 
-    private JSONObject getFileMetadata(SyncSession session, String path, FileVersion fileVersion) throws OXException, JSONException {
+    JSONObject getFileMetadata(SyncSession session, String path, FileVersion fileVersion) throws OXException, JSONException {
         File file = session.getStorage().getFileByName(path, fileVersion.getName(), true);
         if (null == file || false == ChecksumProvider.matches(session, file, fileVersion.getChecksum())) {
             throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
         }
         JSONObject jsonObject = new JsonFileMetadata(session, session.getStorage().getFile(file.getId())).build();
-        jsonObject.put("path", session.getStorage().getPath(file.getFolderId()));
-        jsonObject.put("checksum", ChecksumProvider.getChecksum(session, file).getChecksum());
+        jsonObject.put(PATH, session.getStorage().getPath(file.getFolderId()));
+        jsonObject.put(CHECKSUM, ChecksumProvider.getChecksum(session, file).getChecksum());
         return jsonObject;
     }
 
-    private JSONObject getDirectoryMetadata(SyncSession session, DirectoryVersion directoryVersion) throws OXException, JSONException {
+    JSONObject getDirectoryMetadata(SyncSession session, DirectoryVersion directoryVersion) throws OXException, JSONException {
         ServerDirectoryVersion serverVersion = ServerDirectoryVersion.valueOf(directoryVersion, session);
         FileStorageFolder folder = session.getStorage().getFolder(serverVersion.getPath());
         JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
-        jsonObject.put("checksum", serverVersion.getChecksum());
-        jsonObject.put("path", serverVersion.getPath());
-        jsonObject.put("name", folder.getName());
+        jsonObject.put(CHECKSUM, serverVersion.getChecksum());
+        jsonObject.put(PATH, serverVersion.getPath());
+        jsonObject.put(NAME, folder.getName());
         if (null != folder.getCreationDate()) {
-            jsonObject.put("created", folder.getCreationDate().getTime());
+            jsonObject.put(CREATED, folder.getCreationDate().getTime());
         }
         if (null != folder.getLastModifiedDate()) {
-            jsonObject.put("modified", folder.getLastModifiedDate().getTime());
+            jsonObject.put(MODIFIED, folder.getLastModifiedDate().getTime());
         }
-        jsonObject.put("created_by", folder.getCreatedBy());
-        jsonObject.put("modified_by", folder.getModifiedBy());
+        jsonObject.put(CREATED_BY, folder.getCreatedBy());
+        jsonObject.put(MODIFIED_BY, folder.getModifiedBy());
         return jsonObject;
     }
 
@@ -559,6 +587,89 @@ public class DriveUtilityImpl implements DriveUtility {
     }
 
     @Override
+    public JSONObject getTrashContent(DriveSession session) throws OXException {
+        SyncSession syncSession = new SyncSession(session);
+        DriveStorage storage = syncSession.getStorage();
+        if (false == storage.hasTrashFolder()) {
+            return null;
+        }
+        TrashContent trashContent = storage.getTrashContent();
+        JSONObject result = new JSONObject(2);
+
+        try {
+            FileStorageFolder[] subfolders = trashContent.getSubfolders();
+            if (subfolders != null && subfolders.length > 0) {
+                JSONArray folderArray = loadFolders(syncSession, subfolders);
+                result.put(DIRECTORIES, filterUnwantedFields(folderArray));
+            }
+
+            SearchIterator<File> files = trashContent.getFiles();
+            if (files != null) {
+                JSONArray fileArray = loadFiles(syncSession, files);
+                if(fileArray.length() > 0) {
+                    result.put(FILES, filterUnwantedFields(fileArray));
+                }
+            }
+        } catch (JSONException ex) {
+            throw DriveExceptionCodes.IO_ERROR.create(ex, ex.getMessage());
+        }
+
+        return result;
+    }
+
+    final static String[] UNWANTED_FIELDS = new String[] { "own_rights", "permissions", "extended_permissions", "jump", "shareable", "preview", "thumbnail" };
+
+    private JSONArray filterUnwantedFields(JSONArray array) {
+        array.forEach(new Consumer<Object>() {
+
+            @Override
+            public void accept(Object t) {
+                if (t instanceof JSONObject) {
+                    JSONObject json = (JSONObject) t;
+                    for (String field : UNWANTED_FIELDS) {
+                        json.remove(field);
+                    }
+                }
+            }
+        });
+        return array;
+    }
+
+    private JSONArray loadFiles(SyncSession syncSession, SearchIterator<File> files) throws OXException, JSONException {
+        JSONArray fileArray = new JSONArray();
+        while (files.hasNext()) {
+            File file = files.next();
+            JSONObject jsonObject = new JsonFileMetadata(syncSession, file).build();
+            if (file.getOrigin() != null) {
+                jsonObject.put(ORIGIN, OriginPathFolderFieldWriter.getInstance().getOrigin(file.getOrigin(), syncSession));
+            }
+            fileArray.put(jsonObject);
+        }
+        return fileArray;
+    }
+
+    private JSONArray loadFolders(SyncSession syncSession, FileStorageFolder[] subfolders) throws OXException, JSONException {
+        JSONArray folderArray = new JSONArray(subfolders.length);
+        for (FileStorageFolder folder : subfolders) {
+            JSONObject jsonObject = new JsonDirectoryMetadata(syncSession, folder).build(false);
+            jsonObject.put(NAME, folder.getName());
+            if (null != folder.getCreationDate()) {
+                jsonObject.put(CREATED, folder.getCreationDate().getTime());
+            }
+            if (null != folder.getLastModifiedDate()) {
+                jsonObject.put(MODIFIED, folder.getLastModifiedDate().getTime());
+            }
+            jsonObject.put(CREATED_BY, folder.getCreatedBy());
+            jsonObject.put(MODIFIED_BY, folder.getModifiedBy());
+            FolderPath origin = ((OriginAwareFileStorageFolder) folder).getOrigin();
+            jsonObject.put(ORIGIN, OriginPathFolderFieldWriter.getInstance().getOrigin(origin, syncSession));
+            folderArray.put(jsonObject);
+        }
+        return folderArray;
+    }
+
+
+    @Override
     public FolderStats emptyTrash(DriveSession session) throws OXException {
         DriveStorage storage = new SyncSession(session).getStorage();
         if (false == storage.hasTrashFolder()) {
@@ -567,6 +678,131 @@ public class DriveUtilityImpl implements DriveUtility {
         FileStorageFolder trashFolder = storage.getTrashFolder();
         storage.getFolderAccess().clearFolder(trashFolder.getId(), true);
         return storage.getFolderStats(trashFolder.getId(), true);
+    }
+
+    @Override
+    public void removeFromTrash(DriveSession session, List<String> files, List<String> folders) throws OXException {
+        new SyncSession(session).getStorage().deleteFromTrash(files, folders);
+    }
+
+    @Override
+    public RestoreContent restoreFromTrash(DriveSession session, List<String> files, List<String> folders) throws OXException {
+        return new SyncSession(session).getStorage().restoreFromTrash(files, folders);
+    }
+
+
+    private static final class OriginPathFolderFieldWriter {
+
+        private static final String USER_INFOSTORE_FOLDER_ID   = Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+        private static final String PUBLIC_INFOSTORE_FOLDER_ID = Integer.toString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+        private static final String TREE_ID = "1";
+
+        private static OriginPathFolderFieldWriter INSTANCE = new OriginPathFolderFieldWriter();
+
+        public static OriginPathFolderFieldWriter getInstance() {
+            return INSTANCE;
+        }
+
+        /**
+         * Initializes a new {@link OriginPathFolderFieldWriter}.
+         */
+        private OriginPathFolderFieldWriter() {
+            super();
+        }
+
+        public String getOrigin(FolderPath originPath, SyncSession session) {
+            if (null == originPath) {
+                return null;
+            }
+
+            try {
+                String folderId;
+                switch (originPath.getType()) {
+                    case PRIVATE:
+                        folderId = getInfoStoreDefaultFolder(session).getID();
+                        break;
+                    case PUBLIC:
+                        folderId = PUBLIC_INFOSTORE_FOLDER_ID;
+                        break;
+                    case SHARED:
+                        folderId = USER_INFOSTORE_FOLDER_ID;
+                        break;
+                    case UNDEFINED: /* fall-through */
+                    default:
+                        folderId = getInfoStoreDefaultFolder(session).getID();
+                        originPath = FolderPath.EMPTY_PATH;
+                }
+
+                UserizedFolder folder = getFolderFor(folderId, session);
+                Locale locale = session.getDriveSession().getLocale();
+                StringBuilder sb = new StringBuilder();
+                sb.append(folder.getLocalizedName(locale));
+
+                if (!originPath.isEmpty()) {
+                    boolean searchInSubfolders = true;
+                    for (String folderName : originPath.getPathForRestore()) {
+                        boolean found = false;
+                        if (searchInSubfolders) {
+                            UserizedFolder[] subfolders = getSuboldersFor(folderId, session);
+                            for (int i = 0; !found && i < subfolders.length; i++) {
+                                UserizedFolder subfolder = subfolders[i];
+                                if (folderName.equals(subfolder.getName())) {
+                                    found = true;
+                                    sb.append("/").append(subfolder.getLocalizedName(locale));
+                                    folder = subfolder;
+                                }
+                            }
+                        }
+
+                        if (false == found) {
+                            sb.append("/").append(folderName);
+                            searchInSubfolders = false;
+                        }
+                    }
+                }
+
+                return sb.toString();
+            } catch (OXException e) {
+                LOG.debug("Failed to determine original path", e);
+                return null;
+            }
+        }
+
+        private UserizedFolder getInfoStoreDefaultFolder(SyncSession session) throws OXException {
+            FolderServiceDecorator decorator = initDecorator(session);
+            FolderService folderService = DriveServiceLookup.getService(FolderService.class, true);
+            return folderService.getDefaultFolder(session.getServerSession().getUser(), TREE_ID, InfostoreContentType.getInstance(), session.getServerSession(), decorator);
+        }
+
+        private UserizedFolder getFolderFor(String folderId, SyncSession session) throws OXException {
+            FolderServiceDecorator decorator = initDecorator(session);
+            FolderService folderService = DriveServiceLookup.getService(FolderService.class, true);
+            return folderService.getFolder(TREE_ID, folderId, session.getServerSession(), decorator);
+        }
+
+        private UserizedFolder[] getSuboldersFor(String folderId, SyncSession session) throws OXException {
+            FolderServiceDecorator decorator = initDecorator(session);
+            FolderService folderService = DriveServiceLookup.getService(FolderService.class, true);
+            FolderResponse<UserizedFolder[]> subfolderResponse = folderService.getSubfolders(TREE_ID, folderId, true, session.getServerSession(), decorator);
+            return subfolderResponse.getResponse();
+        }
+
+        /**
+         * Creates and initializes a folder service decorator ready to use with calls to the underlying folder service.
+         *
+         * @param session The sync session
+         * @return A new folder service decorator
+         */
+        private FolderServiceDecorator initDecorator(SyncSession session) {
+            FolderServiceDecorator decorator = new FolderServiceDecorator();
+            Object connection = session.getServerSession().getParameter(Connection.class.getName());
+            if (null != connection) {
+                decorator.put(Connection.class.getName(), connection);
+            }
+            decorator.put("altNames", Boolean.TRUE.toString());
+            decorator.setLocale(session.getDriveSession().getLocale());
+            return decorator;
+        }
     }
 
 }

@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange drive interfaces bundle
 Bundle-SymbolicName: com.openexchange.drive
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.openexchange.drive
-Import-Package: com.openexchange.ajax.container,
+Import-Package: com.google.common.collect,
+ com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.capabilities,
  com.openexchange.exception,
@@ -19,5 +20,6 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.share,
  com.openexchange.share.notification,
  com.openexchange.share.recipient,
+ com.openexchange.tools.iterator,
  com.openexchange.tools.session,
  org.json

@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,11 +40,26 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
-import java.net.*;
-import java.util.concurrent.*;
+import java.io.FileDescriptor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.net.SocketOption;
 import java.nio.channels.SocketChannel;
-import java.lang.reflect.*;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A special Socket that uses a ScheduledExecutorService to
@@ -314,8 +329,34 @@ public class WriteTimeoutSocket extends Socket {
         return socket.isOutputShutdown();
     }
 
+    /*
+     * The following three methods were added to java.net.Socket in Java SE 9.
+     * Since they're not supported on Android, and since we know that we
+     * never use them in JavaMail, we just stub them out here.
+     */
+    //@Override
+    public <T> Socket setOption(SocketOption<T> so, T val) throws IOException {
+    // socket.setOption(so, val);
+    // return this;
+    throw new UnsupportedOperationException("WriteTimeoutSocket.setOption");
+    }
+
+    //@Override
+    public <T> T getOption(SocketOption<T> so) throws IOException {
+    // return socket.getOption(so);
+    throw new UnsupportedOperationException("WriteTimeoutSocket.getOption");
+    }
+
+    //@Override
+    public Set<SocketOption<?>> supportedOptions() {
+    // return socket.supportedOptions();
+    return Collections.emptySet();
+    }
+
     /**
      * KLUDGE for Android, which has this illegal non-Java Compatible method.
+     *
+     * @return  the FileDescriptor object
      */
     public FileDescriptor getFileDescriptor$() {
 	try {
@@ -346,6 +387,7 @@ class TimeoutOutputStream extends OutputStream {
 	this.ses = ses;
 	this.timeout = timeout;
 	timeoutTask = new Callable<Object>() {
+	    @Override
 	    public Object call() throws Exception {
 		os.close();	// close the stream to abort the write
 		return null;

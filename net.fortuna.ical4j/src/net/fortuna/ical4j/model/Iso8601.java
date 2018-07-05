@@ -33,7 +33,6 @@ package net.fortuna.ical4j.model;
 
 import java.text.DateFormat;
 import java.util.Date;
-
 import net.fortuna.ical4j.util.CompatibilityHints;
 import net.fortuna.ical4j.util.Dates;
 import net.fortuna.ical4j.util.TimeZones;

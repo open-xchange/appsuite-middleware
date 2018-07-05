@@ -66,6 +66,7 @@ import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -88,6 +89,9 @@ public final class ListAction extends AbstractMailAccountAction {
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
+        if (null == jData) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
         MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         List<Attribute> attributes = getColumns(requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS));
 

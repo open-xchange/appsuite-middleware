@@ -67,8 +67,6 @@ import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
@@ -78,7 +76,6 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FLAGS;
 import com.sun.mail.imap.protocol.FetchResponse;
@@ -113,12 +110,13 @@ public final class AllFetch {
          * Handles given <code>com.sun.mail.imap.protocol.Item</code> instance and applies it to given message.
          *
          * @param item The item to handle
-         * @param msg The message to apply to
+         * @param config The IMAP config
          * @param logger The logger
+         * @param msg The message to apply to
          * @throws MessagingException If a messaging error occurs
          * @throws OXException If a mail error occurs
          */
-        public abstract void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException;
+        public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) throws OXException;
     }
 
     /**
@@ -131,7 +129,7 @@ public final class AllFetch {
         INTERNALDATE("INTERNALDATE", INTERNALDATE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
+            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
                 m.setReceivedDate(((INTERNALDATE) item).getDate());
             }
         }),
@@ -141,7 +139,7 @@ public final class AllFetch {
         UID("UID", UID.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
+            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
                 m.setMailId(Long.toString(((UID) item).uid));
             }
         }),
@@ -151,30 +149,8 @@ public final class AllFetch {
         FLAGS("FLAGS", FLAGS.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException {
-                MimeMessageConverter.parseFlags((FLAGS) item, m);
-            }
-        }),
-        /**
-         * BODYSTRUCTURE
-         */
-        BODYSTRUCTURE("BODYSTRUCTURE", BODYSTRUCTURE.class, new FetchItemHandler() {
-
-            @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException {
-                final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-                final StringBuilder sb = new StringBuilder();
-                sb.append(bs.type).append('/').append(bs.subtype);
-                if (bs.cParams != null) {
-                    sb.append(bs.cParams);
-                }
-                try {
-                    m.setContentType(new ContentType(sb.toString()));
-                } catch (final OXException e) {
-                    logger.warn("", e);
-                    m.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
-                }
-                m.setHasAttachment(MimeMessageUtility.hasAttachments(bs));
+            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) throws OXException {
+                MimeMessageConverter.parseFlags((FLAGS) item, config.getCapabilities().hasAttachmentMarker(), m);
             }
         }),
         /**
@@ -183,7 +159,7 @@ public final class AllFetch {
         SIZE("RFC822.SIZE", RFC822SIZE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
+            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
                 m.setSize(((RFC822SIZE) item).size);
             }
         }),
@@ -195,7 +171,7 @@ public final class AllFetch {
         ENVELOPE("ENVELOPE", ENVELOPE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
+            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
                 final com.sun.mail.imap.protocol.ENVELOPE envelope = (ENVELOPE) item;
                 // Date
                 m.setSentDate(envelope.date);
@@ -351,7 +327,7 @@ public final class AllFetch {
                                 for (final LowCostItem lowCostItem : items) {
                                     final Item item = getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
                                     try {
-                                        lowCostItem.getItemHandler().handleItem(item, m, LOG);
+                                        lowCostItem.getItemHandler().handleItem(item, m, config, LOG);
                                     } catch (final OXException e) {
                                         LOG.error("", e);
                                     }
@@ -369,10 +345,8 @@ public final class AllFetch {
                         return new MailMessage[0];
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new BadCommandException(response);
                 } else if (response.isNO()) {
                     /*
                      * Check number of messages
@@ -385,10 +359,8 @@ public final class AllFetch {
                         LOG.warn("STATUS command failed. Throwing original exception: {}", response, e);
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, imapFolder.getFullName());
+                    throw new CommandFailedException(response);
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);

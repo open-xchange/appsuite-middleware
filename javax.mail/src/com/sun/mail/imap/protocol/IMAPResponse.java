@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -40,10 +40,13 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.io.*;
-import java.util.*;
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.util.ASCIIUtility;
 
 /**
  * This class represents a response obtained from the input stream
@@ -93,15 +96,31 @@ public class IMAPResponse extends Response {
      * @exception	ProtocolException	for protocol failures
      */
     public IMAPResponse(String r) throws IOException, ProtocolException {
-	super(r);
+	this(r, true);
+    }
+
+    /**
+     * For testing.
+     *
+     * @param	r	the response string
+     * @param	utf8	UTF-8 allowed?
+     * @exception	IOException	for I/O errors
+     * @exception	ProtocolException	for protocol failures
+     * @since	JavaMail 1.6.0
+     */
+    public IMAPResponse(String r, boolean utf8)
+				throws IOException, ProtocolException {
+	super(r, utf8);
 	init();
     }
 
     /**
-     * Read a list of space-separated "flag_extension" sequences and 
+     * Read a list of space-separated "flag-extension" sequences and 
      * return the list as a array of Strings. An empty list is returned
-     * as null.  This is an IMAP-ism, and perhaps this method should 
-     * moved into the IMAP layer.
+     * as null.  Each item is expected to be an atom, possibly preceeded
+     * by a backslash, but we aren't that strict; we just look for strings
+     * separated by spaces and terminated by a right paren.  We assume items
+     * are always ASCII.
      *
      * @return	the list items as a String array
      */
@@ -112,7 +131,7 @@ public class IMAPResponse extends Response {
 	    return null;
 	index++; // skip '('
 
-	List<String> v = new ArrayList<String>();
+	List<String> v = new ArrayList<>();
 	int start;
 	for (start = index; buffer[index] != ')'; index++) {
 	    if (buffer[index] == ' ') { // got one item

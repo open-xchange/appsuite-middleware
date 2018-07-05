@@ -52,11 +52,11 @@ package com.openexchange.mail.osgi;
 import org.osgi.framework.BundleContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
+import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
 import com.openexchange.mail.api.AuthenticationFailedHandlerService;
 import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
 import com.openexchange.mail.api.AuthenticationFailureHandlerResult.Type;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.api.AuthenticationFailedHandler.Service;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.session.Session;
 
@@ -68,6 +68,7 @@ import com.openexchange.session.Session;
  */
 public class AuthenticationFailedHandlerServiceImpl extends RankingAwareNearRegistryServiceTracker<AuthenticationFailedHandler> implements AuthenticationFailedHandlerService {
 
+    /** Simply go ahead with original processing (that is to throw originating authentication error). */
     private static final Type CONTINUE = AuthenticationFailureHandlerResult.Type.CONTINUE;
 
     /**

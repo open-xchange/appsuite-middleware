@@ -49,20 +49,17 @@
 
 package com.openexchange.contact.storage.ldap.database;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
-import com.openexchange.contact.storage.ldap.internal.LdapServiceLookup;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link LdapCreateTableTask}
@@ -82,17 +79,13 @@ public class LdapCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = LdapServiceLookup.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        int contextId = params.getContextId();
-        Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection writeCon = params.getConnection();
         PreparedStatement stmt = null;
-        boolean transactional = false;
+        boolean rollback = false;
         try {
             writeCon.setAutoCommit(false); // BEGIN
-            transactional = true;
+            rollback = true;
+
             String[] tableNames = LdapCreateTableService.getTablesToCreate();
             String[] createStmts = LdapCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
@@ -104,31 +97,29 @@ public class LdapCreateTableTask extends UpdateTaskAdapter {
                     stmt.executeUpdate();
                 } catch (SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                } finally {
+                    Databases.closeSQLStuff(stmt);
                 }
             }
+
             writeCon.commit(); // COMMIT
+            rollback = false;
         } catch (OXException e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
             throw e;
         } catch (Exception e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
             throw LdapExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            if (transactional) {
-                DBUtils.autocommit(writeCon);
+            if (rollback) {
+                Databases.rollback(writeCon);
             }
-            dbService.backForUpdateTask(contextId, writeCon);
+            Databases.autocommit(writeCon);
         }
     }
 
     @Override
     public String[] getDependencies() {
-        return new String[] { };
+        return new String[] {};
     }
 
 }

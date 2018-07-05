@@ -93,8 +93,8 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.groupware.results.Delta;
@@ -239,23 +239,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     String fileNameToUse = null;
                     {
                         List<Field> fields = Arrays.asList(Field.ID, Field.FILENAME);
-                        String name = file.getFileName();
-                        String fileName = name;
-                        int count = 0;
-
+                        NameBuilder fileName = NameBuilder.nameBuilderFor(file.getFileName());
                         while (null == fileNameToUse) {
-                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, fields, null, null, 0);
+                            String fileNameToTest = fileName.toString();
+                            List<File> hits = searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, fields, null, null, 0);
                             boolean found = false;
                             for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
-                                if (it.next().getFileName().equals(fileName)) {
+                                if (it.next().getFileName().equals(fileNameToTest)) {
                                     found = true;
                                 }
                             }
 
                             if (found) {
-                                fileName = FileStorageUtility.enhance(name, ++count);
+                                fileName.advance();
                             } else {
-                                fileNameToUse = fileName;
+                                fileNameToUse = fileNameToTest;
                             }
                         }
                     }
@@ -606,23 +604,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     String fileNameToUse = null;
                     {
                         List<Field> fields = Arrays.asList(Field.ID, Field.FILENAME);
-                        String name = file.getFileName();
-                        String fileName = name;
-                        int count = 0;
-
+                        NameBuilder fileName = NameBuilder.nameBuilderFor(file.getFileName());
                         while (null == fileNameToUse) {
-                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, fields, null, null, 0);
+                            String fileNameToTest = fileName.toString();
+                            List<File> hits = searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, fields, null, null, 0);
                             boolean found = false;
                             for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
-                                if (it.next().getFileName().equals(fileName)) {
+                                if (it.next().getFileName().equals(fileNameToTest)) {
                                     found = true;
                                 }
                             }
 
                             if (found) {
-                                fileName = FileStorageUtility.enhance(name, ++count);
+                                fileName.advance();
                             } else {
-                                fileNameToUse = fileName;
+                                fileNameToUse = fileNameToTest;
                             }
                         }
                     }
@@ -780,8 +776,8 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.<Drive> getClient().client;
-            Map<String, Boolean> knownTrashFolders = new HashMap<String, Boolean>();
-            List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
+            Map<String, Boolean> knownTrashFolders = new HashMap<>();
+            List<IDTuple> ret = new ArrayList<>(ids.size());
             for (IDTuple id : ids) {
                 try {
                     if (hardDelete) {
@@ -853,7 +849,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.<Drive> getClient().client;
-            List<File> files = new LinkedList<File>();
+            List<File> files = new LinkedList<>();
             /*
              * build request to list all files in a folder
              */
@@ -900,7 +896,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
-        List<File> files = new LinkedList<File>();
+        List<File> files = new LinkedList<>();
         for (IDTuple idTuple : ids) {
             files.add(getMetadata(idTuple.getFolder(), idTuple.getId(), CURRENT_VERSION, fields, 0));
         }
@@ -920,9 +916,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.<Drive> getClient().client;
-            List<File> updatedFiles = new LinkedList<File>();
-            List<File> deletedFiles = new LinkedList<File>();
-            List<File> newFiles = new LinkedList<File>();
+            List<File> updatedFiles = new LinkedList<>();
+            List<File> deletedFiles = new LinkedList<>();
+            List<File> newFiles = new LinkedList<>();
             long sequenceNumber = updateSince;
             /*
              * build request to list all files in a folder, changed since the supplied timestamp
@@ -1017,7 +1013,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 files = files.subList(start, toIndex);
             }
 
-            return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+            return new SearchIteratorAdapter<>(files.iterator(), files.size());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -1055,7 +1051,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
+        Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
         for (String folderId : folderIds) {
             sequenceNumbers.put(folderId, largestChangeId);
         }
@@ -1076,14 +1072,14 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private List<File> searchByFileNamePattern(String pattern, String folderId, boolean includeSubfolders, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.<Drive> getClient().client;
-            List<File> files = new ArrayList<File>();
+            List<File> files = new ArrayList<>();
             /*
              * build search query
              */
             StringBuilder stringBuilder = new StringBuilder(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
             Map<String, Boolean> allowedFolders;
             if (null != folderId) {
-                allowedFolders = new HashMap<String, Boolean>();
+                allowedFolders = new HashMap<>();
                 allowedFolders.put(folderId, Boolean.TRUE);
                 if (false == includeSubfolders) {
                     stringBuilder.append(" and '").append(toGoogleDriveFolderId(folderId)).append("' in parents");
@@ -1309,17 +1305,17 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private static Collection<Field> getUniqueFields(List<Field> requestedFields, Field... additionalFields) {
         if (ALL_FIELDS == requestedFields) {
             return Arrays.asList(Field.values());
-        } else {
-            Set<Field> fieldSet = new HashSet<Field>(requestedFields);
-            if (null != additionalFields && 0 < additionalFields.length) {
-                for (Field additionalField : additionalFields) {
-                    if (null != additionalField) {
-                        fieldSet.add(additionalField);
-                    }
+        }
+
+        Set<Field> fieldSet = new HashSet<>(requestedFields);
+        if (null != additionalFields && 0 < additionalFields.length) {
+            for (Field additionalField : additionalFields) {
+                if (null != additionalField) {
+                    fieldSet.add(additionalField);
                 }
             }
-            return fieldSet;
         }
+        return fieldSet;
     }
 
     /**
@@ -1332,7 +1328,26 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         if (null == pattern) {
             return pattern;
         }
-        return pattern.replace("'", "\\'");
+
+        StringBuilder opt = null;
+        int length = pattern.length();
+        for (int i = 0; i < length; i++) {
+            char c = pattern.charAt(i);
+            if ('\'' == c) {
+                if (null == opt) {
+                    opt = new StringBuilder(length);
+                    if (i > 0) {
+                        opt.append(pattern, 0, i);
+                    }
+                }
+                opt.append("\\'");
+            } else {
+                if (null != opt) {
+                    opt.append(c);
+                }
+            }
+        }
+        return null == opt ? pattern : opt.toString();
     }
 
 }

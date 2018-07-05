@@ -52,9 +52,7 @@ package com.openexchange.admin.daemons;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +67,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
@@ -97,21 +96,36 @@ public class AdminDaemon implements AdminDaemonService {
 
     static {
         class RegexHelper {
+
             Pattern wildcardPattern(final String wildcard) {
                 final StringBuilder s = new StringBuilder(wildcard.length());
                 s.append('^');
                 final int len = wildcard.length();
                 for (int i = 0; i < len; i++) {
                     final char c = wildcard.charAt(i);
-                    if (c == '*') {
-                        s.append(".*");
-                    } else if (c == '?') {
-                        s.append(".");
-                    } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
-                        s.append('\\');
-                        s.append(c);
-                    } else {
-                        s.append(c);
+                    switch (c) {
+                        case '*':
+                            s.append(".*");
+                            break;
+                        case '?':
+                            s.append(".");
+                            break;
+                        case '(':
+                        case ')':
+                        case '[':
+                        case ']':
+                        case '$':
+                        case '^':
+                        case '.':
+                        case '{':
+                        case '}':
+                        case '|':
+                        case '\\':
+                            s.append('\\').append(c);
+                            break;
+                        default:
+                            s.append(c);
+                            break;
                     }
                 }
                 s.append('$');
@@ -124,7 +138,7 @@ public class AdminDaemon implements AdminDaemonService {
         }
         final RegexHelper regexHelper = new RegexHelper();
         // Initialize set
-        final Set<Pattern> set = new HashSet<Pattern>(64);
+        final ImmutableSet.Builder<Pattern> set = ImmutableSet.builder();
         set.add(regexHelper.literalPattern("com.openexchange.admin"));
         set.add(regexHelper.wildcardPattern("com.openexchange.admin.*"));
         set.add(regexHelper.wildcardPattern("org.osgi.*"));
@@ -173,7 +187,7 @@ public class AdminDaemon implements AdminDaemonService {
         set.add(regexHelper.literalPattern("com.openexchange.usm.util"));
         set.add(regexHelper.literalPattern("com.openexchange.xerces.sun"));
         set.add(regexHelper.literalPattern("com.openexchange.xml"));
-        ALLOWED_BUNDLE_NAMES = Collections.unmodifiableSet(set);
+        ALLOWED_BUNDLE_NAMES = set.build();
     }
 
     /**
@@ -327,10 +341,10 @@ public class AdminDaemon implements AdminDaemonService {
      */
     public void initRMI(BundleContext context) {
         try {
-            final com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = new com.openexchange.admin.rmi.impl.OXUser(context);
+            final com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = new com.openexchange.admin.rmi.impl.OXUser();
             final com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = new com.openexchange.admin.rmi.impl.OXGroup();
             final com.openexchange.admin.rmi.impl.OXResource oxres_v2 = new com.openexchange.admin.rmi.impl.OXResource();
-            final com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
+            final com.openexchange.admin.rmi.impl.OXLogin oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin();
             final com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
             final OXAdminCoreImpl oxadmincore = new OXAdminCoreImpl();
             final OXTaskMgmtImpl oxtaskmgmt = new OXTaskMgmtImpl();

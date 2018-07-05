@@ -274,7 +274,7 @@ public class DefaultDispatcher implements Dispatcher {
                 UserAwareSSLConfigurationService userAwareSSLConfigurationService = ServerServiceRegistry.getInstance().getService(UserAwareSSLConfigurationService.class);
                 if (null != userAwareSSLConfigurationService) {
                     if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
-                        throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(e.getDisplayArgs()[0]);
+                        throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(e.getDisplayArgs());
                     }
                 }
             }
@@ -348,7 +348,7 @@ public class DefaultDispatcher implements Dispatcher {
             ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.enqueueable());
             enqueueableCache.put(key, ret);
         }
-        return EnqueuableAJAXActionServices.resultFor(ret.booleanValue());
+        return EnqueuableAJAXActionService.resultFor(ret.booleanValue());
     }
 
     private RequestContext buildRequestContext(AJAXRequestData requestData) throws OXException {
@@ -749,10 +749,15 @@ public class DefaultDispatcher implements Dispatcher {
     public AJAXActionServiceFactory lookupFactory(final String module) {
         AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
         if (null == serviceFactory) {
-            final int pos = module.indexOf('/');
-            if (pos > 0) {
-                // Fallback for backwards compatibility. File Download Actions sometimes append the filename to the module.
-                serviceFactory = actionFactories.get(module.substring(0, pos));
+            String candidate = module;
+            int index = candidate.lastIndexOf('/');
+            while (index > 0) {
+                candidate = candidate.substring(0, index);
+                serviceFactory = actionFactories.get(candidate);
+                if (null != serviceFactory) {
+                    break;
+                }
+                index = candidate.lastIndexOf('/');
             }
         }
         return serviceFactory;

@@ -134,7 +134,7 @@ public class FolderCopyTest extends AbstractUserCopyTest {
                 }
             }            
         } catch (final OXException e) {
-            DBUtils.rollback(dstCon);
+            Databases.rollback(dstCon);
             e.printStackTrace();
             fail("A UserCopyException occurred.");
         } finally {            
@@ -227,7 +227,7 @@ public class FolderCopyTest extends AbstractUserCopyTest {
             DBUtils.startTransaction(con);
             newId = IDGenerator.getId(cid, com.openexchange.groupware.Types.FOLDER, con);
             con.commit();
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             stmt = con.prepareStatement(sql);
             int i = 1;
             final Date date = new Date();
@@ -247,10 +247,10 @@ public class FolderCopyTest extends AbstractUserCopyTest {
             
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw e;
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         
         final FolderObject folder =  new FolderObject(newId);
@@ -309,8 +309,8 @@ public class FolderCopyTest extends AbstractUserCopyTest {
      * Clean up methods
      */
     private void cleanDatabase() throws Exception {
-        DBUtils.autocommit(srcCon);
-        DBUtils.autocommit(dstCon);
+        Databases.autocommit(srcCon);
+        Databases.autocommit(dstCon);
         
         /*
          * Delete created test folders

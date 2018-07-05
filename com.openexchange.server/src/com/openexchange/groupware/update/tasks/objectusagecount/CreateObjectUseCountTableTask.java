@@ -49,17 +49,15 @@
 
 package com.openexchange.groupware.update.tasks.objectusagecount;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link CreateObjectUseCountTableTask}
@@ -71,9 +69,7 @@ public class CreateObjectUseCountTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
-        Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection writeCon = params.getConnection();
         PreparedStatement stmt = null;
         try {
             CreateObjectUseCountTableService  tmp = new CreateObjectUseCountTableService();
@@ -91,7 +87,6 @@ public class CreateObjectUseCountTableTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 

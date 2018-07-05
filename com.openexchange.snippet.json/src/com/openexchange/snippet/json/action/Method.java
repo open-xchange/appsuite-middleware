@@ -49,10 +49,10 @@
 
 package com.openexchange.snippet.json.action;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * An enumeration for HTTP methods.
@@ -65,12 +65,12 @@ public enum Method {
     private static final Map<String, Method> MAP;
 
     static {
-        final Method[] values = Method.values();
-        final Map<String, Method> m = new HashMap<String, Method>(values.length);
-        for (final Method method : values) {
+        Method[] values = Method.values();
+        Map<String, Method> m = new HashMap<String, Method>(values.length);
+        for (Method method : values) {
             m.put(method.name(), method);
         }
-        MAP = Collections.unmodifiableMap(m);
+        MAP = ImmutableMap.copyOf(m);
     }
 
     /**

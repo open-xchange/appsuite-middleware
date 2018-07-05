@@ -99,12 +99,18 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             param.getClient(),
             param.getClientToken(),
             param.isTransient(),
-            param.getEnhancement());
+            param.getEnhancement(),
+            param.getUserAgent());
     }
 
     @Override
     public boolean storeSession(String sessionId) throws OXException {
-        return SessionHandler.storeSession(sessionId);
+        return SessionHandler.storeSession(sessionId, true);
+    }
+
+    @Override
+    public boolean storeSession(String sessionId, boolean addIfAbsent) throws OXException {
+        return SessionHandler.storeSession(sessionId, addIfAbsent);
     }
 
     @Override
@@ -129,7 +135,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public boolean removeSession(final String sessionId) {
-        return SessionHandler.clearSession(sessionId);
+        return (null != SessionHandler.clearSession(sessionId, true));
     }
 
     @Override

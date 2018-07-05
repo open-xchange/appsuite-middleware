@@ -388,7 +388,7 @@ public class ContextTest extends AbstractTest {
         // THEN we can add the context with its data
         if (oxu.listDatabase("test-ox-db", cred).length == 0) {
             Database db = UtilTest.getTestDatabaseObject("localhost", "test-ox-db");
-            oxu.registerDatabase(db, cred);
+            oxu.registerDatabase(db, Boolean.FALSE, Integer.valueOf(0), cred);
         }
 
         OXContextInterface oxcontext = (OXContextInterface) Naming.lookup(host + OXContextInterface.RMI_NAME);

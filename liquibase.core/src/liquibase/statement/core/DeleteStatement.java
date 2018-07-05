@@ -1,10 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import liquibase.statement.AbstractSqlStatement;
 
 public class DeleteStatement extends AbstractSqlStatement {
     private String catalogName;

@@ -49,9 +49,6 @@
 
 package com.openexchange.data.conversion.ical;
 
-import static com.openexchange.groupware.calendar.tools.CommonAppointments.D;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -64,8 +61,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.ResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.MockUserLookup;
@@ -171,28 +166,6 @@ public abstract class AbstractICalParserTest {
         Participants.resourceResolver = oldResourceResolver;
     }
 
-    // single appointment
-    protected CalendarDataObject parseAppointment(final String icalText, final TimeZone defaultTZ) throws ConversionError {
-        List<CalendarDataObject> appointments = parseAppointments(icalText, defaultTZ);
-        if (appointments.size() == 0) {
-            return null;
-        }
-        return appointments.get(0);
-    }
-
-    protected CalendarDataObject parseAppointment(final String icalText) throws ConversionError {
-        return parseAppointment(icalText, TimeZone.getDefault());
-    }
-
-    //multiple appointments
-    protected List<CalendarDataObject> parseAppointments(final String icalText) throws ConversionError {
-        return parseAppointments(icalText, TimeZone.getDefault());
-    }
-
-    protected List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ) throws ConversionError {
-        return parser.parseAppointments(icalText, defaultTZ, new ContextImpl(23), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>()).getImportedObjects();
-    }
-
     //single task
     protected Task parseTask(final String icalText, final TimeZone defaultTZ) throws ConversionError {
         return parseTasks(icalText, defaultTZ).get(0);
@@ -211,16 +184,6 @@ public abstract class AbstractICalParserTest {
         return parseTasks(icalText, TimeZone.getDefault());
     }
 
-    protected Appointment appointmentWithRecurrence(final String recurrence, final Date start, final Date end) throws ConversionError {
-
-        final TimeZone utc = TimeZone.getTimeZone("UTC");
-
-        final String icalText = fixtures.veventWithSimpleProperties(start, end, "RRULE", recurrence);
-        final Appointment appointment = parseAppointment(icalText, utc);
-
-        return appointment;
-    }
-
     protected Task taskWithRecurrence(final String recurrence, final Date start, final Date end) throws ConversionError {
 
         final TimeZone utc = TimeZone.getTimeZone("UTC");
@@ -231,36 +194,4 @@ public abstract class AbstractICalParserTest {
         return task;
     }
 
-    protected void assertWarningWhenParsingAppointment(final String icalText, final String warning) throws ConversionError {
-        final ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
-        final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-        final List<CalendarDataObject> result = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings).getImportedObjects();
-
-        assertTrue(0 != result.size()); // Warnings don't abort parsing of the object
-        assertEquals(1, warnings.size());
-        assertEquals(warning, warnings.get(0).getSoleMessage());
-    }
-
-    protected void assertErrorWhenParsingAppointment(final String icalText, final String expectedError) throws ConversionError {
-        final ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
-        final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-        parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings);
-        assertEquals(1, errors.size());
-        assertEquals(expectedError, errors.get(0).getSoleMessage());
-    }
-
-    protected void assertNothingHappensWhenParsingAppointment(final String icalText) throws ConversionError {
-        final ArrayList<ConversionError> errors = new ArrayList<ConversionError>();
-        final ArrayList<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-        List<CalendarDataObject> parsed = parser.parseAppointments(icalText, TimeZone.getTimeZone("UTC"), new ContextImpl(23), errors, warnings).getImportedObjects();
-        assertTrue(null == parsed || 0 == parsed.size());
-        assertEquals(0, errors.size());
-        assertEquals(0, warnings.size());
-    }
-
-    protected void warningOnAppRecurrence(final String recurrence, final String warning) throws ConversionError {
-        final String icalText = fixtures.veventWithSimpleProperties(D("24/02/1981 10:00"), D("24/02/1981 12:00"), "RRULE", recurrence);
-        assertWarningWhenParsingAppointment(icalText, warning);
-
-    }
 }

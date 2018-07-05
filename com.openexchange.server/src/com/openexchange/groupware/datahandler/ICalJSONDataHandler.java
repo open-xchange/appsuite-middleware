@@ -49,56 +49,38 @@
 
 package com.openexchange.groupware.datahandler;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.configuration.ServerConfig;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DefaultConverter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.ResultConverterRegistry;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
-import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.java.Streams;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ICalJSONDataHandler} - The data handler return JSON appointments and JSON tasks parsed from an ICal input stream.
@@ -113,24 +95,22 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ICalJSONDataHandler implements DataHandler {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalJSONDataHandler.class);
+public final class ICalJSONDataHandler extends ICalDataHandler {
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
-    private static final String[] ARGS = new String[0];
-
     /**
      * Initializes a new {@link ICalJSONDataHandler}
+     *
+     * @param services The {@link ServiceLookup}
      */
-    public ICalJSONDataHandler() {
-        super();
+    public ICalJSONDataHandler(ServiceLookup services) {
+        super(services);
     }
 
     @Override
     public String[] getRequiredArguments() {
-        return ARGS;
+        return new String[0];
     }
 
     @Override
@@ -140,12 +120,13 @@ public final class ICalJSONDataHandler implements DataHandler {
 
     @Override
     public ConversionResult processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
-        final Context ctx = ContextStorage.getStorageContext(session);
-        final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
-        if (iCalParser == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalParser.class.getName());
+        if (null == session) {
+            throw DataExceptionCodes.MISSING_ARGUMENT.create("session");
         }
-        final List<CalendarDataObject> appointments;
+
+        final Context ctx = ContextStorage.getStorageContext(session);
+        final ICalParser iCalParser = services.getServiceSafe(ICalParser.class);
+        final List<Event> events;
         final List<Task> tasks;
         final InputStreamCopy inputStreamCopy;
         {
@@ -163,100 +144,59 @@ public final class ICalJSONDataHandler implements DataHandler {
         final TimeZone timeZone;
         {
             final String timeZoneId = dataArguments.get("com.openexchange.groupware.calendar.timezone");
-            timeZone =
-                TimeZoneUtils.getTimeZone(null == timeZoneId ? UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone() : timeZoneId);
+            timeZone = TimeZoneUtils.getTimeZone(null == timeZoneId ? UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone() : timeZoneId);
         }
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         try {
+            /*
+             * Start parsing appointments
+             */
+            InputStream stream = null;
+            try {
+                ICalService iCalService = services.getServiceSafe(ICalService.class);
+                stream = inputStreamCopy.getInputStream();
+                ImportedCalendar calendar = iCalService.importICal(stream, null);
+                events = calendar.getEvents();
+            } finally {
+                safeClose(stream);
+            }
             /*
              * Errors and warnings
              */
             final List<ConversionError> conversionErrors = new ArrayList<ConversionError>(4);
             final List<ConversionWarning> conversionWarnings = new ArrayList<ConversionWarning>(4);
-            {
-                /*
-                 * Start parsing appointments
-                 */
-                appointments = parseAppointmentStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, timeZone);
-                resolveUid(appointments, dataArguments, session);
-                // TODO: Handle errors/warnings
-                conversionErrors.clear();
-                conversionWarnings.clear();
-                /*
-                 * Start parsing tasks
-                 */
-                tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, timeZone);
-            }
+            /*
+             * Start parsing tasks
+             */
+            tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, timeZone);
+            // TODO: Handle errors/warnings
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            inputStreamCopy.close();
+            safeClose(inputStreamCopy);
         }
         /*
          * The JSON array to return
          */
         final JSONArray objects = new JSONArray();
+        ResultConverterRegistry converterRegistry = services.getServiceSafe(ResultConverterRegistry.class);
+        AJAXRequestData request = new AJAXRequestData();
+        request.setSession(serverSession);
         /*
          * Fill JSON appointments
          */
-        if (!appointments.isEmpty()) {
+        if (!events.isEmpty()) {
             /*
              * Insert parsed appointments into denoted calendar folder
              */
-            try {
-                final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(ServerSessionAdapter.valueOf(session));
-                final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-                /*
-                 * Get recurrence position
-                 */
-                final int recurrencePosition;
-                {
-                    final String recPosArg = "com.openexchange.groupware.calendar.recurrencePosition";
-                    final String recPosStr = dataArguments.get(recPosArg);
-                    if (null == recPosStr) {
-                        recurrencePosition = 0;
-                    } else {
-                        int tmp = 0;
-                        try {
-                            tmp = Integer.parseInt(recPosStr.trim());
-                        } catch (final NumberFormatException e) {
-                            LOG.error("Data argument \"{}\" is not a number: {}", recPosArg, recPosStr, e);
-                            tmp = 0;
-                        }
-                        recurrencePosition = tmp;
-                    }
+            ResultConverter resultConverter = converterRegistry.getResultConverter("eventDocument", "json");
+            if (null != resultConverter) {
+                for (Event event : events) {
+                    AJAXRequestResult result = new AJAXRequestResult(event);
+                    resultConverter.convert(request, result, serverSession, new DefaultConverter());
+                    Object resultObject = result.getResultObject();
+                    objects.put(resultObject);
                 }
-                for (final CalendarDataObject appointment : appointments) {
-                    final JSONObject jsonAppointment = new JSONObject();
-                    // TODO: Deliver recurrence position through an argument?
-                    if (appointment.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {
-                        // Commented this because this is done in CalendarOperation.loadAppointment():207 that calls
-                        // extractRecurringInformation()
-                        // appointmentobject.calculateRecurrence();
-                        final RecurringResultsInterface recuResults =
-                            recColl.calculateRecurring(
-                                appointment,
-                                0,
-                                0,
-                                recurrencePosition,
-                                CalendarCollectionService.MAX_OCCURRENCESE,
-                                true);
-                        if (recuResults.size() == 0) {
-                            LOG.warn("No occurrence at position {}", recurrencePosition);
-                            OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
-                        }
-                        final RecurringResultInterface result = recuResults.getRecurringResult(0);
-                        appointment.setStartDate(new Date(result.getStart()));
-                        appointment.setEndDate(new Date(result.getEnd()));
-                        appointment.setRecurrencePosition(result.getPosition());
-
-                        appointmentwriter.writeAppointment(appointment, jsonAppointment);
-                    } else {
-                        appointmentwriter.writeAppointment(appointment, jsonAppointment);
-                    }
-                    objects.put(jsonAppointment);
-                }
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
         }
         /*
@@ -266,184 +206,18 @@ public final class ICalJSONDataHandler implements DataHandler {
             /*
              * Insert parsed tasks into denoted task folder
              */
-            try {
+            ResultConverter resultConverter = converterRegistry.getResultConverter("task", "json");
+            if (null != resultConverter) {
                 for (final Task task : tasks) {
-                    final TaskWriter taskWriter = new TaskWriter(timeZone).setSession(session);
-                    final JSONObject jsonTask = new JSONObject();
-                    taskWriter.writeTask(task, jsonTask);
-                    objects.put(jsonTask);
+                    AJAXRequestResult result = new AJAXRequestResult(task);
+                    resultConverter.convert(request, result, serverSession, new DefaultConverter());
+                    Object resultObject = result.getResultObject();
+                    objects.put(resultObject);
                 }
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
         }
         ConversionResult result = new ConversionResult();
         result.setData(objects);
         return result;
-    }
-
-    /**
-     * @param appointments
-     * @param dataArguments
-     * @param session
-     * @throws OXException
-     */
-    private void resolveUid(final List<CalendarDataObject> appointments, final DataArguments dataArguments, final Session session) throws OXException {
-        final String key = "com.openexchange.groupware.calendar.searchobject";
-        if (!(dataArguments.containsKey(key) && Boolean.parseBoolean(dataArguments.get(key)))) {
-            return;
-        }
-
-        final AppointmentSQLInterface appointmentSql =
-            ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-
-        for (final CalendarDataObject calendarData : appointments) {
-            if (!calendarData.containsUid()) {
-                continue;
-            }
-
-            final int id = appointmentSql.resolveUid(calendarData.getUid());
-            if (id != 0) {
-                final int folder = appointmentSql.getFolder(id);
-                if (folder != 0) {
-                    calendarData.setParentFolderID(folder);
-                }
-                calendarData.setObjectID(id);
-            }
-        }
-    }
-
-    /*-
-     *
-     *
-    private void insertTasks(final Session session, final int taskFolder, final List<Task> tasks, final JSONArray folderAndIdArray) throws OXException, JSONException {
-        final TasksSQLInterface taskSql = new TasksSQLInterfaceImpl(session);
-        for (final Task task : tasks) {
-            task.setParentFolderID(taskFolder);
-            taskSql.insertTaskObject(task);
-            folderAndIdArray.put(new JSONObject().put(CalendarFields.FOLDER_ID, taskFolder).put(CalendarFields.ID, task.getObjectID()));
-        }
-    }
-
-    private void insertAppointments(final Session session, final int calendarFolder, final Context ctx, final List<CalendarDataObject> appointments, final JSONArray folderAndIdArray) throws OXException, JSONException {
-        final AppointmentSQLInterface appointmentSql =
-            ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-        for (final CalendarDataObject appointment : appointments) {
-            appointment.setParentFolderID(calendarFolder);
-            appointment.setContext(ctx);
-            appointment.setIgnoreConflicts(true);
-            appointmentSql.insertAppointmentObject(appointment);
-            folderAndIdArray.put(new JSONObject().put(CalendarFields.FOLDER_ID, calendarFolder).put(
-                CalendarFields.ID,
-                appointment.getObjectID()));
-        }
-    }
-     */
-
-    private List<CalendarDataObject> parseAppointmentStream(final Context ctx, final ICalParser iCalParser, final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors, final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException, ConversionError {
-        final InputStream inputStream = inputStreamCopy.getInputStream();
-        try {
-            return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
-        } finally {
-            Streams.close(inputStream);
-        }
-    }
-
-    private List<Task> parseTaskStream(final Context ctx, final ICalParser iCalParser, final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors, final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException, ConversionError {
-        final InputStream inputStream = inputStreamCopy.getInputStream();
-        try {
-            return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
-        } finally {
-            Streams.close(inputStream);
-        }
-    }
-
-    private static final int LIMIT = 1048576;
-
-    private static InputStreamCopy copyStream(final InputStream orig, final long size) throws OXException {
-        try {
-            return new InputStreamCopy(orig, (size <= 0 || size > LIMIT));
-        } catch (final IOException e) {
-            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static final class InputStreamCopy {
-
-        private static final int DEFAULT_BUF_SIZE = 0x2000;
-
-        private static final String FILE_PREFIX = "openexchange-icaljson-";
-
-        private byte[] bytes;
-
-        private File file;
-
-        private final long size;
-
-        public InputStreamCopy(final InputStream orig, final boolean createFile) throws IOException {
-            super();
-            if (createFile) {
-                size = copy2File(orig);
-            } else {
-                size = copy2ByteArr(orig);
-            }
-        }
-
-        public InputStream getInputStream() throws IOException {
-            return bytes == null ? (file == null ? null : (new BufferedInputStream(new FileInputStream(file), DEFAULT_BUF_SIZE))) : (new UnsynchronizedByteArrayInputStream(
-                bytes));
-        }
-
-        public long getSize() {
-            return size;
-        }
-
-        public void close() {
-            if (file != null) {
-                if (file.exists()) {
-                    file.delete();
-                }
-                file = null;
-            }
-            if (bytes != null) {
-                bytes = null;
-            }
-        }
-
-        private int copy2ByteArr(final InputStream in) throws IOException {
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-            final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-            int len;
-            while ((len = in.read(bbuf)) > 0) {
-                out.write(bbuf, 0, len);
-            }
-            out.flush();
-            this.bytes = out.toByteArray();
-            return bytes.length;
-        }
-
-        private long copy2File(final InputStream in) throws IOException {
-            long totalBytes = 0;
-            {
-                final File tmpFile =
-                    File.createTempFile(FILE_PREFIX, null, new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
-                tmpFile.deleteOnExit();
-                OutputStream out = null;
-                try {
-                    out = new BufferedOutputStream(new FileOutputStream(tmpFile), DEFAULT_BUF_SIZE);
-                    final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-                    int len;
-                    while ((len = in.read(bbuf)) > 0) {
-                        out.write(bbuf, 0, len);
-                        totalBytes += len;
-                    }
-                    out.flush();
-                } finally {
-                    Streams.close(out);
-                }
-                file = tmpFile;
-            }
-            return totalBytes;
-        }
     }
 }

@@ -58,6 +58,7 @@ import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AbstractSmtpAJAXSession;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.contacts.json.ContactActionFactory;
@@ -90,6 +91,7 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
         this.scope = scope;
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -101,10 +103,14 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
         oAuthClient = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
-            oAuthClient.logout();
+            OAuthClient oAuthClient = this.oAuthClient;
+            if (null != oAuthClient) {
+                oAuthClient.logout();
+            }
             unregisterTestClient(clientApp);
         } finally {
             super.tearDown();
@@ -132,7 +138,7 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
         clientData.setIcon(icon);
         clientData.setContactAddress("webmaster@example.com");
         clientData.setWebsite("http://www.example.com");
-        clientData.setDefaultScope(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE, AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE, TaskActionFactory.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_WRITE_SCOPE).toString());
+        clientData.setDefaultScope(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE, AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE, ChronosOAuthScope.OAUTH_WRITE_SCOPE, ChronosOAuthScope.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_WRITE_SCOPE).toString());
         clientData.setRedirectURIs(redirectURIs);
         return clientData;
     }

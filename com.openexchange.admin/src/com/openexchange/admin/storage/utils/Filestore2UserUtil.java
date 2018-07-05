@@ -50,33 +50,42 @@
 package com.openexchange.admin.storage.utils;
 
 import static com.openexchange.database.DBPoolingExceptionCodes.NOT_RESOLVED_SERVER;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.java.Sets;
+import com.openexchange.java.Strings;
+import com.openexchange.threadpool.BoundedCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Filestore2UserUtil}
@@ -248,6 +257,62 @@ public class Filestore2UserUtil {
     }
 
     /**
+     * Gets the file store user count for specified file store.
+     *
+     * @param filestoreId The identifier of the file store
+     * @param cache The admin cache to use
+     * @return The sorted file store user counts
+     * @throws StorageException If file store user counts cannot be returned
+     */
+    public static FilestoreCount getUserCount(int filestoreId, AdminCacheExtended cache) throws StorageException {
+        Connection con = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+
+            // Check if processing
+            if (isNotTerminated(con)) {
+                throw new StorageException("Table \"filestore2user\" not yet initialized");
+            }
+
+            return getUserCount(filestoreId, con);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        } catch (RuntimeException e) {
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    LOG.error("Pooling error", e);
+                }
+            }
+        }
+    }
+
+    private static FilestoreCount getUserCount(int filestoreId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid, user FROM filestore2user WHERE filestore_id=?");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return new FilestoreCount(filestoreId, 0);
+            }
+
+            FilestoreCount filestoreCount = new FilestoreCount(filestoreId, 0);
+            do {
+                filestoreCount.incrementCount();
+            } while (rs.next());
+            return filestoreCount;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
      * Gets the sorted (lowest first) file store user counts.
      *
      * @param cache The admin cache to use
@@ -282,11 +347,18 @@ public class Filestore2UserUtil {
         }
     }
 
-    private static FilestoreCountCollection getUserCounts(Connection con) throws SQLException {
+    /**
+     * Gets the sorted (lowest first) file store user counts.
+     *
+     * @param configDbCon The connection to ConfigDB to use
+     * @return The sorted file store user counts
+     * @throws StorageException If file store user counts cannot be returned
+     */
+    public static FilestoreCountCollection getUserCounts(Connection configDbCon) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, user, filestore_id FROM filestore2user");
+            stmt = configDbCon.prepareStatement("SELECT cid, user, filestore_id FROM filestore2user");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return new FilestoreCountCollection(Collections.<Integer, FilestoreCount> emptyMap());
@@ -607,10 +679,9 @@ public class Filestore2UserUtil {
             if (marked) {
                 unmarkOnError = true;
 
-                // Determine server id
-                int serverID;
+                // Check server id availability
                 try {
-                    serverID = databaseService.getServerId();
+                    databaseService.getServerId();
                 } catch (OXException e) {
                     if (NOT_RESOLVED_SERVER.equals(e)) {
                         // Assume initial start and thus mark as processed as there are no entries to insert
@@ -628,10 +699,10 @@ public class Filestore2UserUtil {
                 inTransaction = true;
 
                 // Determine all pools/schemas
-                Set<PoolAndSchema> pools = PoolAndSchema.determinePoolsAndSchemas(serverID, con);
+                List<SchemaInfo> schemas = getAllNonEmptySchemas(con);
 
                 // Determine all users having an individual file store set
-                Set<FilestoreEntry> allEntries = determineAllEntries(pools, databaseService);
+                Set<FilestoreEntry> allEntries = determineAllEntries(schemas, databaseService);
 
                 // Insert entries
                 insertEntries(allEntries, con);
@@ -674,52 +745,148 @@ public class Filestore2UserUtil {
         }
     }
 
-    private static Set<FilestoreEntry> determineAllEntries(Set<PoolAndSchema> pools, final DatabaseService databaseService) throws StorageException {
+    private static List<Integer> getRegisteredServersIDs(Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT server_id FROM server");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                // Huh...?
+                return Collections.emptyList();
+            }
+
+            List<Integer> serverIds = new LinkedList<>();
+            do {
+                serverIds.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
+            return serverIds;
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private static List<SchemaInfo> getAllNonEmptySchemas(Connection con) throws OXException {
+        // Determine all DB schemas that are currently in use
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            // Grab database schemas
+            stmt = con.prepareStatement("SELECT DISTINCT db_pool_id, schemaname FROM contexts_per_dbschema WHERE count>0");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                // No database schema in use
+                return Collections.emptyList();
+            }
+
+            List<SchemaInfo> l = new LinkedList<>();
+            do {
+                l.add(SchemaInfo.valueOf(rs.getInt(1), rs.getString(2)));
+            } while (rs.next());
+            return l;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private static Set<FilestoreEntry> determineAllEntries(List<SchemaInfo> schemas, final DatabaseService databaseService) throws StorageException {
         // Setup completion service
-        CompletionService<Set<FilestoreEntry>> completionService = new ThreadPoolCompletionService<Set<FilestoreEntry>>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+        CompletionService<Set<FilestoreEntry>> completionService = new BoundedCompletionService<Set<FilestoreEntry>>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class), 10);
         int taskCount = 0;
 
         // Determine entries for each pool/schema
-        for (final PoolAndSchema poolAndSchema : pools) {
+        for (final SchemaInfo schema : schemas) {
             completionService.submit(new Callable<Set<FilestoreEntry>>() {
 
                 @Override
                 public Set<FilestoreEntry> call() throws StorageException {
-                    Connection con = null;
-                    PreparedStatement stmt = null;
-                    ResultSet result = null;
-                    try {
-                        con = databaseService.getNoTimeout(poolAndSchema.getPoolId(), poolAndSchema.getSchema());
+                    int maxRunCount = 5;
+                    int runCount = 0;
+                    while (runCount < maxRunCount) {
+                        Connection con = null;
+                        PreparedStatement stmt = null;
+                        ResultSet result = null;
+                        try {
+                            con = databaseService.getNoTimeout(schema.getPoolId(), schema.getSchema());
 
-                        if (!columnExists(con, "user","filestore_id")) {
-                            // This schema cannot hold users having an individual file storage assigned
-                            return Collections.emptySet();
-                        }
+                            if (!columnExists(con, "user", "filestore_id")) {
+                                // This schema cannot hold users having an individual file storage assigned
+                                return Collections.emptySet();
+                            }
 
-                        stmt = con.prepareStatement("SELECT cid, id, filestore_id FROM user WHERE filestore_id>0 AND (filestore_owner=0 OR filestore_owner=id)");
-                        result = stmt.executeQuery();
+                            stmt = con.prepareStatement("SELECT cid, id, filestore_id FROM user WHERE filestore_id>0 AND (filestore_owner=0 OR filestore_owner=id)");
+                            result = stmt.executeQuery();
 
-                        if (false == result.next()) {
-                            return Collections.emptySet();
-                        }
+                            if (false == result.next()) {
+                                return Collections.emptySet();
+                            }
 
-                        Set<FilestoreEntry> entries = new LinkedHashSet<FilestoreEntry>();
-                        do {
-                            entries.add(new FilestoreEntry(result.getInt(1), result.getInt(2), result.getInt(3)));
-                        } while (result.next());
-                        return entries;
-                    } catch (OXException e) {
-                        LOG.error("Pool Error", e);
-                        throw new StorageException(e);
-                    } catch (SQLException e) {
-                        LOG.error("SQL Error", e);
-                        throw new StorageException(e);
-                    } finally {
-                        closeSQLStuff(result, stmt);
-                        if (null != con) {
-                            databaseService.backNoTimeoout(poolAndSchema.getPoolId(), con);
+                            Set<FilestoreEntry> entries = new LinkedHashSet<FilestoreEntry>();
+                            do {
+                                entries.add(new FilestoreEntry(result.getInt(1), result.getInt(2), result.getInt(3)));
+                            } while (result.next());
+                            return entries;
+                        } catch (OXException e) {
+                            boolean doThrow = true;
+
+                            if (DBPoolingExceptionCodes.NO_CONNECTION.equals(e)) {
+                                java.net.ConnectException connectException = DBUtils.extractException(java.net.ConnectException.class, e);
+                                if (null != connectException) {
+                                    // Database not reachable. Connection was refused remotely.
+                                    doThrow = true;
+                                } else {
+                                    SQLException sqle = DBUtils.extractSqlException(e);
+                                    if (sqle instanceof SQLNonTransientConnectionException) {
+                                        SQLNonTransientConnectionException connectionException = (SQLNonTransientConnectionException) sqle;
+                                        if (isTooManyConnections(connectionException) && (++runCount < maxRunCount)) {
+                                            waitWithExponentialBackoff(runCount, 1000L);
+                                            doThrow = false;
+                                        }
+                                    }
+                                }
+                            } else if (DBPoolingExceptionCodes.SCHEMA_FAILED.equals(e)) {
+                                // Such a schema does not exist
+                                Throwable t = e.getCause();
+                                if (null == t) {
+                                    t = e;
+                                }
+                                LOG.warn("Unknown schema \"{}\" on database host {}. Please check database accessibility and/or context-to-schema associations.", schema.getSchema(), Integer.valueOf(schema.getPoolId()), t);
+                                return Collections.emptySet();
+                            }
+
+                            if (doThrow) {
+                                LOG.error("Failed to determine user-associated file storages for schema \"" + schema.getSchema() + "\" in database " + schema.getPoolId(), e);
+                                throw new StorageException(e);
+                            }
+                        } catch (SQLException e) {
+                            LOG.error("Failed to determine user-associated file storages for schema \"" + schema.getSchema() + "\" in database " + schema.getPoolId(), e);
+                            throw new StorageException(e);
+                        } finally {
+                            Databases.closeSQLStuff(result, stmt);
+                            if (null != con) {
+                                databaseService.backNoTimeoout(schema.getPoolId(), con);
+                            }
                         }
                     }
+
+                    // Should not be reached
+                    throw new StorageException("Failed to determine user-associated file storages for schema \"" + schema.getSchema() + "\" in database " + schema.getPoolId());
+                }
+
+                private boolean isTooManyConnections(SQLNonTransientConnectionException connectionException) {
+                    String message = connectionException.getMessage();
+                    return null != message && Strings.asciiLowerCase(message).indexOf("too many connections") >= 0;
+                }
+
+                private void waitWithExponentialBackoff(int retryCount, long baseMillis) {
+                    long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * baseMillis) + ((long) (Math.random() * baseMillis)), TimeUnit.MILLISECONDS);
+                    LockSupport.parkNanos(nanosToWait);
                 }
             });
             taskCount++;
@@ -738,10 +905,16 @@ public class Filestore2UserUtil {
     }
 
     private static void insertEntries(Set<FilestoreEntry> allEntries, Connection con) throws SQLException {
+        for (Set<FilestoreEntry> entries : Sets.partition(allEntries, 50)) {
+            doInsertEntries(entries, con);
+        }
+    }
+
+    private static void doInsertEntries(Set<FilestoreEntry> entries, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT IGNORE INTO filestore2user (cid, user, filestore_id) VALUES (?, ?, ?)");
-            for (FilestoreEntry filestoreEntry : allEntries) {
+            for (FilestoreEntry filestoreEntry : entries) {
                 stmt.setInt(1, filestoreEntry.cid);
                 stmt.setInt(2, filestoreEntry.user);
                 stmt.setInt(3, filestoreEntry.filestoreId);
@@ -912,7 +1085,7 @@ public class Filestore2UserUtil {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             retval = (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
-            closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
         return retval;
     }
@@ -927,7 +1100,7 @@ public class Filestore2UserUtil {
                 retval = rs.getString(4).equalsIgnoreCase(column);
             }
         } finally {
-            closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
         return retval;
     }

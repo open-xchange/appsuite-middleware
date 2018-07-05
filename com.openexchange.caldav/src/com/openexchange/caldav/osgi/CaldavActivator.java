@@ -50,6 +50,8 @@
 package com.openexchange.caldav.osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.caldav.CalDAVURLField;
 import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
@@ -58,6 +60,11 @@ import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.servlet.CalDAV;
 import com.openexchange.caldav.servlet.CaldavPerformer;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -65,10 +72,7 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -108,9 +112,9 @@ public class CaldavActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
-            ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class,
-            UserService.class, ConfigViewFactory.class, HttpService.class, FreeBusyService.class, JDOMParser.class, GroupService.class,
-            ContactService.class, ResourceService.class, DatabaseService.class
+            ICalEmitter.class, ICalParser.class, FolderService.class, RecurrenceService.class, CalendarUtilities.class, IDBasedCalendarAccessFactory.class,
+            UserService.class, ConfigViewFactory.class, HttpService.class, JDOMParser.class, GroupService.class,
+            ContactService.class, ResourceService.class, DatabaseService.class, ICalService.class, CalendarService.class
         };
     }
 
@@ -151,7 +155,7 @@ public class CaldavActivator extends HousekeepingActivator {
 
                 @Override
                 public String[] getPath() {
-                    return new String[]{"modules", "caldav", "module"};
+                    return new String[] { "modules", "caldav", "module" };
                 }
             });
 
@@ -201,6 +205,8 @@ public class CaldavActivator extends HousekeepingActivator {
                     return capabilities.contains(Permission.CALDAV.getCapabilityName());
                 }
             });
+
+            registerService(AdditionalFolderField.class, new CalDAVURLField(this));
 
             openTrackers();
         } catch (final Exception e) {

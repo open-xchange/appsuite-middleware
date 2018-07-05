@@ -49,14 +49,14 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -64,7 +64,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MailAccountMigrateReplyToTask} - Migrate "replyTo" information from properties table to account tables.
@@ -89,23 +88,24 @@ public final class MailAccountMigrateReplyToTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
-        boolean committed = false;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false); // BEGIN
+            rollback = true;
+
             process("user_mail_account", con);
             process("user_transport_account", con);
+
             con.commit(); // COMMIT
-            committed = true;
+            rollback = false;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (!committed) {
-                DBUtils.rollback(con);
+            if (rollback) {
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
+            Databases.autocommit(con);
         }
     }
 

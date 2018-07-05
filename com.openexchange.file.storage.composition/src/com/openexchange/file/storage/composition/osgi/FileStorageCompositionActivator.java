@@ -54,6 +54,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.file.storage.composition.crypto.CryptoAwareSharingService;
 import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFileAccess;
 import com.openexchange.file.storage.composition.internal.CompositingIDBasedFolderAccess;
 import com.openexchange.file.storage.composition.internal.FileStreamHandlerRegistryImpl;
@@ -91,9 +92,17 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[]{ CryptoAwareSharingService.class };
+    }
+
+    @Override
     protected void startBundle() throws Exception {
         final ServiceLookup services = this;
         Services.setServiceLookup(services);
+
+        IDBasedFileAccessListenerRegistry listenerRegistry = IDBasedFileAccessListenerRegistry.initInstance(context);
+        rememberTracker(listenerRegistry);
 
         // The tracking factory
         TrackingIDBasedFileAccessFactory fileAccessFactory = new TrackingIDBasedFileAccessFactory(services, context);
@@ -130,6 +139,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         super.stopBundle();
         AbstractCompositingIDBasedFileAccess.setHandlerRegistry(null);
+        IDBasedFileAccessListenerRegistry.dropInstance();
         Services.setServiceLookup(null);
     }
 

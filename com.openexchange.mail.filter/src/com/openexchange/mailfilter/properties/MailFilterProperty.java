@@ -257,10 +257,7 @@ public enum MailFilterProperty implements Property {
      * @see com.openexchange.config.lean.Property#getDefaultValue(java.lang.Class)
      */
     @Override
-    public <T extends Object> T getDefaultValue(Class<T> cls) {
-        if (defaultValue.getClass().isAssignableFrom(cls)) {
-            return cls.cast(defaultValue);
-        }
-        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + cls.getCanonicalName() + "'");
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 }

@@ -16,6 +16,7 @@ properties:
     type: integer
     format: int64
     description: The time this message was received.
+    readOnly: true
   colorLabel:
     type: integer
     description: An arbitrary number marking the message in a certain color. The same as the color label common to all groupware objects.

@@ -72,6 +72,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.log.audit.DefaultAttribute;
@@ -249,6 +250,7 @@ public final class POP3StoreConnector {
      * @throws OXException If establishing a connected instance of {@link POP3Store} fails
      */
     public static POP3StoreResult getPOP3Store(POP3Config pop3Config, Properties pop3Properties, boolean monitorFailedAuthentication, final int accountId, final Session session, boolean errorOnMissingUIDL, boolean forceSecure) throws OXException {
+        POP3Store pop3Store = null;
         try {
             final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
             if (tmpDownEnabled) {
@@ -265,13 +267,7 @@ public final class POP3StoreConnector {
             final int port = pop3Config.getPort();
             String staticCapabilities;
             try {
-                staticCapabilities =
-                    POP3CapabilityCache.getCapability(
-                        InetAddress.getByName(IDNA.toASCII(server)),
-                        port,
-                        pop3Config.isSecure(),
-                        pop3ConfProps,
-                        pop3Config.getLogin());
+                staticCapabilities = POP3CapabilityCache.getCapability(InetAddress.getByName(IDNA.toASCII(server)), port, pop3Config.isSecure(), pop3ConfProps, pop3Config.getLogin());
             } catch (final Exception e) {
                 LOG.warn("Couldn't detect capabilities from POP3 server \"{}\" with login \"{}\" (user={}, context={})", server, pop3Config.getLogin(), session.getUserId(), session.getContextId(), e);
                 staticCapabilities = POP3CapabilityCache.getDeaultCapabilities();
@@ -404,7 +400,7 @@ public final class POP3StoreConnector {
             /*
              * Get store
              */
-            final POP3Store pop3Store = (POP3Store) pop3Session.getStore(POP3Provider.PROTOCOL_POP3.getName());
+            pop3Store = (POP3Store) pop3Session.getStore(POP3Provider.PROTOCOL_POP3.getName());
             /*
              * ... and connect
              */
@@ -472,7 +468,10 @@ public final class POP3StoreConnector {
                 throw e;
             } catch (final MessagingException e) {
                 if (MimeMailException.isSSLHandshakeException(e)) {
-                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), server);
+                    List<Object> displayArgs = new ArrayList<>(2);
+                    displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                    displayArgs.add(server);
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), displayArgs.toArray(new Object[] {}));
                 }
 
                 final Exception nested = e.getNextException();
@@ -509,28 +508,16 @@ public final class POP3StoreConnector {
                          * Avoid fetching UIDs when further working with JavaMail API
                          */
                         if (errorOnMissingUIDL) {
-                            throw POP3ExceptionCode.MISSING_REQUIRED_CAPABILITY.create("UIDL",
-                                server,
-                                pop3Config.getLogin(),
-                                Integer.valueOf(session.getUserId()),
-                                Integer.valueOf(session.getContextId()));
+                            throw POP3ExceptionCode.MISSING_REQUIRED_CAPABILITY.create("UIDL", server, pop3Config.getLogin(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                         }
-                        result.addWarning(POP3ExceptionCode.EXPUNGE_MODE_ONLY.create("UIDL",
-                            server,
-                            pop3Config.getLogin(),
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(session.getContextId())));
+                        result.addWarning(POP3ExceptionCode.EXPUNGE_MODE_ONLY.create("UIDL", server, pop3Config.getLogin(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId())));
                     }
                     if (!hasTop && !prober.probeTOP()) {
                         /*-
                          * Probe failed.
                          * Mandatory to further work with JavaMail API
                          */
-                        throw POP3ExceptionCode.MISSING_REQUIRED_CAPABILITY.create("TOP",
-                            server,
-                            pop3Config.getLogin(),
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(session.getContextId()));
+                        throw POP3ExceptionCode.MISSING_REQUIRED_CAPABILITY.create("TOP", server, pop3Config.getLogin(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                     }
                     /*
                      * Check for warnings
@@ -549,9 +536,12 @@ public final class POP3StoreConnector {
                 }
             }
             result.setPop3Store(pop3Store);
+            pop3Store = null;
             return result;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, pop3Config, session);
+        } finally {
+            Streams.close(pop3Store);
         }
     }
 

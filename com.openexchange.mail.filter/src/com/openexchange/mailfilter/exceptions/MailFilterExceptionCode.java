@@ -215,6 +215,14 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
      * "The maximum amount of redirect rules is reached. Please delete or deactivate another redirect rule first."
      */
     TOO_MANY_REDIRECT(MailFilterExceptionMessages.TOO_MANY_REDIRECT_MSG, MailFilterExceptionMessages.TOO_MANY_REDIRECT_MSG, CATEGORY_USER_INPUT, 33),
+    /**
+     * Unable to extract a valid sieve server URI from the user's mail server URL.
+     */
+    UNABLE_TO_EXTRACT_SIEVE_SERVER_URI("Unable to extract a valid sieve server URI from the user's mail server URL.", CATEGORY_ERROR, 34),
+    /**
+     * Invalid mail filter request. A guest user has no mail filters.
+     */
+    INVALID_USER_SPECIFIED("Invalid mail filter request. A guest user has no mail filters.", CATEGORY_ERROR, 35),
     ;
 
     private final String message;

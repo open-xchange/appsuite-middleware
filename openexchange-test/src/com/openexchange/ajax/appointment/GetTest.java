@@ -49,7 +49,9 @@
 
 package com.openexchange.ajax.appointment;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -70,7 +72,7 @@ public class GetTest extends AppointmentTest {
     @Test
     public void testGet() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testGet");
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
@@ -117,6 +119,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setLabel(2);
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
+        appointmentObj.setIgnoreConflicts(true);
 
         final int userParticipantId = getClient2().getValues().getUserId();
         final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();

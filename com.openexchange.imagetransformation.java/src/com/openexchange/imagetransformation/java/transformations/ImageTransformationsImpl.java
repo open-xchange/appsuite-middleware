@@ -49,8 +49,15 @@
 
 package com.openexchange.imagetransformation.java.transformations;
 
-import static com.openexchange.imagetransformation.java.transformations.Utils.*;
-import static com.openexchange.tools.images.ImageTransformationUtility.*;
+import static com.openexchange.imagetransformation.java.transformations.Utils.getFileStream;
+import static com.openexchange.imagetransformation.java.transformations.Utils.getImageInputStream;
+import static com.openexchange.imagetransformation.java.transformations.Utils.getImageReader;
+import static com.openexchange.imagetransformation.java.transformations.Utils.getRequiredResolution;
+import static com.openexchange.imagetransformation.java.transformations.Utils.readExifOrientation;
+import static com.openexchange.imagetransformation.java.transformations.Utils.removeTransparencyIfNeeded;
+import static com.openexchange.imagetransformation.java.transformations.Utils.selectImage;
+import static com.openexchange.tools.images.ImageTransformationUtility.canRead;
+import static com.openexchange.tools.images.ImageTransformationUtility.getImageFormat;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;

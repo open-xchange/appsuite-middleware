@@ -49,13 +49,12 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -63,7 +62,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderCorrectChangingDateTask}
@@ -95,26 +93,31 @@ public final class FolderCorrectChangingDateTask extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         Logger log = org.slf4j.LoggerFactory.getLogger(FolderCorrectChangingDateTask.class);
         log.info("Performing update task {}", FolderCorrectChangingDateTask.class.getSimpleName());
+        Connection connnection = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
-        Connection connnection = Database.getNoTimeout(params.getContextId(), true);
         try {
             connnection.setAutoCommit(false);
+            rollback = true;
+
             stmt = connnection.prepareStatement("UPDATE oxfolder_tree SET changing_date=? WHERE changing_date=?;");
             stmt.setLong(1, System.currentTimeMillis());
             stmt.setLong(2, Long.MAX_VALUE);
             int corrected = stmt.executeUpdate();
             log.info("Corrected {} rows in 'oxfolder_tree'.", corrected);
+
             connnection.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(connnection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connnection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
+            if (rollback) {
+                Databases.rollback(connnection);
+            }
             autocommit(connnection);
-            Database.backNoTimeout(params.getContextId(), true, connnection);
         }
         log.info("{} successfully performed.", FolderCorrectChangingDateTask.class.getSimpleName());
     }

@@ -49,12 +49,12 @@
 
 package com.openexchange.reseller;
 
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
-import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 /**
  * {@link ResellerExceptionCodes}
  *

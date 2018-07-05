@@ -1,17 +1,16 @@
 package liquibase.diff.compare.core;
 
-import liquibase.database.Database;
-import liquibase.diff.ObjectDifferences;
-import liquibase.diff.compare.CompareControl;
-import liquibase.structure.DatabaseObject;
-import liquibase.diff.compare.DatabaseObjectComparator;
-import liquibase.diff.compare.DatabaseObjectComparatorChain;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.DataType;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import liquibase.database.Database;
+import liquibase.diff.ObjectDifferences;
+import liquibase.diff.compare.CompareControl;
+import liquibase.diff.compare.DatabaseObjectComparator;
+import liquibase.diff.compare.DatabaseObjectComparatorChain;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
 
 public final class DefaultDatabaseObjectComparator implements DatabaseObjectComparator {
     @Override

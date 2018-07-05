@@ -84,6 +84,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.TransactionAwares;
 
 /**
  * {@link AbstractListingAction}
@@ -185,7 +186,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
      */
     protected AJAXRequestResult results(SearchIterator<File> searchIterator, InfostoreRequest request) throws OXException {
         SearchIterator<File> results = searchIterator;
-
+        Long timestamp = null;
         if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
@@ -195,6 +196,9 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                     while (results.hasNext()) {
                         // Call preview service for next file
                         File fileMetadata = results.next();
+                        if(timestamp == null || timestamp<fileMetadata.getSequenceNumber()) {
+                            timestamp = fileMetadata.getSequenceNumber();
+                        }
                         files.add(fileMetadata);
                     }
 
@@ -206,7 +210,21 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             }
         }
 
-        return new AJAXRequestResult(results, null, "infostore");
+        // Calculate eventually missing timestamp
+        if(timestamp == null && results.hasNext()) {
+            List<File> files = new LinkedList<File>();
+            while (results.hasNext()) {
+                // Call preview service for next file
+                File fileMetadata = results.next();
+                if(timestamp == null || timestamp < fileMetadata.getSequenceNumber()) {
+                    timestamp = fileMetadata.getSequenceNumber();
+                }
+                files.add(fileMetadata);
+            }
+            return new AJAXRequestResult(files, new Date(timestamp), "infostore");
+        }
+
+        return new AJAXRequestResult(results, timestamp == null ? null : new Date(timestamp), "infostore");
     }
 
     /**
@@ -278,15 +296,19 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                 if (loadFileMetadata) {
                     // Load meta data
                     IDBasedFileAccess fileAccess = Services.getFileAccessFactory().createAccess(session);
-                    for (Iterator<File> iter = files.iterator(); !currentThread.isInterrupted() && numberOfPregeneratedPreviews > 0 && iter.hasNext();) {
-                        File fileMetadata = iter.next();
-                        String id = fileMetadata.getId();
-                        try {
-                            fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-                            triggerFor(id, fileMetadata);
-                        } catch (Exception e) {
-                            LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), session.getUserId(), session.getContextId(), e);
+                    try {
+                        for (Iterator<File> iter = files.iterator(); !currentThread.isInterrupted() && numberOfPregeneratedPreviews > 0 && iter.hasNext();) {
+                            File fileMetadata = iter.next();
+                            String id = fileMetadata.getId();
+                            try {
+                                fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+                                triggerFor(id, fileMetadata);
+                            } catch (Exception e) {
+                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), session.getUserId(), session.getContextId(), e);
+                            }
                         }
+                    } finally {
+                        TransactionAwares.finishSafe(fileAccess);
                     }
                 } else {
                     // No need to load

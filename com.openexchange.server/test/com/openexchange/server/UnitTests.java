@@ -75,7 +75,6 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
     com.openexchange.tools.net.URIParserTest.class,
     com.openexchange.mail.utils.MsisdnUtilityTest.class,
-    com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
     com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
     com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
     com.openexchange.mail.api.MailConfigTest.class,
@@ -88,6 +87,7 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.mail.mime.utils.MimeMessageUtilityTest.class,
     com.openexchange.mail.parser.handlers.JsonMessageHandlerTest.class,
     com.openexchange.groupware.notify.ParticipantNotifyTest.class,
+    com.openexchange.groupware.tasks.mapping.ParticipantsTest.class,
     com.openexchange.mail.json.actions.GetAttachmentActionTest.class,
     com.openexchange.ajax.requesthandler.converters.preview.cache.FileStoreResourceCacheImplTest.class,
     com.openexchange.server.services.SharedInfostoreJSlobTest.class,
@@ -109,7 +109,8 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.ajax.requesthandler.AJAXRequestDataTest.class,
     com.openexchange.mail.usersetting.CachingUserSettingMailStorageTest.class,
     com.openexchange.folderstorage.internal.ConfiguredDefaultPermissionsTest.class,
-    com.openexchange.groupware.contact.Bug53690Test.class
+    com.openexchange.groupware.contact.Bug53690Test.class,
+    com.openexchange.folderstorage.internal.performers.UserSharedFoldersPerformerTest.class,
 })
 public class UnitTests {
 

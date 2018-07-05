@@ -51,8 +51,8 @@ package com.openexchange.ajax.container;
 
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import java.util.List;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
 
 /**

@@ -1,13 +1,16 @@
 package liquibase.dbdoc;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 
-import java.io.*;
-
 public class ChangeLogWriter {
     protected File outputDir;
-    private ResourceAccessor resourceAccessor;
+    private final ResourceAccessor resourceAccessor;
 
     public ChangeLogWriter(ResourceAccessor resourceAccessor, File rootOutputDir) {
         this.outputDir = new File(rootOutputDir, "changelogs");
@@ -19,17 +22,6 @@ public class ChangeLogWriter {
         if (stylesheet == null) {
             throw new IOException("Can not find "+changeLog);
         }
-
-//        File file = outputDir;
-//        String[] splitPath = (changeLog.getFilePath() + ".xml").split("/");
-//        for (int i =0; i < splitPath.length; i++) {
-//            String pathPart = splitPath[i];
-//            file = new File(file, pathPart);
-//            if (i < splitPath.length - 1) {
-//                file.mkdirs();
-//            }
-//        }
-
 
         File xmlFile = new File(outputDir, changeLog + ".html");
         xmlFile.getParentFile().mkdirs();

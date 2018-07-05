@@ -53,21 +53,15 @@ import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import org.slf4j.Logger;
-import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
@@ -96,8 +90,6 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableMultipleSessionRemoteLookUp;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
@@ -293,116 +285,45 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
 
     private Session lookUpRemoteSessionFor(int userId, int contextId, Session optOldSession) {
         HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
-        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+        final ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
         if (null == hzInstance || null == obfuscatorService) {
             return null;
         }
 
-        Cluster cluster = hzInstance.getCluster();
-
-        // Get local member
-        Member localMember = cluster.getLocalMember();
-
         // Determine other cluster members
-        Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+        Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hzInstance);
         if (otherMembers.isEmpty()) {
             return null;
         }
 
-        IExecutorService executor = hzInstance.getExecutorService("default");
-        Map<Member, Future<PortableSessionCollection>> futureMap = executor.submitToMembers(new PortableMultipleSessionRemoteLookUp(userId, contextId), otherMembers);
-        String oldSessionId = null == optOldSession ? null : optOldSession.getSessionID();
-        for (Iterator<Entry<Member, Future<PortableSessionCollection>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
-            Future<PortableSessionCollection> future = it.next().getValue();
-            // Check Future's return value
-            int retryCount = 3;
-            while (retryCount-- > 0) {
-                try {
-                    PortableSessionCollection portableSessionCollection = future.get();
-                    retryCount = 0;
+        final String oldSessionId = null == optOldSession ? null : optOldSession.getSessionID();
+        Hazelcasts.Filter<PortableSessionCollection, PortableSession> filter = new Hazelcasts.Filter<PortableSessionCollection, PortableSession>() {
 
-                    PortableSession[] portableSessions = portableSessionCollection.getSessions();
-                    if (null != portableSessions) {
-                        for (PortableSession portableSession : portableSessions) {
+            @Override
+            public PortableSession accept(PortableSessionCollection portableSessionCollection) {
+                PortableSession[] portableSessions = portableSessionCollection.getSessions();
+                if (null != portableSessions) {
+                    for (PortableSession portableSession : portableSessions) {
+                        if ((null == oldSessionId || false == oldSessionId.equals(portableSession.getSessionID())) && PushUtility.allowedClient(portableSession.getClient(), portableSession, true)) {
                             portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
-                            if ((null == oldSessionId || false == oldSessionId.equals(portableSession.getSessionID())) && PushUtility.allowedClient(portableSession.getClient(), portableSession, true)) {
-                                cancelRest(it);
-                                return portableSession;
-                            }
+                            return portableSession;
                         }
-                    }
-                } catch (InterruptedException e) {
-                    // Interrupted - Keep interrupted state
-                    Thread.currentThread().interrupt();
-                } catch (CancellationException e) {
-                    // Canceled
-                    retryCount = 0;
-                } catch (ExecutionException e) {
-                    Throwable cause = e.getCause();
-
-                    // Check for Hazelcast timeout
-                    if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                        if (cause instanceof RuntimeException) {
-                            throw ((RuntimeException) cause);
-                        }
-                        if (cause instanceof Error) {
-                            throw (Error) cause;
-                        }
-                        throw new IllegalStateException("Not unchecked", cause);
-                    }
-
-                    // Timeout while awaiting remote result
-                    if (retryCount <= 0) {
-                        // No further retry
-                        cancelFutureSafe(future);
                     }
                 }
+                return null;
             }
-        }
-        return null;
-    }
-
-    /**
-     * Gets the other cluster members
-     *
-     * @param allMembers All known members
-     * @param localMember The local member
-     * @return Other cluster members
-     */
-    private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
-        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
-        if (!otherMembers.remove(localMember)) {
-            LOGGER.warn("Couldn't remove local member from cluster members.");
-        }
-        return otherMembers;
-    }
-
-    /**
-     * Cancels given {@link Future} safely
-     *
-     * @param future The {@code Future} to cancel
-     */
-    static <V> void cancelFutureSafe(Future<V> future) {
-        if (null != future) {
-            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
-        }
-    }
-
-    private <V> void cancelRest(final Iterator<Entry<Member, Future<PortableSessionCollection>>> it) {
-        ThreadPoolService threadPool = services.getOptionalService(ThreadPoolService.class);
-        if (null != threadPool) {
-            AbstractTask<Void> task = new AbstractTask<Void>() {
-
-                @Override
-                public Void call() throws Exception {
-                    while (it.hasNext()) {
-                        Future<PortableSessionCollection> future = it.next().getValue();
-                        cancelFutureSafe(future);
-                    }
-                    return null;
-                }
-            };
-            threadPool.submit(task);
+        };
+        try {
+            return Hazelcasts.executeByMembersAndFilter(new PortableMultipleSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw ((RuntimeException) cause);
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IllegalStateException("Not unchecked", cause);
         }
     }
 

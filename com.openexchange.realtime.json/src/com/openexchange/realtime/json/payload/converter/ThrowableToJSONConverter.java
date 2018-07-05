@@ -58,7 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ThrowableToJSONConverter}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ThrowableToJSONConverter extends AbstractPOJOConverter {
@@ -80,7 +80,7 @@ public class ThrowableToJSONConverter extends AbstractPOJOConverter {
             jsonThrowable.put("stackTrace", stackTraceArray);
             return jsonThrowable;
         } catch (Exception e) {
-            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(e, data.toString());
         }
     }
 

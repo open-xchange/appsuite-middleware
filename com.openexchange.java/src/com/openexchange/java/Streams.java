@@ -127,6 +127,28 @@ public class Streams {
     };
 
     /**
+     * Consumes given input stream.
+     *
+     * @param in The input stream to consume
+     * @return The number of bytes consumed
+     * @throws IOException If reading from stream fails
+     */
+    public static long consume(InputStream in) throws IOException {
+        if (null == in) {
+            return 0L;
+        }
+
+        long consumed = 0L;
+        int size = 65536;
+        byte[] skipBuffer = new byte[size];
+        for (int read; (read = in.read(skipBuffer, 0, size)) > 0;) {
+            consumed += read;
+        }
+
+        return consumed;
+    }
+
+    /**
      * Checks if specified stream is empty.
      * <p>
      * If <code>null</code> is returned, the given stream is ensured to be closed.

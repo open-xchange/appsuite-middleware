@@ -52,9 +52,9 @@ package com.openexchange.mail.search.service;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.BooleanTerm;
 import com.openexchange.mail.search.FileNameTerm;
 import com.openexchange.mail.search.HeaderTerm;
-import com.openexchange.mail.search.BooleanTerm;
 import com.openexchange.mail.search.NOTTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
@@ -148,7 +148,7 @@ public final class SearchTermMapper {
                 }
                 return new HeaderTerm(values[0].toString(), values[1].toString());
             case ATTACHMENT:
-                return ("name".equals(values[0])) ? new FileNameTerm((String) values[1]) : BooleanTerm.TRUE;
+                return ("name".equals(values[0].toString().toLowerCase())) ? new FileNameTerm((String) values[1]) : BooleanTerm.TRUE;
             default:
                 return BooleanTerm.TRUE;
 

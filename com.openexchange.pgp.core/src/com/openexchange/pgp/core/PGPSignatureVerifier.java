@@ -68,7 +68,7 @@ import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
  * {@link PGPSignatureVerifier} - Wrapper for verifying PGP signature
  *
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
- * @since v2.4.2
+ * @since v7.8.4
  */
 public class PGPSignatureVerifier {
 
@@ -77,7 +77,7 @@ public class PGPSignatureVerifier {
 
     /**
      * Initializes a new {@link PGPSignatureVerifier}.
-     * 
+     *
      * @param keyRetrievalStrategy A strategy for retrieving public key in order to verify signatures
      */
     public PGPSignatureVerifier(PGPKeyRetrievalStrategy keyRetrievalStrategy) {
@@ -86,7 +86,7 @@ public class PGPSignatureVerifier {
 
     /**
      * Internal method to get a public key for a given signature
-     * 
+     *
      * @param signature The signature to retrieve the key for
      * @return The PGPPublicKey related to the given signature, or null if no such key was found
      * @throws Exception
@@ -97,7 +97,7 @@ public class PGPSignatureVerifier {
 
     /**
      * Verifies signatures
-     * 
+     *
      * @param signedData The data which are signed
      * @param signatureData The data containing one or more signatures
      * @return A list of verification results
@@ -108,20 +108,20 @@ public class PGPSignatureVerifier {
         signatureData = PGPUtil.getDecoderStream(signatureData);
         PGPObjectFactory objectFactory = new PGPObjectFactory(signatureData, new BcKeyFingerprintCalculator());
         Object pgpObject = objectFactory.nextObject();
-        
+
         //Trying to get the signature list from the stream
         PGPSignatureList signatureList = pgpObject instanceof PGPSignatureList ? (PGPSignatureList) pgpObject : null;
-        
+
         //If no plain signature list was found, we check if we have a compressed signature list
         if(signatureList == null && pgpObject instanceof PGPCompressedData) {
             PGPCompressedData compressedData = (PGPCompressedData)pgpObject;
             pgpObject = new PGPObjectFactory(compressedData.getDataStream(), new BcKeyFingerprintCalculator()).nextObject();
-            //Check again if we now have a decomprssed signature list 
+            //Check again if we now have a decomprssed signature list
             signatureList = pgpObject instanceof PGPSignatureList ? (PGPSignatureList) pgpObject : null;
         }
 
-        Hashtable<PGPSignature,PGPPublicKey> keysForSignature = new Hashtable<PGPSignature, PGPPublicKey>();            
-        
+        Hashtable<PGPSignature,PGPPublicKey> keysForSignature = new Hashtable<PGPSignature, PGPPublicKey>();
+
         if (signatureList != null) {
             //Initializing each signature
             Iterator<PGPSignature> iterator = signatureList.iterator();

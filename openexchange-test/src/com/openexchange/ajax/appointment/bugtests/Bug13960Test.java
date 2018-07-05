@@ -94,6 +94,7 @@ public class Bug13960Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -112,6 +113,7 @@ public class Bug13960Test extends AbstractAJAXSession {
         response.fillAppointment(appointment);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -157,7 +159,9 @@ public class Bug13960Test extends AbstractAJAXSession {
             assertEquals(JSONObject.NULL, array.get(recurrencePositionPos));
         }
         {
-            AllRequest request = new AllRequest(appointment.getParentFolderID(), COLUMNS, appointment.getStartDate(), appointment.getEndDate(), timeZone);
+            Date start = TimeTools.getAPIDate(timeZone, appointment.getStartDate(), 0);
+            Date end = TimeTools.getAPIDate(timeZone, appointment.getEndDate(), 1);
+            AllRequest request = new AllRequest(appointment.getParentFolderID(), COLUMNS, start, end, timeZone);
             CommonAllResponse response = getClient().execute(request);
             int idPos = response.getColumnPos(Appointment.OBJECT_ID);
             int row = 0;

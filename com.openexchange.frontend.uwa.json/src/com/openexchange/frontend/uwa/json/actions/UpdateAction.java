@@ -57,6 +57,7 @@ import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidgetService;
 import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
 import com.openexchange.modules.model.Attribute;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -73,6 +74,9 @@ public class UpdateAction extends AbstractUWAAction {
     @Override
     protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws JSONException, OXException {
         UWAWidget widget = req.getBody();
+        if(widget == null) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
         List<Attribute<UWAWidget>> fields = req.getFields();
         widgets.update(widget, fields);
         UWAWidget loaded = widgets.get(widget.getId());
