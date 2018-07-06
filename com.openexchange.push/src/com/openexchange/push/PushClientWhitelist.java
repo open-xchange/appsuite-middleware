@@ -49,11 +49,13 @@
 
 package com.openexchange.push;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.openexchange.java.Strings;
 
 /**
  * {@link PushClientWhitelist}
@@ -61,6 +63,80 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushClientWhitelist {
+
+    /** Check if a certain client identifier matches */
+    public static interface ClientMatcher {
+
+        /**
+         * Checks if specified client identifier does match according to this matcher's consideration.
+         *
+         * @return  <tt>true</tt> if client identifier matches; otherwise <code>false</code>
+         */
+        boolean matches(String clientId);
+    }
+
+    /** A matcher which checks if client identifier ignore-case starts with a certain prefix */
+    public static class IgnoreCasePrefixClientMatcher implements ClientMatcher {
+
+        private final String prefix;
+
+        /**
+         * Initializes a new {@link IgnoreCasePrefixClientMatcher}.
+         *
+         * @param prefix The prefix
+         */
+        public IgnoreCasePrefixClientMatcher(String prefix) {
+            super();
+            this.prefix = Strings.asciiLowerCase(prefix);
+        }
+
+        @Override
+        public boolean matches(String clientId) {
+            return Strings.asciiLowerCase(clientId).startsWith(prefix);
+        }
+    }
+
+    /** A matcher which uses a regular expression to check if a client identifier matches */
+    public static class PatternClientMatcher implements ClientMatcher {
+
+        private final Pattern pattern;
+
+        /**
+         * Initializes a new {@link PatternClientMatcher}.
+         *
+         * @param pattern
+         */
+        public PatternClientMatcher(Pattern pattern) {
+            super();
+            this.pattern = pattern;
+        }
+
+        @Override
+        public boolean matches(String clientId) {
+            return pattern.matcher(clientId).matches();
+        }
+    }
+
+    /** A matcher which checks if client identifier ignore-case equals a certain identifier */
+    public static class IgnoreCaseExactClientMatcher implements ClientMatcher {
+
+        private final String clientId;
+
+        /**
+         * Initializes a new {@link IgnoreCaseExactClientMatcher}.
+         *
+         * @param clientId The client identifier
+         */
+        public IgnoreCaseExactClientMatcher(String clientId) {
+            super();
+            this.clientId = Strings.asciiLowerCase(clientId);
+        }
+
+        @Override
+        public boolean matches(String clientId) {
+            return this.clientId.equals(Strings.asciiLowerCase(clientId));
+        }
+    }
 
     private static final PushClientWhitelist instance = new PushClientWhitelist();
 
@@ -73,24 +149,32 @@ public final class PushClientWhitelist {
         return instance;
     }
 
-    private final ConcurrentMap<Pattern, Pattern> map;
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final ConcurrentMap<ClientMatcher, ClientMatcher> map;
+    private final Cache<String, Boolean> checks;
 
     /**
      * Initializes a new {@link PushClientWhitelist}.
      */
     private PushClientWhitelist() {
         super();
-        map = new ConcurrentHashMap<Pattern, Pattern>(4, 0.9f, 1);
+        map = new ConcurrentHashMap<ClientMatcher, ClientMatcher>(4, 0.9f, 1);
+        checks = CacheBuilder.newBuilder().expireAfterWrite(Duration.ofHours(2)).initialCapacity(16).maximumSize(1024).build();
     }
 
     /**
-     * Adds specified pattern if no such pattern is already contained.
+     * Adds specified matcher if no such matcher is already contained.
      *
-     * @param pattern The pattern to add
+     * @param matcher The matcher to add
      * @return <code>true</code> for successful insertion; otherwise <code>false</code>
      */
-    public boolean add(final Pattern pattern) {
-        return (null == map.putIfAbsent(pattern, pattern));
+    public boolean add(final ClientMatcher matcher) {
+        boolean added = (null == map.putIfAbsent(matcher, matcher));
+        if (added) {
+            checks.invalidateAll();
+        }
+        return added;
     }
 
     /**
@@ -103,23 +187,27 @@ public final class PushClientWhitelist {
     }
 
     /**
-     * Checks if this white-list contains specified pattern.
+     * Checks if this white-list contains specified matcher.
      *
-     * @param pattern The pattern
+     * @param matcher The matcher
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
-    public boolean contains(final Pattern pattern) {
-        return map.containsKey(pattern);
+    public boolean contains(final ClientMatcher matcher) {
+        return map.containsKey(matcher);
     }
 
     /**
-     * Removes specified pattern.
+     * Removes specified matcher.
      *
-     * @param pattern The pattern
+     * @param matcher The matcher
      * @return <code>true</code> if specified pattern was removed; otherwise <code>false</code>
      */
-    public boolean remove(final Pattern pattern) {
-        return (null != map.remove(pattern));
+    public boolean remove(final ClientMatcher matcher) {
+        boolean removed = null != map.remove(matcher);
+        if (removed) {
+            checks.invalidateAll();
+        }
+        return removed;
     }
 
     /**
@@ -127,6 +215,7 @@ public final class PushClientWhitelist {
      */
     public void clear() {
         map.clear();
+        checks.invalidateAll();
     }
 
     /**
@@ -139,15 +228,6 @@ public final class PushClientWhitelist {
     }
 
     /**
-     * Gets currently contained patterns.
-     *
-     * @return Currently contained patterns.
-     */
-    public Set<Pattern> getPatterns() {
-        return new HashSet<Pattern>(map.keySet());
-    }
-
-    /**
      * Checks if specified client identifier is matched by one of contained patterns.
      *
      * @param clientId The client identifier
@@ -157,8 +237,20 @@ public final class PushClientWhitelist {
         if (null == clientId) {
             return false;
         }
-        for (final Pattern pattern : map.keySet()) {
-            if (pattern.matcher(clientId).matches()) {
+
+        Boolean matches = checks.getIfPresent(clientId);
+        if (null != matches) {
+            return matches.booleanValue();
+        }
+
+        matches = Boolean.valueOf(doCheckAllowed(clientId));
+        checks.put(clientId, matches);
+        return matches.booleanValue();
+    }
+
+    private boolean doCheckAllowed(final String clientId) {
+        for (ClientMatcher matcher : map.keySet()) {
+            if (matcher.matches(clientId)) {
                 return true;
             }
         }
