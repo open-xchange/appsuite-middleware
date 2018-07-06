@@ -239,10 +239,10 @@ public class WrappingFilter implements Filter {
 
         // Determine remote IP address
         String forHeaderValue = httpRequest.getHeader(forHeader);
-        String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
-        if (null == remoteIP) {
+        String remoteAddress = IPTools.getRemoteIP(forHeaderValue, knownProxies);
+        if (null == remoteAddress) {
             LOG.debug("Could not detect a valid remote IP address in {}: [{}], falling back to default", forHeader, forHeaderValue == null ? "" : forHeaderValue);
-            remoteIP = httpRequest.getRemoteAddr();
+            remoteAddress = httpRequest.getRemoteAddr();
         }
 
         // Determine protocol/scheme of the incoming request
@@ -252,7 +252,7 @@ public class WrappingFilter implements Filter {
             protocol = httpRequest.getScheme();
         }
 
-        return new HttpServletRequestWrapper(protocol, remoteIP, httpRequest.getServerPort(), httpRequest);
+        return new HttpServletRequestWrapper(protocol, remoteAddress, httpRequest.getServerPort(), httpRequest);
     }
 
     private boolean isValidProtocol(String protocolHeaderValue) {
