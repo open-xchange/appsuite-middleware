@@ -50,7 +50,7 @@
 package com.openexchange.share.handler.ical;
 
 import java.io.IOException;
-import java.util.AbstractMap;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -58,15 +58,17 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventStatus;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
@@ -76,6 +78,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SortOrder;
+import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -142,6 +145,11 @@ public class ICalHandler extends HttpAuthShareHandler {
         EVENT_FIELDS = fields.toArray(new EventField[fields.size()]);
     }
 
+    /**
+     * The event fields being exported for event tombstones
+     */
+    private final static EventField[] EVENT_TOMBSTONE_FIELDS = { EventField.UID, EventField.TIMESTAMP, EventField.SEQUENCE, EventField.RECURRENCE_ID };
+
     private final ServiceLookup services;
 
     /**
@@ -195,6 +203,8 @@ public class ICalHandler extends HttpAuthShareHandler {
             }
         } catch (OXException e) {
             sendError(resolvedShare.getResponse(), e);
+        } catch (Exception e) {
+            sendError(resolvedShare.getResponse(), ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
         }
     }
 
@@ -206,31 +216,32 @@ public class ICalHandler extends HttpAuthShareHandler {
      */
     private void writeEvents(ResolvedShare share, ShareTarget target) throws OXException, IOException {
         /*
-         * prepare iCal export
+         * get events in folder, considering the client supplied ETag in "If-None-Match", and a possible "return=minimal" preference
          */
+        UserizedFolder folder = services.getService(FolderService.class).getFolder(
+            FolderStorage.REAL_TREE_ID, target.getFolder(), share.getSession(), null);
+        String ifNoneMatch = share.getRequest().getHeader("If-None-Match");
+        String prefer = share.getRequest().getHeader("Prefer");
+        EventsResult eventsResult = getEvents(share.getSession(), folder, ifNoneMatch, prefer);
+        if (eventsResult.eTagMatched) {
+            share.getResponse().setHeader("ETag", eventsResult.eTag);
+            share.getResponse().sendError(HttpServletResponse.SC_NOT_MODIFIED);
+            return;
+        }
+        /*
+         * prepare iCal export, apply calendar properties & add event data
+         */
+        String name = extractName(share, folder);
         ICalService iCalService = services.getService(ICalService.class);
         ICalParameters iCalParameters = iCalService.initParameters();
         iCalParameters.set(ICalParameters.DEFAULT_TIMEZONE, TimeZone.getTimeZone(share.getUser().getTimeZone()));
         CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
-        UserizedFolder folder = services.getService(FolderService.class).getFolder(
-            FolderStorage.REAL_TREE_ID, target.getFolder(), share.getSession(), null);
-        String name = extractName(share, folder);
-        if (Strings.isEmpty(name)) {
-            name = "Calendar";
-        }
         calendarExport.setName(name);
         calendarExport.setMethod("PUBLISH");
-        /*
-         * get events in folder & add to export, considering the client supplied ETag in "If-None-Match"
-         */
-        String ifNoneMatch = share.getRequest().getHeader("If-None-Match");
-        Entry<String, List<Event>> eventsAndETag = getEvents(share.getSession(), folder, ifNoneMatch);
-        if (null == eventsAndETag.getValue()) {
-            share.getResponse().sendError(HttpServletResponse.SC_NOT_MODIFIED);
-            return;
-        }
-        for (Event event : eventsAndETag.getValue()) {
-            calendarExport.add(event);
+        if (null != eventsResult.events) {
+            for (Event event : eventsResult.events) {
+                calendarExport.add(event);
+            }
         }
         /*
          * write response
@@ -238,13 +249,25 @@ public class ICalHandler extends HttpAuthShareHandler {
         HttpServletResponse response = share.getResponse();
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("text/calendar; charset=UTF-8");
-        response.setHeader("ETag", eventsAndETag.getKey());
+        response.setHeader("ETag", eventsResult.eTag);
+        if (eventsResult.preferenceApplied) {
+            response.setHeader("Preference-Applied", prefer);
+        }
         com.openexchange.tools.servlet.http.Tools.setHeaderForFileDownload(
             share.getRequest().getHeader("User-Agent"), response, name + ".ics");
         calendarExport.writeVCalendar(response.getOutputStream());
     }
 
-    private Entry<String, List<Event>> getEvents(Session session, UserizedFolder folder, String ifNoneMatch) throws OXException {
+    private static class EventsResult {
+
+        List<Event> events;
+        String      eTag;
+        boolean     eTagMatched;
+        boolean     preferenceApplied;
+
+    }
+
+    private EventsResult getEvents(Session session, UserizedFolder folder, String ifNoneMatch, String prefer) throws OXException {
         if (null == folder.getAccountID()) {
             /*
              * assume default account; get events from calendar service
@@ -252,26 +275,85 @@ public class ICalHandler extends HttpAuthShareHandler {
             CalendarSession calendarSession = services.getService(CalendarService.class).init(session);
             applyParameters(calendarSession);
             long sequenceNumber = calendarSession.getCalendarService().getSequenceNumber(calendarSession, folder.getID());
-            String etag = getETag(folder, sequenceNumber);
-            if (etag.equals(ifNoneMatch)) {
-                return new AbstractMap.SimpleEntry<String, List<Event>>(etag, null);
+            String eTag = encodeETag(folder.getLastModifiedUTC(), Long.valueOf(sequenceNumber));
+            EventsResult result = new EventsResult();
+            result.eTag = eTag;
+            if (eTag.equals(ifNoneMatch)) {
+                /*
+                 * no changes
+                 */
+                result.eTagMatched = true;
+                return result;
             }
-            List<Event> events = calendarSession.getCalendarService().getEventsInFolder(calendarSession, folder.getID());
-            return new AbstractMap.SimpleEntry<String, List<Event>>(etag, events);
-        } else {
             /*
-             * get events from calendar access
+             * complete result, otherwise
              */
-            IDBasedCalendarAccess calendarAccess = services.getService(IDBasedCalendarAccessFactory.class).createAccess(session);
-            applyParameters(calendarAccess);
-            Long sequenceNumber = calendarAccess.getSequenceNumbers(Collections.singletonList(folder.getID())).get(folder.getID());
-            String etag = getETag(folder, null != sequenceNumber ? sequenceNumber.longValue() : 0L);
-            if (etag.equals(ifNoneMatch)) {
-                return new AbstractMap.SimpleEntry<String, List<Event>>(etag, null);
-            }
-            List<Event> events = calendarAccess.getEventsInFolder(folder.getID());
-            return new AbstractMap.SimpleEntry<String, List<Event>>(etag, events);
+            result.events = prepareEvents(calendarSession.getCalendarService().getEventsInFolder(calendarSession, folder.getID()));
+            return result;
         }
+        /*
+         * get events from calendar access
+         */
+        IDBasedCalendarAccess calendarAccess = services.getService(IDBasedCalendarAccessFactory.class).createAccess(session);
+        applyParameters(calendarAccess);
+        Long sequenceNumber = calendarAccess.getSequenceNumbers(Collections.singletonList(folder.getID())).get(folder.getID());
+        String eTag = encodeETag(folder.getLastModifiedUTC(), sequenceNumber);
+        EventsResult result = new EventsResult();
+        result.eTag = eTag;
+        if (Strings.isNotEmpty(ifNoneMatch)) {
+            if (eTag.equals(ifNoneMatch)) {
+                /*
+                 * no changes
+                 */
+                result.eTagMatched = true;
+                return result;
+            }
+            if ("return=minimal".equalsIgnoreCase(prefer)) {
+                Long updatedSince = decodeSequenceNumber(ifNoneMatch);
+                if (null != updatedSince && getIntervalStart().getTime() <= updatedSince.longValue()) {
+                    /*
+                     * delta result is possible
+                     */
+                    UpdatesResult updatesResult = calendarAccess.getUpdatedEventsInFolder(folder.getID(), updatedSince);
+                    result.events = new ArrayList<Event>();
+                    result.events.addAll(prepareEventTombstones(updatesResult.getDeletedEvents()));
+                    result.events.addAll(prepareEvents(updatesResult.getNewAndModifiedEvents()));
+                    result.preferenceApplied = true;
+                    return result;
+                }
+            }
+        }
+        /*
+         * complete result, otherwise
+         */
+        result.events = prepareEvents(calendarAccess.getEventsInFolder(folder.getID()));
+        return result;
+    }
+
+    private static List<Event> prepareEventTombstones(List<Event> deletedEvents) throws OXException {
+        if (null == deletedEvents || deletedEvents.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Event> preparedTombstones = new ArrayList<Event>(deletedEvents.size());
+        for (Event event : deletedEvents) {
+            Event preparedEventTombstone = EventMapper.getInstance().copy(event, null, false, EVENT_TOMBSTONE_FIELDS);
+            preparedEventTombstone.setStatus(new EventStatus("DELETED"));
+            preparedTombstones.add(preparedEventTombstone);
+        }
+        return preparedTombstones;
+    }
+
+    private static List<Event> prepareEvents(List<Event> events) throws OXException {
+        if (null == events || events.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Event> preparedEvents = new ArrayList<Event>(events.size());
+        for (Event event : events) {
+            Event preparedEvent = EventMapper.getInstance().copy(event, null, false, EVENT_FIELDS);
+            CalendarUtils.removeImplicitAttendee(preparedEvent);
+            preparedEvents.add(preparedEvent);
+        }
+        return preparedEvents;
     }
 
     private <T extends CalendarParameters> T applyParameters(T calendarParameters) {
@@ -394,10 +476,7 @@ public class ICalHandler extends HttpAuthShareHandler {
             LOG.warn("Unrecognized value for \"com.openexchange.share.handler.iCal.pastInterval\", falling back to \"two_weeks\"");
             calendar.add(Calendar.YEAR, -1);
         }
-        for (int field : new int[] { Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND }) {
-            calendar.set(field, 0);
-        }
-        return calendar.getTime();
+        return CalendarUtils.truncateTime(calendar).getTime();
     }
 
     private static boolean acceptsICal(HttpServletRequest request) {
@@ -446,27 +525,44 @@ public class ICalHandler extends HttpAuthShareHandler {
      *
      * @param share The resolved share
      * @param folder The share to extract the name for
-     * @return The display name, or <code>null</code> if name extraction fails
+     * @return The display name
      */
     private String extractName(ResolvedShare share, UserizedFolder folder) {
+        Locale locale = share.getUser().getLocale();
+        String name = null != locale ? folder.getLocalizedName(locale) : folder.getName();
         try {
-            Locale locale = share.getUser().getLocale();
-            String name = null != locale ? folder.getLocalizedName(locale) : folder.getName();
             if (SharedType.getInstance().equals(folder.getType())) {
                 int ownerID = folder.getCreatedBy();
                 User user = services.getService(UserService.class).getUser(ownerID, share.getContext());
-                return name + " (" + user.getDisplayName() + ')';
+                name += " (" + user.getDisplayName() + ')';
             }
-            return name;
         } catch (OXException e) {
             LOG.warn("Error extracting name for share {}", share, e);
-            return null;
         }
+        return Strings.isEmpty(name) ? "Calendar" : name;
     }
 
-    private static String getETag(UserizedFolder folder, long sequenceNumber) {
-        long folderLastModified = null != folder.getLastModifiedUTC() ? folder.getLastModifiedUTC().getTime() : 0L;
-        return Hashing.murmur3_128().newHasher().putLong(folderLastModified).putLong(sequenceNumber).hash().toString();
+    private static String encodeETag(Date folderLastModified, Long sequenceNumber) {
+        byte[] bytes = ByteBuffer.allocate(16)
+            .putLong(null == folderLastModified ? 0 : folderLastModified.getTime())
+            .putLong(null == sequenceNumber ? 0 : sequenceNumber.longValue())
+        .array();
+        return BaseEncoding.base64Url().omitPadding().encode(bytes);
+    }
+
+    private static Long decodeSequenceNumber(String eTag) {
+        if (Strings.isNotEmpty(eTag)) {
+            try {
+                byte[] bytes = BaseEncoding.base64Url().omitPadding().decode(eTag);
+                ByteBuffer buffer = ByteBuffer.wrap(bytes);
+                if (16 == buffer.remaining()) {
+                    return buffer.getLong(8);
+                }
+            } catch (IllegalArgumentException e) {
+                // ignore
+            }
+        }
+        return null;
     }
 
 }
