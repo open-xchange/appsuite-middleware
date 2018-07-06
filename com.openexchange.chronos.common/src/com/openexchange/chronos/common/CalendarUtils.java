@@ -885,7 +885,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the event is <i>floating</i>, <code>false</code>, otherwise
      */
     public static boolean isFloating(Event event) {
-        return event.getStartDate().isFloating();
+        return null != event.getStartDate() && event.getStartDate().isFloating();
     }
 
     /**
