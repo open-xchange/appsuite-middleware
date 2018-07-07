@@ -303,14 +303,14 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                 if (msg1.isSeen()) {
                     if (msg2.isSeen()) {
-                        return compareByReceivedDate(msg1, msg2, false);
+                        return compareByReceivedDate(msg1, msg2, true);
                     }
-                    return 1;
-                }
-                if (msg2.isSeen()) {
                     return -1;
                 }
-                return compareByReceivedDate(msg1, msg2, false);
+                if (msg2.isSeen()) {
+                    return 1;
+                }
+                return compareByReceivedDate(msg1, msg2, true);
             }
         });
         COMPARERS.put(MailSortField.FLAG_ANSWERED, new FieldComparer() {
