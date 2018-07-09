@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link GuiPreferenceUserAttributeChangers}
@@ -91,7 +92,6 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
      */
     @Override
     public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
-        SettingStorage settStor = SettingStorage.getInstance(contextId, userId);
         Map<String, String> guiPreferences = userData.getGuiPreferences();
         if (guiPreferences == null) {
             return EMPTY_SET;
@@ -100,6 +100,8 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
         // If administrator sets GUI configuration existing GUI configuration is overwritten
         Set<String> changedAttributes = new HashSet<>();
         Iterator<Entry<String, String>> iter = guiPreferences.entrySet().iterator();
+
+        SettingStorage settingStorage = getSettingStorage(userId, contextId);
         while (iter.hasNext()) {
             Entry<String, String> entry = iter.next();
             String key = entry.getKey();
@@ -108,7 +110,7 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
                 try {
                     Setting setting = ConfigTree.getInstance().getSettingByPath(key);
                     setting.setSingleValue(value);
-                    settStor.save(connection, setting);
+                    settingStorage.save(connection, setting);
                     changedAttributes.add(key);
                 } catch (OXException e) {
                     LOG.error("Problem while storing GUI preferences.", e);
@@ -116,5 +118,21 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
             }
         }
         return changedAttributes;
+    }
+
+    /**
+     * Returns the {@link SettingStorage} instance for the specified user in the specified context
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return the {@link SettingStorage} instance for the specified user in the specified context
+     * @throws StorageException if the {@link SettingStorage} instance cannot be initialised
+     */
+    private SettingStorage getSettingStorage(int userId, int contextId) throws StorageException {
+        try {
+            return SettingStorage.getInstance(ServerSessionAdapter.valueOf(userId, contextId));
+        } catch (OXException e) {
+            throw new StorageException("Cannot initialise the SettingStorage for user '" + userId + "' in context '" + contextId + "'", e);
+        }
     }
 }
