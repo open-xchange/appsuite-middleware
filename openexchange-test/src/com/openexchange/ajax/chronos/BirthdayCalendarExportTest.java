@@ -50,6 +50,7 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -60,19 +61,15 @@ import org.junit.Test;
  */
 public class BirthdayCalendarExportTest extends AbstractImportExportTest {
 
-   @Test
-    public void testBirthdayExportForExternalContacts() throws Exception {
-        createContactWithBirthdayEvent(defaultUserApi.getSession());
-        String folderId = getBirthdayCalendarFolder();
+    @Test
+    public void testBirthdayCalendarExport() throws Exception {
+        String session = defaultUserApi.getSession();
+        createContactWithBirthdayEvent(session);
+        String folderId = getBirthdayCalendarFolder(session);
         //export
-        String ical = importExportManager.exportICalFile(defaultUserApi.getSession(), folderId);
-        //TODO add proper checks and remove handling for the created contact
+        String ical = importExportManager.exportICalFile(session, folderId);
         assertNotNull(ical);
+        assertTrue(ical.contains("Peter Paul Rubens"));
     }
-
-   @Test
-   public void testBirthdayExportForInternalContacts() {
-       //TODO
-   }
 
 }

@@ -267,22 +267,28 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         throw new Exception("Unable to find default calendar folder!");
     }
 
-    public String getBirthdayCalendarFolder() throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(defaultUserApi.getSession(), "event", "1,300,308", "1");
+    public String getBirthdayCalendarFolder(String session) throws Exception {
+        return findPrivateFolder(session, "event", "Birthdays");
+    }
 
+    public String getDefaultContactFolder(String session) throws Exception {
+        return findPrivateFolder(session, "contacts", "Contacts");
+    }
+
+    @SuppressWarnings("unchecked")
+    private String findPrivateFolder(String session, String module, String folder) throws Exception {
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, "1,300,308", "1");
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
         }
         Object privateFolders = visibleFolders.getData().getPrivate();
-        @SuppressWarnings("unchecked")
         ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
-
-        for (ArrayList<?> folder : privateList) {
-            if (folder.get(1).equals("Birthdays")) {
-                return folder.get(0).toString();
+        for (ArrayList<?> folderName : privateList) {
+            if (folderName.get(1).equals(folder)) {
+                return folderName.get(0).toString();
             }
         }
-        throw new Exception("Unable to find birthday calendar folder!");
+        throw new Exception("Unable to find default "+module+" folder!");
     }
 
     /**
