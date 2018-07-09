@@ -77,6 +77,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Reference;
+import com.openexchange.java.Strings;
 
 /**
  * {@link EntityProcessor}
@@ -239,7 +240,7 @@ public class EntityProcessor {
         if (null != sentBy) {
             if (0 < sentBy.getEntity()) {
                 parameters.put("SENT-BY", ResourceId.forUser(contextId, organizer.getSentBy().getEntity()));
-            } else {
+            } else if (Strings.isNotEmpty(organizer.getSentBy().getUri())) {
                 parameters.put("SENT-BY", organizer.getSentBy().getUri());
             }
         }
