@@ -788,14 +788,14 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 String storedPrincipal = resultSet.getString(columnLabels[2]);
                 int storedPrincipalId = resultSet.getInt(columnLabels[3]);
                 if (0 < storedOrganizerId && storedOrganizerId == storedPrincipalId ||
-                    0 == storedOrganizerId && null != storedOrganizer && storedOrganizer.equals(storedPrincipal) ||
-                    0 == storedPrincipalId && null == storedPrincipal) {
+                    0 == storedOrganizerId && Strings.isNotEmpty(storedOrganizer) && storedOrganizer.equals(storedPrincipal) ||
+                    0 == storedPrincipalId && Strings.isEmpty(storedPrincipal)) {
                     /*
                      * no different "sent-by" user, take over stored values
                      */
                     organizer.setEntity(storedOrganizerId);
                     organizer.setUri(Appointment2Event.getURI(storedOrganizer));
-                } else {
+                } else if (null != storedOrganizer || 0 < storedOrganizerId) {
                     /*
                      * organizer with sent-by, use stored principal as organizer and stored organizer as "sent-by":
                      * database/legacy: organizer ~ acting user , principal ~ calendar owner
@@ -807,6 +807,12 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                     sentBy.setEntity(storedOrganizerId);
                     sentBy.setUri(Appointment2Event.getURI(storedOrganizer));
                     organizer.setSentBy(sentBy);
+                } else {
+                    /*
+                     * malformed organizer data, take over values from stored principal
+                     */
+                    organizer.setEntity(storedPrincipalId);
+                    organizer.setUri(Appointment2Event.getURI(storedPrincipal));
                 }
                 return null == organizer.getUri() && 0 == organizer.getEntity() ? null : organizer;
             }
