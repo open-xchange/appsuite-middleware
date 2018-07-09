@@ -61,8 +61,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.DatabaseConnectionListener;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -73,6 +75,8 @@ import com.openexchange.pooling.PoolingException;
 public class ReplicationMonitor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReplicationMonitor.class);
+
+    private final ServiceListing<DatabaseConnectionListener> connectionListeners;
 
     private final FetchAndSchema TIMEOUT = new TimeoutFetchAndSchema(this, true);
     private final FetchAndSchema NOTIMEOUT = new NotimeoutFetchAndSchema(this, true);
@@ -88,10 +92,20 @@ public class ReplicationMonitor {
 
     private long lastLogged = 0;
 
-    ReplicationMonitor(boolean active, boolean checkWriteCons) {
+    ReplicationMonitor(boolean active, boolean checkWriteCons, ServiceListing<DatabaseConnectionListener> connectionListeners) {
         super();
         this.active = active;
         this.checkWriteCons = checkWriteCons;
+        this.connectionListeners = connectionListeners;
+    }
+
+    /**
+     * Gets the connection listeners
+     *
+     * @return The connection listeners
+     */
+    public ServiceListing<DatabaseConnectionListener> getConnectionListeners() {
+        return connectionListeners;
     }
 
     Connection checkFallback(Pools pools, AssignmentImpl assign, boolean noTimeout, boolean write) throws OXException {

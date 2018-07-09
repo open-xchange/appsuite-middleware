@@ -65,6 +65,7 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -74,6 +75,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import com.openexchange.database.DatabaseConnectionListener;
 import com.openexchange.database.Databases;
 import com.openexchange.database.Heartbeat;
 import com.openexchange.database.internal.AssignmentImpl;
@@ -83,6 +85,7 @@ import com.openexchange.database.internal.MysqlUtils;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
 import com.openexchange.database.internal.StateAware;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -203,10 +206,13 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
 
     private final AtomicReference<HeartBeatHelper> heartBeatReference;
 
+    private final ServiceListing<DatabaseConnectionListener> connectionListeners;
+
     public JDBC4ConnectionReturner(Pools pools, ReplicationMonitor monitor, AssignmentImpl assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
         super();
         this.pools = pools;
         this.monitor = monitor;
+        connectionListeners = monitor.getConnectionListeners();
         this.assign = assign;
         this.delegate = delegate;
         this.noTimeout = noTimeout;
@@ -265,7 +271,24 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
             }
         }
 
+        List<DatabaseConnectionListener> listeners = connectionListeners.getServiceList();
+        for (DatabaseConnectionListener connectionListener : listeners) {
+            try {
+                connectionListener.onBeforeCommitPerformed(this);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to invoke onBeforeCommitPerformed() for {}", connectionListener.getClass().getName(), e);
+            }
+        }
+
         delegate.commit();
+
+        for (DatabaseConnectionListener connectionListener : listeners) {
+            try {
+                connectionListener.onAfterCommitPerformed(this);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to invoke onAfterCommitPerformed() for {}", connectionListener.getClass().getName(), e);
+            }
+        }
     }
 
     @Override
@@ -424,19 +447,63 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
     @Override
     public void rollback() throws SQLException {
         checkForAlreadyClosed();
+
+        List<DatabaseConnectionListener> listeners = connectionListeners.getServiceList();
+        for (DatabaseConnectionListener connectionListener : listeners) {
+            try {
+                connectionListener.onBeforeRollbackPerformed(this);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to invoke onBeforeRollbackPerformed() for {}", connectionListener.getClass().getName(), e);
+            }
+        }
+
         delegate.rollback();
+
+        for (DatabaseConnectionListener connectionListener : listeners) {
+            try {
+                connectionListener.onAfterRollbackPerformed(this);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to invoke onAfterRollbackPerformed() for {}", connectionListener.getClass().getName(), e);
+            }
+        }
     }
 
     @Override
     public void rollback(final Savepoint savepoint) throws SQLException {
         checkForAlreadyClosed();
+
+        List<DatabaseConnectionListener> listeners = connectionListeners.getServiceList();
+        for (DatabaseConnectionListener connectionListener : listeners) {
+            try {
+                connectionListener.onBeforeRollbackPerformed(this);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to invoke onBeforeRollbackPerformed() for {}", connectionListener.getClass().getName(), e);
+            }
+        }
+
         delegate.rollback(savepoint);
+
+        for (DatabaseConnectionListener connectionListener : listeners) {
+            try {
+                connectionListener.onAfterRollbackPerformed(this);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to invoke onAfterRollbackPerformed() for {}", connectionListener.getClass().getName(), e);
+            }
+        }
     }
 
     @Override
     public void setAutoCommit(final boolean autoCommit) throws SQLException {
         checkForAlreadyClosed();
         delegate.setAutoCommit(autoCommit);
+
+        for (DatabaseConnectionListener connectionListener : connectionListeners) {
+            try {
+                connectionListener.onAutoCommitChanged(autoCommit, this);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to invoke onAutoCommitChanged() for {}", connectionListener.getClass().getName(), e);
+            }
+        }
     }
 
     @Override

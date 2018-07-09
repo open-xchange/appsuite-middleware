@@ -57,10 +57,12 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.DatabaseConnectionListener;
 import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.lock.LockService;
+import com.openexchange.osgi.ServiceListing;
 
 /**
  * Contains the code to startup the complete database connection pooling and replication monitor.
@@ -149,9 +151,10 @@ public final class Initialization {
      * @param configurationService A reference to the configuration service
      * @param configViewFactory The config view factory
      * @param migrationService The database migration service, or <code>null</code> if not available
+     * @param connectionListeners The connection listeners
      * @return The database service
      */
-    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService) throws OXException {
+    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService, ServiceListing<DatabaseConnectionListener> connectionListeners) throws OXException {
         if (null != databaseService) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
@@ -162,7 +165,7 @@ public final class Initialization {
         // Setting up database connection pools.
         pools = new Pools(timer);
         // Setting up the replication monitor
-        monitor = new ReplicationMonitor(configuration.getBoolean(REPLICATION_MONITOR, true), configuration.getBoolean(CHECK_WRITE_CONS, false));
+        monitor = new ReplicationMonitor(configuration.getBoolean(REPLICATION_MONITOR, true), configuration.getBoolean(CHECK_WRITE_CONS, false), connectionListeners);
         management.addOverview(new Overview(pools, monitor));
         // Add life cycle for configuration database
         final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);

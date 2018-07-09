@@ -60,6 +60,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import com.openexchange.osgi.ServiceListings;
 
 /**
  * Tests for class {@link ReplicationMonitor}.
@@ -74,7 +75,7 @@ public class ReplicationMonitorTest {
 
     @Before
     public void setUp() {
-        monitor = new ReplicationMonitor(false, false);
+        monitor = new ReplicationMonitor(false, false, ServiceListings.emptyList());
         assignment = new AssignmentImpl(0, 0, 0, 0, null);
     }
 

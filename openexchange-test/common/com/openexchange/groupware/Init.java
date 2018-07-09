@@ -159,6 +159,7 @@ import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
 import com.openexchange.net.ssl.config.impl.internal.TrustAllSSLConfigurationService;
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
+import com.openexchange.osgi.ServiceListings;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
 import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
@@ -782,7 +783,7 @@ public final class Init {
             final CacheService cacheService = (CacheService) services.get(CacheService.class);
             ConfigViewFactory configViewFactory = (ConfigViewFactory) services.get(ConfigViewFactory.class);
             com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
-            final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, configViewFactory, null);
+            final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, configViewFactory, null, ServiceListings.emptyList());
             services.put(DatabaseService.class, dbService);
             com.openexchange.database.internal.Initialization.getInstance().setCacheService(cacheService);
             Database.setDatabaseService(dbService);
