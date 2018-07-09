@@ -47,25 +47,20 @@
  *
  */
 
-package com.openexchange.database.osgi;
+package com.openexchange.database;
 
-import org.osgi.framework.BundleContext;
-import com.openexchange.database.GeneralDatabaseConnectionListener;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.osgi.annotation.Service;
 
 /**
- * {@link DatabaseConnectionListenerTracker}
+ * {@link GeneralDatabaseConnectionListener} - A listener which receives various call-backs for certain connection-associated events for all
+ * connections.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.1
  */
-public class DatabaseConnectionListenerTracker extends RankingAwareNearRegistryServiceTracker<GeneralDatabaseConnectionListener> {
+@Service
+public interface GeneralDatabaseConnectionListener extends DatabaseConnectionListener {
 
-    /**
-     * Initializes a new {@link DatabaseConnectionListenerTracker}.
-     */
-    public DatabaseConnectionListenerTracker(BundleContext context) {
-        super(context, GeneralDatabaseConnectionListener.class);
-    }
+    // A marked interface
 
 }

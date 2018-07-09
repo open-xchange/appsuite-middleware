@@ -58,6 +58,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.AssignmentFactory;
 import com.openexchange.database.DatabaseConnectionListener;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.GeneralDatabaseConnectionListener;
 import com.openexchange.database.internal.AssignmentFactoryImpl;
 import com.openexchange.database.internal.DatabaseServiceImpl;
 import com.openexchange.database.internal.Initialization;
@@ -74,7 +75,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseServiceRegisterer.class);
 
     private final BundleContext context;
-    private final ServiceListing<DatabaseConnectionListener> connectionListeners;
+    private final ServiceListing<GeneralDatabaseConnectionListener> connectionListeners;
 
     private ConfigurationService configService;
     private ConfigViewFactory configViewFactory;
@@ -87,7 +88,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
      *
      * @param context The bundle context
      */
-    public DatabaseServiceRegisterer(ServiceListing<DatabaseConnectionListener> connectionListeners, BundleContext context) {
+    public DatabaseServiceRegisterer(ServiceListing<GeneralDatabaseConnectionListener> connectionListeners, BundleContext context) {
         super();
         this.connectionListeners = connectionListeners;
         this.context = context;

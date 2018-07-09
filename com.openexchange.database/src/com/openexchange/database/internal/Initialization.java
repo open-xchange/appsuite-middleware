@@ -58,6 +58,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseConnectionListener;
+import com.openexchange.database.GeneralDatabaseConnectionListener;
 import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
@@ -154,7 +155,7 @@ public final class Initialization {
      * @param connectionListeners The connection listeners
      * @return The database service
      */
-    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService, ServiceListing<DatabaseConnectionListener> connectionListeners) throws OXException {
+    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService, ServiceListing<GeneralDatabaseConnectionListener> connectionListeners) throws OXException {
         if (null != databaseService) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
