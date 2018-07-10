@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -76,6 +77,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.util.AssertUtil;
+import com.openexchange.data.conversion.ical.Assert;
 
 /**
  * {@link UserTest}
@@ -159,6 +161,44 @@ public class UserTest extends AbstractRMITest {
         } else {
             fail("Expected to get user data for added user");
         }
+    }
+
+    /**
+     * Tests the user creation
+     */
+    @Test
+    public void testRemoteHTMLLoading() throws Exception {
+
+        // create new user
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+        usr.setRemoteHtmlLoadingAllowed(Boolean.TRUE);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
+
+        // See if value was set
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+        Assert.assertThat("ID should be the same", srv_loaded.getId(), is(createduser.getId()));
+        //verify data
+        AssertUtil.assertUser(createduser, srv_loaded);
+        Assert.assertThat("HTML loading should be allowed", srv_loaded.isRemoteHtmlLoadingAllowed(), is(Boolean.TRUE));
+
+        // Change value 
+        createduser.setRemoteHtmlLoadingAllowed(Boolean.FALSE);
+        getUserManager().change(context, createduser, contextAdminCredentials);
+        srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+        Assert.assertThat("ID should be the same", srv_loaded.getId(), is(createduser.getId()));
+        //verify data
+        AssertUtil.assertUser(createduser, srv_loaded);
+        Assert.assertThat("HTML loading should be allowed", srv_loaded.isRemoteHtmlLoadingAllowed(), is(Boolean.FALSE));
+
+        // Don't set value, no update
+        createduser.setRemoteHtmlLoadingAllowed(null);
+        getUserManager().change(context, createduser, contextAdminCredentials);
+        srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+        Assert.assertThat("ID should be the same", srv_loaded.getId(), is(createduser.getId()));
+        //verify data
+        AssertUtil.assertUser(createduser, srv_loaded);
+        Assert.assertThat("HTML loading should be allowed", srv_loaded.isRemoteHtmlLoadingAllowed(), is(Boolean.FALSE));
     }
 
     /**
