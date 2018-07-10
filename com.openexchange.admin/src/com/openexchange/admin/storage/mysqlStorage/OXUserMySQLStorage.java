@@ -1365,7 +1365,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         if ((null != usrdata.isRemoteHtmlLoadingAllowed() && usrdata.isRemoteHtmlLoadingAllowed().booleanValue()) || Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim())) {
             isAllowed = Boolean.TRUE;
         } else {
-            isAllowed = getConfigViewValue(userId, contextId, "com.openexchange.mail.isHTMLMailAllowed", null);
+            isAllowed = getConfigViewValue(userId, contextId, "com.openexchange.mail.isRemoteHTMLLoadingAllowed", null);
         }
         if (null != isAllowed && isAllowed.booleanValue()) {
             flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
