@@ -154,6 +154,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="remote_html_loading" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -296,7 +297,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield19",
     "userfield20",
     "primaryAccountName",
-    "convertDriveUserFolders"
+    "convertDriveUserFolders",
+    "remoteHtmlLoading"
 })
 public class User {
 
@@ -565,6 +567,8 @@ public class User {
     private String primaryAccountName;
     @XmlElement(name = "convert_drive_user_folders", nillable = true)
     protected Boolean convertDriveUserFolders;
+    @XmlElement(name = "remote_html_loading", nillable = true)
+    protected Boolean remoteHtmlLoading;
 
     /**
      * Gets the value of the aliases property.
@@ -3784,6 +3788,14 @@ public class User {
 
     public void setConvertDriveUserFolders(Boolean convertDriveUserFolders) {
         this.convertDriveUserFolders = convertDriveUserFolders;
+    }
+    
+    public Boolean isRemoteHtmlLoading() {
+        return remoteHtmlLoading;
+    }
+    
+    public void setRemoteHtmlLoading(Boolean remoteHtmlLoading) {
+        this.remoteHtmlLoading = remoteHtmlLoading;
     }
 
 }

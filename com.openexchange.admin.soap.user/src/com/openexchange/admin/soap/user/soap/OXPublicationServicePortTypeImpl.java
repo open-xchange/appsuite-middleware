@@ -847,6 +847,16 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             user.setUserfield20(tmp);
         }
 
+        Boolean tmp_bool = soapUser.isConvertDriveUserFolders();
+        if (tmp_bool != null) {
+            user.setConvertDriveUserFolders(tmp_bool.booleanValue());
+        }
+
+        tmp_bool = soapUser.isRemoteHtmlLoading();
+        if (tmp_bool != null) {
+            user.setRemoteHtmlLoadingAllowed(tmp_bool);
+        }
+
         SOAPStringMapMap userAttributes = soapUser.getUserAttributes();
         if (null != userAttributes) {
             user.setUserAttributes(soap2MapMap(userAttributes));
@@ -1012,6 +1022,8 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapUser.setUserfield18(user.getUserfield18());
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
+        soapUser.setConvertDriveUserFolders(Boolean.valueOf(user.isConvertDriveUserFolders()));
+        soapUser.setRemoteHtmlLoading(user.isRemoteHtmlLoadingAllowed());
         return soapUser;
     }
 
