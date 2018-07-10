@@ -2335,12 +2335,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     /**
      * checking for some requirements when changing existing user data
      *
-     * @param ctx
-     * @param newuser
-     * @param dbuser
-     * @param prop
-     * @throws StorageException
-     * @throws InvalidDataException
+     * @param ctx The {@link Context}
+     * @param newuser The {@link User}
+     * @param dbuser The database {@link User}
+     * @param prop Additional {@link PropertyHandler} 
+     * @throws StorageException If user can't be found
+     * @throws InvalidDataException If data already exists or is flawed
      */
     private void checkChangeUserData(final Context ctx, final User newuser, final User dbuser, final PropertyHandler prop) throws StorageException, InvalidDataException {
         if (newuser.getName() != null) {
