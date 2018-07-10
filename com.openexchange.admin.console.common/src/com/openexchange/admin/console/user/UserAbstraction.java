@@ -485,7 +485,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_PUBLIC_FOLDER_EDITABLE = "access-public-folder-editable";
     protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
     protected static final String OPT_CSV_IMPORT = "csv-import";
-    protected static final String OPT_REMOTE_HTML_LOADING = "remote-html-loading";
+    protected static final String OPT_REMOTE_CONTENT_ALLOWED = "remote-content-allowed";
 
     // extended options
     protected static final String OPT_EMAIL1_LONG = "email1";
@@ -795,7 +795,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption titleOption;
     private CLIOption positionOption;
     private CLIOption primaryAccountNameOption;
-    private CLIOption remoteHtmlLoading;
+    private CLIOption remoteContentAllowed;
 
     protected HashMap<String, CSVConstants> constantsMap;
 
@@ -2637,7 +2637,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.primaryAccountNameOption = setLongOpt(parser, OPT_PRIMARY_ACCOUNT_NAME, "The name of the primary mail account.", true, false, true);
         setGui_Spam_option(parser);
         setModuleAccessOptions(parser);
-        setRemoteHtmlLoading(parser);
+        setRemoteContentAllowed(parser);
     }
 
     protected final void setPrimaryAccountOption(AdminParser parser) {
@@ -2648,8 +2648,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.spamFilterOption = setSettableBooleanLongOpt(admp, OPT_GUI_LONG, "true / false", "GUI_Spam_filter_capabilities_enabled", true, false, true);
     }
 
-    protected final void setRemoteHtmlLoading(final AdminParser parser) {
-        this.remoteHtmlLoading = setSettableBooleanLongOpt(parser, OPT_REMOTE_HTML_LOADING, "true / false", "GUI_Spam_filter_capabilities_enabled", true, false, true);
+    protected final void setRemoteContentAllowed(final AdminParser parser) {
+        this.remoteContentAllowed = setSettableBooleanLongOpt(parser, OPT_REMOTE_CONTENT_ALLOWED, "true / false", "The value indicating if remote content will be loaded or not", true, false, true);
     }
 
     protected final void setCsvImport(final AdminParser admp) {
@@ -2704,7 +2704,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
         {
-            usr.setRemoteContentAllowed((Boolean) parser.getOptionValue(this.remoteHtmlLoading));
+            usr.setRemoteContentAllowed((Boolean) parser.getOptionValue(this.remoteContentAllowed));
         }
 
         {
