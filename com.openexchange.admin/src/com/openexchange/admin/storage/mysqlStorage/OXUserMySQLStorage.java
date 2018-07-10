@@ -2078,6 +2078,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     } else {
                         newuser.setGui_spam_filter_enabled(Boolean.FALSE);
                     }
+                    if ((bits & UserSettingMail.INT_ALLOW_HTML_IMAGES) == UserSettingMail.INT_ALLOW_HTML_IMAGES) {
+                        newuser.setRemoteHtmlLoadingAllowed(Boolean.TRUE);
+                    } else {
+                        newuser.setRemoteHtmlLoadingAllowed(Boolean.FALSE);
+                    }
                     newuser.setDefaultSenderAddress(rs.getString("send_addr"));
                     newuser.setUploadFileSizeLimit(Integer.valueOf(rs.getInt("upload_quota")));
                     newuser.setUploadFileSizeLimitPerFile(Integer.valueOf(rs.getInt("upload_quota_per_file")));
