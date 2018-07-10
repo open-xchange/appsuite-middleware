@@ -3745,10 +3745,23 @@ public class User {
         this.convertDriveUserFolders = convertDriveUserFolders;
     }
     
+    /**
+     * Indicates whether the loading of content from remote servers is allowed when displaying HTML mails
+     * 
+     * @return A {@link Boolean}. The boolean is
+     *         <code>true</code> if loading of content from remote servers is allowed when displaying HTML mails
+     *         <code>false</code> if loading of content from remote servers isn't allowed when displaying HTML mails
+     *         <code>null</code> if not set
+     */
     public Boolean isRemoteHtmlLoading() {
         return remoteHtmlLoading;
     }
     
+    /**
+     * Set the value for remote-html-loading
+     * 
+     * @param remoteHtmlLoading The {@link Boolean} to set
+     */
     public void setRemoteHtmlLoading(Boolean remoteHtmlLoading) {
         this.remoteHtmlLoading = remoteHtmlLoading;
     }
