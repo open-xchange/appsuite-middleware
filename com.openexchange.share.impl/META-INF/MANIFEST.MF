@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.share.impl
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.capabilities,
+Import-Package: com.openexchange.caching,
+ com.openexchange.caching.events,
+ com.openexchange.capabilities,
  com.openexchange.cluster.timer,
  com.openexchange.config,
  com.openexchange.config.cascade,
