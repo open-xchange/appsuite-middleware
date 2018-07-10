@@ -1256,12 +1256,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     flags |= UserSettingMail.INT_SPAM_ENABLED;
                 }
 
-                /*
-                 * Check if HTML content is allowed to be displayed by default
-                 */
-                if (Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim())) {
-                    flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
-                }
+                flags = checkHTMLMailAllowed(flags, usrdata, userId, contextId);
 
                 /*-
                  * Apply other default values
@@ -1350,6 +1345,60 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
+    /**
+     * Check if HTML content is allowed to be displayed by default.
+     * Follow the scheme:
+     * 1) passed value for {@link User#isRemoteHtmlLoadingAllowed()} (introduced with MW-988)
+     * 2) passed value for MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT
+     * 3) value for new parameter from config cascade
+     * 4) false as fallback
+     * 
+     * @param flags The flag bitmap
+     * @param usrdata The user data
+     * @param userId The ID of the user to be created
+     * @param contextId The ID of the context, the user gets created in
+     * @return The flag bitmap
+     */
+    private int checkHTMLMailAllowed(int flags, User usrdata, int userId, int contextId) {
+        Boolean isAllowed = null;
+
+        if (usrdata.isRemoteHtmlLoadingAllowed() || Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim())) {
+            isAllowed = Boolean.TRUE;
+        } else {
+            isAllowed = getConfigViewValue(userId, contextId, "com.openexchange.mail.isHTMLMailAllowed", null);
+        }
+        if (null != isAllowed && isAllowed.booleanValue()) {
+            flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
+        }
+        return flags;
+    }
+
+    /**
+     * Get a {@link Boolean} for the specified property name
+     * 
+     * @param userId The ID of the user to be created
+     * @param contextId The ID of the context, the user gets created in
+     * @param propertyName The name of the property to get
+     * @param defaultValue The default value for the boolean to use
+     * @return A {@link Boolean} or the default value
+     */
+    private Boolean getConfigViewValue(int userId, int contextId, String propertyName, Boolean defaultValue) {
+        ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (viewFactory != null) {
+            try {
+                ConfigView view = viewFactory.getView(userId, contextId);
+                return view.get(propertyName, Boolean.class);
+            } catch (OXException e) {
+                if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                    // Context is about being created...
+                } else {
+                    LOG.warn("Unable to load {}.", propertyName);
+                }
+            }
+        }
+        return defaultValue;
+    }
+
     private OXFolderDefaultMode getFolderCreationMode(final User usrdata) {
         OXFolderDefaultMode folderCreationMode = OXFolderDefaultMode.DEFAULT;
         if (usrdata.isDriveFolderModeSet()) {
@@ -1410,20 +1459,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         account.setLogin(null == user.getImapLogin() ? "" : user.getImapLogin());
         account.setPrimaryAddress(user.getPrimaryEmail());
         {
-            Boolean check = Boolean.FALSE;
-            final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-            if (viewFactory != null) {
-                try {
-                    ConfigView view = viewFactory.getView(userId, ctx.getId());
-                    check = view.get("com.openexchange.mail.useStaticDefaultFolders", Boolean.class);
-                } catch (OXException e) {
-                    if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
-                        // Context is about being created...
-                    } else {
-                        LOG.warn("Unable to load com.openexchange.mail.useStaticDefaultFolders property.");
-                    }
-                }
-            }
+            Boolean check = getConfigViewValue(userId, ctx.getId().intValue(), "com.openexchange.mail.useStaticDefaultFolders", Boolean.FALSE);
 
             if (check != null && check) {
                 String lang = user.getLanguage().toUpperCase();
