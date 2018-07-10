@@ -594,7 +594,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean convertDriveUserFolders = false;
 
-    private boolean remoteHtmlLoadingAllowed = false;
+    private Boolean remoteHtmlLoadingAllowed = null;
 
     /**
      * Instantiates a new empty user object
@@ -4273,17 +4273,19 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return convertDriveUserFolders;
     }
 
-    public void setRemoteHtmlLoadingAllowed(boolean remoteHtmlLoadingAllowed) {
+    public void setRemoteHtmlLoadingAllowed(Boolean remoteHtmlLoadingAllowed) {
         this.remoteHtmlLoadingAllowed = remoteHtmlLoadingAllowed;
     }
 
     /**
      * Indicates whether the loading of content from remote servers is allowed when displaying HTML mails
      * 
-     * @return <code>true</code> if loading of content from remote servers is allowed when displaying HTML mails
-     *         <code>false</code>
+     * @return A {@link Boolean}. The boolean is
+     *         <code>true</code> if loading of content from remote servers is allowed when displaying HTML mails
+     *         <code>false</code> if loading of content from remote servers isn't allowed when displaying HTML mails
+     *         <code>null</code> if not set
      */
-    public boolean isRemoteHtmlLoadingAllowed() {
+    public Boolean isRemoteHtmlLoadingAllowed() {
         return remoteHtmlLoadingAllowed;
     }
 
@@ -5129,7 +5131,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + ((primaryAccountName == null) ? 0 : primaryAccountName.hashCode());
         result = prime * result + (primaryAccountNameSet ? 1231 : 1237);
         result = prime * result + (convertDriveUserFolders ? 1231 : 1237);
-        result = prime * result + (remoteHtmlLoadingAllowed ? 1231 : 1237);
+        result = prime * result + (remoteHtmlLoadingAllowed == null ? 0 : remoteHtmlLoadingAllowed.hashCode());
         return result;
     }
 
@@ -6332,7 +6334,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (convertDriveUserFolders != other.convertDriveUserFolders) {
             return false;
         }
-        if (remoteHtmlLoadingAllowed != other.remoteHtmlLoadingAllowed) {
+        if (remoteHtmlLoadingAllowed == null) {
+            if (other.remoteHtmlLoadingAllowed != null) {
+                return false;
+            }
+        } else if (!remoteHtmlLoadingAllowed.equals(other.remoteHtmlLoadingAllowed)) {
             return false;
         }
         return true;

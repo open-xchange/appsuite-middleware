@@ -1362,7 +1362,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     private int checkHTMLMailAllowed(int flags, User usrdata, int userId, int contextId) {
         Boolean isAllowed = null;
 
-        if (usrdata.isRemoteHtmlLoadingAllowed() || Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim())) {
+        if ((null != usrdata.isRemoteHtmlLoadingAllowed() && usrdata.isRemoteHtmlLoadingAllowed().booleanValue()) || Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim())) {
             isAllowed = Boolean.TRUE;
         } else {
             isAllowed = getConfigViewValue(userId, contextId, "com.openexchange.mail.isHTMLMailAllowed", null);

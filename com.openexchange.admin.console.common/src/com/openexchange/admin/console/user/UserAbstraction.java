@@ -2704,10 +2704,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
         {
-            Boolean remoteHtmlLoading = (Boolean) parser.getOptionValue(this.remoteHtmlLoading);
-            if (null != remoteHtmlLoading) {
-                usr.setRemoteHtmlLoadingAllowed(remoteHtmlLoading.booleanValue());
-            }
+            usr.setRemoteHtmlLoadingAllowed((Boolean) parser.getOptionValue(this.remoteHtmlLoading));
         }
 
         {
