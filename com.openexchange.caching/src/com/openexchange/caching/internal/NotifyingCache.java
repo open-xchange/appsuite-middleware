@@ -403,8 +403,12 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     }
 
     private void notify(CacheEvent event, CacheEventService eventService) {
-        Condition condition = ThreadLocalConditionHolder.getInstance().getCondition();
-        eventService.notify(this, null == condition ? event : new ConditionalCacheEvent(event, condition), false);
+        if (event instanceof ConditionalCacheEvent) {
+            eventService.notify(this, event, false);
+        } else {
+            Condition condition = ThreadLocalConditionHolder.getInstance().getCondition();
+            eventService.notify(this, null == condition ? event : new ConditionalCacheEvent(event, condition), false);
+        }
     }
 
     @Override
