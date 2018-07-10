@@ -83,6 +83,11 @@ public class ConnectionHelper {
         OWNED_WRITEABLE;
     }
 
+    /**
+     * <pre>
+     * Connection.class.getName()) + '@' + Thread.currentThread().getId()
+     * </pre>
+     */
     private static String getConnectionSessionParameterName() {
         return new StringBuilder(Connection.class.getName()).append('@').append(Thread.currentThread().getId()).toString();
     }
