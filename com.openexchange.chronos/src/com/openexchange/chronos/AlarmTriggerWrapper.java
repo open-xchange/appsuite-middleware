@@ -47,57 +47,53 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos;
 
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link CalendarStorageFactory}
+ * {@link AlarmTriggerWrapper}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.1
  */
-public interface CalendarStorageFactory {
+public class AlarmTriggerWrapper {
+
+    private final AlarmTrigger alarmTrigger;
+    private final int ctx;
+    private final int account;
+
 
     /**
-     * Initializes a new {@link CalendarStorage}.
+     * Initializes a new {@link AlarmTriggerWrapper}.
+     */
+    public AlarmTriggerWrapper(AlarmTrigger alarmTrigger, int ctx, int account) {
+        this.alarmTrigger = alarmTrigger;
+        this.account = account;
+        this.ctx = ctx;
+    }
+
+    public AlarmTrigger getAlarmTrigger() {
+        return this.alarmTrigger;
+    }
+
+
+    /**
+     * Gets the ctx
      *
-     * @param context The context
-     * @param accountId The account identifier
-     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
+     * @return The ctx
      */
-    CalendarStorage create(Context context, int accountId, EntityResolver entityResolver) throws OXException;
+    public int getCtx() {
+        return ctx;
+    }
+
 
     /**
-     * Initializes a new {@link CalendarStorage}.
+     * Gets the account
      *
-     * @param context The context
-     * @param accountId The account identifier
-     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
-     * @param dbProvider The database provider to use
-     * @param txPolicy The transaction policy
+     * @return The account
      */
-    CalendarStorage create(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
-
-    /**
-     * Initializes a new {@link AdministrativeCalendarStorage}.
-     */
-    AdministrativeCalendarStorage createAdministrative() throws OXException;
-
-    /**
-     * Wraps a calendar storage into a special <i>resilient</i> calendar storage that tries to automatically handle SQL <i>truncation</i>
-     * and <i>incorrect string</i> warnings by adjusting the affected strings, and retrying the operation. Additionally, no exceptions are
-     * raised when trying to store properties or property values that are not supported by the storage.
-     *
-     * @param storage The calendar storage to wrap
-     * @return The wrapped calendar storage
-     * @see CalendarParameters#PARAMETER_IGNORE_STORAGE_WARNINGS
-     */
-    CalendarStorage makeResilient(CalendarStorage storage);
+    public int getAccount() {
+        return account;
+    }
 
 }

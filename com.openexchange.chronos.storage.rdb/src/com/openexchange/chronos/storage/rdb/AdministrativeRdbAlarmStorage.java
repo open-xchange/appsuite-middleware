@@ -47,57 +47,67 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos.storage.rdb;
 
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.storage.AdministrativeAlarmStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link CalendarStorageFactory}
+ * {@link AdministrativeRdbAlarmStorage}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.1
  */
-public interface CalendarStorageFactory {
+public class AdministrativeRdbAlarmStorage implements AdministrativeAlarmStorage {
 
-    /**
-     * Initializes a new {@link CalendarStorage}.
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AdministrativeRdbAlarmStorage.class);
+
+      /**
+     * Logs & executes a prepared statement's SQL query.
      *
-     * @param context The context
-     * @param accountId The account identifier
-     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
+     * @param stmt The statement to execute the SQL query from
+     * @return The result set
      */
-    CalendarStorage create(Context context, int accountId, EntityResolver entityResolver) throws OXException;
+    protected static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
+        if (false == LOG.isDebugEnabled()) {
+            return stmt.executeQuery();
+        } else {
+            String statementString = String.valueOf(stmt);
+            long start = System.currentTimeMillis();
+            ResultSet resultSet = stmt.executeQuery();
+            LOG.debug("executeQuery: {} - {} ms elapsed.", statementString, L(System.currentTimeMillis() - start));
+            return resultSet;
+        }
+    }
 
     /**
-     * Initializes a new {@link CalendarStorage}.
+     * Logs & executes a prepared statement's SQL update.
      *
-     * @param context The context
-     * @param accountId The account identifier
-     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
-     * @param dbProvider The database provider to use
-     * @param txPolicy The transaction policy
+     * @param stmt The statement to execute the SQL update from
+     * @return The number of affected rows
      */
-    CalendarStorage create(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
+    protected static int logExecuteUpdate(PreparedStatement stmt) throws SQLException {
+        if (false == LOG.isDebugEnabled()) {
+            return stmt.executeUpdate();
+        } else {
+            String statementString = String.valueOf(stmt);
+            long start = System.currentTimeMillis();
+            int rowCount = stmt.executeUpdate();
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", statementString, I(rowCount), L(System.currentTimeMillis() - start));
+            return rowCount;
+        }
+    }
 
-    /**
-     * Initializes a new {@link AdministrativeCalendarStorage}.
-     */
-    AdministrativeCalendarStorage createAdministrative() throws OXException;
-
-    /**
-     * Wraps a calendar storage into a special <i>resilient</i> calendar storage that tries to automatically handle SQL <i>truncation</i>
-     * and <i>incorrect string</i> warnings by adjusting the affected strings, and retrying the operation. Additionally, no exceptions are
-     * raised when trying to store properties or property values that are not supported by the storage.
-     *
-     * @param storage The calendar storage to wrap
-     * @return The wrapped calendar storage
-     * @see CalendarParameters#PARAMETER_IGNORE_STORAGE_WARNINGS
-     */
-    CalendarStorage makeResilient(CalendarStorage storage);
-
+    @Override
+    public Alarm getAlarm(Connection con, int cid, int accountId, int alarmId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

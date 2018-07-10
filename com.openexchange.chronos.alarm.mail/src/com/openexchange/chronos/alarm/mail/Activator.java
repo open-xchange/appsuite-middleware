@@ -47,57 +47,61 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos.alarm.mail;
 
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
- * {@link CalendarStorageFactory}
+ * {@link Activator}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.1
  */
-public interface CalendarStorageFactory {
+public class Activator extends HousekeepingActivator{
 
-    /**
-     * Initializes a new {@link CalendarStorage}.
-     *
-     * @param context The context
-     * @param accountId The account identifier
-     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
-     */
-    CalendarStorage create(Context context, int accountId, EntityResolver entityResolver) throws OXException;
+    private ScheduledTimerTask scheduleAtFixedRate;
 
-    /**
-     * Initializes a new {@link CalendarStorage}.
-     *
-     * @param context The context
-     * @param accountId The account identifier
-     * @param entityResolver The entity resolver to use, or <code>null</code> if not available
-     * @param dbProvider The database provider to use
-     * @param txPolicy The transaction policy
-     */
-    CalendarStorage create(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class};
+    }
 
-    /**
-     * Initializes a new {@link AdministrativeCalendarStorage}.
-     */
-    AdministrativeCalendarStorage createAdministrative() throws OXException;
+    @Override
+    protected void startBundle() throws Exception {
+        TimerService timerService = getService(TimerService.class);
+        if(timerService==null) {
+            throw ServiceExceptionCode.absentService(TimerService.class);
+        }
+        DatabaseService dbService = getService(DatabaseService.class);
+        if(dbService==null) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+        CalendarStorageFactory calendarStorageFactory = getService(CalendarStorageFactory.class);
+        if(calendarStorageFactory==null) {
+            throw ServiceExceptionCode.absentService(CalendarStorageFactory.class);
+        }
+        ContextService ctxService = getService(ContextService.class);
+        if(ctxService==null) {
+            throw ServiceExceptionCode.absentService(ContextService.class);
+        }
 
-    /**
-     * Wraps a calendar storage into a special <i>resilient</i> calendar storage that tries to automatically handle SQL <i>truncation</i>
-     * and <i>incorrect string</i> warnings by adjusting the affected strings, and retrying the operation. Additionally, no exceptions are
-     * raised when trying to store properties or property values that are not supported by the storage.
-     *
-     * @param storage The calendar storage to wrap
-     * @return The wrapped calendar storage
-     * @see CalendarParameters#PARAMETER_IGNORE_STORAGE_WARNINGS
-     */
-    CalendarStorage makeResilient(CalendarStorage storage);
+        scheduleAtFixedRate = timerService.scheduleAtFixedRate(new MailAlarmDeliveryWorker(calendarStorageFactory.createAdministrative(), dbService, ctxService, timerService, 10, Calendar.MINUTE), 0, 10, TimeUnit.MINUTES);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        scheduleAtFixedRate.cancel(true);
+    }
+
+
 
 }
