@@ -80,7 +80,7 @@ public final class OAuthUtil {
      * @param oauthAccount The OAuth account providing enabled scopes
      * @param session The session providing user data
      * @param scopes The scopes to check
-     * @throws OXException If one of specified scopes is either not availabke or not enabled
+     * @throws OXException If one of specified scopes is either not available or not enabled
      */
     public static void checkScopesAvailableAndEnabled(OAuthAccount oauthAccount, Session session, OXScope... scopes) throws OXException {
         checkScopesAvailableAndEnabled(oauthAccount, session.getUserId(), session.getContextId(), scopes);
@@ -93,7 +93,7 @@ public final class OAuthUtil {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param scopes The scopes to check
-     * @throws OXException If one of specified scopes is either not availabke or not enabled
+     * @throws OXException If one of specified scopes is either not available or not enabled
      */
     public static void checkScopesAvailableAndEnabled(OAuthAccount oauthAccount, int userId, int contextId, OXScope... scopes) throws OXException {
         if (null == oauthAccount) {
@@ -109,14 +109,13 @@ public final class OAuthUtil {
         {
             Set<OAuthScope> availableScopes = oAuthServiceMetaData.getAvailableScopes(userId, contextId);
             for (OXScope oxScope : scopes) {
-                OAuthScope foundScope = null;
-                for (Iterator<OAuthScope> it = availableScopes.iterator(); null == foundScope && it.hasNext();) {
-                    OAuthScope scope = it.next();
-                    if (oxScope == scope.getOXScope()) {
-                        foundScope = scope;
+                boolean found = false;
+                for (Iterator<OAuthScope> it = availableScopes.iterator(); false == found && it.hasNext();) {
+                    if (oxScope == it.next().getOXScope()) {
+                        found = true;
                     }
                 }
-                if (null == foundScope) {
+                if (false == found) {
                     throw OAuthExceptionCodes.NO_SUCH_SCOPE_AVAILABLE.create(oxScope.getDisplayName());
                 }
             }
