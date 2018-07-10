@@ -4461,6 +4461,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.guiPreferences = null;
         this.userAttributes = new HashMap<String, Map<String, String>>();
         this.primaryAccountName = null;
+        this.remoteHtmlLoadingAllowed = null;
     }
 
     /**
