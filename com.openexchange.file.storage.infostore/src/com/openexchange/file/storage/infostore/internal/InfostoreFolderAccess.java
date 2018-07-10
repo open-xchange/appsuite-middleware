@@ -203,12 +203,12 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public Quota getFileQuota(String folderId) throws OXException {
-        return infostore.getFileQuota(session);
+        return INFOSTORE_FOLDER_ID.equals(folderId) ? infostore.getFileQuota(session) : infostore.getFileQuota(Utils.parseUnsignedLong(folderId), session);
     }
 
     @Override
     public Quota getStorageQuota(String folderId) throws OXException {
-        return infostore.getStorageQuota(session);
+        return INFOSTORE_FOLDER_ID.equals(folderId) ? infostore.getStorageQuota(session) : infostore.getStorageQuota(Utils.parseUnsignedLong(folderId), session);
     }
 
     @Override
