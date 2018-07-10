@@ -239,6 +239,25 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     }
 
     /**
+     * @param session The session of the user
+     * @return String The identifier of the birthday calendar folder
+     * @throws Exception if the birthday calendar folder cannot be found
+     *
+     */
+    protected String getBirthdayCalendarFolder(String session) throws Exception {
+        return findPrivateFolder(session, "event", "Birthdays");
+    }
+
+    /**
+     * @param session The session of the user
+     * @return String The identifier of the default contact folder
+     * @throws Exception if the default contact folder cannot be found
+     */
+    protected String getDefaultContactFolder(String session) throws Exception {
+        return findPrivateFolder(session, "contacts", "Contacts");
+    }
+
+    /**
      * Retrieves the default calendar folder of the user with the specified session
      *
      * @param session The session of the user
@@ -246,15 +265,8 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @return The default calendar folder of the user
      * @throws Exception if the default calendar folder cannot be found
      */
-    @SuppressWarnings("unchecked")
     private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, "event", "1,308", "0");
-        if (visibleFolders.getError() != null) {
-            throw new OXException(new Exception(visibleFolders.getErrorDesc()));
-        }
-
-        Object privateFolders = visibleFolders.getData().getPrivate();
-        ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(session, "event", "1,308", "0");
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
         } else {
@@ -267,28 +279,39 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         throw new Exception("Unable to find default calendar folder!");
     }
 
-    public String getBirthdayCalendarFolder(String session) throws Exception {
-        return findPrivateFolder(session, "event", "Birthdays");
-    }
-
-    public String getDefaultContactFolder(String session) throws Exception {
-        return findPrivateFolder(session, "contacts", "Contacts");
-    }
-
-    @SuppressWarnings("unchecked")
+    /**
+     * @param session The session of the user
+     * @param module The folder module
+     * @param folder The name of the folder
+     * @return folderId The folderId as string
+     * @throws Exception if the folder cannot be found
+     */
     private String findPrivateFolder(String session, String module, String folder) throws Exception {
-        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, "1,300,308", "1");
-        if (visibleFolders.getError() != null) {
-            throw new OXException(new Exception(visibleFolders.getErrorDesc()));
-        }
-        Object privateFolders = visibleFolders.getData().getPrivate();
-        ArrayList<ArrayList<?>> privateList = (ArrayList<ArrayList<?>>) privateFolders;
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(session, module, "1,300,308", "1");
         for (ArrayList<?> folderName : privateList) {
             if (folderName.get(1).equals(folder)) {
                 return folderName.get(0).toString();
             }
         }
         throw new Exception("Unable to find default "+module+" folder!");
+    }
+
+    /**
+     * @param session The session of the user
+     * @param module The folder module
+     * @param columns The columns identifier
+     * @param tree The folder tree identifier
+     * @return List of available folders
+     * @throws Exception if the api call fails
+     */
+    @SuppressWarnings({ "unchecked" })
+    private ArrayList<ArrayList<?>> getPrivateFolderList(String session, String module, String columns, String tree) throws Exception {
+        FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree);
+        if (visibleFolders.getError() != null) {
+            throw new OXException(new Exception(visibleFolders.getErrorDesc()));
+        }
+        Object privateFolders = visibleFolders.getData().getPrivate();
+        return (ArrayList<ArrayList<?>>) privateFolders;
     }
 
     /**
