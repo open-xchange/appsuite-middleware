@@ -557,6 +557,7 @@ public final class NewAction extends AbstractMailAction {
             if (newMessageId) {
                 message.removeHeader("Message-ID");
             }
+            message.foldAllHeaderLines();
             String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
             if (isEmpty(fromAddr)) {
                 // Add from address

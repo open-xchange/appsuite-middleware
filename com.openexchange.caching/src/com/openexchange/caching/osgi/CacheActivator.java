@@ -52,7 +52,6 @@ package com.openexchange.caching.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -69,7 +68,6 @@ import com.openexchange.caching.internal.JCSCacheInformation;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -82,20 +80,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public final class CacheActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheActivator.class);
-
-    static volatile CacheService cacheService;
-
-    /**
-     * Gets the cacheService
-     *
-     * @return The cacheService or <code>null</code>
-     */
-    public static CacheService getCacheService() {
-        return cacheService;
-    }
-
-    private volatile ObjectName objectName;
+    private ObjectName objectName;
 
     /**
      * Initializes a new {@link CacheActivator}.
@@ -138,27 +123,13 @@ public final class CacheActivator extends HousekeepingActivator {
          * Register service
          */
         final JCSCacheService jcsCacheService = JCSCacheService.getInstance();
-        if (service.getBoolProperty("com.openexchange.caching.jcs.enabled", true)) {
+        {
             final Dictionary<String, Object> dictionary = new Hashtable<String, Object>(2);
             dictionary.put("name", "oxcache");
             dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
             registerService(CacheService.class, jcsCacheService, dictionary);
-            cacheService = jcsCacheService;
-        } else {
-            LOG.info("\n\n\tDefault cache service implementation has been disabled.\n");
-            track(CacheService.class, new SimpleRegistryListener<CacheService>() {
-
-                @Override
-                public void added(ServiceReference<CacheService> ref, CacheService service) {
-                    cacheService = service;
-                }
-
-                @Override
-                public void removed(ServiceReference<CacheService> ref, CacheService service) {
-                    cacheService = null;
-                }
-            });
         }
+
         final class ServiceTrackerCustomizerImpl implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
             private final BundleContext bundleContext;
@@ -204,9 +175,8 @@ public final class CacheActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() {
-        cacheService = null;
-        cleanUp();
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
         /*
          * Stop cache
          */
@@ -217,32 +187,29 @@ public final class CacheActivator extends HousekeepingActivator {
         JCSCacheServiceInit.releaseInstance();
     }
 
-    void registerCacheMBean(JCSCacheService jcsCacheService, ManagementService management) {
+    synchronized void registerCacheMBean(JCSCacheService jcsCacheService, ManagementService management) {
         ObjectName objectName = this.objectName;
         if (objectName == null) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheActivator.class);
             try {
                 objectName = getObjectName(JCSCacheInformation.class.getName(), CacheInformationMBean.CACHE_DOMAIN);
                 this.objectName = objectName;
                 management.registerMBean(objectName, new JCSCacheInformation(jcsCacheService));
-            } catch (final MalformedObjectNameException e) {
-                LOG.error("", e);
-            } catch (final NotCompliantMBeanException e) {
-                LOG.error("", e);
-            } catch (final OXException e) {
-                LOG.error("", e);
+            } catch (Exception e) {
+                logger.error("", e);
             }
         }
     }
 
-    void unregisterCacheMBean(ManagementService management) {
+    synchronized void unregisterCacheMBean(ManagementService management) {
         final ObjectName objectName = this.objectName;
         if (objectName != null) {
+            this.objectName = null;
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheActivator.class);
             try {
                 management.unregisterMBean(objectName);
-            } catch (final OXException e) {
-                LOG.error("", e);
-            } finally {
-                this.objectName = null;
+            } catch (Exception e) {
+                logger.error("", e);
             }
         }
     }
@@ -256,8 +223,8 @@ public final class CacheActivator extends HousekeepingActivator {
      * @throws MalformedObjectNameException If instantiation of {@link ObjectName} fails
      */
     private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
-        final int pos = className.lastIndexOf('.');
-        return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+        int pos = className.lastIndexOf('.');
+        return new ObjectName(domain, "name", pos < 0 ? className : className.substring(pos + 1));
     }
 
 }

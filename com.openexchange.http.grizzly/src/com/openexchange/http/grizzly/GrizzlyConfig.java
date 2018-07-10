@@ -155,7 +155,7 @@ public class GrizzlyConfig {
                 this.contentSecurityPolicy = csp.trim();
             }
             this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
-            this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", false);
+            this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", true);
             String proxyCandidates = configService.getProperty("com.openexchange.server.knownProxies", "");
             this.knownProxies = IPTools.filterIP(proxyCandidates);
             this.forHeader = configService.getProperty("com.openexchange.server.forHeader", "X-Forwarded-For");

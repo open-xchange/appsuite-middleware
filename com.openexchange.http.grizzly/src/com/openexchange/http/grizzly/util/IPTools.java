@@ -52,6 +52,7 @@ package com.openexchange.http.grizzly.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
@@ -94,29 +95,28 @@ public class IPTools {
      * @return The first IP that isn't a known proxy address. The remote IP or <code>null</code> if no valid remote IP could be found or an IP address is malformed
      */
     public static String getRemoteIP(String forwardedIPs, Collection<IPRange> knownProxies) {
-        if (Strings.isEmpty(forwardedIPs) || knownProxies.isEmpty()) {
+        if (Strings.isEmpty(forwardedIPs)) {
             return null;
         }
 
-        // Split & iterate in reverse order until first remote IP occurs
-        String[] ips = Strings.splitByComma(forwardedIPs);
         String remoteIP = null;
         String previousIP = null;
         try {
+            // Split & iterate in reverse order until first remote IP occurs
+            Collection<IPRange> knownProxiesToUse = null == knownProxies ? Collections.<IPRange> emptyList() : knownProxies;
+            String[] ips = Strings.splitByComma(forwardedIPs);
             for (int i = ips.length; null == remoteIP && i-- > 0;) {
                 previousIP = ips[i];
                 boolean unknownByProxies = true;
-                for (IPRange range : knownProxies) {
-                    if (range.contains(previousIP)) {
+                for (Iterator<IPRange> it = knownProxiesToUse.iterator(); unknownByProxies && it.hasNext();) {
+                    if (it.next().contains(previousIP)) {
                         // IP is within the range. So it is a known proxy
                         unknownByProxies = false;
-                        break;
                     }
                 }
                 if (unknownByProxies) {
-                    // Check if IP passed all known proxies
+                    // IP address is not covered by any known proxy. Therefore consider it as the remote IP address of requesting client
                     remoteIP = previousIP;
-                    break;
                 }
             }
         } catch (IllegalArgumentException e) {
@@ -124,7 +124,7 @@ public class IPTools {
              * If the IP is malformed the underlying framework triggered through range.contains()
              * will throw an IllegalArgumentException
              */
-            LOG.debug("{} is not a valid IP. Discarding search for remote IP.", previousIP);
+            LOG.debug("{} is not a valid IP. Discarding search for remote IP.", previousIP, e);
             return null;
         }
 

@@ -49,7 +49,8 @@
 
 package com.openexchange.caching.internal.jcs2cache;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import org.apache.jcs.engine.behavior.IElementAttributes;
 import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
 import com.openexchange.caching.ElementAttributes;
@@ -84,7 +85,7 @@ public final class JCSElementAttributesDelegator extends org.apache.jcs.engine.E
     }
 
     @Override
-    public void addElementEventHandlers(final ArrayList eventHandlers) {
+    public void addElementEventHandlers(final Queue<IElementEventHandler> eventHandlers) {
         for (final Object object : eventHandlers) {
             attributes.addElementEventHandler(new ElementEventHandler2JCS((IElementEventHandler) object));
         }
@@ -101,12 +102,12 @@ public final class JCSElementAttributesDelegator extends org.apache.jcs.engine.E
     }
 
     @Override
-    public ArrayList<IElementEventHandler> getElementEventHandlers() {
-        final ArrayList<ElementEventHandler> l = attributes.getElementEventHandlers();
+    public Queue<IElementEventHandler> getElementEventHandlers() {
+        final Queue<ElementEventHandler> l = attributes.getElementEventHandlers();
         if (l == null || l.size() == 0) {
             return null;
         }
-        final ArrayList<IElementEventHandler> retval = new ArrayList<IElementEventHandler>(l.size());
+        final Queue<IElementEventHandler> retval = new LinkedList<IElementEventHandler>();
         for (final ElementEventHandler handler : l) {
             retval.add(new JCSElementEventHandlerDelegator(handler));
         }

@@ -49,8 +49,6 @@
 
 package com.openexchange.caching.internal;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -93,6 +91,8 @@ import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 import com.openexchange.exception.OXException;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
@@ -270,7 +270,10 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
         final int length = keys.length;
         final List<Serializable> list = new ArrayList<Serializable>(length);
         for (int i = 0; i < length; i++) {
-            list.add(cacheControl.get((Serializable) keys[i]).getVal());
+            ICacheElement element = cacheControl.get((Serializable) keys[i]);
+            if(element != null) {
+                list.add(element.getVal());
+            }
         }
 
         return list;

@@ -103,6 +103,7 @@ import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.HostInfo;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthEventConstants;
@@ -354,7 +355,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     }
 
                     String prevCbUrl = cbUrl;
-                    cbUrl = currentHost.injectRoute(new StringBuilder(uri.getScheme()).append("://").append(uri.getHost()).append(path).toString());
+                    String deferredBaseURL = new StringBuilder(uri.getScheme()).append("://").append(uri.getHost()).append(path).toString();
+                    // For the Twitter API we need to inject the route as URL parameter instead of path segment, see Bug 59098
+                    cbUrl = KnownApi.TWITTER.getServiceId().equals(serviceMetaData) ? currentHost.injectRouteAsParameter(deferredBaseURL) : currentHost.injectRoute(deferredBaseURL);
 
                     org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session, scopes);
                     scribeToken = service.getRequestToken();
