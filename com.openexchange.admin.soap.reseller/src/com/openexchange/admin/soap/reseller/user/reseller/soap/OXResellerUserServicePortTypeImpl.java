@@ -1541,9 +1541,9 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             user.setConvertDriveUserFolders(bool_tmp.booleanValue());
         }
         
-        bool_tmp = soapUser.isRemoteHtmlLoading();
+        bool_tmp = soapUser.isRemoteContentAllowed();
         if (bool_tmp != null) {
-            user.setRemoteHtmlLoadingAllowed(bool_tmp);
+            user.setRemoteContentAllowed(bool_tmp);
         }
 
         tmp = soapUser.getDepartment();
@@ -2305,7 +2305,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapUser.setUserfield20(user.getUserfield20());
         soapUser.setPrimaryAccountName(user.getPrimaryAccountName());
         soapUser.setConvertDriveUserFolders(Boolean.valueOf(user.isConvertDriveUserFolders()));
-        soapUser.setRemoteHtmlLoading(user.isRemoteHtmlLoadingAllowed());
+        soapUser.setRemoteContentAllowed(user.isRemoteContentAllowed());
         return soapUser;
     }
 

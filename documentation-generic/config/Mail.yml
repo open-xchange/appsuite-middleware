@@ -872,7 +872,7 @@ properties:
       file: mail.properties
       packageName: open-xchange-core
       tags: ["Mail"]
-    - key: com.openexchange.mail.isRemoteHTMLLoadingAllowed
+    - key: com.openexchange.mail.isRemoteContentAllowed
       description: |
         This option specifies whether content from remote servers will be loaded when displaying HTML mails.
         

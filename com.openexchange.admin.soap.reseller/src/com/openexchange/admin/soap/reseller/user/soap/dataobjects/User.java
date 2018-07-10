@@ -148,7 +148,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * &lt;element name="userfield20" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  * &lt;element name="primaryAccountName" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  * &lt;element name="convert_drive_user_folders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- * &lt;element name="remote_html_loading" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ * &lt;element name="remote_content_allowed" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  * &lt;/sequence>
  * &lt;/restriction>
  * &lt;/complexContent>
@@ -292,7 +292,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "userfield20",
     "primaryAccountName",
     "convertDriveUserFolders",
-    "remoteHtmlLoading"
+    "remoteContentAllowed"
 })
 public class User {
 
@@ -561,8 +561,8 @@ public class User {
     private String primaryAccountName;
     @XmlElement(name = "convert_drive_user_folders", nillable = true)
     protected Boolean convertDriveUserFolders;
-    @XmlElement(name = "remote_html_loading", nillable = true)
-    protected Boolean remoteHtmlLoading;
+    @XmlElement(name = "remote_content_allowed", nillable = true)
+    protected Boolean remoteContentAllowed;
 
     /**
      * Gets the value of the aliases property.
@@ -3753,17 +3753,17 @@ public class User {
      *         <code>false</code> if loading of content from remote servers isn't allowed when displaying HTML mails
      *         <code>null</code> if not set
      */
-    public Boolean isRemoteHtmlLoading() {
-        return remoteHtmlLoading;
+    public Boolean isRemoteContentAllowed() {
+        return remoteContentAllowed;
     }
     
     /**
      * Set the value for remote-html-loading
      * 
-     * @param remoteHtmlLoading The {@link Boolean} to set
+     * @param remoteContentAllowed The {@link Boolean} to set
      */
-    public void setRemoteHtmlLoading(Boolean remoteHtmlLoading) {
-        this.remoteHtmlLoading = remoteHtmlLoading;
+    public void setRemoteContentAllowed(Boolean remoteContentAllowed) {
+        this.remoteContentAllowed = remoteContentAllowed;
     }
 
 }

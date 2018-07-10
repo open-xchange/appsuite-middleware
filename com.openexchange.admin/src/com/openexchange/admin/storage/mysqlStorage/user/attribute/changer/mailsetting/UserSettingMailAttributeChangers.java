@@ -96,14 +96,14 @@ public class UserSettingMailAttributeChangers extends AbstractUserAttributeChang
 
             @Override
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
-                Boolean remoteHtmlLoading = userData.isRemoteHtmlLoadingAllowed();
-                if (remoteHtmlLoading == null) {
+                Boolean remoteContentnLoading = userData.isRemoteContentAllowed();
+                if (remoteContentnLoading == null) {
                     return false;
                 }
                 try {
                     UserSettingMail userSettingMail = CachingUserSettingMailStorage.getInstance().getUserSettingMail(userId, contextId);
-                    if (remoteHtmlLoading.booleanValue() != userSettingMail.isAllowHTMLImages()) {
-                        userSettingMail.setAllowHTMLImages(remoteHtmlLoading.booleanValue());
+                    if (remoteContentnLoading.booleanValue() != userSettingMail.isAllowHTMLImages()) {
+                        userSettingMail.setAllowHTMLImages(remoteContentnLoading.booleanValue());
                         return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserMailSettingAttribute.BITS, Integer.valueOf(userSettingMail.getBitsValue())), connection);
                     }
                 } catch (OXException e) {

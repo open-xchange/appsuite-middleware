@@ -1348,7 +1348,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     /**
      * Check if HTML content is allowed to be displayed by default.
      * Follow the scheme:
-     * 1) passed value for {@link User#isRemoteHtmlLoadingAllowed()} (introduced with MW-988)
+     * 1) passed value for {@link User#isRemoteContentAllowed()} (introduced with MW-988)
      * 2) passed value for MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT
      * 3) value for new parameter from config cascade
      * 4) false as fallback
@@ -1362,10 +1362,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     private int checkHTMLMailAllowed(int flags, User usrdata, int userId, int contextId) {
         Boolean isAllowed = null;
 
-        if ((null != usrdata.isRemoteHtmlLoadingAllowed() && usrdata.isRemoteHtmlLoadingAllowed().booleanValue()) || Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim())) {
+        if ((null != usrdata.isRemoteContentAllowed() && usrdata.isRemoteContentAllowed().booleanValue()) || Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim())) {
             isAllowed = Boolean.TRUE;
         } else {
-            isAllowed = getConfigViewValue(userId, contextId, "com.openexchange.mail.isRemoteHTMLLoadingAllowed", null);
+            isAllowed = getConfigViewValue(userId, contextId, "com.openexchange.mail.isRemoteContentAllowed", null);
         }
         if (null != isAllowed && isAllowed.booleanValue()) {
             flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
@@ -2079,9 +2079,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         newuser.setGui_spam_filter_enabled(Boolean.FALSE);
                     }
                     if ((bits & UserSettingMail.INT_ALLOW_HTML_IMAGES) == UserSettingMail.INT_ALLOW_HTML_IMAGES) {
-                        newuser.setRemoteHtmlLoadingAllowed(Boolean.TRUE);
+                        newuser.setRemoteContentAllowed(Boolean.TRUE);
                     } else {
-                        newuser.setRemoteHtmlLoadingAllowed(Boolean.FALSE);
+                        newuser.setRemoteContentAllowed(Boolean.FALSE);
                     }
                     newuser.setDefaultSenderAddress(rs.getString("send_addr"));
                     newuser.setUploadFileSizeLimit(Integer.valueOf(rs.getInt("upload_quota")));
