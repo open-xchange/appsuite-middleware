@@ -47,41 +47,53 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos.alarm.mail;
 
 import java.sql.Connection;
-import java.util.Date;
-import java.util.List;
-import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.AlarmTriggerWrapper;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AdministrativeAlarmTriggerStorage}
+ * {@link AddProcessedColumnUpdateTask}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public interface AdministrativeAlarmTriggerStorage {
+public class AddProcessedColumnUpdateTask extends UpdateTaskAdapter {
 
-    /**
-     * Lists alarm triggers until the given time in ascending order
-     *
-     * @param con The connection
-     * @param until The upper limit
-     * @return A list of {@link AlarmTriggerWrapper}s
-     * @throws OXException
-     */
-    List<AlarmTriggerWrapper> getAndLockTriggers(Connection con, Date until) throws OXException;
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+            Column col = new Column("processed", "bigint(20) NOT NULL DEFAULT 0");
+            Tools.addColumns(con, "calendar_alarm_trigger", col);
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+        }
 
+    }
 
-    /**
-     * Sets the processing status to the given {@link AlarmTrigger}s
-     *
-     * @param con The connection to use
-     * @param triggers The triggers to update
-     * @param time The time to set or null to reset the status
-     * @throws OXException
-     */
-    public void setProcessingStatus(Connection con, List<AlarmTriggerWrapper> triggers, Long time) throws OXException;
+    @Override
+    public String[] getDependencies() {
+        return new String[] {"com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"};
+    }
+
 }

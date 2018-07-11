@@ -49,11 +49,17 @@
 
 package com.openexchange.chronos.alarm.mail;
 
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -71,11 +77,19 @@ public class Activator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class};
+        return new Class<?>[] {ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
+        final AddProcessedColumnUpdateTask task = new AddProcessedColumnUpdateTask();
+        registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+            @Override
+            public Collection<UpdateTaskV2> getUpdateTasks() {
+                return Arrays.asList(((UpdateTaskV2) task));
+            }
+        });
+
         TimerService timerService = getService(TimerService.class);
         if(timerService==null) {
             throw ServiceExceptionCode.absentService(TimerService.class);
@@ -92,8 +106,13 @@ public class Activator extends HousekeepingActivator{
         if(ctxService==null) {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
-
-        scheduleAtFixedRate = timerService.scheduleAtFixedRate(new MailAlarmDeliveryWorker(calendarStorageFactory.createAdministrative(), dbService, ctxService, timerService, 10, Calendar.MINUTE), 0, 10, TimeUnit.MINUTES);
+        CalendarUtilities calUtil = getService(CalendarUtilities.class);
+        if(calUtil==null) {
+            throw ServiceExceptionCode.absentService(CalendarUtilities.class);
+        }
+        MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, 10, Calendar.MINUTE);
+        scheduleAtFixedRate = timerService.scheduleAtFixedRate(worker, 0, 10, TimeUnit.MINUTES);
+        registerService(CalendarHandler.class, new MailAlarmCalendarHandler(worker));
     }
 
     @Override

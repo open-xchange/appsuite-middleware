@@ -7,11 +7,16 @@ Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.chronos.alarm.mail
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.service,
  com.openexchange.chronos.storage,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.update,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.timer,
- org.osgi.framework
+ com.openexchange.tools.update,
+ org.osgi.framework,
+ org.slf4j;version="1.7.25"

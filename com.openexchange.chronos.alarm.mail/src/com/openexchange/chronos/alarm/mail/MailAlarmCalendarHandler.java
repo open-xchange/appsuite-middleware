@@ -47,41 +47,54 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos.alarm.mail;
 
-import java.sql.Connection;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.AlarmTriggerWrapper;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarEvent;
+import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link AdministrativeAlarmTriggerStorage}
+ * {@link MailAlarmCalendarHandler}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public interface AdministrativeAlarmTriggerStorage {
+public class MailAlarmCalendarHandler implements CalendarHandler {
+
+    private final MailAlarmDeliveryWorker worker;
 
     /**
-     * Lists alarm triggers until the given time in ascending order
-     *
-     * @param con The connection
-     * @param until The upper limit
-     * @return A list of {@link AlarmTriggerWrapper}s
-     * @throws OXException
+     * Initializes a new {@link MailAlarmCalendarHandler}.
+     * @param worker
      */
-    List<AlarmTriggerWrapper> getAndLockTriggers(Connection con, Date until) throws OXException;
+    public MailAlarmCalendarHandler(MailAlarmDeliveryWorker worker) {
+        this.worker = worker;
+    }
+
+    @Override
+    public void handle(CalendarEvent event) {
+        // Check deleted events and remove the according tasks
+        for(DeleteResult deletion: event.getDeletions()) {
+            worker.cancelAll(deletion.getEventID().getObjectID());
+        }
+        // Check if an updated events has tasks and if so load and check the appropriate alarm data
+        List<Event> eventsToCheck = new ArrayList<>();
+        for(UpdateResult updateResult : event.getUpdates()) {
+           eventsToCheck.add(updateResult.getOriginal());
+        }
+        try {
+            worker.checkEvents(eventsToCheck, event.getContextId(), event.getAccountId());
+        } catch (OXException e) {
+            // TODO handle error
+        }
 
 
-    /**
-     * Sets the processing status to the given {@link AlarmTrigger}s
-     *
-     * @param con The connection to use
-     * @param triggers The triggers to update
-     * @param time The time to set or null to reset the status
-     * @throws OXException
-     */
-    public void setProcessingStatus(Connection con, List<AlarmTriggerWrapper> triggers, Long time) throws OXException;
+
+    }
+
 }

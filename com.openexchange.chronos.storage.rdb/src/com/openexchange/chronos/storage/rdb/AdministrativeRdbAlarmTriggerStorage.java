@@ -56,8 +56,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
@@ -92,6 +94,8 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
     }
 
     private List<AlarmTriggerWrapper> getAndLockTriggers(Long until, Connection con) throws OXException {
+        Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        instance.add(Calendar.MINUTE, -5);
         try {
             AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(new AlarmTriggerField[] {AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME})).append(" FROM ").append("calendar_alarm_trigger");
@@ -99,7 +103,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
             if (until != null) {
                 stringBuilder.append(" AND triggerDate<?");
             }
-            stringBuilder.append(" AND status=0");
+            stringBuilder.append(" AND ( processed=0 OR processed<"+instance.getTimeInMillis()+" )");
             stringBuilder.append(" AND action="+ AlarmAction.EMAIL.getValue());
 
             stringBuilder.append(" ORDER BY triggerDate");
@@ -124,14 +128,17 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
     };
 
     @Override
-    public void setProcessingStatus(Connection con, List<AlarmTriggerWrapper> triggers, int status) throws OXException {
-        StringBuilder stringBuilder = new StringBuilder().append("UPDATE calendar_alarm_trigger SET pushed=?");
+    public void setProcessingStatus(Connection con, List<AlarmTriggerWrapper> triggers, Long time) throws OXException {
+        if(time<0) {
+            time = null;
+        }
+        StringBuilder stringBuilder = new StringBuilder().append("UPDATE calendar_alarm_trigger SET processed=?");
         stringBuilder.append(" WHERE cid=? AND account=? AND alarm=?");
         try {
             PreparedStatement stmt = con.prepareStatement(stringBuilder.toString());
             for(AlarmTriggerWrapper trigger: triggers) {
                 int param = 1;
-                stmt.setInt(param++, status);
+                stmt.setLong(param++, time==null ? 0 : time);
                 stmt.setInt(param++, trigger.getCtx());
                 stmt.setInt(param++, trigger.getAccount());
                 stmt.setInt(param++, trigger.getAlarmTrigger().getAlarm());

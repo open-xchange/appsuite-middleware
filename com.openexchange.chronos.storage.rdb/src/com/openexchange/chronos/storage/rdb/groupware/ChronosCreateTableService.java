@@ -281,6 +281,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "floatingTimezone VARCHAR(255) DEFAULT NULL," +
                 "relatedTime BIGINT(20) DEFAULT NULL," +
                 "pushed BOOL DEFAULT FALSE," +
+                "processed BIGINT(20) NOT NULL DEFAULT 0," +
                 "PRIMARY KEY (cid,account,alarm)," +
                 "KEY triggerDate (cid,account,user,triggerDate)," +
                 "KEY event (cid,account,user,eventId)" +

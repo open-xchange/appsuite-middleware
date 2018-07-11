@@ -55,9 +55,24 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import com.google.common.io.BaseEncoding;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AdministrativeAlarmStorage;
+import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 
 /**
  * {@link AdministrativeRdbAlarmStorage}
@@ -68,6 +83,7 @@ import com.openexchange.exception.OXException;
 public class AdministrativeRdbAlarmStorage implements AdministrativeAlarmStorage {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AdministrativeRdbAlarmStorage.class);
+    private static final AlarmMapper MAPPER = AlarmMapper.getInstance();
 
       /**
      * Logs & executes a prepared statement's SQL query.
@@ -107,7 +123,159 @@ public class AdministrativeRdbAlarmStorage implements AdministrativeAlarmStorage
 
     @Override
     public Alarm getAlarm(Connection con, int cid, int accountId, int alarmId) throws OXException {
-        // TODO Auto-generated method stub
+        AlarmField[] mappedFields = MAPPER.getMappedFields(MAPPER.getMappedFields());
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT event").append(MAPPER.getColumns(mappedFields))
+            .append(" FROM calendar_alarm WHERE cid=? AND account=? AND alarmId=?")
+        ;
+        stringBuilder.append(';');
+        try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            stmt.setInt(parameterIndex++, accountId);
+            stmt.setInt(parameterIndex++, alarmId);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                String eventId = resultSet.getString(1);
+                return readAlarm(cid, eventId, resultSet, mappedFields);
+            }
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e.getMessage());
+        }
+    }
+
+    private Alarm readAlarm(int cid, String eventId, ResultSet resultSet, AlarmField[] fields) throws SQLException, OXException {
+        return adjustAfterLoad(cid, eventId, MAPPER.fromResultSet(resultSet, fields));
+    }
+
+    /**
+     * Adjusts certain properties of an alarm after loading it from the database.
+     *
+     * @param eventId The identifier of the associated event
+     * @param alarm The alarm to adjust
+     * @return The (possibly adjusted) alarm reference
+     */
+    private Alarm adjustAfterLoad(int cid, String eventId, Alarm alarm) {
+        ExtendedProperties extendedProperties = alarm.getExtendedProperties();
+        if (null == extendedProperties) {
+            return alarm;
+        }
+        /*
+         * move specific properties from container into alarm object
+         */
+        ExtendedProperty summaryProperty = extendedProperties.get("SUMMARY");
+        if (null != summaryProperty) {
+            alarm.setSummary((String) summaryProperty.getValue());
+            extendedProperties.remove(summaryProperty);
+        }
+        ExtendedProperty descriptionProperty = extendedProperties.get("DESCRIPTION");
+        if (null != descriptionProperty) {
+            alarm.setDescription((String) descriptionProperty.getValue());
+            extendedProperties.remove(descriptionProperty);
+        }
+        List<ExtendedProperty> attendeeProperties = extendedProperties.getAll("ATTENDEE");
+        if (null != attendeeProperties && 0 < attendeeProperties.size()) {
+            alarm.setAttendees(decodeAttendees(cid, eventId, attendeeProperties));
+            extendedProperties.removeAll(attendeeProperties);
+        }
+        List<ExtendedProperty> attachmentProperties = extendedProperties.getAll("ATTACH");
+        if (null != attachmentProperties && 0 < attachmentProperties.size()) {
+            alarm.setAttachments(decodeAttachments(eventId, attachmentProperties));
+            extendedProperties.removeAll(attachmentProperties);
+        }
+
+        if (extendedProperties.size() == 0) {
+            alarm.removeExtendedProperties();
+        }
+        return alarm;
+    }
+
+    /**
+     * Decodes a list of extended properties into a valid list of attendees.
+     *
+     * @param eventId The identifier of the associated event
+     * @param attendeeProperties The extended attendee properties to decode
+     * @return The decoded attendees, or an empty list if there are none
+     */
+    private List<Attendee> decodeAttendees(int cid, String eventId, List<ExtendedProperty> attendeeProperties) {
+        List<Attendee> attendees = new ArrayList<Attendee>(attendeeProperties.size());
+        for (ExtendedProperty attendeeProperty : attendeeProperties) {
+            Attendee attendee = new Attendee();
+            attendee.setUri((String) attendeeProperty.getValue());
+            ExtendedPropertyParameter cnParameter = attendeeProperty.getParameter("CN");
+            if (null != cnParameter) {
+                attendee.setCn(cnParameter.getValue());
+            }
+            try {
+                attendee = new EntityProcessor(cid, optEntityResolver(cid)).adjustAfterLoad(attendee);
+            } catch (OXException e) {
+                LOG.debug("Error processing " + attendee+ ": "+e.getMessage(), e);
+            }
+            attendees.add(attendee);
+        }
+        return attendees;
+    }
+
+    /**
+     * Optionally gets an entity resolver for the supplied context.
+     *
+     * @param contextId The identifier of the context to get the entity resolver for
+     * @return The entity resolver, or <code>null</code> if not available
+     */
+    private static EntityResolver optEntityResolver(int contextId) {
+        CalendarUtilities calendarUtilities = Services.getOptionalService(CalendarUtilities.class);
+        if (null != calendarUtilities) {
+            try {
+                return calendarUtilities.getEntityResolver(contextId);
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(RdbCalendarStorage.class).warn(
+                    "Error getting entity resolver for context {}: {}", I(contextId), e.getMessage(), e);
+            }
+        }
         return null;
+    }
+
+    /**
+     * Decodes a list of extended properties into a valid list of attachments.
+     *
+     * @param eventId The identifier of the associated event
+     * @param attachmentProperties The extended attachment properties to decode
+     * @return The decoded attendees, or an empty list if there are none
+     */
+    private List<Attachment> decodeAttachments(String eventId, List<ExtendedProperty> attachmentProperties) {
+        List<Attachment> attachments = new ArrayList<Attachment>(attachmentProperties.size());
+        for (ExtendedProperty attachmentProperty : attachmentProperties) {
+            Attachment attachment = new Attachment();
+            ExtendedPropertyParameter fmtTypeParameter = attachmentProperty.getParameter("FMTTYPE");
+            if (null != fmtTypeParameter) {
+                attachment.setFormatType(fmtTypeParameter.getValue());
+            }
+            ExtendedPropertyParameter filenameParameter = attachmentProperty.getParameter("FILENAME");
+            if (null != filenameParameter) {
+                attachment.setFilename(filenameParameter.getValue());
+            }
+            ExtendedPropertyParameter sizeParameter = attachmentProperty.getParameter("SIZE");
+            if (null != sizeParameter) {
+                try {
+                    attachment.setSize(Long.parseLong(sizeParameter.getValue()));
+                } catch (NumberFormatException e) {
+                    LOG.debug("Error parsing attachment size parameter: "+e.getMessage(), e);
+                }
+            }
+            ExtendedPropertyParameter valueParameter = attachmentProperty.getParameter("VALUE");
+            if (null != valueParameter && "BINARY".equals(valueParameter.getValue())) {
+                ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+                try {
+                    fileHolder.write(BaseEncoding.base64().decode((String) attachmentProperty.getValue()));
+                    attachment.setData(fileHolder);
+                } catch (IllegalArgumentException | OXException e) {
+                    LOG.debug("Error processing binary alarm data: "+e.getMessage(), e);
+                    Streams.close(fileHolder);
+                }
+            } else {
+                attachment.setUri((String) attachmentProperty.getValue());
+            }
+            attachments.add(attachment);
+        }
+        return attachments;
     }
 }
