@@ -380,6 +380,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         add_config(OPT_CONFIG_LONG, false),
         remove_config(OPT_REMOVE_CONFIG_LONG, false),
         primary_account_name(OPT_PRIMARY_ACCOUNT_NAME, false),
+        remote_content_allowed(OPT_REMOTE_CONTENT_ALLOWED, false),
         ;
 
         private final String string;
@@ -1838,6 +1839,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 user.setPrimaryAccountName(value);
             }
         });
+        setValue(nextLine, idarray, Constants.remote_content_allowed, new MethodStringClosure() {
+
+            @Override
+            public void callMethod(final String value) {
+                user.setRemoteContentAllowed(Boolean.valueOf(stringToBool(value)));
+            }
+        });
         final int m2 = idarray[Constants.MAILALIAS.getIndex()];
         if (m2 >= 0) {
             String mailAlias = nextLine[m2];
@@ -2649,7 +2657,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setRemoteContentAllowed(final AdminParser parser) {
-        this.remoteContentAllowed = setSettableBooleanLongOpt(parser, OPT_REMOTE_CONTENT_ALLOWED, "true / false", "The value indicating if remote content will be loaded or not", true, false, true);
+        this.remoteContentAllowed = setSettableBooleanLongOpt(parser, OPT_REMOTE_CONTENT_ALLOWED, "true / false", "The value indicating if remote content in HTML mails will be loaded or not", true, false, true);
     }
 
     protected final void setCsvImport(final AdminParser admp) {
@@ -2704,9 +2712,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
         {
-            usr.setRemoteContentAllowed((Boolean) parser.getOptionValue(this.remoteContentAllowed));
+            Boolean remoteContentAllowed = (Boolean) parser.getOptionValue(this.spamFilterOption);
+            if (null != remoteContentAllowed) {
+                usr.setRemoteContentAllowed(remoteContentAllowed);
+            }
         }
-
         {
             String value = (String) parser.getOptionValue(email1Option);
             if (null != value) {
