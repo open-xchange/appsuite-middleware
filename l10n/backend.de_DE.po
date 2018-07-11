@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-06-29 09:34+0200\n"
+"PO-Revision-Date: 2018-07-11 11:03+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1068,8 +1068,9 @@ msgstr ""
 #. * <code>🎂</code> is the <i>birthday cake</i> character (<code>U+1F382</code>).
 #.
 #: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:81
+#, fuzzy
 msgid "🎂 %1$s"
-msgstr ""
+msgstr "🎂 %1$s"
 
 #. *
 #. * The event description displayed for the birthday of a contact if the full date of birth is known, with the first parameter being
@@ -1085,8 +1086,9 @@ msgstr "* %1$s"
 #. * (<code>U+1F382</code>).
 #.
 #: com.openexchange.chronos.provider.birthdays/src/com/openexchange/chronos/provider/birthdays/BirthdaysCalendarStrings.java:94
+#, fuzzy
 msgid "🎂 %1$s (%2$d. birthday)"
-msgstr ""
+msgstr "🎂 %1$s (%2$d. Geburtstag)"
 
 #: com.openexchange.chronos.provider.caching/src/com/openexchange/chronos/provider/caching/basic/exception/BasicCachingCalendarExceptionMessages.java:63
 msgid ""
