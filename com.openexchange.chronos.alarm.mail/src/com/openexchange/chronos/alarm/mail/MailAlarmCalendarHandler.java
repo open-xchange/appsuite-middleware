@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
@@ -85,16 +86,17 @@ public class MailAlarmCalendarHandler implements CalendarHandler {
         // Check if an updated events has tasks and if so load and check the appropriate alarm data
         List<Event> eventsToCheck = new ArrayList<>();
         for(UpdateResult updateResult : event.getUpdates()) {
-           eventsToCheck.add(updateResult.getOriginal());
+            eventsToCheck.add(updateResult.getOriginal());
         }
+        for(CreateResult createResult : event.getCreations()) {
+            eventsToCheck.add(createResult.getCreatedEvent());
+        }
+
         try {
             worker.checkEvents(eventsToCheck, event.getContextId(), event.getAccountId());
         } catch (OXException e) {
             // TODO handle error
         }
-
-
-
     }
 
 }

@@ -110,8 +110,8 @@ public class Activator extends HousekeepingActivator{
         if(calUtil==null) {
             throw ServiceExceptionCode.absentService(CalendarUtilities.class);
         }
-        MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, 10, Calendar.MINUTE);
-        scheduleAtFixedRate = timerService.scheduleAtFixedRate(worker, 0, 10, TimeUnit.MINUTES);
+        MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, 60, Calendar.MINUTE);
+        scheduleAtFixedRate = timerService.scheduleAtFixedRate(worker, 0, 1, TimeUnit.MINUTES);
         registerService(CalendarHandler.class, new MailAlarmCalendarHandler(worker));
     }
 

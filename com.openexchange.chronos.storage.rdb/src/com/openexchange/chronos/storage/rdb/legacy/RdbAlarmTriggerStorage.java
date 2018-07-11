@@ -435,6 +435,11 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
+    public AlarmTrigger loadTrigger(int id) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Integer recalculateFloatingAlarmTriggers(int userId) throws OXException {
         // TODO Auto-generated method stub
         return null;

@@ -90,21 +90,21 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
      */
     @Override
     public List<AlarmTriggerWrapper> getAndLockTriggers(Connection con, Date until) throws OXException {
-            return getAndLockTriggers(until == null ? null : until.getTime(), con);
+        return getAndLockTriggers(until == null ? null : until.getTime(), con);
     }
 
     private List<AlarmTriggerWrapper> getAndLockTriggers(Long until, Connection con) throws OXException {
         Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         instance.add(Calendar.MINUTE, -5);
         try {
-            AlarmTriggerField[] mappedFields = new AlarmTriggerField[] {AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID};
+            AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
 
             if (until != null) {
                 stringBuilder.append(" triggerDate<?");
             }
-            stringBuilder.append(" AND ( processed=0 OR processed<"+instance.getTimeInMillis()+" )");
-            stringBuilder.append(" AND action='"+ AlarmAction.EMAIL.getValue()+"'");
+            stringBuilder.append(" AND ( processed=0 OR processed<" + instance.getTimeInMillis() + " )");
+            stringBuilder.append(" AND action='" + AlarmAction.EMAIL.getValue() + "'");
 
             stringBuilder.append(" ORDER BY triggerDate");
             stringBuilder.append(" FOR UPDATE");
@@ -129,22 +129,23 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
 
     @Override
     public void setProcessingStatus(Connection con, List<AlarmTriggerWrapper> triggers, Long time) throws OXException {
-        if(time<0) {
+        if (time < 0) {
             time = null;
         }
         StringBuilder stringBuilder = new StringBuilder().append("UPDATE calendar_alarm_trigger SET processed=?");
         stringBuilder.append(" WHERE cid=? AND account=? AND alarm=?");
         try {
-            PreparedStatement stmt = con.prepareStatement(stringBuilder.toString());
-            for(AlarmTriggerWrapper trigger: triggers) {
-                int param = 1;
-                stmt.setLong(param++, time==null ? 0 : time);
-                stmt.setInt(param++, trigger.getCtx());
-                stmt.setInt(param++, trigger.getAccount());
-                stmt.setInt(param++, trigger.getAlarmTrigger().getAlarm());
-                stmt.addBatch();
+            try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
+                for (AlarmTriggerWrapper trigger : triggers) {
+                    int param = 1;
+                    stmt.setLong(param++, time == null ? 0 : time);
+                    stmt.setInt(param++, trigger.getCtx());
+                    stmt.setInt(param++, trigger.getAccount());
+                    stmt.setInt(param++, trigger.getAlarmTrigger().getAlarm());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
             }
-            stmt.executeBatch();
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
@@ -196,6 +197,50 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
             int rowCount = stmt.executeUpdate();
             LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", statementString, I(rowCount), L(System.currentTimeMillis() - start));
             return rowCount;
+        }
+    }
+
+    @Override
+    public List<AlarmTriggerWrapper> getAlarmTriggers(Connection con, int cid, int account, String eventId) throws OXException {
+        try {
+            AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
+            StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
+            stringBuilder.append(" cid=? AND account=? AND eventId=?");
+            List<AlarmTriggerWrapper> alarmTriggers = new ArrayList<AlarmTriggerWrapper>();
+            try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, cid);
+                stmt.setInt(parameterIndex++, account);
+                stmt.setString(parameterIndex++, eventId);
+                try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                    while (resultSet.next()) {
+                        alarmTriggers.add(readTrigger(resultSet, mappedFields));
+                    }
+                }
+                return alarmTriggers;
+            }
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public AlarmTriggerWrapper getAlarmTriggers(Connection con, int cid, int account, int alarm) throws OXException {
+        try {
+            AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
+            StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
+            stringBuilder.append(" cid=? AND account=? AND alarm=?");
+            try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, cid);
+                stmt.setInt(parameterIndex++, account);
+                stmt.setInt(parameterIndex++, alarm);
+                try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                    return resultSet.next() ? readTrigger(resultSet, mappedFields) : null;
+                }
+            }
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     }
 }

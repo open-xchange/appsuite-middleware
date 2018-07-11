@@ -84,4 +84,28 @@ public interface AdministrativeAlarmTriggerStorage {
      * @throws OXException
      */
     public void setProcessingStatus(Connection con, List<AlarmTriggerWrapper> triggers, Long time) throws OXException;
+
+
+    /**
+     * Retrieves the given alarm trigger
+     *
+     * @param con The connection to use
+     * @param cid The context id
+     * @param account The account id
+     * @param eventId The event id
+     * @return A list of {@link AlarmTriggerWrapper}
+     * @throws OXException
+     */
+    List<AlarmTriggerWrapper> getAlarmTriggers(Connection con, int cid, int account, String eventId) throws OXException;
+
+
+    /**
+     * @param con
+     * @param cid
+     * @param account
+     * @param alarm
+     * @return
+     * @throws OXException
+     */
+    AlarmTriggerWrapper getAlarmTriggers(Connection con, int cid, int account, int alarm) throws OXException;
 }
