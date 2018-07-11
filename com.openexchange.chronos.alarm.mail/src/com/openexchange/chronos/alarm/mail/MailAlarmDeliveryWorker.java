@@ -65,7 +65,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerWrapper;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AdministrativeCalendarStorage;
@@ -142,9 +141,9 @@ public class MailAlarmDeliveryWorker implements Runnable{
                             delay = 0;
                         }
 
-                        SingleMailDeliveryTask task = new SingleMailDeliveryTask(factory, calUtil, ctxService.getContext(ctxId), trigger.getAccount(), alarm, trigger.getAlarmTrigger());
+                        SingleMailDeliveryTask task = new SingleMailDeliveryTask(factory, calUtil, ctxService.getContext(trigger.getCtx()), trigger.getAccount(), alarm, trigger.getAlarmTrigger());
                         ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
-                        scheduledTasks.put(key(ctxId, trigger.getAccount(), trigger.getAlarmTrigger().getEventId(), alarm.getId()), timer);
+                        scheduledTasks.put(key(trigger.getCtx(), trigger.getAccount(), trigger.getAlarmTrigger().getEventId(), alarm.getId()), timer);
                     }
                 } finally {
                     dbservice.backForUpdateTask(ctxId, con);
@@ -221,7 +220,8 @@ public class MailAlarmDeliveryWorker implements Runnable{
         public void run() {
             try {
                 CalendarStorage storage = factory.create(ctx, account, optEntityResolver(ctx.getContextId()));
-                Event event = storage.getEventStorage().loadEvent(trigger.getEventId(), EventField.values());
+                Event event = storage.getEventStorage().loadEvent(trigger.getEventId(), null);
+                storage.getUtilities().loadAdditionalEventData(trigger.getUserId(), event, null);
                 List<Alarm> alarms = event.getAlarms();
                 for(Alarm tmpAlarm: alarms) {
                     if(tmpAlarm.getId() == alarm.getId()) {

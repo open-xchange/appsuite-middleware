@@ -123,10 +123,10 @@ public class AdministrativeRdbAlarmStorage implements AdministrativeAlarmStorage
 
     @Override
     public Alarm getAlarm(Connection con, int cid, int accountId, int alarmId) throws OXException {
-        AlarmField[] mappedFields = MAPPER.getMappedFields(MAPPER.getMappedFields());
+        AlarmField[] mappedFields = MAPPER.getMappedFields();
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT event").append(MAPPER.getColumns(mappedFields))
-            .append(" FROM calendar_alarm WHERE cid=? AND account=? AND alarmId=?")
+            .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
+            .append(" FROM calendar_alarm WHERE cid=? AND account=? AND id=?")
         ;
         stringBuilder.append(';');
         try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
@@ -135,8 +135,11 @@ public class AdministrativeRdbAlarmStorage implements AdministrativeAlarmStorage
             stmt.setInt(parameterIndex++, accountId);
             stmt.setInt(parameterIndex++, alarmId);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                String eventId = resultSet.getString(1);
-                return readAlarm(cid, eventId, resultSet, mappedFields);
+                if(resultSet.next()) {
+                    String eventId = resultSet.getString(1);
+                    return readAlarm(cid, eventId, resultSet, mappedFields);
+                }
+                return null;
             }
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e.getMessage());

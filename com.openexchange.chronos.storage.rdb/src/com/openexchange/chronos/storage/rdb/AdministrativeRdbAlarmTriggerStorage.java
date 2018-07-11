@@ -97,14 +97,14 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
         Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         instance.add(Calendar.MINUTE, -5);
         try {
-            AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
-            StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(new AlarmTriggerField[] {AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME})).append(" FROM ").append("calendar_alarm_trigger");
+            AlarmTriggerField[] mappedFields = new AlarmTriggerField[] {AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID};
+            StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
 
             if (until != null) {
-                stringBuilder.append(" AND triggerDate<?");
+                stringBuilder.append(" triggerDate<?");
             }
             stringBuilder.append(" AND ( processed=0 OR processed<"+instance.getTimeInMillis()+" )");
-            stringBuilder.append(" AND action="+ AlarmAction.EMAIL.getValue());
+            stringBuilder.append(" AND action='"+ AlarmAction.EMAIL.getValue()+"'");
 
             stringBuilder.append(" ORDER BY triggerDate");
             stringBuilder.append(" FOR UPDATE");
