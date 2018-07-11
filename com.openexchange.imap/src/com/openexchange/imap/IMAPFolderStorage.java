@@ -661,7 +661,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (null == listInfo) {
                 IMAPFolder f = getIMAPFolder(fullName);
                 if (canBeOpened(f)) {
-                    return IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, ignoreDeletedMailsForFolderCount);
+                    return IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName);
                 }
 
                 f = checkForNamespaceFolder(fullName);
@@ -704,7 +704,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (null == listInfo) {
                 IMAPFolder f = getIMAPFolder(fullName);
                 if (canBeOpened(f)) {
-                    return IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, ignoreDeletedMailsForFolderCount)[1];
+                    return IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[1];
                 }
 
                 f = checkForNamespaceFolder(fullName);
@@ -790,7 +790,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (null == listInfo) {
                 IMAPFolder f = getIMAPFolder(fullName);
                 if (canBeOpened(f)) {
-                    return IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, false)[0];
+                    return IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[0];
                 }
 
                 f = checkForNamespaceFolder(fullName);

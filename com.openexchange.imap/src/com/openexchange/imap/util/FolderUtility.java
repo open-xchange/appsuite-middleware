@@ -154,7 +154,7 @@ public final class FolderUtility {
         try {
             f.open(IMAPFolder.READ_ONLY);
             return true;
-        } catch (FolderNotFoundException e) {
+        } catch (javax.mail.FolderNotFoundException e) {
             // Rethrow...
             throw e;
         } catch (MessagingException e) {
