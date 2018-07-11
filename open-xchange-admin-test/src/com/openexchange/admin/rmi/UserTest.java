@@ -163,12 +163,8 @@ public class UserTest extends AbstractRMITest {
         }
     }
 
-    /**
-     * Tests the user creation
-     */
     @Test
-    public void testRemoteHTMLLoading() throws Exception {
-
+    public void testCreateUserRemoteContentAllowed() throws Exception {
         // create new user
         UserModuleAccess access = new UserModuleAccess();
         User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
@@ -177,29 +173,43 @@ public class UserTest extends AbstractRMITest {
 
         // See if value was set
         User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
-        Assert.assertThat("ID should be the same", srv_loaded.getId(), is(createduser.getId()));
-        //verify data
-        AssertUtil.assertUser(createduser, srv_loaded);
-        Assert.assertThat("HTML loading should be allowed", srv_loaded.isRemoteContentAllowed(), is(Boolean.TRUE));
+        Assert.assertThat("Loading remote content should be allowed!", srv_loaded.isRemoteContentAllowed(), is(Boolean.TRUE));
+    }
 
+    @Test
+    public void testChangeUserRemoteContentAllowed() throws Exception {
+        // create new user
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+        usr.setRemoteContentAllowed(Boolean.TRUE);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
+        
         // Change value 
         createduser.setRemoteContentAllowed(Boolean.FALSE);
         getUserManager().change(context, createduser, contextAdminCredentials);
-        srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
-        Assert.assertThat("ID should be the same", srv_loaded.getId(), is(createduser.getId()));
-        //verify data
-        AssertUtil.assertUser(createduser, srv_loaded);
-        Assert.assertThat("HTML loading should be allowed", srv_loaded.isRemoteContentAllowed(), is(Boolean.FALSE));
+        
+        // Check value
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+        Assert.assertThat("Loading remote content should be disabled!", srv_loaded.isRemoteContentAllowed(), is(Boolean.FALSE));
+    }
 
-        // Don't set value, no update
+    @Test
+    public void testChangeUserWithoutRemoteContentAllowed() throws Exception {
+        // create new user
+        UserModuleAccess access = new UserModuleAccess();
+        User usr = UserFactory.createUser(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, TEST_DOMAIN, context);
+        usr.setRemoteContentAllowed(Boolean.TRUE);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
+        
+        // Don't set value
         createduser.setRemoteContentAllowed(null);
         getUserManager().change(context, createduser, contextAdminCredentials);
-        srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
-        Assert.assertThat("ID should be the same", srv_loaded.getId(), is(createduser.getId()));
-        //verify data
-        AssertUtil.assertUser(createduser, srv_loaded);
-        Assert.assertThat("HTML loading should be allowed", srv_loaded.isRemoteContentAllowed(), is(Boolean.FALSE));
+        
+        // Value should be unchanged
+        User srv_loaded = getUserManager().getData(context, id(createduser), contextAdminCredentials);
+        Assert.assertThat("Loading remote content should still be enabled!", srv_loaded.isRemoteContentAllowed(), is(Boolean.TRUE));
     }
+    
 
     /**
      * Tests the user creation with context module access rights
