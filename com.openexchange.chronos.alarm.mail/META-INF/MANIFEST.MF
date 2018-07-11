@@ -6,6 +6,7 @@ Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.chronos.alarm.mail
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.openexchange.chronos.alarm.mail.Activator
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.service,
  com.openexchange.chronos.storage,

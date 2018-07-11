@@ -142,7 +142,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
                             delay = 0;
                         }
 
-                        SingleMailDelivererTask task = new SingleMailDelivererTask(factory, calUtil, ctxService.getContext(ctxId), trigger.getAccount(), alarm, trigger.getAlarmTrigger());
+                        SingleMailDeliveryTask task = new SingleMailDeliveryTask(factory, calUtil, ctxService.getContext(ctxId), trigger.getAccount(), alarm, trigger.getAlarmTrigger());
                         ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
                         scheduledTasks.put(key(ctxId, trigger.getAccount(), trigger.getAlarmTrigger().getEventId(), alarm.getId()), timer);
                     }
@@ -174,7 +174,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
                     delay = 0;
                 }
 
-                SingleMailDelivererTask task = new SingleMailDelivererTask(factory, calUtil, ctxService.getContext(cid), account, alarm, trigger);
+                SingleMailDeliveryTask task = new SingleMailDeliveryTask(factory, calUtil, ctxService.getContext(cid), account, alarm, trigger);
                 ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
                 scheduledTasks.put(key(cid, account, trigger.getEventId(), alarm.getId()), timer);
             } finally {
@@ -196,7 +196,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
         return new Key(cid, account, eventId, alarm);
     }
 
-    private class SingleMailDelivererTask implements Runnable{
+    private class SingleMailDeliveryTask implements Runnable{
 
         Context ctx;
         private final int account;
@@ -206,9 +206,9 @@ public class MailAlarmDeliveryWorker implements Runnable{
         private final CalendarUtilities calUtil;
 
         /**
-         * Initializes a new {@link MailAlarmDeliveryWorker.SingleMailDelivererTask}.
+         * Initializes a new {@link MailAlarmDeliveryWorker.SingleMailDeliveryTask}.
          */
-        public SingleMailDelivererTask(CalendarStorageFactory factory, CalendarUtilities calUtil, Context ctx, int account, Alarm alarm, AlarmTrigger trigger) {
+        public SingleMailDeliveryTask(CalendarStorageFactory factory, CalendarUtilities calUtil, Context ctx, int account, Alarm alarm, AlarmTrigger trigger) {
             this.ctx = ctx;
             this.account = account;
             this.alarm = alarm;
@@ -233,6 +233,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
                 Map<Integer, List<Alarm>> loadAlarms = storage.getAlarmStorage().loadAlarms(event);
                 storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
                 storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
+                LOG.info("Mail successfully send!");
                 // TODO send mail
             } catch (OXException e) {
                 // TODO handle exception
