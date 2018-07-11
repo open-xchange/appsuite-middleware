@@ -52,6 +52,7 @@ package com.openexchange.chronos.itip.sender;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -128,7 +129,7 @@ public class DefaultMailSenderService implements MailSenderService {
     }
 
     @Override
-    public void sendMail(NotificationMail mail, Session session, CalendarUser principal) throws OXException {
+    public void sendMail(NotificationMail mail, Session session, CalendarUser principal, String comment) throws OXException {
         if (!mail.shouldBeSent()) {
             return;
         }
@@ -366,14 +367,12 @@ public class DefaultMailSenderService implements MailSenderService {
         Event event = mail.getMessage().getEvent();
         if (null != event) {
             ITipMethod iTipMethod = mail.getMessage().getMethod();
-            if (null != iTipMethod && ITipMethod.REPLY.equals(iTipMethod) && Strings.isNotEmpty(mail.getMessage().getEvent().getAttendees().get(0).getComment())) {
+            String comment = mail.getMessage().getEvent().getAttendees().get(0).getComment();
+            if (null != iTipMethod && ITipMethod.REPLY.equals(iTipMethod) && Strings.isNotEmpty(comment)) {
                 // Add attendee comment as event comment
-                ExtendedProperties props = event.getExtendedProperties();
-                if (null == props) {
-                    props = new ExtendedProperties();
-                }
-                props.add(new ExtendedProperty(COMMENT, mail.getMessage().getEvent().getAttendees().get(0).getComment()));
-                event.setExtendedProperties(props);
+                addComment(event, comment);
+            } else if (iTipMethod != null && EnumSet.of(ITipMethod.REQUEST, ITipMethod.CANCEL).contains(iTipMethod) && Strings.isNotEmpty(mail.getMessage().getComment())) {
+                addComment(event, mail.getMessage().getComment());
             }
             export.add(event);
         }
@@ -396,6 +395,15 @@ public class DefaultMailSenderService implements MailSenderService {
             icalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, isAscii(icalFile) ? "7bit" : "quoted-printable");
         }
         return icalPart;
+    }
+
+    private void addComment(Event event, String comment) {
+        ExtendedProperties props = event.getExtendedProperties();
+        if (null == props) {
+            props = new ExtendedProperties();
+        }
+        props.add(new ExtendedProperty(COMMENT, comment));
+        event.setExtendedProperties(props);
     }
 
     private BodyPart generateIcalPart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException {

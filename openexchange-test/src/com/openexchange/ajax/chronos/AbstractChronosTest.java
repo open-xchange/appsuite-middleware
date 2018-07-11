@@ -64,12 +64,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
+import com.openexchange.testing.httpclient.models.DeleteBody;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
+import com.openexchange.testing.httpclient.models.UpdateBody;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 
@@ -136,7 +139,9 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         Exception exception = null;
         try {
             if (eventIds != null) {
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<>(eventIds), null, null, false, false, null);
+                DeleteBody body = new DeleteBody();
+                body.setEvents(new ArrayList<>(eventIds));
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE);
             }
         } catch (Exception e) {
             exception = e;
@@ -147,7 +152,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
         try {
             if (folderToDelete != null) {
-                defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", System.currentTimeMillis(), "event", true, false, false);
+                defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE);
             }
         } catch (Exception e) {
             exception = e;
@@ -316,7 +321,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
                 return folderName.get(0).toString();
             }
         }
-        throw new Exception("Unable to find default "+module+" folder!");
+        throw new Exception("Unable to find default " + module + " folder!");
     }
 
     /**
@@ -382,4 +387,15 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         return data;
     }
 
+    /**
+     * Generates an {@link UpdateBody}.
+     * 
+     * @param eventData The {@link EventData} to update
+     * @return An {@link UpdateBody}.
+     */
+    protected UpdateBody getUpdateBody(EventData eventData) {
+        UpdateBody body = new UpdateBody();
+        body.setEvent(eventData);
+        return body;
+    }
 }

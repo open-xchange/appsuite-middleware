@@ -73,7 +73,7 @@ public class PoolingMailSenderService implements MailSenderService {
     }
 
     @Override
-    public void sendMail(NotificationMail mail, Session session, CalendarUser principal) throws OXException {
+    public void sendMail(NotificationMail mail, Session session, CalendarUser principal, String comment) throws OXException {
         if (!mail.shouldBeSent()) {
             return;
         }
@@ -82,7 +82,7 @@ public class PoolingMailSenderService implements MailSenderService {
             // Dump messages if the appointment is deleted
             if (isDeleteMail(mail)) {
                 pool.drop(mail.getEvent(), session);
-                delegate.sendMail(mail, session, principal);
+                delegate.sendMail(mail, session, principal, comment);
                 return;
             }
 
@@ -97,7 +97,7 @@ public class PoolingMailSenderService implements MailSenderService {
                 if (mail.getSharedCalendarOwner() != null) {
                     sharedFolderOwner = mail.getSharedCalendarOwner().getIdentifier();
                 }
-                pool.enqueue(mail.getOriginal(), mail.getEvent(), session, sharedFolderOwner, principal);
+                pool.enqueue(mail.getOriginal(), mail.getEvent(), session, sharedFolderOwner, principal, comment);
                 return;
             }
 
@@ -108,10 +108,10 @@ public class PoolingMailSenderService implements MailSenderService {
                     app = mail.getEvent();
                 }
                 pool.fasttrack(app, session);
-                delegate.sendMail(mail, session, principal);
+                delegate.sendMail(mail, session, principal, comment);
                 return;
             }
-            poolAwareDirectSend(mail, session, principal);
+            poolAwareDirectSend(mail, session, principal, comment);
             //delegate.sendMail(mail, session);
 
         } catch (OXException x) {
@@ -126,9 +126,9 @@ public class PoolingMailSenderService implements MailSenderService {
      * @param session The {@link Session}
      * @throws OXException In case sending fails
      */
-    private void poolAwareDirectSend(NotificationMail mail, Session session, CalendarUser principal) throws OXException {
+    private void poolAwareDirectSend(NotificationMail mail, Session session, CalendarUser principal, String comment) throws OXException {
         pool.aware(mail.getEvent(), mail.getRecipient(), session);
-        delegate.sendMail(mail, session, principal);
+        delegate.sendMail(mail, session, principal, comment);
     }
 
     private boolean isStateChange(NotificationMail mail) {

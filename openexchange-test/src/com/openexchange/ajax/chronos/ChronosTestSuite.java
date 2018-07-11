@@ -81,7 +81,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ICalImportAccessTest.class,
     ChronosBugsTestSuite.class,
     ITipTestSuite.class,
-    BirthdayCalendarExportTest.class
+    BirthdayCalendarExportTest.class,
+    BasicCommentTest.class
     // @formatter:on
 
 })

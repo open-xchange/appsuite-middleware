@@ -68,6 +68,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.tools.HTMLUtils;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -234,6 +235,16 @@ public class LabelHelper {
             return "";
         }
         return delegationState.getUpdateIntroduction();
+    }
+    
+    public String getComment() {
+        if (mail.getActor().isVirtual()) {
+            return "";
+        }
+        if (mail.getMessage() == null || Strings.isEmpty(mail.getMessage().getComment())) {
+            return "";
+        }
+        return new Sentence(Messages.COMMENT_INTRO).add(mail.getMessage().getComment(), ArgumentType.ITALIC).getMessage(wrapper, locale);
     }
 
     public String getDirectLink() {

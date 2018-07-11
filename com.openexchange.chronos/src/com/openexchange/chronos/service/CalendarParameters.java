@@ -274,6 +274,14 @@ public interface CalendarParameters {
     static final String PARAMETER_SUPPRESS_ITIP = "itip.suppress";
 
     /**
+     * {@link String}
+     * <p/>
+     * A comment set by the user when updating/deleting events.
+     * <p/>
+     */
+    static final String PARAMETER_COMMENT = "comment";
+
+    /**
      * Sets a parameter.
      *
      * @param parameter The parameter name to set
