@@ -57,8 +57,18 @@ package com.openexchange.drive.events;
  */
 public interface DriveEventPublisher {
 
+    /**
+     * Publishes a drive event.
+     * 
+     * @param event The drive event to publish
+     */
     void publish(DriveEvent event);
 
+    /**
+     * Gets a value indicating whether the publisher only handles node-local events or not.
+     * 
+     * @return <code>true</code> if the publisher operates local only, <code>false</code>, otherwise
+     */
     boolean isLocalOnly();
 
 }
