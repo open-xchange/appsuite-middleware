@@ -380,7 +380,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         add_config(OPT_CONFIG_LONG, false),
         remove_config(OPT_REMOVE_CONFIG_LONG, false),
         primary_account_name(OPT_PRIMARY_ACCOUNT_NAME, false),
-        remote_content_allowed(OPT_REMOTE_CONTENT_ALLOWED, false),
+        load_remote_mail_content_by_default(OPT_LOAD_REMOTE_MAIL_CONTENT_BY_DEFAULT, false),
         ;
 
         private final String string;
@@ -486,7 +486,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_PUBLIC_FOLDER_EDITABLE = "access-public-folder-editable";
     protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
     protected static final String OPT_CSV_IMPORT = "csv-import";
-    protected static final String OPT_REMOTE_CONTENT_ALLOWED = "remote-content-allowed";
+    protected static final String OPT_LOAD_REMOTE_MAIL_CONTENT_BY_DEFAULT = "load-remote-mail-content-by-default";
 
     // extended options
     protected static final String OPT_EMAIL1_LONG = "email1";
@@ -796,7 +796,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption titleOption;
     private CLIOption positionOption;
     private CLIOption primaryAccountNameOption;
-    private CLIOption remoteContentAllowed;
+    private CLIOption loadRemoteMailContentByDefault;
 
     protected HashMap<String, CSVConstants> constantsMap;
 
@@ -1839,11 +1839,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 user.setPrimaryAccountName(value);
             }
         });
-        setValue(nextLine, idarray, Constants.remote_content_allowed, new MethodStringClosure() {
+        setValue(nextLine, idarray, Constants.load_remote_mail_content_by_default, new MethodStringClosure() {
 
             @Override
             public void callMethod(final String value) {
-                user.setRemoteContentAllowed(Boolean.valueOf(stringToBool(value)));
+                user.setLoadRemoteMailContentByDefault(Boolean.valueOf(stringToBool(value)));
             }
         });
         final int m2 = idarray[Constants.MAILALIAS.getIndex()];
@@ -2645,7 +2645,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.primaryAccountNameOption = setLongOpt(parser, OPT_PRIMARY_ACCOUNT_NAME, "The name of the primary mail account.", true, false, true);
         setGui_Spam_option(parser);
         setModuleAccessOptions(parser);
-        setRemoteContentAllowed(parser);
+        setLoadRemoteMailContentByDefault(parser);
     }
 
     protected final void setPrimaryAccountOption(AdminParser parser) {
@@ -2656,8 +2656,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.spamFilterOption = setSettableBooleanLongOpt(admp, OPT_GUI_LONG, "true / false", "GUI_Spam_filter_capabilities_enabled", true, false, true);
     }
 
-    protected final void setRemoteContentAllowed(final AdminParser parser) {
-        this.remoteContentAllowed = setSettableBooleanLongOpt(parser, OPT_REMOTE_CONTENT_ALLOWED, "true / false", "The value indicating if remote content in HTML mails will be loaded or not", true, false, true);
+    protected final void setLoadRemoteMailContentByDefault(final AdminParser parser) {
+        this.loadRemoteMailContentByDefault = setSettableBooleanLongOpt(parser, OPT_LOAD_REMOTE_MAIL_CONTENT_BY_DEFAULT, "true / false", "The value indicating if remote content in HTML mails will be loaded or not", true, false, true);
     }
 
     protected final void setCsvImport(final AdminParser admp) {
@@ -2712,9 +2712,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
         {
-            Boolean remoteContentAllowed = (Boolean) parser.getOptionValue(this.remoteContentAllowed);
-            if (null != remoteContentAllowed) {
-                usr.setRemoteContentAllowed(remoteContentAllowed);
+            Boolean loadRemoteMailContentByDefault = (Boolean) parser.getOptionValue(this.loadRemoteMailContentByDefault);
+            if (null != loadRemoteMailContentByDefault) {
+                usr.setLoadRemoteMailContentByDefault(loadRemoteMailContentByDefault);
             }
         }
         {

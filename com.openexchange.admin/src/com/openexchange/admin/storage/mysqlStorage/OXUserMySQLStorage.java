@@ -1256,7 +1256,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     flags |= UserSettingMail.INT_SPAM_ENABLED;
                 }
 
-                flags = checkHTMLMailAllowed(flags, usrdata.isRemoteContentAllowed(), contextId);
+                flags = checkHTMLMailAllowed(flags, usrdata.isLoadRemoteMailContentByDefault(), contextId);
 
                 /*-
                  * Apply other default values
@@ -1348,7 +1348,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     /**
      * Check if HTML content is allowed to be displayed by default.
      * Follow the scheme:
-     * 1) passed value for {@link User#isRemoteContentAllowed()} (introduced with MW-988)
+     * 1) passed value for {@link User#isLoadRemoteMailContentByDefault()} (introduced with MW-988)
      * 2) passed value for MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT
      * 3) value for new parameter from config cascade
      * 4) false as fallback
@@ -1358,15 +1358,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * @param contextId The ID of the context, the user gets created in
      * @return The flag bitmap
      */
-    private int checkHTMLMailAllowed(int flags, Boolean isRemoteContentAllowed, int contextId) {
+    private int checkHTMLMailAllowed(int flags, Boolean isLoadRemoteMailContentByDefault, int contextId) {
         Boolean isAllowed = null;
 
-        if (null != isRemoteContentAllowed) {
-            isAllowed = isRemoteContentAllowed;
+        if (null != isLoadRemoteMailContentByDefault) {
+            isAllowed = isLoadRemoteMailContentByDefault;
         } else if (Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim())) {
             isAllowed = Boolean.TRUE;
         } else {
-            isAllowed = getConfigViewValue(0, contextId, "com.openexchange.mail.isRemoteContentAllowed", null);
+            isAllowed = getConfigViewValue(0, contextId, "com.openexchange.mail.remoteContentPerDefault", null);
         }
         if (null != isAllowed && isAllowed.booleanValue()) {
             flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
@@ -2080,9 +2080,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         newuser.setGui_spam_filter_enabled(Boolean.FALSE);
                     }
                     if ((bits & UserSettingMail.INT_ALLOW_HTML_IMAGES) == UserSettingMail.INT_ALLOW_HTML_IMAGES) {
-                        newuser.setRemoteContentAllowed(Boolean.TRUE);
+                        newuser.setLoadRemoteMailContentByDefault(Boolean.TRUE);
                     } else {
-                        newuser.setRemoteContentAllowed(Boolean.FALSE);
+                        newuser.setLoadRemoteMailContentByDefault(Boolean.FALSE);
                     }
                     newuser.setDefaultSenderAddress(rs.getString("send_addr"));
                     newuser.setUploadFileSizeLimit(Integer.valueOf(rs.getInt("upload_quota")));

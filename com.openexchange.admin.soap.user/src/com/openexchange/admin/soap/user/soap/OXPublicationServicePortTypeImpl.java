@@ -852,9 +852,9 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
             user.setConvertDriveUserFolders(tmp_bool.booleanValue());
         }
 
-        tmp_bool = soapUser.isRemoteContentAllowed();
+        tmp_bool = soapUser.isLoadRemoteMailContentByDefault();
         if (tmp_bool != null) {
-            user.setRemoteContentAllowed(tmp_bool);
+            user.setLoadRemoteMailContentByDefault(tmp_bool);
         }
 
         SOAPStringMapMap userAttributes = soapUser.getUserAttributes();
@@ -1023,7 +1023,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapUser.setUserfield19(user.getUserfield19());
         soapUser.setUserfield20(user.getUserfield20());
         soapUser.setConvertDriveUserFolders(Boolean.valueOf(user.isConvertDriveUserFolders()));
-        soapUser.setRemoteContentAllowed(user.isRemoteContentAllowed());
+        soapUser.setLoadRemoteMailContentByDefault(user.isLoadRemoteMailContentByDefault());
         return soapUser;
     }
 

@@ -594,7 +594,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean convertDriveUserFolders = false;
 
-    private Boolean remoteContentAllowed = null;
+    private Boolean loadRemoteMailContentByDefault = null;
 
     /**
      * Instantiates a new empty user object
@@ -4273,20 +4273,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return convertDriveUserFolders;
     }
 
-    public void setRemoteContentAllowed(Boolean remoteContentnAllowed) {
-        this.remoteContentAllowed = remoteContentnAllowed;
+    public void setLoadRemoteMailContentByDefault(Boolean loadRemoteMailContentByDefault) {
+        this.loadRemoteMailContentByDefault = loadRemoteMailContentByDefault;
     }
 
     /**
-     * Indicates whether the loading of content from remote servers is allowed when displaying HTML mails
+     * Indicates whether the loading of content from remote servers is allowed per default when displaying HTML mails
      * 
      * @return A {@link Boolean}. The boolean is
-     *         <code>true</code> if loading of content from remote servers is allowed when displaying HTML mails
-     *         <code>false</code> if loading of content from remote servers isn't allowed when displaying HTML mails
+     *         <code>true</code> if loading of content from remote servers is allowed per default when displaying HTML mails
+     *         <code>false</code> if loading of content from remote servers isn't allowed per default when displaying HTML mails
      *         <code>null</code> if not set
      */
-    public Boolean isRemoteContentAllowed() {
-        return remoteContentAllowed;
+    public Boolean isLoadRemoteMailContentByDefault() {
+        return loadRemoteMailContentByDefault;
     }
 
     @Override
@@ -4461,7 +4461,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.guiPreferences = null;
         this.userAttributes = new HashMap<String, Map<String, String>>();
         this.primaryAccountName = null;
-        this.remoteContentAllowed = null;
+        this.loadRemoteMailContentByDefault = null;
     }
 
     /**
@@ -5132,7 +5132,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + ((primaryAccountName == null) ? 0 : primaryAccountName.hashCode());
         result = prime * result + (primaryAccountNameSet ? 1231 : 1237);
         result = prime * result + (convertDriveUserFolders ? 1231 : 1237);
-        result = prime * result + (remoteContentAllowed == null ? 0 : remoteContentAllowed.hashCode());
+        result = prime * result + (loadRemoteMailContentByDefault == null ? 0 : loadRemoteMailContentByDefault.hashCode());
         return result;
     }
 
@@ -6335,11 +6335,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (convertDriveUserFolders != other.convertDriveUserFolders) {
             return false;
         }
-        if (remoteContentAllowed == null) {
-            if (other.remoteContentAllowed != null) {
+        if (loadRemoteMailContentByDefault == null) {
+            if (other.loadRemoteMailContentByDefault != null) {
                 return false;
             }
-        } else if (!remoteContentAllowed.equals(other.remoteContentAllowed)) {
+        } else if (!loadRemoteMailContentByDefault.equals(other.loadRemoteMailContentByDefault)) {
             return false;
         }
         return true;
