@@ -53,11 +53,13 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -110,8 +112,15 @@ public class Activator extends HousekeepingActivator{
         if(calUtil==null) {
             throw ServiceExceptionCode.absentService(CalendarUtilities.class);
         }
-        MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, 60, Calendar.MINUTE);
-        scheduleAtFixedRate = timerService.scheduleAtFixedRate(worker, 0, 1, TimeUnit.MINUTES);
+        MailAlarmNotificationService mailService = new MailAlarmNotificationService() {
+
+            @Override
+            public void send(Event event, int contextId, int... userIds) throws OXException {
+                // dummy impl
+            }
+        }; //TODO use proper service
+        MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailService, 10, Calendar.MINUTE);
+        scheduleAtFixedRate = timerService.scheduleAtFixedRate(worker, 0, 10, TimeUnit.MINUTES);
         registerService(CalendarHandler.class, new MailAlarmCalendarHandler(worker));
     }
 

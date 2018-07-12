@@ -57,7 +57,6 @@ import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.UpdateResult;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link MailAlarmCalendarHandler}
@@ -92,11 +91,7 @@ public class MailAlarmCalendarHandler implements CalendarHandler {
             eventsToCheck.add(createResult.getCreatedEvent());
         }
 
-        try {
-            worker.checkEvents(eventsToCheck, event.getContextId(), event.getAccountId());
-        } catch (OXException e) {
-            // TODO handle error
-        }
+        worker.checkEvents(eventsToCheck, event.getContextId(), event.getAccountId());
     }
 
 }
