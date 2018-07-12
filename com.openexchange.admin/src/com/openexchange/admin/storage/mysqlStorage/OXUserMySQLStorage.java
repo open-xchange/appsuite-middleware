@@ -1256,7 +1256,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     flags |= UserSettingMail.INT_SPAM_ENABLED;
                 }
 
-                flags = checkHTMLMailAllowed(flags, usrdata, userId, contextId);
+                flags = checkHTMLMailAllowed(flags, usrdata.isRemoteContentAllowed(), contextId);
 
                 /*-
                  * Apply other default values
@@ -1355,15 +1355,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * 
      * @param flags The flag bitmap
      * @param usrdata The user data
-     * @param userId The ID of the user to be created
      * @param contextId The ID of the context, the user gets created in
      * @return The flag bitmap
      */
-    private int checkHTMLMailAllowed(int flags, User usrdata, int userId, int contextId) {
+    private int checkHTMLMailAllowed(int flags, Boolean isRemoteContentAllowed, int contextId) {
         Boolean isAllowed = null;
 
-        if (null != usrdata.isRemoteContentAllowed()) {
-            isAllowed = usrdata.isRemoteContentAllowed();
+        if (null != isRemoteContentAllowed) {
+            isAllowed = isRemoteContentAllowed;
         } else if (Boolean.parseBoolean(prop.getUserProp("MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT", "true").trim())) {
             isAllowed = Boolean.TRUE;
         } else {
