@@ -1348,13 +1348,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     /**
      * Check if HTML content is allowed to be displayed by default.
      * Follow the scheme:
-     * 1) passed value for {@link User#isLoadRemoteMailContentByDefault()} (introduced with MW-988)
-     * 2) passed value for MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT
-     * 3) value for new parameter from config cascade
-     * 4) false as fallback
+     * <p>
+     * 1) passed value for {@link User#isLoadRemoteMailContentByDefault()} (introduced with MW-988)<br>
+     * 2) passed value for MAIL_ALLOW_HTML_CONTENT_BY_DEFAULT<br>
+     * 3) value for <strong>com.openexchange.mail.remoteContentPerDefault</strong> from config cascade<br>
+     * 4) false as fallback<br>
      * 
      * @param flags The flag bitmap
-     * @param usrdata The user data
+     * @param isLoadRemoteMailContentByDefault {@link Boolean} if remote HTML loading in mails is allowed per default
      * @param contextId The ID of the context, the user gets created in
      * @return The flag bitmap
      */
