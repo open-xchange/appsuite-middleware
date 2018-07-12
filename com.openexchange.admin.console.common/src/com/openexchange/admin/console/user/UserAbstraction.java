@@ -2712,7 +2712,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
         {
-            Boolean remoteContentAllowed = (Boolean) parser.getOptionValue(this.spamFilterOption);
+            Boolean remoteContentAllowed = (Boolean) parser.getOptionValue(this.remoteContentAllowed);
             if (null != remoteContentAllowed) {
                 usr.setRemoteContentAllowed(remoteContentAllowed);
             }
