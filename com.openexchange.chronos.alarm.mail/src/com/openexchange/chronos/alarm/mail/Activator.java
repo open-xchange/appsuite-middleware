@@ -49,11 +49,12 @@
 
 package com.openexchange.chronos.alarm.mail;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +83,7 @@ public class Activator extends HousekeepingActivator{
 
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-    private final List<ScheduledTimerTask> scheduleAtFixedRate = new ArrayList<>();
+    private final Map<ScheduledTimerTask, MailAlarmDeliveryWorker> scheduledTasks = new ConcurrentHashMap<>();
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -133,7 +134,15 @@ public class Activator extends HousekeepingActivator{
         }; //TODO use proper service
 
         int period = leanConfig.getIntProperty(MailAlarmConfig.PERIOD);
+        int lookAhead = leanConfig.getIntProperty(MailAlarmConfig.LOOK_AHEAD);
+        if(lookAhead < period) {
+            LOG.warn("The {} value is smaller than the {} value. Falling back to {}.", MailAlarmConfig.LOOK_AHEAD.getFQPropertyName(), MailAlarmConfig.PERIOD.getFQPropertyName(), period);
+            lookAhead = period;
+        }
+        int initialDelay = leanConfig.getIntProperty(MailAlarmConfig.INITIAL_DELAY);
+
         int workerCount = leanConfig.getIntProperty(MailAlarmConfig.WORKER_COUNT);
+        int mailShift = Math.abs(leanConfig.getIntProperty(MailAlarmConfig.MAIL_SHIFT));
         if(workerCount <= 0) {
             workerCount = 1;
         }
@@ -142,8 +151,9 @@ public class Activator extends HousekeepingActivator{
         }
         boolean registeredCalendarHandler = false;
         for(int x=0; x<workerCount; x++) {
-            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailService, period, Calendar.MINUTE);
-            scheduleAtFixedRate.add(timerService.scheduleAtFixedRate(worker, 0, 10, TimeUnit.MINUTES));
+            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailService, lookAhead, Calendar.MINUTE, mailShift);
+            ScheduledTimerTask scheduledTimerTask = timerService.scheduleAtFixedRate(worker, initialDelay, period, TimeUnit.MINUTES);
+            scheduledTasks.put(scheduledTimerTask, worker);
             if(!registeredCalendarHandler) {
                 // only register a calendar handler for the first worker
                 registerService(CalendarHandler.class, new MailAlarmCalendarHandler(worker));
@@ -154,11 +164,10 @@ public class Activator extends HousekeepingActivator{
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        for(ScheduledTimerTask task: scheduleAtFixedRate) {
-            task.cancel(true);
+        for(Entry<ScheduledTimerTask, MailAlarmDeliveryWorker> entry: scheduledTasks.entrySet()) {
+            entry.getValue().cancel();
+            entry.getKey().cancel(true);
         }
     }
-
-
 
 }

@@ -61,9 +61,26 @@ import com.openexchange.config.lean.Property;
 public class MailAlarmConfig {
 
     /**
-     * Defines the period of the mail delivery worker in minutes
+     * Defines the time in minutes between executions of the mail delivery worker.
      */
-    public static final Property PERIOD = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.period", 10);
+    public static final Property PERIOD = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.period", 60);
+
+    /**
+     * Defines the initial delay after which the mail delivery worker runs for the first time.
+     */
+    public static final Property INITIAL_DELAY = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.initialDelay", 10);
+
+    /**
+     * Defines the time in minutes the delivery worker looks ahead to pick up mail alarms. Must not be smaller than {@link #PERIOD}.
+     */
+    public static final Property LOOK_AHEAD = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.lookAhead", 65);
+
+    /**
+     * Defines the time in milliseconds an alarm mail should be send out before the trigger time.
+     * With this property the admin can configure the average time needed by the mail system to send out the mail.
+     * This way the mail should usually be send out on time and not a few seconds late.
+     */
+    public static final Property MAIL_SHIFT = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.time.shift", 0);
 
     /**
      * Defines the amount of mail delivery worker
