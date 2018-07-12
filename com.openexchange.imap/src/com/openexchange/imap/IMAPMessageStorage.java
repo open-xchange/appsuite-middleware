@@ -749,10 +749,25 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          * Check for field FULL
          */
         if (fieldSet.contains(MailField.FULL) || fieldSet.contains(MailField.BODY)) {
+            /*
+             * Determine number of unread messages for that folder ina dvance
+             */
+            int numUnreadMessages;
+            try {
+                numUnreadMessages = IMAPCommandsCollection.getUnread(imapFolder);
+            } catch (MessagingException e) {
+                if (ImapUtility.isInvalidMessageset(e)) {
+                    return new MailMessage[0];
+                }
+                throw handleMessagingException(fullName, e);
+            }
+            /*
+             * Query messages
+             */
             final MailMessage[] mails = new MailMessage[uids.length];
             for (int j = 0; j < mails.length; j++) {
                 try {
-                    mails[j] = getMessageLong(fullName, uids[j], false);
+                    mails[j] = getMessageLongInternal(fullName, uids[j], false, numUnreadMessages);
                 } catch (final OXException e) {
                     e.setCategory(Category.CATEGORY_WARNING);
                     imapAccess.addWarnings(Collections.singletonList(e));
@@ -1502,6 +1517,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public MailMessage getMessageLong(final String fullName, final long msgUID, final boolean markSeen) throws OXException {
+        return getMessageLongInternal(fullName, msgUID, markSeen, -1);
+    }
+
+    private MailMessage getMessageLongInternal(String fullName, long msgUID, boolean markSeen, int numUnreadMessages) throws OXException {
         if (msgUID < 0) {
             return null;
         }
@@ -1617,7 +1636,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     mail.setOriginalFolder(new FullnameArgument(accountId, origFolder));
                 }
                 mail.setMailId(Long.toString(msgUID));
-                mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
+                mail.setUnreadMessages(numUnreadMessages >= 0 ? numUnreadMessages : IMAPCommandsCollection.getUnread(imapFolder));
             } catch (final OXException e) {
                 if (MimeMailExceptionCode.MESSAGE_REMOVED.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.equals(e)) {
                     /*
