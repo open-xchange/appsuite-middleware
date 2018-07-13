@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.mail.osgi;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -58,20 +58,29 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.Event;
+import com.openexchange.chronos.alarm.mail.AddProcessedColumnUpdateTask;
+import com.openexchange.chronos.alarm.mail.MailAlarmCalendarHandler;
+import com.openexchange.chronos.alarm.mail.MailAlarmConfig;
+import com.openexchange.chronos.alarm.mail.MailAlarmDeliveryWorker;
+import com.openexchange.chronos.alarm.mail.MailAlarmNotificationService;
+import com.openexchange.chronos.alarm.mail.impl.MailAlarmNotificationServiceImpl;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.osgi.Tools;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link Activator}
@@ -79,7 +88,7 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class Activator extends HousekeepingActivator{
+public class Activator extends HousekeepingActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
@@ -87,74 +96,54 @@ public class Activator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class, LeanConfigurationService.class};
+        return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class, 
+            LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class, 
+            ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         final AddProcessedColumnUpdateTask task = new AddProcessedColumnUpdateTask();
         registerService(UpdateTaskProviderService.class.getName(), new UpdateTaskProviderService() {
+
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
                 return Arrays.asList(((UpdateTaskV2) task));
             }
         });
 
-        TimerService timerService = getService(TimerService.class);
-        if(timerService==null) {
-            throw ServiceExceptionCode.absentService(TimerService.class);
-        }
-        DatabaseService dbService = getService(DatabaseService.class);
-        if(dbService==null) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
-        }
-        CalendarStorageFactory calendarStorageFactory = getService(CalendarStorageFactory.class);
-        if(calendarStorageFactory==null) {
-            throw ServiceExceptionCode.absentService(CalendarStorageFactory.class);
-        }
-        ContextService ctxService = getService(ContextService.class);
-        if(ctxService==null) {
-            throw ServiceExceptionCode.absentService(ContextService.class);
-        }
-        CalendarUtilities calUtil = getService(CalendarUtilities.class);
-        if(calUtil==null) {
-            throw ServiceExceptionCode.absentService(CalendarUtilities.class);
-        }
-        LeanConfigurationService leanConfig = getService(LeanConfigurationService.class);
-        if(leanConfig==null) {
-            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
-        }
-
-        MailAlarmNotificationService mailService = new MailAlarmNotificationService() {
-
-            @Override
-            public void send(Event event, int contextId, int... userIds) throws OXException {
-                // dummy impl
-            }
-        }; //TODO use proper service
+        TimerService timerService = Tools.requireService(TimerService.class, this);
+        DatabaseService dbService = Tools.requireService(DatabaseService.class, this);
+        CalendarStorageFactory calendarStorageFactory = Tools.requireService(CalendarStorageFactory.class, this);
+        ContextService ctxService = Tools.requireService(ContextService.class, this);
+        CalendarUtilities calUtil = Tools.requireService(CalendarUtilities.class, this);
+        LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, this);
 
         int period = leanConfig.getIntProperty(MailAlarmConfig.PERIOD);
         int lookAhead = leanConfig.getIntProperty(MailAlarmConfig.LOOK_AHEAD);
-        if(lookAhead < period) {
+        if (lookAhead < period) {
             LOG.warn("The {} value is smaller than the {} value. Falling back to {}.", MailAlarmConfig.LOOK_AHEAD.getFQPropertyName(), MailAlarmConfig.PERIOD.getFQPropertyName(), period);
             lookAhead = period;
         }
         int initialDelay = leanConfig.getIntProperty(MailAlarmConfig.INITIAL_DELAY);
         int workerCount = leanConfig.getIntProperty(MailAlarmConfig.WORKER_COUNT);
-        if(workerCount <= 0) {
+        if (workerCount <= 0) {
             workerCount = 1;
         }
         int mailShift = Math.abs(leanConfig.getIntProperty(MailAlarmConfig.MAIL_SHIFT));
         int overdueWaitTime = Math.abs(leanConfig.getIntProperty(MailAlarmConfig.OVERDUE));
-        if(workerCount > 1) {
-            LOG.warn("Using "+workerCount+" mail alarm worker. Increasing the value above 1 should not be used in a production environment and only be used for testing purposes.");
+        if (workerCount > 1) {
+            LOG.warn("Using " + workerCount + " mail alarm worker. Increasing the value above 1 should not be used in a production environment and only be used for testing purposes.");
         }
+
+        MailAlarmNotificationService mailAlarmNotificationService = new MailAlarmNotificationServiceImpl(this);
+
         boolean registeredCalendarHandler = false;
-        for(int x=0; x<workerCount; x++) {
-            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailService, lookAhead, Calendar.MINUTE, mailShift, overdueWaitTime);
+        for (int x = 0; x < workerCount; x++) {
+            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailAlarmNotificationService, lookAhead, Calendar.MINUTE, mailShift, overdueWaitTime);
             ScheduledTimerTask scheduledTimerTask = timerService.scheduleAtFixedRate(worker, initialDelay, period, TimeUnit.MINUTES);
             scheduledTasks.put(scheduledTimerTask, worker);
-            if(!registeredCalendarHandler) {
+            if (!registeredCalendarHandler) {
                 // only register a calendar handler for the first worker
                 registerService(CalendarHandler.class, new MailAlarmCalendarHandler(worker));
             }
@@ -164,10 +153,9 @@ public class Activator extends HousekeepingActivator{
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        for(Entry<ScheduledTimerTask, MailAlarmDeliveryWorker> entry: scheduledTasks.entrySet()) {
+        for (Entry<ScheduledTimerTask, MailAlarmDeliveryWorker> entry : scheduledTasks.entrySet()) {
             entry.getValue().cancel();
             entry.getKey().cancel(true);
         }
     }
-
 }

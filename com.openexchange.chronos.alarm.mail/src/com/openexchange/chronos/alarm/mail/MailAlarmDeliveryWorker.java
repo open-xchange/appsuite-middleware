@@ -88,7 +88,7 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class MailAlarmDeliveryWorker implements Runnable{
+public class MailAlarmDeliveryWorker implements Runnable {
 
     protected static final Logger LOG = LoggerFactory.getLogger(MailAlarmDeliveryWorker.class);
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
@@ -102,9 +102,9 @@ public class MailAlarmDeliveryWorker implements Runnable{
     Map<Key, ScheduledTimerTask> scheduledTasks = new ConcurrentHashMap<>();
     private final CalendarStorageFactory factory;
     private final CalendarUtilities calUtil;
-    private long lastCheck=0;
+    private long lastCheck = 0;
 
-    final MailAlarmNotificationService mailService;
+    private final MailAlarmNotificationService mailAlarmNotificationService;
     private final int mailShift;
     private final int lookAhead;
     private final int overdueWaitTime;
@@ -125,7 +125,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
      * @param lookAhead The time in minutes the worker is looking ahead
      * @throws OXException
      */
-    public MailAlarmDeliveryWorker(CalendarStorageFactory factory, DatabaseService dbservice, ContextService ctxService, CalendarUtilities calUtil, TimerService timerService, MailAlarmNotificationService mailService, int lookAhead, int timeUnit, int mailShift, int overdueWaitTime) throws OXException {
+    public MailAlarmDeliveryWorker(CalendarStorageFactory factory, DatabaseService dbservice, ContextService ctxService, CalendarUtilities calUtil, TimerService timerService, MailAlarmNotificationService mailAlarmNotificationService, int lookAhead, int timeUnit, int mailShift, int overdueWaitTime) throws OXException {
         this.storage = factory.createAdministrative();
         this.dbservice = dbservice;
         this.timeUnit = timeUnit;
@@ -133,7 +133,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
         this.timerService = timerService;
         this.factory = factory;
         this.calUtil = calUtil;
-        this.mailService = mailService;
+        this.mailAlarmNotificationService = mailAlarmNotificationService;
         this.lookAhead = lookAhead;
         this.mailShift = mailShift;
         this.overdueWaitTime = overdueWaitTime;
@@ -150,7 +150,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
             lastCheck = currentUTCTime.getTimeInMillis();
             for (Integer ctxId : ctxIds) {
                 // Test if schema is ready
-                if(!Updater.getInstance().getStatus(ctxId).isExecutedSuccessfully(AddProcessedColumnUpdateTask.class.getName())) {
+                if (!Updater.getInstance().getStatus(ctxId).isExecutedSuccessfully(AddProcessedColumnUpdateTask.class.getName())) {
                     continue;
                 }
 
@@ -158,17 +158,16 @@ public class MailAlarmDeliveryWorker implements Runnable{
                 boolean readOnly = true;
                 try {
                     con.setAutoCommit(false);
-
                     Calendar overdueTime = Calendar.getInstance(UTC);
                     overdueTime.add(Calendar.MINUTE, -Math.abs(overdueWaitTime));
                     List<AlarmTriggerWrapper> lockedTriggers = storage.getAlarmTriggerStorage().getAndLockTriggers(con, until.getTime(), overdueTime.getTime());
-                    if(lockedTriggers.isEmpty()) {
+                    if (lockedTriggers.isEmpty()) {
                         continue;
                     }
 
                     storage.getAlarmTriggerStorage().setProcessingStatus(con, lockedTriggers, currentUTCTime.getTimeInMillis());
                     readOnly = false;
-                    for(AlarmTriggerWrapper trigger: lockedTriggers) {
+                    for (AlarmTriggerWrapper trigger : lockedTriggers) {
 
                         Alarm alarm = storage.getAlarmStorage().getAlarm(con, trigger.getCtx(), trigger.getAccount(), trigger.getAlarmTrigger().getAlarm());
                         Calendar calTriggerTime = Calendar.getInstance(UTC);
@@ -177,7 +176,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
                         Calendar now = Calendar.getInstance(UTC);
 
                         long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - mailShift;
-                        if(delay < 0) {
+                        if (delay < 0) {
                             delay = 0;
                         }
 
@@ -188,7 +187,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
                         LOG.info("Created a new mail alarm task for {}", key);
                     }
                     con.commit();
-                    succesfull=true;
+                    succesfull = true;
                 } catch (SQLException e) {
                     // ignore retry next time
                 } finally {
@@ -223,7 +222,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
 
     public void cancelTask(int cid, int account, String eventId, Alarm alarm) {
         ScheduledTimerTask scheduledTimerTask = scheduledTasks.get(key(cid, account, eventId, alarm.getId()));
-        if(scheduledTimerTask!=null) {
+        if (scheduledTimerTask != null) {
             scheduledTimerTask.cancel();
         }
     }
@@ -232,7 +231,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
         return new Key(cid, account, eventId, alarm);
     }
 
-    private class SingleMailDeliveryTask implements Runnable{
+    private class SingleMailDeliveryTask implements Runnable {
 
         Context ctx;
         private final Alarm alarm;
@@ -263,7 +262,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
                 process(writeCon);
             } catch (OXException | SQLException e) {
                 try {
-                    if(writeCon != null) {
+                    if (writeCon != null) {
                         writeCon.rollback();
                         try {
                             isReadOnly = process(writeCon);
@@ -289,7 +288,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
                         // ignore
                     }
                 }
-                if(isReadOnly) {
+                if (isReadOnly) {
                     dbservice.backWritableAfterReading(ctx, writeCon);
                 } else {
                     dbservice.backWritable(ctx, writeCon);
@@ -302,7 +301,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
             SimpleDBProvider provider = new SimpleDBProvider(writeCon, writeCon);
             CalendarStorage storage = factory.create(ctx, wrapper.getAccount(), optEntityResolver(ctx.getContextId()), provider, DBTransactionPolicy.NO_TRANSACTIONS);
             AlarmTrigger loadedTrigger = storage.getAlarmTriggerStorage().loadTrigger(wrapper.getAlarmTrigger().getAlarm());
-            if(loadedTrigger == null || loadedTrigger.getProcessed() != processed) {
+            if (loadedTrigger == null || loadedTrigger.getProcessed() != processed) {
                 // Abort since the triggers is either gone or picked up by another node (e.g. because of an update)
                 LOG.info("Skipped mail alarm task for {}. Its trigger is not up to date!", key(ctx.getContextId(), wrapper.getAccount(), wrapper.getAlarmTrigger().getEventId(), alarm.getId()));
                 return isReadOnly;
@@ -310,8 +309,8 @@ public class MailAlarmDeliveryWorker implements Runnable{
             Event event = storage.getEventStorage().loadEvent(wrapper.getAlarmTrigger().getEventId(), null);
             storage.getUtilities().loadAdditionalEventData(wrapper.getAlarmTrigger().getUserId(), event, null);
             List<Alarm> alarms = event.getAlarms();
-            for(Alarm tmpAlarm: alarms) {
-                if(tmpAlarm.getId() == alarm.getId()) {
+            for (Alarm tmpAlarm : alarms) {
+                if (tmpAlarm.getId() == alarm.getId()) {
                     tmpAlarm.setAcknowledged(new Date());
                     break;
                 }
@@ -323,10 +322,10 @@ public class MailAlarmDeliveryWorker implements Runnable{
             storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
             writeCon.commit();
             writeCon.setAutoCommit(true);
-            LOG.info("Mail successfully send!");
             try {
-                mailService.send(event, ctx.getContextId(), wrapper.getAlarmTrigger().getUserId());
-            } catch(OXException e) {
+                mailAlarmNotificationService.send(event, ctx.getContextId(), wrapper.getAlarmTrigger().getUserId());
+                LOG.debug("Mail successfully send!");
+            } catch (OXException e) {
                 LOG.warn("Unable to send mail for calendar alarm ({}): {}", key(ctx.getContextId(), wrapper.getAccount(), wrapper.getAlarmTrigger().getEventId(), alarm.getId()), e.getMessage(), e);
             }
             scheduledTasks.remove(key(ctx.getContextId(), wrapper.getAccount(), event.getId(), alarm.getId()));
@@ -357,9 +356,9 @@ public class MailAlarmDeliveryWorker implements Runnable{
      */
     public void cancelAll(String eventId) {
         Iterator<Entry<Key, ScheduledTimerTask>> iterator = scheduledTasks.entrySet().iterator();
-        while(iterator.hasNext()) {
+        while (iterator.hasNext()) {
             Entry<Key, ScheduledTimerTask> next = iterator.next();
-            if(next.getKey().getEventId().equals(eventId)) {
+            if (next.getKey().getEventId().equals(eventId)) {
                 LOG.info("Canceled mail alarm task for {}", next.getKey());
                 next.getValue().cancel();
                 iterator.remove();
@@ -447,7 +446,7 @@ public class MailAlarmDeliveryWorker implements Runnable{
             ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
             scheduledTasks.put(key, timer);
         } catch (OXException e) {
-            if(processingSet) {
+            if (processingSet) {
                 try {
                     // If the error is thrown after the processed value is successfully set then set it back to 0 so the next task can pick it up
                     factory.createAdministrative().getAlarmTriggerStorage().setProcessingStatus(con, Collections.singletonList(wrapper), 0l);

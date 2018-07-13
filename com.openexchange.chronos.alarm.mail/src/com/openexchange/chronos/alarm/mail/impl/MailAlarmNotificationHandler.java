@@ -47,19 +47,50 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.mail.impl;
 
-import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.TransportProviderRegistry;
+import com.openexchange.server.ServiceLookup;
 
-/**
- * {@link MailAlarmNotificationService}
- *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.1
- */
-public interface MailAlarmNotificationService {
 
-    void send(Event event, int contextId, int userId) throws OXException;
+public class MailAlarmNotificationHandler {
 
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link MailAlarmNotificationHandler}.
+     * @throws OXException
+     */
+    public MailAlarmNotificationHandler(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    private TransportProvider getTransportProvider() {
+        return TransportProviderRegistry.getTransportProvider("smtp");
+    }
+
+    private static void sendMail(MailTransport transport, ComposedMailMessage mail) throws OXException {
+        try {
+            transport.sendMailMessage(mail, ComposeType.NEW);
+        } finally {
+            try {
+                transport.close();
+            } catch (OXException e) {
+                // ignore
+            }
+        }
+    }
+
+    public void send(MailAlarmNotification notification) throws OXException {
+        TransportProvider transportProvider = getTransportProvider();
+        ComposedMailMessage mail = MailAlarmMail.init(notification, services).compose();
+
+        sendMail(transportProvider.createNewNoReplyTransport(notification.getContextId(), true), mail);
+    }
 }

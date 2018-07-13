@@ -47,19 +47,90 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.mail.impl;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import com.openexchange.chronos.Event;
-import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link MailAlarmNotificationService}
+ * {@link MailAlarmNotification}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public interface MailAlarmNotificationService {
+public class MailAlarmNotification {
 
-    void send(Event event, int contextId, int userId) throws OXException;
+    private final int contextId;
+    private final User targetUser;
+    private final Event event;
 
+    private MailAlarmNotification(Event event, int contextId, User targetUser) {
+        this.event = event;
+        this.contextId = contextId;
+        this.targetUser = targetUser;
+    }
+
+    /**
+     * Gets the ID of the context where the share is located.
+     *
+     * @return The context ID
+     */
+    public int getContextId() {
+        return this.contextId;
+    }
+
+    /**
+     * Gets the targetUser
+     *
+     * @return The targetUser
+     */
+    public User getTargetUser() {
+        return targetUser;
+    }
+
+    /**
+     * Gets the event
+     *
+     * @return The event
+     */
+    public Event getEvent() {
+        return event;
+    }
+
+    public static MailAlarmNotificationBuilder builder() {
+        return new MailAlarmNotificationBuilder();
+    }
+
+    static class MailAlarmNotificationBuilder {
+
+        private User targetUser;
+        private int contextId;
+        private Event event;
+
+        public MailAlarmNotificationBuilder setEvent(Event event) {
+            this.event = event;
+            return this;
+        }
+
+        public MailAlarmNotificationBuilder setTargetUser(User targetUser) {
+            this.targetUser = targetUser;
+            return this;
+        }
+
+        public MailAlarmNotificationBuilder setContextId(int contextId) {
+            this.contextId = contextId;
+            return this;
+        }
+
+        public MailAlarmNotification build() {
+            checkNotNull(targetUser, "targetUser");
+            checkNotNull(event, "event");
+            checkArgument(contextId > 0, "contextId");
+
+            MailAlarmNotification notification = new MailAlarmNotification(this.event, this.contextId, this.targetUser);
+            return notification;
+        }
+    }
 }

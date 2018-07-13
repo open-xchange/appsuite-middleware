@@ -47,19 +47,19 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.mail.exception;
 
-import com.openexchange.chronos.Event;
-import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MailAlarmNotificationService}
+ * 
+ * {@link MailAlarmExceptionMessages}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public interface MailAlarmNotificationService {
+public class MailAlarmExceptionMessages implements LocalizableStrings {
 
-    void send(Event event, int contextId, int userId) throws OXException;
+    public static final String INVALID_MAIL_ADDRESS_MSG = "\"%1$s\" is not a valid email address.";
 
 }

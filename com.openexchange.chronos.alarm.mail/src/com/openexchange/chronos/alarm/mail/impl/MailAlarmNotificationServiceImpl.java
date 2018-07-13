@@ -47,19 +47,56 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.mail.impl;
 
+import static com.openexchange.osgi.Tools.requireService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.alarm.mail.MailAlarmNotificationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.user.UserService;
 
 /**
- * {@link MailAlarmNotificationService}
+ * {@link MailAlarmNotificationServiceImpl}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public interface MailAlarmNotificationService {
+public class MailAlarmNotificationServiceImpl implements MailAlarmNotificationService {
 
-    void send(Event event, int contextId, int userId) throws OXException;
+    private static final Logger LOG = LoggerFactory.getLogger(MailAlarmNotificationServiceImpl.class.getName());
 
+    private MailAlarmNotificationHandler mailAlarmNotificationHandler;
+
+    private ServiceLookup services;
+
+    public MailAlarmNotificationServiceImpl(ServiceLookup services) {
+        this.services = services;
+        this.mailAlarmNotificationHandler = new MailAlarmNotificationHandler(services);
+    }
+
+    @Override
+    public void send(Event event, int contextId, int userId) throws OXException {
+        if (event == null || contextId < 1 || userId < 1) {
+            LOG.debug("Event is null or contextId/userId invalid. Cannot send alarm notification via mail.");
+            return;
+        }
+
+        ContextService contextService = requireService(ContextService.class, services);
+        Context context = contextService.getContext(contextId);
+        UserService userService = requireService(UserService.class, services);
+        User targetUser = userService.getUser(userId, context);
+
+        MailAlarmNotification notification = buildMailAlarmNotification(event, contextId, targetUser);
+        this.mailAlarmNotificationHandler.send(notification);
+    }
+
+    private MailAlarmNotification buildMailAlarmNotification(Event event, int contextId, User targetUser) {
+        return MailAlarmNotification.builder().setEvent(event).setTargetUser(targetUser).setContextId(contextId).build();
+    }
 }
