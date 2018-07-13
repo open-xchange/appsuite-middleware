@@ -194,6 +194,28 @@ msgstr ""
 msgid "Synchronize your address books and contacts."
 msgstr ""
 
+#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/exception/MailAlarmExceptionMessages.java:63
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
+#: com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:62
+msgid "\"%1$s\" is not a valid email address."
+msgstr ""
+
+#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:63
+msgid "Notification"
+msgstr ""
+
+#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:65
+msgid "When"
+msgstr ""
+
+#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:67
+msgid "Where"
+msgstr ""
+
+#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:69
+msgid "Who"
+msgstr ""
+
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:62
 #: com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:67
 msgid "Conversion failed for property \"%1$s\": %2$s"
@@ -9587,11 +9609,6 @@ msgstr ""
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:68
 msgid "The link \"%1$s\" is invalid."
-msgstr ""
-
-#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
-#: com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:62
-msgid "\"%1$s\" is not a valid email address."
 msgstr ""
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:72
