@@ -72,7 +72,7 @@ public interface AdministrativeAlarmTriggerStorage {
      * @return A list of {@link AlarmTriggerWrapper}s
      * @throws OXException
      */
-    List<AlarmTriggerWrapper> getAndLockTriggers(Connection con, Date until) throws OXException;
+    List<AlarmTriggerWrapper> getAndLockTriggers(Connection con, Date until, Date overdueTime) throws OXException;
 
 
     /**
@@ -87,7 +87,7 @@ public interface AdministrativeAlarmTriggerStorage {
 
 
     /**
-     * Retrieves the given alarm trigger
+     * Retrieves and locks mail alarm triggers for the given event which are not already taken by another worker.
      *
      * @param con The connection to use
      * @param cid The context id
@@ -96,16 +96,18 @@ public interface AdministrativeAlarmTriggerStorage {
      * @return A list of {@link AlarmTriggerWrapper}
      * @throws OXException
      */
-    List<AlarmTriggerWrapper> getAlarmTriggers(Connection con, int cid, int account, String eventId) throws OXException;
+    List<AlarmTriggerWrapper> getAndLockMailAlarmTriggers(Connection con, int cid, int account, String eventId) throws OXException;
 
 
     /**
-     * @param con
-     * @param cid
-     * @param account
-     * @param alarm
-     * @return
+     * Retrieves the {@link AlarmTriggerWrapper}
+     *
+     * @param con The connection to use
+     * @param cid The context id
+     * @param account The calendar account
+     * @param alarm The id of the alarm
+     * @return The {@link AlarmTriggerWrapper}
      * @throws OXException
      */
-    AlarmTriggerWrapper getAlarmTriggers(Connection con, int cid, int account, int alarm) throws OXException;
+    AlarmTriggerWrapper getAlarmTrigger(Connection con, int cid, int account, int alarm) throws OXException;
 }

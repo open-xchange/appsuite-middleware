@@ -140,18 +140,18 @@ public class Activator extends HousekeepingActivator{
             lookAhead = period;
         }
         int initialDelay = leanConfig.getIntProperty(MailAlarmConfig.INITIAL_DELAY);
-
         int workerCount = leanConfig.getIntProperty(MailAlarmConfig.WORKER_COUNT);
-        int mailShift = Math.abs(leanConfig.getIntProperty(MailAlarmConfig.MAIL_SHIFT));
         if(workerCount <= 0) {
             workerCount = 1;
         }
+        int mailShift = Math.abs(leanConfig.getIntProperty(MailAlarmConfig.MAIL_SHIFT));
+        int overdueWaitTime = Math.abs(leanConfig.getIntProperty(MailAlarmConfig.OVERDUE));
         if(workerCount > 1) {
             LOG.warn("Using "+workerCount+" mail alarm worker. Increasing the value above 1 should not be used in a production environment and only be used for testing purposes.");
         }
         boolean registeredCalendarHandler = false;
         for(int x=0; x<workerCount; x++) {
-            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailService, lookAhead, Calendar.MINUTE, mailShift);
+            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailService, lookAhead, Calendar.MINUTE, mailShift, overdueWaitTime);
             ScheduledTimerTask scheduledTimerTask = timerService.scheduleAtFixedRate(worker, initialDelay, period, TimeUnit.MINUTES);
             scheduledTasks.put(scheduledTimerTask, worker);
             if(!registeredCalendarHandler) {

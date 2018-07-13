@@ -76,6 +76,11 @@ public class MailAlarmConfig {
     public static final Property LOOK_AHEAD = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.lookAhead", 65);
 
     /**
+     * Defines the time in minutes that is waited until an alarm that is already in process is picked up. E.g. because the node who originally was going to process the trigger has died.
+     */
+    public static final Property OVERDUE = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.overdueWaitTime", 5);
+
+    /**
      * Defines the time in milliseconds an alarm mail should be send out before the trigger time.
      * With this property the admin can configure the average time needed by the mail system to send out the mail.
      * This way the mail should usually be send out on time and not a few seconds late.
