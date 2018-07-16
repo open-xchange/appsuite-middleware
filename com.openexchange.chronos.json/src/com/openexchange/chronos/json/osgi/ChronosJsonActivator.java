@@ -96,6 +96,7 @@ import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvide
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ChronosJsonActivator}
@@ -108,9 +109,9 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, 
-            CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class, 
-            ContactService.class, ResourceService.class, GroupService.class
+            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class,
+            CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class,
+            ContactService.class, ResourceService.class, GroupService.class, UserService.class
         };
     }
 

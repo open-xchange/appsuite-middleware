@@ -121,6 +121,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                 alarms = Collections.emptyList();
             } else {
                 alarms = parseAlarms(jsonObject.getJSONArray(ALARMS_FIELD), getTimeZone(requestData));
+                alarmChecker.checkAlarmList(calendarAccess.getSession(), null, alarms);
             }
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());

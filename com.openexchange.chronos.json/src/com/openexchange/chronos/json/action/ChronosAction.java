@@ -70,6 +70,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.json.converter.AlarmChecker;
 import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
@@ -103,6 +104,8 @@ public abstract class ChronosAction extends AbstractChronosAction {
 
     protected static final String BODY_PARAM_COMMENT = "comment";
 
+    protected final AlarmChecker alarmChecker;
+
     /**
      * Initializes a new {@link ChronosAction}.
      *
@@ -110,6 +113,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
      */
     protected ChronosAction(ServiceLookup services) {
         super(services);
+        this.alarmChecker = new AlarmChecker(services);
     }
 
     @Override
@@ -230,6 +234,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
         try {
             Event event = EventMapper.getInstance().deserialize(jsonEvent, EventMapper.getInstance().getMappedFields(), getTimeZone(requestData));
             processAttachments(uploads, event);
+            alarmChecker.checkEvent(requestData.getSession(), event);
             return event;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
