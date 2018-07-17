@@ -575,7 +575,7 @@ properties:
       tags: ["Drive", "Push", "Apple"]
     - key: com.openexchange.drive.events.apn2.ios.privatekey
       description: |
-        Specifies the private key used to connect to APNs using provider authentication JSON Web Token (JWT)
+        Specifies the private key file used to connect to APNs using provider authentication JSON Web Token (JWT)
         Required if "com.openexchange.drive.events.apn2.enabled" is "true", "com.openexchange.drive.events.apn2.ios.authtype"
         is "jwt" and the package containing the restricted drive components is not installed.
       defaultValue: 
