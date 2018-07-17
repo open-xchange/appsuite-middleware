@@ -6,9 +6,7 @@ Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.drive.events.apn2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.clevertap.apns,
- com.clevertap.apns.clients,
- com.fasterxml.jackson.core,
+Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.filter,
  com.fasterxml.jackson.core.format,
@@ -48,6 +46,12 @@ Import-Package: com.clevertap.apns,
  com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.timer,
+ com.turo.pushy.apns;version="0.13.3",
+ com.turo.pushy.apns.auth;version="0.13.3",
+ com.turo.pushy.apns.proxy;version="0.13.3",
+ com.turo.pushy.apns.server;version="0.13.3",
+ com.turo.pushy.apns.util;version="0.13.3",
+ com.turo.pushy.apns.util.concurrent;version="0.13.3",
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

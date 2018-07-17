@@ -50,12 +50,14 @@
 package com.openexchange.drive.events.apn2.internal;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import com.clevertap.apns.Notification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.turo.pushy.apns.DeliveryPriority;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 
 
 /**
@@ -64,7 +66,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.1
  */
-public class ApnsHttp2Notification extends Notification {
+public class ApnsHttp2Notification extends SimpleApnsPushNotification {
 
     private static String maptoString(Map<String, Object> root) {
         ObjectMapper mapper = new ObjectMapper();
@@ -97,22 +99,26 @@ public class ApnsHttp2Notification extends Notification {
 
         private final HashMap<String, Object> root, aps, alert;
         private final String token;
-        private String topic = null;
+        private final String topic;
         private String collapseId = null;
-        private long expiration = -1; // defaults to -1, as 0 is a valid value (included only if greater than -1)
-        private Priority priority;
+        private long expiration;
+        private DeliveryPriority priority;
         private UUID uuid;
 
         /**
          * Creates a new notification builder.
          *
          * @param token The device token
+         * @param topic The topic to which this notification should be sent
          */
-        public Builder(String token) {
+        public Builder(String token, String topic) {
             this.token = token;
+            this.topic  = topic;
             root = new HashMap<>();
             aps = new HashMap<>();
             alert = new HashMap<>();
+            priority = DeliveryPriority.IMMEDIATE;
+            expiration = DEFAULT_EXPIRATION_PERIOD_MILLIS;
         }
 
         public Builder withMutableContent(boolean mutable) {
@@ -192,11 +198,6 @@ public class ApnsHttp2Notification extends Notification {
             return this;
         }
 
-        public Builder withTopic(String topic) {
-            this.topic = topic;
-            return this;
-        }
-
         public Builder withCollapseId(String collapseId) {
             this.collapseId = collapseId;
             return this;
@@ -212,7 +213,7 @@ public class ApnsHttp2Notification extends Notification {
             return this;
         }
 
-        public Builder withPriority(Priority priority) {
+        public Builder withPriority(DeliveryPriority priority) {
             this.priority = priority;
             return this;
         }
@@ -225,40 +226,29 @@ public class ApnsHttp2Notification extends Notification {
         public ApnsHttp2Notification build() {
             root.put("aps", aps);
             aps.put("alert", alert);
-            return new ApnsHttp2Notification(root, token, topic, collapseId, expiration, priority, uuid);
+            return new ApnsHttp2Notification(token, topic, root, expiration < 0 ? null : new Date(System.currentTimeMillis() + expiration), priority, collapseId, uuid);
         }
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Initializes a new {@link ApnsHttp2Notification}.
+     * Constructs a new push notification with the given token, topic, payload, delivery expiration time, delivery
+     * priority, "collapse identifier," and unique push notification identifier.
      *
-     * @param root The root map describing the payload
-     * @param token The device token
-     * @param topic The topic to advertise
-     * @param collapseId The optional collapse identifier
-     * @param expiration The optional expiration
-     * @param priority The optional priority
-     * @param uuid The optional UUID
+     * @param token The device token to which this push notification should be delivered; must not be {@code null}
+     * @param topic The topic to which this notification should be sent; must not be {@code null}
+     * @param payload The payload to include in this push notification; must not be {@code null}
+     * @param invalidationTime The time at which Apple's servers should stop trying to deliver this message; if
+     * {@code null}, no delivery attempts beyond the first will be made
+     * @param priority The priority with which this notification should be delivered to the receiving device
+     * @param collapseId The "collapse identifier" for this notification, which allows it to supersede or be superseded
+     * by other notifications with the same collapse identifier
+     * @param apnsId The unique identifier for this notification; may be {@code null}, in which case the APNs server
+     * will assign a unique identifier automatically
      */
-    public ApnsHttp2Notification(Map<String, Object> root, String token) {
-        this(root, token, null, null, -1, null, null);
-    }
-
-    /**
-     * Initializes a new {@link ApnsHttp2Notification}.
-     *
-     * @param root The root map describing the payload
-     * @param token The device token
-     * @param topic The topic to advertise
-     * @param collapseId The optional collapse identifier
-     * @param expiration The optional expiration
-     * @param priority The optional priority
-     * @param uuid The optional UUID
-     */
-    public ApnsHttp2Notification(Map<String, Object> root, String token, String topic, String collapseId, long expiration, Priority priority, UUID uuid) {
-        super(maptoString(root), token, topic, collapseId, expiration, priority, uuid);
+    public ApnsHttp2Notification(String token, String topic, Map<String, Object> payload, Date invalidationTime, DeliveryPriority priority, String collapseId, UUID apnsId) {
+        super(token, topic, maptoString(payload), invalidationTime, priority, collapseId, apnsId);
     }
 
 }

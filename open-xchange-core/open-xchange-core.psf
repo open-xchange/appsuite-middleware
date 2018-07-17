@@ -243,6 +243,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.websockets.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.squareup.okhttp3"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.turo.pushy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,de.l3s.boilerpipe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,documentation-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,documentation-tools"/>

@@ -108,7 +108,7 @@ public class ApnsHttp2Options {
 
     private final AuthType authType;
 
-    private final String privateKey;
+    private final File privateKey;
     private final String keyId;
     private final String teamId;
 
@@ -150,14 +150,14 @@ public class ApnsHttp2Options {
     /**
      * Initializes a new immutable {@link ApnsHttp2Options} instance using a provider JSON Web Token (JWT).
      *
-     * @param privateKey The APNS authentication key; excluding <code>"-----BEGIN PRIVATE KEY-----"</code> and <code>"-----END PRIVATE KEY-----"</code>
+     * @param privateKey The APNS authentication key
      * @param keyId The key identifier obtained from developer account
      * @param teamId The team identifier obtained from developer account
      * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
      * @param bundleIdentifier The bundle identifier of the app
      * @param topic The app's topic, which is typically the bundle ID of the app
      */
-    public ApnsHttp2Options(String privateKey, String keyId, String teamId, boolean production, String topic) {
+    public ApnsHttp2Options(File privateKey, String keyId, String teamId, boolean production, String topic) {
         super();
         authType = AuthType.JWT;
         this.keystore = null;
@@ -224,11 +224,11 @@ public class ApnsHttp2Options {
     }
 
     /**
-     * Gets the APNS auth key; excluding <code>"-----BEGIN PRIVATE KEY-----"</code> and <code>"-----END PRIVATE KEY-----"</code>
+     * Gets the APNS auth key file
      *
-     * @return The APNS auth key
+     * @return The APNS auth key file
      */
-    public String getPrivateKey() {
+    public File getPrivateKey() {
         return privateKey;
     }
 

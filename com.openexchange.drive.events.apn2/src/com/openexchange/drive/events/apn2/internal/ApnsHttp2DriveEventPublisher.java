@@ -52,10 +52,7 @@ package com.openexchange.drive.events.apn2.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import com.clevertap.apns.ApnsClient;
-import com.clevertap.apns.Notification;
-import com.clevertap.apns.NotificationRequestError;
-import com.clevertap.apns.NotificationResponse;
+import java.util.concurrent.ExecutionException;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options;
@@ -63,6 +60,10 @@ import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.turo.pushy.apns.ApnsClient;
+import com.turo.pushy.apns.PushNotificationResponse;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import com.turo.pushy.apns.util.concurrent.PushNotificationFuture;
 
 
 /**
@@ -137,16 +138,25 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
             return;
         }
 
-        // Compile appropriate notifications/payloads for available subscriptions
-        List<NotificationAndSubscription> notifications = getNotifications(event, subscriptions);
-        if (notifications.isEmpty()) {
-            // Nothing to do
+        // Get the APNS HTTP/2 options to use
+        ApnsHttp2Options options;
+        try {
+            options = getOptions();
+        } catch (OXException e) {
+            LoggerHolder.LOG.error("unable to get APNS HTTP/2 options for service {}", getServiceID(), e);
             return;
         }
 
         // Get the APNS HTTP/2 client to use
-        ApnsClient client = getClient();
+        ApnsClient client = getClient(options);
         if (null == client) {
+            // Nothing to do
+            return;
+        }
+
+        // Compile appropriate notifications/payloads for available subscriptions
+        List<NotificationAndSubscription> notifications = getNotifications(event, subscriptions, options);
+        if (notifications.isEmpty()) {
             // Nothing to do
             return;
         }
@@ -154,7 +164,7 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
         // Push the notifications & remember responses
         List<NotificationResponseAndSubscription> responses = new ArrayList<>(notifications.size());
         for (NotificationAndSubscription notification : notifications) {
-            responses.add(new NotificationResponseAndSubscription(client.push(notification.notification), notification.subscription));
+            responses.add(new NotificationResponseAndSubscription(client.sendNotification(notification.notification), notification.subscription));
         }
 
         processNotificationResponses(responses);
@@ -166,33 +176,40 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
         }
 
         for (NotificationResponseAndSubscription notificationResponseAndSubscription : notificationResponses) {
-            NotificationResponse notificationResponse = notificationResponseAndSubscription.notificationResponse;
-            NotificationRequestError error = notificationResponse.getError();
-            if (null == error) {
-                LoggerHolder.LOG.debug("{}", notificationResponse);
-                continue;
-            }
-
+            PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = notificationResponseAndSubscription.sendNotificationFuture;
             Subscription subscription = notificationResponseAndSubscription.subscription;
-            if (NotificationRequestError.DeviceTokenInactiveForTopic == error || NotificationRequestError.InvalidProviderToken == error) {
-                LoggerHolder.LOG.warn("Unsuccessful notification for drive event due to inactive or invalid device token: {}", subscription.getToken());
-                removeSubscription(subscription);
-            } else {
-                LoggerHolder.LOG.warn("Unsuccessful notification for drive event for device token {}: {}", subscription.getToken(), error);
+            try {
+                PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = sendNotificationFuture.get();
+                if (pushNotificationResponse.isAccepted()) {
+                    LoggerHolder.LOG.debug("Push notification accepted by APNs gateway.");
+                } else {
+                    if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
+                        LoggerHolder.LOG.warn("Unsuccessful notification for drive event due to inactive or invalid device token: {}", subscription.getToken());
+                        removeSubscription(subscription);
+                    } else {
+                        LoggerHolder.LOG.warn("Unsuccessful notification for drive event for device token {}: {}", subscription.getToken(), pushNotificationResponse.getRejectionReason());
+                    }
+                }
+            } catch (ExecutionException e) {
+                LoggerHolder.LOG.warn("Failed to send push notification for drive event for device token {}", subscription.getToken(), e.getCause());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LoggerHolder.LOG.warn("Interrupted while sending push notification for drive event for device token {}", subscription.getToken(), e.getCause());
+                return;
             }
         }
     }
 
-    private ApnsClient getClient() {
+    private ApnsClient getClient(ApnsHttp2Options options) {
         try {
-            return ApnsHttp2Utility.getApnsClient(getOptions());
+            return ApnsHttp2Utility.getApnsClient(options);
         } catch (OXException e) {
-            LoggerHolder.LOG.error("unable to create APNS HTTP/s client for service {}", getServiceID(), e);
+            LoggerHolder.LOG.error("unable to create APNS HTTP/2 client for service {}", getServiceID(), e);
         }
         return null;
     }
 
-    private List<NotificationAndSubscription> getNotifications(DriveEvent event, List<Subscription> subscriptions) {
+    private List<NotificationAndSubscription> getNotifications(DriveEvent event, List<Subscription> subscriptions, ApnsHttp2Options options) {
         int size = subscriptions.size();
         if (size <= 0) {
             return Collections.emptyList();
@@ -200,7 +217,7 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
 
         List<NotificationAndSubscription> notifications = new ArrayList<NotificationAndSubscription>(size);
         for (Subscription subscription : subscriptions) {
-            Notification notification = getNotification(event, subscription);
+            SimpleApnsPushNotification notification = getNotification(event, subscription, options);
             if (null != notification) {
                 notifications.add(new NotificationAndSubscription(notification, subscription));
             }
@@ -208,13 +225,13 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
         return notifications;
     }
 
-    private Notification getNotification(DriveEvent event, Subscription subscription) {
+    private SimpleApnsPushNotification getNotification(DriveEvent event, Subscription subscription, ApnsHttp2Options options) {
         String pushTokenReference = event.getPushTokenReference();
         if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
             return null;
         }
 
-        return new ApnsHttp2Notification.Builder(subscription.getToken())
+        return new ApnsHttp2Notification.Builder(subscription.getToken(), options.getTopic())
             .withCustomAlertLocKey("TRIGGER_SYNC")
             .withCustomAlertActionLocKey("OK")
             .withCustomField("root", subscription.getRootFolderID())
@@ -226,10 +243,10 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
 
     private static class NotificationAndSubscription {
 
-        final Notification notification;
+        final SimpleApnsPushNotification notification;
         final Subscription subscription;
 
-        NotificationAndSubscription(Notification notification, Subscription subscription) {
+        NotificationAndSubscription(SimpleApnsPushNotification notification, Subscription subscription) {
             super();
             this.notification = notification;
             this.subscription = subscription;
@@ -238,12 +255,12 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
 
     private static class NotificationResponseAndSubscription {
 
-        final NotificationResponse notificationResponse;
+        final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture;
         final Subscription subscription;
 
-        NotificationResponseAndSubscription(NotificationResponse notificationResponse, Subscription subscription) {
+        NotificationResponseAndSubscription(PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture, Subscription subscription) {
             super();
-            this.notificationResponse = notificationResponse;
+            this.sendNotificationFuture = sendNotificationFuture;
             this.subscription = subscription;
         }
     }

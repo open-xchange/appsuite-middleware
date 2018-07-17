@@ -49,23 +49,19 @@
 
 package com.openexchange.drive.events.apn2.internal;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.clevertap.apns.ApnsClient;
-import com.clevertap.apns.clients.ApnsClientBuilder;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options.AuthType;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
+import com.turo.pushy.apns.ApnsClient;
+import com.turo.pushy.apns.ApnsClientBuilder;
+import com.turo.pushy.apns.auth.ApnsSigningKey;
 
 /**
  * {@link ApnsHttp2Utility} - APNS HTTP/2 utility class.
@@ -112,37 +108,25 @@ public class ApnsHttp2Utility {
      */
     public static ApnsClient createNewApnsClient(ApnsHttp2Options options) throws OXException {
         try {
-            ApnsClientBuilder clientBuilder = new ApnsClientBuilder().inSynchronousMode().withDefaultTopic(options.getTopic());
-            if (options.isProduction()) {
-                clientBuilder.withProductionGateway();
-            }
-
+            ApnsClientBuilder clientBuilder;
             if (AuthType.CERTIFICATE == options.getAuthType()) {
-                FileInputStream cert = new FileInputStream(options.getKeystore());
-                try {
-                    clientBuilder.withCertificate(cert).withPassword(options.getPassword());
-                } finally {
-                    Streams.close(cert);
-                }
+                clientBuilder = new ApnsClientBuilder()
+                    .setApnsServer(options.isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                    .setClientCredentials(options.getKeystore(), options.getPassword());
             } else {
-                clientBuilder.withApnsAuthKey(options.getPrivateKey()).withTeamID(options.getTeamId()).withKeyID(options.getKeyId());
+                clientBuilder = new ApnsClientBuilder()
+                    .setApnsServer(options.isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                    .setSigningKey(ApnsSigningKey.loadFromPkcs8File(options.getPrivateKey(), options.getTeamId(), options.getKeyId()));
             }
-
             return clientBuilder.build();
-        } catch (UnrecoverableKeyException e) {
-            throw DriveExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid APNS HTTP/2 keystore specified for drive events");
-        } catch (KeyManagementException e) {
-            throw DriveExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid APNS HTTP/2 keystore specified for drive events");
         } catch (FileNotFoundException e) {
             throw DriveExceptionCodes.UNEXPECTED_ERROR.create(e, "No such APNS HTTP/2 keystore file for drive events: " + options.getKeystore());
-        } catch (CertificateException e) {
-            throw DriveExceptionCodes.UNEXPECTED_ERROR.create(e, "Any of the certificates in the APNS HTTP/2 keystore for drive events could not be loaded");
         } catch (NoSuchAlgorithmException e) {
             throw DriveExceptionCodes.UNEXPECTED_ERROR.create(e, "The algorithm used to check the integrity of the APNS HTTP/2 keystore for drive events cannot be found");
-        } catch (KeyStoreException e) {
-            throw DriveExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid APNS HTTP/2 keystore specified for drive events");
         } catch (IOException e) {
             throw DriveExceptionCodes.UNEXPECTED_ERROR.create(e, "There is an I/O or format problem with the APNS HTTP/2 keystore data of the keystore for drive events or specified password is invalid");
+        } catch (InvalidKeyException e) {
+            throw DriveExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid APNS HTTP/2 private key specified for drive events");
         }
     }
 
