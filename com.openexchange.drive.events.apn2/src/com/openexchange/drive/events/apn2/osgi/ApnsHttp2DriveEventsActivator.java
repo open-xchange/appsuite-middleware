@@ -155,8 +155,8 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
             boolean production = configService.getBoolProperty(prefix + "production", true);
             apnsHttp2Options = createOptions(keystoreName, password, production, topic);
         } else if (authType == AuthType.JWT) {
-            String privateKey = configService.getProperty(prefix + "privatekey");
-            if (null == privateKey) {
+            String privateKeyFile = configService.getProperty(prefix + "privatekey");
+            if (null == privateKeyFile) {
                 LOG.info("Missing \"privatekey\" APNS HTTP/2 option for drive events. Ignoring APNS HTTP/2 configuration for drive events.");
                 return null;
             }
@@ -178,7 +178,7 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
             }
 
             boolean production = configService.getBoolProperty(prefix + "production", true);
-            apnsHttp2Options = createOptions(privateKey, keyId, teamId, production, topic);
+            apnsHttp2Options = createOptions(privateKeyFile, keyId, teamId, production, topic);
         } else {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "authtype");
         }
@@ -191,18 +191,18 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
         return new ApnsHttp2Options(new File(resourceName), password, production, topic);
     }
 
-    private ApnsHttp2Options createOptions(String privateKey, String keyId, String teamId, boolean production, String topic) throws Exception{
+    private ApnsHttp2Options createOptions(String privateKeyFile, String keyId, String teamId, boolean production, String topic) throws Exception{
         StringBuilder sPrivateKey = null;
         {
             InputStream resourceStream = null;
             BufferedReader reader = null;
             try {
-                resourceStream = new FileInputStream(new File(privateKey));
+                resourceStream = new FileInputStream(new File(privateKeyFile));
                 reader = new BufferedReader(new InputStreamReader(resourceStream, Charsets.ISO_8859_1));
                 sPrivateKey = new StringBuilder(2048);
                 for (String line; (line = reader.readLine()) != null;) {
                     if (!line.startsWith("-----BEGIN") && !line.startsWith("-----END")) {
-                        sPrivateKey.append(line).append('\n');
+                        sPrivateKey.append(line);
                     }
                 }
             } finally {
