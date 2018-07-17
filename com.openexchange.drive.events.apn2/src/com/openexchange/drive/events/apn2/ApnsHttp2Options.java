@@ -50,8 +50,6 @@
 package com.openexchange.drive.events.apn2;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicReference;
-import com.clevertap.apns.ApnsClient;
 import com.openexchange.java.Strings;
 
 /**
@@ -120,8 +118,6 @@ public class ApnsHttp2Options {
     private final boolean production;
     private final String topic;
 
-    private final AtomicReference<ApnsClient> clientReference;
-
     /**
      * Initializes a new immutable {@link ApnsHttp2Options} instance using a provider certificate.
      *
@@ -141,7 +137,6 @@ public class ApnsHttp2Options {
      */
     public ApnsHttp2Options(File keystore, String password, boolean production, String topic) {
         super();
-        clientReference = new AtomicReference<ApnsClient>(null);
         authType = AuthType.CERTIFICATE;
         this.keystore = keystore;
         this.password = password;
@@ -164,7 +159,6 @@ public class ApnsHttp2Options {
      */
     public ApnsHttp2Options(String privateKey, String keyId, String teamId, boolean production, String topic) {
         super();
-        clientReference = new AtomicReference<ApnsClient>(null);
         authType = AuthType.JWT;
         this.keystore = null;
         this.password = null;

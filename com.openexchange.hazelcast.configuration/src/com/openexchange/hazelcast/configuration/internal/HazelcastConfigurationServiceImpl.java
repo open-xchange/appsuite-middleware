@@ -188,6 +188,10 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * General
          */
+        String licenseKey = configService.getProperty("com.openexchange.hazelcast.licenseKey");
+        if (Strings.isNotEmpty(licenseKey)) {
+            config.setLicenseKey(licenseKey);
+        }
         String join = configService.getProperty("com.openexchange.hazelcast.network.join", NETWORK_JOIN_EMPTY);
         String groupName = configService.getProperty("com.openexchange.hazelcast.group.name");
         if (false == Strings.isEmpty(groupName)) {

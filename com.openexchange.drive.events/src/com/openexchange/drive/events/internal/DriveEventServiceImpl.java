@@ -69,6 +69,7 @@ import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.DriveEventService;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageEventHelper;
 import com.openexchange.java.Strings;
@@ -86,7 +87,8 @@ import com.openexchange.timer.TimerService;
  */
 public class DriveEventServiceImpl implements org.osgi.service.event.EventHandler, DriveEventService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveEventServiceImpl.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveEventServiceImpl.class);
 
     private final List<DriveEventPublisher> publishers;
     private final ConcurrentMap<Integer, FolderBuffer> folderBuffers;
@@ -104,7 +106,8 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     public DriveEventServiceImpl() throws OXException {
         super();
         this.publishers = new CopyOnWriteArrayList<DriveEventPublisher>();
-        this.folderBuffers = new ConcurrentHashMap<Integer, FolderBuffer>();
+        final ConcurrentMap<Integer, FolderBuffer> folderBuffers = new ConcurrentHashMap<Integer, FolderBuffer>();
+        this.folderBuffers = folderBuffers;
         this.driveUtility = DriveEventServiceLookup.getService(DriveService.class, true).getUtility();
         ConfigurationService configService = DriveEventServiceLookup.getService(ConfigurationService.class, true);
         this.consolidationTime = configService.getIntProperty("com.openexchange.drive.events.consolidationTime", 1000);
@@ -116,8 +119,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
             @Override
             public void run() {
                 try {
-                    Iterator<FolderBuffer> iterator = folderBuffers.values().iterator();
-                    while (iterator.hasNext()) {
+                    for (Iterator<FolderBuffer> iterator = folderBuffers.values().iterator(); iterator.hasNext();) {
                         FolderBuffer buffer = iterator.next();
                         if (buffer.isReady()) {
                             iterator.remove();
@@ -126,6 +128,9 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                     }
                 } catch (Exception e) {
                     LOG.warn("error publishing drive events.", e);
+                } catch (Throwable t) {
+                    ExceptionUtils.handleThrowable(t);
+                    LOG.warn("error publishing drive events.", t);
                 }
             }
         }, publisherDelay, publisherDelay);
@@ -156,7 +161,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
         }
     }
 
-    private void notifyPublishers(FolderBuffer buffer) {
+    void notifyPublishers(FolderBuffer buffer) {
         if (null != buffer) {
             Set<String> folderIDs = buffer.getFolderIDs();
             if (null != folderIDs && 0 < folderIDs.size()) {

@@ -325,7 +325,7 @@ public class Event2Appointment {
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
         while (iterator.hasNext()) {
             RecurrenceId next = iterator.next();
-            if (next.equals(recurrenceId)) {
+            if (0 == next.compareTo(recurrenceId)) {
                 return iterator.getPosition();
             }
             if (next.getValue().after(recurrenceId.getValue())) {

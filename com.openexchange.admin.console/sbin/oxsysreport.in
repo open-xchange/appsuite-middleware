@@ -98,6 +98,7 @@ PROCS='
     free;
     getmissingservices;
     hostname -f;
+    ip addr show;
     java -version;
     listbundles;
     listconfigdiff;

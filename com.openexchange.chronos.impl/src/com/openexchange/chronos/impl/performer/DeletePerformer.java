@@ -175,16 +175,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              */
             if (isSeriesMaster(originalEvent)) {
                 recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
-                if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
-                    /*
-                     * deletion of existing change exception
-                     */
-                    // deleteException(loadExceptionData(originalEvent.getId(), recurrenceID));
-                    // TODO: not supported in old stack (attempt fails with APP-0011), so throwing exception as expected by test for now
-                    // com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions.testShouldFailIfTryingToCreateADeleteExceptionOnTopOfAChangeException())
-                    throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(
-                        new Exception("Deletion of existing change exception not supported"), recurrenceId, originalEvent.getRecurrenceRule());
-                } else if (null != recurrenceId.getRange()) {
+                if (null != recurrenceId.getRange()) {
                     /*
                      * delete "this and future" recurrences; adjust recurrence rule to have a fixed UNTIL one second or day prior the targeted occurrence
                      */
@@ -217,6 +208,15 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     Event updatedEvent = loadEventData(originalEvent.getId());
                     updateAlarmTrigger(originalEvent, updatedEvent);
                     resultTracker.trackUpdate(originalEvent, updatedEvent);
+                } else if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
+                    /*
+                     * deletion of existing change exception
+                     */
+                    // deleteException(loadExceptionData(originalEvent.getId(), recurrenceID));
+                    // TODO: not supported in old stack (attempt fails with APP-0011), so throwing exception as expected by test for now
+                    // com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions.testShouldFailIfTryingToCreateADeleteExceptionOnTopOfAChangeException())
+                    throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(
+                        new Exception("Deletion of existing change exception not supported"), recurrenceId, originalEvent.getRecurrenceRule());
                 } else {
                     /*
                      * creation of new delete exception

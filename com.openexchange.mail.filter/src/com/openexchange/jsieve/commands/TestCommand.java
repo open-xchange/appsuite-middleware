@@ -205,7 +205,14 @@ public class TestCommand extends Command {
          * <code>hasflag [MATCH-TYPE] [COMPARATOR] [&lt;variable-list: string-list&gt;] &lt;list-of-flags: string-list&gt;</code>
          * <p><a href="https://tools.ietf.org/html/rfc5232#section-4">RFC-5232: Test hasflag</a></p>
          */
-        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), Arrays.asList("imap4flags", "imapflags"), null);
+        HASFLAG("hasflag", 1, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), Arrays.asList("imap4flags", "imapflags"), null),
+        /**
+         * <p>  The "string" test evaluates to true if any of the source strings matches any key. The type of match defaults to ":is".</p>
+         * <code>string [MATCH-TYPE] [COMPARATOR] &lt;source: string-list&gt; &lt;key-list: string-list&gt;</code>
+         * <p><a href="https://tools.ietf.org/html/rfc5229#section-5">RFC-5229: Test string</a></p>
+         */
+        STRING("string", 2, Integer.MAX_VALUE, null, standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), Arrays.asList("variables"), null);
+
 
         ////////////////////////////////// MATCH TYPES /////////////////////////////////////////////////
 

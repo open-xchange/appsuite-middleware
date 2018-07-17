@@ -223,14 +223,14 @@ properties:
       tags: ["Hazelcast"]
     - key: com.openexchange.hazelcast.network.symmetricEncryption
       description: |
-        Enables or disables symmetric encryption. When enabled, the entire communication between the Hazelcast members is encrypted at socket level. 
+        Requires an enterprise license key. Enables or disables symmetric encryption. When enabled, the entire communication between the Hazelcast members is encrypted at socket level. 
         Ensure that all symmetric encryption settings are equal on all participating nodes in the cluster. 
         More advanced options (including asymmetric encryption and SSL) may still be configured via the <code>hazelcast.xml</code> file, see instructions on top of this page.
       defaultValue: false
       version:
       reloadable: false
       configcascadeAware: false
-      related: 
+      related: com.openexchange.hazelcast.licenseKey
       file: hazelcast.properties
       packageName: open-xchange-core
       tags: ["Hazelcast", "Encryption"]
@@ -348,6 +348,17 @@ properties:
         Lite members are the Hazelcast cluster members that do not store data. These members are used mainly to execute tasks and register listeners, and they do not have partitions.
       defaultValue: false
       version: 7.8.4
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: hazelcast.properties
+      packageName: open-xchange-core
+      tags: ["Hazelcast"]
+    - key: com.openexchange.hazelcast.licenseKey
+      description: |
+        Sets the license key for this hazelcast instance. The license key is used to enable enterprise features.
+      defaultValue: false
+      version: 7.10.1
       reloadable: false
       configcascadeAware: false
       related:
