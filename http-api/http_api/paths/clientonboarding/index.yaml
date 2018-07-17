@@ -1,3 +1,4 @@
 requests:
   - ConfigRequest.yaml
   - ExecuteRequest.yaml
+  - DownloadRequest.yaml

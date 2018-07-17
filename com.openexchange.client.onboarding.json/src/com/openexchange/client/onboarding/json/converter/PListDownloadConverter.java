@@ -47,48 +47,70 @@
  *
  */
 
-package com.openexchange.client.onboarding.json.osgi;
+package com.openexchange.client.onboarding.json.converter;
 
-import org.slf4j.Logger;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.client.onboarding.download.DownloadLinkProvider;
-import com.openexchange.client.onboarding.json.OnboardingActionFactory;
-import com.openexchange.client.onboarding.json.converter.OnboardingViewConverter;
-import com.openexchange.client.onboarding.json.converter.PListDownloadConverter;
-import com.openexchange.client.onboarding.json.converter.ScenarioConverter;
-import com.openexchange.client.onboarding.service.OnboardingService;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.plist.PListDict;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link OnboardingJsonActivator}
+ * {@link PListDownloadConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.1
  */
-public class OnboardingJsonActivator extends AJAXModuleActivator {
+public class PListDownloadConverter implements ResultConverter {
 
-    /**
-     * Initializes a new {@link OnboardingJsonActivator}.
-     */
-    public OnboardingJsonActivator() {
-        super();
+    @Override
+    public String getInputFormat() {
+        return "plist_download";
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, OnboardingService.class, ConfigViewFactory.class, DownloadLinkProvider.class };
+    public String getOutputFormat() {
+        return "apiResponse";
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(OnboardingJsonActivator.class);
-        logger.info("Starting bundle: \"com.openexchange.client.onboarding.json\"");
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
 
-        registerService(ResultConverter.class, new OnboardingViewConverter(this));
-        registerService(ResultConverter.class, new ScenarioConverter(this));
-        registerService(ResultConverter.class, new PListDownloadConverter());
-        registerModule(new OnboardingActionFactory(this), "onboarding");
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        PListDict dict = (PListDict) result.getResultObject();
+        Writer writer = new OutputStreamWriter(fileHolder.asOutputStream());
+        try {
+            dict.writeTo(writer);
+            writer.flush();
+            fileHolder.setDelivery("download");
+            fileHolder.setDisposition("attachment");
+            fileHolder.setContentType("application/octet-stream");
+            fileHolder.setName("profile_download.mobileconfig");
+            result.setResultObject(fileHolder, "file");
+        } catch (IOException e) {
+            if (null != fileHolder) {
+                Streams.close(fileHolder);
+            }
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            if (null != fileHolder) {
+                Streams.close(fileHolder);
+            }
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
 }
