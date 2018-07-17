@@ -47,40 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.onboarding;
+package com.openexchange.ajax.onboarding.tests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.onboarding.tests.ConfigTest;
-import com.openexchange.ajax.onboarding.tests.DAVSyncProfileTest;
-import com.openexchange.ajax.onboarding.tests.DownloadTest;
-import com.openexchange.ajax.onboarding.tests.EASSyncProfileTest;
-import com.openexchange.ajax.onboarding.tests.EMClientURLTest;
-import com.openexchange.ajax.onboarding.tests.MailSyncProfileTest;
-import com.openexchange.ajax.onboarding.tests.PlistSMSRateLimitTest;
-import com.openexchange.ajax.onboarding.tests.PlistSMSTest;
-import com.openexchange.ajax.onboarding.tests.PlistSMSUserLimitTest;
+import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.testing.httpclient.modules.ClientonboardingApi;
+
 
 /**
- * {@link OnboardingAJAXSuite}
+ * {@link AbstractOnboardingTest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @since v7.10.1
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ConfigTest.class,
-    DAVSyncProfileTest.class,
-    EASSyncProfileTest.class,
-    EMClientURLTest.class,
-    PlistSMSTest.class,
-    PlistSMSUserLimitTest.class,
-    PlistSMSRateLimitTest.class,
-    MailSyncProfileTest.class,
-    DownloadTest.class,
+public class AbstractOnboardingTest extends AbstractAPIClientSession {
 
-})
-public class OnboardingAJAXSuite {
+    private ClientonboardingApi api;
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        api = new ClientonboardingApi(apiClient);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
+
+    protected ClientonboardingApi getApi() {
+        return api;
+    }
 
 }
