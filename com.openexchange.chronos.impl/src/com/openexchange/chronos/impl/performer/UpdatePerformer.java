@@ -183,17 +183,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalSeriesMaster.getSeriesId(), recurrenceId);
         }
-        if (contains(originalSeriesMaster.getChangeExceptionDates(), recurrenceId)) {
-            /*
-             * update for existing change exception, perform update, touch master & track results
-             */
-            Check.recurrenceRangeMatches(recurrenceId, null);
-            Event originalExceptionEvent = loadExceptionData(originalSeriesMaster.getSeriesId(), recurrenceId);
-            updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
-            touch(originalSeriesMaster.getSeriesId());
-            resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
-            return;
-        } else if (null != recurrenceId.getRange()) {
+        if (null != recurrenceId.getRange()) {
             /*
              * update "this and future" recurrences; first split the series at this recurrence
              */
@@ -204,6 +194,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             updateEvent(updatedMasterEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
+        } else if (contains(originalSeriesMaster.getChangeExceptionDates(), recurrenceId)) {
+            /*
+             * update for existing change exception, perform update, touch master & track results
+             */
+            Check.recurrenceRangeMatches(recurrenceId, null);
+            Event originalExceptionEvent = loadExceptionData(originalSeriesMaster.getSeriesId(), recurrenceId);
+            updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
+            touch(originalSeriesMaster.getSeriesId());
+            resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
         } else {
             /*
              * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
