@@ -88,6 +88,13 @@ public class MailAlarmConfig {
     public static final Property MAIL_SHIFT = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.time.shift", 0);
 
     /**
+     * Defines whether each node should spawn an own worker or if one worker should be spawned for the hole cluster.
+     *
+     * Possible values: "cluster" | "node"
+     */
+    public static final Property MODE = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.mode", "cluster");
+
+    /**
      * Defines the amount of mail delivery worker
      */
     public static final Property WORKER_COUNT = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.worker.count", 1);

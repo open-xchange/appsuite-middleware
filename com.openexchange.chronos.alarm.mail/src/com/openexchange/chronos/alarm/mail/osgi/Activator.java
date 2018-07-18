@@ -67,6 +67,7 @@ import com.openexchange.chronos.alarm.mail.impl.MailAlarmNotificationServiceImpl
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
@@ -91,14 +92,20 @@ import com.openexchange.user.UserService;
 public class Activator extends HousekeepingActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private static final String CLUSTER_ID = "com.openexchange.chronos.alarm.mail.worker";
 
     private final Map<ScheduledTimerTask, MailAlarmDeliveryWorker> scheduledTasks = new ConcurrentHashMap<>();
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class, 
-            LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class, 
+        return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class,
+            LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
             ConfigurationService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { ClusterTimerService.class };
     }
 
     @Override
@@ -113,6 +120,7 @@ public class Activator extends HousekeepingActivator {
         });
 
         TimerService timerService = Tools.requireService(TimerService.class, this);
+        ClusterTimerService clusterTimerService = getOptionalService(ClusterTimerService.class);
         DatabaseService dbService = Tools.requireService(DatabaseService.class, this);
         CalendarStorageFactory calendarStorageFactory = Tools.requireService(CalendarStorageFactory.class, this);
         ContextService ctxService = Tools.requireService(ContextService.class, this);
@@ -136,12 +144,24 @@ public class Activator extends HousekeepingActivator {
             LOG.warn("Using " + workerCount + " mail alarm worker. Increasing the value above 1 should not be used in a production environment and only be used for testing purposes.");
         }
 
+        Mode mode = Mode.getMode(leanConfig.getProperty(MailAlarmConfig.MODE));
         MailAlarmNotificationService mailAlarmNotificationService = new MailAlarmNotificationServiceImpl(this);
 
         boolean registeredCalendarHandler = false;
         for (int x = 0; x < workerCount; x++) {
             MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailAlarmNotificationService, lookAhead, Calendar.MINUTE, mailShift, overdueWaitTime);
-            ScheduledTimerTask scheduledTimerTask = timerService.scheduleAtFixedRate(worker, initialDelay, period, TimeUnit.MINUTES);
+            ScheduledTimerTask scheduledTimerTask;
+            if (mode.equals(Mode.cluster)) {
+                if (clusterTimerService != null) {
+                    scheduledTimerTask = clusterTimerService.scheduleAtFixedRate(CLUSTER_ID, worker, initialDelay, period, TimeUnit.MINUTES);
+                } else {
+                    LOG.warn("Mail alarm worker is configured to run in cluster mode, but no ClusterTimerService is present. Falling back to node Mode.");
+                    scheduledTimerTask = timerService.scheduleAtFixedRate(worker, initialDelay, period, TimeUnit.MINUTES);
+                }
+            } else {
+                scheduledTimerTask = timerService.scheduleAtFixedRate(worker, initialDelay, period, TimeUnit.MINUTES);
+            }
+
             scheduledTasks.put(scheduledTimerTask, worker);
             if (!registeredCalendarHandler) {
                 // only register a calendar handler for the first worker
@@ -159,5 +179,25 @@ public class Activator extends HousekeepingActivator {
             entry.getKey().cancel(true);
         }
         LOG.info("Successfully stopped bundle "+this.context.getBundle().getSymbolicName());
+    }
+
+    /**
+     * {@link Mode} defines different modes the mail alarm worker can be run.
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.1
+     */
+    private enum Mode {
+        cluster,
+        node;
+
+        public static Mode getMode(String mode) {
+            try {
+                return Mode.valueOf(mode);
+            } catch (IllegalArgumentException e) {
+                // Fallback to cluster
+                return cluster;
+            }
+        }
     }
 }
