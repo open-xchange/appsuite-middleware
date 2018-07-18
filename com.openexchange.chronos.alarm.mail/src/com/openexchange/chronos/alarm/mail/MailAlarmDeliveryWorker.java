@@ -108,7 +108,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
     private final CalendarUtilities calUtil;
     private long lastCheck = 0;
 
-    private final MailAlarmNotificationService mailService;
+    final MailAlarmNotificationService mailService;
     private final int mailShift;
     private final int lookAhead;
     private final int overdueWaitTime;
@@ -279,26 +279,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
             boolean successfull = false;
             try {
                 con.setAutoCommit(false);
-                AdministrativeCalendarStorage storage = factory.createAdministrative();
-                Calendar cal = Calendar.getInstance(UTC);
-                if (lastCheck != 0) {
-                    cal.setTimeInMillis(lastCheck);
-                }
-                cal.add(timeUnit, lookAhead);
-                for (Event event : events) {
-                    List<AlarmTriggerWrapper> wrappers = storage.getAlarmTriggerStorage().getAndLockMailAlarmTriggers(con, cid, account, event.getId());
-                    // Schedule a task for all triggers before the next usual interval
-                    for (AlarmTriggerWrapper wrapper : wrappers) {
-                        Key key = key(cid, account, event.getId(), wrapper.getAlarmTrigger().getAlarm());
-                        if (wrapper.getAlarmTrigger().getTime() > cal.getTimeInMillis()) {
-                            cancelTask(key);
-                            continue;
-                        }
-                        Alarm alarm = storage.getAlarmStorage().getAlarm(con, cid, account, wrapper.getAlarmTrigger().getAlarm());
-                        scheduleTask(con, key, alarm, wrapper);
-                        readonly = false;
-                    }
-                }
+                readonly = checkEvents(con, events, cid, account);
                 con.commit();
                 successfull = true;
             } catch (SQLException e) {
@@ -328,6 +309,31 @@ public class MailAlarmDeliveryWorker implements Runnable {
             LOG.error("Error while trying to handle event: {}", e.getMessage(), e);
             // Can be ignored. Triggers are picked up with the next run of the MailAlarmDeliveryWorker
         }
+    }
+
+    boolean checkEvents(Connection con, List<Event> events, int cid, int account) throws OXException {
+        boolean result = true;
+        AdministrativeCalendarStorage storage = factory.createAdministrative();
+        Calendar cal = Calendar.getInstance(UTC);
+        if (lastCheck != 0) {
+            cal.setTimeInMillis(lastCheck);
+        }
+        cal.add(timeUnit, lookAhead);
+        for (Event event : events) {
+            List<AlarmTriggerWrapper> wrappers = storage.getAlarmTriggerStorage().getAndLockMailAlarmTriggers(con, cid, account, event.getId());
+            // Schedule a task for all triggers before the next usual interval
+            for (AlarmTriggerWrapper wrapper : wrappers) {
+                Key key = key(cid, account, event.getId(), wrapper.getAlarmTrigger().getAlarm());
+                if (wrapper.getAlarmTrigger().getTime() > cal.getTimeInMillis()) {
+                    cancelTask(key);
+                    continue;
+                }
+                Alarm alarm = storage.getAlarmStorage().getAlarm(con, cid, account, wrapper.getAlarmTrigger().getAlarm());
+                scheduleTask(con, key, alarm, wrapper);
+                result = false;
+            }
+        }
+        return result;
     }
 
     /**
@@ -533,24 +539,44 @@ public class MailAlarmDeliveryWorker implements Runnable {
         public void run() {
             Connection writeCon = null;
             boolean isReadOnly = true;
+            boolean processFinished = false;
             try {
                 writeCon = dbservice.getWritable(ctx);
                 writeCon.setAutoCommit(false);
-                process(writeCon);
+                // do the delivery and update the db entries (e.g. like setting the acknowledged field)
+                isReadOnly = process(writeCon);
+                processFinished = true;
+                // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
+                if(!isReadOnly) {
+                    checkEvent(writeCon, wrapper.getAlarmTrigger().getEventId());
+                }
             } catch (OXException | SQLException e) {
                 try {
                     if (writeCon != null) {
+                        // rollback the last transaction
                         writeCon.rollback();
-                        try {
-                            isReadOnly = process(writeCon);
-                        } catch (SQLException | OXException e1) {
-                            // Nothing that can be done. Do a rollback and reset the processed value
-                            writeCon.rollback();
+                        // if the error occurred during the process retry the hole operation once
+                        if(processFinished == false) {
                             try {
-                                factory.createAdministrative().getAlarmTriggerStorage().setProcessingStatus(writeCon, Collections.singletonList(wrapper), 0l);
-                                isReadOnly = false;
-                            } catch (OXException e2) {
-                                // ignore
+                                writeCon.setAutoCommit(false);
+                                // do the delivery and update the db entries (e.g. like setting the acknowledged field)
+                                isReadOnly = process(writeCon);
+                                processFinished = true;
+                                // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
+                                if(!isReadOnly) {
+                                    checkEvent(writeCon, wrapper.getAlarmTrigger().getEventId());
+                                }
+                            } catch (SQLException | OXException e1) {
+                                // Nothing that can be done. Do a rollback and reset the processed value if necessary
+                                writeCon.rollback();
+                                if (processFinished == false) {
+                                    try {
+                                        factory.createAdministrative().getAlarmTriggerStorage().setProcessingStatus(writeCon, Collections.singletonList(wrapper), 0l);
+                                        isReadOnly = false;
+                                    } catch (OXException e2) {
+                                        // ignore
+                                    }
+                                }
                             }
                         }
                     }
@@ -576,7 +602,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
         /**
          * Executes the mail alarm delivery
          *
-         * @param writeCon A writeable connection
+         * @param writeCon A writable connection
          * @return true if the given connection is only used for read operations, false otherwise.
          * @throws OXException
          * @throws SQLException
@@ -604,7 +630,6 @@ public class MailAlarmDeliveryWorker implements Runnable {
             storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
             storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
             writeCon.commit();
-            writeCon.setAutoCommit(true);
             LOG.info("Mail successfully send!");
             try {
                 mailService.send(event, ctx.getContextId(), wrapper.getAlarmTrigger().getUserId());
@@ -613,6 +638,13 @@ public class MailAlarmDeliveryWorker implements Runnable {
             }
             scheduledTasks.remove(key(ctx.getContextId(), wrapper.getAccount(), event.getId(), alarm.getId()));
             return false;
+        }
+
+        private void checkEvent(Connection writeCon, String eventId) throws SQLException, OXException {
+            Event eve = new Event();
+            eve.setId(eventId);
+            checkEvents(writeCon, Collections.singletonList(eve), ctx.getContextId(), wrapper.getAccount());
+            writeCon.commit();
         }
 
         /**

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.chronos;
 
 import java.rmi.server.UID;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
@@ -57,6 +58,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.factory.EventFactory.RecurringFrequency;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.data.conversion.ical.Assert;
@@ -95,7 +97,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
     }
 
     /**
-     * Creates a mail alarm and checks if a mail is successfully send to the inbox
+     * Creates an event with a mail alarm and checks if a mail is successfully send to the inbox
      *
      * @throws ChronosApiException
      * @throws ApiException
@@ -105,49 +107,185 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
     @Test
     public void testBasicMailAlarm() throws ApiException, ChronosApiException, InterruptedException {
 
-        String mySubject = "testCreateSingleAlarmTrigger_"+new UID().toString();
+        String summary = "testCreateSingleAlarmTrigger_"+new UID().toString();
         long currentTime = System.currentTimeMillis();
         DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(15));
         DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1));
         Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null, null);
 
+        Calendar time = Calendar.getInstance(getUserTimeZone());
+        long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(15);
+
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), summary, startDate, endDate, mailAlarm, folderId);
+        EventData event = eventManager.createEvent(toCreate);
+        getAndAssertAlarms(event, 1, folderId);
+
+        // wait until the mail is send (30 seconds + 15 seconds as a buffer)
+        Thread.sleep(TimeUnit.SECONDS.toMillis(45));
+
+        checkMail(summary, time, Collections.singletonList(expectedSentDate), 1);
+    }
+
+    /**
+     * Creates an event with a mail alarm, updates the start time to a later time and check if no mail is send out
+     *
+     * @throws ChronosApiException
+     * @throws ApiException
+     * @throws InterruptedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testMoveOut() throws ApiException, ChronosApiException, InterruptedException {
+
+        // Create event
+        String summary = "testMoveOut_"+new UID().toString();
+        long currentTime = System.currentTimeMillis();
+        DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(30));
+        DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1));
+        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null, null);
+
+        Calendar time = Calendar.getInstance(getUserTimeZone());
+        long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(30);
+
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), summary, startDate, endDate, mailAlarm, folderId);
+        EventData event = eventManager.createEvent(toCreate);
+        EventData createdEvent = getAndAssertAlarms(event, 1, folderId);
+
+        // Update event
+        startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(30) + TimeUnit.HOURS.toMillis(3));
+        endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1) + TimeUnit.HOURS.toMillis(3));
+        createdEvent.setStartDate(startDate);
+        createdEvent.setEndDate(endDate);
+        eventManager.updateEvent(createdEvent, false, false);
+
+        // wait until the mail is send (30 seconds + 15 seconds as a buffer)
+        Thread.sleep(TimeUnit.SECONDS.toMillis(45));
+
+        checkMail(summary, time, Collections.singletonList(expectedSentDate), 0);
+    }
+
+    /**
+     * Creates a mail alarm, updates the start time to a earlier time and check if a mail is send out on time
+     *
+     * @throws ChronosApiException
+     * @throws ApiException
+     * @throws InterruptedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testMoveIn() throws ApiException, ChronosApiException, InterruptedException {
+
+        // Create event
+        String summary = "testMoveIn_"+new UID().toString();
+        long currentTime = System.currentTimeMillis();
+        DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(30) + TimeUnit.HOURS.toMillis(3));
+        DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1) + TimeUnit.HOURS.toMillis(3));
+        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null, null);
+
+        Calendar time = Calendar.getInstance(getUserTimeZone());
+        long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(30);
+
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), summary, startDate, endDate, mailAlarm, folderId);
+        EventData event = eventManager.createEvent(toCreate);
+        EventData createdEvent = getAndAssertAlarms(event, 1, folderId);
+
+        // Update event
+        startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(30) );
+        endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1) );
+        createdEvent.setStartDate(startDate);
+        createdEvent.setEndDate(endDate);
+        eventManager.updateEvent(createdEvent, false, false);
+
+        // wait until the mail is send (30 seconds + 15 seconds as a buffer)
+        Thread.sleep(TimeUnit.SECONDS.toMillis(45));
+        checkMail(summary, time, Collections.singletonList(expectedSentDate), 1);
+    }
+
+    /**
+     * Creates an event series with a mail alarm and two occurrences and checks if a mail is send out on time for both occurrences.
+     *
+     * @throws ChronosApiException
+     * @throws ApiException
+     * @throws InterruptedException
+     */
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testEventSeries() throws ApiException, ChronosApiException, InterruptedException {
+
+        // Create event
+        String summary = "testEventSeries_"+new UID().toString();
+        long currentTime = System.currentTimeMillis();
+        DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(30));
+        DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1));
+        Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null, null);
+
+        Calendar time = Calendar.getInstance(getUserTimeZone());
+        List<Long> expectedSentDates = new ArrayList<>();
+        expectedSentDates.add(new Long(time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(30)));
+        expectedSentDates.add(new Long(time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(30) + TimeUnit.MINUTES.toMillis(1)));
+
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), summary, 2, folderId, RecurringFrequency.MINUTELY);
+        toCreate.setStartDate(startDate);
+        toCreate.setEndDate(endDate);
+        toCreate.setAlarms(Collections.singletonList(mailAlarm));
+        EventData event = eventManager.createEvent(toCreate);
+        getAndAssertAlarms(event, 1, folderId);
+
+        // wait until the mails are send (90 seconds + 15 seconds as a buffer)
+        Thread.sleep(TimeUnit.SECONDS.toMillis(105));
+
+        checkMail(summary, time, expectedSentDates, 2);
+    }
+
+    private TimeZone getUserTimeZone() throws ApiException {
         UserResponse userResponse = userApi.getUser(getSessionId(), null);
         Assert.assertNull(userResponse.getErrorDesc(), userResponse.getError());
         Assert.assertNotNull(userResponse.getData());
         UserData data = userResponse.getData();
         String timezone = data.getTimezone();
-        Calendar time = Calendar.getInstance(TimeZone.getTimeZone(timezone));
-        long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(15);
+        return TimeZone.getTimeZone(timezone);
+    }
 
-        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), mySubject, startDate, endDate, mailAlarm, folderId);
-        EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1, folderId);
-
-        // wait until the mail is send (1 minute + 30 seconds as a buffer)
-        Thread.sleep(TimeUnit.SECONDS.toMillis(30));
-
+    @SuppressWarnings("unchecked")
+    private void checkMail(String summary, Calendar time, List<Long> expectedSentDates, int mails) throws ApiException {
         MailsResponse mailResponse = mailApi.getAllMails(getSessionId(), "default0/INBOX", getColumns(), null, false, false, String.valueOf(MailListField.DATE.getField()), "DESC", null, null, 100, null);
         Assert.assertNull(mailResponse.getError());
         Assert.assertNotNull(mailResponse.getData());
-        boolean found = false;
+        int found = 0;
 
         long delta = TimeUnit.SECONDS.toMillis(5);
         for (List<String> mail : mailResponse.getData()) {
             String subject = mail.get(2);
-            if( subject != null && subject.contains(mySubject)) {
+            if( subject != null && subject.contains(summary)) {
+                if(mails == 0) {
+                    Assert.fail("Mail found even though no mail should be sent out.");
+                }
                 Long sentDate = Long.valueOf(mail.get(1));
                 sentDate = sentDate - time.getTimeZone().getOffset(sentDate);
                 MailListElement element = new MailListElement();
                 element.setFolder("default0/INBOX");
                 element.setId(mail.get(0));
                 mailApi.deleteMails(getSessionId(), Collections.singletonList(element), Long.MAX_VALUE);
-                found = true;
-                Assert.assertTrue("Wrong sent date. Expected a maximal difference of "+delta+" but was "+Math.abs(sentDate - expectedSentDate), Math.abs(sentDate - expectedSentDate) <= delta);
-                break;
+                found++;
+                boolean matchAnySentDate = false;
+                long closest = 0;
+                for(Long expectedSentDate : expectedSentDates) {
+                    if(Math.abs(sentDate - expectedSentDate) <= delta){
+                        matchAnySentDate = true;
+                        break;
+                    } else {
+                        if(closest==0 || closest > Math.abs(sentDate - expectedSentDate)) {
+                            closest = Math.abs(sentDate - expectedSentDate);
+                        }
+                    }
+                }
+                Assert.assertTrue("Wrong sent date. Expected a maximal difference of "+delta+" but was "+closest, matchAnySentDate);
             }
         }
-
-        Assert.assertTrue("No notification mail found.", found);
+        if(mails == 0) {
+            return;
+        }
+        Assert.assertEquals("Found a wrong amount of notification mails.", mails, found);
     }
 
     private static final String COMMA = ",";
