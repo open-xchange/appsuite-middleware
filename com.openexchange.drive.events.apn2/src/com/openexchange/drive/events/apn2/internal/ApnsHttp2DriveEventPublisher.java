@@ -181,7 +181,7 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
             try {
                 PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = sendNotificationFuture.get();
                 if (pushNotificationResponse.isAccepted()) {
-                    LoggerHolder.LOG.debug("Push notification accepted by APNs gateway.");
+                    LoggerHolder.LOG.debug("Push notification for drive event accepted by APNs gateway for device token: {}", subscription.getToken());
                 } else {
                     if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
                         LoggerHolder.LOG.warn("Unsuccessful notification for drive event due to inactive or invalid device token: {}", subscription.getToken());
