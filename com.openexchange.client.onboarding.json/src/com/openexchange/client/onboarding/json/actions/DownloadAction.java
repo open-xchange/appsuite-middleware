@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -96,7 +97,7 @@ public class DownloadAction extends AbstractOnboardingAction {
                 onboardingProviderIds = new String[] { BuiltInProvider.CALDAV.getId(), BuiltInProvider.CARDDAV.getId() };
                 break;
             default:
-                // Exception
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type);
         }
         OnboardingService service = getOnboardingService();
         PListDict dict = null;
