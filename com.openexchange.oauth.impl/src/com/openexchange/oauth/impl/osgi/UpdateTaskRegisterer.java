@@ -65,6 +65,7 @@ import com.openexchange.oauth.impl.internal.groupware.OAuthAddIdentityColumnTask
 import com.openexchange.oauth.impl.internal.groupware.OAuthAddScopeColumnTask;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
+import com.openexchange.oauth.impl.internal.groupware.RemoveLinkedInScopeUpdateTask;
 import com.openexchange.oauth.impl.internal.groupware.RenameMigrateLinkedInServiceIdUpdateTask;
 
 /**
@@ -99,7 +100,8 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<Data
                 return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask()), new OAuthCreateTableTask2(), 
                     new OAuthAddScopeColumnTask(), new RenameMigrateLinkedInServiceIdUpdateTask(), 
                     new DropForeignKeyFromOAuthAccountTask(), new OAuthAddIdentityColumnTaskV2(), 
-                    new OAuthAccountsTableUtf8Mb4UpdateTask(), new OAuthAccountsTableUtf8Mb4UpdateTaskV2());
+                    new OAuthAccountsTableUtf8Mb4UpdateTask(), new OAuthAccountsTableUtf8Mb4UpdateTaskV2(),
+                    new RemoveLinkedInScopeUpdateTask());
                 //@formatter:on
             }
         }, null);
