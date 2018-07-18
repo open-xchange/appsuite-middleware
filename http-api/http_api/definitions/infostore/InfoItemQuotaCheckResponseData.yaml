@@ -1,0 +1,5 @@
+type: object
+properties:
+  accepted:
+    type: boolean
+    description: returns true if the check fails, otherwise an error is raised.

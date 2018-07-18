@@ -49,28 +49,42 @@
 
 package com.openexchange.filestore.impl.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.osgi.CompositeBundleActivator;
-
+import org.slf4j.Logger;
+import com.openexchange.filestore.FileQuotaCheckService;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.filestore.impl.FileQuotaCheckServiceImpl;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link FileStorageCompositeActivator}
+ * {@link FileQuotaCheckActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:jan-oliver.huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10.1
  */
-public final class FileStorageCompositeActivator extends CompositeBundleActivator {
+public class FileQuotaCheckActivator extends HousekeepingActivator{
 
-    /**
-     * Initializes a new {@link FileStorageCompositeActivator}.
-     */
-    public FileStorageCompositeActivator() {
-        super();
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FileQuotaCheckActivator.class);
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new DefaultFileStorageActivator(), new DBQuotaFileStorageActivator(), new FileQuotaCheckActivator() };
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { QuotaFileStorageService.class } ;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(FileQuotaCheckService.class, new FileQuotaCheckServiceImpl(), null);
+        LOGGER.info("Successfully started FileQuotaCheckService");
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        LOGGER.info("Successfully stopped FileQuotaCheckService");
     }
 
 }

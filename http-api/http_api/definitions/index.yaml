@@ -369,6 +369,14 @@ InfoItemsRestoreResponseData:
   $ref: ./infostore/InfoItemsRestoreResponseData.yaml
 InfoFolderPathData:
   $ref: ./infostore/FolderPathData.yaml
+InfoItemQuotaCheckData:
+  $ref: ./infostore/InfoItemQuotaCheckData.yaml
+InfoItemQuotaCheckFiles:
+  $ref: ./infostore/InfoItemQuotaCheckFiles.yaml
+InfoItemQuotaCheckResponse:
+  $ref: ./infostore/InfoItemQuotaCheckResponse.yaml
+InfoItemQuotaCheckResponseData:
+  $ref: ./infostore/InfoItemQuotaCheckResponseData.yaml
 # Module: attachments
 AttachmentsResponse:
   $ref: ./attachments/AttachmentsResponse.yaml

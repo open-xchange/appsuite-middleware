@@ -357,4 +357,36 @@ public interface InfostoreRequest {
      */
     List<Integer> getEntities() throws OXException;
 
+    /**
+     * Gets the folder id which is used to provide a quota check prior to uploading files
+     *
+     * @return The folder id to check the quota
+     * @throws OXException If parsing of the request body fails
+     */
+    String getQuotaCheckFolder() throws OXException;
+
+    /**
+     * Gets the accumulated file quota which is transferred by the request body
+     *
+     * @return The accumulated file quota
+     * @throws OXException If parsing of the request body fails
+     */
+    long getAccumulatedFileQuota() throws OXException;
+
+    /**
+     * Gets the accumulated storage quota which is transferred by the request body
+     *
+     * @return The accumulated storage quota
+     * @throws OXException If parsing of the request body fails
+     */
+    long getAccumulatedStorageQuota() throws OXException;
+
+    /**
+     * Gets a list of uploaded files, which is used to check the quotas
+     *
+     * @return The list of all uploaded file to check the quotas with
+     * @throws OXException If parsing of the request body fails
+     */
+    List<File> getQuotaCheckFiles() throws OXException;
+
 }

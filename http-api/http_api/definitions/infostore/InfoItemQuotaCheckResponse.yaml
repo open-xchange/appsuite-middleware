@@ -1,0 +1,5 @@
+type: object
+properties:
+  data:
+    $ref: "#/definitions/InfoItemQuotaCheckResponseData"
+  $ref: ../common/CommonResponseData.yaml

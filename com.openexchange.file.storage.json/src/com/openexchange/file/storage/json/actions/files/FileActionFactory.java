@@ -110,6 +110,8 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("checkname", new CheckNameAction());
 
         actions.put("restore", new RestoreAction());
+
+        actions.put("quotacheck", new QuotaCheckAction());
         this.actions = actions.build();
     }
 

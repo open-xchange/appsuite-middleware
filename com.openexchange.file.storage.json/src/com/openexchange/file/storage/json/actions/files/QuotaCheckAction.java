@@ -47,30 +47,38 @@
  *
  */
 
-package com.openexchange.filestore.impl.osgi;
+package com.openexchange.file.storage.json.actions.files;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.osgi.CompositeBundleActivator;
-
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.json.services.Services;
+import com.openexchange.filestore.FileQuotaCheckService;
 
 /**
- * {@link FileStorageCompositeActivator}
+ * {@link QuotaCheckAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:jan-oliver.huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10.1
  */
-public final class FileStorageCompositeActivator extends CompositeBundleActivator {
-
-    /**
-     * Initializes a new {@link FileStorageCompositeActivator}.
-     */
-    public FileStorageCompositeActivator() {
-        super();
-    }
+public class QuotaCheckAction extends AbstractWriteAction {
 
     @Override
-    protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new DefaultFileStorageActivator(), new DBQuotaFileStorageActivator(), new FileQuotaCheckActivator() };
+    protected AJAXRequestResult handle(InfostoreRequest request) throws OXException {
+        String folderId = request.getQuotaCheckFolder();
+
+        IDBasedFolderAccess folderAccess = request.getFolderAccess();
+        AJAXRequestResult result = new AJAXRequestResult();
+
+        FileQuotaCheckService fileQuotaCheckService = Services.getFileQuotaCheckService();
+        try {
+            fileQuotaCheckService.completeQuotaCheck(request.getSession().getUserId(), request.getSession().getContextId(),
+                request.getQuotaCheckFiles(), folderAccess.getFileQuota(folderId),
+                folderAccess.getStorageQuota(folderId), request.getAccumulatedFileQuota(), request.getAccumulatedStorageQuota());
+        } catch (OXException e) {
+            result.setException(e);
+        }
+        return result;
     }
 
 }

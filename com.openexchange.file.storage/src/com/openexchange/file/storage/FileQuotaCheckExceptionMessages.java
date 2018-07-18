@@ -47,30 +47,28 @@
  *
  */
 
-package com.openexchange.filestore.impl.osgi;
+package com.openexchange.file.storage;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.osgi.CompositeBundleActivator;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link FileStorageCompositeActivator}
+ * {@link FileQuotaCheckExceptionMessages}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:jan-oliver.huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10.1
  */
-public final class FileStorageCompositeActivator extends CompositeBundleActivator {
+public class FileQuotaCheckExceptionMessages implements LocalizableStrings {
+
+    public static final String QUOTA_CHECK_MSG = "There is not enough free space for your upload.";
+
+    public static final String MAX_UPLOAD_CHECK_MSG = "The upload exceeds the maximum upload size.";
+    
 
     /**
-     * Initializes a new {@link FileStorageCompositeActivator}.
+     * Initializes a new {@link FileQuotaCheckExceptionMessages}.
      */
-    public FileStorageCompositeActivator() {
+    private FileQuotaCheckExceptionMessages() {
         super();
-    }
-
-    @Override
-    protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new DefaultFileStorageActivator(), new DBQuotaFileStorageActivator(), new FileQuotaCheckActivator() };
     }
 
 }

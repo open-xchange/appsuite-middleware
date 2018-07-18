@@ -58,6 +58,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
 import com.openexchange.file.storage.json.FileFieldCollector;
 import com.openexchange.file.storage.json.osgi.OSGiFileFieldCollector;
+import com.openexchange.filestore.FileQuotaCheckService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.preview.PreviewService;
@@ -74,8 +75,8 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class Services {
 
-    private static AtomicReference<ServiceLookup> LOOKUP_REF = new AtomicReference<ServiceLookup>();
-    private static AtomicReference<OSGiFileFieldCollector> FIELD_COLLECTOR = new AtomicReference<OSGiFileFieldCollector>();
+    private static AtomicReference<ServiceLookup> LOOKUP_REF = new AtomicReference<>();
+    private static AtomicReference<OSGiFileFieldCollector> FIELD_COLLECTOR = new AtomicReference<>();
 
     /**
      * Sets the file field collector instance.
@@ -167,6 +168,11 @@ public class Services {
     public static ThreadControlService getThreadControlService() {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(ThreadControlService.class);
+    }
+
+    public static FileQuotaCheckService getFileQuotaCheckService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(FileQuotaCheckService.class);
     }
 
 }
