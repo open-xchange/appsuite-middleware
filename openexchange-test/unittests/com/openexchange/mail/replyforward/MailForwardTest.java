@@ -51,7 +51,6 @@ package com.openexchange.mail.replyforward;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.io.ByteArrayOutputStream;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -65,7 +64,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.AbstractMailTest;
-import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -74,7 +72,6 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MailForwardTest}
@@ -288,81 +285,6 @@ public final class MailForwardTest extends AbstractMailTest {
                 }
 
             } finally {
-                /*
-                 * close
-                 */
-                mailAccess.close(false);
-            }
-
-        } catch (final Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-    }
-
-    @Test
-    public void testForwardMultiple() {
-        try {
-
-            new ContextImpl(getCid());
-            final SessionObject session = getSession();
-
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-            mailAccess.connect();
-            String[] uids = null;
-            try {
-                {
-                    final MailMessage[] mails = new MailMessage[2];
-                    mails[0] = MimeMessageConverter.convertMessage(RFC822_FORWARD.getBytes(com.openexchange.java.Charsets.US_ASCII));
-                    mails[1] = MimeMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
-                    uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
-                }
-
-                final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, new MailField[] { MailField.FULL });
-
-                final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(fetchedMails, false);
-
-                assertTrue("Unexpected content type: " + forwardMail.getContentType().toString(), forwardMail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
-
-                final int count = forwardMail.getEnclosedCount();
-                assertTrue("Unexpected number of attachments: " + count, count == 3);
-
-                boolean partOfFirstMailFound = false;
-                boolean partOfSecondMailFound = false;
-
-                for (int i = 0; i < count; i++) {
-                    final MailPart part = forwardMail.getEnclosedMailPart(i);
-                    if (i == 0) {
-                        assertTrue("Unexpected enclosed part's content type: " + part.getContentType(), part.getContentType().isMimeType(MimeTypes.MIME_TEXT_ALL));
-                    } else {
-                        assertTrue("Unexpected enclosed part's content type: " + part.getContentType(), part.getContentType().isMimeType(MimeTypes.MIME_MESSAGE_RFC822));
-                    }
-                    /*
-                     * additional checks for bug 12420, where there is an amount of forwarded mails, yet their content is always that of the
-                     * main mail.
-                     */
-                    if (i == 1 || i == 2) {
-                        final MailMessage myMail = (MailMessage) part.getContent();
-                        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
-                        myMail.writeTo(out);
-                        final String mailtext = new String(out.toByteArray(), com.openexchange.java.Charsets.US_ASCII);
-                        if (mailtext.contains("This is the first message")) {
-                            partOfFirstMailFound = true;
-                        }
-                        if (mailtext.contains("This is the second message")) {
-                            partOfSecondMailFound = true;
-                        }
-                    }
-                }
-                assertTrue("Part of first mail missing", partOfFirstMailFound);
-                assertTrue("Part of second mail missing", partOfSecondMailFound);
-
-            } finally {
-
-                if (uids != null) {
-                    mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-                }
-
                 /*
                  * close
                  */
