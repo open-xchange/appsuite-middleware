@@ -148,6 +148,7 @@ public class Activator extends HousekeepingActivator {
                 registerService(CalendarHandler.class, new MailAlarmCalendarHandler(worker));
             }
         }
+        LOG.info("Successfully started bundle "+this.context.getBundle().getSymbolicName());
     }
 
     @Override
@@ -157,5 +158,6 @@ public class Activator extends HousekeepingActivator {
             entry.getValue().cancel();
             entry.getKey().cancel(true);
         }
+        LOG.info("Successfully stopped bundle "+this.context.getBundle().getSymbolicName());
     }
 }

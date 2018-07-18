@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.chronos;
 
+import java.rmi.server.UID;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
@@ -62,8 +65,13 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.MailListElement;
 import com.openexchange.testing.httpclient.models.MailsResponse;
+import com.openexchange.testing.httpclient.models.UserData;
+import com.openexchange.testing.httpclient.models.UserResponse;
 import com.openexchange.testing.httpclient.modules.MailApi;
+import com.openexchange.testing.httpclient.modules.UserApi;
+import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link MailAlarmTriggerTest}
@@ -77,10 +85,13 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
     private MailApi mailApi;
 
+    private UserApi userApi;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         mailApi = new MailApi(apiClient);
+        userApi = new UserApi(apiClient);
     }
 
     /**
@@ -90,27 +101,53 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
      * @throws ApiException
      * @throws InterruptedException
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void testBasicMailAlarm() throws ApiException, ChronosApiException, InterruptedException {
 
+        String mySubject = "testCreateSingleAlarmTrigger_"+new UID().toString();
         long currentTime = System.currentTimeMillis();
-        DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16));
+        DateTimeData startDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(15) + TimeUnit.SECONDS.toMillis(15));
         DateTimeData endDate = DateTimeUtil.getDateTime(currentTime + TimeUnit.MINUTES.toMillis(16) + TimeUnit.HOURS.toMillis(1));
         Alarm mailAlarm = AlarmFactory.createMailAlarm("-PT15M", null, null, null);
-        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testCreateSingleAlarmTrigger", startDate, endDate, mailAlarm, folderId);
+
+        UserResponse userResponse = userApi.getUser(getSessionId(), null);
+        Assert.assertNull(userResponse.getErrorDesc(), userResponse.getError());
+        Assert.assertNotNull(userResponse.getData());
+        UserData data = userResponse.getData();
+        String timezone = data.getTimezone();
+        Calendar time = Calendar.getInstance(TimeZone.getTimeZone(timezone));
+        long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(15);
+
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), mySubject, startDate, endDate, mailAlarm, folderId);
         EventData event = eventManager.createEvent(toCreate);
         getAndAssertAlarms(event, 1, folderId);
 
         // wait until the mail is send (1 minute + 30 seconds as a buffer)
-        Thread.sleep(TimeUnit.SECONDS.toMillis(90));
+        Thread.sleep(TimeUnit.SECONDS.toMillis(30));
 
         MailsResponse mailResponse = mailApi.getAllMails(getSessionId(), "default0/INBOX", getColumns(), null, false, false, String.valueOf(MailListField.DATE.getField()), "DESC", null, null, 100, null);
         Assert.assertNull(mailResponse.getError());
         Assert.assertNotNull(mailResponse.getData());
+        boolean found = false;
+
+        long delta = TimeUnit.SECONDS.toMillis(5);
         for (List<String> mail : mailResponse.getData()) {
-            // TODO identify the reminder mail
+            String subject = mail.get(2);
+            if( subject != null && subject.contains(mySubject)) {
+                Long sentDate = Long.valueOf(mail.get(1));
+                sentDate = sentDate - time.getTimeZone().getOffset(sentDate);
+                MailListElement element = new MailListElement();
+                element.setFolder("default0/INBOX");
+                element.setId(mail.get(0));
+                mailApi.deleteMails(getSessionId(), Collections.singletonList(element), Long.MAX_VALUE);
+                found = true;
+                Assert.assertTrue("Wrong sent date. Expected a maximal difference of "+delta+" but was "+Math.abs(sentDate - expectedSentDate), Math.abs(sentDate - expectedSentDate) <= delta);
+                break;
+            }
         }
 
+        Assert.assertTrue("No notification mail found.", found);
     }
 
     private static final String COMMA = ",";
@@ -129,5 +166,4 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
         return result.toString();
     }
-
 }
