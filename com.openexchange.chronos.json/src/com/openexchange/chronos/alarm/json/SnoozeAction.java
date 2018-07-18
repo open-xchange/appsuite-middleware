@@ -109,6 +109,9 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
 
         EventID eventID = parseIdParameter(requestData);
         Event event = calendarAccess.getEvent(eventID);
+        if(event.containsAlarms() == false || event.getAlarms() == null) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AlarmParameters.PARAMETER_ALARM_ID, "The event doesn't contain a alarm with this id.");
+        }
         List<Alarm> alarms = new ArrayList<Alarm>(event.getAlarms());
 
         Alarm oldAlarmToSnooze = null;
