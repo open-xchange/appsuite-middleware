@@ -52,8 +52,6 @@ package com.openexchange.ajax.share.bugs;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
@@ -61,14 +59,9 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
-import com.openexchange.ajax.share.actions.NotifyFileRequest;
 import com.openexchange.ajax.share.actions.NotifyFolderRequest;
 import com.openexchange.ajax.smtptest.actions.ClearMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
-import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageGuestObjectPermission;
-import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
@@ -122,55 +115,4 @@ public class Bug52843Test extends ShareTest {
         Message notificationMessage = discoverInvitationMessage(getClient(), getClient().getValues().getDefaultAddress());
         assertNull("Notification was received", notificationMessage);
     }
-
-    @Test
-    public void testNotifyFile() throws Exception {
-        /*
-         * insert shared file
-         */
-        byte[] contents = new byte[64 + random.nextInt(256)];
-        random.nextBytes(contents);
-        String filename = randomUID();
-        int parentFolder = getDefaultFolder(FolderObject.INFOSTORE);
-        List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>();
-        FileStorageGuestObjectPermission guestPermission = randomGuestObjectPermission(RecipientType.GUEST);
-        permissions.add(guestPermission);
-        int otherUserId = getClient2().getValues().getUserId();
-        DefaultFileStorageObjectPermission otherUserPermission = new DefaultFileStorageObjectPermission(otherUserId, false, FileStorageObjectPermission.WRITE);
-        permissions.add(otherUserPermission);
-        File file = insertSharedFile(parentFolder, filename, permissions, contents);
-        /*
-         * check permissions
-         */
-        FileStorageObjectPermission matchingPermission = null;
-        for (FileStorageObjectPermission objectPermission : file.getObjectPermissions()) {
-            if (objectPermission.getEntity() != getClient().getValues().getUserId() &&
-                objectPermission.getEntity() != otherUserId) {
-                matchingPermission = objectPermission;
-                break;
-            }
-        }
-        assertNotNull("No matching permission in created file found", matchingPermission);
-        checkPermissions(guestPermission, matchingPermission);
-        /*
-         * discover & check guest
-         */
-        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
-        checkGuestPermission(guestPermission, guest);
-        /*
-         * check access to share
-         */
-        GuestClient guestClient = resolveShare(discoverShareURL(guest), guestPermission.getRecipient());
-        guestClient.checkShareModuleAvailable();
-        guestClient.checkShareAccessible(guestPermission, contents);
-        /*
-         * try to re-send notification as guest
-         */
-        getClient().execute(new ClearMailsRequest());
-        AbstractAJAXResponse notifyResponse = guestClient.execute(new NotifyFileRequest(guestClient.getItem(), otherUserId));
-        assertTrue("No errors or warnings", notifyResponse.hasError() || notifyResponse.hasWarnings());
-        Message notificationMessage = discoverInvitationMessage(getClient(), getClient2().getValues().getDefaultAddress());
-        assertNull("Notification was received", notificationMessage);
-    }
-
 }
