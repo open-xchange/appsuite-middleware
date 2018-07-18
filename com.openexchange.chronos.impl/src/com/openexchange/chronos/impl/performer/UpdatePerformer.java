@@ -270,8 +270,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * prepare event update & check conflicts as needed
          */
         List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent.getId()) : null;
+        Event originalSeriesMasterEvent = isSeriesException(originalEvent) ? loadEventData(originalEvent.getSeriesId()) : null;
         EventUpdateProcessor eventUpdate = new EventUpdateProcessor(
-            session, folder, originalEvent, originalChangeExceptions, eventData, timestamp, Arrays.add(SKIPPED_FIELDS, ignoredFields));
+            session, folder, originalEvent, originalChangeExceptions, originalSeriesMasterEvent, eventData, timestamp, Arrays.add(SKIPPED_FIELDS, ignoredFields));
         if (needsConflictCheck(eventUpdate)) {
             Check.noConflicts(storage, session, eventUpdate.getUpdate(), eventUpdate.getAttendeeUpdates().previewChanges());
         }
