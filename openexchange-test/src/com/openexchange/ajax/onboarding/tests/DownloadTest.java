@@ -49,15 +49,9 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
-import static org.junit.Assert.assertEquals;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.springframework.util.xml.StaxUtils;
-import org.xml.sax.XMLReader;
 import com.openexchange.testing.httpclient.modules.ClientonboardingApi;
 
 /**
@@ -82,37 +76,28 @@ public class DownloadTest extends AbstractOnboardingTest {
     public void testDownloadCalDAVProfile() throws Exception {
         ClientonboardingApi api = getApi();
         byte[] response = api.downloadClientOnboardingProfile(getSessionId(), "caldav");
-        XMLReader profile = parseProfile(response);
-        String payloadId = (String) profile.getProperty("PayloadIdentifier");
-        String payloadType = (String) profile.getProperty("PayloadType");
-        String payloadVersion = (String) profile.getProperty("PayloadVersion");
-        String payloadDisplayName = (String) profile.getProperty("PayloadDisplayName");
-        assertEquals("com.open-xchange.caldav", payloadId);
-        assertEquals("Configuration", payloadType);
-        assertEquals("1", payloadVersion);
-        assertEquals("caldav", payloadDisplayName);
+        assertNotNull(response);
+        String profile = new String(response, "UTF-8");
+        assertTrue(profile.contains("PayloadIdentifier"));
+        assertTrue(profile.contains("PayloadType"));
+        assertTrue(profile.contains("PayloadVersion"));
+        assertTrue(profile.contains("PayloadDisplayName"));
+        assertTrue(profile.contains("com.open-xchange.caldav"));
+        assertTrue(profile.contains("Configuration"));
     }
 
     @Test
     public void testDownloadCardDAVProfile() throws Exception {
         ClientonboardingApi api = getApi();
         byte[] response = api.downloadClientOnboardingProfile(getSessionId(), "carddav");
-        XMLReader profile = parseProfile(response);
-        String payloadId = (String) profile.getProperty("PayloadIdentifier");
-        String payloadType = (String) profile.getProperty("PayloadType");
-        String payloadVersion = (String) profile.getProperty("PayloadVersion");
-        String payloadDisplayName = (String) profile.getProperty("PayloadDisplayName");
-        assertEquals("com.open-xchange.carddav", payloadId);
-        assertEquals("Configuration", payloadType);
-        assertEquals("1", payloadVersion);
-        assertEquals("carddav", payloadDisplayName);
-    }
-
-    private XMLReader parseProfile(byte[] response) throws XMLStreamException, UnsupportedEncodingException {
-        String xmlString = new String(response, "UTF-8");
-        XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-        XMLStreamReader reader = inputFactory.createXMLStreamReader(new StringReader(xmlString));
-        return StaxUtils.createXMLReader(reader);
+        assertNotNull(response);
+        String profile = new String(response, "UTF-8");
+        assertTrue(profile.contains("PayloadIdentifier"));
+        assertTrue(profile.contains("PayloadType"));
+        assertTrue(profile.contains("PayloadVersion"));
+        assertTrue(profile.contains("PayloadDisplayName"));
+        assertTrue(profile.contains("com.open-xchange.carddav"));
+        assertTrue(profile.contains("Configuration"));
     }
 
 }
