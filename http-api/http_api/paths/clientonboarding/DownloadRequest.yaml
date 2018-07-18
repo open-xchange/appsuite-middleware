@@ -13,7 +13,7 @@
           The identifier of profile to download; one of
           - caldav
           - carddav
-          - both
+          - dav
         required: true
     responses:
       200:
