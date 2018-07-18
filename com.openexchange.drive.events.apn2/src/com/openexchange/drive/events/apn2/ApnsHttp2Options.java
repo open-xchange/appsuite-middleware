@@ -132,7 +132,6 @@ public class ApnsHttp2Options {
      *                 </ul>
      * @param password The keystore's password.
      * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
-     * @param bundleIdentifier The bundle identifier of the app
      * @param topic The app's topic, which is typically the bundle ID of the app
      */
     public ApnsHttp2Options(File keystore, String password, boolean production, String topic) {
@@ -154,7 +153,6 @@ public class ApnsHttp2Options {
      * @param keyId The key identifier obtained from developer account
      * @param teamId The team identifier obtained from developer account
      * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
-     * @param bundleIdentifier The bundle identifier of the app
      * @param topic The app's topic, which is typically the bundle ID of the app
      */
     public ApnsHttp2Options(File privateKey, String keyId, String teamId, boolean production, String topic) {
