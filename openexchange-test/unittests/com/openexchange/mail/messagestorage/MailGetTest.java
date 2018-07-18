@@ -289,29 +289,6 @@ public final class MailGetTest extends MessageStorageTest {
         }
     }
 
-    // Added for bug 14276
-    @Test
-    public void testMailGetBrokenContentTypeList() throws OXException {
-        final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[] { new TestMailMessage() });
-        try {
-            for(MailMessage fetchedMail : mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE)) {
-                assertFalse("Missing mail ID", fetchedMail.getMailId() == null);
-                assertTrue("Missing content type", fetchedMail.containsContentType());
-                assertTrue("Missing flags", fetchedMail.containsFlags());
-                assertTrue("Message must contain attachment information", fetchedMail.containsHasAttachment() || fetchedMail.containsAlternativeHasAttachment());
-                if (fetchedMail.getContentType().isMimeType("multipart/*")) {
-                    // Signed mails are no longer re
-                    assertFalse("Message is of type '" + fetchedMail.getContentType() + "' but signals attachment", fetchedMail.hasAttachment());
-                } else {
-                    assertFalse("Message is not of type multipart/*, but signals to hold attachments", fetchedMail.hasAttachment());
-                }
-            }
-
-        } finally {
-            mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-        }
-    }
-
     @Test
     public void testMailGetBrokenContentTypeGet() throws OXException {
         final String[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", new MailMessage[] { new TestMailMessage() });

@@ -54,8 +54,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import javax.mail.MessagingException;
 import org.junit.Test;
@@ -63,11 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.ACLPermission;
 import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.mail.AbstractMailTest;
-import com.openexchange.mail.IndexRange;
-import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
-import com.openexchange.mail.MailSortField;
-import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailCapabilities;
@@ -75,7 +69,6 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
-import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -770,117 +763,6 @@ public final class MailFolderTest extends AbstractMailTest {
         } finally {
             if (fullname != null) {
                 mailAccess.getFolderStorage().deleteFolder(fullname, true);
-            }
-
-            /*
-             * close
-             */
-            mailAccess.close(false);
-        }
-    }
-
-    private static final MailField[] FIELDS_ID = { MailField.ID };
-
-    @Test
-    public void testFolderClear() throws OXException, MessagingException, IOException {
-        final SessionObject session = getSession();
-
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-        mailAccess.connect();
-
-        String fullname = null;
-        String[] trashedIDs = null;
-        String trashFullname = null;
-        try {
-            final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
-
-            {
-                final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
-                final String parentFullname;
-                if (inbox.isHoldsFolders()) {
-                    fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name).toString();
-                    parentFullname = INBOX;
-                } else {
-                    fullname = name;
-                    parentFullname = MailFolder.DEFAULT_FOLDER_ID;
-                }
-
-                if (mailAccess.getFolderStorage().exists(fullname)) {
-                    mailAccess.getFolderStorage().clearFolder(fullname, true);
-                } else {
-                    final MailFolderDescription mfd = new MailFolderDescription();
-                    mfd.setExists(false);
-                    mfd.setParentFullname(parentFullname);
-                    mfd.setSeparator(inbox.getSeparator());
-                    mfd.setSubscribed(false);
-                    mfd.setName(name);
-
-                    final MailPermission p = MailProviderRegistry.getMailProviderBySession(session, MailAccount.DEFAULT_ID).createNewMailPermission(session, MailAccount.DEFAULT_ID);
-                    p.setEntity(getUser());
-                    p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
-                    p.setFolderAdmin(true);
-                    p.setGroupPermission(false);
-                    mfd.addPermission(p);
-                    mailAccess.getFolderStorage().createFolder(mfd);
-                }
-            }
-
-            final MailMessage[] mails = getMessages(getTestMailDir(), -1);
-            String[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
-
-            final MailFolder f = mailAccess.getFolderStorage().getFolder(fullname);
-            final int messageCount = f.getMessageCount();
-            if (messageCount > 0) {
-                assertTrue("Messages not completely appended to mail folder " + fullname + ": " + messageCount + " < " + uids.length, messageCount >= uids.length);
-            }
-
-            trashFullname = mailAccess.getFolderStorage().getTrashFolder();
-            int numTrashedMails = getMessageCount(mailAccess, trashFullname);
-            final Set<String> ids = new HashSet<String>(numTrashedMails);
-            MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
-            for (int i = 0; i < trashed.length; i++) {
-                ids.add(trashed[i].getMailId());
-            }
-
-            mailAccess.getFolderStorage().clearFolder(fullname);
-
-            assertTrue("Folder should be empty", getMessageCount(mailAccess, fullname) == 0);
-            final int expectedMsgCount = numTrashedMails + uids.length;
-            assertTrue("Mails not completely backuped", getMessageCount(mailAccess, trashFullname) == expectedMsgCount);
-
-            final Set<String> newIds = new HashSet<String>(expectedMsgCount);
-            trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
-            assertTrue("Size mismatch: " + trashed.length + " but should be " + expectedMsgCount, trashed.length == expectedMsgCount);
-            for (int i = 0; i < trashed.length; i++) {
-                newIds.add(trashed[i].getMailId());
-            }
-            newIds.removeAll(ids);
-            trashedIDs = new String[newIds.size()];
-            int i = 0;
-            for (final String id : newIds) {
-                trashedIDs[i++] = id;
-            }
-            mailAccess.getMessageStorage().deleteMessages(trashFullname, trashedIDs, true);
-            trashedIDs = null;
-
-            uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
-            //f = mailAccess.getFolderStorage().getFolder(fullname);
-            assertTrue("Messages not completely appended to mail folder " + fullname, getMessageCount(mailAccess, fullname) == uids.length);
-
-            numTrashedMails = getMessageCount(mailAccess, trashFullname);
-
-            mailAccess.getFolderStorage().clearFolder(fullname, true);
-
-            assertTrue("Folder should be empty", getMessageCount(mailAccess, fullname) == 0);
-            assertTrue("Mails not deleted permanently although hardDelete flag set to true", getMessageCount(mailAccess, trashFullname) == numTrashedMails);
-
-        } finally {
-            if (fullname != null) {
-                mailAccess.getFolderStorage().deleteFolder(fullname, true);
-            }
-
-            if (trashedIDs != null) {
-                mailAccess.getMessageStorage().deleteMessages(trashFullname, trashedIDs, true);
             }
 
             /*
