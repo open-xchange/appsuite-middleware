@@ -63,17 +63,17 @@ public class MailAlarmConfig {
     /**
      * Defines the time in minutes between executions of the mail delivery worker.
      */
-    public static final Property PERIOD = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.period", 60);
+    public static final Property PERIOD = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.period", 30);
 
     /**
-     * Defines the initial delay after which the mail delivery worker runs for the first time.
+     * Defines the initial delay in minutes after which the mail delivery worker runs for the first time.
      */
     public static final Property INITIAL_DELAY = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.initialDelay", 10);
 
     /**
      * Defines the time in minutes the delivery worker looks ahead to pick up mail alarms. Must not be smaller than {@link #PERIOD}.
      */
-    public static final Property LOOK_AHEAD = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.lookAhead", 65);
+    public static final Property LOOK_AHEAD = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.lookAhead", 35);
 
     /**
      * Defines the time in minutes that is waited until an alarm that is already in process is picked up. E.g. because the node who originally was going to process the trigger has died.
