@@ -114,42 +114,6 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         rememberClient(user2.getEnhancedApiClient());
     }
 
-
-    @Test
-    public void testFreeBusyTime() throws Exception {
-        Date now = new Date();
-        long day1 = 1000 * (now.getTime() / 1000);
-        long day3 = day1 + TimeUnit.DAYS.toMillis(2);
-        long day5 = day3 + TimeUnit.DAYS.toMillis(2);
-        long nextWeek = day1 + TimeUnit.DAYS.toMillis(7);
-        createEvent("dayOne", day1, day1 + TimeUnit.HOURS.toMillis(1));
-        createEvent("dayThree", day3, day3 + TimeUnit.HOURS.toMillis(1));
-        createEvent("dayFive", day5, day5 + TimeUnit.HOURS.toMillis(1));
-
-        ChronosFreeBusyResponse freeBusy = chronosApi.freebusy(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(defaultUserApi.getCalUser()), null, true);
-
-        assertEquals(freeBusy.getError(), null, freeBusy.getErrorDesc());
-        assertNotNull(freeBusy.getData());
-        List<ChronosFreeBusyResponseData> data = freeBusy.getData();
-        //Expect only one event for the given attendee
-        assertEquals(1, data.size());
-        List<FreeBusyTime> freeBusyTimes = data.get(0).getFreeBusyTime();
-
-        // Expect 3 free busy times. One each for every event
-        assertEquals(3, freeBusyTimes.size());
-        assertEquals(day1, freeBusyTimes.get(0).getStartTime().longValue());
-        assertEquals(day1 + TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(0).getEndTime().longValue());
-        assertEquals("BUSY", freeBusyTimes.get(0).getFbType());
-
-        assertEquals(day3, freeBusyTimes.get(1).getStartTime().longValue());
-        assertEquals(day3 + TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(1).getEndTime().longValue());
-        assertEquals("BUSY", freeBusyTimes.get(1).getFbType());
-
-        assertEquals(day5, freeBusyTimes.get(2).getStartTime().longValue());
-        assertEquals(day5 + TimeUnit.HOURS.toMillis(1), freeBusyTimes.get(2).getEndTime().longValue());
-        assertEquals("BUSY", freeBusyTimes.get(2).getFbType());
-    }
-
     @Test
     public void testMaskId() throws Exception {
         Date now = new Date();

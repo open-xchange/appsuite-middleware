@@ -67,7 +67,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     DuplicateAuthIdTest.class,
     RedeemTest.class,
     HttpAuthTest.class,
-    ChangeIPTest.class,
     FormLoginTest.class,
     TokenLoginTest.class,
     Bug32695Test.class,
