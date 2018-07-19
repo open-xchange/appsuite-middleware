@@ -62,6 +62,7 @@ import com.openexchange.drive.events.apn2.internal.IOSApnsHttp2DriveEventPublish
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -83,7 +84,8 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, ConfigurationService.class, TimerService.class };
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, ConfigurationService.class, TimerService.class,
+            ThreadPoolService.class };
     }
 
     @Override
