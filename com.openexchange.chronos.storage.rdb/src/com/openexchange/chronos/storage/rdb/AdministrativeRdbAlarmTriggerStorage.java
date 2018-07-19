@@ -103,20 +103,20 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
             AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
 
-            stringBuilder.append(" triggerDate<?");
+            stringBuilder.append(" action=?");
+            stringBuilder.append(" AND triggerDate<?");
             stringBuilder.append(" AND ( processed=0 OR (triggerDate<? AND processed<?))");
-            stringBuilder.append(" AND action=?");
-
             stringBuilder.append(" ORDER BY triggerDate");
             stringBuilder.append(" FOR UPDATE");
+
             List<AlarmTriggerWrapper> alarmTriggers = new ArrayList<AlarmTriggerWrapper>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
 
                 int index = 1;
+                stmt.setString(index++, AlarmAction.EMAIL.getValue());
                 stmt.setLong(index++, until);
                 stmt.setLong(index++, overdueTime);
                 stmt.setLong(index++, overdueTime);
-                stmt.setString(index++, AlarmAction.EMAIL.getValue());
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
                     while (resultSet.next()) {
