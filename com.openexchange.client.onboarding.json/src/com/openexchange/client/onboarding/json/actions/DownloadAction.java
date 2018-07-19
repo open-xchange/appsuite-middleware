@@ -63,6 +63,7 @@ import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -88,12 +89,24 @@ public class DownloadAction extends AbstractOnboardingAction {
         String type = requestData.getParameter("type");
         switch (type) {
             case "caldav":
+                if (!session.getUserPermissionBits().hasCalendar()) {
+                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALENDAR);
+                }
                 onboardingProviderIds = new String[] { BuiltInProvider.CALDAV.getId() };
                 break;
             case "carddav":
+                if (!session.getUserPermissionBits().hasContact()) {
+                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CONTACTS);
+                }
                 onboardingProviderIds = new String[] { BuiltInProvider.CARDDAV.getId() };
                 break;
             case "dav":
+                if (!session.getUserPermissionBits().hasCalendar()) {
+                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALENDAR);
+                }
+                if (!session.getUserPermissionBits().hasContact()) {
+                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CONTACTS);
+                }
                 onboardingProviderIds = new String[] { BuiltInProvider.CALDAV.getId(), BuiltInProvider.CARDDAV.getId() };
                 break;
             default:
