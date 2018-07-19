@@ -101,14 +101,10 @@ public class PListDownloadConverter implements ResultConverter {
             fileHolder.setName("profile_download.mobileconfig");
             result.setResultObject(fileHolder, "file");
         } catch (IOException e) {
-            if (null != fileHolder) {
-                Streams.close(fileHolder);
-            }
+            Streams.close(fileHolder);
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            if (null != fileHolder) {
-                Streams.close(fileHolder);
-            }
+            Streams.close(fileHolder);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

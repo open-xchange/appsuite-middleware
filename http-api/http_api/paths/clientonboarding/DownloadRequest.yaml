@@ -14,6 +14,11 @@
           - caldav
           - carddav
           - dav
+        enum: [
+                "caldav",
+                "carddav",
+                "dav"                
+              ]
         required: true
     responses:
       200:
