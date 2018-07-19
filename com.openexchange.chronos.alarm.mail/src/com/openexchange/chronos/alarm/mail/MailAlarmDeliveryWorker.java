@@ -154,6 +154,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
 
     @Override
     public void run() {
+        LOG.info("Started mail alarm delivery worker...");
         Calendar until = Calendar.getInstance(UTC);
         until.add(timeUnit, lookAhead);
         boolean succesfull = false;
@@ -197,7 +198,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
                         ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
                         Key key = key(trigger.getCtx(), trigger.getAccount(), trigger.getAlarmTrigger().getEventId(), alarm.getId());
                         scheduledTasks.put(key, timer);
-                        LOG.info("Created a new mail alarm task for {}", key);
+                        LOG.trace("Created a new mail alarm task for {}", key);
                     }
                     con.commit();
                     succesfull = true;
@@ -226,12 +227,12 @@ public class MailAlarmDeliveryWorker implements Runnable {
                         dbservice.backForUpdateTask(ctxId, con);
                     }
                 }
-
             }
         } catch (OXException e) {
             // Nothing that can be done here. Just retry it with the next run
             LOG.error(e.getMessage(), e);
         }
+        LOG.info("Mail Alarm delivery worker run finished!");
     }
 
     /**
@@ -257,7 +258,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
         while (iterator.hasNext()) {
             Entry<Key, ScheduledTimerTask> next = iterator.next();
             if (next.getKey().getEventId().equals(eventId)) {
-                LOG.info("Canceled mail alarm task for {}", next.getKey());
+                LOG.trace("Canceled mail alarm task for {}", next.getKey());
                 next.getValue().cancel();
                 iterator.remove();
             }
@@ -360,7 +361,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
                 delay = 0;
             }
 
-            LOG.info("Created new task for {}", key);
+            LOG.trace("Created new task for {}", key);
             SingleMailDeliveryTask task = new SingleMailDeliveryTask(factory, calUtil, ctxService.getContext(key.getCid()), alarm, wrapper, now.getTimeInMillis());
             ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
             scheduledTasks.put(key, timer);
@@ -385,7 +386,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
     private void cancelTask(Key key) {
         ScheduledTimerTask scheduledTimerTask = scheduledTasks.get(key);
         if (scheduledTimerTask != null) {
-            LOG.info("Canceled mail alarm task for {}", key);
+            LOG.trace("Canceled mail alarm task for {}", key);
             scheduledTimerTask.cancel();
             scheduledTasks.remove(key);
         }
@@ -412,7 +413,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
                         AlarmTrigger trigger = new AlarmTrigger();
                         trigger.setAlarm(key.getId());
                         storage.getAlarmTriggerStorage().setProcessingStatus(con, Collections.singletonList(new AlarmTriggerWrapper(trigger, key.getCid(), key.getAccount())), 0l);
-                        LOG.info("Properly resettet the processed status of the alarm trigger for {}", key);
+                        LOG.trace("Properly resettet the processed status of the alarm trigger for {}", key);
                     } catch (OXException e) {
                         // ignore
                     }
@@ -421,7 +422,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
                 // ignore
             }
             entry.getValue().cancel();
-            LOG.info("Cancel mail alarm delivery task for {}", key);
+            LOG.trace("Canceled mail alarm delivery task for {}", key);
         }
         scheduledTasks.clear();
     }
@@ -613,7 +614,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
             AlarmTrigger loadedTrigger = storage.getAlarmTriggerStorage().loadTrigger(wrapper.getAlarmTrigger().getAlarm());
             if (loadedTrigger == null || loadedTrigger.getProcessed() != processed) {
                 // Abort since the triggers is either gone or picked up by another node (e.g. because of an update)
-                LOG.info("Skipped mail alarm task for {}. Its trigger is not up to date!", key(ctx.getContextId(), wrapper.getAccount(), wrapper.getAlarmTrigger().getEventId(), alarm.getId()));
+                LOG.trace("Skipped mail alarm task for {}. Its trigger is not up to date!", key(ctx.getContextId(), wrapper.getAccount(), wrapper.getAlarmTrigger().getEventId(), alarm.getId()));
                 return true;
             }
             Event event = storage.getEventStorage().loadEvent(wrapper.getAlarmTrigger().getEventId(), null);
@@ -630,13 +631,14 @@ public class MailAlarmDeliveryWorker implements Runnable {
             storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
             storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
             writeCon.commit();
-            LOG.info("Mail successfully send!");
+            Key key = key(ctx.getContextId(), wrapper.getAccount(), event.getId(), alarm.getId());
             try {
                 mailService.send(event, ctx.getContextId(), wrapper.getAlarmTrigger().getUserId());
+                LOG.trace("Mail successfully send for {}", key);
             } catch (OXException e) {
-                LOG.warn("Unable to send mail for calendar alarm ({}): {}", key(ctx.getContextId(), wrapper.getAccount(), wrapper.getAlarmTrigger().getEventId(), alarm.getId()), e.getMessage(), e);
+                LOG.warn("Unable to send mail for calendar alarm ({}): {}", key, e.getMessage(), e);
             }
-            scheduledTasks.remove(key(ctx.getContextId(), wrapper.getAccount(), event.getId(), alarm.getId()));
+            scheduledTasks.remove(key);
             return false;
         }
 
@@ -657,7 +659,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
             try {
                 return calUtil.getEntityResolver(contextId);
             } catch (OXException e) {
-                LOG.warn("Error getting entity resolver for context: {}", Integer.valueOf(contextId), e);
+                LOG.trace("Error getting entity resolver for context: {}", Integer.valueOf(contextId), e);
             }
             return null;
         }

@@ -104,7 +104,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
 
             stringBuilder.append(" triggerDate<?");
-            stringBuilder.append(" AND ( processed=0 OR triggerDate<?)");
+            stringBuilder.append(" AND ( processed=0 OR (triggerDate<? AND processed<?))");
             stringBuilder.append(" AND action=?");
 
             stringBuilder.append(" ORDER BY triggerDate");
@@ -114,6 +114,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
 
                 int index = 1;
                 stmt.setLong(index++, until);
+                stmt.setLong(index++, overdueTime);
                 stmt.setLong(index++, overdueTime);
                 stmt.setString(index++, AlarmAction.EMAIL.getValue());
 

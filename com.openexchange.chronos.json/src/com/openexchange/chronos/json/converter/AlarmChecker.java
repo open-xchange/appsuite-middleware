@@ -105,9 +105,11 @@ public class AlarmChecker {
      * @throws OXException
      */
     public void checkAlarmList(Session session, Event event, List<Alarm> alarms) throws OXException {
-        for (Alarm alarm : alarms) {
-            if (alarm.containsAction() && AlarmAction.EMAIL.equals(alarm.getAction())) {
-                fillAlarm(session, event, alarm);
+        if(alarms!=null) {
+            for (Alarm alarm : alarms) {
+                if (alarm.containsAction() && AlarmAction.EMAIL.equals(alarm.getAction())) {
+                    fillAlarm(session, event, alarm);
+                }
             }
         }
     }
