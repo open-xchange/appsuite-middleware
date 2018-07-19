@@ -159,7 +159,7 @@ public class Check {
         RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
         Iterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData, new Date(recurrenceID.getValue().getTimestamp()), null);
         if (false == iterator.hasNext()) {
-            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), seriesMaster.getRecurrenceRule());
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), recurrenceData);
         }
         return recurrenceID;
     }

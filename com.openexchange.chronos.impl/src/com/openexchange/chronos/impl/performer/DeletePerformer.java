@@ -70,6 +70,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -216,7 +217,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     // TODO: not supported in old stack (attempt fails with APP-0011), so throwing exception as expected by test for now
                     // com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions.testShouldFailIfTryingToCreateADeleteExceptionOnTopOfAChangeException())
                     throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(
-                        new Exception("Deletion of existing change exception not supported"), recurrenceId, originalEvent.getRecurrenceRule());
+                        new Exception("Deletion of existing change exception not supported"), recurrenceId, new DefaultRecurrenceData(originalEvent));
                 } else {
                     /*
                      * creation of new delete exception

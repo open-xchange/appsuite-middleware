@@ -135,12 +135,14 @@ public class DefaultRecurrenceData implements RecurrenceData {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("DefaultRecurrenceData [rrule=").append(rrule);
-        sb.append(", seriesStart=").append(seriesStart);
-        sb.append(", exceptionDates=").append((null == exceptionDates ? "null" : Arrays.toString(exceptionDates)));
-        sb.append(", recurrenceDates=").append((null == exceptionDates ? "null" : Arrays.toString(exceptionDates)));
-        sb.append(']');
-        return sb.toString();
+        return new StringBuilder("DefaultRecurrenceData [")
+            .append("rrule=").append(rrule)
+            .append(", start=").append(seriesStart)
+            .append(", timezone=").append(null != seriesStart && null != seriesStart.getTimeZone() ? seriesStart.getTimeZone().getID() : null)
+            .append(", exDates=").append(null == exceptionDates ? null : Arrays.toString(exceptionDates))
+            .append(", rDates=").append(null == recurrenceDates ? null : Arrays.toString(recurrenceDates))
+            .append(']')
+        .toString();
     }
 
 }
