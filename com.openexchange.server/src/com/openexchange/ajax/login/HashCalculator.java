@@ -193,7 +193,7 @@ public class HashCalculator {
             if (null != salt) {
                 md.update(salt);
                 if (null != traceBuilder) {
-                    traceBuilder.append(", salt=").append(new String(salt, StandardCharsets.UTF_8));
+                    traceBuilder.append(", salt=***");
                 }
             }
 
