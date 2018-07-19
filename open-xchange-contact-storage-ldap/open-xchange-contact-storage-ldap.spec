@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 37
+%define        ox_release 36
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -62,8 +62,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/contact-storage-ldap/cache.properties
 
 %changelog
-* Mon Jul 16 2018 Tobias Friedrich <tobias.friedrich@open-xchange.com>
-Build for patch 2018-07-23 (4834)
 * Mon Jul 09 2018 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2018-07-09 (4819)
 * Tue Jun 26 2018 Tobias Friedrich <tobias.friedrich@open-xchange.com>

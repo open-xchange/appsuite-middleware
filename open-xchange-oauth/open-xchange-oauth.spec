@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 37
+%define        ox_release 36
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -145,8 +145,6 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 
 %changelog
-* Mon Jul 16 2018 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2018-07-23 (4834)
 * Mon Jul 09 2018 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2018-07-09 (4819)
 * Tue Jun 26 2018 Steffen Templin <marcus.klein@open-xchange.com>
