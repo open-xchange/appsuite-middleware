@@ -100,4 +100,28 @@ public class DownloadTest extends AbstractOnboardingTest {
         assertTrue(profile.contains("Configuration"));
     }
 
+    @Test
+    public void testDownloadDAVProfile() throws Exception {
+        ClientonboardingApi api = getApi();
+        byte[] response = api.downloadClientOnboardingProfile(getSessionId(), "dav");
+        assertNotNull(response);
+        String profile = new String(response, "UTF-8");
+        assertTrue(profile.contains("PayloadIdentifier"));
+        assertTrue(profile.contains("PayloadType"));
+        assertTrue(profile.contains("PayloadVersion"));
+        assertTrue(profile.contains("PayloadDisplayName"));
+        assertTrue(profile.contains("com.open-xchange.carddav"));
+        assertTrue(profile.contains("com.open-xchange.caldav"));
+        assertTrue(profile.contains("Configuration"));
+    }
+
+    @Test
+    public void testInvalidProfileName() throws Exception {
+        ClientonboardingApi api = getApi();
+        byte[] response = api.downloadClientOnboardingProfile(getSessionId(), "invalid");
+        assertNotNull(response);
+        String resp = new String(response, "UTF-8");
+        assertTrue(resp.contains("error"));
+    }
+
 }
