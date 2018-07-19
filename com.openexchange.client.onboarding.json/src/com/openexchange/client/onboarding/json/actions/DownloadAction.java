@@ -59,6 +59,7 @@ import com.openexchange.client.onboarding.Icon;
 import com.openexchange.client.onboarding.Link;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.OnboardingType;
+import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.service.OnboardingService;
@@ -89,18 +90,30 @@ public class DownloadAction extends AbstractOnboardingAction {
         String type = requestData.getParameter("type");
         switch (type) {
             case "caldav":
+                if (!OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session)) {
+                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALDAV);
+                }
                 if (!session.getUserPermissionBits().hasCalendar()) {
                     throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALENDAR);
                 }
                 onboardingProviderIds = new String[] { BuiltInProvider.CALDAV.getId() };
                 break;
             case "carddav":
+                if (!OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), session)) {
+                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CARDDAV);
+                }
                 if (!session.getUserPermissionBits().hasContact()) {
                     throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CONTACTS);
                 }
                 onboardingProviderIds = new String[] { BuiltInProvider.CARDDAV.getId() };
                 break;
             case "dav":
+                if (!OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session)) {
+                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALDAV);
+                }
+                if (!OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), session)) {
+                    throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CARDDAV);
+                }
                 if (!session.getUserPermissionBits().hasCalendar()) {
                     throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(Permission.CALENDAR);
                 }
