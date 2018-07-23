@@ -49,9 +49,7 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -101,7 +99,6 @@ import com.openexchange.imap.storecache.IMAPStoreContainer;
 import com.openexchange.imap.util.HostAndPort;
 import com.openexchange.imap.util.HostAndPortAndCredentials;
 import com.openexchange.imap.util.StampAndOXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.audit.AuditLogService;
@@ -621,8 +618,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Try to connect to IMAP server
              */
             final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
-            String tmpPass = authEncode(getMailConfig().getPassword(), imapConfProps.getImapAuthEnc());
-            String login = authEncode(config.getLogin(), imapConfProps.getImapAuthEnc());
+            String tmpPass = getMailConfig().getPassword();
+            String login = config.getLogin();
             /*
              * Get properties
              */
@@ -729,10 +726,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  */
                 checkTemporaryDown(imapConfProps);
             }
-            String encodedPassword = authEncode(config.getPassword(), imapConfProps.getImapAuthEnc());
+            String tmpPassword = config.getPassword();
             boolean certainPassword = false;
             if (certainPassword) {
-                encodedPassword = "secret";
+                tmpPassword = "secret";
             }
             String user = config.getLogin();
             String proxyUser = null;
@@ -748,8 +745,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     }
                 }
             }
-            user = authEncode(user, imapConfProps.getImapAuthEnc());
-            proxyUser = authEncode(proxyUser, imapConfProps.getImapAuthEnc());
             /*
              * Get properties
              */
@@ -803,7 +798,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             this.server = IDNA.toASCII(config.getServer());
             this.port = config.getPort();
             this.login = isProxyAuth ? proxyUser : user;
-            this.password = encodedPassword;
+            this.password = tmpPassword;
             /*
              * Check for already failed authentication
              */
@@ -1580,19 +1575,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 LOG.error("Error while closing IMAP store.", e);
             }
         }
-    }
-
-    private static String authEncode(String s, String charset) {
-        String tmp = s;
-        if (tmp != null) {
-            try {
-                tmp = new String(s.getBytes(Charsets.forName(charset)), Charsets.ISO_8859_1);
-            } catch (final UnsupportedCharsetException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored", e);
-                mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-            }
-        }
-        return tmp;
     }
 
 }
