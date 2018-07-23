@@ -3552,6 +3552,11 @@ msgstr ""
 msgid "Login denied."
 msgstr ""
 
+#. Login denied: %1$s
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:119
+msgid "Login denied: %1$s"
+msgstr ""
+
 #. Too few (%d) login attributes.
 #: com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
 msgid "Too few (%d) login attributes."
