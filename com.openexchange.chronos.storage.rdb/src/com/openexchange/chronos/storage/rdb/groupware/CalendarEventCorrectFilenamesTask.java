@@ -61,11 +61,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
@@ -76,12 +78,12 @@ import com.openexchange.java.Strings;
 import com.openexchange.tools.arrays.Collections;
 
 /**
- * {@link CalendarEventCorrectFilenameTask}
+ * {@link CalendarEventCorrectFilenamesTask}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.1
  */
-public class CalendarEventCorrectFilenameTask extends UpdateTaskAdapter {
+public class CalendarEventCorrectFilenamesTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
@@ -120,11 +122,11 @@ public class CalendarEventCorrectFilenameTask extends UpdateTaskAdapter {
         /*
          * check for redundant filenames & group the remaining events
          */
-        List<String> idsWithRemovableFilenames = new ArrayList<String>();
+        Set<String> idsWithRemovableFilenames = new HashSet<String>();
         Map<String, List<Event>> eventsByFilename = new HashMap<String, List<Event>>();
         for (Event event : eventsWithFilename) {
             if (Objects.equals(event.getUid(), event.getFilename())) {
-                org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenameTask.class).debug(
+                org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenamesTask.class).debug(
                     "Redundant filename {} in {} in context {}, remembering for cleanup.", event.getFilename(), event, I(contextId));
                 idsWithRemovableFilenames.add(event.getId());
                 continue;
@@ -139,9 +141,9 @@ public class CalendarEventCorrectFilenameTask extends UpdateTaskAdapter {
         for (Entry<String, List<Event>> entry : eventsByFilename.entrySet()) {
             Map<String, List<Event>> eventsByUID = getEventsByUID(entry.getValue());
             if (1 >= eventsByUID.size()) {
-                org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenameTask.class).debug(
+                org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenamesTask.class).debug(
                     "Same UID for all events with filename {} in context {}, no action required.", entry.getKey(), I(contextId));
-                continue; // same uid for all events with this filename, no action required
+                continue;
             }
             /*
              * preserve filename in "oldest" event group (based on series id), remember identifiers of others for cleanup
@@ -149,7 +151,7 @@ public class CalendarEventCorrectFilenameTask extends UpdateTaskAdapter {
             List<List<Event>> eventGroups = sortBySeriesId(eventsByUID.values());
             for (int i = 1; i < eventGroups.size(); i++) {
                 for (Event event : eventGroups.get(i)) {
-                    org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenameTask.class).debug(
+                    org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenamesTask.class).debug(
                         "Ambigious filename {} for {} in context {}, remembering for cleanup.", event.getFilename(), event, I(contextId));
                     idsWithRemovableFilenames.add(event.getId());
                 }
@@ -160,15 +162,32 @@ public class CalendarEventCorrectFilenameTask extends UpdateTaskAdapter {
          */
         int updated = 0;
         if (0 < idsWithRemovableFilenames.size()) {
-            for (List<String> chunk : Lists.partition(idsWithRemovableFilenames, 500)) {
-                updated += removeFilename(connection, contextId, chunk);
-            }
-            org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenameTask.class).info(
+            updated = removeFilenames(connection, contextId, idsWithRemovableFilenames);
+            org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenamesTask.class).info(
                 "Updated {} events with redundant or ambiguous filenames in context {}.", I(updated), I(contextId));
+            idsWithRemovableFilenames.clear();
+        }
+        /*
+         * get remaining events by filename & check for conflicts with uids of other events
+         */
+        eventsByFilename = getEventsWithFilename(connection, contextId);
+        Map<String, List<Event>> eventsWithUid = getEventsWithUid(connection, contextId, eventsByFilename.keySet());
+        for (String uid : eventsWithUid.keySet()) {
+            for (Event event : eventsByFilename.get(uid)) {
+                org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenamesTask.class).debug(
+                    "Conflicting filename {} for {} in context {}, remembering for cleanup.", uid, event, I(contextId));
+                idsWithRemovableFilenames.add(event.getId());
+            }            
+        }
+        if (0 < idsWithRemovableFilenames.size()) {
+            int updated2 = removeFilenames(connection, contextId, idsWithRemovableFilenames);
+            org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenamesTask.class).info(
+                "Updated {} events with conflicting filenames in context {}.", I(updated2), I(contextId));
+            updated += updated2;
         }
         return updated;
     }
-
+    
     private static List<List<Event>> sortBySeriesId(Collection<List<Event>> eventCollections) {
         List<List<Event>> sortedCollections = new ArrayList<List<Event>>(eventCollections);
         java.util.Collections.sort(sortedCollections, (events1, events2) -> {
@@ -198,6 +217,54 @@ public class CalendarEventCorrectFilenameTask extends UpdateTaskAdapter {
         }
         return eventsByUID;
     }
+    
+    private static Map<String, List<Event>> getEventsWithUid(Connection connection, int cid, Collection<String> uids) throws SQLException {
+        if (null == uids || uids.isEmpty()) {
+            return java.util.Collections.emptyMap();
+        }
+        String sql = new StringBuilder()
+            .append("SELECT id,series,uid,filename FROM calendar_event WHERE cid=? AND uid IN (")
+            .append(getParameters(uids.size())).append(");")
+        .toString();
+        Map<String, List<Event>> eventsPerUid = new HashMap<String, List<Event>>();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            for (String uid : uids) {
+                stmt.setString(parameterIndex++, uid);
+            }
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                while (resultSet.next()) {
+                    Event event = new Event();
+                    event.setId(resultSet.getString("id"));
+                    event.setSeriesId(resultSet.getString("series"));
+                    event.setUid(resultSet.getString("uid"));
+                    event.setFilename(resultSet.getString("filename"));
+                    Collections.put(eventsPerUid, event.getUid(), event);
+                }
+            }
+        }
+        return eventsPerUid;
+    }
+
+    private static Map<String, List<Event>> getEventsWithFilename(Connection connection, int cid) throws SQLException {
+        Map<String, List<Event>> eventsPerFilename = new HashMap<String, List<Event>>();
+        String sql = "SELECT id,series,uid,filename FROM calendar_event WHERE cid=? AND account=0 AND filename IS NOT NULL;";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, cid);
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                while (resultSet.next()) {
+                    Event event = new Event();
+                    event.setId(resultSet.getString("id"));
+                    event.setSeriesId(resultSet.getString("series"));
+                    event.setUid(resultSet.getString("uid"));
+                    event.setFilename(resultSet.getString("filename"));
+                    Collections.put(eventsPerFilename, event.getFilename(), event);
+                }
+            }
+        }
+        return eventsPerFilename;
+    }
 
     private static Map<Integer, List<Event>> getEventsWithFilename(Connection connection) throws SQLException {
         Map<Integer, List<Event>> eventsPerContext = new HashMap<Integer, List<Event>>();
@@ -217,19 +284,23 @@ public class CalendarEventCorrectFilenameTask extends UpdateTaskAdapter {
         return eventsPerContext;
     }
 
-    private static int removeFilename(Connection connection, int cid, List<String> ids) throws SQLException {
+    private static int removeFilenames(Connection connection, int cid, Collection<String> ids) throws SQLException {
         if (null == ids || ids.isEmpty()) {
             return 0;
         }
-        String sql = new StringBuilder().append("UPDATE calendar_event SET filename=NULL WHERE cid=? AND account=0 AND id IN (").append(getParameters(ids.size())).append(");").toString();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, cid);
-            for (String id : ids) {
-                stmt.setString(parameterIndex++, id);
+        int updated = 0;
+        for (List<String> chunk : Lists.partition(new ArrayList<String>(ids), 500)) {
+            String sql = new StringBuilder().append("UPDATE calendar_event SET filename=NULL WHERE cid=? AND account=0 AND id IN (").append(getParameters(chunk.size())).append(");").toString();
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, cid);
+                for (String id : chunk) {
+                    stmt.setString(parameterIndex++, id);
+                }
+                updated += stmt.executeUpdate();
             }
-            return stmt.executeUpdate();
         }
+        return updated;
     }
 
 }
