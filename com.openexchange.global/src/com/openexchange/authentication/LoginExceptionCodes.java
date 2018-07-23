@@ -173,7 +173,7 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Thrown in case login attempts is denied by server or any 3rd party component that controls login flow.
      * <p>
-     * Login denied
+     * Login denied: %1$s
      */
     LOGIN_DENIED_WITH_MESSAGE("Login denied: %1$s", LoginExceptionMessages.LOGIN_DENIED_WITH_MESSAGE_MSG, Category.CATEGORY_PERMISSION_DENIED, LOGIN_DENIED.getNumber()), // Yapp, same error code
     ;
