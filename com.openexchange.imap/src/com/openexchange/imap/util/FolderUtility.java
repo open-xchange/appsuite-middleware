@@ -60,6 +60,7 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.session.Session;
+import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.ListInfo;
@@ -125,9 +126,10 @@ public final class FolderUtility {
                 boolean ignoreSubscription = folderStorage.getImapConfig().getIMAPProperties().isIgnoreSubscription();
                 boolean exists = "INBOX".equals(imapFullName) || ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session, ignoreSubscription).exists();
                 if (!exists) {
-                    // Do explicit LIST for "hidden" folders not appearing in LIST "" "*", but dedicatedly LISTable
+                    // Do explicit LIST for "hidden" folders not appearing in LIST "" "*", but dedicatedly LISTable or EXAMINEable
                     ListInfo listInfo = IMAPCommandsCollection.getListInfo(imapFullName, f);
-                    if (null == listInfo) {
+                    if (null == listInfo && false == canBeOpened(f)) {
+                        // Is dedicatedly EXAMINEable?
                         f = folderStorage.checkForNamespaceFolder(imapFullName, f);
                         if (null == f) {
                             throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
@@ -138,6 +140,37 @@ public final class FolderUtility {
             return IMAPFolderConverter.convertFolder(f, session, folderStorage.getImapAccess(), folderStorage.getContext());
         } catch (MessagingException e) {
             throw folderStorage.handleMessagingException(fullName, e);
+        }
+    }
+
+    /**
+     * Checks if specified IMAP folder can be opened
+     *
+     * @param f The IMAP folder to check
+     * @return <code>true</code> if EXAMINE succeeded; otherwise <code>false</code> in case a NO response is signaled
+     * @throws MessagingException
+     */
+    public static boolean canBeOpened(IMAPFolder f) throws MessagingException {
+        try {
+            f.open(IMAPFolder.READ_ONLY);
+            return true;
+        } catch (javax.mail.FolderNotFoundException e) {
+            // Rethrow...
+            throw e;
+        } catch (MessagingException e) {
+            if ("folder cannot contain messages".equals(e.getMessage())) {
+                // Folder could not be opened because it cannot hold messages
+                return false;
+            }
+
+            Exception exception = e.getNextException();
+            if (exception instanceof CommandFailedException) {
+                // Folder could not be opened due to a NO response
+                return false;
+            }
+
+            // Got a BAD or a BYE? Then connection may be bad. Rethrow...
+            throw e;
         }
     }
 

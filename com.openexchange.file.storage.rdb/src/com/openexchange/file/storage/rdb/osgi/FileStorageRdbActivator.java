@@ -67,6 +67,7 @@ import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStora
 import com.openexchange.file.storage.rdb.internal.RdbFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.rdb.secret.RdbFileStorageSecretHandling;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -101,7 +102,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, FileStorageServiceRegistry.class,
-            CacheService.class, SecretEncryptionFactoryService.class, IDGeneratorService.class, CryptoService.class };
+            CacheService.class, SecretEncryptionFactoryService.class, IDGeneratorService.class, CryptoService.class, FolderCacheInvalidationService.class };
     }
 
     @Override

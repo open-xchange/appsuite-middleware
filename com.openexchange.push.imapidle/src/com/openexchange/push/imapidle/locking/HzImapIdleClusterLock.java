@@ -50,6 +50,7 @@
 package com.openexchange.push.imapidle.locking;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
@@ -67,14 +68,19 @@ import com.openexchange.server.ServiceLookup;
  */
 public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
 
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HzImapIdleClusterLock.class);
+    }
+
     private volatile String mapName;
     private final AtomicBoolean notActive;
 
     /**
      * Initializes a new {@link HzImapIdleClusterLock}.
      */
-    public HzImapIdleClusterLock(String mapName, ServiceLookup services) {
-        super(services);
+    public HzImapIdleClusterLock(String mapName, boolean validateSessionExistence, ServiceLookup services) {
+        super(validateSessionExistence, services);
         this.mapName = mapName;
         notActive = new AtomicBoolean();
     }
@@ -107,6 +113,7 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
     }
 
     private void handleNotActiveException(HazelcastInstanceNotActiveException e) {
+        LoggerHolder.LOGGER.error("Hazelcast down. Hazelcast-based IMAP-IDLE cluster lock does therefore no more work.", e);
         notActive.set(true);
     }
 
@@ -120,9 +127,9 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
     }
 
     @Override
-    public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
+    public AcquisitionResult acquireLock(SessionInfo sessionInfo) throws OXException {
         if (notActive.get()) {
-            return true;
+            return AcquisitionResult.ACQUIRED_NEW;
         }
         HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
         if (null == hzInstance) {
@@ -133,7 +140,7 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
         IMap<String, String> map = map(hzInstance);
         if (null == map) {
             // Hazelcast is absent
-            return true;
+            return AcquisitionResult.ACQUIRED_NEW;
         }
 
         long now = System.currentTimeMillis();
@@ -141,17 +148,30 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
 
         if (null == previous) {
             // Not present before
-            return true;
+            return AcquisitionResult.ACQUIRED_NEW;
         }
 
         // Check if valid
-        if (validValue(previous, now, sessionInfo.isTransient(), hzInstance)) {
+        Validity validity = validateValue(previous, now, getValidationArgs(sessionInfo, hzInstance));
+        if (Validity.VALID == validity) {
             // Locked
-            return false;
+            return AcquisitionResult.NOT_ACQUIRED;
         }
 
         // Invalid entry - try to replace it mutually exclusive
-        return map.replace(key, previous, generateValue(now, sessionInfo));
+        boolean replaced = map.replace(key, previous, generateValue(now, sessionInfo));
+        if (false == replaced) {
+            return AcquisitionResult.NOT_ACQUIRED;
+        }
+
+        switch (validity) {
+            case NO_SUCH_SESSION:
+                return AcquisitionResult.ACQUIRED_NO_SUCH_SESSION;
+            case TIMED_OUT:
+                return AcquisitionResult.ACQUIRED_TIMED_OUT;
+            default:
+                return AcquisitionResult.ACQUIRED_NEW;
+        }
     }
 
     @Override
