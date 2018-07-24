@@ -658,7 +658,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         String file = null;
         try {
             // Store new file
-            if (checked) {
+            if (checked || 0 > quota) {
                 file = fileStorage.saveNewFile(is);
             } else {
                 long usage = getUsage();
@@ -720,7 +720,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         boolean notFoundError = false;
         try {
             // Append to new file
-            if (checked) {
+            if (checked || 0 > quota) {
                 newSize = fileStorage.appendToFile(is, name, offset);
             } else {
                 long usage = getUsage();
