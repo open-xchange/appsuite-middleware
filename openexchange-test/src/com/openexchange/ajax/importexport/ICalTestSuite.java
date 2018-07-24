@@ -84,7 +84,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug20718Test_JumpDuringDstCrossing.class,
     Bug20896Test_AlarmsChange.class,
     Bug20945Test_UnexpectedError26.class,
-    Bug22059Test.class,
     Bug27474Test.class,
     Bug28071Test.class,
     Bug56435Test_TaskStateRoundtrip.class,
