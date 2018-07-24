@@ -563,7 +563,12 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         trigger.setEventId(event.getId());
 
         if (CalendarUtils.isFloating(event) && alarm.getTrigger().getDateTime()==null) {
-            trigger.setTimezone(resolver.getTimeZone(userId));
+            try {
+                trigger.setTimezone(resolver.getTimeZone(userId));
+            } catch (OXException e) {
+                addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine timezone for user \"" + userId + "\", skipping insertion of alarm triggers", e);
+                return null;
+            }
         }
         TimeZone tz = UTC;
         if (trigger.containsTimezone()) {
