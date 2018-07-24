@@ -397,14 +397,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     private boolean checkExceededQuota(String id, long quota, long required, long newUsage, long oldUsage) {
         if ((quota == 0) || (quota > 0 && newUsage > quota)) {
             // Advertise exceeded quota to listeners
-            int ownerId = ownerInfo.getOwnerId();
-            for (QuotaFileStorageListener quotaListener : quotaListeners) {
-                try {
-                    quotaListener.onQuotaExceeded(id, required, oldUsage, quota, ownerId, contextId);
-                } catch (Exception e) {
-                    LOGGER.warn("", e);
-                }
-            }
+            notifyOnQuotaExceeded(id, quota, required, newUsage, oldUsage);
             return true;
         }
         return false;
@@ -688,6 +681,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         } catch (OXException e) {
             Throwable cause = e.getCause();
             if (cause instanceof StorageFullIOException) {
+                long required = ((StorageFullIOException) cause).getActualSize();
+                long usage = getUsage();
+                notifyOnQuotaExceeded(null, quota, required, usage + required, usage);
                 throw QuotaFileStorageExceptionCodes.STORE_FULL.create(e, new Object[0]);
             }
             throw e;
@@ -745,6 +741,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         } catch (OXException e) {
             Throwable cause = e.getCause();
             if (cause instanceof StorageFullIOException) {
+                long required = ((StorageFullIOException) cause).getActualSize();
+                long usage = getUsage();
+                notifyOnQuotaExceeded(name, quota, required, usage + required, usage);
                 throw QuotaFileStorageExceptionCodes.STORE_FULL.create(e, new Object[0]);
             }
             if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
@@ -916,6 +915,17 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
         return fileStorage.getFile(name, offset, length);
+    }
+
+    private void notifyOnQuotaExceeded(String id, long quota, long required, long newUsage, long oldUsage) {
+        int ownerId = ownerInfo.getOwnerId();
+        for (QuotaFileStorageListener quotaListener : quotaListeners) {
+            try {
+                quotaListener.onQuotaExceeded(id, required, oldUsage, quota, ownerId, contextId);
+            } catch (Exception e) {
+                LOGGER.warn("", e);
+            }
+        }
     }
 
     @Override
