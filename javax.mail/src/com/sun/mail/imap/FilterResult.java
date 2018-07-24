@@ -38,32 +38,85 @@
  * holder.
  */
 
-package com.sun.mail.imap.protocol;
-
-import com.sun.mail.iap.ParsingException; 
+package com.sun.mail.imap;
 
 /**
- * This class represents the UID data item.
+ * {@link FilterResult} - Indicates whether a filter was successfully applied to a message.
  *
- * @author  John Mani
+ * @author Thorben Betten
  */
+public class FilterResult {
 
-public class UID implements Item {
-    
-    static final char[] name = {'U','I','D'};
-    public int seqnum;
-
-    public long uid;
+    private final long uid;
+    private final String errors;
+    private final String warnings;
 
     /**
-     * Constructor.
-     *
-     * @param	r	the FetchResponse
-     * @exception	ParsingException	for parsing failures
+     * Initializes a new {@link FilterResult}.
+     * 
+     * @param uid The optional UID or <code>-1</code>
+     * @param errors The possible errors
+     * @param warnings The possible warnings
      */
-    public UID(IMAPResponse r) throws ParsingException {
-	seqnum = r.getNumber();
-	r.skipSpaces();
-	uid = r.readLong();
+    public FilterResult(long uid, String errors, String warnings) {
+        super();
+        this.uid = uid < 0 ? -1 : uid;
+        this.errors = errors;
+        this.warnings = warnings;
     }
+    
+    /**
+     * Checks if the filter was applied successfully.
+     *
+     * @return <code>true</code> if filter was applied successfully; otherwise <code>false</code>
+     */
+    public boolean isOK() {
+        return null == errors && null == warnings;
+    }
+    
+    /**
+     * Checks if the filter was applied successfully, but there were one or more warnings produced by the filter.
+     *
+     * @return <code>true</code> if warnings exist; otherwise <code>false</code>
+     */
+    public boolean hasWarnings() {
+        return null != warnings;
+    }
+    
+    /**
+     * Checks if application of the filter failed for some reason.
+     *
+     * @return <code>true</code> if filter failed; otherwise <code>false</code>
+     */
+    public boolean hasErrors() {
+        return null != errors;
+    }
+
+    /**
+     * Gets the UID
+     *
+     * @return The UID or <code>-1</code>
+     */
+    public long getUid() {
+        return uid;
+    }
+
+    /**
+     * Gets the a human-readable descriptive text listing the encountered errors
+     *
+     * @return The errors
+     */
+    public String getErrors() {
+        return errors;
+    }
+
+    /**
+     * Gets the a human-readable descriptive text listing the produced warnings.
+     *
+     * @return The warnings
+     */
+    public String getWarnings() {
+        return warnings;
+    }
+
 }

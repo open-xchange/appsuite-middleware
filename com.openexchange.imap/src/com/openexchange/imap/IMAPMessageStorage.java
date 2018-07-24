@@ -138,11 +138,13 @@ import com.openexchange.mail.api.IMailMessageStorageBatchCopyMove;
 import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorageEnhancedDeletion;
 import com.openexchange.mail.api.IMailMessageStorageExt;
+import com.openexchange.mail.api.IMailMessageStorageMailFilterApplication;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.IMailMessageStorageThreadReferences;
 import com.openexchange.mail.api.ISimplifiedThreadStructureEnhanced;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.IDMailMessage;
+import com.openexchange.mail.dataobjects.MailFilterResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.MailThread;
@@ -190,6 +192,8 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.AppendUID;
+import com.sun.mail.imap.Filter;
+import com.sun.mail.imap.FilterResult;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
@@ -211,7 +215,7 @@ import net.htmlparser.jericho.Source;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructureEnhanced, IMailMessageStorageMimeSupport, IMailMessageStorageBatchCopyMove, IMailMessageStorageThreadReferences, IMailMessageStorageEnhancedDeletion {
+public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructureEnhanced, IMailMessageStorageMimeSupport, IMailMessageStorageBatchCopyMove, IMailMessageStorageThreadReferences, IMailMessageStorageEnhancedDeletion, IMailMessageStorageMailFilterApplication {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPMessageStorage.class);
 
@@ -2615,6 +2619,70 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
         SearchTerm<?> searchTermToUse = prepareSearchTerm(searchTerm);
         return conversationWorker.getThreadReferences(fullName, size, sortField, order, searchTermToUse, mailFields, headerNames);
+    }
+
+    @Override
+    public boolean isMailFilterApplicationSupported() throws OXException {
+        return imapConfig.getImapCapabilities().hasMailFilterApplication();
+    }
+
+    @Override
+    public List<MailFilterResult> applyMailFilter(String fullName, String mailFilter, SearchTerm<?> searchTerm) throws OXException {
+        try {
+            /*
+             * Open and check user rights on source folder
+             */
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, READ_WRITE);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (Strings.toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw handleMessagingException(fullName, e);
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+            try {
+                if (!holdsMessages()) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
+                }
+                if (imapConfig.isSupportsACLs() && !aclExtension.canInsert(RightsCache.getCachedRights(imapFolder, true, session, accountId))) { // XXX
+                    throw IMAPException.create(IMAPException.Code.NO_INSERT_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+            } catch (final MessagingException e) {
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
+            }
+            /*
+             * Prepare search term
+             */
+            searchTerm = prepareSearchTerm(searchTerm);
+            /*
+             * Apply filter
+             */
+            javax.mail.search.SearchTerm jmsSearchTerm;
+            if (searchTerm == null) {
+                jmsSearchTerm = null;
+            } else {
+                if (searchTerm.containsWildcard()) {
+                    jmsSearchTerm = searchTerm.getNonWildcardJavaMailSearchTerm();
+                } else {
+                    jmsSearchTerm = searchTerm.getJavaMailSearchTerm();
+                }
+            }
+            FilterResult[] filterResults = imapFolder.filter(Filter.getScriptFilter(mailFilter), jmsSearchTerm);
+            /*
+             * Return results
+             */
+            List<MailFilterResult> retval = new ArrayList<MailFilterResult>(filterResults.length);
+            for (FilterResult filterResult : filterResults) {
+                long uid = filterResult.getUid();
+                retval.add(new MailFilterResult(uid < 0 ? null : Long.toString(uid), filterResult.getErrors(), filterResult.getWarnings()));
+            }
+            return retval;
+        } catch (final MessagingException e) {
+            throw handleMessagingException(fullName, e);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
     }
 
     @Override

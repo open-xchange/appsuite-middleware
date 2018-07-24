@@ -241,6 +241,17 @@ public abstract class MailCapabilities {
     }
 
     /**
+     * Indicates if mail system supports application of mail filters to existing mails.
+     * <p>
+     * Defaults to <code>false</code>
+     *
+     * @return <code>true</code> if mail system supports application of mail filters; otherwise <code>false</code>
+     */
+    public boolean hasMailFilterApplication() {
+        return false;
+    }
+
+    /**
      * Indicates if mail system supports retrieving folder validity information.
      * <p>
      * Defaults to <code>false</code>

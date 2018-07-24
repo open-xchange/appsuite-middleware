@@ -80,6 +80,8 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.CopyUID;
+import com.sun.mail.imap.Filter;
+import com.sun.mail.imap.Filter.FilterSpec;
 import com.sun.mail.imap.ResyncData;
 import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.SortTerm;
@@ -520,6 +522,8 @@ public class IMAPProtocol extends Protocol {
 	IMAPResponse r = new IMAPResponse(this);
 	if (r.keyEquals("FETCH"))
 	    r = new FetchResponse(r, getFetchItems());
+	else if (r.keyEquals("FILTERED"))
+	    r = new FilteredResponse(r);
 	return r;
     }
 
@@ -2661,6 +2665,60 @@ public class IMAPProtocol extends Protocol {
     } else {
         return command("FETCH " + msgSequence + " (" + what + ')', null);
     }
+    }
+
+    public Response[] filter(Filter filter, SearchTerm sterm, boolean uid) throws ProtocolException, SearchException {
+    if (!hasCapability("FILTER=SIEVE")) 
+        throw new BadCommandException("FILTER=SIEVE not supported");
+    
+    final Argument args = new Argument();
+    // filter criteria
+    {        
+        args.writeAtom("SIEVE");
+        
+        FilterSpec filterSpec = filter.getSpec();
+        args.writeAtom(filterSpec.getName());
+        
+        switch (filterSpec) {   
+            case DELIVERY:
+                // nothing
+                break;
+            case GLOBAL:
+                // expect script name
+                args.writeString(filter.getScriptName(), StandardCharsets.UTF_8);
+                break;
+            case PERSONAL:
+                // expect script name
+                args.writeString(filter.getScriptName(), StandardCharsets.UTF_8);
+                break;
+            case SCRIPT:
+                // expect script
+                args.writeBytes(filter.getScript().getBytes(StandardCharsets.UTF_8));
+                break;
+            default:
+                break;
+        }  
+    }
+
+    args.writeAtom("UTF-8");    // charset specification
+    if (sterm != null) {
+        try {
+        args.append(getSearchSequence().generateSequence(sterm, "UTF-8"));
+        } catch (final IOException ioex) {
+        // should never happen
+        throw new SearchException(ioex.toString());
+        }
+    } else {
+        args.writeAtom("ALL");
+    }
+
+    Response[] r = command(uid ? "UID FILTER" : "FILTER", args);
+    Response response = r[r.length-1];
+
+    // dispatch remaining untagged responses
+    notifyResponseHandlers(r);
+    handleResult(response);
+    return r;
     }
 
     /**
