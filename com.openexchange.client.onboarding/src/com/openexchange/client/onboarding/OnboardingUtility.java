@@ -801,11 +801,10 @@ public class OnboardingUtility {
      * @param hostData The host data
      * @param optProtocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
      * @param optPath The path on the server. If <code>null</code> no path is inserted
-     * @param withRoute Whether to include the JVM route in the server URL or not
      * @param params The query string parameters. If <code>null</code> no query is included
      * @return A string builder with the URL so far, ready for meddling.
      */
-    public static StringBuilder constructURLWithParameters(HostData hostData, String optProtocol, String optPath, boolean withRoute, Map<String, String> params) {
+    public static StringBuilder constructURLWithParameters(HostData hostData, String optProtocol, String optPath, Map<String, String> params) {
         final StringBuilder url = new StringBuilder(128);
         // Protocol/schema
         {
@@ -833,10 +832,6 @@ public class OnboardingUtility {
                 url.append('/');
             }
             url.append(optPath);
-        }
-        // JVM route
-        if (withRoute) {
-            url.append(";jsessionid=").append(hostData.getRoute());
         }
         // Query string
         if (params != null) {
