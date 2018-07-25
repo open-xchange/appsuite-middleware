@@ -55,8 +55,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.Api;
-import org.scribe.builder.api.BoxApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
@@ -221,12 +219,12 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
         final DeferringURLService deferrer = services.getService(DeferringURLService.class);
         if (null != deferrer && deferrer.isDeferrerURLAvailable(session.getUserId(), session.getContextId())) {
-            final String retval = injectRoute(deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId()), currentHost.getRoute());
+            final String retval = deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
             LOGGER.debug("Initializing {} OAuth account for user {} in context {} with call-back URL: {}", getDisplayName(), session.getUserId(), session.getContextId(), retval);
             return retval;
         }
 
-        final String retval = injectRoute(deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost.getHost()).toString()), currentHost.getRoute());
+        final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost.getHost()).toString());
         LOGGER.debug("Initializing {} OAuth account for user {} in context {} with call-back URL: {}", getDisplayName(), session.getUserId(), session.getContextId(), retval);
         return retval;
     }
@@ -271,17 +269,6 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
      */
     private String extractProtocol(final String url) {
         return Strings.toLowerCase(url).startsWith("https") ? "https" : "http";
-    }
-
-    /**
-     * Injects specified JVM route into given URL.
-     *
-     * @param url The URL to inject to
-     * @param route The JVM route to inject
-     * @return The URL with JVM route injected
-     */
-    protected String injectRoute(String url, String route) {
-        return HostInfo.injectRouteIntoUrl(url, route);
     }
 
     /**

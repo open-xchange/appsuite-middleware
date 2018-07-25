@@ -80,10 +80,10 @@ public class YahooOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthS
     @Override
     public String modifyCallbackURL(String callbackUrl, HostInfo currentHost, Session session) {
         DeferringURLService deferrer = services.getService(DeferringURLService.class);
-        if (deferrer == null) {
+        if (deferrer == null || false == deferrer.isDeferrerURLAvailable(session.getUserId(), session.getContextId())) {
             return callbackUrl;
         }
-        return injectRoute(deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId()), currentHost.getRoute());
+        return deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
     }
 
     @Override
@@ -108,7 +108,7 @@ public class YahooOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthS
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
@@ -118,7 +118,7 @@ public class YahooOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthS
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
@@ -128,7 +128,7 @@ public class YahooOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthS
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
      */
     @Override
