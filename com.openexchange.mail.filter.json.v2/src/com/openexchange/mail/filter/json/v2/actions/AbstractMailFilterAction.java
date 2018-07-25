@@ -52,8 +52,8 @@ package com.openexchange.mail.filter.json.v2.actions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mailfilter.Credentials;
@@ -61,6 +61,7 @@ import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractMailFilterAction}
@@ -68,7 +69,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public abstract class AbstractMailFilterAction implements AJAXActionService{
+public abstract class AbstractMailFilterAction implements EnqueuableAJAXActionService {
 
     protected final ServiceLookup services;
     private static final String UserNameParameter = "username";
@@ -121,6 +122,11 @@ public abstract class AbstractMailFilterAction implements AJAXActionService{
 
     private String getUserName(AJAXRequestData request) {
         return request.getParameter(UserNameParameter);
+    }
+
+    @Override
+    public Result isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException {
+        return EnqueuableAJAXActionService.resultFor(false);
     }
 
 }

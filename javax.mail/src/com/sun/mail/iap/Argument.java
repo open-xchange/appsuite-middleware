@@ -58,13 +58,24 @@ import com.sun.mail.util.ASCIIUtility;
  */
 
 public class Argument {
-    protected final List<Object> items;
+    protected final List<Item> items;
+    protected final boolean allowIntermediateFlush;
 
     /**
      * Constructor
      */
     public Argument() {
-	items = new ArrayList<>(1);
+    this(true);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param allowIntermediateFlush <code>true</code> to allow intermediate flishes to the output stream; otherwise <code>false</code>
+     */
+    public Argument(boolean allowIntermediateFlush) {
+	items = new ArrayList<>(4);
+	this.allowIntermediateFlush = allowIntermediateFlush;
     }
 
     /**
@@ -81,6 +92,27 @@ public class Argument {
     }
 
     /**
+     * Append the given Argument to this Argument. All items
+     * from the source argument are copied into this destination
+     * argument.
+     *
+     * @param   arg the Argument to append
+     * @return      this
+     */
+    public Argument appendWithNoDelimitingSpace(Argument arg) {
+    boolean first = true;
+    for (Item item : arg.items) {
+        if (first) {
+            items.add(new Item(item.item, false));
+            first = false;
+        } else {
+            items.add(item);
+        }
+    }
+    return this;
+    }    
+
+    /**
      * Write out given string as an ASTRING, depending on the type
      * of the characters inside the string. The string should
      * contain only ASCII characters. <p>
@@ -91,7 +123,7 @@ public class Argument {
      * @return		this
      */
     public Argument writeString(String s) {
-	items.add(new AString(ASCIIUtility.getBytes(s)));
+	items.add(new Item(new AString(ASCIIUtility.getBytes(s))));
 	return this;
     }
 
@@ -109,7 +141,7 @@ public class Argument {
 	if (charset == null) // convenience
 	    writeString(s);
 	else
-	    items.add(new AString(s.getBytes(charset)));
+	    items.add(new Item(new AString(s.getBytes(charset))));
 	return this;
     }
 
@@ -126,7 +158,7 @@ public class Argument {
 	if (charset == null) // convenience
 	    writeString(s);
 	else
-	    items.add(new AString(s.getBytes(charset)));
+	    items.add(new Item(new AString(s.getBytes(charset))));
 	return this;
     }
 
@@ -141,9 +173,9 @@ public class Argument {
      */
     public Argument writeNString(String s) {
 	if (s == null)
-	    items.add(new NString(null));
+	    items.add(new Item(new NString(null)));
 	else
-	    items.add(new NString(ASCIIUtility.getBytes(s)));
+	    items.add(new Item(new NString(ASCIIUtility.getBytes(s))));
 	return this;
     }
 
@@ -160,11 +192,11 @@ public class Argument {
     public Argument writeNString(String s, String charset)
 		throws UnsupportedEncodingException {
 	if (s == null)
-	    items.add(new NString(null));
+	    items.add(new Item(new NString(null)));
 	else if (charset == null) // convenience
 	    writeString(s);
 	else
-	    items.add(new NString(s.getBytes(charset)));
+	    items.add(new Item(new NString(s.getBytes(charset))));
 	return this;
     }
 
@@ -179,11 +211,11 @@ public class Argument {
      */
     public Argument writeNString(String s, Charset charset) {
 	if (s == null)
-	    items.add(new NString(null));
+	    items.add(new Item(new NString(null)));
 	else if (charset == null) // convenience
 	    writeString(s);
 	else
-	    items.add(new NString(s.getBytes(charset)));
+	    items.add(new Item(new NString(s.getBytes(charset))));
 	return this;
     }
 
@@ -193,7 +225,7 @@ public class Argument {
      * @return	this
      */
     public Argument writeBytes(byte[] b)  {
-	items.add(b);
+	items.add(new Item(b));
 	return this;
     }
 
@@ -203,7 +235,7 @@ public class Argument {
      * @return	this
      */
     public Argument writeBytes(ByteArrayOutputStream b)  {
-	items.add(b);
+	items.add(new Item(b));
 	return this;
     }
 
@@ -213,7 +245,7 @@ public class Argument {
      * @return	this
      */
     public Argument writeBytes(Literal b)  {
-	items.add(b);
+	items.add(new Item(b));
 	return this;
     }
 
@@ -225,8 +257,20 @@ public class Argument {
      * @return	this
      */
     public Argument writeAtom(String s) {
-	items.add(new Atom(s));
+	items.add(new Item(new Atom(s)));
 	return this;
+    }
+
+    /**
+     * Write out given string as an Atom. Note that an Atom can contain only
+     * certain US-ASCII characters.  No validation is done on the characters 
+     * in the string.
+     * @param s  String
+     * @return  this
+     */
+    public Argument writeAtomWithNoDelimitingSpace(String s) {
+    items.add(new Item(new Atom(s), false));
+    return this;
     }
 
     /**
@@ -235,7 +279,7 @@ public class Argument {
      * @return	this
      */
     public Argument writeNumber(int i) {
-	items.add(Integer.valueOf(i));
+	items.add(new Item(Integer.valueOf(i)));
 	return this;
     }
 
@@ -245,7 +289,7 @@ public class Argument {
      * @return	this
      */
     public Argument writeNumber(long i) {
-	items.add(Long.valueOf(i));
+	items.add(new Item(Long.valueOf(i)));
 	return this;
     }
 
@@ -256,7 +300,7 @@ public class Argument {
      * @return	this
      */
     public Argument writeArgument(Argument c) {
-	items.add(c);
+	items.add(new Item(c));
 	return this;
     }
 
@@ -268,12 +312,15 @@ public class Argument {
     DataOutputStream os = (DataOutputStream)protocol.getOutputStream();
 
     boolean first = true;
-    List<Object> items = null == this.items ? java.util.Collections.emptyList() : this.items;
-    for (Object o : items) {
+    List<Item> items = null == this.items ? java.util.Collections.emptyList() : this.items;
+    for (Item item : items) {
+        Object o = item.item;
         if (first) {
             first = false;
         } else {  // write delimiter if not the first item
-            os.write(' ');            
+            if (item.withDelimitingSpace) {                
+                os.write(' ');
+            }
         }
 
         if (o instanceof Atom) {
@@ -419,7 +466,8 @@ public class Argument {
 	    os.writeBytes("+}\r\n");
 	else
 	    os.writeBytes("}\r\n");
-	os.flush();
+	if (allowIntermediateFlush)
+	    os.flush();
 
 	// If we are using synchronized literals, wait for the server's
 	// continuation signal
@@ -475,8 +523,22 @@ public class Argument {
     }
 }
 
+class Item {
+    final Object item;
+    final boolean withDelimitingSpace;
+
+    Item(Object o) {
+        this(o, true);
+    }
+
+    Item(Object o, boolean b) {
+    item = o;
+    withDelimitingSpace = b;
+    }
+}
+
 class Atom {
-    String string;
+    final String string;
 
     Atom(String s) {
 	string = s;
@@ -484,7 +546,7 @@ class Atom {
 }
 
 class AString {
-    byte[] bytes;
+    final byte[] bytes;
 
     AString(byte[] b) {
 	bytes = b;
@@ -492,7 +554,7 @@ class AString {
 }
 
 class NString {
-    byte[] bytes;
+    final byte[] bytes;
 
     NString(byte[] b) {
 	bytes = b;

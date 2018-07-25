@@ -40,6 +40,7 @@
 
 package com.sun.mail.imap.protocol;
 
+import java.nio.charset.StandardCharsets;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.FilterResult;
@@ -85,34 +86,32 @@ public class FilteredResponse extends IMAPResponse {
             throw new ParsingException("error in FILTERED parsing, missing 'TAG' at index " + index);
         }
         skipSpaces();
-        tagReference = readString();
+        tagReference = readAtomString();
 
         if (!isNextNonSpace(')')) {
             throw new ParsingException("error in FILTERED parsing, missing ')' at index " + index);
         }
 
         UID uid = null;
-        String errors = null;
-        String warnings = null;
         do {
             skipSpaces();
             switch (buffer[index]) {
                 case 'O': case 'o':
                     if (match(FILTER_RESULT_OK)) {
                         // End
-                        return new FilterResult(null == uid ? -1 : uid.uid, errors, warnings);
+                        return FilterResult.okResult(null == uid ? -1 : uid.uid);
                     }
                     throw new ParsingException("error in FILTERED parsing, unrecognized item at index " + index + ", starts with \"" + next20() + "\"");
                 case 'E': case 'e':
                     if (match(FILTER_RESULT_ERRORS)) {
-                        errors = readString();
-                        return new FilterResult(null == uid ? -1 : uid.uid, errors, warnings);
+                        String errors = readString();
+                        return FilterResult.errorsResult(errors, null == uid ? -1 : uid.uid);
                     }
                     throw new ParsingException("error in FILTERED parsing, unrecognized item at index " + index + ", starts with \"" + next20() + "\"");
                 case 'W': case 'w':
                     if (match(FILTER_RESULT_WARNINGS)) {
-                        warnings = readString();
-                        return new FilterResult(null == uid ? -1 : uid.uid, errors, warnings);
+                        String warnings = readString();
+                        return FilterResult.warningsResult(warnings, null == uid ? -1 : uid.uid);
                     }
                     throw new ParsingException("error in FILTERED parsing, unrecognized item at index " + index + ", starts with \"" + next20() + "\"");
                 case 'U': case 'u':
@@ -164,7 +163,7 @@ public class FilteredResponse extends IMAPResponse {
     public String getTagReference() {
         return tagReference;
     }
-    
+
     /**
      * Gets the filter result
      *
@@ -172,6 +171,34 @@ public class FilteredResponse extends IMAPResponse {
      */
     public FilterResult getFilterResult() {
         return filterResult;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(32).append("* FILTERED ");
+        sb.append("(TAG ").append(tagReference).append(") ");
+        long uid = filterResult.getUid();
+        if (uid >= 0) {
+            sb.append("UID ").append(uid).append(' ');
+        }
+
+        String errors = filterResult.getErrors();
+        if (null != errors) {
+            int numBytes = errors.getBytes(StandardCharsets.UTF_8).length;
+            sb.append("ERRORS {").append(numBytes).append(numBytes > 0 ? "+" : "").append("}").append("\r\n");
+            sb.append(errors);
+            return sb.toString();
+        }
+
+        String warnings = filterResult.getWarnings();
+        if (null != warnings) {
+            int numBytes = warnings.getBytes(StandardCharsets.UTF_8).length;
+            sb.append("WARNINGS {").append(numBytes).append(numBytes > 0 ? "+" : "").append("}").append("\r\n");
+            sb.append(errors);
+            return sb.toString();
+        }
+
+        return sb.append("OK").toString();
     }
 
 }

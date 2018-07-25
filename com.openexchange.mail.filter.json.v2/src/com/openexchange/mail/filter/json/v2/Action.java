@@ -90,7 +90,11 @@ public enum Action {
     /**
      * Gets the whole script as text
      */
-    GETSCRIPT("getscript");
+    GETSCRIPT("getscript"),
+    /**
+     * Applies a given script to a mail folder
+     */
+    APPLY("apply");
 
     private final String ajaxName;
 

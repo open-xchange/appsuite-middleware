@@ -155,6 +155,8 @@ public class Filter {
         return new Filter(FilterSpec.SCRIPT, null, script);
     }
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final FilterSpec spec;
     private final String scriptName;
     private final String script;
@@ -180,8 +182,12 @@ public class Filter {
 
     /**
      * Gets the SIEVE script name.
+     * <p>
+     * Only available for {@link FilterSpec#PERSONAL PERSONAL} and {@link FilterSpec#GLOBAL GLOBAL} specifications.
      *
      * @return The SIEVE script name or <code>null</code>
+     * @see #getPersonalFilter(String)
+     * @see #getGlobalFilter(String)
      */
     public String getScriptName() {
         return scriptName;
@@ -189,8 +195,11 @@ public class Filter {
 
     /**
      * Gets the SIEVE script.
+     * <p>
+     * Only available for {@link FilterSpec#SCRIPT SCRIPT} specification.
      *
      * @return The SIEVE script or <code>null</code>
+     * @see #getScriptFilter(String)
      */
     public String getScript() {
         return script;

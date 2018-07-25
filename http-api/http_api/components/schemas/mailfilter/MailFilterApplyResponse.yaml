@@ -1,0 +1,23 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: The results per mail
+    items:
+      type: object
+      title: Result
+      properties:
+        id:
+          type: string
+          description: The id of the mail
+        folder: 
+          type: string
+          description: The id of the folder
+        result:
+          type: string
+          description: The type of the result.
+          enum: ["OK", "ERRORS", "WARNINGS"]
+        errors:
+          type: string
+          description: Gets a human-readable descriptive text listing the encountered errors or warnings.

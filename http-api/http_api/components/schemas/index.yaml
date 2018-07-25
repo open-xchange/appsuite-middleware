@@ -476,6 +476,8 @@ MailFilterRulesResponsev2:
   $ref: ./mailfilter/MailFilterRulesResponse_v2.yaml
 MailFilterCreationResponse:
   $ref: ./mailfilter/MailFilterCreationResponse.yaml
+MailFilterApplyResponse:
+  $ref: ./mailfilter/MailFilterApplyResponse.yaml
 MailFilterDeletionBody:
   $ref: ./mailfilter/MailFilterDeletionBody.yaml
 MailFilterScriptResponse:

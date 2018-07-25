@@ -1,4 +1,5 @@
 requests: 
+  - ApplyRequest.yaml
   - ConfigRequest.yaml
   - DeleteRequest.yaml
   - DeletescriptRequest.yaml

@@ -47,38 +47,55 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.imap.dataobjects;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailFilterResult;
-import com.openexchange.mail.search.SearchTerm;
+import com.sun.mail.imap.FilterResult;
+
 
 /**
- * {@link IMailMessageStorageMailFilterApplication} - Extends basic message storage by applying a mail filter expression to a mailbox' messages.
+ * {@link IMAPMailFilterResult} - The mail filter result backed by an IMAP filter result.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public interface IMailMessageStorageMailFilterApplication extends IMailMessageStorage {
+public class IMAPMailFilterResult extends MailFilterResult {
+
+    private final FilterResult filterResult;
 
     /**
-     * Indicates if applying mail filters are supported.
+     * Initializes a new {@link IMAPMailFilterResult}.
      *
-     * @return <code>true</code> if supported; otherwise <code>false</code>
-     * @throws OXException If check fails
+     * @param filterResult The IMAP filter result
      */
-    boolean isMailFilterApplicationSupported() throws OXException;
+    public IMAPMailFilterResult(FilterResult filterResult) {
+        super(filterResult.getUid() < 0 ? null : Long.toString(filterResult.getUid(), 10));
+        this.filterResult = filterResult;
+    }
 
-    /**
-     * Applies the given mail filter script to the messages contained in folder specified by full name.
-     *
-     * @param fullName the folder full name
-     * @param mailFilterScript The mail filter script to apply
-     * @param searchTerm The search term to filter the messages to which the mail filter script is supposed to be applied; may be <code>null</code> to apply to all messages
-     * @param acceptOkFilterResults <code>true</code> in case OK filter results should be kept; otherwise <code>false</code> to discard them (and only return filter results of either ERRORS or WARNINGS)
-     * @return The filter results
-     * @throws OXException If an error occurs
-     */
-    List<MailFilterResult> applyMailFilterScript(String fullName, String mailFilterScript, SearchTerm<?> searchTerm, boolean acceptOkFilterResults) throws OXException;
+    @Override
+    public boolean isOK() {
+        return filterResult.isOK();
+    }
+
+    @Override
+    public boolean hasWarnings() {
+        return filterResult.hasWarnings();
+    }
+
+    @Override
+    public boolean hasErrors() {
+        return filterResult.hasErrors();
+    }
+
+    @Override
+    public String getErrors() {
+        return filterResult.getErrors();
+    }
+
+    @Override
+    public String getWarnings() {
+        return filterResult.getWarnings();
+    }
 
 }

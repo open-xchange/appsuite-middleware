@@ -1619,10 +1619,12 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
      *
      * @param filter The filter to apply
      * @param sterm The optional search term to filter by
+     * @param acceptOkFilterResults <code>true</code> in case OK filter results should be kept; otherwise <code>false</code> to discard them
+     *                              (and only return filter result which is either ERRORS or WARNINGS)
      * @return The filter results
      * @throws MessagingException
      */
-    public FilterResult[] filter(Filter filter, SearchTerm sterm) throws MessagingException {
+    public FilterResult[] filter(Filter filter, SearchTerm sterm, boolean acceptOkFilterResults) throws MessagingException {
         synchronized (messageCacheLock) {
             checkOpened();
 
@@ -1640,22 +1642,32 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
             if (r == null)
                 return new FilterResult[0];
 
-            // to collect FILTERED responses & unsolicited FETCH FLAG responses 
+            // to collect FILTERED responses
             List<FilterResult> filteredResponses = new ArrayList<FilterResult>(r.length);
             
             // to collect non-FETCH responses & unsolicited FETCH FLAG responses 
-            List<Response> v = new ArrayList<Response>(r.length);
+            List<Response> v = null;
 
             for (int k = r.length, i = 0; k-- > 0; i++) {
                 if (r[i] == null)
                     continue;
                 
                 if (r[i] instanceof FilteredResponse) {
-                    filteredResponses.add(((FilteredResponse) r[i]).getFilterResult());
+                    if (acceptOkFilterResults) {                        
+                        filteredResponses.add(((FilteredResponse) r[i]).getFilterResult());
+                    } else {
+                        FilterResult filterResult = ((FilteredResponse) r[i]).getFilterResult();
+                        if (filterResult.hasErrors() || filterResult.hasWarnings()) {
+                            filteredResponses.add(filterResult);
+                        }
+                    }
                     continue;
                 }
                 
                 if (!(r[i] instanceof FetchResponse)) {
+                    if (v == null) {
+                        v = new ArrayList<Response>(r.length >> 1);
+                    }
                     v.add(r[i]); // Unsolicited Non-FILTERED response
                     continue;
                 }
@@ -1683,12 +1695,16 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 
                 // If this response contains any unsolicited FLAGS
                 // add it to the unsolicited response vector
-                if (unsolicitedFlags)
+                if (unsolicitedFlags) {
+                    if (v == null) {
+                        v = new ArrayList<Response>(r.length >> 1);
+                    }
                     v.add(f);
+                }
             }
 
             // Dispatch any unsolicited responses
-            if (!v.isEmpty()) {
+            if (v != null) {
             Response[] responses = new Response[v.size()];
             v.toArray(responses);
             handleResponses(responses);

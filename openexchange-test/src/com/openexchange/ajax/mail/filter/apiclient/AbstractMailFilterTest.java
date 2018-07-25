@@ -47,38 +47,68 @@
  *
  */
 
-package com.openexchange.mail.api;
+package com.openexchange.ajax.mail.filter.apiclient;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.MailFilterResult;
-import com.openexchange.mail.search.SearchTerm;
+import java.util.Set;
+import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
+import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.testing.httpclient.models.MailFilterDeletionBody;
+import com.openexchange.testing.httpclient.modules.FoldersApi;
+import com.openexchange.testing.httpclient.modules.MailApi;
+import com.openexchange.testing.httpclient.modules.MailfilterApi;
 
 /**
- * {@link IMailMessageStorageMailFilterApplication} - Extends basic message storage by applying a mail filter expression to a mailbox' messages.
+ * {@link AbstractMailFilterTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.1
  */
-public interface IMailMessageStorageMailFilterApplication extends IMailMessageStorage {
+public abstract class AbstractMailFilterTest extends AbstractConfigAwareAPIClientSession {
 
-    /**
-     * Indicates if applying mail filters are supported.
-     *
-     * @return <code>true</code> if supported; otherwise <code>false</code>
-     * @throws OXException If check fails
-     */
-    boolean isMailFilterApplicationSupported() throws OXException;
+    protected MailfilterApi mailfilterapi;
+    protected FoldersApi folderApi;
+    protected MailApi mailApi;
 
-    /**
-     * Applies the given mail filter script to the messages contained in folder specified by full name.
-     *
-     * @param fullName the folder full name
-     * @param mailFilterScript The mail filter script to apply
-     * @param searchTerm The search term to filter the messages to which the mail filter script is supposed to be applied; may be <code>null</code> to apply to all messages
-     * @param acceptOkFilterResults <code>true</code> in case OK filter results should be kept; otherwise <code>false</code> to discard them (and only return filter results of either ERRORS or WARNINGS)
-     * @return The filter results
-     * @throws OXException If an error occurs
-     */
-    List<MailFilterResult> applyMailFilterScript(String fullName, String mailFilterScript, SearchTerm<?> searchTerm, boolean acceptOkFilterResults) throws OXException;
+    Set<Integer> sieveRuleToDelete = new HashSet<>();
+    List<String> foldersToDelete = new ArrayList<>();
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        this.mailfilterapi = new MailfilterApi(getApiClient());
+        this.folderApi = new FoldersApi(getApiClient());
+        this.mailApi = new MailApi(getApiClient());
+    }
+
+    public String rememberFolder(String folderId) {
+        foldersToDelete.add(folderId);
+        return folderId;
+    }
+
+    public Integer rememberSieveRule(Integer ruleId) {
+        sieveRuleToDelete.add(ruleId);
+        return ruleId;
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        ApiException ex = null;
+        try {
+            folderApi.deleteFolders(getSessionId(), foldersToDelete, "0", Long.MAX_VALUE, null, true, false, false, null);
+            for (int ruleId : sieveRuleToDelete) {
+                MailFilterDeletionBody body = new MailFilterDeletionBody();
+                body.setId(ruleId);
+                mailfilterapi.deleteRuleV2(getSessionId(), body, null);
+            }
+        } catch (ApiException e) {
+            ex = e;
+        }
+        super.tearDown();
+        if (ex != null) {
+            throw ex;
+        }
+    }
 }

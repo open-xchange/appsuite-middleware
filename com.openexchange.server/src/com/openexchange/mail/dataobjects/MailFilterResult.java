@@ -55,24 +55,64 @@ package com.openexchange.mail.dataobjects;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.1
  */
-public class MailFilterResult {
+public abstract class MailFilterResult {
 
-    private final String id;
-    private final String errors;
-    private final String warnings;
+    private static final OkMailFilterResult PLAIN_OK = new OkMailFilterResult(null);
+
+    /**
+     * Gets the OK filter result for given optional ID
+     *
+     * @param id The optional ID or <code>null</code>
+     * @return The OK filter result
+     */
+    public static MailFilterResult okFor(String id) {
+        return id == null ? PLAIN_OK : new OkMailFilterResult(id);
+    }
+
+    /**
+     * Gets the WARNINGS filter result for given optional ID
+     *
+     * @param id The optional ID or <code>null</code>
+     * @param warnings The warnings
+     * @return The WARNINGS filter result
+     */
+    public static MailFilterResult warningsFor(String id, String warnings) {
+        return new WarningsMailFilterResult(id, warnings);
+    }
+
+    /**
+     * Gets the ERRORS filter result for given optional ID
+     *
+     * @param id The optional ID or <code>null</code>
+     * @param errors The errors
+     * @return The ERRORS filter result
+     */
+    public static MailFilterResult errorsFor(String id, String errors) {
+        return new ErrorsMailFilterResult(id, errors);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /** The optional mail ID or <code>null</code> */
+    protected final String id;
 
     /**
      * Initializes a new {@link MailFilterResult}.
      *
-     * @param uid The optional ID or <code>null</code>
-     * @param errors The possible errors
-     * @param warnings The possible warnings
+     * @param id The optional mail ID or <code>null</code>
      */
-    public MailFilterResult(String id, String errors, String warnings) {
+    protected MailFilterResult(String id) {
         super();
         this.id = id;
-        this.errors = errors;
-        this.warnings = warnings;
+    }
+
+    /**
+     * Gets the mail ID.
+     *
+     * @return The mail ID or <code>null</code>
+     */
+    public String getId() {
+        return id;
     }
 
     /**
@@ -80,53 +120,138 @@ public class MailFilterResult {
      *
      * @return <code>true</code> if filter was applied successfully; otherwise <code>false</code>
      */
-    public boolean isOK() {
-        return null == errors && null == warnings;
-    }
+    public abstract boolean isOK();
 
     /**
      * Checks if the filter was applied successfully, but there were one or more warnings produced by the filter.
      *
      * @return <code>true</code> if warnings exist; otherwise <code>false</code>
      */
-    public boolean hasWarnings() {
-        return null != warnings;
-    }
+    public abstract boolean hasWarnings();
 
     /**
      * Checks if application of the filter failed for some reason.
      *
      * @return <code>true</code> if filter failed; otherwise <code>false</code>
      */
-    public boolean hasErrors() {
-        return null != errors;
-    }
+    public abstract boolean hasErrors();
 
     /**
-     * Gets the ID
-     *
-     * @return The ID or <code>null</code>
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Gets the a human-readable descriptive text listing the encountered errors
+     * Gets a human-readable descriptive text listing the encountered errors
      *
      * @return The errors
      */
-    public String getErrors() {
-        return errors;
-    }
+    public abstract String getErrors();
 
     /**
-     * Gets the a human-readable descriptive text listing the produced warnings.
+     * Gets a human-readable descriptive text listing the produced warnings.
      *
      * @return The warnings
      */
-    public String getWarnings() {
-        return warnings;
+    public abstract String getWarnings();
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static class OkMailFilterResult extends MailFilterResult {
+
+        OkMailFilterResult(String id) {
+            super(id);
+        }
+
+        @Override
+        public boolean isOK() {
+            return true;
+        }
+
+        @Override
+        public boolean hasWarnings() {
+            return false;
+        }
+
+        @Override
+        public boolean hasErrors() {
+            return false;
+        }
+
+        @Override
+        public String getErrors() {
+            return null;
+        }
+
+        @Override
+        public String getWarnings() {
+            return null;
+        }
+    }
+
+    private static class WarningsMailFilterResult extends MailFilterResult {
+
+        private final String warnings;
+
+        WarningsMailFilterResult(String id, String warnings) {
+            super(id);
+            this.warnings = warnings;
+        }
+
+        @Override
+        public String getWarnings() {
+            return warnings;
+        }
+
+        @Override
+        public boolean hasWarnings() {
+            return true;
+        }
+
+        @Override
+        public boolean isOK() {
+            return false;
+        }
+
+        @Override
+        public boolean hasErrors() {
+            return false;
+        }
+
+        @Override
+        public String getErrors() {
+            return null;
+        }
+    }
+
+    private static class ErrorsMailFilterResult extends MailFilterResult {
+
+        private final String errors;
+
+        ErrorsMailFilterResult(String id, String errors) {
+            super(id);
+            this.errors = errors;
+        }
+
+        @Override
+        public boolean isOK() {
+            return false;
+        }
+
+        @Override
+        public boolean hasWarnings() {
+            return false;
+        }
+
+        @Override
+        public boolean hasErrors() {
+            return true;
+        }
+
+        @Override
+        public String getErrors() {
+            return errors;
+        }
+
+        @Override
+        public String getWarnings() {
+            return null;
+        }
     }
 
 }

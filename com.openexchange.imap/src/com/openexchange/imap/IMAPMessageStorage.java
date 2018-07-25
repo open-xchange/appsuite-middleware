@@ -113,6 +113,7 @@ import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
+import com.openexchange.imap.dataobjects.IMAPMailFilterResult;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.sort.IMAPSort;
@@ -2627,7 +2628,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
-    public List<MailFilterResult> applyMailFilter(String fullName, String mailFilter, SearchTerm<?> searchTerm) throws OXException {
+    public List<MailFilterResult> applyMailFilterScript(String fullName, String mailFilterScript, SearchTerm<?> searchTerm, boolean acceptOkFilterResults) throws OXException {
+        if (Strings.isEmpty(mailFilterScript)) {
+            // Nothing to apply
+            return Collections.emptyList();
+        }
+
         try {
             /*
              * Open and check user rights on source folder
@@ -2652,10 +2658,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
             }
             /*
-             * Prepare search term
-             */
-            searchTerm = prepareSearchTerm(searchTerm);
-            /*
              * Apply filter
              */
             javax.mail.search.SearchTerm jmsSearchTerm;
@@ -2668,14 +2670,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     jmsSearchTerm = searchTerm.getJavaMailSearchTerm();
                 }
             }
-            FilterResult[] filterResults = imapFolder.filter(Filter.getScriptFilter(mailFilter), jmsSearchTerm);
+            FilterResult[] filterResults = imapFolder.filter(Filter.getScriptFilter(mailFilterScript), jmsSearchTerm, acceptOkFilterResults);
             /*
              * Return results
              */
             List<MailFilterResult> retval = new ArrayList<MailFilterResult>(filterResults.length);
             for (FilterResult filterResult : filterResults) {
-                long uid = filterResult.getUid();
-                retval.add(new MailFilterResult(uid < 0 ? null : Long.toString(uid), filterResult.getErrors(), filterResult.getWarnings()));
+                if (filterResult != null) {
+                    retval.add(new IMAPMailFilterResult(filterResult));
+                }
             }
             return retval;
         } catch (final MessagingException e) {

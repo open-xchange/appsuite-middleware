@@ -56,6 +56,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -70,6 +71,7 @@ import java.util.concurrent.TimeUnit;
 import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
+import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.ParseException;
 import org.apache.jsieve.parser.generated.Token;
 import org.slf4j.Logger;
@@ -92,6 +94,7 @@ import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.jsieve.commands.test.ITestCommand;
 import com.openexchange.jsieve.export.Capabilities;
+import com.openexchange.jsieve.export.RuleConverter;
 import com.openexchange.jsieve.export.SieveHandler;
 import com.openexchange.jsieve.export.SieveHandlerFactory;
 import com.openexchange.jsieve.export.SieveTextFilter;
@@ -99,6 +102,8 @@ import com.openexchange.jsieve.export.SieveTextFilter.ClientRulesAndRequire;
 import com.openexchange.jsieve.export.SieveTextFilter.RuleListAndNextUid;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
+import com.openexchange.jsieve.visitors.Visitor;
+import com.openexchange.jsieve.visitors.Visitor.OwnType;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
@@ -1250,6 +1255,22 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             } finally {
                 closeSieveHandler(sieveHandler);
             }
+        }
+    }
+
+    @Override
+    public String convertToString(Credentials credentials, Rule rule) throws OXException {
+        new SieveTextFilter(credentials).addRequired(rule);
+        Node node = RuleConverter.rulesToNodes(Collections.singletonList(rule));
+        try {
+            StringBuilder result = new StringBuilder();
+            @SuppressWarnings("unchecked") List<OwnType> list = (List<OwnType>) node.jjtAccept(new Visitor(), null);
+            for (OwnType ownTyper : list) {
+                result.append(ownTyper.getOutput().toString());
+            }
+            return result.toString();
+        } catch (SieveException e) {
+            throw MailFilterExceptionCode.SIEVE_ERROR.create(e.getMessage());
         }
     }
 }

@@ -38,72 +38,28 @@
  * holder.
  */
 
-package com.sun.mail.imap;
+package com.sun.mail.imap.filter;
 
-import com.sun.mail.imap.filter.ErrorsFilterResult;
-import com.sun.mail.imap.filter.OkFilterResult;
-import com.sun.mail.imap.filter.WarningsFilterResult;
+import com.sun.mail.imap.FilterResult;
 
 /**
- * {@link FilterResult} - Indicates whether a filter was successfully applied to a message.
+ * {@link ErrorsFilterResult} - The ERRORS filter result.
  *
  * @author Thorben Betten
  */
-public abstract class FilterResult {
+public class ErrorsFilterResult extends FilterResult {
 
-    private static final FilterResult SIMPLE_OK = new OkFilterResult(-1);
-
-    /**
-     * Creates an OK filter result.
-     *
-     * @param uid The optional UID
-     * @return The OK filter result
-     */
-    public static FilterResult okResult(long uid) {
-        return uid < 0 ? SIMPLE_OK : new OkFilterResult(uid);
-    }
+    private final String errors;
 
     /**
-     * Creates a WARNINGS filter result.
-     *
-     * @param uid The optional UID
-     * @return The WARNINGS filter result
-     */
-    public static FilterResult warningsResult(String warnings, long uid) {
-        return new WarningsFilterResult(uid, warnings);
-    }
-
-    /**
-     * Creates an ERRORS filter result.
-     *
-     * @param uid The optional UID
-     * @return The ERRORS filter result
-     */
-    public static FilterResult errorsResult(String errors, long uid) {
-        return new ErrorsFilterResult(uid, errors);
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-
-    protected final long uid;
-
-    /**
-     * Initializes a new {@link FilterResult}.
+     * Initializes a new {@link ErrorsFilterResult}.
      *
      * @param uid The optional UID or <code>-1</code>
+     * @param errors The possible errors
      */
-    protected FilterResult(long uid) {
-        super();
-        this.uid = uid < 0 ? -1 : uid;
-    }
-
-    /**
-     * Gets the UID
-     *
-     * @return The UID or <code>-1</code>
-     */
-    public long getUid() {
-        return uid;
+    public ErrorsFilterResult(long uid, String errors) {
+        super(uid);
+        this.errors = errors;
     }
 
     /**
@@ -111,34 +67,49 @@ public abstract class FilterResult {
      *
      * @return <code>true</code> if filter was applied successfully; otherwise <code>false</code>
      */
-    public abstract boolean isOK();
+    @Override
+    public boolean isOK() {
+        return false;
+    }
 
     /**
      * Checks if the filter was applied successfully, but there were one or more warnings produced by the filter.
      *
      * @return <code>true</code> if warnings exist; otherwise <code>false</code>
      */
-    public abstract boolean hasWarnings();
+    @Override
+    public boolean hasWarnings() {
+        return false;
+    }
 
     /**
      * Checks if application of the filter failed for some reason.
      *
      * @return <code>true</code> if filter failed; otherwise <code>false</code>
      */
-    public abstract boolean hasErrors();
+    @Override
+    public boolean hasErrors() {
+        return true;
+    }
 
     /**
      * Gets the a human-readable descriptive text listing the encountered errors
      *
      * @return The errors
      */
-    public abstract String getErrors();
+    @Override
+    public String getErrors() {
+        return errors;
+    }
 
     /**
      * Gets the a human-readable descriptive text listing the produced warnings.
      *
      * @return The warnings
      */
-    public abstract String getWarnings();
+    @Override
+    public String getWarnings() {
+        return null;
+    }
 
 }

@@ -64,7 +64,6 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.actions.AllAction;
 import com.openexchange.mail.json.actions.AllSeenAction;
-import com.openexchange.mail.json.actions.ApplyMailFilterAction;
 import com.openexchange.mail.json.actions.ArchiveAction;
 import com.openexchange.mail.json.actions.ArchiveFolderAction;
 import com.openexchange.mail.json.actions.AutosaveAction;
@@ -195,7 +194,6 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         builder.put("examine", new ExamineAction(services));
         builder.put("thread_references", new ThreadReferencesAction(services));
         builder.put("trash", new TrashAction(services));
-        builder.put("apply_filter", new ApplyMailFilterAction(services));
 
         this.actions = builder.build();
     }

@@ -494,6 +494,31 @@ public final class SieveTextFilter {
         return newRulesList;
     }
 
+    /**
+     * Adds the proper require commands according to the actions used in the command within.
+     * @param rule The rule to add the require command to
+     */
+    public void addRequired(Rule rule) {
+        final Set<String> requires = new HashSet<String>();
+        if (null == rule.getRequireCommand()) {
+            final ArrayList<Command> commands = rule.getCommands();
+            if (!rule.isCommented() && null != commands) {
+                for (final Command command : commands) {
+                    final Set<String> required = command.getRequired();
+                    requires.addAll(required);
+                }
+            }
+            if (!requires.isEmpty()) {
+                final ArrayList<ArrayList<String>> arrayList = new ArrayList<ArrayList<String>>();
+                arrayList.add(new ArrayList<String>(requiredList(requires)));
+                ArrayList<Command> cmds = new ArrayList<>();
+                cmds.add(new RequireCommand(arrayList));
+                cmds.addAll(rule.getCommands());
+                rule.setCommands(cmds);
+            }
+        }
+    }
+
     private static Set<String> requiredList(final Set<String> requires) {
         if (requires.contains("imapflags") && requires.contains("imap4flags")) {
             // Prefer "imap4flags" if both supported

@@ -120,6 +120,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private static final String CAPABILITY_FILENAME_SEARCH = "FILENAME_SEARCH";
     private static final String CAPABILITY_ATTACHMENT_MARKER = "ATTACHMENT_MARKER";
     private static final String CAPABILITY_TEXT_PREVIEW = "TEXT_PREVIEW";
+    private static final String CAPABILITY_MAIL_FILTER_APPLICATION = "MAIL_FILTER";
 
     /**
      * The mail folder content type.
@@ -331,6 +332,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         }
         if (mailCapabilities.hasTextPreview()) {
             addSupportedCapabilities(CAPABILITY_TEXT_PREVIEW);
+        }
+        if (mailCapabilities.hasMailFilterApplication()) {
+            addSupportedCapabilities(CAPABILITY_MAIL_FILTER_APPLICATION);
         }
         if (!mailFolder.isHoldsFolders() && mp.canCreateSubfolders()) {
             // Cannot contain subfolders; therefore deny subfolder creation
