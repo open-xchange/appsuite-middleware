@@ -119,10 +119,11 @@ public interface ManagedFileManagement {
      *
      * @param temporaryFile A temporary file (previously obtained from {@link #newTempFile()}
      * @param ttl The custom time-to-live or <code>-1</code> to use default one
+     * @param distribute <code>true</code> to attempt to have created file remotely accessible for other cluster nodes, too; otherwise <code>false</code> for local-only
      * @return A new managed file
      * @throws OXException If a new managed file cannot be created from specified temporary file
      */
-    ManagedFile createManagedFile(File temporaryFile, int ttl) throws OXException;
+    ManagedFile createManagedFile(File temporaryFile, int ttl, boolean distribute) throws OXException;
 
     /**
      * Creates a new managed file from specified input stream.
@@ -199,7 +200,7 @@ public interface ManagedFileManagement {
 
     /**
      * Creates a new managed file from the specified input stream and with the specified TTL
-     * 
+     *
      * @param inputStream The input stream whose content is filled into newly created file
      * @param optExtension An optional file extension; e.g. <code>".txt"</code>
      * @param @param ttl The custom time-to-live or <code>-1</code> to use default one
@@ -207,10 +208,10 @@ public interface ManagedFileManagement {
      * @throws OXException If a new managed file cannot be created from specified content
      */
     ManagedFile createManagedFile(InputStream inputStream, String optExtension, int ttl) throws OXException;
-    
+
     /**
      * Creates a new managed file from the specified input stream and with the specified TTL
-     * 
+     *
      * @param inputStream The input stream whose content is filled into newly created file
      * @param @param ttl The custom time-to-live or <code>-1</code> to use default one
      * @return A new managed file
