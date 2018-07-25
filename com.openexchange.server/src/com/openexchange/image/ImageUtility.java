@@ -365,10 +365,8 @@ public final class ImageUtility {
         if (null != alias) {
             sb.append(alias);
         }
-        if (optImageHostSet || isOAuthSession || addRoute(addRoute, imageLocation)) {
-            if (null != httpSessionID) {
-                sb.append(";jsessionid=").append(httpSessionID);
-            }
+        if ((null != httpSessionID) && (optImageHostSet || isOAuthSession || addRoute(addRoute, imageLocation))) {
+            sb.append(";jsessionid=").append(httpSessionID);
         }
         boolean first = true;
         if (null != publicSessionId) {
