@@ -145,6 +145,19 @@ public class SelfProtectionFactory {
         }
 
         /**
+         * Checks if a map of event results contains too many events.
+         *
+         * @param eventsResults A map of events results
+         * @param requestedFields The requested fields, or <code>null</code> if all event fields were requested
+         * @throws OXException if the collections contain too many {@link Event}s
+         */
+        public void checkEventResults(Map<?, ? extends EventsResult> eventsResults, EventField[] requestedFields) throws OXException {
+            if (countEventsResults(eventsResults) > eventLimit && false == CalendarUtils.containsOnlyIdentifyingFields(requestedFields)) {
+                throw CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create();
+            }
+        }
+
+        /**
          * Checks if an {@link Event} contains too many {@link Alarm}s or too many {@link Attendee}s
          *
          * @param event The event to check
@@ -186,20 +199,18 @@ public class SelfProtectionFactory {
             }
         }
 
-        public void checkResultMap(Map<?, ? extends EventsResult> map) throws OXException {
-            int sum = 0;
-            for (EventsResult collection : map.values()) {
-                if (collection == null || null == collection.getEvents()) {
-                    continue;
-                }
-                sum += collection.getEvents().size();
-            }
+    }
 
-            if (sum > eventLimit) {
-                throw CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create();
+    private static int countEventsResults(Map<?, ? extends EventsResult> eventsResults) {
+        int count = 0;
+        if (null != eventsResults) {
+            for (EventsResult value : eventsResults.values()) {
+                if (null != value && null != value.getEvents()) {
+                    count += value.getEvents().size();
+                }
             }
         }
-
+        return count;
     }
 
 }
