@@ -47,53 +47,56 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.alarm.mail;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AlarmTriggerWrapper}
+ * {@link MailAlarmDeliveryWorkerUpdateTask}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class AlarmTriggerWrapper {
+public class MailAlarmDeliveryWorkerUpdateTask extends UpdateTaskAdapter {
 
-    private final AlarmTrigger alarmTrigger;
-    private final int ctx;
-    private final int account;
+    private static final String TABLE = "calendar_alarm_trigger";
 
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(con);
+            rollback = true;
+            Column col = new Column("processed", "bigint(20) NOT NULL DEFAULT 0");
+            Tools.checkAndAddColumns(con, TABLE , col);
+            Tools.createIndex(con, TABLE, new String[] {"action", "triggerDate"});
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+        }
 
-    /**
-     * Initializes a new {@link AlarmTriggerWrapper}.
-     */
-    public AlarmTriggerWrapper(AlarmTrigger alarmTrigger, int ctx, int account) {
-        this.alarmTrigger = alarmTrigger;
-        this.account = account;
-        this.ctx = ctx;
     }
 
-    public AlarmTrigger getAlarmTrigger() {
-        return this.alarmTrigger;
-    }
-
-
-    /**
-     * Gets the ctx
-     *
-     * @return The ctx
-     */
-    public int getCtx() {
-        return ctx;
-    }
-
-
-    /**
-     * Gets the account
-     *
-     * @return The account
-     */
-    public int getAccount() {
-        return account;
+    @Override
+    public String[] getDependencies() {
+        return new String[] {"com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"};
     }
 
 }

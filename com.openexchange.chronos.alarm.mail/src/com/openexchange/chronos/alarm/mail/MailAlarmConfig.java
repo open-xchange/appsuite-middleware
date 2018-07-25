@@ -59,45 +59,44 @@ import com.openexchange.config.lean.Property;
  * @since v7.10.1
  */
 public class MailAlarmConfig {
+    private static final String PREFIX = "com.openexchange.calendar.alarm.mail.backgroundWorker.";
 
     /**
      * Defines the time in minutes between executions of the mail delivery worker.
      */
-    public static final Property PERIOD = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.period", 30);
+    public static final Property PERIOD = DefaultProperty.valueOf(PREFIX + "period", 30);
 
     /**
      * Defines the initial delay in minutes after which the mail delivery worker runs for the first time.
      */
-    public static final Property INITIAL_DELAY = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.initialDelay", 10);
+    public static final Property INITIAL_DELAY = DefaultProperty.valueOf(PREFIX + "initialDelay", 10);
 
     /**
      * Defines the time in minutes the delivery worker looks ahead to pick up mail alarms. Must not be smaller than {@link #PERIOD}.
      */
-    public static final Property LOOK_AHEAD = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.lookAhead", 35);
+    public static final Property LOOK_AHEAD = DefaultProperty.valueOf(PREFIX + "lookAhead", 35);
 
     /**
      * Defines the time in minutes that is waited until an alarm that is already in process is picked up. E.g. because the node who originally was going to process the trigger has died.
      */
-    public static final Property OVERDUE = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.overdueWaitTime", 5);
+    public static final Property OVERDUE = DefaultProperty.valueOf(PREFIX + "overdueWaitTime", 5);
 
     /**
      * Defines the time in milliseconds an alarm mail should be send out before the trigger time.
      * With this property the admin can configure the average time needed by the mail system to send out the mail.
      * This way the mail should usually be send out on time and not a few seconds late.
      */
-    public static final Property MAIL_SHIFT = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.time.shift", 0);
+    public static final Property MAIL_SHIFT = DefaultProperty.valueOf(PREFIX + "time.shift", 0);
 
     /**
-     * Defines whether each node should spawn an own worker or if one worker should be spawned for the hole cluster.
-     *
-     * Possible values: "cluster" | "node"
+     * Enables or disables the mail alarm delivery worker.
      */
-    public static final Property MODE = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.mode", "cluster");
+    public static final Property ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", true);
 
     /**
      * Defines the amount of mail delivery worker
      */
-    public static final Property WORKER_COUNT = DefaultProperty.valueOf("com.openexchange.calendar.alarm.mail.worker.count", 1);
+    public static final Property WORKER_COUNT = DefaultProperty.valueOf(PREFIX + "count", 1);
 
 
 }

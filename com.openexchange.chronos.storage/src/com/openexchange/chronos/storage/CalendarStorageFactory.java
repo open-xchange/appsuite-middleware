@@ -85,11 +85,6 @@ public interface CalendarStorageFactory {
     CalendarStorage create(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
 
     /**
-     * Initializes a new {@link AdministrativeCalendarStorage}.
-     */
-    AdministrativeCalendarStorage createAdministrative() throws OXException;
-
-    /**
      * Wraps a calendar storage into a special <i>resilient</i> calendar storage that tries to automatically handle SQL <i>truncation</i>
      * and <i>incorrect string</i> warnings by adjusting the affected strings, and retrying the operation. Additionally, no exceptions are
      * raised when trying to store properties or property values that are not supported by the storage.

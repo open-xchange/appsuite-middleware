@@ -53,7 +53,6 @@ import static com.openexchange.osgi.Tools.requireService;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.storage.AdministrativeCalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
@@ -128,11 +127,6 @@ public class RdbCalendarStorageFactory implements CalendarStorageFactory {
     @Override
     public CalendarStorage makeResilient(CalendarStorage storage) {
         return new com.openexchange.chronos.storage.rdb.resilient.RdbCalendarStorage(services, storage, true, true, ProblemSeverity.MAJOR);
-    }
-
-    @Override
-    public AdministrativeCalendarStorage createAdministrative() throws OXException {
-        return new AdministrativeRdbCalendarStorage();
     }
 
 }

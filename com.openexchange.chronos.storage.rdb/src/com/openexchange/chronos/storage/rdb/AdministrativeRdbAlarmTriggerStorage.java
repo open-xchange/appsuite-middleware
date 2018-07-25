@@ -55,18 +55,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
-import com.openexchange.chronos.AlarmTriggerWrapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.Pair;
 
 /**
  * {@link AdministrativeRdbAlarmTriggerStorage}
@@ -80,16 +80,8 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
 
     private static final AlarmTriggerDBMapper MAPPER = AlarmTriggerDBMapper.getInstance();
 
-    /**
-     * Lists alarm triggers for the given user until the given time in ascending order and locks it for update.
-     *
-     * @param user The user id
-     * @param until The upper limit
-     * @return A list of {@link AlarmTrigger}
-     * @throws OXException
-     */
     @Override
-    public List<AlarmTriggerWrapper> getAndLockTriggers(Connection con, Date until, Date overdueTime) throws OXException {
+    public Map<Pair<Integer, Integer>, AlarmTrigger> getAndLockTriggers(Connection con, Date until, Date overdueTime) throws OXException {
         if (overdueTime == null) {
             Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             instance.add(Calendar.MINUTE, -5);
@@ -98,7 +90,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
         return getAndLockTriggers(con, until == null ? null : until.getTime(), overdueTime.getTime());
     }
 
-    private List<AlarmTriggerWrapper> getAndLockTriggers(Connection con, Long until, Long overdueTime) throws OXException {
+    private Map<Pair<Integer, Integer>, AlarmTrigger> getAndLockTriggers(Connection con, Long until, Long overdueTime) throws OXException {
         try {
             AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
@@ -106,10 +98,9 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
             stringBuilder.append(" action=?");
             stringBuilder.append(" AND triggerDate<?");
             stringBuilder.append(" AND ( processed=0 OR (triggerDate<? AND processed<?))");
-            stringBuilder.append(" ORDER BY triggerDate");
             stringBuilder.append(" FOR UPDATE");
 
-            List<AlarmTriggerWrapper> alarmTriggers = new ArrayList<AlarmTriggerWrapper>();
+            Map<Pair<Integer, Integer>, AlarmTrigger> result = new HashMap<>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
 
                 int index = 1;
@@ -120,18 +111,18 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
 
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
                     while (resultSet.next()) {
-                        alarmTriggers.add(readTrigger(resultSet, mappedFields));
+                        result.put(new Pair<Integer, Integer>(resultSet.getInt(1), resultSet.getInt(2)), readTrigger(resultSet, mappedFields));
                     }
                 }
             }
-            return alarmTriggers;
+            return result;
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     };
 
     @Override
-    public void setProcessingStatus(Connection con, List<AlarmTriggerWrapper> triggers, Long time) throws OXException {
+    public void setProcessingStatus(Connection con, Map<Pair<Integer, Integer>, AlarmTrigger> triggers, Long time) throws OXException {
         if (time < 0) {
             time = null;
         }
@@ -139,12 +130,12 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
         stringBuilder.append(" WHERE cid=? AND account=? AND alarm=?");
         try {
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
-                for (AlarmTriggerWrapper trigger : triggers) {
+                for (Pair<Integer, Integer> key: triggers.keySet()) {
                     int param = 1;
                     stmt.setLong(param++, time == null ? 0 : time);
-                    stmt.setInt(param++, trigger.getCtx());
-                    stmt.setInt(param++, trigger.getAccount());
-                    stmt.setInt(param++, trigger.getAlarmTrigger().getAlarm());
+                    stmt.setInt(param++, key.getFirst());
+                    stmt.setInt(param++, key.getSecond());
+                    stmt.setInt(param++, triggers.get(key).getAlarm());
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
@@ -163,17 +154,17 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
      * @throws SQLException
      * @throws OXException
      */
-    private AlarmTriggerWrapper readTrigger(ResultSet resultSet, AlarmTriggerField... fields) throws SQLException, OXException {
-        return new AlarmTriggerWrapper(MAPPER.fromResultSet(resultSet, fields), resultSet.getInt(1), resultSet.getInt(2));
+    private AlarmTrigger readTrigger(ResultSet resultSet, AlarmTriggerField... fields) throws SQLException, OXException {
+        return MAPPER.fromResultSet(resultSet, fields);
     }
 
     @Override
-    public List<AlarmTriggerWrapper> getAndLockMailAlarmTriggers(Connection con, int cid, int account, String eventId) throws OXException {
+    public Map<Pair<Integer, Integer>, AlarmTrigger> getAndLockMailAlarmTriggers(Connection con, int cid, int account, String eventId) throws OXException {
         try {
             AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
             stringBuilder.append(" cid=? AND account=? AND action=? AND eventId=? AND processed=0 FOR UPDATE");
-            List<AlarmTriggerWrapper> alarmTriggers = new ArrayList<AlarmTriggerWrapper>();
+            Map<Pair<Integer, Integer>, AlarmTrigger> result = new HashMap<>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, cid);
@@ -182,10 +173,10 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
                 stmt.setString(parameterIndex++, eventId);
                 try (ResultSet resultSet = logExecuteQuery(stmt)) {
                     while (resultSet.next()) {
-                        alarmTriggers.add(readTrigger(resultSet, mappedFields));
+                        result.put(new Pair<Integer, Integer>(resultSet.getInt(1), resultSet.getInt(2)), readTrigger(resultSet, mappedFields));
                     }
                 }
-                return alarmTriggers;
+                return result;
             }
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
@@ -193,7 +184,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
     }
 
     @Override
-    public AlarmTriggerWrapper getAlarmTrigger(Connection con, int cid, int account, int alarm) throws OXException {
+    public AlarmTrigger getAlarmTrigger(Connection con, int cid, int account, int alarm) throws OXException {
         try {
             AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");

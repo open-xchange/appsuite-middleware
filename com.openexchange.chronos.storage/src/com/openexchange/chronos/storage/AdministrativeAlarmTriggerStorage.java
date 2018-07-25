@@ -51,10 +51,10 @@ package com.openexchange.chronos.storage;
 
 import java.sql.Connection;
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.AlarmTriggerWrapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.Pair;
 
 /**
  * {@link AdministrativeAlarmTriggerStorage}
@@ -65,14 +65,15 @@ import com.openexchange.exception.OXException;
 public interface AdministrativeAlarmTriggerStorage {
 
     /**
-     * Lists alarm triggers until the given time in ascending order
+     * Retrieves a mapping of cic/account {@link Pair}s to alarm triggers which are either not processed yet and have a trigger time before the given until value or are older than the given overdue time.
      *
-     * @param con The connection
-     * @param until The upper limit
-     * @return A list of {@link AlarmTriggerWrapper}s
+     * @param con The connection to use
+     * @param until The upper limit for the trigger time
+     * @param overdueTime The overdue date
+     * @return A mapping of a cid/account {@link Pair} to an {@link AlarmTrigger}
      * @throws OXException
      */
-    List<AlarmTriggerWrapper> getAndLockTriggers(Connection con, Date until, Date overdueTime) throws OXException;
+    Map<Pair<Integer, Integer>, AlarmTrigger> getAndLockTriggers(Connection con, Date until, Date overdueTime) throws OXException;
 
 
     /**
@@ -83,7 +84,7 @@ public interface AdministrativeAlarmTriggerStorage {
      * @param time The time to set or null to reset the status
      * @throws OXException
      */
-    public void setProcessingStatus(Connection con, List<AlarmTriggerWrapper> triggers, Long time) throws OXException;
+    public void setProcessingStatus(Connection con, Map<Pair<Integer, Integer>, AlarmTrigger> triggers, Long time) throws OXException;
 
 
     /**
@@ -93,21 +94,21 @@ public interface AdministrativeAlarmTriggerStorage {
      * @param cid The context id
      * @param account The account id
      * @param eventId The event id
-     * @return A list of {@link AlarmTriggerWrapper}
+     * @return A mapping of a cid/account {@link Pair} to an {@link AlarmTrigger}
      * @throws OXException
      */
-    List<AlarmTriggerWrapper> getAndLockMailAlarmTriggers(Connection con, int cid, int account, String eventId) throws OXException;
+    Map<Pair<Integer, Integer>, AlarmTrigger> getAndLockMailAlarmTriggers(Connection con, int cid, int account, String eventId) throws OXException;
 
 
     /**
-     * Retrieves the {@link AlarmTriggerWrapper}
+     * Retrieves the {@link AlarmTrigger}
      *
      * @param con The connection to use
      * @param cid The context id
      * @param account The calendar account
      * @param alarm The id of the alarm
-     * @return The {@link AlarmTriggerWrapper}
+     * @return The {@link AlarmTrigger}
      * @throws OXException
      */
-    AlarmTriggerWrapper getAlarmTrigger(Connection con, int cid, int account, int alarm) throws OXException;
+    AlarmTrigger getAlarmTrigger(Connection con, int cid, int account, int alarm) throws OXException;
 }
