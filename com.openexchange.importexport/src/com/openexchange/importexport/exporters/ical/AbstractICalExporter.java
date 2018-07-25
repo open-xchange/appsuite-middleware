@@ -49,17 +49,31 @@
 
 package com.openexchange.importexport.exporters.ical;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.osgi.Tools.requireService;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.contact.helpers.ContactDisplayNameHelper;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
+import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -150,6 +164,64 @@ public abstract class AbstractICalExporter implements ICalExport {
 
     public Map<String, List<String>> getBatchIds() {
         return batchIds;
+    }
+
+    /**
+     * Extracts the display name for an exported folder, i.e. the (localized) folder name and owner information.
+     *
+     * @param folder The folder to extract the name for
+     * @return The display name, or <code>null</code> if none could be derived
+     */
+    protected String extractName(UserizedFolder folder) {
+        String name = folder.getLocalizedName(folder.getLocale(), true);
+        if (null == name) {
+            name = folder.getName();
+        }
+        if (null != name && SharedType.getInstance().equals(folder.getType())) {
+            try {
+                Contact owner = ImportExportServices.getContactService().getUser(folder.getSession(), folder.getCreatedBy());
+                String ownerName = ContactDisplayNameHelper.formatDisplayName((I18nServiceRegistry) null, owner, folder.getLocale());
+                if (Strings.isNotEmpty(ownerName)) {
+                    name += " (" + ownerName + ')';
+                }
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(AbstractICalExporter.class).debug("Error getting display name for folder owner", e);
+            }
+        }
+        return name;
+    }
+
+    /**
+     * Extracts the display name for an exported folder, i.e. the (localized) folder name and owner information.
+     *
+     * @param session The session
+     * @param folderId The identifier of the folder to extract the name for
+     * @return The display name, or <code>null</code> if none could be derived
+     */
+    protected String extractName(Session session, String folderId) {
+        try {
+            return extractName(ImportExportServices.getFolderService().getFolder(FolderStorage.REAL_TREE_ID, folderId, session, null));
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(AbstractICalExporter.class).debug("Error extracting name from folder", e);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the configured maximum number of included components when exporting to the iCalendar format.
+     * 
+     * @param session The session
+     * @return The export limit, or <code>-1</code> if not limited
+     */
+    protected static int getExportLimit(Session session) {
+        Integer defaultValue = I(10000);
+        try {
+            ConfigView view = requireService(ConfigViewFactory.class, ImportExportServices.LOOKUP.get()).getView(session.getUserId(), session.getContextId());
+            return i(view.opt("com.openexchange.export.ical.limit", Integer.class, defaultValue));
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(AbstractICalExporter.class).debug("Error getting configured export limit, falling back to {}", defaultValue, e);
+        }
+        return i(defaultValue);
     }
 
 }
