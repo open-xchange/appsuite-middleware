@@ -83,6 +83,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
@@ -124,6 +125,7 @@ import com.openexchange.chronos.provider.folder.FolderCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.ErrorAwareCalendarResult;
 import com.openexchange.chronos.service.EventID;
@@ -984,7 +986,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 }
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-            getSelfProtection().checkResultMap(results);
+            Check.resultSizeNotExceeded(getSelfProtection(), results, get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
         }
         return results;
     }

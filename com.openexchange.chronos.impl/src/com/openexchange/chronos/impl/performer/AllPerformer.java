@@ -72,8 +72,10 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.impl.CalendarFolder;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SearchOptions;
@@ -206,7 +208,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         boolean skipClassified = isSkipClassifiedEvents(session);
         for (Entry<CalendarFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
             resultsPerFolderId.put(entry.getKey().getId(), new EventPostProcessor(session, storage, skipClassified).process(entry.getValue(), entry.getKey()).getEventsResult());
-            getSelfProtection().checkResultMap(resultsPerFolderId);
+            Check.resultSizeNotExceeded(getSelfProtection(), resultsPerFolderId, session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
         }
         return resultsPerFolderId;
     }

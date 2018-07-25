@@ -112,8 +112,20 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
                 // Skip not existing events
                 continue;
             }
-            calendarExport.add(exportPseudoGrupScheduled(event, session));
+            calendarExport.add(prepareForExport(event));
         }
+        return write(calendarExport, optOut);
+    }
+
+    /**
+     * Serializes a calendar export. In case an output stream is available, the iCalendar data is written directly. Otherwise, the data is
+     * written into a new file holder sink.
+     * 
+     * @param calendarExport The calendar export to serialize
+     * @param optOut The output stream to write to, or <code>null</code> to write to a new file holder
+     * @return The file holder sink, or <code>null</code> if the export was directly written to the output stream
+     */
+    protected ThresholdFileHolder write(CalendarExport calendarExport, OutputStream optOut) throws OXException {
         if (null != optOut) {
             calendarExport.writeVCalendar(optOut);
             return null;
@@ -132,20 +144,25 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
     }
 
     /**
-     * Removes organizer and attendees from pseudo group scheduled (see {@link CalendarUtils#isPseudoGroupScheduled(Event)} events
+     * Prepares an event for export.
      *
      * @param event The event
-     * @param session The session
-     * @return The stripped {@link Event}
-     * @throws OXException In case event can't be copied
+     * @return The prepared event
      */
-    private Event exportPseudoGrupScheduled(Event event, Session session) throws OXException {
+    protected static Event prepareForExport(Event event) {
         if (CalendarUtils.isPseudoGroupScheduled(event)) {
-            Event copy = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            Event copy;
+            try {
+                copy = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(AbstractICalExporter.class).warn("Error copying event, falling back to original event data", e);
+                return event;
+            }
             copy.removeAttendees();
             copy.removeOrganizer();
             return copy;
         }
         return event;
     }
+
 }
