@@ -370,7 +370,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         if (null == db.getUrl()) {
-            db.setUrl("jdbc:mysql://" + DEFAULT_HOSTNAME + "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=false&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
+            db.setUrl("jdbc:mysql://" + DEFAULT_HOSTNAME);
         }
 
         boolean bCreateSchemas = null != createSchemas && createSchemas.booleanValue();
