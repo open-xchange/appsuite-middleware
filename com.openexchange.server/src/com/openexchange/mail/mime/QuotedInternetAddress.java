@@ -555,8 +555,11 @@ public final class QuotedInternetAddress extends InternetAddress {
                 break;
 
             case '[': // a domain-literal, probably
+                int lindex = index;
                 rfc822 = true;
-                final int lindex = index;
+                if (start == -1) {
+                    start = index;
+                }
                 outb: for (index++; index < length; index++) {
                     c = s.charAt(index);
                     switch (c) {

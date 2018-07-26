@@ -987,8 +987,10 @@ public class InternetAddress extends Address implements Cloneable {
 		break;
 
 	    case '[':	// a domain-literal, probably
-		rfc822 = true;
-		int lindex = index;
+	    int lindex = index;
+	    rfc822 = true;
+	    if (start == -1)
+	        start = index;
 	      outb:
 		for (index++; index < length; index++) {
 		    c = s.charAt(index);
