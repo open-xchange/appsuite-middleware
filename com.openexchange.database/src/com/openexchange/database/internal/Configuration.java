@@ -315,7 +315,21 @@ public final class Configuration {
         logArgs.add(poolConfig.testOnIdle);
         logArgs.add(Strings.getLineSeparator());
         logArgs.add(poolConfig.testThreads);
-        LOG.info("Database pooling options:" + "{}    Maximum idle connections: {}" + "{}    Maximum idle time: {}ms" + "{}    Maximum active connections: {}" + "{}    Maximum wait time for a connection: {}ms" + "{}    Maximum life time of a connection: {}ms" + "{}    Action if connections exhausted: {}" + "{}    Test connections on activate: {}" + "{}    Test connections on deactivate: {}" + "{}    Test idle connections: {}" + "{}    Test threads for bad connection usage (SLOW): {}", logArgs.toArray(new Object[logArgs.size()]));
+        // @formatter:off
+        LOG.info("Database pooling options:" +
+            "{}    Maximum idle connections: {}" +
+            "{}    Maximum idle time: {}ms" +
+            "{}    Maximum active connections: {}" +
+            "{}    Maximum wait time for a connection: {}ms" +
+            "{}    Maximum life time of a connection: {}ms" +
+            "{}    Action if connections exhausted: {}" +
+            "{}    Test connections on activate: {}" +
+            "{}    Test connections on deactivate: {}" +
+            "{}    Test idle connections: {}" +
+            "{}    Test threads for bad connection usage (SLOW): {}",
+            logArgs.toArray(new Object[logArgs.size()])
+         // @formatter:on
+        );
     }
 
     ConnectionPool.Config getPoolConfig() {
