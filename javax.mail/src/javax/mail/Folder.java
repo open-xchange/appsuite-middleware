@@ -110,7 +110,7 @@ import javax.mail.search.SearchTerm;
  * Note that a Message's message number can change within a
  * session if the containing Folder is expunged using the expunge
  * method.  Clients that use message numbers as references to messages
- * should be aware of this and should be prepared to deal with 
+ * should be aware of this and should be prepared to deal with this
  * situation (probably by flushing out existing message number references
  * and reloading them). Because of this complexity, it is better for
  * clients to use Message objects as references to messages, rather than
