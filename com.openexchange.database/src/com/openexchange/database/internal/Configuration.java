@@ -50,8 +50,11 @@
 package com.openexchange.database.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -67,9 +70,13 @@ public final class Configuration {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Configuration.class);
 
-    private static final String CONFIG_FILENAME = "configdb.properties";
+    private static final String CONFIG_DB_FILENAME = "configdb.properties";
 
     private Properties props;
+
+    private static final String JDBC_CONFIG = "dbconnector.yaml";
+
+    private Properties jdbcProps;
 
     private final Properties readProps = new Properties();
 
@@ -95,6 +102,10 @@ public final class Configuration {
 
     Properties getWriteProps() {
         return writeProps;
+    }
+
+    Properties getJdbcProps() {
+        return jdbcProps;
     }
 
     private String getProperty(final Property property) {
@@ -160,18 +171,65 @@ public final class Configuration {
         if (null != props) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(this.getClass().getName());
         }
-        props = service.getFile(CONFIG_FILENAME);
+        props = service.getFile(CONFIG_DB_FILENAME);
         if (props.isEmpty()) {
             throw DBPoolingExceptionCodes.MISSING_CONFIGURATION.create();
         }
+        readJdbcProps(service);
         separateReadWrite();
         loadDrivers();
         initPoolConfig();
     }
 
+    private void readJdbcProps(ConfigurationService config) {
+        jdbcProps = new Properties();
+
+        // Set defaults:
+        jdbcProps.setProperty("useUnicode", "true");
+        jdbcProps.setProperty("characterEncoding", "UTF-8");
+        jdbcProps.setProperty("autoReconnect", "false");
+        jdbcProps.setProperty("useServerPrepStmts", "false");
+        jdbcProps.setProperty("useTimezone", "true");
+        jdbcProps.setProperty("serverTimezone", "UTC");
+        jdbcProps.setProperty("connectTimeout", "15000");
+        jdbcProps.setProperty("socketTimeout", "15000");
+        jdbcProps.setProperty("useSSL", "false");
+
+        // Apply config
+        jdbcProps.putAll(parseJdbcYaml(config));
+    }
+
+    private Map<String, String> parseJdbcYaml(ConfigurationService config) {
+        Object yaml = config.getYaml(JDBC_CONFIG);
+        if (yaml == null) {
+            return Collections.emptyMap();
+        }
+
+        if (!Map.class.isInstance(yaml)) {
+            LOG.error("Can't parse connector configuration file: {}", JDBC_CONFIG);
+            return Collections.emptyMap();
+        }
+
+        Map<String, Object> jdbcConfig = (Map<String, Object>) yaml;
+        if (!jdbcConfig.containsKey("com.mysql.jdbc")) {
+            LOG.error("Can't parse connector configuration file: {}", JDBC_CONFIG);
+            return Collections.emptyMap();
+        }
+
+        if (!Map.class.isInstance(jdbcConfig.get("com.mysql.jdbc"))) {
+            LOG.error("Can't parse connector configuration file: {}", JDBC_CONFIG);
+            return Collections.emptyMap();
+        }
+
+        Map<String, Object> map = (Map<String, Object>) jdbcConfig.get("com.mysql.jdbc");
+
+        // Enforce Strings
+        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toString()));
+    }
+
     private void separateReadWrite() {
-        readProps.setProperty("useSSL", "false");
-        writeProps.setProperty("useSSL", "false");
+        readProps.putAll(jdbcProps);
+        writeProps.putAll(jdbcProps);
         for (final Object tmp : props.keySet()) {
             final String key = (String) tmp;
             if (key.startsWith("readProperty.")) {
@@ -216,6 +274,7 @@ public final class Configuration {
      */
     public void clear() {
         props = null;
+        jdbcProps = null;
         readProps.clear();
         writeProps.clear();
     }
@@ -256,19 +315,7 @@ public final class Configuration {
         logArgs.add(poolConfig.testOnIdle);
         logArgs.add(Strings.getLineSeparator());
         logArgs.add(poolConfig.testThreads);
-        LOG.info("Database pooling options:" +
-                 "{}    Maximum idle connections: {}" +
-                 "{}    Maximum idle time: {}ms" +
-                 "{}    Maximum active connections: {}" +
-                 "{}    Maximum wait time for a connection: {}ms" +
-                 "{}    Maximum life time of a connection: {}ms" +
-                 "{}    Action if connections exhausted: {}" +
-                 "{}    Test connections on activate: {}" +
-                 "{}    Test connections on deactivate: {}" +
-                 "{}    Test idle connections: {}" +
-                 "{}    Test threads for bad connection usage (SLOW): {}",
-                 logArgs.toArray(new Object[logArgs.size()])
-            );
+        LOG.info("Database pooling options:" + "{}    Maximum idle connections: {}" + "{}    Maximum idle time: {}ms" + "{}    Maximum active connections: {}" + "{}    Maximum wait time for a connection: {}ms" + "{}    Maximum life time of a connection: {}ms" + "{}    Action if connections exhausted: {}" + "{}    Test connections on activate: {}" + "{}    Test connections on deactivate: {}" + "{}    Test idle connections: {}" + "{}    Test threads for bad connection usage (SLOW): {}", logArgs.toArray(new Object[logArgs.size()]));
     }
 
     ConnectionPool.Config getPoolConfig() {

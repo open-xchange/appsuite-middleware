@@ -51,8 +51,6 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,7 +58,6 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -88,12 +85,15 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
 
+    private Properties jdbcProperties;
+
     public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, final ConfigDatabaseService configDatabaseService) {
         super();
         this.management = management;
         this.timer = timer;
         this.configDatabaseService = configDatabaseService;
         this.defaultPoolConfig = configuration.getPoolConfig();
+        this.jdbcProperties = configuration.getJdbcProps();
     }
 
     @Override
@@ -134,22 +134,10 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         return retval;
     }
 
-    private static void parseUrlToProperties(final ConnectionData retval) throws OXException {
-        final int paramStart = retval.url.indexOf('?');
-        if (-1 != paramStart) {
-            final Matcher matcher = pattern.matcher(retval.url);
+    private void removeParameters(ConnectionData retval) throws OXException {
+        int paramStart = retval.url.indexOf('?');
+        if (paramStart != -1) {
             retval.url = retval.url.substring(0, paramStart);
-            while (matcher.find()) {
-                final String name = matcher.group(1);
-                final String value = matcher.group(2);
-                if (name != null && name.length() > 0 && value != null && value.length() > 0) {
-                    try {
-                        retval.props.put(name, URLDecoder.decode(value, "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        throw DBPoolingExceptionCodes.PARAMETER_PROBLEM.create(e, value);
-                    }
-                }
-            }
         }
     }
 
@@ -166,7 +154,6 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
                 retval = new ConnectionData();
                 Properties defaults = new Properties();
                 retval.props = defaults;
-                defaults.put("useSSL", "false");
                 int pos = 1;
                 retval.url = result.getString(pos++);
                 retval.driverClass = result.getString(pos++);
@@ -184,7 +171,9 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
             closeSQLStuff(result, stmt);
             configDatabaseService.backReadOnly(con);
         }
-        parseUrlToProperties(retval);
+
+        removeParameters(retval);
+        retval.props.putAll(jdbcProperties);
         return retval;
     }
 }
