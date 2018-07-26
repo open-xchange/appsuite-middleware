@@ -87,7 +87,7 @@ public class DownloadAction extends AbstractOnboardingAction {
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         String[] onboardingProviderIds = null;
-        String type = requestData.getParameter("type");
+        String type = requestData.requireParameter("type");
         switch (type) {
             case "caldav":
                 if (!OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session)) {
