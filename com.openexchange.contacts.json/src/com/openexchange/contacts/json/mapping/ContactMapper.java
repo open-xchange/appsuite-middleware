@@ -91,6 +91,7 @@ import com.openexchange.java.util.Pair;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ContactMapper} - JSON mapper for contacts.
@@ -3203,6 +3204,17 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             @Override
             public void remove(Contact contact) {
                 // no
+            }
+
+            @Override
+            public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException, OXException {
+                Object value;
+                if (null != session) {
+                    value = from.getSortName(ServerSessionAdapter.valueOf(session).getUser().getLocale());
+                } else {
+                    value = from.getSortName();
+                }
+                return null != value ? value : JSONObject.NULL;
             }
         });
 
