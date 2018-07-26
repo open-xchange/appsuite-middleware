@@ -1344,7 +1344,14 @@ public class InternetAddress extends Address implements Cloneable {
 		    throw new AddressException(
 		     "Quoted local address contains newline without whitespace",
 			addr);
-	    }
+	    } else if (c == '.') {
+        if (i == start)
+            throw new AddressException(
+            "Local address starts with dot", addr);
+        if (lastc == '.')
+            throw new AddressException(
+            "Local address contains dot-dot", addr);
+        }
 	    if (inquote)
 		continue;
 	    if (c == '@') {
