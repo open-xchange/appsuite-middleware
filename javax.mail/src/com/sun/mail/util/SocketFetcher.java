@@ -363,12 +363,12 @@ public class SocketFetcher {
     if (proxyHost != null) {
 	    int i = proxyHost.indexOf(':');
 	    if (i >= 0) {
-		proxyHost = proxyHost.substring(0, i);
 		try {
 		    proxyPort = Integer.parseInt(proxyHost.substring(i + 1));
 		} catch (NumberFormatException ex) {
 		    // ignore it
 		}
+		proxyHost = proxyHost.substring(0, i);
 	    }
 	    proxyPort = PropUtil.getIntProperty(props,
 					prefix + ".proxy.port", proxyPort);
@@ -380,12 +380,12 @@ public class SocketFetcher {
 		    props.getProperty(prefix + ".socks.host", null)) != null) {
 	    int i = socksHost.indexOf(':');
 	    if (i >= 0) {
-		socksHost = socksHost.substring(0, i);
 		try {
 		    socksPort = Integer.parseInt(socksHost.substring(i + 1));
 		} catch (NumberFormatException ex) {
 		    // ignore it
 		}
+		socksHost = socksHost.substring(0, i);
 	    }
 	    socksPort = PropUtil.getIntProperty(props,
 					prefix + ".socks.port", socksPort);
