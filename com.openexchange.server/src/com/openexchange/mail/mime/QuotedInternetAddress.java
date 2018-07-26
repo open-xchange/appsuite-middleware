@@ -866,6 +866,27 @@ public final class QuotedInternetAddress extends InternetAddress {
                     inquote = true;
                 }
                 continue;
+            } else if (c == '\r') {
+                // peek ahead, next char must be LF
+                if (i + 1 < len && addr.charAt(i + 1) != '\n') {
+                    throw new AddressException("Quoted local address contains CR without LF", addr);
+                }
+            } else if (c == '\n') {
+                /*
+                 * CRLF followed by whitespace is allowed in a quoted string.
+                 * We allowed naked LF, but ensure LF is always followed by
+                 * whitespace to prevent spoofing the end of the header.
+                 */
+                if (i + 1 < len && addr.charAt(i + 1) != ' ' && addr.charAt(i + 1) != '\t') {
+                    throw new AddressException("Quoted local address contains newline without whitespace", addr);
+                }
+            } else if (c == '.') {
+                if (i == start) {
+                    throw new AddressException("Local address starts with dot", addr);
+                }
+                if (lastc == '.') {
+                    throw new AddressException("Local address contains dot-dot", addr);
+                }
             }
             if (inquote) {
                 continue;
