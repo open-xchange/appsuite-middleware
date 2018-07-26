@@ -65,17 +65,6 @@ public class SearchTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testPattern() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("*", folderId);
-        assertFalse(itm.getLastResponse().hasError());
-        assertTitles(files, all);
-
-        files = itm.search("Test ?5", folderId);
-        assertFalse(itm.getLastResponse().hasError());
-        assertTitles(files, "Test 15", "Test 25");
-    }
-
-    @Test
     public void testAll() throws Exception {
         List<com.openexchange.file.storage.File> files = itm.search("", folderId);
         assertFalse(itm.getLastResponse().hasError());

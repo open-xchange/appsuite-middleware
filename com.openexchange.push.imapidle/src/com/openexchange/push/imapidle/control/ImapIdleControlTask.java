@@ -50,47 +50,69 @@
 package com.openexchange.push.imapidle.control;
 
 import java.util.List;
-import com.openexchange.push.imapidle.ImapIdlePushListener;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadRenamer;
 
 /**
- * {@link ImapIdleControlTask} - Responsible for interrupting expired threads currently performing IMAP IDLE.
+ * {@link ImapIdleControlTask} - Responsible for interrupting IMAP IDLE of expired threads.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ImapIdleControlTask implements Runnable {
+public class ImapIdleControlTask extends AbstractImapIdleControlTask implements Task<Void> {
 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdleControlTask.class);
-
-    private final ImapIdleControl control;
+    private volatile boolean keepOn;
 
     /**
      * Initializes a new {@link ImapIdleControlTask}.
      */
     public ImapIdleControlTask(ImapIdleControl control) {
-        super();
-        this.control = control;
+        super(control);
+        keepOn = true;
     }
 
     @Override
-    public void run() {
+    public Void call() {
         try {
-            List<ImapIdleRegistration> expired = control.removeExpired();
-            for (ImapIdleRegistration registration : expired) {
-                // Idl'ing for too long
-                ImapIdlePushListener pushListener = registration.getPushListener();
-                if (pushListener.isIdling()) {
-                    try {
-                        pushListener.markInterrupted();
-                        registration.getImapFolder().close(false);
-                    } catch (Exception e) {
-                        LOGGER.warn("Failed to interrupt elapsed {}IMAP-IDLE listener for user {} in context {}.", pushListener.isPermanent() ? "permanent " : "", pushListener.getUserId(), pushListener.getContextId());
+            while (keepOn) {
+                try {
+                    List<ImapIdleRegistration> expired = control.awaitExpired();
+                    for (ImapIdleRegistration registration : expired) {
+                        // Idl'ing for too long
+                        handleExpired(registration);
                     }
+                } catch (InterruptedException e) {
+                    throw e;
+                } catch (Exception e) {
+                    // Ignore
                 }
             }
-        } catch (Exception e) {
-            // Ignore
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+        return null;
+    }
+
+    /**
+     * Signals to cancel this task.
+     */
+    public void cancel() {
+        keepOn = false;
+    }
+
+    @Override
+    public void afterExecute(Throwable throwable) {
+        // NOP
+    }
+
+    @Override
+    public void beforeExecute(Thread thread) {
+        // NOP
+    }
+
+    @Override
+    public void setThreadName(ThreadRenamer threadRenamer) {
+        threadRenamer.renamePrefix("ImapIdleControlTask");
     }
 
 }

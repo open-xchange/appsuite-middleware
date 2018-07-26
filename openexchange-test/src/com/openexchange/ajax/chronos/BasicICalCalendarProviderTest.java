@@ -74,6 +74,7 @@ import org.apache.http.HttpStatus;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
+import org.junit.Ignore;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
@@ -107,6 +108,7 @@ import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
+@Ignore
 public class BasicICalCalendarProviderTest extends AbstractExternalProviderChronosTest {
 
     public BasicICalCalendarProviderTest() {

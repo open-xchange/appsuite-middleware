@@ -163,36 +163,6 @@ public class Bug40142Test extends AbstractInfostoreTest {
         assertEquals("Name should be the same", "name.name (1).txt.pgp", actual.getFileName());
     }
 
-    @Test
-    public void testCopyFile() throws OXException, IOException, SAXException, JSONException {
-
-        final FolderObject folder = generateInfostoreFolder("InfostoreCreateDeleteTest Folder");
-        ftm.insertFolderOnServer(folder);
-        File actual;
-
-        {
-            final File expected = new DefaultFile();
-            expected.setCreated(new Date());
-            expected.setFolderId(String.valueOf(folder.getObjectID()));
-            expected.setFileName("name.name.txt.pgp");
-            expected.setLastModified(new Date());
-            final java.io.File file = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
-
-            itm.newAction(expected, file);
-            assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
-
-            actual = itm.getAction(expected.getId());
-            assertEquals("Name should be the same", expected.getFileName(), actual.getFileName());
-        }
-        itm.copyAction(actual.getId(), folder.getObjectID() + "", actual);
-        final String id = actual.getId();
-
-
-        actual = itm.getAction(id);
-        assertEquals("Name should be the same", "name.name (1).txt.pgp", actual.getFileName());
-
-    }
-
     @SuppressWarnings("unchecked")
     @Test
     public void testDeleteFileWithExistingNameInTrash() throws OXException, IOException, SAXException, JSONException {

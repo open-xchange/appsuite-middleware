@@ -47,45 +47,36 @@
  *
  */
 
-package com.openexchange.rest.passwordchange.history;
+package com.openexchange.push.imapidle.control;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import javax.ws.rs.core.Application;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.json.JSONArray;
-import org.junit.Test;
-import com.openexchange.admin.rest.passwordchange.history.api.PasswordChangeHistoryREST;
-import com.openexchange.passwordchange.history.PasswordChangeInfo;
+import java.util.List;
 
 /**
- * {@link TimeTest}
+ * {@link ImapIdlePeriodicControlTask} - Responsible for interrupting expired threads currently performing IMAP IDLE.
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class TimeTest extends AbstractPasswordchangehistoryTest {
+public class ImapIdlePeriodicControlTask extends AbstractImapIdleControlTask implements Runnable {
+
+    /**
+     * Initializes a new {@link ImapIdlePeriodicControlTask}.
+     */
+    public ImapIdlePeriodicControlTask(ImapIdleControl control) {
+        super(control);
+    }
 
     @Override
-    protected Application configure() {
-        return new ResourceConfig(PasswordChangeHistoryREST.class);
-    }
-
-    @Test
-    public void testTime() throws Exception {
-
-        String retval = pwdhapi.passwdChanges(contextID, userID, new Long(0), "date");
-        JSONArray array = new JSONArray(retval);
-
-        for (int i = 0; i < array.length(); i++) {
-            PasswordChangeInfo info = parse(array.getJSONObject(i));
-            if ((send - info.getCreated()) < 1000) {
-                // Check other criteria. This may fail if a password change made by another test was within the last second
-                assertEquals("Was not changed by this test!", CLIENT_ID, info.getClient());
-                assertEquals("Was not changed by this test!", "127.0.0.1", info.getIP());
-                return;
+    public void run() {
+        try {
+            List<ImapIdleRegistration> expired = control.removeExpired();
+            for (ImapIdleRegistration registration : expired) {
+                // Idl'ing for too long
+                handleExpired(registration);
             }
+        } catch (Exception e) {
+            // Ignore
         }
-        fail("Did not find any timestamp near the transmitting timestamp");
     }
+
 }

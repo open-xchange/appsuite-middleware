@@ -61,7 +61,6 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     LimitTest.class,
-    TimeTest.class
 })
 public class PasswordchangehistorySuite {
 

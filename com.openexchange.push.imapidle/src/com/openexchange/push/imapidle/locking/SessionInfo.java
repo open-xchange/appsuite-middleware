@@ -53,7 +53,7 @@ import javax.annotation.concurrent.Immutable;
 import com.openexchange.session.Session;
 
 /**
- * {@link SessionInfo} - The session info.
+ * {@link SessionInfo} - The session info for the IMAP-IDLE listener.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2

@@ -73,8 +73,73 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
     /** The time-to-live in cache; cluster lock timeout minus 5 minutes */
     private static final long CACHE_EXPIRATION = ImapIdleClusterLock.TIMEOUT_MILLIS - 300000L;
 
+    static enum Validity {
+        VALID, TIMED_OUT, NO_SUCH_SESSION;
+    }
+
+    /** The arguments to control validation of session existence */
+    static class SessionValidationArgs {
+
+        static class Builder {
+
+            private boolean validateSessionExistence;
+            private boolean tranzient;
+            private HazelcastInstance hzInstance;
+
+            Builder() {
+                super();
+            }
+
+            Builder withValidateSessionExistence(boolean validateSessionExistence) {
+                this.validateSessionExistence = validateSessionExistence;
+                return this;
+            }
+
+            Builder withTranzient(boolean tranzient) {
+                this.tranzient = tranzient;
+                return this;
+            }
+
+            Builder withHzInstance(HazelcastInstance hzInstance) {
+                this.hzInstance = hzInstance;
+                return this;
+            }
+
+            SessionValidationArgs build() {
+                return new SessionValidationArgs(validateSessionExistence, tranzient, hzInstance);
+            }
+        }
+
+        /** The constant for <b>no(!)</b> validation of session existence */
+        static final SessionValidationArgs NO_SESSION_EXISTENCE_VALIDATION = new Builder().withValidateSessionExistence(false).build();
+
+        /** <code>true</code> to perform validation of session existence; otherwise <code>false</code> to discard validation */
+        final boolean validateSessionExistence;
+
+        /** <code>true</code> if session is not supposed to be held in session storage; otherwise <code>false</code> */
+        final boolean tranzient;
+
+        /** The Hazelcast instance */
+        final HazelcastInstance hzInstance;
+
+        /**
+         * Initializes a new {@link SessionValidationArds}.
+         */
+        SessionValidationArgs(boolean validateSessionExistence, boolean tranzient, HazelcastInstance hzInstance) {
+            super();
+            this.validateSessionExistence = validateSessionExistence;
+            this.tranzient = tranzient;
+            this.hzInstance = hzInstance;
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     /** The service look-up */
     protected final ServiceLookup services;
+
+    /** <code>true</code> to perform validation of session existence; otherwise <code>false</code> to discard validation */
+    protected final boolean validateSessionExistence;
 
     /**
      * A volatile cache for remote look-ups of transient sessions
@@ -86,10 +151,22 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
     /**
      * Initializes a new {@link AbstractImapIdleClusterLock}.
      */
-    protected AbstractImapIdleClusterLock(ServiceLookup services) {
+    protected AbstractImapIdleClusterLock(boolean validateSessionExistence, ServiceLookup services) {
         super();
+        this.validateSessionExistence = validateSessionExistence;
         this.services = services;
         remoteLookUps = CacheBuilder.newBuilder().initialCapacity(512).expireAfterWrite(CACHE_EXPIRATION, TimeUnit.MILLISECONDS).build();
+    }
+
+    /**
+     * Gets the appropriate validation arguments.
+     *
+     * @param sessionInfo The session info
+     * @param hzInstance The Hazelcast instance to use
+     * @return The validation arguments
+     */
+    protected SessionValidationArgs getValidationArgs(SessionInfo sessionInfo, HazelcastInstance hzInstance) {
+        return validateSessionExistence ? new SessionValidationArgs.Builder().withValidateSessionExistence(true).withTranzient(sessionInfo.isTransient()).withHzInstance(hzInstance).build() : SessionValidationArgs.NO_SESSION_EXISTENCE_VALIDATION;
     }
 
     /**
@@ -111,12 +188,20 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
      *
      * @param value The value to check
      * @param now The current time stamp
-     * @param tranzient <code>true</code> if session is not supposed to be held in session storage; otherwise <code>false</code>
-     * @param hzInstance The Hazelcast instance
+     * @param validationArguments The arguments to control validation of session existence
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
-    protected boolean validValue(String value, long now, boolean tranzient, HazelcastInstance hzInstance) {
-        return (now - parseMillisFromValue(value) <= TIMEOUT_MILLIS) && existsSessionFromValue(value, tranzient, hzInstance);
+    protected Validity validateValue(String value, long now, SessionValidationArgs validationArguments) {
+        if (now - parseMillisFromValue(value) > TIMEOUT_MILLIS) {
+            return Validity.TIMED_OUT;
+        }
+
+        if (validationArguments.validateSessionExistence && (false == existsSessionFromValue(value, validationArguments.tranzient, validationArguments.hzInstance))) {
+            // Session could not be found
+            return Validity.NO_SUCH_SESSION;
+        }
+
+        return Validity.VALID;
     }
 
     /**
@@ -125,7 +210,7 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
      * @param value The value
      * @return The milliseconds
      */
-    protected long parseMillisFromValue(String value) {
+    private long parseMillisFromValue(String value) {
         int pos = value.indexOf('?');
         return Long.parseLong(pos > 0 ? value.substring(0, pos) : value);
     }
@@ -138,7 +223,7 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
      * @param hzInstance The Hazelcast instance
      * @return <code>true</code> if session still exists; otherwise <code>false</code>
      */
-    protected boolean existsSessionFromValue(String value, boolean tranzient, HazelcastInstance hzInstance) {
+    private boolean existsSessionFromValue(String value, boolean tranzient, HazelcastInstance hzInstance) {
         int pos = value.indexOf('?');
         if (pos < 0) {
             // Value from a permanent listener - Always true

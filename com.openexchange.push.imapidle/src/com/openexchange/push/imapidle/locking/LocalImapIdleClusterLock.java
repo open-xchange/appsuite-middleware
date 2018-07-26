@@ -67,8 +67,8 @@ public class LocalImapIdleClusterLock extends AbstractImapIdleClusterLock {
     /**
      * Initializes a new {@link LocalImapIdleClusterLock}.
      */
-    public LocalImapIdleClusterLock(ServiceLookup services) {
-        super(services);
+    public LocalImapIdleClusterLock(boolean validateSessionExistence, ServiceLookup services) {
+        super(validateSessionExistence, services);
         locks = new ConcurrentHashMap<>(2048, 0.9F, 1);
     }
 
@@ -82,7 +82,7 @@ public class LocalImapIdleClusterLock extends AbstractImapIdleClusterLock {
     }
 
     @Override
-    public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
+    public AcquisitionResult acquireLock(SessionInfo sessionInfo) throws OXException {
         Key key = generateKey(sessionInfo);
 
         long now = System.currentTimeMillis();
@@ -90,17 +90,30 @@ public class LocalImapIdleClusterLock extends AbstractImapIdleClusterLock {
 
         if (null == previous) {
             // Not present before
-            return true;
+            return AcquisitionResult.ACQUIRED_NEW;
         }
 
         // Check if valid
-        if (validValue(previous, now, sessionInfo.isTransient(), null)) {
+        Validity validity = validateValue(previous, now, getValidationArgs(sessionInfo, null));
+        if (Validity.VALID == validity) {
             // Locked
-            return false;
+            return AcquisitionResult.NOT_ACQUIRED;
         }
 
         // Invalid entry - try to replace it mutually exclusive
-        return locks.replace(key, previous, generateValue(now, sessionInfo));
+        boolean replaced = locks.replace(key, previous, generateValue(now, sessionInfo));
+        if (false == replaced) {
+            return AcquisitionResult.NOT_ACQUIRED;
+        }
+
+        switch (validity) {
+            case NO_SUCH_SESSION:
+                return AcquisitionResult.ACQUIRED_NO_SUCH_SESSION;
+            case TIMED_OUT:
+                return AcquisitionResult.ACQUIRED_TIMED_OUT;
+            default:
+                return AcquisitionResult.ACQUIRED_NEW;
+        }
     }
 
     @Override

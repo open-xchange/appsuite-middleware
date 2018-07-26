@@ -61,16 +61,36 @@ import com.openexchange.exception.OXException;
 public interface ImapIdleClusterLock {
 
     /**
-     * The default timeout for an acquired lock in milliseconds.
+     * The default timeout (10 minutes) for an acquired cluster lock in milliseconds.
      */
     public static final long TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(10L);
 
+    /** The cluster lock type */
     public static enum Type {
         HAZELCAST,
         DATABASE,
         LOCAL,
-        NONE,
-        ;
+        NONE;
+    }
+
+    /** Signals the result of an acquisition attempt for a cluster lock */
+    public static enum AcquisitionResult {
+        /**
+         * The was no such cluster lock, hence successfully acquired
+         */
+        ACQUIRED_NEW,
+        /**
+         * The existent cluster lock timed out, hence successfully acquired
+         */
+        ACQUIRED_TIMED_OUT,
+        /**
+         * The session associated with existent cluster lock is gone, hence successfully acquired
+         */
+        ACQUIRED_NO_SUCH_SESSION,
+        /**
+         * The cluster lock is still held by another listener
+         */
+        NOT_ACQUIRED;
     }
 
     /**
@@ -84,10 +104,10 @@ public interface ImapIdleClusterLock {
      * Attempts to acquires the lock for given user
      *
      * @param sessionInfo The associated session
-     * @return <code>true</code> if lock was acquired; otherwise <code>false</code> if another one acquired the lock before
+     * @return The acquire result
      * @throws OXException
      */
-    boolean acquireLock(SessionInfo sessionInfo) throws OXException;
+    AcquisitionResult acquireLock(SessionInfo sessionInfo) throws OXException;
 
     /**
      * Refreshed the lock for given user.

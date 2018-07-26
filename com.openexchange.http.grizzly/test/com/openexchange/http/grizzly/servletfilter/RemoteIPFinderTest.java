@@ -62,13 +62,13 @@ import com.openexchange.net.IPTools;
 public class RemoteIPFinderTest {
 
     // extra spaces for trim() test
-    private final static String validIPv4Remotes   = " 192.168.32.49 , 192.168.32.50 , 192.168.33.225, 192.168.33.224";
+    private final static String validIPv4Remotes = " 192.168.32.49 , 192.168.32.50 , 192.168.33.225, 192.168.33.224";
     private final static String invalidIPv4Remotes = "192.168.32.49, 192.168.32.555, 192.168.33.225, 192.168.33.224";
-    private final static String knownIPv4          = " 192.168.33.225 , 192.168.33.224 ";
+    private final static String knownIPv4 = " 192.168.33.225 , 192.168.33.224 ";
 
-    private final static String validIPv6Remotes   = "2001:db8:0:8d3:0:8a2e:70:7341, 2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
+    private final static String validIPv6Remotes = "2001:db8:0:8d3:0:8a2e:70:7341, 2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
     private final static String invalidIPv6Remotes = "2001:db8:0:8d3:0:8a2e:70:, 2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
-    private final static String knownIPv6          = "2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
+    private final static String knownIPv6 = "2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344";
 
     private final String emptyRemote = "";
 
@@ -79,8 +79,7 @@ public class RemoteIPFinderTest {
 
     @Test
     public void testEmptyKnownIPv4() {
-        String remoteIP = IPTools.getRemoteIP(validIPv4Remotes, IPTools.filterIP(emptyRemote));
-        assertNull(remoteIP);
+        evaluate(emptyRemote, validIPv4Remotes, "192.168.33.224");
     }
 
     @Test
@@ -102,8 +101,7 @@ public class RemoteIPFinderTest {
 
     @Test
     public void testEmptyKnownIPv6() {
-        String remoteIP = IPTools.getRemoteIP(validIPv6Remotes, IPTools.filterIP(emptyRemote));
-        assertNull(remoteIP);
+        evaluate(emptyRemote, validIPv6Remotes, "2001:db8:0:8d3:0:8a2e:70:7344");
     }
 
     @Test

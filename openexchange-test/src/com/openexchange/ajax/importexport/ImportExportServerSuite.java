@@ -67,6 +67,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     //CSV
     CSVImportExportServletTest.class,
     Bug18482Test_ByteOrderMarkOnUtf8.class,
+    Bug20516Test.class,
     Bug32200Test.class,
     Bug33748Test.class,
     Bug32994Test.class,

@@ -72,8 +72,8 @@ public class NoOpImapIdleClusterLock implements ImapIdleClusterLock {
     }
 
     @Override
-    public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
-        return true;
+    public AcquisitionResult acquireLock(SessionInfo sessionInfo) throws OXException {
+        return AcquisitionResult.ACQUIRED_NEW;
     }
 
     @Override

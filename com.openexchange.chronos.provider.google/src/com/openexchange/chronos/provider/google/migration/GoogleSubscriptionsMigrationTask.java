@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.google.migration;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.HashSet;
@@ -128,7 +129,16 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
         int[] contextsInSameSchema = params.getContextsInSameSchema();
 
         for (int ctxId : contextsInSameSchema) {
-            Context ctx = contextService.loadContext(ctxId);
+            Context ctx;
+            try {
+                ctx = contextService.loadContext(ctxId);
+            } catch (OXException e) {
+                if ("CTX-0001".equals(e.getErrorCode())) {
+                    LOG.error("Unable to load context {}, skipping migration.", I(ctxId), e);
+                    continue;
+                }
+                throw e;
+            }
             /*
              * Step 1: Load subscriptions
              */
