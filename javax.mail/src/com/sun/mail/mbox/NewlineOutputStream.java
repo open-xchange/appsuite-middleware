@@ -59,7 +59,7 @@ public class NewlineOutputStream extends FilterOutputStream {
     static {
 	String s = null;
 	try {
-	    s = System.getProperty("line.separator");
+	    s = System.lineSeparator();
 	} catch (SecurityException sex) {
 	    // ignore, should never happen
 	}
