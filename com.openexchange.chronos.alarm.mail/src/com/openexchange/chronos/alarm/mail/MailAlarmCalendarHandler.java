@@ -80,7 +80,7 @@ public class MailAlarmCalendarHandler implements CalendarHandler {
     public void handle(CalendarEvent event) {
         // Check deleted events and remove the according tasks
         for(DeleteResult deletion: event.getDeletions()) {
-            worker.cancelAll(deletion.getEventID().getObjectID());
+            worker.cancelAll(event.getContextId(), event.getAccountId(), deletion.getEventID().getObjectID());
         }
         // Check if an updated events has tasks and if so load and check the appropriate alarm data
         List<Event> eventsToCheck = new ArrayList<>();

@@ -275,13 +275,13 @@ public class MailAlarmDeliveryWorker implements Runnable {
      *
      * @param eventID The event id to cancel tasks for. E.g. because the event is deleted.
      */
-    public void cancelAll(String eventId) {
+    public void cancelAll(int cid, int accountId, String eventId) {
         Iterator<Entry<Key, ScheduledTimerTask>> iterator = scheduledTasks.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Entry<Key, ScheduledTimerTask> next = iterator.next();
-            if (next.getKey().getEventId().equals(eventId)) {
-                LOG.trace("Canceled mail alarm task for {}", next.getKey());
-                next.getValue().cancel();
+        for (Entry<Key, ScheduledTimerTask> entry : scheduledTasks.entrySet()) {
+            Key key = entry.getKey();
+            if (key.getCid() == cid && key.getAccount() == accountId && key.getEventId().equals(eventId)) {
+                LOG.trace("Canceled mail alarm task for {}", key);
+                entry.getValue().cancel();
                 iterator.remove();
             }
         }
