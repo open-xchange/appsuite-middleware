@@ -56,6 +56,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -4076,12 +4077,23 @@ public class Contact extends CommonObject {
         return true;
     }
 
-    private static final String DIVIDER = "_";
+    /**
+     * Gets a string suitable to sort contacts (as used when ordering contact results via {@link Contact#SPECIAL_SORTING}), using no
+     * specific locale.
+     * 
+     * @return The sort name
+     */
+    public String getSortName() {
+        return getSortName(null);
+    }
 
     /**
      * Gets a string suitable to sort contacts (as used when ordering contact results via {@link Contact#SPECIAL_SORTING}).
+     * 
+     * @param locale The locale to consider, or <code>null</code> to fallback to the default sort name
+     * @return The sort name
      */
-    public String getSortName() {
+    public String getSortName(Locale locale) {
         /*
          * prefer display name for distribution lists
          */
@@ -4096,14 +4108,22 @@ public class Contact extends CommonObject {
             return sortName;
         }
         /*
-         * for contacts, use last- and firstname, preferring the yomi names if set
+         * for contacts, use last- and firstname, preferring the yomi names if suitable
          */
+        boolean preferYomiFields = null != locale && Locale.JAPANESE.getLanguage().equals(locale.getLanguage());
+        preferYomiFields = true;
         {
+            String[] names;
+            if (preferYomiFields) {
+                names = new String[] { getYomiLastName(), getYomiFirstName(), getSurName(), getGivenName() };
+            } else {
+                names = new String[] { getSurName(), getGivenName(), getYomiLastName(), getYomiFirstName() };
+            }
             StringBuilder stringBuilder = new StringBuilder(64);
-            for (String value : new String[] { getYomiLastName(), getYomiFirstName(), getSurName(), getGivenName() }) {
+            for (String value : names) {
                 if (Strings.isNotEmpty(value)) {
-                    if(stringBuilder.length() != 0) {
-                        stringBuilder.append(DIVIDER);
+                    if (0 < stringBuilder.length()) {
+                        stringBuilder.append('_');
                     }
                     stringBuilder.append(value);
                 }
@@ -4115,7 +4135,13 @@ public class Contact extends CommonObject {
         /*
          * otherwise, use first non-empty value in displayname, (yomi)company, email1, email2
          */
-        for (int column : new int[] { DISPLAY_NAME, YOMI_COMPANY, COMPANY, EMAIL1, EMAIL2 }) {
+        int[] columns;
+        if (preferYomiFields) {
+            columns = new int[] { DISPLAY_NAME, YOMI_COMPANY, COMPANY, EMAIL1, EMAIL2 };
+        } else {
+            columns = new int[] { DISPLAY_NAME, COMPANY, YOMI_COMPANY, EMAIL1, EMAIL2 };
+        }
+        for (int column : columns) {
             String value = (String) get(column);
             if (Strings.isNotEmpty(value)) {
                 return value;

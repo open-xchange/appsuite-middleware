@@ -57,37 +57,49 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 
 /**
- * {@link Bug53690Test}
+ * {@link Bug59522Test}
  *
- * Fields considered for sorting / categorizing contacts inconsistent
+ * Odd sorting with furigana fields in non japanese languages
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
-public class Bug53690Test {
+public class Bug59522Test {
 
     @Test
-    public void testSortWithYomiFirstNameOnly() {
-        Contact contact = new Contact();
-        contact.setYomiFirstName("test");
-        assertFalse("No sort name", Strings.isEmpty(contact.getSortName()));
-    }
-
-    @Test
-    public void testSortWithGivenNameOnly() {
-        Contact contact = new Contact();
-        contact.setGivenName("test");
-        assertFalse("No sort name", Strings.isEmpty(contact.getSortName()));
-    }
-
-    @Test
-    public void testSortYomiNamesFirst() {
+    public void testSortWithJapaneseLocale() {
         Contact contact = new Contact();
         contact.setYomiFirstName("YomiFirstName");
         contact.setYomiLastName("YomiLastName");
         contact.setSurName("SurName");
         contact.setGivenName("GivenName");
-        assertFalse("No sort name", Strings.isEmpty(contact.getSortName(Locale.JAPANESE)));
+        assertFalse("No sort name", Strings.isEmpty(contact.getSortName()));
+        assertTrue("Yomi names not first", contact.getSortName(Locale.JAPAN).startsWith("YomiLastName_YomiFirstName"));
         assertTrue("Yomi names not first", contact.getSortName(Locale.JAPANESE).startsWith("YomiLastName_YomiFirstName"));
     }
+
+    @Test
+    public void testSortWithNonJapaneseLocale() {
+        Contact contact = new Contact();
+        contact.setYomiFirstName("YomiFirstName");
+        contact.setYomiLastName("YomiLastName");
+        contact.setSurName("SurName");
+        contact.setGivenName("GivenName");
+        assertFalse("No sort name", Strings.isEmpty(contact.getSortName()));
+        assertTrue("Non-Yomi names not first", contact.getSortName(Locale.GERMAN).startsWith("SurName_GivenName"));
+        assertTrue("Non-Yomi names not first", contact.getSortName(Locale.GERMANY).startsWith("SurName_GivenName"));
+    }
+
+    @Test
+    public void testSortWithoutLocale() {
+        Contact contact = new Contact();
+        contact.setYomiFirstName("YomiFirstName");
+        contact.setYomiLastName("YomiLastName");
+        contact.setSurName("SurName");
+        contact.setGivenName("GivenName");
+        assertFalse("No sort name", Strings.isEmpty(contact.getSortName()));
+        assertTrue("Non-Yomi names not first", contact.getSortName().startsWith("SurName_GivenName"));
+        assertTrue("Non-Yomi names not first", contact.getSortName().startsWith("SurName_GivenName"));
+    }
+
 }
