@@ -595,7 +595,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     private Alarm readAlarm(String eventId, ResultSet resultSet, AlarmField[] fields) throws SQLException, OXException {
-        return adjustAfterLoad(eventId, MAPPER.fromResultSet(resultSet, fields));
+        return adjustAfterLoad(eventId, MAPPER.fromResultSet(resultSet, MAPPER.getMappedFields(fields)));
     }
 
     /**
@@ -858,8 +858,9 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @throws SQLException
      */
     private Alarm selectAlarm(Connection con, int cid, int accountId, int alarmId, AlarmField[] fields) throws OXException, SQLException {
+        AlarmField[] mappedFields = MAPPER.getMappedFields(fields);
         StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT event,").append(MAPPER.getColumns(fields))
+            .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
             .append(" FROM calendar_alarm WHERE cid=? AND account=? AND id=?;");
         try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;

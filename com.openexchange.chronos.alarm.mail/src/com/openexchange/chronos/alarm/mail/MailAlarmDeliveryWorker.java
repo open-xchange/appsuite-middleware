@@ -51,6 +51,7 @@ package com.openexchange.chronos.alarm.mail;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -74,6 +75,7 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
@@ -131,17 +133,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
      * @param overdueWaitTime The time in minutes to wait until an old trigger is picked up.
      * @throws OXException If not administrative storage could be created.
      */
-    public MailAlarmDeliveryWorker( AdministrativeAlarmTriggerStorage storage,
-                                    CalendarStorageFactory factory,
-                                    DatabaseService dbservice,
-                                    ContextService ctxService,
-                                    CalendarUtilities calUtil,
-                                    TimerService timerService,
-                                    MailAlarmNotificationService mailService,
-                                    int lookAhead,
-                                    int timeUnit,
-                                    int mailShift,
-                                    int overdueWaitTime) throws OXException {
+    public MailAlarmDeliveryWorker(AdministrativeAlarmTriggerStorage storage, CalendarStorageFactory factory, DatabaseService dbservice, ContextService ctxService, CalendarUtilities calUtil, TimerService timerService, MailAlarmNotificationService mailService, int lookAhead, int timeUnit, int mailShift, int overdueWaitTime) throws OXException {
         this.storage = storage;
         this.dbservice = dbservice;
         this.timeUnit = timeUnit;
@@ -160,7 +152,6 @@ public class MailAlarmDeliveryWorker implements Runnable {
         LOG.info("Started mail alarm delivery worker...");
         Calendar until = Calendar.getInstance(UTC);
         until.add(timeUnit, lookAhead);
-        boolean succesfull = false;
         try {
             List<Integer> ctxIds = ctxService.getDistinctContextsPerSchema();
             Calendar currentUTCTime = Calendar.getInstance(UTC);
@@ -170,76 +161,74 @@ public class MailAlarmDeliveryWorker implements Runnable {
                 if (!Updater.getInstance().getStatus(ctxId).isExecutedSuccessfully(MailAlarmDeliveryWorkerUpdateTask.class.getName())) {
                     continue;
                 }
-
-                Connection con = dbservice.getForUpdateTask(ctxId);
+                Connection con = null;
+                boolean successful = false;
                 boolean readOnly = true;
                 try {
+                    con = dbservice.getForUpdateTask(ctxId);
                     con.setAutoCommit(false);
                     Calendar overdueTime = Calendar.getInstance(UTC);
                     overdueTime.add(Calendar.MINUTE, -Math.abs(overdueWaitTime));
-                    Map<Pair<Integer, Integer>, AlarmTrigger> lockedTriggers = storage.getAndLockTriggers(con, until.getTime(), overdueTime.getTime());
+                    Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers = storage.getAndLockTriggers(con, until.getTime(), overdueTime.getTime());
                     if (lockedTriggers.isEmpty()) {
                         continue;
                     }
-
                     storage.setProcessingStatus(con, lockedTriggers, currentUTCTime.getTimeInMillis());
-                    readOnly = false;
-                    for (Entry<Pair<Integer, Integer>, AlarmTrigger> entry: lockedTriggers.entrySet()) {
-                        int cid = entry.getKey().getFirst();
-                        int account = entry.getKey().getSecond();
-                        AlarmTrigger trigger = entry.getValue();
-
-                        CalendarStorage ctxStorage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(con, con), DBTransactionPolicy.NO_TRANSACTIONS);
-                        Alarm alarm = ctxStorage.getAlarmStorage().loadAlarm(trigger.getAlarm());
-                        Calendar calTriggerTime = Calendar.getInstance(UTC);
-                        calTriggerTime.setTimeInMillis(entry.getValue().getTime());
-
-                        Calendar now = Calendar.getInstance(UTC);
-
-                        long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - mailShift;
-                        if (delay < 0) {
-                            delay = 0;
-                        }
-
-                        SingleMailDeliveryTask task = createTask(cid, account, alarm, trigger, currentUTCTime.getTimeInMillis());
-                        ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
-                        Key key = key(cid, account, trigger.getEventId(), alarm.getId());
-                        scheduledTasks.put(key, timer);
-                        LOG.trace("Created a new mail alarm task for {}", key);
-                    }
                     con.commit();
-                    succesfull = true;
+                    readOnly = false;
+                    spawnDeliveryTaskForTriggers(con, lockedTriggers, until, currentUTCTime);
+                    successful = true;
                 } catch (SQLException e) {
                     // ignore retry next time
                     LOG.error(e.getMessage(), e);
                 } finally {
-                    if (con != null) {
-                        if (succesfull == false) {
-                            try {
-                                con.rollback();
-                            } catch (SQLException e) {
-                                // ignore
-                            }
-                        }
-
-                        try {
-                            con.setAutoCommit(true);
-                        } catch (SQLException e1) {
-                            // ignore
-                        }
+                    if (successful == false) {
+                        Databases.rollback(con);
                     }
-                    if (readOnly) {
-                        dbservice.backForUpdateTaskAfterReading(ctxId, con);
-                    } else {
-                        dbservice.backForUpdateTask(ctxId, con);
+                    Databases.autocommit(con);
+                    if (con != null) {
+                        if (readOnly) {
+                            dbservice.backForUpdateTaskAfterReading(ctxId, con);
+                        } else {
+                            dbservice.backForUpdateTask(ctxId, con);
+                        }
                     }
                 }
             }
-        } catch (OXException e) {
+        } catch (Exception e) {
             // Nothing that can be done here. Just retry it with the next run
             LOG.error(e.getMessage(), e);
         }
         LOG.info("Mail Alarm delivery worker run finished!");
+    }
+
+    private void spawnDeliveryTaskForTriggers(Connection con, Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers, Calendar until, Calendar currentUTCTime) throws OXException {
+        for (Entry<Pair<Integer, Integer>, List<AlarmTrigger>> entry : lockedTriggers.entrySet()) {
+            int cid = entry.getKey().getFirst();
+            int account = entry.getKey().getSecond();
+            CalendarStorage ctxStorage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(con, con), DBTransactionPolicy.NO_TRANSACTIONS);
+            for (AlarmTrigger trigger : entry.getValue()) {
+                try {
+                    Alarm alarm = ctxStorage.getAlarmStorage().loadAlarm(trigger.getAlarm());
+                    Calendar calTriggerTime = Calendar.getInstance(UTC);
+                    calTriggerTime.setTimeInMillis(trigger.getTime());
+                    Calendar now = Calendar.getInstance(UTC);
+                    long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - mailShift;
+                    if (delay < 0) {
+                        delay = 0;
+                    }
+
+                    SingleMailDeliveryTask task = createTask(cid, account, alarm, trigger, currentUTCTime.getTimeInMillis());
+                    ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
+                    Key key = key(cid, account, trigger.getEventId(), alarm.getId());
+                    scheduledTasks.put(key, timer);
+                    LOG.trace("Created a new mail alarm task for {}", key);
+                } catch (UnsupportedOperationException e) {
+                    LOG.error("Can't handle mail alarms as long as the legacy storage is used.");
+                    continue;
+                }
+            }
+        }
     }
 
     /**
@@ -277,7 +266,8 @@ public class MailAlarmDeliveryWorker implements Runnable {
      */
     public void cancelAll(int cid, int accountId, String eventId) {
         Iterator<Entry<Key, ScheduledTimerTask>> iterator = scheduledTasks.entrySet().iterator();
-        for (Entry<Key, ScheduledTimerTask> entry : scheduledTasks.entrySet()) {
+        while (iterator.hasNext()) {
+            Entry<Key, ScheduledTimerTask> entry = iterator.next();
             Key key = entry.getKey();
             if (key.getCid() == cid && key.getAccount() == accountId && key.getEventId().equals(eventId)) {
                 LOG.trace("Canceled mail alarm task for {}", key);
@@ -295,36 +285,44 @@ public class MailAlarmDeliveryWorker implements Runnable {
      * @param account The account id
      */
     public void checkEvents(List<Event> events, int cid, int account) {
-        Connection con;
+        Connection readCon = null;
+        Connection writeCon = null;
         try {
-            con = dbservice.getWritable(cid);
-            boolean readonly = true;
-            boolean successfull = false;
+            readCon = dbservice.getReadOnly(cid);
+            boolean successful = false;
+            boolean readOnly = true;
             try {
-                con.setAutoCommit(false);
-                readonly = checkEvents(con, events, cid, account);
-                con.commit();
-                successfull = true;
+                List<AlarmTrigger> triggers = checkEvents(readCon, events, cid, account, false);
+                if (triggers.isEmpty() == false) {
+                    // If there are due alarm triggers get a writable connection and lock those triggers
+                    writeCon = dbservice.getWritable(cid);
+                    writeCon.setAutoCommit(false);
+                    triggers = checkEvents(writeCon, events, cid, account, true);
+                    if (triggers.isEmpty() == false) {
+                        readOnly = false;
+                        CalendarStorage calStorage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(readCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS);
+                        for (AlarmTrigger trigger : triggers) {
+                            scheduleTaskForEvent(writeCon, calStorage, key(cid, account, trigger.getEventId(), trigger.getAlarm()), trigger);
+                        }
+                    }
+                    writeCon.commit();
+                    successful = true;
+                }
             } catch (SQLException e) {
                 LOG.error("Error while scheduling mail alarm task: {}", e.getMessage(), e);
             } finally {
-                if (con != null) {
-                    if (!successfull) {
-                        try {
-                            con.rollback();
-                        } catch (SQLException e) {
-                            // ignore
-                        }
+                if (readCon != null) {
+                    dbservice.backReadOnly(cid, readCon);
+                }
+                if (writeCon != null) {
+                    if (successful == false) {
+                        Databases.rollback(writeCon);
                     }
-                    try {
-                        con.setAutoCommit(true);
-                    } catch (SQLException e) {
-                        // ignore
-                    }
-                    if (readonly) {
-                        dbservice.backWritableAfterReading(cid, con);
+                    Databases.autocommit(writeCon);
+                    if (readOnly) {
+                        dbservice.backWritableAfterReading(cid, writeCon);
                     } else {
-                        dbservice.backWritable(cid, con);
+                        dbservice.backWritable(cid, writeCon);
                     }
                 }
             }
@@ -334,29 +332,50 @@ public class MailAlarmDeliveryWorker implements Runnable {
         }
     }
 
-    boolean checkEvents(Connection con, List<Event> events, int cid, int account) throws OXException {
-        boolean result = true;
+    /**
+     * Checks the given events for mail alarms which need to be triggered soon
+     *
+     * @param con The connection to use
+     * @param events The events to check
+     * @param cid The id of the context the events belong to
+     * @param account The id of the account the events belong to
+     * @return A list of AlarmTriggers which needs to be scheduled
+     * @throws OXException
+     */
+    List<AlarmTrigger> checkEvents(Connection con, List<Event> events, int cid, int account, boolean isWriteCon) throws OXException {
         Calendar cal = Calendar.getInstance(UTC);
         if (lastCheck != 0) {
             cal.setTimeInMillis(lastCheck);
         }
         cal.add(timeUnit, lookAhead);
+        List<AlarmTrigger> result = null;
         for (Event event : events) {
-            Map<Pair<Integer, Integer>, AlarmTrigger> triggerMap = storage.getAndLockMailAlarmTriggers(con, cid, account, event.getId());
+            Map<Pair<Integer, Integer>, List<AlarmTrigger>> triggerMap = storage.getMailAlarmTriggers(con, cid, account, event.getId(), isWriteCon);
             // Schedule a task for all triggers before the next usual interval
-            for (Entry<Pair<Integer, Integer>, AlarmTrigger> entry : triggerMap.entrySet()) {
-                Key key = key(cid, account, event.getId(), entry.getValue().getAlarm());
-                if (entry.getValue().getTime() > cal.getTimeInMillis()) {
-                    cancelTask(key);
-                    continue;
+            for (Entry<Pair<Integer, Integer>, List<AlarmTrigger>> entry : triggerMap.entrySet()) {
+                for (AlarmTrigger trigger : entry.getValue()) {
+                    Key key = key(cid, account, event.getId(), trigger.getAlarm());
+                    if (trigger.getTime() > cal.getTimeInMillis()) {
+                        cancelTask(key);
+                        continue;
+                    }
+                    if (result == null) {
+                        result = new ArrayList<>();
+                    }
+                    result.add(trigger);
                 }
-                CalendarStorage storage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(con, con), DBTransactionPolicy.NO_TRANSACTIONS);
-                Alarm alarm = storage.getAlarmStorage().loadAlarm(entry.getValue().getAlarm());
-                scheduleTask(con, key, alarm, entry.getValue());
-                result = false;
             }
         }
-        return result;
+        return result == null ? Collections.emptyList() : result;
+    }
+
+    private void scheduleTaskForEvent(Connection writeCon, CalendarStorage storage, Key key, AlarmTrigger trigger) throws OXException {
+        try {
+            Alarm alarm = storage.getAlarmStorage().loadAlarm(trigger.getAlarm());
+            scheduleTask(writeCon, key, alarm, trigger);
+        } catch (UnsupportedOperationException e) {
+            LOG.error("Can't handle mail alarms as long as the legacy storage is used.");
+        }
     }
 
     /**
@@ -375,7 +394,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
             calTriggerTime.setTimeInMillis(trigger.getTime());
             Calendar now = Calendar.getInstance(UTC);
 
-            storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(key.getCid(), key.getAccount()), trigger), now.getTimeInMillis());
+            storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(key.getCid(), key.getAccount()), Collections.singletonList(trigger)), now.getTimeInMillis());
             processingSet = true;
 
             long delay = calTriggerTime.getTimeInMillis() - now.getTimeInMillis();
@@ -391,7 +410,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
             if (processingSet) {
                 try {
                     // If the error is thrown after the processed value is successfully set then set it back to 0 so the next task can pick it up
-                    storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(key.getCid(), key.getAccount()), trigger), 0l);
+                    storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(key.getCid(), key.getAccount()), Collections.singletonList(trigger)), 0l);
                 } catch (OXException e1) {
                     // Can be ignored. The trigger is picked up once the trigger time is overdue.
                 }
@@ -428,7 +447,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
                     try {
                         AlarmTrigger trigger = new AlarmTrigger();
                         trigger.setAlarm(key.getId());
-                        storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(key.getCid(), key.getAccount()), trigger), 0l);
+                        storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(key.getCid(), key.getAccount()), Collections.singletonList(trigger)), 0l);
                         LOG.trace("Properly resettet the processed status of the alarm trigger for {}", key);
                     } catch (OXException e) {
                         // ignore
@@ -464,7 +483,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
      * @param key The key to remove
      */
     public void remove(Key key) {
-        if(key != null) {
+        if (key != null) {
             scheduledTasks.remove(key);
         }
     }
@@ -571,7 +590,6 @@ public class MailAlarmDeliveryWorker implements Runnable {
         private final AdministrativeAlarmTriggerStorage storage;
         private final MailAlarmNotificationService mailService;
 
-
         /**
          * Initializes a new {@link SingleMailDeliveryTask}.
          *
@@ -609,74 +627,68 @@ public class MailAlarmDeliveryWorker implements Runnable {
                 Event event = prepareEvent(writeCon);
                 writeCon.commit();
                 processFinished = true;
-                if(event != null) {
+                if (event != null) {
                     isReadOnly = false;
                     sendMail(event);
                 }
                 // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
-                if(event != null) {
+                if (event != null) {
                     checkEvent(writeCon, event);
+                    writeCon.commit();
                 }
             } catch (OXException | SQLException e) {
-                try {
-                    if (writeCon != null) {
-                        // rollback the last transaction
-                        writeCon.rollback();
-                        // if the error occurred during the process retry the hole operation once
-                        if(processFinished == false) {
-                            try {
-                                writeCon.setAutoCommit(false);
-                                // do the delivery and update the db entries (e.g. like setting the acknowledged field)
-                                Event event = prepareEvent(writeCon);
+                if (writeCon != null) {
+                    // rollback the last transaction
+                    Databases.rollback(writeCon);
+                    // if the error occurred during the process retry the hole operation once
+                    if (processFinished == false) {
+                        try {
+                            writeCon.setAutoCommit(false);
+                            // do the delivery and update the db entries (e.g. like setting the acknowledged field)
+                            Event event = prepareEvent(writeCon);
+                            writeCon.commit();
+                            if (event != null) {
+                                isReadOnly = false;
+                                sendMail(event);
+                            }
+                            processFinished = true;
+                            // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
+                            if (event != null) {
+                                checkEvent(writeCon, event);
                                 writeCon.commit();
-                                if(event != null) {
+                            }
+                        } catch (SQLException | OXException e1) {
+                            // Nothing that can be done. Do a rollback and reset the processed value if necessary
+                            Databases.rollback(writeCon);
+                            if (processFinished == false) {
+                                try {
+                                    storage.setProcessingStatus(writeCon, Collections.singletonMap(new Pair<>(ctx.getContextId(), account), Collections.singletonList(trigger)), 0l);
                                     isReadOnly = false;
-                                    sendMail(event);
-                                }
-                                processFinished = true;
-                                // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
-                                if(event != null) {
-                                    checkEvent(writeCon, event);
-                                }
-                            } catch (SQLException | OXException e1) {
-                                // Nothing that can be done. Do a rollback and reset the processed value if necessary
-                                writeCon.rollback();
-                                if (processFinished == false) {
-                                    try {
-                                        storage.setProcessingStatus(writeCon, Collections.singletonMap(new Pair<>(ctx.getContextId(), account), trigger), 0l);
-                                        isReadOnly = false;
-                                    } catch (OXException e2) {
-                                        // ignore
-                                    }
+                                } catch (OXException e2) {
+                                    // ignore
                                 }
                             }
                         }
                     }
-                } catch (SQLException sql) {
-                    // ignore
                 }
             } finally {
                 callback.remove(key(ctx.getContextId(), account, trigger.getEventId(), alarm.getId()));
+                Databases.autocommit(writeCon);
                 if (writeCon != null) {
-                    try {
-                        writeCon.setAutoCommit(true);
-                    } catch (SQLException e) {
-                        // ignore
+                    if (isReadOnly) {
+                        dbservice.backWritableAfterReading(ctx, writeCon);
+                    } else {
+                        dbservice.backWritable(ctx, writeCon);
                     }
-                }
-                if (isReadOnly) {
-                    dbservice.backWritableAfterReading(ctx, writeCon);
-                } else {
-                    dbservice.backWritable(ctx, writeCon);
                 }
             }
         }
 
         /**
          * Checks if the delivery is still necessary and prepares the event for it:
-         *  - Acknowledges the alarm
-         *  - Deletes and reinserts the alarm triggers
-         *  - updates the event timestamp
+         * - Acknowledges the alarm
+         * - Deletes and reinserts the alarm triggers
+         * - updates the event timestamp
          *
          * @param writeCon A writable connection
          * @return The prepared Event or null
@@ -737,8 +749,14 @@ public class MailAlarmDeliveryWorker implements Runnable {
         }
 
         private void checkEvent(Connection writeCon, Event event) throws SQLException, OXException {
-            checkEvents(writeCon, Collections.singletonList(event), ctx.getContextId(), account);
-            writeCon.commit();
+            int cid = ctx.getContextId();
+            List<AlarmTrigger> triggers = checkEvents(writeCon, Collections.singletonList(event), cid, account, true);
+            if (triggers.isEmpty() == false) {
+                CalendarStorage calStorage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(writeCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS);
+                for (AlarmTrigger trigger : triggers) {
+                    scheduleTaskForEvent(writeCon, calStorage, key(cid, account, trigger.getEventId(), trigger.getAlarm()), trigger);
+                }
+            }
         }
 
         /**

@@ -101,7 +101,7 @@ public class Activator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class,
             LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
-            ConfigurationService.class, ClusterTimerService.class  };
+            ConfigurationService.class, ClusterTimerService.class, AdministrativeAlarmTriggerStorage.class };
     }
 
     @Override
@@ -115,7 +115,7 @@ public class Activator extends HousekeepingActivator {
             }
         });
         LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, this);
-        if(leanConfig.getBooleanProperty(MailAlarmConfig.ENABLED)) {
+        if (!leanConfig.getBooleanProperty(MailAlarmConfig.ENABLED)) {
             LOG.info("Skipped starting the mail alarm delivery worker, because it is disabled.");
             LOG.info("Successfully started bundle "+this.context.getBundle().getSymbolicName());
             return;

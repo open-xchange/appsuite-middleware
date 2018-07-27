@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage;
 
 import java.sql.Connection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.exception.OXException;
@@ -65,15 +66,16 @@ import com.openexchange.java.util.Pair;
 public interface AdministrativeAlarmTriggerStorage {
 
     /**
-     * Retrieves a mapping of cic/account {@link Pair}s to alarm triggers which are either not processed yet and have a trigger time before the given until value or are older than the given overdue time.
+     * Retrieves a mapping of cic/account {@link Pair}s to a list of {@link AlarmTrigger}s which are either
+     * not processed yet and have a trigger time before the given until value or are older than the given overdue time.
      *
      * @param con The connection to use
      * @param until The upper limit for the trigger time
      * @param overdueTime The overdue date
-     * @return A mapping of a cid/account {@link Pair} to an {@link AlarmTrigger}
+     * @return A mapping of a cid/account {@link Pair} to a list of {@link AlarmTrigger}s
      * @throws OXException
      */
-    Map<Pair<Integer, Integer>, AlarmTrigger> getAndLockTriggers(Connection con, Date until, Date overdueTime) throws OXException;
+    Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Date until, Date overdueTime) throws OXException;
 
 
     /**
@@ -84,7 +86,7 @@ public interface AdministrativeAlarmTriggerStorage {
      * @param time The time to set or null to reset the status
      * @throws OXException
      */
-    public void setProcessingStatus(Connection con, Map<Pair<Integer, Integer>, AlarmTrigger> triggers, Long time) throws OXException;
+    public void setProcessingStatus(Connection con, Map<Pair<Integer, Integer>, List<AlarmTrigger>> triggers, Long time) throws OXException;
 
 
     /**
@@ -94,10 +96,11 @@ public interface AdministrativeAlarmTriggerStorage {
      * @param cid The context id
      * @param account The account id
      * @param eventId The event id
-     * @return A mapping of a cid/account {@link Pair} to an {@link AlarmTrigger}
+     * @param lock Whether the selected triggers should be locked or not
+     * @return A mapping of a cid/account {@link Pair} to a list of {@link AlarmTrigger}s
      * @throws OXException
      */
-    Map<Pair<Integer, Integer>, AlarmTrigger> getAndLockMailAlarmTriggers(Connection con, int cid, int account, String eventId) throws OXException;
+    Map<Pair<Integer, Integer>, List<AlarmTrigger>> getMailAlarmTriggers(Connection con, int cid, int account, String eventId, boolean lock) throws OXException;
 
 
     /**
