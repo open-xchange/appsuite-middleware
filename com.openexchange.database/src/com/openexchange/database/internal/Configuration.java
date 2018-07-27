@@ -84,7 +84,7 @@ public final class Configuration {
 
     private final ConnectionPool.Config poolConfig = ConnectionPool.DEFAULT_CONFIG;
 
-    Configuration() {
+    public Configuration() {
         super();
     }
 
@@ -331,9 +331,72 @@ public final class Configuration {
          // @formatter:on
         );
     }
+    
 
     ConnectionPool.Config getPoolConfig() {
         return poolConfig;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((jdbcProps == null) ? 0 : jdbcProps.hashCode());
+        result = prime * result + ((poolConfig == null) ? 0 : poolConfig.hashCode());
+        result = prime * result + ((props == null) ? 0 : props.hashCode());
+        result = prime * result + ((readProps == null) ? 0 : readProps.hashCode());
+        result = prime * result + ((writeProps == null) ? 0 : writeProps.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Configuration other = (Configuration) obj;
+        if (jdbcProps == null) {
+            if (other.jdbcProps != null) {
+                return false;
+            }
+        } else if (!jdbcProps.equals(other.jdbcProps)) {
+            return false;
+        }
+        if (poolConfig == null) {
+            if (other.poolConfig != null) {
+                return false;
+            }
+        } else if (!poolConfig.equals(other.poolConfig)) {
+            return false;
+        }
+        if (props == null) {
+            if (other.props != null) {
+                return false;
+            }
+        } else if (!props.equals(other.props)) {
+            return false;
+        }
+        if (readProps == null) {
+            if (other.readProps != null) {
+                return false;
+            }
+        } else if (!readProps.equals(other.readProps)) {
+            return false;
+        }
+        if (writeProps == null) {
+            if (other.writeProps != null) {
+                return false;
+            }
+        } else if (!writeProps.equals(other.writeProps)) {
+            return false;
+        }
+        return true;
     }
 
     /**
