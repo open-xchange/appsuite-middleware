@@ -199,7 +199,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * update for existing change exception, perform update, touch master & track results
              */
             Check.recurrenceRangeMatches(recurrenceId, null);
-            Event originalExceptionEvent = loadExceptionData(originalSeriesMaster.getSeriesId(), recurrenceId);
+            Event originalExceptionEvent = loadExceptionData(originalSeriesMaster, recurrenceId);
             updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
             touch(originalSeriesMaster.getSeriesId());
             resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
@@ -269,7 +269,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * prepare event update & check conflicts as needed
          */
-        List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent.getId()) : null;
+        List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent) : null;
         Event originalSeriesMasterEvent = isSeriesException(originalEvent) ? loadEventData(originalEvent.getSeriesId()) : null;
         EventUpdateProcessor eventUpdate = new EventUpdateProcessor(
             session, folder, originalEvent, originalChangeExceptions, originalSeriesMasterEvent, eventData, timestamp, Arrays.add(SKIPPED_FIELDS, ignoredFields));
@@ -277,7 +277,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Check.noConflicts(storage, session, eventUpdate.getUpdate(), eventUpdate.getAttendeeUpdates().previewChanges());
         }
         /*
-         * check permissions & update event data in storage, checking permissions as required
+         * recursively perform pending deletions of change exceptions if required
+         */
+        if (false == eventUpdate.getExceptionUpdates().isEmpty()) {
+            for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
+                delete(removedException);
+            }
+        }
+        /*
+         * update event data in storage, checking permissions as required
          */
         storeEventUpdate(originalEvent, eventUpdate.getDelta(), eventUpdate.getUpdatedFields(), assumeExternalOrganizerUpdate);
         storeAttendeeUpdates(originalEvent, eventUpdate.getAttendeeUpdates(), assumeExternalOrganizerUpdate);
@@ -292,6 +300,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             List<Alarm> defaultAlarm = isAllDay(eventUpdate.getUpdate()) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
             if (null != defaultAlarm) {
                 insertAlarms(eventUpdate.getUpdate(), userId, defaultAlarm, true);
+            }
+        }
+        /*
+         * recursively perform pending updates of change exceptions if required
+         */
+        if (false == eventUpdate.getExceptionUpdates().isEmpty()) {
+            for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
+                updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
             }
         }
         /*
@@ -313,17 +329,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
         }
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
-        /*
-         * recursively perform pending updates of change exceptions, too
-         */
-        if (false == eventUpdate.getExceptionUpdates().isEmpty()) {
-            for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
-                delete(removedException);
-            }
-            for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
-                updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
-            }
-        }
     }
 
     /**
@@ -420,7 +425,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         /*
                          * remove attendee from existing change exception
                          */
-                        Event originalExceptionEvent = loadExceptionData(originalEvent.getSeriesId(), recurrenceId);
+                        Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
                         delete(originalExceptionEvent, userAttendee);
                     } else {
                         /*

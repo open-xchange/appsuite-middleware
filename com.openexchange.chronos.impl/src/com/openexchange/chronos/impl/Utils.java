@@ -97,6 +97,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -108,6 +109,7 @@ import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
@@ -955,6 +957,41 @@ public class Utils {
                 return true;
             }
         };
+    }
+
+    /**
+     * Replaces a change exception's recurrence identifier to piggyback the recurrence data of the corresponding event series. This aids the
+     * <i>legacy</i> storage to calculate the correct recurrence positions properly.
+     * 
+     * @param changeException The change exception event to edit the recurrence identifier in
+     * @param recurrenceData The recurrence data to inject
+     * @return The passed change exception event, with an replaced data-aware recurrence identifier
+     * @see DataAwareRecurrenceId
+     */
+    public static Event injectRecurrenceData(Event changeException, RecurrenceData recurrenceData) {
+        RecurrenceId recurrenceId = changeException.getRecurrenceId();
+        if (null != recurrenceId) {
+            changeException.setRecurrenceId(new DataAwareRecurrenceId(recurrenceData, recurrenceId.getValue()));
+        }
+        return changeException;
+    }
+
+    /**
+     * Replaces the recurrence identifier in a list of change exceptions to piggyback the recurrence data of the corresponding event
+     * series. This aids the <i>legacy</i> storage to calculate the correct recurrence positions properly.
+     * 
+     * @param changeExceptions The change exception events to edit the recurrence identifier in
+     * @param recurrenceData The recurrence data to inject
+     * @return The passed change exception events, with an replaced data-aware recurrence identifier
+     * @see DataAwareRecurrenceId
+     */
+    public static List<Event> injectRecurrenceData(List<Event> changeExceptions, RecurrenceData recurrenceData) {
+        if (null != changeExceptions) {
+            for (Event changeException : changeExceptions) {
+                injectRecurrenceData(changeException, recurrenceData);
+            }
+        }
+        return changeExceptions;
     }
 
     /**

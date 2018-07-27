@@ -69,6 +69,16 @@ public class DefaultRecurrenceData implements RecurrenceData {
     private final long[] recurrenceDates;
 
     /**
+     * Initializes a new {@link DefaultRecurrenceData} based on a recurrence rule and start date, without further exception dates.
+     *
+     * @param rrule The underlying recurrence rule
+     * @param seriesStart The series start date, usually the date of the first occurrence
+     */
+    public DefaultRecurrenceData(String rrule, DateTime seriesStart) {
+        this(rrule, seriesStart, null);
+    }
+
+    /**
      * Initializes a new {@link DefaultRecurrenceData}.
      *
      * @param rrule The underlying recurrence rule
