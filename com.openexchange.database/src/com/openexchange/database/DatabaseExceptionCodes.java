@@ -70,6 +70,22 @@ public enum DatabaseExceptionCodes implements DisplayableOXExceptionCode {
      * An SQL error cause by an illegal or unsupported character string: %1$s
      */
     STRING_LITERAL_ERROR("An SQL error cause by an illegal or unsupported character string: %1$s", DatabaseExceptionStrings.STRING_LITERAL_ERROR_MSG, Category.CATEGORY_USER_INPUT, 2),
+    
+    /**
+     * The keystore could not be (re)-loaded: %1$s
+     * <p>
+     * 
+     * Note: The display message must <b>not</b> be changed. Leaking information about keystore problems is none business of the user
+     */
+    KEYSTORE_UNAVAILABLE("The keystore could not be (re)-loaded: %1$s", DatabaseExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 3),
+
+    /**
+     * The given file path \"%1$s\" is invalid.
+     * <p>
+     * 
+     * Note: The display message must <b>not</b> be changed. Leaking information about keystore problems is none business of the user
+     */
+    KEYSTORE_FILE_ERROR("The given file path \"%1$s\" is invalid.", DatabaseExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 4),
 
     ;
 
