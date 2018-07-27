@@ -57,7 +57,6 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
-import com.openexchange.database.DatabaseConnectionListener;
 import com.openexchange.database.GeneralDatabaseConnectionListener;
 import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
@@ -129,8 +128,8 @@ public final class Initialization {
 
     private final Timer timer = new Timer();
     private final Management management = new Management(timer);
-    private final Configuration configuration = new Configuration();
 
+    private Configuration configuration = null;
     private CacheService cacheService;
     private ReplicationMonitor monitor;
     private Pools pools;
@@ -153,14 +152,15 @@ public final class Initialization {
      * @param configViewFactory The config view factory
      * @param migrationService The database migration service, or <code>null</code> if not available
      * @param connectionListeners The connection listeners
+     * @param configuration The {@link Configuration}
      * @return The database service
+     * @throws OXException Various
      */
-    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService, ServiceListing<GeneralDatabaseConnectionListener> connectionListeners) throws OXException {
+    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService, ServiceListing<GeneralDatabaseConnectionListener> connectionListeners, Configuration configuration) throws OXException {
+        this.configuration = configuration;
         if (null != databaseService) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
-        // Parse configuration
-        configuration.readConfiguration(configurationService);
         // Set timer interval
         timer.configure(configuration);
         // Setting up database connection pools.
