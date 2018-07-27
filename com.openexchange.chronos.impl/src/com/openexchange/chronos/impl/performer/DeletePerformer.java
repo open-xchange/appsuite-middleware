@@ -195,7 +195,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     }
                     Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splittedChangeExceptionDates = splitExceptionDates(originalEvent.getChangeExceptionDates(), until);
                     if (false == splittedChangeExceptionDates.getValue().isEmpty()) {
-                        for (Event changeException : loadExceptionData(originalEvent.getSeriesId(), splittedChangeExceptionDates.getValue())) {
+                        for (Event changeException : loadExceptionData(originalEvent, splittedChangeExceptionDates.getValue())) {
                             delete(changeException);
                         }
                         eventUpdate.setChangeExceptionDates(splittedChangeExceptionDates.getKey());

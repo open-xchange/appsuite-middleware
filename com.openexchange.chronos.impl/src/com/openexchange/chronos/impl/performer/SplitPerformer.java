@@ -55,9 +55,9 @@ import static com.openexchange.chronos.common.CalendarUtils.isFloating;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.splitExceptionDates;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import static com.openexchange.chronos.impl.Utils.injectRecurrenceData;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +74,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -137,7 +136,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         Check.eventIsInFolder(originalEvent, folder);
         requireWritePermissions(originalEvent);
         Map<Integer, List<Alarm>> originalAlarmsByUserId = storage.getAlarmStorage().loadAlarms(originalEvent);
-        List<Event> originalChangeExceptions = isNullOrEmpty(originalEvent.getChangeExceptionDates()) ? Collections.emptyList() : loadExceptionData(originalEvent.getSeriesId());
+        List<Event> originalChangeExceptions = loadExceptionData(originalEvent);
         /*
          * check the supplied split point for validity & derive next recurrence
          */
@@ -261,12 +260,9 @@ public class SplitPerformer extends AbstractUpdatePerformer {
             if (0 <= compare(originalChangeException.getRecurrenceId().getValue(), splitPoint, timeZone)) {
                 Event exceptionUpdate = EventMapper.getInstance().copy(originalChangeException, null, EventField.ID);
                 exceptionUpdate.setRelatedTo(relatedTo);
-                {
-                    // workaround to hide a possibly incorrect recurrence position in passed recurrence id for legacy storage
-                    // TODO: remove once no longer needed
-                    DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(updatedSeriesMaster.getRecurrenceRule(), updatedSeriesMaster.getStartDate(), null);
-                    exceptionUpdate.setRecurrenceId(new DataAwareRecurrenceId(recurrenceData, originalChangeException.getRecurrenceId().getValue()));
-                }
+                // workaround to hide a possibly incorrect recurrence position in passed recurrence id for legacy storage
+                // TODO: remove once no longer needed
+                injectRecurrenceData(exceptionUpdate, new DefaultRecurrenceData(updatedSeriesMaster.getRecurrenceRule(), updatedSeriesMaster.getStartDate()));
                 Consistency.setModified(session, timestamp, exceptionUpdate, session.getUserId());
                 storage.getEventStorage().updateEvent(exceptionUpdate);
                 resultTracker.trackUpdate(originalChangeException, loadEventData(originalChangeException.getId()));
