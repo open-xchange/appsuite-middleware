@@ -1,0 +1,208 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.database.internal;
+
+import java.security.KeyStore;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadables;
+import com.openexchange.database.ConfigurationListener;
+import com.openexchange.database.ConfigurationListener.ConfigDBListener;
+import com.openexchange.database.DatabaseExceptionCodes;
+import com.openexchange.database.internal.reloadable.KeyStoreReloader;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.ConcurrentHashSet;
+
+/**
+ * {@link KeyStoreReloaderImpl}
+ *
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.1
+ */
+public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader {
+
+    private static final String USE_SSL = "useSSL";
+
+    public static final String CLIENT_CERT_PATH_NAME     = "clientCertificateKeyStoreUrl";
+    public static final String CLIENT_CERT_PASSWORD_NAME = "clientCertificateKeyStorePassword";
+
+    public static final String TRUST_CERT_PATH_NAME     = "trustCertificateKeyStoreUrl";
+    public static final String TRUST_CERT_PASSWORD_NAME = "trustCertificateKeyStorePassword";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreReloaderImpl.class);
+
+    private ConcurrentHashSet<ConfigurationListener> listerners;
+
+    private ConcurrentHashMap<String, ConfigAwareKeyStore> stores;
+
+    private Configuration configuration;
+
+    /**
+     * "PKCS12" is recommend in <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#KeystoreImplementation">JCA reference guide</a>
+     * nevertheless <a href="https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-using-ssl.html">JDBC reference guide</a> uses "JKS" for client key store
+     */
+    private static final String[] keyStoreTypes = new String[] { "JKS", "PKCS12", KeyStore.getDefaultType() };
+
+    /**
+     * Initializes a new {@link KeyStoreReloaderImpl}.
+     * 
+     * @param configuration The {@link Configuration} for connections
+     * @throws OXException In case key store can't be loaded
+     * 
+     */
+    public KeyStoreReloaderImpl(Configuration configuration) throws OXException {
+        super();
+        listerners = new ConcurrentHashSet<>(4);
+        stores = new ConcurrentHashMap<>(4);
+        this.configuration = configuration;
+
+        savePut("ClientStore", CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, keyStoreTypes[0]);
+        savePut("CAStore", TRUST_CERT_PATH_NAME, TRUST_CERT_PASSWORD_NAME, keyStoreTypes[0]);
+
+        if (stores.isEmpty() && isSSL(configuration)) {
+            LOGGER.error("No keystores where added also 'useSSL' was set. SSL can't be used");
+            throw DatabaseExceptionCodes.SQL_ERROR.create("No SSL keystores where configured");
+        }
+
+        // Ignore listeners on start up
+        loadKeyStores(configuration);
+    }
+
+    private void savePut(String key, String path, String password, String type) {
+        try {
+            stores.put(key, new ConfigAwareKeyStore(configuration, path, password, type));
+        } catch (OXException e) {
+            LOGGER.debug("Unable to initialize keystore for " + key, e);
+        }
+    }
+
+    @Override
+    public boolean loadKeyStores(Configuration configuration) throws OXException {
+        // Do we need to do something?
+        if (isSSL(configuration)) {
+            return false;
+        }
+
+        boolean retval = false;
+        for (Entry<String, ConfigAwareKeyStore> entry : stores.entrySet()) {
+            retval |= entry.getValue().reloadStore(configuration);
+        }
+
+        return retval;
+    }
+
+    private boolean isSSL(Configuration configuration) {
+        Boolean useSSL = Boolean.valueOf(configuration.getJdbcProps().getProperty(USE_SSL));
+        if (null == useSSL || false == useSSL.booleanValue()) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setKeyStoreListener(ConfigurationListener listener) {
+        return listerners.add(listener);
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        try {
+            Configuration configuration = new Configuration();
+            configuration.readConfiguration(configService);
+            // Check if key store was modified or configuration was changed and we need to notify
+            if (loadKeyStores(configuration) || false == this.configuration.equals(configuration)) {
+                notify(configuration);
+                this.configuration = configuration;
+            }
+        } catch (OXException e) {
+            LOGGER.error("Was not able to reload SSL configuration for SQL!", e);
+        }
+
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.getInterestsForAll();
+    }
+
+    /**
+     * Notifies the {@link ConfigurationListener}. Looks up which properties has changed and notifies only relevant
+     * 
+     * @param configuration The new {@link Configuration}
+     */
+    private void notify(Configuration configuration) {
+        if (checkForChangedProperties(this.configuration.getJdbcProps(), configuration.getJdbcProps())) {
+            listerners.forEach(l -> l.notify(configuration));
+        }
+        if (checkForChangedProperties(this.configuration.getReadProps(), configuration.getReadProps()) || checkForChangedProperties(this.configuration.getWriteProps(), configuration.getWriteProps())) {
+            listerners.stream().filter(l -> ConfigDBListener.class.isAssignableFrom(l.getClass())).forEach(l -> l.notify(configuration));
+        }
+    }
+
+    private boolean checkForChangedProperties(Properties oldProperties, Properties newProperties) {
+        if (oldProperties.size() != newProperties.size()) {
+            return true;
+        }
+        for (Entry<Object, Object> property : oldProperties.entrySet()) {
+            String newProperty = newProperties.getProperty(String.valueOf(property.getKey()));
+            if (null != newProperty && null != property.getValue() && false == property.getValue().equals(newProperty)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+}
