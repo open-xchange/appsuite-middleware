@@ -365,18 +365,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param attendeeHelper The attendee helper for the update
      * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
      */
-    private boolean needsConflictCheck(EventUpdate eventUpdate) {
-        if (eventUpdate.getUpdatedFields().contains(EventField.START_DATE) &&
-            eventUpdate.getUpdate().getStartDate().before(eventUpdate.getOriginal().getStartDate())) {
+    private boolean needsConflictCheck(EventUpdate eventUpdate) throws OXException {
+        if (Utils.coversDifferentTimePeriod(eventUpdate.getOriginal(), eventUpdate.getUpdate())) {
             /*
-             * (re-)check conflicts if updated start is before the original start
-             */
-            return true;
-        }
-        if (eventUpdate.getUpdatedFields().contains(EventField.END_DATE) &&
-            eventUpdate.getUpdate().getEndDate().after(eventUpdate.getOriginal().getEndDate())) {
-            /*
-             * (re-)check conflicts if updated end is after the original end
+             * (re-)check conflicts if event appears in a different time period
              */
             return true;
         }
@@ -389,12 +381,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (0 < eventUpdate.getAttendeeUpdates().getAddedItems().size()) {
             /*
              * (re-)check conflicts if there are new attendees
-             */
-            return true;
-        }
-        if (eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE)) {
-            /*
-             * (re-)check conflicts if recurrence rule changes
              */
             return true;
         }

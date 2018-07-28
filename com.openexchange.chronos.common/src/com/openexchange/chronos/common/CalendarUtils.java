@@ -51,6 +51,7 @@ package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.net.URI;
@@ -686,6 +687,60 @@ public class CalendarUtils {
         } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
             throw CalendarExceptionCodes.INVALID_RRULE.create(e, rrule);
         }
+    }
+
+    /**
+     * Gets a value indicating whether an updated recurrence rule would produce further, additional occurrences compared to the original
+     * rule.
+     *
+     * @param originalRRule The original recurrence rule, or <code>null</code> if there was none
+     * @param updatedRRule The original recurrence rule, or <code>null</code> if there is none
+     * @return <code>true</code> if the updated rule yields further occurrences or unsure, <code>false</code>, otherwise
+     */
+    public static boolean hasFurtherOccurrences(String originalRRule, String updatedRRule) throws OXException {
+        if (null == originalRRule) {
+            return null != updatedRRule;
+        }
+        if (null == updatedRRule) {
+            return false;
+        }
+        RecurrenceRule originalRule = initRecurrenceRule(originalRRule);
+        RecurrenceRule updatedRule = initRecurrenceRule(updatedRRule);
+        /*
+         * check if only UNTIL was changed
+         */
+        RecurrenceRule checkedRule = initRecurrenceRule(updatedRule.toString());
+        checkedRule.setUntil(originalRule.getUntil());
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            return 1 == CalendarUtils.compare(originalRule.getUntil(), updatedRule.getUntil(), null);
+        }
+        /*
+         * check if only COUNT was changed
+         */
+        checkedRule = initRecurrenceRule(updatedRule.toString());
+        if (null == originalRule.getCount()) {
+            checkedRule.setUntil(null);
+        } else {
+            checkedRule.setCount(i(originalRule.getCount()));
+        }
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            int originalCount = null == originalRule.getCount() ? Integer.MAX_VALUE : i(originalRule.getCount());
+            int updatedCount = null == updatedRule.getCount() ? Integer.MAX_VALUE : i(updatedRule.getCount());
+            return updatedCount > originalCount;
+        }
+        /*
+         * check if only the INTERVAL was extended
+         */
+        checkedRule = initRecurrenceRule(updatedRule.toString());
+        checkedRule.setInterval(originalRule.getInterval());
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            return 0 != updatedRule.getInterval() % originalRule.getInterval();
+        }
+        /*
+         * check if each BY... part is equally or more restrictive
+         */
+        //TODO
+        return true;
     }
 
     /**
