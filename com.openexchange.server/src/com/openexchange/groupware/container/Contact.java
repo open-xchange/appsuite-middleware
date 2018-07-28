@@ -4111,7 +4111,6 @@ public class Contact extends CommonObject {
          * for contacts, use last- and firstname, preferring the yomi names if suitable
          */
         boolean preferYomiFields = null != locale && Locale.JAPANESE.getLanguage().equals(locale.getLanguage());
-        preferYomiFields = true;
         {
             String[] names;
             if (preferYomiFields) {
