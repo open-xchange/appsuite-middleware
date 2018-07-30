@@ -47,60 +47,85 @@
  *
  */
 
-package com.openexchange.chronos.storage;
-
-import java.sql.Connection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.util.Pair;
+package com.openexchange.chronos.alarm.mail;
 
 /**
- * {@link AdministrativeAlarmTriggerStorage}
+ * {@link Key} is a identifying key for a {@link SingleMailDeliveryTask}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public interface AdministrativeAlarmTriggerStorage {
+class Key {
+
+    private final int cid, account, id;
+    private final String eventId;
 
     /**
-     * Retrieves a mapping of cic/account {@link Pair}s to a list of {@link AlarmTrigger}s which are either
-     * not processed yet and have a trigger time before the given until value or are older than the given overdue time.
-     *
-     * @param con The connection to use
-     * @param until The upper limit for the trigger time
-     * @param overdueTime The overdue date
-     * @param lock Whether the selected triggers should be locked or not
-     * @return A mapping of a cid/account {@link Pair} to a list of {@link AlarmTrigger}s
-     * @throws OXException
+     * Initializes a new {@link MailAlarmDeliveryWorker.key}.
      */
-    Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Date until, Date overdueTime, boolean lock) throws OXException;
+    public Key(int cid, int account, String eventId, int id) {
+        this.cid = cid;
+        this.account = account;
+        this.id = id;
+        this.eventId = eventId;
+    }
 
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = hash * 31 + cid;
+        hash = hash * 31 + account;
+        hash = hash * 31 + eventId.hashCode();
+        hash = hash * 31 + id;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Key) {
+            return obj.hashCode() == this.hashCode();
+        }
+        return false;
+    }
 
     /**
-     * Sets the processing status to the given {@link AlarmTrigger}s
+     * Gets the eventId
      *
-     * @param con The connection to use
-     * @param triggers The triggers to update
-     * @param time The time to set or null to reset the status
-     * @throws OXException
+     * @return The eventId
      */
-    public void setProcessingStatus(Connection con, Map<Pair<Integer, Integer>, List<AlarmTrigger>> triggers, Long time) throws OXException;
-
+    public String getEventId() {
+        return eventId;
+    }
 
     /**
-     * Retrieves and locks mail alarm triggers for the given event which are not already taken by another worker.
+     * Gets the cid
      *
-     * @param con The connection to use
-     * @param cid The context id
-     * @param account The account id
-     * @param eventId The event id
-     * @param lock Whether the selected triggers should be locked or not
-     * @return A mapping of a cid/account {@link Pair} to a list of {@link AlarmTrigger}s
-     * @throws OXException
+     * @return The cid
      */
-    Map<Pair<Integer, Integer>, List<AlarmTrigger>> getMailAlarmTriggers(Connection con, int cid, int account, String eventId, boolean lock) throws OXException;
+    public int getCid() {
+        return cid;
+    }
 
+    /**
+     * Gets the account
+     *
+     * @return The account
+     */
+    public int getAccount() {
+        return account;
+    }
+
+    @Override
+    public String toString() {
+        return "Key [cid=" + cid + "|account=" + account + "|eventId=" + eventId + "|alarmId=" + id + "]";
+    }
+
+    /**
+     * Gets the id
+     *
+     * @return The id
+     */
+    public int getId() {
+        return id;
+    }
 }

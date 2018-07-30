@@ -84,16 +84,16 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
     private static final AlarmTriggerDBMapper MAPPER = AlarmTriggerDBMapper.getInstance();
 
     @Override
-    public Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Date until, Date overdueTime) throws OXException {
+    public Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Date until, Date overdueTime, boolean lock) throws OXException {
         if (overdueTime == null) {
             Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             instance.add(Calendar.MINUTE, -5);
             overdueTime = instance.getTime();
         }
-        return getAndLockTriggers(con, until == null ? null : until.getTime(), overdueTime.getTime());
+        return getAndLockTriggers(con, until == null ? null : until.getTime(), overdueTime.getTime(), lock);
     }
 
-    private Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Long until, Long overdueTime) throws OXException {
+    private Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Long until, Long overdueTime, boolean lock) throws OXException {
         try {
             AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
@@ -101,7 +101,11 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
             stringBuilder.append(" action=?");
             stringBuilder.append(" AND triggerDate<?");
             stringBuilder.append(" AND ( processed=0 OR (triggerDate<? AND processed<?))");
-            stringBuilder.append(" FOR UPDATE");
+            if (lock) {
+                stringBuilder.append(" FOR UPDATE;");
+            } else {
+                stringBuilder.append(";");
+            }
 
             Map<Pair<Integer, Integer>, List<AlarmTrigger>> result = new HashMap<>();
             try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
@@ -201,26 +205,6 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
                     }
                 }
                 return result;
-            }
-        } catch (SQLException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public AlarmTrigger getAlarmTrigger(Connection con, int cid, int account, int alarm) throws OXException {
-        try {
-            AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
-            StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
-            stringBuilder.append(" cid=? AND account=? AND alarm=?");
-            try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
-                int parameterIndex = 1;
-                stmt.setInt(parameterIndex++, cid);
-                stmt.setInt(parameterIndex++, account);
-                stmt.setInt(parameterIndex++, alarm);
-                try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                    return resultSet.next() ? readTrigger(resultSet, mappedFields) : null;
-                }
             }
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());

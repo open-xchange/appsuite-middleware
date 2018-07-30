@@ -50,7 +50,6 @@
 package com.openexchange.chronos.alarm.mail.osgi;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -102,9 +101,9 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class, 
-            LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class, 
-            ConfigurationService.class, ClusterTimerService.class, AdministrativeAlarmTriggerStorage.class, TemplateService.class, 
+        return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class,
+            LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
+            ConfigurationService.class, ClusterTimerService.class, AdministrativeAlarmTriggerStorage.class, TemplateService.class,
             ResourceService.class, HtmlService.class };
     }
 
@@ -155,12 +154,13 @@ public class Activator extends HousekeepingActivator {
 
         boolean registeredCalendarHandler = false;
         for (int x = 0; x < workerCount; x++) {
-            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(storage, calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailAlarmNotificationService, lookAhead, Calendar.MINUTE, mailShift, overdueWaitTime);
+            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(storage, calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailAlarmNotificationService, lookAhead, mailShift, overdueWaitTime);
             ScheduledTimerTask scheduledTimerTask = clusterTimerService.scheduleAtFixedRate(CLUSTER_ID, worker, initialDelay, period, TimeUnit.MINUTES);
             scheduledTasks.put(scheduledTimerTask, worker);
             if (!registeredCalendarHandler) {
                 // only register a calendar handler for the first worker
                 registerService(CalendarHandler.class, new MailAlarmCalendarHandler(worker));
+                registeredCalendarHandler = true;
             }
         }
         LOG.info("Successfully started bundle "+this.context.getBundle().getSymbolicName());

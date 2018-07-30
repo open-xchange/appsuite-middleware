@@ -50,6 +50,7 @@
 package com.openexchange.chronos.alarm.mail;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarEvent;
@@ -79,9 +80,11 @@ public class MailAlarmCalendarHandler implements CalendarHandler {
     @Override
     public void handle(CalendarEvent event) {
         // Check deleted events and remove the according tasks
+        HashSet<String> eventsToCancel = new HashSet<>();
         for(DeleteResult deletion: event.getDeletions()) {
-            worker.cancelAll(event.getContextId(), event.getAccountId(), deletion.getEventID().getObjectID());
+            eventsToCancel.add(deletion.getEventID().getObjectID());
         }
+        worker.cancelAll(event.getContextId(), event.getAccountId(), eventsToCancel);
         // Check if an updated events has tasks and if so load and check the appropriate alarm data
         List<Event> eventsToCheck = new ArrayList<>();
         for(UpdateResult updateResult : event.getUpdates()) {
@@ -91,7 +94,7 @@ public class MailAlarmCalendarHandler implements CalendarHandler {
             eventsToCheck.add(createResult.getCreatedEvent());
         }
 
-        worker.checkEvents(eventsToCheck, event.getContextId(), event.getAccountId());
+        worker.checkAndScheduleTasksForEvents(eventsToCheck, event.getContextId(), event.getAccountId());
     }
 
 }
