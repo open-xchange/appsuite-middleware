@@ -101,6 +101,10 @@ public class FileDeliveryServlet extends HttpServlet {
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Configuration configuration = Services.getConfiguration();
+        if (configuration.isEnabled() == false) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Data retrieval is disabled.");
+            return;
+        }
         final String token = req.getParameter("token");
         if(token == null) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing parameter 'token");

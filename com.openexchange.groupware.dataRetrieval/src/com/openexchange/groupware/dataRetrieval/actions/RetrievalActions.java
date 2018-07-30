@@ -100,6 +100,10 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
         @Override
         public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+            final Configuration configuration = Services.getConfiguration();
+            if (configuration.isEnabled() == false) {
+                throw AjaxExceptionCodes.DISABLED_ACTION.create(REGISTER);
+            }
             final String id = requestData.getParameter("datasource");
             DataProvider provider = null;
             Object state = null;
