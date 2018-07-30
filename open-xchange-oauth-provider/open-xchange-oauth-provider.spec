@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 37
+%define        ox_release 38
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -78,6 +78,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/oauth-provider.properties
 
 %changelog
+* Mon Jul 30 2018 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2018-08-06 (4850)
 * Thu Jul 19 2018 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2018-07-23 (4834)
 * Mon Jul 09 2018 Steffen Templin <steffen.templin@open-xchange.com>
