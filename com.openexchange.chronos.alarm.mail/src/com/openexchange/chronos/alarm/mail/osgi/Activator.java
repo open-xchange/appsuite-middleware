@@ -58,10 +58,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.alarm.mail.MailAlarmDeliveryWorkerUpdateTask;
 import com.openexchange.chronos.alarm.mail.MailAlarmCalendarHandler;
 import com.openexchange.chronos.alarm.mail.MailAlarmConfig;
 import com.openexchange.chronos.alarm.mail.MailAlarmDeliveryWorker;
+import com.openexchange.chronos.alarm.mail.MailAlarmDeliveryWorkerUpdateTask;
 import com.openexchange.chronos.alarm.mail.MailAlarmNotificationService;
 import com.openexchange.chronos.alarm.mail.impl.MailAlarmNotificationServiceImpl;
 import com.openexchange.chronos.service.CalendarHandler;
@@ -75,11 +75,14 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.Tools;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -99,9 +102,10 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class,
-            LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
-            ConfigurationService.class, ClusterTimerService.class, AdministrativeAlarmTriggerStorage.class };
+        return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class, 
+            LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class, 
+            ConfigurationService.class, ClusterTimerService.class, AdministrativeAlarmTriggerStorage.class, TemplateService.class, 
+            ResourceService.class, HtmlService.class };
     }
 
     @Override

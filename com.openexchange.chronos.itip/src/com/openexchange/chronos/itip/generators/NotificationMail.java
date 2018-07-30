@@ -199,7 +199,7 @@ public class NotificationMail {
 
     public ITipEventUpdate getDiff() throws OXException {
         if (diff == null && original != null && event != null) {
-            diff = new ITipEventUpdate(original, event, true, NotificationMailGenerator.DEFAULT_SKIP);
+            diff = new ITipEventUpdate(original, event, true, ITipNotificationMailGenerator.DEFAULT_SKIP);
         }
         return diff;
     }

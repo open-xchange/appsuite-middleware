@@ -47,90 +47,51 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail.impl;
+package com.openexchange.chronos.itip.generators;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.itip.ITipIntegrationUtility;
+import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 
 /**
- * {@link MailAlarmNotification}
+ * {@link ITipITipNotificationMailGeneratorFactory}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.1
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MailAlarmNotification {
+public class ITipNotificationMailGeneratorFactory implements ITipMailGeneratorFactory {
 
-    private final int contextId;
-    private final User targetUser;
-    private final Event event;
+    private final NotificationParticipantResolver resolver;
+    private final ITipIntegrationUtility util;
 
-    private MailAlarmNotification(Event event, int contextId, User targetUser) {
-        this.event = event;
-        this.contextId = contextId;
-        this.targetUser = targetUser;
+    private final ServiceLookup services;
+
+    public ITipNotificationMailGeneratorFactory(NotificationParticipantResolver resolver, ITipIntegrationUtility util, ServiceLookup services) {
+        super();
+        this.resolver = resolver;
+        this.util = util;
+        this.services = services;
     }
 
-    /**
-     * Gets the ID of the context where the share is located.
-     *
-     * @return The context ID
-     */
-    public int getContextId() {
-        return this.contextId;
+    @Override
+    public ITipMailGenerator create(Event original, Event updated, Session session, int onBehalfOfId, CalendarUser principal) throws OXException {
+        return create(original, updated, session, onBehalfOfId, principal, null);
     }
 
-    /**
-     * Gets the targetUser
-     *
-     * @return The targetUser
-     */
-    public User getTargetUser() {
-        return targetUser;
+    @Override
+    public ITipMailGenerator create(Event original, Event updated, Session session, int onBehalfOfId, CalendarUser principal, String comment) throws OXException {
+        Context ctx = services.getService(ContextService.class).getContext(session.getContextId());
+        User user = services.getService(UserService.class).getUser(session.getUserId(), ctx);
+        User onBehalfOf = (onBehalfOfId <= 0) ? user : services.getService(UserService.class).getUser(onBehalfOfId, ctx);
+
+        ITipNotificationMailGenerator generator = new ITipNotificationMailGenerator(services, resolver, util, original, updated, user, onBehalfOf, ctx, session, principal, comment);
+        return generator;
     }
 
-    /**
-     * Gets the event
-     *
-     * @return The event
-     */
-    public Event getEvent() {
-        return event;
-    }
-
-    public static MailAlarmNotificationBuilder builder() {
-        return new MailAlarmNotificationBuilder();
-    }
-
-    static class MailAlarmNotificationBuilder {
-
-        private User targetUser;
-        private int contextId;
-        private Event event;
-
-        public MailAlarmNotificationBuilder setEvent(Event event) {
-            this.event = event;
-            return this;
-        }
-
-        public MailAlarmNotificationBuilder setTargetUser(User targetUser) {
-            this.targetUser = targetUser;
-            return this;
-        }
-
-        public MailAlarmNotificationBuilder setContextId(int contextId) {
-            this.contextId = contextId;
-            return this;
-        }
-
-        public MailAlarmNotification build() {
-            checkNotNull(targetUser, "targetUser");
-            checkNotNull(event, "event");
-            checkArgument(contextId > 0, "contextId");
-
-            MailAlarmNotification notification = new MailAlarmNotification(this.event, this.contextId, this.targetUser);
-            return notification;
-        }
-    }
 }

@@ -86,27 +86,32 @@ import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 /**
- * {@link DefaultNotificationParticipantResolver}
+ * {@link ITipNotificationParticipantResolver}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DefaultNotificationParticipantResolver implements NotificationParticipantResolver {
+public class ITipNotificationParticipantResolver implements NotificationParticipantResolver {
 
-    private final static Logger LOG = LoggerFactory.getLogger(DefaultNotificationParticipantResolver.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ITipNotificationParticipantResolver.class);
 
-    private final UserService            userService;
-    private final ConfigurationService   config;
-    private final ResourceService        resources;
+    protected final UserService userService;
+    protected final ConfigurationService config;
+    protected final ResourceService resources;
     private final ITipIntegrationUtility util;
 
-    public DefaultNotificationParticipantResolver(ITipIntegrationUtility util) {
+    public ITipNotificationParticipantResolver(ITipIntegrationUtility util) {
+        this(util, Services.getService(ConfigurationService.class), Services.getService(UserService.class), Services.getService(ResourceService.class));
+    }
+
+    public ITipNotificationParticipantResolver(ITipIntegrationUtility util, ConfigurationService configurationService, UserService userService, ResourceService resourceService) {
         super();
-        this.userService = Services.getService(UserService.class);
-        this.resources = Services.getService(ResourceService.class);
-        this.config = Services.getService(ConfigurationService.class);
+        this.userService = userService;
+        this.resources = resourceService;
+        this.config = configurationService;
         this.util = util;
     }
 
+    
     // TODO: Principal
     @Override
     public List<NotificationParticipant> resolveAllRecipients(Event original, Event update, User user, User onBehalfOf, Context ctx, Session session, CalendarUser principal) throws OXException {
@@ -159,7 +164,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         }
 
         final User[] participantUsers = userService.getUser(ctx, Coll2i(userIds.keySet()));
-        CalendarUser organizer = determineOrganizer(original, update, ctx, session);
+        CalendarUser organizer = determineOrganizer(original, update, ctx, session.getUserId());
         String organizerMail = CalendarUtils.extractEMailAddress(organizer.getEMail());
         if (organizerMail.toLowerCase().startsWith("mailto:")) {
             organizerMail = organizerMail.substring(7);
@@ -402,7 +407,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         return retval;
     }
 
-    private String getMailAddress(User u, Attendee userParticipant) {
+    protected String getMailAddress(User u, Attendee userParticipant) {
         if (CalendarUtils.isInternalUser(userParticipant) && null != userParticipant) {
             String mail = CalendarUtils.extractEMailAddress(userParticipant.getUri());
             if (Strings.isNotEmpty(mail)) {
@@ -414,7 +419,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         return u.getMail();
     }
 
-    private CalendarUser determineOrganizer(Event original, Event update, final Context ctx, Session session) throws OXException {
+    protected CalendarUser determineOrganizer(Event original, Event update, final Context ctx, int userId) throws OXException {
         if (update.containsOrganizer() && null != update.getOrganizer()) {
             return update.getOrganizer();
         } else if (null != original && original.containsOrganizer() && null != original.getOrganizer()) {
@@ -424,7 +429,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         }
         // Use current user as fall back
         LOG.debug("Unable to resolve organizer for appointment: " + update.getId() + " in context " + ctx.getContextId() + ". Using current user as organizer");
-        User defaultOrganizer = userService.getUser(session.getUserId(), ctx);
+        User defaultOrganizer = userService.getUser(userId, ctx);
         CalendarUser cu = new CalendarUser();
         cu.setCn(defaultOrganizer.getDisplayName());
         cu.setEMail(defaultOrganizer.getMail());
@@ -478,7 +483,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         return resourceParticipants;
     }
 
-    private NotificationConfiguration getDefaultConfiguration(final User user, final Context ctx) {
+    protected NotificationConfiguration getDefaultConfiguration(final User user, final Context ctx) {
         final NotificationConfiguration configuration = new NotificationConfiguration();
 
         configuration.setIncludeHTML(true); // TODO: pay attention to user
@@ -493,7 +498,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         return configuration;
     }
 
-    private void configure(final User user, final Context ctx, final NotificationConfiguration config, final boolean isOrganizer) {
+    protected void configure(final User user, final Context ctx, final NotificationConfiguration config, final boolean isOrganizer) {
         final UserSettingMailStorage usmStorage = UserSettingMailStorage.getInstance();
         final UserSettingMail usm = usmStorage.getUserSettingMail(user.getId(), ctx);
 
@@ -514,7 +519,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
     }
 
-    private String getFolderIdForUser(Event event, int contextId, int userId) throws OXException {
+    protected String getFolderIdForUser(Event event, int contextId, int userId) throws OXException {
         /*
          * get folder view from event data
          */

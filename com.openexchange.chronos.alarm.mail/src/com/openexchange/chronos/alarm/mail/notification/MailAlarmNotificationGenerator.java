@@ -1,0 +1,252 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.chronos.alarm.mail.notification;
+
+import static com.openexchange.osgi.Tools.requireService;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.alarm.mail.impl.MailAlarmMailStrings;
+import com.openexchange.chronos.compat.ShownAsTransparency;
+import com.openexchange.chronos.itip.ITipRole;
+import com.openexchange.chronos.itip.generators.DateHelper;
+import com.openexchange.chronos.itip.generators.HTMLWrapper;
+import com.openexchange.chronos.itip.generators.LabelHelper;
+import com.openexchange.chronos.itip.generators.NotificationMail;
+import com.openexchange.chronos.itip.generators.NotificationParticipant;
+import com.openexchange.chronos.itip.generators.ParticipantHelper;
+import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.State;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.TemplateService;
+
+/**
+ * 
+ * {@link MailAlarmNotificationGenerator}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.1
+ */
+public class MailAlarmNotificationGenerator {
+
+    private ServiceLookup services;
+
+    private Event event;
+
+    private Context ctx;
+
+    private User user;
+
+    private List<NotificationParticipant> participants;
+
+    private List<NotificationParticipant> resources;
+
+    private NotificationParticipant organizer;
+
+    private NotificationParticipant recipient;
+
+    public MailAlarmNotificationGenerator(ServiceLookup services, MailAlarmNotificationParticipantResolver participantResolver, Event event, User user, Context ctx) throws OXException {
+        this.services = services;
+        this.event = event;
+        this.ctx = ctx;
+        this.user = user;
+        List<NotificationParticipant> recipients = participantResolver.resolveAllRecipients(null, event, user, null, ctx, null, null);
+        this.participants = participantResolver.getAllParticipants(recipients, event);
+        this.resources = participantResolver.getResources(event);
+
+        for (final NotificationParticipant participant : recipients) {
+            if (participant.hasRole(ITipRole.ORGANIZER)) {
+                this.organizer = participant;
+            }
+            if (participant.getIdentifier() == user.getId()) {
+                this.recipient = participant;
+            }
+        }
+    }
+
+    public ExtendedNotificationMail create(String templateName) throws OXException {
+        ExtendedNotificationMail mail = new ExtendedNotificationMail();
+        initMail(mail);
+        mail.setTemplateName(templateName);
+        render(mail);
+        return mail;
+    }
+
+    private void initMail(final ExtendedNotificationMail mail) throws OXException {
+        mail.setRecipient(recipient);
+        mail.setOrganizer(organizer);
+        mail.setActor(organizer);
+        mail.setEvent(event);
+        mail.setParticipants(participants);
+        mail.setResources(resources);
+        mail.setStateType(State.Type.REMINDER);
+        mail.setSubject(generateSubject());
+    }
+
+    private String generateSubject() throws OXException {
+        TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
+        Locale locale = user.getLocale();
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
+        Translator translator = translatorFactory.translatorFor(locale);
+        String summary = event.getSummary();
+        if (summary.length() > 40) {
+            summary = summary.substring(0, 36).concat("...");
+        }
+        DateFormat df = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, user.getLocale());
+        String formattedStartDate = df.format(new Date(event.getStartDate().getTimestamp()));
+
+        return translator.translate(MailAlarmMailStrings.NOTIFICATION).concat(": ").concat(summary).concat(" - ").concat(formattedStartDate);
+    }
+
+    private void render(final ExtendedNotificationMail mail) throws OXException {
+        if (services == null) {
+            return;
+        }
+        final NotificationParticipant participant = mail.getRecipient();
+
+        final TemplateService templates = services.getService(TemplateService.class);
+        if (templates == null) {
+            return;
+        }
+        final OXTemplate textTemplate = templates.loadTemplate(mail.getTemplateName() + ".txt.tmpl");
+        final OXTemplate htmlTemplate = templates.loadTemplate(mail.getTemplateName() + ".html.tmpl");
+
+        final Map<String, Object> env = new HashMap<String, Object>();
+
+        TypeWrapper wrapper = new PassthroughWrapper();
+        env.put("mail", mail);
+        env.put("templating", templates.createHelper(env, null, false));
+        env.put("formatters", dateHelperFor(mail.getRecipient()));
+        env.put("participantHelper", new ParticipantHelper(participant.getLocale()));
+        env.put("labels", getLabelHelper(mail, wrapper, participant));
+
+        AllocatingStringWriter writer = new AllocatingStringWriter();
+        textTemplate.process(env, writer);
+        mail.setText(writer.toString());
+
+        wrapper = new HTMLWrapper();
+        env.put("labels", getLabelHelper(mail, wrapper, participant));
+        writer = new AllocatingStringWriter();
+        htmlTemplate.process(env, writer);
+        mail.setHtml(writer.toString());
+
+        mail.setEnvironment(env);
+    }
+
+    private LabelHelper getLabelHelper(final NotificationMail mail, final TypeWrapper wrapper, final NotificationParticipant participant) throws OXException {
+        return new LabelHelper(dateHelperFor(participant), participant.getTimeZone(), mail, participant.getLocale(), ctx, wrapper, services);
+    }
+
+    private DateHelper dateHelperFor(final NotificationParticipant participant) {
+        return new DateHelper(event, participant.getLocale(), participant.getTimeZone());
+    }
+
+    private class PassthroughWrapper implements TypeWrapper {
+
+        @Override
+        public String none(final Object argument) {
+            if (argument != null) {
+                return argument.toString();
+            }
+            return "";
+        }
+
+        @Override
+        public String original(final Object argument) {
+            return none(argument);
+        }
+
+        @Override
+        public String participant(final Object argument) {
+            return none(argument);
+        }
+
+        @Override
+        public String state(final Object argument, final ParticipationStatus status) {
+            return none(argument);
+        }
+
+        @Override
+        public String updated(final Object argument) {
+            return none(argument);
+        }
+
+        @Override
+        public String emphasiszed(final Object argument) {
+            return none(argument);
+        }
+
+        @Override
+        public String reference(final Object argument) {
+            return none(argument);
+        }
+
+        @Override
+        public String shownAs(final Object argument, final ShownAsTransparency shownAs) {
+            return none(argument);
+        }
+
+    }
+
+}

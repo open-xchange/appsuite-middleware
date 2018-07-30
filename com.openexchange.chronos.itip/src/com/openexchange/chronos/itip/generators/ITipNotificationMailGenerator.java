@@ -100,13 +100,13 @@ import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 
 /**
- * {@link NotificationMailGenerator}
+ * {@link ITipNotificationMailGenerator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class NotificationMailGenerator implements ITipMailGenerator {
+public class ITipNotificationMailGenerator implements ITipMailGenerator {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(NotificationMailGenerator.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ITipNotificationMailGenerator.class);
 
     private NotificationParticipant organizer;
 
@@ -137,7 +137,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected final List<NotificationParticipant> participants;
 
     protected NotificationParticipant onBehalfOf;
-    
+
     protected String comment;
 
     protected CalendarUtilities calendarUtilities;
@@ -145,7 +145,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     public static final EventField[] DEFAULT_SKIP = new EventField[] { EventField.ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY, EventField.CREATED, EventField.LAST_MODIFIED, EventField.ALARMS, EventField.SEQUENCE,
         EventField.TRANSP, EventField.TIMESTAMP, EventField.FLAGS };
 
-    public NotificationMailGenerator(final ServiceLookup services, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event updated, User user,
+    public ITipNotificationMailGenerator(final ServiceLookup services, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event updated, User user,
         final User onBehalfOf, final Context ctx, final Session session, CalendarUser principal, String comment) throws OXException {
         this.util = util;
         this.ctx = ctx;
@@ -343,7 +343,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     /**
      * Determinate the {@link NotificationParticipant} to use as the sender of the mail.
      * Considers {@link NotificationProperty#FROM_SOURCE} for the correct mail address to use.
-     * 
+     *
      * @param external If the receiver of the mail is internal or external
      * @return The sender with correct mail set
      */

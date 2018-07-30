@@ -71,13 +71,13 @@ public class MailAlarmNotificationServiceImpl implements MailAlarmNotificationSe
 
     private static final Logger LOG = LoggerFactory.getLogger(MailAlarmNotificationServiceImpl.class.getName());
 
-    private MailAlarmNotificationHandler mailAlarmNotificationHandler;
+    private MailAlarmMailHandler mailAlarmNotificationHandler;
 
     private ServiceLookup services;
 
     public MailAlarmNotificationServiceImpl(ServiceLookup services) {
         this.services = services;
-        this.mailAlarmNotificationHandler = new MailAlarmNotificationHandler(services);
+        this.mailAlarmNotificationHandler = new MailAlarmMailHandler(services);
     }
 
     @Override
@@ -92,11 +92,6 @@ public class MailAlarmNotificationServiceImpl implements MailAlarmNotificationSe
         UserService userService = requireService(UserService.class, services);
         User targetUser = userService.getUser(userId, context);
 
-        MailAlarmNotification notification = buildMailAlarmNotification(event, contextId, targetUser);
-        this.mailAlarmNotificationHandler.send(notification);
-    }
-
-    private MailAlarmNotification buildMailAlarmNotification(Event event, int contextId, User targetUser) {
-        return MailAlarmNotification.builder().setEvent(event).setTargetUser(targetUser).setContextId(contextId).build();
+        this.mailAlarmNotificationHandler.send(event, targetUser, contextId);
     }
 }

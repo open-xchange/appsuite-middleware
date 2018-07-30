@@ -124,7 +124,7 @@ public class DefaultNotificationParticipantResolverTest {
     private Session session;
 
     // --------- PRIVATE OBJECTS ------------
-    private DefaultNotificationParticipantResolver resolver;
+    private ITipNotificationParticipantResolver resolver;
 
     private final Context context = new ContextImpl(CONTEXT_ID);
 
@@ -145,11 +145,8 @@ public class DefaultNotificationParticipantResolverTest {
         PowerMockito.when(UserSettingMailStorage.getInstance()).thenReturn(userSettingMailStorage);
         PowerMockito.when(userSettingMailStorage.getUserSettingMail(Matchers.anyInt(), Matchers.eq(Matchers.eq(context)))).thenReturn(null);
 
-        // Mock util
-        PowerMockito.when(util.getFolderIdForUser(Matchers.any(Session.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(null);
-
         // Create service to test
-        resolver = new DefaultNotificationParticipantResolver(util);
+        resolver = new ITipNotificationParticipantResolver(util);
     }
 
     private void prepareServices(Event updated, User onBehalfOf) throws OXException {

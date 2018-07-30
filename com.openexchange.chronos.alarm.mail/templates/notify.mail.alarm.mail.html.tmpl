@@ -1,34 +1,16 @@
-<#include "notify.common.button.tmpl">
 <!DOCTYPE html>
 <html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta charset="UTF-8">
-</head>
-<body>
- <#escape x as x?html>
-  
-  <p id="summary">
-    ${summary}
-  </p>
-  
-  <#if description?has_content>
-    <p id="description"><cite>${description}</cite></p>
-  </#if>
-
-  <p id="start_date"><cite>${start_date}</cite></p>
-
-  <#if location?has_content>
-    <p id="location"><cite>${location}</cite></p>
-  </#if>
-
-  <p id="attendees"><cite>${attendees}</cite></p>
-  
-  <p id="url"><cite>${url}</cite></p>
-  
- </#escape>
- 
- <#include "notify.common.footer.html.tmpl">
- 
-</body>
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <style type="text/css">
+            ${templating.include( "notify.appointment.styles.css.tmpl" )}
+        </style>
+    </head>
+    <body>
+        <div class="content">
+            ${templating.include( "notify.appointment.intro.html.tmpl" )}
+            ${templating.include( "notify.mail.alarm.show.html.tmpl" )}
+        </div>
+    </body>
 </html>

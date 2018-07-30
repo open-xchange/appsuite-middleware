@@ -47,52 +47,26 @@
  *
  */
 
-package com.openexchange.chronos.itip.generators;
+package com.openexchange.chronos.alarm.mail.notification;
 
-import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.itip.ITipIntegrationUtility;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-import com.openexchange.user.UserService;
+import java.util.Map;
+import com.openexchange.chronos.itip.generators.NotificationMail;
 
 /**
- * {@link NotificationMailGeneratorFactory}
+ * {@link ExtendedNotificationMail}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.1
  */
-public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactory {
+public class ExtendedNotificationMail extends NotificationMail {
 
-    private final NotificationParticipantResolver resolver;
-    private final ITipIntegrationUtility util;
+    private Map<String, Object> environment;
 
-    private final ServiceLookup services;
-
-    public NotificationMailGeneratorFactory(NotificationParticipantResolver resolver, ITipIntegrationUtility util, ServiceLookup services) {
-        super();
-        this.resolver = resolver;
-        this.util = util;
-        this.services = services;
+    public Map<String, Object> getEnvironment() {
+        return environment;
     }
 
-    @Override
-    public ITipMailGenerator create(Event original, Event updated, Session session, int onBehalfOfId, CalendarUser principal) throws OXException {
-        return create(original, updated, session, onBehalfOfId, principal, null);
+    public void setEnvironment(Map<String, Object> environment) {
+        this.environment = environment;
     }
-
-    @Override
-    public ITipMailGenerator create(Event original, Event updated, Session session, int onBehalfOfId, CalendarUser principal, String comment) throws OXException {
-        Context ctx = services.getService(ContextService.class).getContext(session.getContextId());
-        User user = services.getService(UserService.class).getUser(session.getUserId(), ctx);
-        User onBehalfOf = (onBehalfOfId <= 0) ? user : services.getService(UserService.class).getUser(onBehalfOfId, ctx);
-
-        NotificationMailGenerator generator = new NotificationMailGenerator(services, resolver, util, original, updated, user, onBehalfOf, ctx, session, principal, comment);
-
-        return generator;
-    }
-
 }

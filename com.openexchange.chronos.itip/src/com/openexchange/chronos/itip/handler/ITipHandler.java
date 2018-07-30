@@ -69,8 +69,8 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
+import com.openexchange.chronos.itip.generators.ITipNotificationMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationMail;
-import com.openexchange.chronos.itip.generators.NotificationMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.sender.MailSenderService;
@@ -127,10 +127,10 @@ public class ITipHandler implements CalendarHandler {
         allButDeleted.remove(AttendeeField.TRANSP);
     }
 
-    private NotificationMailGeneratorFactory generators;
-    private MailSenderService sender;
+    private final ITipNotificationMailGeneratorFactory generators;
+    private final MailSenderService sender;
 
-    public ITipHandler(NotificationMailGeneratorFactory generatorFactory, MailSenderService sender) {
+    public ITipHandler(ITipNotificationMailGeneratorFactory generatorFactory, MailSenderService sender) {
         this.generators = generatorFactory;
         this.sender = sender;
     }
@@ -234,7 +234,7 @@ public class ITipHandler implements CalendarHandler {
         List<UpdateResult> exceptions = Collections.emptyList();
 
         if (CalendarUtils.isSeriesMaster(update.getUpdate()) && update.containsAnyChangeOf(EXCEPTION_DELETE)) {
-            // Handle as delete 
+            // Handle as delete
             RecurrenceService service = Services.getService(RecurrenceService.class, true);
             RecurrenceIterator<Event> recurrenceIterator = service.iterateEventOccurrences(update.getOriginal(), null, null);
 
@@ -307,7 +307,7 @@ public class ITipHandler implements CalendarHandler {
 
             // Check if there is a group to handle
             if (eventGroup.size() > 1) {
-                // Check if master is present 
+                // Check if master is present
                 Optional<DeleteResult> master = eventGroup.stream().filter(u -> seriesId.equals(u.getOriginal().getId())).findFirst();
                 if (master.isPresent() && CalendarUtils.isSeriesMaster(master.get().getOriginal())) {
                     // Series update, remove those items from the update list and the master from the exceptions
