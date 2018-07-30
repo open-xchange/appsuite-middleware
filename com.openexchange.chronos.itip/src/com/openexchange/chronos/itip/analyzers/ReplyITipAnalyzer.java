@@ -243,8 +243,11 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     private boolean containsPartyCrasher(ITipAnalysis analysis) throws OXException {
-        for (ITipChange change : analysis.getChanges()) {
-            if (false == change.getDiff().getAttendeeUpdates().getAddedItems().isEmpty()) {
+        for (ITipChange change : analysis.getChanges()) { 
+            if (null != change.getDiff() 
+                && null != change.getDiff().getAttendeeUpdates() 
+                && null != change.getDiff().getAttendeeUpdates().getAddedItems() 
+                && false == change.getDiff().getAttendeeUpdates().getAddedItems().isEmpty()) {
                 return true;
             }
         }
