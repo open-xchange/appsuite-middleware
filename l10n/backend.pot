@@ -204,18 +204,6 @@ msgstr ""
 msgid "Notification"
 msgstr ""
 
-#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:65
-msgid "When"
-msgstr ""
-
-#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:67
-msgid "Where"
-msgstr ""
-
-#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:69
-msgid "Who"
-msgstr ""
-
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:62
 #: com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:67
 msgid "Conversion failed for property \"%1$s\": %2$s"
