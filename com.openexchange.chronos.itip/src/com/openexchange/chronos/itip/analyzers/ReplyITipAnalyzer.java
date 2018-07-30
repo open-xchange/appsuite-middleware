@@ -255,7 +255,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     private Attendee getReply(Event update) throws OXException {
-        if (update.getAttendees().size() != 1) {
+        if (null == update.getAttendees() || update.getAttendees().size() != 1) {
             // Not RFC conform
             throw ITipExceptions.NOT_CONFORM.create();
         }
