@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getFolder;
@@ -165,17 +166,17 @@ public class SearchPerformer extends AbstractQueryPerformer {
             List<CalendarFolder> foldersForEvent = getFoldersForEvent(folders, event);
             if (foldersForEvent.isEmpty() && null != event.getFolderId()) {
                 CalendarFolder invisibleFolder = Utils.getFolder(session, event.getFolderId(), false);
-                if (Utils.isVisible(invisibleFolder, event)) {
-                    List<Event> processedEvents = new EventPostProcessor(session, storage, true).process(event, invisibleFolder).getEvents();
+                if (Utils.isVisible(invisibleFolder, event) && false == isClassifiedFor(event, session.getUserId())) {
+                    List<Event> processedEvents = new EventPostProcessor(session, storage).process(event, invisibleFolder).getEvents();
                     com.openexchange.tools.arrays.Collections.put(eventsPerFolderId, invisibleFolder.getId(), processedEvents);
                 }
             } else if (1 == foldersForEvent.size()) {
-                List<Event> processedEvents = new EventPostProcessor(session, storage, true).process(event, foldersForEvent.get(0)).getEvents();
+                List<Event> processedEvents = new EventPostProcessor(session, storage).process(event, foldersForEvent.get(0)).getEvents();
                 com.openexchange.tools.arrays.Collections.put(eventsPerFolderId, foldersForEvent.get(0).getId(), processedEvents);
             } else {
                 for (CalendarFolder folder : foldersForEvent) {
                     Event copiedEvent = EventMapper.getInstance().copy(event, new Event(), (EventField[]) null);
-                    List<Event> processedEvents = new EventPostProcessor(session, storage, true).process(copiedEvent, folder).getEvents();
+                    List<Event> processedEvents = new EventPostProcessor(session, storage).process(copiedEvent, folder).getEvents();
                     com.openexchange.tools.arrays.Collections.put(eventsPerFolderId, folder.getId(), processedEvents);
                 }
             }
@@ -341,7 +342,10 @@ public class SearchPerformer extends AbstractQueryPerformer {
     private static List<CalendarFolder> getFoldersForEvent(List<CalendarFolder> possibleFolders, Event event) {
         List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
         for (CalendarFolder folder : possibleFolders) {
-            if (Utils.isInFolder(event, folder)) {
+            /*
+             * only include if it appears in folder, and is not classified for the current session user
+             */
+            if (Utils.isInFolder(event, folder) && false == isClassifiedFor(event, folder.getSession().getUserId())) {
                 folders.add(folder);
             }
         }

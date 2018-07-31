@@ -163,7 +163,6 @@ public interface FolderCalendarAccess extends CalendarAccess {
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
      * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * <li>{@link CalendarParameters#PARAMETER_SKIP_CLASSIFIED}</li>
      * </ul>
      *
      * @param folderId The identifier of the folder to get the events from
@@ -182,7 +181,6 @@ public interface FolderCalendarAccess extends CalendarAccess {
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
      * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * <li>{@link CalendarParameters#PARAMETER_SKIP_CLASSIFIED}</li>
      * </ul>
      *
      * @param folderId The identifier of the folder to get the events from

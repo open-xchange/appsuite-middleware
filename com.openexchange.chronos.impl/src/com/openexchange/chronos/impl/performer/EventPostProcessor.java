@@ -96,7 +96,6 @@ public class EventPostProcessor {
     private final CalendarSession session;
     private final CalendarStorage storage;
     private final EventField[] requestedFields;
-    private final boolean skipClassified;
     private final List<Event> events;
 
     private SelfProtection selfProtection;
@@ -107,15 +106,13 @@ public class EventPostProcessor {
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
-     * @param skipClassified <code>true</code> to skip events that are <i>classified</i> for the user, <code>false</code>, otherwise
      */
-    public EventPostProcessor(CalendarSession session, CalendarStorage storage, boolean skipClassified) {
+    public EventPostProcessor(CalendarSession session, CalendarStorage storage) {
         super();
         this.session = session;
         this.storage = storage;
         this.events = new ArrayList<Event>();
         this.requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        this.skipClassified = skipClassified;
     }
 
     /**
@@ -217,7 +214,7 @@ public class EventPostProcessor {
     }
 
     private boolean process(Event event, String folderId, int calendarUserId) throws OXException {
-        if (isExcluded(event, session, skipClassified)) {
+        if (isExcluded(event, session)) {
             return false;
         }
         event.setFolderId(folderId);

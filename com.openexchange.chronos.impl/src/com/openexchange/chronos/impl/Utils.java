@@ -557,25 +557,20 @@ public class Utils {
      * Gets a value indicating whether a specific event should be excluded from results based on the configured calendar parameters,
      * e.g. because ...
      * <ul>
-     * <li>it is classified as private or confidential for the accessing user and such events are configured to be excluded</li>
      * <li>it's start-date is behind the range requested via parameters</li>
      * <li>it's end-date is before the range requested via parameters</li>
      * </ul>
      *
      * @param event The event to check
      * @param session The calendar session
-     * @param skipClassified <code>true</code> to skip <i>confidential</i> events in shared folders, <code>false</code>, otherwise
      * @return <code>true</code> if the event should be excluded, <code>false</code>, otherwise
      */
-    public static boolean isExcluded(Event event, CalendarSession session, boolean skipClassified) throws OXException {
-        /*
-         * excluded if "classified" for user (and such events are requested to be excluded)
-         */
-        if (isClassifiedFor(event, session.getUserId())) {
-            if (skipClassified || false == Classification.CONFIDENTIAL.equals(event.getClassification())) {
-                // only include 'confidential' events if requested
-                return true;
-            }
+    public static boolean isExcluded(Event event, CalendarSession session) throws OXException {
+        if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
+            /*
+             * excluded if classified as private for the session user
+             */
+            return true;
         }
         Date from = getFrom(session);
         Date until = getUntil(session);
@@ -596,20 +591,6 @@ public class Utils {
             }
         }
         return false;
-    }
-
-    /**
-     * Gets a value indicating whether events in foreign folders classified as {@link Classification#CONFIDENTIAL} are to be included in
-     * the results or not. <p/>
-     * <b>Note:</b> Events that are marked as {@link Classification#PRIVATE} are always excluded in shared folders (in case the user is not
-     * attending itself).
-     *
-     * @param parameters The calendar parameters to evaluate
-     * @return <code>true</code> if classified events should be skipped, <code>false</code>, otherwise
-     * @see CalendarParameters#PARAMETER_SKIP_CLASSIFIED
-     */
-    public static boolean isSkipClassifiedEvents(CalendarParameters parameters) {
-        return parameters.get(CalendarParameters.PARAMETER_SKIP_CLASSIFIED, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     /**
