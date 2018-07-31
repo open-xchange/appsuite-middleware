@@ -163,28 +163,34 @@ public class MailAlarmDeliveryWorker implements Runnable {
                 Connection writeCon = null;
                 boolean successful = false;
                 boolean readOnly = true;
+                Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers = null;
                 try {
 
                     Calendar overdueTime = Calendar.getInstance(UTC);
                     overdueTime.add(Calendar.MINUTE, -Math.abs(overdueWaitTime));
                     readCon = dbservice.getReadOnly(ctxId);
-                    Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers = storage.getAndLockTriggers(readCon, until.getTime(), overdueTime.getTime(), false);
+                    lockedTriggers = storage.getAndLockTriggers(readCon, until.getTime(), overdueTime.getTime(), false);
                     if (lockedTriggers.isEmpty()) {
                         successful = true;
                         continue;
                     }
+
+                    dbservice.backReadOnly(ctxId, readCon);
+                    readCon = null;
 
                     writeCon = dbservice.getForUpdateTask(ctxId);
                     writeCon.setAutoCommit(false);
                     lockedTriggers = storage.getAndLockTriggers(writeCon, until.getTime(), overdueTime.getTime(), true);
                     if (lockedTriggers.isEmpty()) {
                         successful = true;
+                        if (Thread.interrupted()) {
+                            throw new InterruptedException();
+                        }
                         continue;
                     }
                     readOnly = false;
                     storage.setProcessingStatus(writeCon, lockedTriggers, currentUTCTime.getTimeInMillis());
                     writeCon.commit();
-                    spawnDeliveryTaskForTriggers(lockedTriggers, until, currentUTCTime);
                     successful = true;
                 } catch (SQLException e) {
                     // ignore retry next time
@@ -205,6 +211,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
                         }
                     }
                 }
+                spawnDeliveryTaskForTriggers(lockedTriggers, until, currentUTCTime);
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
@@ -335,13 +342,15 @@ public class MailAlarmDeliveryWorker implements Runnable {
             try {
                 List<AlarmTrigger> triggers = checkEvents(readCon, events, cid, account, false);
                 if (triggers.isEmpty() == false) {
+                    dbservice.backReadOnly(cid, readCon);
+                    readCon = null;
                     // If there are due alarm triggers get a writable connection and lock those triggers
                     writeCon = dbservice.getWritable(cid);
                     writeCon.setAutoCommit(false);
                     triggers = checkEvents(writeCon, events, cid, account, true);
                     if (triggers.isEmpty() == false) {
                         readOnly = false;
-                        CalendarStorage calStorage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(readCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS);
+                        CalendarStorage calStorage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(writeCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS);
                         for (AlarmTrigger trigger : triggers) {
                             scheduleTaskForEvent(writeCon, calStorage, key(cid, account, trigger.getEventId(), trigger.getAlarm()), trigger);
                         }

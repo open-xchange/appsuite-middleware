@@ -93,7 +93,6 @@ public class UpdateAlarmsAction extends ChronosAction {
         }
         EventID eventID = parseIdParameter(requestData);
         List<Alarm> alarms = parseAlarms(jsonArray, getTimeZone(requestData));
-        alarmChecker.checkAlarmList(calendarAccess.getSession(), null, alarms);
         CalendarResult calendarResult = calendarAccess.updateAlarms(eventID, alarms, clientTimestamp);
         return new AJAXRequestResult(calendarResult, new Date(calendarResult.getTimestamp()), CalendarResultConverter.INPUT_FORMAT);
     }
