@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
- * {@link ConfigAwareKeyStore}
+ * {@link ConfigAwareKeyStore} - Links a {@link KeyStore} to the {@link Configuration}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
@@ -82,7 +82,7 @@ public class ConfigAwareKeyStore {
     /**
      * Initializes a new {@link ConfigAwareKeyStore}.
      * 
-     * @param configuration The {@link Configuration}
+     * @param configuration The {@link Configuration} to get the values from
      * @param path The path to the store
      * @param password The optional password for the store
      * @param type The type of the store. See <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#KeystoreImplementation">JCA reference guide</a>
@@ -101,7 +101,8 @@ public class ConfigAwareKeyStore {
         this.password = password;
 
         try {
-            this.store = KeyStore.getInstance(Strings.isEmpty(type) ? "JKS" : type);
+            String actualType = configuration.getJdbcProps().getProperty(type);
+            this.store = KeyStore.getInstance(Strings.isEmpty(actualType) ? KeyStore.getDefaultType() : actualType);
         } catch (KeyStoreException e) {
             LOGGER.debug("Was not able to load KeyStore for type {}.", type);
             throw DatabaseExceptionCodes.KEYSTORE_UNAVAILABLE.create(e, e.getMessage());
@@ -153,5 +154,9 @@ public class ConfigAwareKeyStore {
         }
         return false;
 
+    }
+
+    public KeyStore getStore() {
+        return store;
     }
 }

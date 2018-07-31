@@ -49,7 +49,6 @@
 
 package com.openexchange.database.internal;
 
-import java.security.KeyStore;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,9 +77,11 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
 
     public static final String CLIENT_CERT_PATH_NAME     = "clientCertificateKeyStoreUrl";
     public static final String CLIENT_CERT_PASSWORD_NAME = "clientCertificateKeyStorePassword";
+    public static final String CLIENT_CERT_TYPE          = "clientCertificateKeyStoreType";
 
     public static final String TRUST_CERT_PATH_NAME     = "trustCertificateKeyStoreUrl";
     public static final String TRUST_CERT_PASSWORD_NAME = "trustCertificateKeyStorePassword";
+    public static final String TRUST_CERT_TYPE          = "trustCertificateKeyStoreType";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreReloaderImpl.class);
 
@@ -89,12 +90,6 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
     private ConcurrentHashMap<String, ConfigAwareKeyStore> stores;
 
     private Configuration configuration;
-
-    /**
-     * "PKCS12" is recommend in <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#KeystoreImplementation">JCA reference guide</a>
-     * nevertheless <a href="https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-using-ssl.html">JDBC reference guide</a> uses "JKS" for client key store
-     */
-    private static final String[] keyStoreTypes = new String[] { "JKS", "PKCS12", KeyStore.getDefaultType() };
 
     /**
      * Initializes a new {@link KeyStoreReloaderImpl}.
@@ -109,8 +104,8 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
         stores = new ConcurrentHashMap<>(4);
         this.configuration = configuration;
 
-        savePut("CAStore", TRUST_CERT_PATH_NAME, TRUST_CERT_PASSWORD_NAME, keyStoreTypes[0]);
-        savePut("ClientStore", CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, keyStoreTypes[0]);
+        savePut("CAStore", TRUST_CERT_PATH_NAME, TRUST_CERT_PASSWORD_NAME, TRUST_CERT_TYPE);
+        savePut("ClientStore", CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, CLIENT_CERT_TYPE);
 
         if (stores.isEmpty() && isSSL(configuration)) {
             LOGGER.error("No keystores where added also 'useSSL' was set. SSL can't be used");
