@@ -181,8 +181,7 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
     private void notify(Configuration configuration) {
         if (checkForChangedProperties(this.configuration.getJdbcProps(), configuration.getJdbcProps())) {
             listerners.forEach(l -> l.notify(configuration));
-        }
-        if (checkForChangedProperties(this.configuration.getReadProps(), configuration.getReadProps()) || checkForChangedProperties(this.configuration.getWriteProps(), configuration.getWriteProps())) {
+        } else if (checkForChangedProperties(this.configuration.getReadProps(), configuration.getReadProps()) || checkForChangedProperties(this.configuration.getWriteProps(), configuration.getWriteProps())) {
             listerners.stream().filter(l -> ConfigDBListener.class.isAssignableFrom(l.getClass())).forEach(l -> l.notify(configuration));
         }
     }
@@ -193,7 +192,11 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
         }
         for (Entry<Object, Object> property : oldProperties.entrySet()) {
             String newProperty = newProperties.getProperty(String.valueOf(property.getKey()));
-            if (null != newProperty && null != property.getValue() && false == property.getValue().equals(newProperty)) {
+            if (null == newProperty) {
+                if (null != property.getValue()) {
+                    return true;
+                }
+            } else if (false == newProperty.equals(property.getValue())) {
                 return true;
             }
         }
