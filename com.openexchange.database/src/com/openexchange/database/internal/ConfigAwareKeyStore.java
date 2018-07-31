@@ -59,6 +59,7 @@ import java.security.cert.CertificateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseExceptionCodes;
+import com.openexchange.database.internal.reloadable.KeyStoreUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -159,4 +160,66 @@ public class ConfigAwareKeyStore {
     public KeyStore getStore() {
         return store;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(ConfigAwareKeyStore.class.getName());
+        sb.append("=[storeHash:").append(storeHash);
+        sb.append(",path:").append(path);
+        sb.append(",password:").append(password);
+        sb.append(",keystore:").append(store.toString());
+        sb.append("]");
+        return sb.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        result = prime * result + ((store == null) ? 0 : KeyStoreUtil.getHashSum(store));
+        result = prime * result + storeHash;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ConfigAwareKeyStore other = (ConfigAwareKeyStore) obj;
+        if (password == null) {
+            if (other.password != null) {
+                return false;
+            }
+        } else if (!password.equals(other.password)) {
+            return false;
+        }
+        if (path == null) {
+            if (other.path != null) {
+                return false;
+            }
+        } else if (!path.equals(other.path)) {
+            return false;
+        }
+        if (store == null) {
+            if (other.store != null) {
+                return false;
+            }
+        } else if (0 != KeyStoreUtil.compare(store, other.store)) {
+            return false;
+        }
+        if (storeHash != other.storeHash) {
+            return false;
+        }
+        return true;
+    }
+
 }
