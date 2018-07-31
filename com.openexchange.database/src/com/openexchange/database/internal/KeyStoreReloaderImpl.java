@@ -109,8 +109,8 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
         stores = new ConcurrentHashMap<>(4);
         this.configuration = configuration;
 
-        savePut("ClientStore", CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, keyStoreTypes[0]);
         savePut("CAStore", TRUST_CERT_PATH_NAME, TRUST_CERT_PASSWORD_NAME, keyStoreTypes[0]);
+        savePut("ClientStore", CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, keyStoreTypes[0]);
 
         if (stores.isEmpty() && isSSL(configuration)) {
             LOGGER.error("No keystores where added also 'useSSL' was set. SSL can't be used");
@@ -132,7 +132,7 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
     @Override
     public boolean loadKeyStores(Configuration configuration) throws OXException {
         // Do we need to do something?
-        if (isSSL(configuration)) {
+        if (false == isSSL(configuration)) {
             return false;
         }
 
@@ -146,7 +146,7 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
 
     private boolean isSSL(Configuration configuration) {
         Boolean useSSL = Boolean.valueOf(configuration.getJdbcProps().getProperty(USE_SSL));
-        if (null == useSSL || false == useSSL.booleanValue()) {
+        if (null != useSSL && useSSL.booleanValue()) {
             return true;
         }
         return false;
