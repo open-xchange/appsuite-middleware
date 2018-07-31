@@ -832,46 +832,48 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     private AuthenticationFailureHandlerResult handleConnectFailure(OXException e, MailConfig mailConfig) {
-        if (!MimeMailExceptionCode.LOGIN_FAILED.equals(e) && !MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e) && !OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e)) {
-            return AuthenticationFailureHandlerResult.createErrorResult(e);
-        }
-
-        if (mailConfig.getAccountId() == MailAccount.DEFAULT_ID) {
-            AuthenticationFailedHandlerService handlerService = ServerServiceRegistry.getInstance().getService(AuthenticationFailedHandlerService.class);
-            if (null != handlerService) {
-                try {
-                    return handlerService.handleAuthenticationFailed(e, Service.MAIL, mailConfig, session);
-                } catch (OXException x) {
-                    return AuthenticationFailureHandlerResult.createErrorResult(x);
-                }
-            }
-        }
-
-        if (OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e)) {
-            return AuthenticationFailureHandlerResult.createErrorResult(e);
-        }
-
-        // Authentication failed... Check for OAuth-based authentication
-        if (AuthType.isOAuthType(mailConfig.getAuthType())) {
-            // Determine identifier of the associated OAuth account
-            int oauthAccountId = mailConfig.getOAuthAccountId();
-            if (oauthAccountId >= 0) {
-                OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
-                if (null == oauthService) {
-                    LOG.warn("Detected failed OAuth authentication, but unable to handle as needed service {} is missing", OAuthService.class.getSimpleName());
-                } else {
+        if (MimeMailExceptionCode.LOGIN_FAILED.equals(e) || MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e) || OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e) || (e.getCause() instanceof javax.mail.AuthenticationFailedException)) {
+            // Authentication failed...
+            if (mailConfig.getAccountId() == MailAccount.DEFAULT_ID) {
+                AuthenticationFailedHandlerService handlerService = ServerServiceRegistry.getInstance().getService(AuthenticationFailedHandlerService.class);
+                if (null != handlerService) {
                     try {
-                        OAuthAccount oAuthAccount = oauthService.getAccount(session, oauthAccountId);
-                        API api = oAuthAccount.getAPI();
-                        Throwable cause = e.getCause();
-                        return AuthenticationFailureHandlerResult.createErrorResult(OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId())));
-                    } catch (Exception x) {
-                        LOG.warn("Failed to handle failed OAuth authentication", x);
+                        return handlerService.handleAuthenticationFailed(e, Service.MAIL, mailConfig, session);
+                    } catch (OXException x) {
+                        return AuthenticationFailureHandlerResult.createErrorResult(x);
                     }
                 }
             }
+        
+            if (OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e)) {
+                return AuthenticationFailureHandlerResult.createErrorResult(e);
+            }
+        
+            // Authentication failed... Check for OAuth-based authentication
+            if (AuthType.isOAuthType(mailConfig.getAuthType())) {
+                // Determine identifier of the associated OAuth account
+                int oauthAccountId = mailConfig.getOAuthAccountId();
+                if (oauthAccountId >= 0) {
+                    OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
+                    if (null == oauthService) {
+                        LOG.warn("Detected failed OAuth authentication, but unable to handle as needed service {} is missing", OAuthService.class.getSimpleName());
+                    } else {
+                        try {
+                            OAuthAccount oAuthAccount = oauthService.getAccount(session, oauthAccountId);
+                            API api = oAuthAccount.getAPI();
+                            Throwable cause = e.getCause();
+                            return AuthenticationFailureHandlerResult.createErrorResult(OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId())));
+                        } catch (Exception x) {
+                            LOG.warn("Failed to handle failed OAuth authentication", x);
+                        }
+                    }
+                }
+            }
+        
+            return AuthenticationFailureHandlerResult.createErrorResult(e);
         }
-
+        
+        // Otherwise signal regular error result
         return AuthenticationFailureHandlerResult.createErrorResult(e);
     }
 

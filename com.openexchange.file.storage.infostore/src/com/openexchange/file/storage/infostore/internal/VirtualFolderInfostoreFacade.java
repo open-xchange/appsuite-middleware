@@ -344,6 +344,16 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public Quota getFileQuota(long folderId, ServerSession session) throws OXException {
+        return Quota.getUnlimitedQuota(Type.FILE);
+    }
+
+    @Override
+    public Quota getStorageQuota(long folderId, ServerSession session) throws OXException {
+        return Quota.getUnlimitedQuota(Type.STORAGE);
+    }
+
+    @Override
     public boolean exists(int id, int version, Context context) throws OXException {
         return false;
     }

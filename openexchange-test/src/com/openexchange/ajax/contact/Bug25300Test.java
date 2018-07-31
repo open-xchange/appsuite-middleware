@@ -65,6 +65,7 @@ public class Bug25300Test extends AbstractManagedContactTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -81,47 +82,6 @@ public class Bug25300Test extends AbstractManagedContactTest {
     @Test
     public void testYomiAndAddressFields() throws Exception {
         int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.YOMI_FIRST_NAME, Contact.YOMI_LAST_NAME, Contact.YOMI_COMPANY, Contact.ADDRESS_HOME, Contact.ADDRESS_BUSINESS, Contact.ADDRESS_OTHER };
-        Contact[] contacts = cotm.allAction(contact.getParentFolderID(), columnIDs);
-        assertNotNull("got no contacts", contacts);
-        assertTrue("got no contacts", 0 < contacts.length);
-        JSONArray arr = (JSONArray) cotm.getLastResponse().getData();
-        assertNotNull("no json array in response data", arr);
-        int size = arr.length();
-        assertTrue("no data in json array", 0 < arr.length());
-        for (int i = 0; i < size; i++) {
-            JSONArray objectData = arr.optJSONArray(i);
-            assertNotNull(objectData);
-            final int objectIdData = objectData.getInt(0);
-            final int folderIdData = objectData.getInt(1);
-            final String yomiFirstNameData = objectData.getString(2);
-            final String yomiLastNameData = objectData.getString(3);
-            final String yomiCompanyData = objectData.getString(4);
-            final String addressHomeData = objectData.getString(5);
-            final String addressBusinessData = objectData.getString(6);
-            final String addressOtherData = objectData.getString(7);
-
-            assertEquals("Unexpected objectId: ", objectIdData, contact.getObjectID());
-            assertEquals("Unexpected folderId: ", folderIdData, contact.getParentFolderID());
-            assertEquals("Unexpected yomiFirstName: ", yomiFirstNameData, contact.getYomiFirstName());
-            assertEquals("Unexpected yomiLastName: ", yomiLastNameData, contact.getYomiLastName());
-            assertEquals("Unexpected yomiCompany: ", yomiCompanyData, contact.getYomiCompany());
-            assertEquals("Unexpected addressHome: ", addressHomeData, contact.getAddressHome());
-            assertEquals("Unexpected addressBusiness: ", addressBusinessData, contact.getAddressBusiness());
-            assertEquals("Unexpected addressOther: ", addressOtherData, contact.getAddressOther());
-        }
-    }
-
-    @Test
-    public void testBackwardCompatibilityWithExchangedColumnsId() throws Exception {
-        // old column ids in contact details
-        final int yomiFirstName = 610;
-        final int yomiLastName = 611;
-        final int yomiCompany = 612;
-        final int addressHome = 613;
-        final int addressBusiness = 614;
-        final int addressOther = 615;
-
-        int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, yomiFirstName, yomiLastName, yomiCompany, addressHome, addressBusiness, addressOther };
         Contact[] contacts = cotm.allAction(contact.getParentFolderID(), columnIDs);
         assertNotNull("got no contacts", contacts);
         assertTrue("got no contacts", 0 < contacts.length);

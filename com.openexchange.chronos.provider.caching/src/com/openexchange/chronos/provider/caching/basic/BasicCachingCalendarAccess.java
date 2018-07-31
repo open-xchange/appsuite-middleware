@@ -674,7 +674,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         List<Event> addedItems = new ArrayList<Event>(externalEvents);
         for (Event event : addedItems) {
             try {
-                Check.mandatoryFields(event, EventField.START_DATE, EventField.TIMESTAMP);
+                Check.mandatoryFields(event, EventField.START_DATE);
             } catch (OXException e) {
                 LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
                 externalEvents.remove(event);

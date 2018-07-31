@@ -126,10 +126,9 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
 
     private void applyEventData(final CalendarSession session, CalendarStorage storage, Event event) throws OXException {
         event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
-        for (Attendee attendee : event.getAttendees()) {
-            if (attendee.getEntity() == session.getUserId()) {
-                event.setFolderId(attendee.getFolderId());
-            }
+        Attendee attendee = CalendarUtils.find(event.getAttendees(), session.getUserId());
+        if (null != attendee) {
+            event.setFolderId(attendee.getFolderId());
         }
         if (event.getFolderId() == null) {
             event.setFolderId(getFolderIdForUser(session.getSession(), event.getId(), session.getUserId()));

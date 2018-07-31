@@ -170,6 +170,12 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
      * Login denied
      */
     LOGIN_DENIED("Login denied.", LoginExceptionMessages.LOGIN_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 26),
+    /**
+     * Thrown in case login attempts is denied by server or any 3rd party component that controls login flow.
+     * <p>
+     * %1$s
+     */
+    LOGIN_DENIED_WITH_MESSAGE("%1$s", LoginExceptionMessages.LOGIN_DENIED_WITH_MESSAGE_MSG, Category.CATEGORY_PERMISSION_DENIED, 27),
     ;
 
     private static final String PREFIX = "LGI";

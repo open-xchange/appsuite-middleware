@@ -241,7 +241,7 @@ contains() {
     test -z "$file" && die "contains: missing file argument (arg 2)"
     test -e "$file" || die "contains: $file does not exist"
 
-    grep -q "$expression" "$file"
+    grep -q -- "$expression" "$file"
     return $?
 }
 

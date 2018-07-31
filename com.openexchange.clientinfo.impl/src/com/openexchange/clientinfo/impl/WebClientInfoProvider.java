@@ -274,6 +274,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
             case CHROMIUM:
                 return BROWSER_CHROMIUM;
             case FIREFOX:
+            case MOBILE_FIREFOX:
                 return BROWSER_FIREFOX;
             case OPERA:
             case OPERA_MINI:
@@ -281,6 +282,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                 return BROWSER_OPERA;
             case SAFARI:
             case SAFARI_RSS_READER:
+            case MOBILE_SAFARI:
                 return BROWSER_SAFARI;
             default:
                 return BROWSER_UNKNOWN;

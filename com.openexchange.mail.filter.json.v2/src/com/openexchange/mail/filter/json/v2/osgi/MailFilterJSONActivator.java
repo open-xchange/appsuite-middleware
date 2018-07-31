@@ -93,6 +93,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.FalseTestCom
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.HasFlagCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.SizeTestCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.StringTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.TrueTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTest;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTestParser;
@@ -113,7 +114,6 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
      */
     public MailFilterJSONActivator() {
         super();
-
     }
 
     @Override
@@ -158,6 +158,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(Commands.TRUE.getCommandName(), new TrueTestCommandParser(this));
         registry.register(Commands.FALSE.getCommandName(), new FalseTestCommandParser(this));
         registry.register(Commands.HASFLAG.getCommandName(), new HasFlagCommandParser(this));
+        registry.register(Commands.STRING.getCommandName(), new StringTestCommandParser(this));
 
         registry.register(SimplifiedHeaderTest.From.getCommandName(), simplifiedHeaderTestParser);
         registry.register(SimplifiedHeaderTest.To.getCommandName(), simplifiedHeaderTestParser);

@@ -54,7 +54,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -63,7 +62,6 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
-import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
@@ -71,14 +69,11 @@ import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
-import com.openexchange.testing.httpclient.models.UpdatesResult;
 
 /**
  *
@@ -340,264 +335,6 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         }
         Assert.fail("Alarm trigger not found.");
         return null;
-    }
-
-    @Test
-    public void testEventSeriesAlarmTriggerTimeRoundtripForMultipleUser() throws Exception {
-        int currentTriggers = getAlarmTriggers().size();
-
-        /*
-         * 1. Create an event series with two attendees and test if the times are correct
-         */
-
-        // Create an event yesterday 12 o clock
-        Calendar cal = DateTimeUtil.getUTCCalendar();
-        cal.add(Calendar.DAY_OF_MONTH, -1);
-
-        DateTimeData startDate = DateTimeUtil.getDateTime(cal);
-        DateTimeData endDate = DateTimeUtil.incrementDateTimeData(startDate, TimeUnit.HOURS.toMillis(1));
-
-        // Create an event with alarm and two attendees
-        ArrayList<Attendee> atts = new ArrayList<>(2);
-        Attendee attendee1 = AttendeeFactory.createIndividual(defaultUserApi.getCalUser());
-        atts.add(attendee1);
-        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser());
-        atts.add(attendee2);
-
-        // Create an event with alarm
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testSeriesAlarmTriggerTimeRoundtrip", startDate, endDate, 4, folderId);
-        toCreate.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT15M")));
-        toCreate.setAttendees(atts);
-
-        Date time = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime();
-        EventData event = eventManager.createEvent(toCreate);
-        getAndAssertAlarms(event, 1, folderId);
-
-        UpdatesResult updatesResult = eventManager2.getUpdates(time);
-        if (updatesResult.getNewAndModified().size() == 0) {
-            // The event is maybe not processed yet. Wait 10 seconds and try again
-            Thread.sleep(10 * 1000);
-            updatesResult = eventManager2.getUpdates(time);
-        }
-        assertEquals(1, updatesResult.getNewAndModified().size());
-        EventData eventU2 = updatesResult.getNewAndModified().get(0);
-
-        // Check if next trigger is at correct time
-        long currentTime = System.currentTimeMillis();
-        AlarmTriggerData triggers = getAndCheckAlarmTrigger(1 + currentTriggers); // The created alarm
-        AlarmTrigger alarmTrigger = null;
-        for (AlarmTrigger trigger : triggers) {
-            if (trigger.getFolder().equalsIgnoreCase(folderId)) {
-                alarmTrigger = trigger;
-                break;
-            }
-        }
-        Calendar eventTime = Calendar.getInstance(UTC);
-        eventTime.setTimeInMillis(cal.getTimeInMillis());
-        if (currentTime < (cal.getTimeInMillis() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
-            // The next trigger is today
-            eventTime.add(Calendar.DAY_OF_MONTH, 1);
-        } else {
-            // The next trigger is tomorrow
-            eventTime.add(Calendar.DAY_OF_MONTH, 2);
-        }
-        Calendar alarmTriggerTime = Calendar.getInstance(UTC);
-        alarmTriggerTime.setTime(eventTime.getTime());
-        alarmTriggerTime.add(Calendar.MINUTE, -15);
-        checkAlarmTime(alarmTrigger, event.getId(), alarmTriggerTime.getTimeInMillis());
-
-        // User 2 shouldn't have any triggers
-        triggers = eventManager2.getAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2));
-        assertEquals(0, triggers.size());
-
-        /*
-         * 2. Accept the event with user 2
-         */
-        AttendeeAndAlarm body = new AttendeeAndAlarm();
-        attendee2.setPartStat("ACCEPTED");
-        attendee2.setMember(null);
-        body.attendee(attendee2);
-
-        body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
-        eventManager2.updateAttendee(eventU2.getId(), body, false);
-
-        // Now user 2 should have a trigger
-        triggers = eventManager2.getAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2));
-        assertEquals(1, triggers.size());
-        checkAlarmTime(triggers.get(0), event.getId(), alarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
-
-        /*
-         * 3. create an exception for the event recurrence of the next trigger by shifting the start time by one hour
-         */
-        eventManager.getEvent(folderId, event.getId());
-        CalendarResult updateResult = eventManager.shiftEvent(event.getId(), alarmTrigger.getRecurrenceId(), event, eventTime, TimeUnit.HOURS, 1, null);
-        assertNotNull(updateResult.getCreated());
-        assertEquals(1, updateResult.getCreated().size());
-        EventData exceptionEvent = updateResult.getCreated().get(0);
-
-        // Check if trigger times are correct
-        triggers = getAndCheckAlarmTrigger(2 + currentTriggers); // The alarm of the series and the alarm for the exception
-
-        alarmTrigger = null;
-        AlarmTrigger alarmTrigger2 = null;
-        for (AlarmTrigger trigger : triggers) {
-            if (trigger.getFolder().equalsIgnoreCase(folderId)) {
-                if (alarmTrigger == null) {
-                    alarmTrigger = trigger;
-                } else if (alarmTrigger2 == null) {
-                    alarmTrigger2 = trigger;
-                    break;
-                }
-            }
-        }
-
-        // Check the exception
-        Calendar exceptionTriggerTime = Calendar.getInstance(UTC);
-        exceptionTriggerTime.setTimeInMillis(alarmTriggerTime.getTimeInMillis());
-        exceptionTriggerTime.add(Calendar.HOUR, 1); // Old alarm time shifted by one hour
-        checkAlarmTime(alarmTrigger, exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis());
-
-        // Check the normal alarm
-        Calendar newAlarmTriggerTime = Calendar.getInstance(UTC);
-        newAlarmTriggerTime.setTimeInMillis(alarmTriggerTime.getTimeInMillis());
-        newAlarmTriggerTime.add(Calendar.DAY_OF_MONTH, 1); // Old alarm time shifted by one day (next recurrence)
-        checkAlarmTime(alarmTrigger2, event.getId(), newAlarmTriggerTime.getTimeInMillis());
-
-        // Check user 2 too
-        triggers = eventManager2.getAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2));
-        assertEquals(2, triggers.size());
-        checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
-        checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
-
-        /*
-         * 4. Remove user 2 from exception
-         */
-        List<Attendee> attendees = exceptionEvent.getAttendees();
-        Attendee removed;
-        if (attendees.get(0).getEntity() == defaultUserApi.getCalUser()) {
-            removed = attendees.remove(1);
-        } else {
-            removed = attendees.remove(0);
-        }
-        EventData updateEvent = eventManager.updateEvent(exceptionEvent);
-
-        // Check again if trigger times are correct
-        triggers = getAndCheckAlarmTrigger(2 + currentTriggers); // The alarm of the series and the alarm for the exception
-
-        alarmTrigger = null;
-        alarmTrigger2 = null;
-        for (AlarmTrigger trigger : triggers) {
-            if (trigger.getFolder().equalsIgnoreCase(folderId)) {
-                if (alarmTrigger == null) {
-                    alarmTrigger = trigger;
-                } else if (alarmTrigger2 == null) {
-                    alarmTrigger2 = trigger;
-                    break;
-                }
-            }
-        }
-
-        // Check the exception
-        checkAlarmTime(alarmTrigger, exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis());
-
-        // Check the normal alarm
-        checkAlarmTime(alarmTrigger2, event.getId(), newAlarmTriggerTime.getTimeInMillis());
-
-        // Check user 2 too
-        triggers = eventManager2.getAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2));
-        assertEquals(1, triggers.size());
-        checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
-
-        /*
-         * 5. Re-add user 2
-         */
-        attendees.add(removed);
-        exceptionEvent.setLastModified(updateEvent.getLastModified());
-        eventManager.updateEvent(exceptionEvent);
-        eventManager2.setLastTimeStamp(eventManager.getLastTimeStamp());
-
-        // Check again if trigger times are correct
-        triggers = getAndCheckAlarmTrigger(2 + currentTriggers); // The alarm of the series and the alarm for the exception
-
-        alarmTrigger = null;
-        alarmTrigger2 = null;
-        for (AlarmTrigger trigger : triggers) {
-            if (trigger.getFolder().equalsIgnoreCase(folderId)) {
-                if (alarmTrigger == null) {
-                    alarmTrigger = trigger;
-                } else if (alarmTrigger2 == null) {
-                    alarmTrigger2 = trigger;
-                    break;
-                }
-            }
-        }
-
-        // Check the exception
-        checkAlarmTime(alarmTrigger, exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis());
-
-        // Check the normal alarm
-        checkAlarmTime(alarmTrigger2, event.getId(), newAlarmTriggerTime.getTimeInMillis());
-
-        // Check user 2 too
-        triggers = eventManager2.getAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2));
-        assertEquals(1, triggers.size());
-        checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
-
-        /*
-         * 6. Accept exception with user 2
-         */
-        body = new AttendeeAndAlarm();
-        attendee2.setPartStat("ACCEPTED");
-        body.attendee(attendee2);
-
-        body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
-        eventManager2.updateAttendee(exceptionEvent.getId(), body, false);
-
-        // Now user 2 should have a trigger again
-        triggers = eventManager2.getAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2));
-        assertEquals(2, triggers.size());
-        checkAlarmTime(triggers.get(0), exceptionEvent.getId(), exceptionTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
-        checkAlarmTime(triggers.get(1), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
-
-        /*
-         * 7. Delete the exception
-         */
-        EventId toDelete = new EventId();
-        toDelete.setFolder(exceptionEvent.getFolder());
-        toDelete.setId(exceptionEvent.getId());
-        eventManager.deleteEvent(toDelete);
-
-        // Check the normal alarm
-        triggers = getAndCheckAlarmTrigger(1 + currentTriggers); // Only the alarm of the series
-
-        alarmTrigger = null;
-        for (AlarmTrigger trigger : triggers) {
-            if (trigger.getFolder().equalsIgnoreCase(folderId)) {
-                alarmTrigger = trigger;
-                break;
-            }
-        }
-
-        checkAlarmTime(alarmTrigger, event.getId(), newAlarmTriggerTime.getTimeInMillis());
-
-        // check user 2
-        triggers = eventManager2.getAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2));
-        assertEquals(1, triggers.size());
-        checkAlarmTime(triggers.get(0), event.getId(), newAlarmTriggerTime.getTimeInMillis() - TimeUnit.MINUTES.toMillis(5));
-
-        /*
-         * 8. Delete series too
-         */
-        toDelete = new EventId();
-        toDelete.setFolder(event.getFolder());
-        toDelete.setId(event.getId());
-        eventManager.deleteEvent(toDelete);
-
-        // Check the normal alarm
-        getAndCheckAlarmTrigger(currentTriggers); // No upcoming triggers
-
-        // check user 2
-        getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), currentTriggers, user2.getChronosApi(), user2.getSession()); // No upcoming triggers
     }
 
     @Test

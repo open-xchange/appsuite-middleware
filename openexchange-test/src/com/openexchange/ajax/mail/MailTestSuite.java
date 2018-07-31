@@ -84,7 +84,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     GetStructureTest.class,
     Base64Test.class,
     AllSeenMailTest.class,
-    com.openexchange.ajax.mail.MultipleGetTest.class,
 
     /* AlwaysTest.class, */
 
@@ -97,7 +96,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug16141Test.class,
     Bug29865Test.class,
     Bug19696Test.class,
-    Bug30703Test.class,
     Bug30903Test.class,
     Bug31855Test.class,
     Bug32355Test.class,

@@ -50,6 +50,7 @@
 package com.openexchange.rest.passwordchange.history;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -82,7 +83,7 @@ public class TimeTest extends AbstractPasswordchangehistoryTest {
             if ((send - info.getCreated()) < 1000) {
                 // Check other criteria. This may fail if a password change made by another test was within the last second
                 assertEquals("Was not changed by this test!", CLIENT_ID, info.getClient());
-                assertEquals("Was not changed by this test!", "127.0.0.1", info.getIP());
+                assertTrue("IP must be set.", null != info.getIP());
                 return;
             }
         }

@@ -80,8 +80,9 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
     private static final EventField[] EVENT_TOMBSTONE_FIELDS = {
         EventField.FOLDER_ID, EventField.ID, EventField.SERIES_ID, EventField.CALENDAR_USER, EventField.UID, EventField.FILENAME,
         EventField.TIMESTAMP, EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.MODIFIED_BY,
-        EventField.SEQUENCE, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.DELETE_EXCEPTION_DATES,
-        EventField.CHANGE_EXCEPTION_DATES, EventField.CLASSIFICATION, EventField.TRANSP
+        EventField.SEQUENCE, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.RECURRENCE_ID,
+        EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_DATES,
+        EventField.CLASSIFICATION, EventField.TRANSP
     };
 
     /** The attendee fields that are preserved for reference in <i>tombstone</i> attendees */

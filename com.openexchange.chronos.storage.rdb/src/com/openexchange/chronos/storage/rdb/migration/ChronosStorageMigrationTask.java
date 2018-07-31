@@ -53,10 +53,13 @@ import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.UpdateConcurrency.BLOCKING;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
@@ -116,7 +119,22 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
              * migrate calendar data for all contexts & increment progress
              */
             for (int contextId : contextIds) {
-                new CalendarDataMigration(progress, config, contextService.loadContext(contextId), connection).perform();
+                Context context;
+                try {
+                    context = contextService.loadContext(contextId);
+                } catch (OXException e) {
+                    if ("CTX-0001".equals(e.getErrorCode())) {
+                        LOG.error("Unable to load context {}, skipping migration.", I(contextId), e);
+                        progress.nextContext();
+                        continue;
+                    }
+                    throw e;
+                }
+                try {
+                    new CalendarDataMigration(progress, config, context, connection).perform();
+                } catch (Exception e) {
+                    throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, "Error performing calendar migration in context " + contextId);
+                }
                 progress.nextContext();
             }
             if (config.isUncommitted()) {

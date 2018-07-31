@@ -646,6 +646,26 @@ public interface InfostoreFacade extends TransactionAware {
     /**
      * Gets the quota restrictions and current usage of {@link Type#FILE} for the supplied session.
      *
+     * @param folderId The folder identifier
+     * @param session The session
+     * @return The folder-associated quota of {@link Type#FILE}, or quota with {@link Quota#UNLIMITED} limit if not set
+     * @throws OXException
+     */
+    Quota getFileQuota(long folderId, ServerSession session) throws OXException;
+
+    /**
+     * Gets the quota restrictions and current usage of {@link Type#STORAGE} for the supplied session.
+     *
+     * @param folderId The folder identifier
+     * @param session The session
+     * @return The quota of {@link Type#STORAGE}, or quota with {@link Quota#UNLIMITED} limit if not set
+     * @throws OXException
+     */
+    Quota getStorageQuota(long folderId, ServerSession session) throws OXException;
+
+    /**
+     * Gets the quota restrictions and current usage of {@link Type#FILE} for the supplied session.
+     *
      * @param session The session
      * @return The quota of {@link Type#FILE}, or quota with {@link Quota#UNLIMITED} limit if not set
      * @throws OXException

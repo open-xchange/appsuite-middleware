@@ -183,17 +183,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalSeriesMaster.getSeriesId(), recurrenceId);
         }
-        if (contains(originalSeriesMaster.getChangeExceptionDates(), recurrenceId)) {
-            /*
-             * update for existing change exception, perform update, touch master & track results
-             */
-            Check.recurrenceRangeMatches(recurrenceId, null);
-            Event originalExceptionEvent = loadExceptionData(originalSeriesMaster.getSeriesId(), recurrenceId);
-            updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
-            touch(originalSeriesMaster.getSeriesId());
-            resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
-            return;
-        } else if (null != recurrenceId.getRange()) {
+        if (null != recurrenceId.getRange()) {
             /*
              * update "this and future" recurrences; first split the series at this recurrence
              */
@@ -204,6 +194,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             updateEvent(updatedMasterEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
+        } else if (contains(originalSeriesMaster.getChangeExceptionDates(), recurrenceId)) {
+            /*
+             * update for existing change exception, perform update, touch master & track results
+             */
+            Check.recurrenceRangeMatches(recurrenceId, null);
+            Event originalExceptionEvent = loadExceptionData(originalSeriesMaster, recurrenceId);
+            updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
+            touch(originalSeriesMaster.getSeriesId());
+            resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
         } else {
             /*
              * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
@@ -270,14 +269,23 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * prepare event update & check conflicts as needed
          */
-        List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent.getId()) : null;
+        List<Event> originalChangeExceptions = isSeriesMaster(originalEvent) ? loadExceptionData(originalEvent) : null;
+        Event originalSeriesMasterEvent = isSeriesException(originalEvent) ? loadEventData(originalEvent.getSeriesId()) : null;
         EventUpdateProcessor eventUpdate = new EventUpdateProcessor(
-            session, folder, originalEvent, originalChangeExceptions, eventData, timestamp, Arrays.add(SKIPPED_FIELDS, ignoredFields));
+            session, folder, originalEvent, originalChangeExceptions, originalSeriesMasterEvent, eventData, timestamp, Arrays.add(SKIPPED_FIELDS, ignoredFields));
         if (needsConflictCheck(eventUpdate)) {
             Check.noConflicts(storage, session, eventUpdate.getUpdate(), eventUpdate.getAttendeeUpdates().previewChanges());
         }
         /*
-         * check permissions & update event data in storage, checking permissions as required
+         * recursively perform pending deletions of change exceptions if required
+         */
+        if (false == eventUpdate.getExceptionUpdates().isEmpty()) {
+            for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
+                delete(removedException);
+            }
+        }
+        /*
+         * update event data in storage, checking permissions as required
          */
         storeEventUpdate(originalEvent, eventUpdate.getDelta(), eventUpdate.getUpdatedFields(), assumeExternalOrganizerUpdate);
         storeAttendeeUpdates(originalEvent, eventUpdate.getAttendeeUpdates(), assumeExternalOrganizerUpdate);
@@ -292,6 +300,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             List<Alarm> defaultAlarm = isAllDay(eventUpdate.getUpdate()) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
             if (null != defaultAlarm) {
                 insertAlarms(eventUpdate.getUpdate(), userId, defaultAlarm, true);
+            }
+        }
+        /*
+         * recursively perform pending updates of change exceptions if required
+         */
+        if (false == eventUpdate.getExceptionUpdates().isEmpty()) {
+            for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
+                updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
             }
         }
         /*
@@ -313,17 +329,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
         }
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
-        /*
-         * recursively perform pending updates of change exceptions, too
-         */
-        if (false == eventUpdate.getExceptionUpdates().isEmpty()) {
-            for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
-                delete(removedException);
-            }
-            for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
-                updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
-            }
-        }
     }
 
     /**
@@ -360,18 +365,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param attendeeHelper The attendee helper for the update
      * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
      */
-    private boolean needsConflictCheck(EventUpdate eventUpdate) {
-        if (eventUpdate.getUpdatedFields().contains(EventField.START_DATE) &&
-            eventUpdate.getUpdate().getStartDate().before(eventUpdate.getOriginal().getStartDate())) {
+    private boolean needsConflictCheck(EventUpdate eventUpdate) throws OXException {
+        if (Utils.coversDifferentTimePeriod(eventUpdate.getOriginal(), eventUpdate.getUpdate())) {
             /*
-             * (re-)check conflicts if updated start is before the original start
-             */
-            return true;
-        }
-        if (eventUpdate.getUpdatedFields().contains(EventField.END_DATE) &&
-            eventUpdate.getUpdate().getEndDate().after(eventUpdate.getOriginal().getEndDate())) {
-            /*
-             * (re-)check conflicts if updated end is after the original end
+             * (re-)check conflicts if event appears in a different time period
              */
             return true;
         }
@@ -384,12 +381,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (0 < eventUpdate.getAttendeeUpdates().getAddedItems().size()) {
             /*
              * (re-)check conflicts if there are new attendees
-             */
-            return true;
-        }
-        if (eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE)) {
-            /*
-             * (re-)check conflicts if recurrence rule changes
              */
             return true;
         }
@@ -420,7 +411,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         /*
                          * remove attendee from existing change exception
                          */
-                        Event originalExceptionEvent = loadExceptionData(originalEvent.getSeriesId(), recurrenceId);
+                        Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
                         delete(originalExceptionEvent, userAttendee);
                     } else {
                         /*

@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.I2i;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -183,7 +184,7 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
             return delegate.loadAccounts(userId);
         }
         /*
-         * try and get accounts via cached account id list fro user
+         * try and get accounts via cached account id list for user
          */
         CacheKey accountIdsKey = getAccountIdsKey(userId);
         int[] accountIds = optClonedAccountIds(cache.get(accountIdsKey));
@@ -218,8 +219,36 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
 
     @Override
     public List<CalendarAccount> loadAccounts(int[] userIds, String providerId) throws OXException {
-        //TODO: from cache / put result in cache?
-        return delegate.loadAccounts(userIds, providerId);
+        if (null == userIds || 0 == userIds.length) {
+            return Collections.emptyList();
+        }
+        if (bypassCache()) {
+            return delegate.loadAccounts(userIds, providerId);
+        }
+        List<CalendarAccount> matchingAccounts = new ArrayList<CalendarAccount>();
+        /*
+         * try and get matching accounts for user from cache
+         */
+        List<Integer> usersToLoad = new ArrayList<Integer>(userIds.length);
+        for (int userId : userIds) {
+            List<CalendarAccount> cachedAccounts = optCachedAccounts(userId);
+            if (null == cachedAccounts) {
+                usersToLoad.add(I(userId));
+            } else {
+                for (CalendarAccount cachedAccount : cachedAccounts) {
+                    if (cachedAccount.getProviderId().equals(providerId)) {
+                        matchingAccounts.add(cachedAccount);
+                    }
+                }
+            }
+        }
+        /*
+         * load matching accounts of remaining users from storage
+         */
+        if (0 < usersToLoad.size()) {
+            matchingAccounts.addAll(delegate.loadAccounts(I2i(usersToLoad), providerId));
+        }
+        return matchingAccounts;
     }
 
     @Override
@@ -248,6 +277,24 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
 
     private boolean bypassCache() {
         return DBTransactionPolicy.NO_TRANSACTIONS.equals(delegate.getTransactionPolicy());
+    }
+
+    private List<CalendarAccount> optCachedAccounts(int userId) throws OXException {
+        CacheKey accountIdsKey = getAccountIdsKey(userId);
+        int[] accountIds = optClonedAccountIds(cache.get(accountIdsKey));
+        if (null == accountIds) {
+            return null;
+        }
+        List<CalendarAccount> accounts = new ArrayList<CalendarAccount>(accountIds.length);
+        for (int accountId : accountIds) {
+            CacheKey key = getAccountKey(userId, accountId);
+            CalendarAccount account = optClonedAccount(cache.get(key));
+            if (null == account) {
+                return null;
+            }
+            accounts.add(account);
+        }
+        return accounts;
     }
 
     private static CalendarAccount optClonedAccount(Object cachedAccount) throws OXException {

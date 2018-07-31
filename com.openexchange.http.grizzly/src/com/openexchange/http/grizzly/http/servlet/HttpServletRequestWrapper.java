@@ -127,7 +127,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
         OXRequest internalRequest = (OXRequest) ServletUtils.getInternalRequest(httpServletRequest);
         internalRequest.setXForwardPort(serverPort);
         internalRequest.setXForwardProto(requestScheme);
-        internalRequest.setAttribute("com.openexchange.http.isForcedSecurity", true);
+        internalRequest.setAttribute("com.openexchange.http.isForcedSecurity", Boolean.TRUE);
     }
 
     /**

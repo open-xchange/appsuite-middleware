@@ -85,12 +85,12 @@ public class LimitedInputStream extends FilterInputStream {
     /**
      * Called to indicate, that the input streams limit has been exceeded.
      *
-     * @param pSizeMax The input streams limit, in bytes.
-     * @param pCount The actual number of bytes.
+     * @param numBytes The total number of bytes available from the underlying stream
+     * @param maxNumBytes The input stream's limit, in bytes.
      * @throws IOException If the called method is expected to raise an I/O error
      */
-    protected void raiseError(long pSizeMax, long pCount) throws IOException {
-        throw new StorageFullIOException(pCount, pSizeMax);
+    protected void raiseError(long numBytes, long maxNumBytes) throws IOException {
+        throw new StorageFullIOException(numBytes, maxNumBytes);
     }
 
     /**
@@ -100,8 +100,29 @@ public class LimitedInputStream extends FilterInputStream {
      */
     private void checkLimit() throws IOException {
         if (count > sizeMax) {
-            raiseError(sizeMax, count);
+            // Safely count remaining bytes to determine total number of bytes provided by underlying stream
+            raiseError(count + countRemainingBytesSafely(), sizeMax);
         }
+    }
+
+    private long countRemainingBytesSafely() {
+        long count = 0;
+        int buflen = 0xFFFF;
+        byte[] buf = new byte[buflen];
+        int read;
+        do {
+            try {
+                read = super.read(buf, 0, buflen);
+            } catch (IOException e) {
+                // Failed reading from stream
+                read = 0;
+            }
+            if (read <= 0) {
+                // No further bytes available
+                return count;
+            }
+            count += read;
+        } while (true);
     }
 
     @Override

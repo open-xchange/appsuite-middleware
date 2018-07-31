@@ -48,7 +48,7 @@ package javax.mail;
  * @author Bill Shannon
  */
 
-public class AuthenticationFailedException extends LoginFailedException {
+public class AuthenticationFailedException extends MessagingException {
 
     private static final long serialVersionUID = 492080754054436511L;
 

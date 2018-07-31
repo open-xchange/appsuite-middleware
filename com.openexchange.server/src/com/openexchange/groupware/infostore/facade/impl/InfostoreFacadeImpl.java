@@ -80,6 +80,7 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
@@ -502,6 +503,22 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public com.openexchange.file.storage.Quota getFileQuota(ServerSession session) throws OXException {
+        return getFileQuotaFor(session);
+    }
+
+    @Override
+    public Quota getFileQuota(long folderId, ServerSession session) throws OXException {
+        EffectiveInfostoreFolderPermission folderPermission = security.getFolderPermission(session, folderId);
+        if (FolderObject.INFOSTORE != folderPermission.getPermission().getFolderModule()) {
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
+        }
+        if (false == folderPermission.canCreateObjects()) {
+            throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+        }
+        return getFileQuotaFor(session);
+    }
+
+    private com.openexchange.file.storage.Quota getFileQuotaFor(ServerSession session) throws OXException {
         long limit = com.openexchange.file.storage.Quota.UNLIMITED;
         long usage = com.openexchange.file.storage.Quota.UNLIMITED;
         limit = AmountQuotas.getLimit(session, "infostore", ServerServiceRegistry.getServize(ConfigViewFactory.class, true), ServerServiceRegistry.getServize(DatabaseService.class, true));
@@ -513,17 +530,35 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public com.openexchange.file.storage.Quota getStorageQuota(ServerSession session) throws OXException {
+        return getStorageQuotaFor(session.getUserId(), session.getContextId());
+    }
+
+    @Override
+    public Quota getStorageQuota(long folderId, ServerSession session) throws OXException {
+        EffectiveInfostoreFolderPermission folderPermission = security.getFolderPermission(session, folderId);
+        if (FolderObject.INFOSTORE != folderPermission.getPermission().getFolderModule()) {
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
+        }
+        if (false == folderPermission.canCreateObjects()) {
+            throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+        }
+
+        int folderOwner = folderPermission.getFolderOwner();
+        return getStorageQuotaFor(folderOwner, session.getContextId());
+    }
+
+    private com.openexchange.file.storage.Quota getStorageQuotaFor(int folderOwner, int contextId) {
         long limit = com.openexchange.file.storage.Quota.UNLIMITED;
         long usage = com.openexchange.file.storage.Quota.UNLIMITED;
 
         try {
-            QuotaFileStorage fileStorage = getFileStorage(session.getUserId(), session.getContextId());
+            QuotaFileStorage fileStorage = getFileStorage(folderOwner, contextId);
             limit = fileStorage.getQuota();
             if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
                 usage = fileStorage.getUsage();
             }
         } catch (OXException e) {
-            LOG.warn("Error getting file storage quota for user {} in context {}", session.getUserId(), session.getContextId(), e);
+            LOG.warn("Error getting file storage quota for user {} in context {}", I(folderOwner), I(contextId), e);
         }
 
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.STORAGE);
@@ -596,8 +631,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             return saveDocument(document, data, sequenceNumber, true, session);
         } catch (OXException e) {
             if (e.getCode() == InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.getNumber() && e.getPrefix().equals(EnumComponent.INFOSTORE.getAbbreviation())) {
-                long folderId = (long) e.getDisplayArgs()[1];
-                int id = (int) e.getDisplayArgs()[2];
+                long folderId = ((Long) e.getDisplayArgs()[1]).longValue();
+                int id = ((Integer) e.getDisplayArgs()[2]).intValue();
                 if (id == 0) {
                     throw InfostoreExceptionCodes.MODIFIED_CONCURRENTLY.create();
                 }
@@ -913,14 +948,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         // Check and adjust folder id
-        List<Metadata> sanitizedColumns = new ArrayList<Metadata>(modifiedColumns.length);
-        Collections.addAll(sanitizedColumns, modifiedColumns);
+        Metadata[] modifiedCols = modifiedColumns;
+        List<Metadata> sanitizedColumns = new ArrayList<Metadata>(modifiedCols.length);
+        Collections.addAll(sanitizedColumns, modifiedCols);
         if (sanitizedColumns.contains(Metadata.FOLDER_ID_LITERAL)) {
             long folderId = document.getFolderId();
             if (folderId == sharedFilesFolderID) {
                 document.setFolderId(infoPerm.getObject().getFolderId());
                 sanitizedColumns.remove(Metadata.FOLDER_ID_LITERAL);
-                modifiedColumns = sanitizedColumns.toArray(new Metadata[sanitizedColumns.size()]);
+                modifiedCols = sanitizedColumns.toArray(new Metadata[sanitizedColumns.size()]);
             } else if (document.getFolderId() != -1 && infoPerm.getObject().getFolderId() != document.getFolderId()) {
                 EffectiveInfostoreFolderPermission targetFolderPermission = security.getFolderPermission(session, document.getFolderId());
                 if (FolderObject.INFOSTORE != targetFolderPermission.getPermission().getFolderModule()) {
@@ -936,7 +972,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         // Set modified information
-        Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
+        Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedCols));
         updatedCols.removeAll(Arrays.asList(Metadata.CREATED_BY_LITERAL, Metadata.CREATION_DATE_LITERAL, Metadata.ID_LITERAL));
         boolean checkWriteLock = true;
         if(updatedCols.size()==1 && updatedCols.contains(Metadata.OBJECT_PERMISSIONS_LITERAL)){
@@ -971,7 +1007,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         long folderId = document.getFolderId();
         if (folderId < 0) {
-            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(folderId);
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(Long.valueOf(folderId));
         }
         if (folderId < FolderObject.MIN_FOLDER_ID) {
             throw InfostoreExceptionCodes.NO_DOCUMENTS_IN_VIRTUAL_FOLDER.create();
@@ -1025,9 +1061,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 if (updatedCols.contains(Metadata.ORIGIN_LITERAL)) {
                     placeHolder.setOriginFolderPath(document.getOriginFolderPath());
                 }
-                if (null == filenameReserver) {
-                    filenameReserver = new FilenameReserverImpl(context, db);
-                }
+                filenameReserver = new FilenameReserverImpl(context, db);
                 FilenameReservation reservation = filenameReserver.reserve(placeHolder, true);
                 document.setFileName(reservation.getFilename());
                 updatedCols.add(Metadata.FILENAME_LITERAL);
@@ -1049,9 +1083,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 DocumentMetadata placeHolder = new DocumentMetadataImpl(oldDocument.getId());
                 placeHolder.setFolderId(oldDocument.getFolderId());
                 placeHolder.setFileName(document.getFileName());
-                if (null == filenameReserver) {
-                    filenameReserver = new FilenameReserverImpl(context, db);
-                }
+                filenameReserver = new FilenameReserverImpl(context, db);
                 FilenameReservation reservation = filenameReserver.reserve(placeHolder, true);
                 document.setFileName(reservation.getFilename());
                 updatedCols.add(Metadata.FILENAME_LITERAL);
@@ -1524,7 +1556,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          */
         Map<Integer, Long> idsToFolders = Tools.getIDsToFolders(ids);
         for (DocumentMetadata document : allDocuments) {
-            Long requestedFolder = idsToFolders.get(document.getId());
+            Long requestedFolder = idsToFolders.get(I(document.getId()));
             long expectedFolder = document.getFolderId();
             if (requestedFolder == null || requestedFolder.longValue() != expectedFolder) {
                 throw InfostoreExceptionCodes.NOT_EXIST.create();
@@ -1591,7 +1623,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         // Ensure folder ids are consistent between request and existing documents
         for (DocumentMetadata document : allDocuments) {
-            Long requestedFolder = idsToFolders.get(document.getId());
+            Long requestedFolder = idsToFolders.get(I(document.getId()));
             long expectedFolder = document.getFolderId();
             if (requestedFolder == null || requestedFolder.longValue() != expectedFolder) {
                 throw InfostoreExceptionCodes.NOT_EXIST.create();
@@ -1608,7 +1640,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         final Set<Integer> unknownDocuments = new HashSet<Integer>(idsToFolders.keySet());
         for (DocumentMetadata document : allDocuments) {
-            unknownDocuments.remove(document.getId());
+            unknownDocuments.remove(I(document.getId()));
         }
 
         final List<DocumentMetadata> rejectedDocuments = new ArrayList<DocumentMetadata>();
@@ -1620,7 +1652,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         for (Integer notFound : unknownDocuments) {
-            rejectedIDs.add(new IDTuple(idsToFolders.get(notFound).toString(), Integer.toString(notFound)));
+            rejectedIDs.add(new IDTuple(idsToFolders.get(notFound).toString(), notFound.toString()));
         }
 
         return rejectedIDs;
@@ -1647,7 +1679,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         // Ensure folder ids are consistent between request and existing documents
         for (DocumentMetadata document : allDocuments) {
-            Long requestedFolder = idsToFolders.get(document.getId());
+            Long requestedFolder = idsToFolders.get(I(document.getId()));
             long expectedFolder = document.getFolderId();
             if (requestedFolder == null || requestedFolder.longValue() != expectedFolder) {
                 throw InfostoreExceptionCodes.NOT_EXIST.create();
@@ -1656,7 +1688,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         final Set<Integer> unknownDocuments = new HashSet<Integer>(idsToFolders.keySet());
         for (DocumentMetadata document : allDocuments) {
-            unknownDocuments.remove(document.getId());
+            unknownDocuments.remove(I(document.getId()));
         }
 
         if (!unknownDocuments.isEmpty()) {
@@ -1704,6 +1736,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         try {
             checkWriteLock(metadata, session);
         } catch (OXException x) {
+            LOG.trace("", x);
             return versionIds;
         }
         EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
@@ -2502,7 +2535,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                             try {
                                 fileStorage.deleteFile(removeInfo.fileId);
                             } catch (Exception e) {
-                                LOG.error("Failed to delete file {} from storage of owner {} in context {}", removeInfo.fileId, removeInfo.folderAdmin, removeInfo.contextId, e);
+                                LOG.error("Failed to delete file {} from storage of owner {} in context {}", removeInfo.fileId, I(removeInfo.folderAdmin), I(removeInfo.contextId), e);
                             }
                             return null;
                         }
@@ -2531,7 +2564,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                                 try {
                                     fileStorage.deleteFiles(locations.toArray(new String[locations.size()]));
                                 } catch (Exception e) {
-                                    LOG.error("Failed to delete files {} from storage of owner {} in context {}", locations, key.getUserId(), key.getContextId(), e);
+                                    LOG.error("Failed to delete files {} from storage of owner {} in context {}", locations, I(key.getUserId()), I(key.getContextId()), e);
                                 }
                                 return null;
                             }
@@ -2561,7 +2594,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                                 try {
                                     shareService.scheduleGuestCleanup(contextID, guestIDs);
                                 } catch (Exception e) {
-                                    LOG.error("Failed to clean-up guests {} in context {}", Arrays.toString(guestIDs), contextID, e);
+                                    LOG.error("Failed to clean-up guests {} in context {}", Arrays.toString(guestIDs), I(contextID), e);
                                 }
                                 return null;
                             }
@@ -2674,7 +2707,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 try {
                     incompleteTuples.put(Integer.valueOf(tuple.getId()), tuple);
                 } catch (NumberFormatException e) {
-                    throw InfostoreExceptionCodes.NOT_EXIST.create();
+                    throw InfostoreExceptionCodes.NOT_EXIST.create(e);
                 }
             }
         }
@@ -2811,7 +2844,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                         /*
                          * set "shareable" flag based on folder permissions
                          */
-                        document.setShareable(folderPermission.canWriteAllObjects() || folderPermission.canWriteOwnObjects() && document.getCreatedBy() == user.getId());
+                        document.setShareable(null != folderPermission && (folderPermission.canWriteAllObjects() || folderPermission.canWriteOwnObjects() && document.getCreatedBy() == user.getId()));
                     }
                     return document;
                 }
@@ -2826,7 +2859,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @param session The session
      * @return The identifier of the shared documents folder
      */
-    private int getSharedFilesFolderID(ServerSession session) {
+    int getSharedFilesFolderID(ServerSession session) {
         return getSharedFilesFolderID(session.getContext(), session.getUser());
     }
 

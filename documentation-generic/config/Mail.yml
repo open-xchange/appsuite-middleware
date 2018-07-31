@@ -558,7 +558,7 @@ properties:
       tags: ["Mail"]
     - key: com.openexchange.mail.maxMailSize
       description: |
-        Specifies the max. mail size allowed being transported.
+        Specifies the max. mail size in bytes allowed being transported.
         A value of <code>0</code> or less means infinite.
       defaultValue: -1
       version: 
