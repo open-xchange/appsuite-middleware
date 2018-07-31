@@ -1,0 +1,12 @@
+type: object
+properties:
+  $ref: ./RawContactData.yaml
+  contact_id: 
+    type: integer
+    format: int32
+    description: The id of the contact
+  internal_userid:
+    type: integer
+    format: int32
+    description: The internal user id
+  
