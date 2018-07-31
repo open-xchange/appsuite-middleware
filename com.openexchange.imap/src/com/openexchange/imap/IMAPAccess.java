@@ -116,6 +116,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailProxyConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
@@ -766,6 +767,21 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     imapProps.put("mail.imap.sasl.mechanisms", "PLAIN");
                 }
             }
+
+            /*
+             * Remove proxy settings for whitelisted hosts
+             */
+            List<String> nonProxyHosts = MailProxyConfig.getInstance().getNonProxyHosts(session.getContextId(), session.getUserId());
+            for (String host : nonProxyHosts) {
+                if (host.equalsIgnoreCase(imapConfig.getServer())) {
+                    imapProps.remove("mail.imap.proxy.host");
+                    imapProps.remove("mail.imap.proxy.port");
+                    imapProps.remove("mail.imaps.proxy.host");
+                    imapProps.remove("mail.imaps.proxy.host");
+                    break;
+                }
+            }
+
             /*
              * Get parameterized IMAP session
              */

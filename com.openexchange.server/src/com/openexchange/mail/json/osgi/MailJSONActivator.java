@@ -107,6 +107,7 @@ import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.internal.MailCategoriesPreferenceItem;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.config.MailProxyConfig;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.config.MaliciousFolders;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -243,6 +244,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(ResultConverter.class, new MailJSONConverter(converter));
 
         registerService(Reloadable.class, MailReloadable.getInstance());
+        registerService(Reloadable.class, MailProxyConfig.getInstance());
         registerService(Reloadable.class, TransportReloadable.getInstance());
         registerService(ForcedReloadable.class, new ForcedReloadable() {
 
