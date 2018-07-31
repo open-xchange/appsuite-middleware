@@ -1,0 +1,12 @@
+com.mysql.jdbc:
+# The driver properties should be kept at their defaults
+    useUnicode: true
+    characterEncoding: UTF-8
+    autoReconnect: false
+    useServerPrepStmts: false
+    useTimezone: true
+    serverTimezone: UTC
+    connectTimeout: 15000
+    socketTimeout: 15000
+# SSL/TLS
+    useSSL: false
