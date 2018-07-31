@@ -75,7 +75,6 @@ public interface FolderSyncAware extends SyncAware {
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
      * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * <li>{@link CalendarParameters#PARAMETER_SKIP_CLASSIFIED}</li>
      * </ul>
      *
      * @param folderId The fully qualified identifier of the folder to get the updated events from

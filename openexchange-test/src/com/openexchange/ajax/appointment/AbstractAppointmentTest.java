@@ -117,6 +117,7 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
 
     protected AppointmentRangeGenerator appointmentRangeGenerator;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -401,12 +402,11 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      * @param cols Columns to use for the request
      * @param lastModified The timestamp of the last update of the requested appointments
      * @param ignore what kind of updates to ignore
-     * @param showPrivate When true, shows private appointments of the folder owner (Only works in shared folders)
      * @return The UpdatesResponse containg new, modified and deleted appointments
      * @throws Exception
      */
-    public AppointmentUpdatesResponse listModifiedAppointments(final int inFolder, int[] cols, final Date lastModified, Ignore ignore, boolean showPrivate) throws Exception {
-        return listModifiedAppointments(null, inFolder, cols, lastModified, ignore, showPrivate);
+    public AppointmentUpdatesResponse listModifiedAppointments(final int inFolder, int[] cols, final Date lastModified, Ignore ignore) throws Exception {
+        return listModifiedAppointments(null, inFolder, cols, lastModified, ignore);
     }
 
     /**
@@ -415,15 +415,14 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      * @param cols Columns to use for the request
      * @param lastModified The timestamp of the last update of the requested appointments
      * @param ignore what kind of updates to ignore
-     * @param showPrivate When true, shows private appointments of the folder owner (Only works in shared folders)
      * @return The UpdatesResponse containg new, modified and deleted appointments
      * @throws Exception
      */
-    public AppointmentUpdatesResponse listModifiedAppointments(AJAXClient selectedClient, final int inFolder, int[] cols, final Date lastModified, Ignore ignore, boolean showPrivate) throws Exception {
+    public AppointmentUpdatesResponse listModifiedAppointments(AJAXClient selectedClient, final int inFolder, int[] cols, final Date lastModified, Ignore ignore) throws Exception {
         if (selectedClient == null) {
             selectedClient = getClient();
         }
-        final UpdatesRequest request = new UpdatesRequest(inFolder, cols, lastModified, false, showPrivate, Ignore.NONE);
+        final UpdatesRequest request = new UpdatesRequest(inFolder, cols, lastModified, false, Ignore.NONE);
         final AppointmentUpdatesResponse response = selectedClient.execute(request);
         return response;
     }

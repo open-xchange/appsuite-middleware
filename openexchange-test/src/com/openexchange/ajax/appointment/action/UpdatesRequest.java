@@ -68,22 +68,9 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
     private final int[] columns;
     private final Date timestamp;
     private final boolean recurrenceMaster;
-    private final boolean showPrivates;
     private final Ignore ignore;
     private Date end;
     private Date start;
-
-    /**
-     * Initializes a new {@link UpdatesRequest} that doesn't show private appointments and ignores updates for deleted.
-     * 
-     * @param folderId Folder id to use for the request
-     * @param columns Columns to use for the request
-     * @param timestamp Timestamp to use for the request
-     * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
-     */
-    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
-        this(folderId, columns, timestamp, recurrenceMaster, false, Ignore.DELETED);
-    }
 
     /**
      * Initializes a new {@link UpdatesRequest} that ignores updates for deleted.
@@ -92,23 +79,9 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
      * @param columns Columns to use for the request
      * @param timestamp Timestamp to use for the request
      * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
-     * @param showPrivates When true, shows private appointments of the folder owner (Only works in shared folders)
      */
-    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, final boolean showPrivates) {
-        this(folderId, columns, timestamp, recurrenceMaster, showPrivates, Ignore.DELETED);
-    }
-
-    /**
-     * Initializes a new {@link UpdatesRequest}. Ignores private appointments by default.
-     * 
-     * @param folderId Folder id to use for the request
-     * @param columns Columns to use for the request
-     * @param timestamp Timestamp to use for the request
-     * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
-     * @param ignore What kind of updates should be ignored
-     */
-    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, Ignore ignore) {
-        this(folderId, columns, timestamp, recurrenceMaster, false, ignore);
+    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
+        this(folderId, columns, timestamp, recurrenceMaster, Ignore.DELETED);
     }
 
     /**
@@ -118,19 +91,17 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
      * @param columns Columns to use for the request
      * @param timestamp Timestamp to use for the request
      * @param recurrenceMaster if true a recurring appointment isn't split into single occurrances but kept as one object
-     * @param showPrivates When true, shows private appointments of the folder owner (Only works in shared folders)
      * @param ignore What kind of updates should be ignored
      */
-    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, final boolean showPrivates, Ignore ignore) {
-        this(folderId, columns, timestamp, recurrenceMaster, showPrivates, ignore, null, null);
+    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, Ignore ignore) {
+        this(folderId, columns, timestamp, recurrenceMaster, ignore, null, null);
     }
 
-    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, final boolean showPrivates, Ignore ignore, Date start, Date end) {
+    public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, Ignore ignore, Date start, Date end) {
         this.folderId = folderId;
         this.columns = columns;
         this.timestamp = timestamp;
         this.recurrenceMaster = recurrenceMaster;
-        this.showPrivates = showPrivates;
         this.ignore = ignore;
         this.start = start;
         this.end = end;
@@ -157,7 +128,6 @@ public class UpdatesRequest extends AbstractAppointmentRequest<AppointmentUpdate
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, timestamp));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_IGNORE, ignore.getValue()));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_RECURRENCE_MASTER, recurrenceMaster));
-        parameterList.add(new Parameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, showPrivates));
         if (start != null) {
             parameterList.add(new Parameter(AJAXServlet.PARAMETER_START, start));
         }

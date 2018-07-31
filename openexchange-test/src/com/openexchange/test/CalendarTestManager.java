@@ -389,8 +389,8 @@ public class CalendarTestManager implements TestManager {
         }
     }
 
-    public List<Appointment> updates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, boolean showPrivates, Ignore ignore, Date start, Date end) {
-        UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster, showPrivates, ignore, start, end);
+    public List<Appointment> updates(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster, Ignore ignore, Date start, Date end) {
+        UpdatesRequest req = new UpdatesRequest(folderId, columns, timestamp, recurrenceMaster, ignore, start, end);
         AppointmentUpdatesResponse resp = execute(req);
         extractInfo(resp);
         try {
