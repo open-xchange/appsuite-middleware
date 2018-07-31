@@ -11,8 +11,11 @@ com.mysql.jdbc:
 # SSL/TLS
     useSSL: false
     requireSSL : false
+    verifyServerCertificate: false
     clientCertificateKeyStoreUrl: file:your_path_to_client_keystore
     clientCertificateKeyStorePassword: secret
+    clientCertificateKeyStoreType: JKS
     trustCertificateKeyStoreUrl: file:your_path_to_CA_keystore
     trustCertificateKeyStorePassword: secret
+    trustCertificateKeyStoreType: JKS
     tls_version: TLSv1,TLSv1.1
