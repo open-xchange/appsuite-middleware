@@ -379,21 +379,21 @@ public final class Configuration {
             if (other.props != null) {
                 return false;
             }
-        } else if (!props.equals(other.props)) {
+        } else if (!ConfigurationUtil.matches(props, other.props)) {
             return false;
         }
         if (readProps == null) {
             if (other.readProps != null) {
                 return false;
             }
-        } else if (!readProps.equals(other.readProps)) {
+        } else if (!ConfigurationUtil.matches(readProps, other.readProps)) {
             return false;
         }
         if (writeProps == null) {
             if (other.writeProps != null) {
                 return false;
             }
-        } else if (!writeProps.equals(other.writeProps)) {
+        } else if (!ConfigurationUtil.matches(writeProps, other.writeProps)) {
             return false;
         }
         return true;
