@@ -49,33 +49,55 @@
 
 package com.openexchange.chronos.ical;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import org.dmfs.rfc5545.DateTime;
+import org.junit.Test;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
+import com.openexchange.time.TimeTools;
 
 /**
- * {@link ICalTestSuite}
+ * {@link Bug59654Test}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    AvailabilityTest.class,
-    BasicTest.class,
-    Bug17963Test.class,
-    PreserveOriginalTest.class,
-    TestXProperties.class,
-    Bug59654Test.class
-})
-public final class ICalTestSuite {
+public class Bug59654Test extends ICalTest {
 
-    /**
-     * Initializes a new {@link ICalTestSuite}.
-     */
-    public ICalTestSuite() {
-        super();
+    @Test
+    public void testNewLines() throws Exception {
+        /*
+         * prepare event with attendee comment
+         */
+        Event event = new Event();
+        event.setUid(UUID.randomUUID().toString());
+        event.setStartDate(new DateTime(TimeTools.D("next sunday at 12:30").getTime()));
+        event.setEndDate(new DateTime(TimeTools.D("next sunday at 13:30").getTime()));
+        ExtendedProperties extendedProperties = new ExtendedProperties();
+        List<ExtendedPropertyParameter> parameters = new ArrayList<>();
+        parameters.add(new ExtendedPropertyParameter("X-CALENDARSERVER-ATTENDEE-REF", "urn:uuid:00000001-0000-1b22-00fc-c0e11e000003"));
+        parameters.add(new ExtendedPropertyParameter("X-CALENDARSERVER-DTSTAMP", "20180528T121803Z"));
+        String comment = "First line\nSecond Line\nThird Line";
+        extendedProperties.add(new ExtendedProperty("X-CALENDARSERVER-ATTENDEE-COMMENT", comment, parameters));
+        event.setExtendedProperties(extendedProperties);
+        /*
+         * check attendee comment after multiple import/export roundtrips
+         */
+        String exportedICal = exportEvent(event);
+        Event importedEvent = importEvent(exportedICal);
+        for (int i = 0; i < 10; i++) {
+            exportedICal = exportEvent(importedEvent);
+            importedEvent = importEvent(exportedICal);
+        }
+        ExtendedProperties importedExtendedProperties = importedEvent.getExtendedProperties();
+        assertNotNull(importedExtendedProperties);
+        assertEquals(extendedProperties.get("X-CALENDARSERVER-ATTENDEE-COMMENT"), importedExtendedProperties.get("X-CALENDARSERVER-ATTENDEE-COMMENT"));
     }
 
 }
