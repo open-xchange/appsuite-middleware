@@ -61,17 +61,17 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.database.ConfigurationListener;
 import com.openexchange.database.ConfigurationListener.ConfigDBListener;
 import com.openexchange.database.DatabaseExceptionCodes;
-import com.openexchange.database.internal.reloadable.KeyStoreReloader;
+import com.openexchange.database.internal.reloadable.ConnectionReloader;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentHashSet;
 
 /**
- * {@link KeyStoreReloaderImpl}
+ * {@link ConnectionReloaderImpl}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader {
+public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloader {
 
     private static final String USE_SSL = "useSSL";
 
@@ -83,7 +83,7 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
     public static final String TRUST_CERT_PASSWORD_NAME = "trustCertificateKeyStorePassword";
     public static final String TRUST_CERT_TYPE          = "trustCertificateKeyStoreType";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreReloaderImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionReloaderImpl.class);
 
     private ConcurrentHashSet<ConfigurationListener> listerners;
 
@@ -92,13 +92,13 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
     private Configuration configuration;
 
     /**
-     * Initializes a new {@link KeyStoreReloaderImpl}.
+     * Initializes a new {@link ConnectionReloaderImpl}.
      * 
      * @param configuration The {@link Configuration} for connections
      * @throws OXException In case key store can't be loaded
      * 
      */
-    public KeyStoreReloaderImpl(Configuration configuration) throws OXException {
+    public ConnectionReloaderImpl(Configuration configuration) throws OXException {
         super();
         listerners = new ConcurrentHashSet<>(4);
         stores = new ConcurrentHashMap<>(4);
@@ -148,7 +148,7 @@ public class KeyStoreReloaderImpl implements ForcedReloadable, KeyStoreReloader 
     }
 
     @Override
-    public boolean setKeyStoreListener(ConfigurationListener listener) {
+    public boolean setConfigurationListener(ConfigurationListener listener) {
         return listerners.add(listener);
     }
 
