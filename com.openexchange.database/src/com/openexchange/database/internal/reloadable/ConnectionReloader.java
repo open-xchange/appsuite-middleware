@@ -55,12 +55,12 @@ import com.openexchange.database.internal.Configuration;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link KeyStoreReloader}
+ * {@link ConnectionReloader}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public interface KeyStoreReloader {
+public interface ConnectionReloader {
 
     /**
      * Loads or reloads the {@link KeyStore}
@@ -80,5 +80,5 @@ public interface KeyStoreReloader {
      * @param listener The listener
      * @return <code>true</code> if this set did not already contain the specified element
      */
-    boolean setKeyStoreListener(ConfigurationListener listener);
+    boolean setConfigurationListener(ConfigurationListener listener);
 }
