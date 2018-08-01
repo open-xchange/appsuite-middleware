@@ -49,29 +49,32 @@
 
 package com.openexchange.chronos.alarm.mail.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.MailDateFormat;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.alarm.mail.exception.MailAlarmExceptionCodes;
 import com.openexchange.chronos.alarm.mail.notification.ExtendedNotificationMail;
 import com.openexchange.chronos.alarm.mail.notification.MailAlarmNotificationGenerator;
-import com.openexchange.chronos.alarm.mail.notification.MailAlarmNotificationParticipantResolver;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.itip.tools.ITipUtils;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.MailData.Builder;
 import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.user.UserService;
 
 /**
  * 
@@ -91,13 +94,11 @@ public class MailAlarmMailGenerator {
         this.mailData = mailData;
     }
 
-    public static MailAlarmMailGenerator init(Event event, User user, int contextId, ServiceLookup services) throws OXException {
+    public static MailAlarmMailGenerator init(Event event, User user, int contextId, long trigger, ServiceLookup services) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         Context context = contextService.getContext(contextId);
 
-        MailAlarmNotificationParticipantResolver participantResolver = new MailAlarmNotificationParticipantResolver(requireService(ConfigurationService.class, services), requireService(UserService.class, services), requireService(ResourceService.class, services), contextService);
-        MailAlarmNotificationGenerator notificationMailGenerator = new MailAlarmNotificationGenerator(services, participantResolver, event, user, context);
-
+        MailAlarmNotificationGenerator notificationMailGenerator = new MailAlarmNotificationGenerator(services, event, user, context);
         ExtendedNotificationMail mail = notificationMailGenerator.create("notify.mail.alarm.mail");
 
         ServerConfigService serverConfigService = requireService(ServerConfigService.class, services);
@@ -112,11 +113,13 @@ public class MailAlarmMailGenerator {
                 .setMailConfig(serverConfig.getNotificationMailConfig())
                 .setContext(context)
                 .addMailHeader("X-Open-Xchange-Alarm-Type", "EMAIL")
+                .addMailHeader(MessageHeaders.HDR_DATE, new MailDateFormat().format(new Date(trigger)))
+                .addMailHeader(MessageHeaders.HDR_MESSAGE_ID, ITipUtils.generateHeaderValue(event.getUid(), true))
                 .setSubject(mail.getSubject())
                 ;
             return new MailAlarmMailGenerator(mailData.build(), services);
         } catch (AddressException | UnsupportedEncodingException e) {
-            throw MailAlarmExceptionCodes.INVALID_MAIL_ADDRESS.create(e, user.getMail());
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e,CalendarUtils.getURI(user.getMail()), I(user.getId()), CalendarUserType.INDIVIDUAL); // FIXME we might change the method signature to user CalendarUser instead of User
         }
     }
 

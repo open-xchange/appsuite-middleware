@@ -235,7 +235,7 @@ class SingleMailDeliveryTask implements Runnable {
     private void sendMail(Event event) {
         Key key = new Key(ctx.getContextId(), account, event.getId(), alarm.getId());
         try {
-            mailService.send(event, ctx.getContextId(), trigger.getUserId());
+            mailService.send(event, ctx.getContextId(), trigger.getUserId(), trigger.getTime().longValue());
             LOG.trace("Mail successfully send for {}", key);
         } catch (OXException e) {
             LOG.warn("Unable to send mail for calendar alarm ({}): {}", key, e.getMessage(), e);

@@ -60,5 +60,5 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class MailAlarmMailStrings implements LocalizableStrings {
 
-    public static final String NOTIFICATION = "Notification";
+    public static final String REMINDER = "Reminder";
 }

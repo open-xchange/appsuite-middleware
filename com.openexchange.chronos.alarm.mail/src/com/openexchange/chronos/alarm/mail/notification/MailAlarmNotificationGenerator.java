@@ -51,14 +51,20 @@ package com.openexchange.chronos.alarm.mail.notification;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.alarm.mail.impl.MailAlarmMailStrings;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.generators.DateHelper;
@@ -75,6 +81,8 @@ import com.openexchange.groupware.notify.State;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -104,21 +112,30 @@ public class MailAlarmNotificationGenerator {
 
     private NotificationParticipant recipient;
 
-    public MailAlarmNotificationGenerator(ServiceLookup services, MailAlarmNotificationParticipantResolver participantResolver, Event event, User user, Context ctx) throws OXException {
+    public MailAlarmNotificationGenerator(ServiceLookup services, Event event, User user, Context ctx) throws OXException {
         this.services = services;
         this.event = event;
         this.ctx = ctx;
         this.user = user;
-        List<NotificationParticipant> recipients = participantResolver.resolveAllRecipients(null, event, user, null, ctx, null, null);
-        this.participants = participantResolver.getAllParticipants(recipients, event);
-        this.resources = participantResolver.getResources(event);
 
-        for (final NotificationParticipant participant : recipients) {
-            if (participant.hasRole(ITipRole.ORGANIZER)) {
-                this.organizer = participant;
+        this.organizer = new NotificationParticipant(ITipRole.ORGANIZER, false, event.getOrganizer().getEMail(), event.getOrganizer().getEntity());
+        this.recipient = new NotificationParticipant(event.getOrganizer().getEMail().equals(user.getMail()) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE, false, user.getMail(), user.getId());
+        this.resources = getResources(services, event, ctx, user);
+
+        List<Attendee> attendees = event.getAttendees();
+        this.participants = new ArrayList<>();
+        for (Attendee attendee : attendees) {
+            if (attendee.getCuType() != CalendarUserType.INDIVIDUAL) {
+                continue;
             }
-            if (participant.getIdentifier() == user.getId()) {
-                this.recipient = participant;
+            if (CalendarUtils.isExternalUser(attendee)) {
+                NotificationParticipant participant = new NotificationParticipant(ITipRole.ATTENDEE, true, attendee.getEMail());
+                participant.setConfirmStatus(attendee.getPartStat());
+                participants.add(participant);
+            } else {
+                NotificationParticipant participant = new NotificationParticipant(ITipRole.ATTENDEE, false, attendee.getEMail(), attendee.getEntity());
+                participant.setConfirmStatus(attendee.getPartStat());
+                participants.add(participant);
             }
         }
     }
@@ -153,10 +170,10 @@ public class MailAlarmNotificationGenerator {
         if (summary.length() > 40) {
             summary = summary.substring(0, 36).concat("...");
         }
-        DateFormat df = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, user.getLocale());
+        DateFormat df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, user.getLocale()) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, user.getLocale());
         String formattedStartDate = df.format(new Date(event.getStartDate().getTimestamp()));
 
-        return translator.translate(MailAlarmMailStrings.NOTIFICATION).concat(": ").concat(summary).concat(" - ").concat(formattedStartDate);
+        return translator.translate(MailAlarmMailStrings.REMINDER).concat(": ").concat(summary).concat(" - ").concat(formattedStartDate);
     }
 
     private void render(final ExtendedNotificationMail mail) throws OXException {
@@ -249,4 +266,25 @@ public class MailAlarmNotificationGenerator {
 
     }
 
+    private static List<NotificationParticipant> getResources(ServiceLookup services, Event event, Context ctx, User user) throws OXException {
+        final List<Attendee> resources = CalendarUtils.filter(event.getAttendees(), Boolean.TRUE, CalendarUserType.RESOURCE);
+        if (resources == null) {
+            return Collections.emptyList();
+        }
+        ResourceService resourceService = requireService(ResourceService.class, services);
+
+        final List<NotificationParticipant> resourceParticipants = new ArrayList<NotificationParticipant>();
+        for (final Attendee attResource : resources) {
+            Resource resource = resourceService.getResource(attResource.getEntity(), ctx);
+            if (resource.getMail() != null) {
+                final NotificationParticipant participant = new NotificationParticipant(ITipRole.ATTENDEE, false, resource.getMail());
+                participant.setLocale(user.getLocale());
+                participant.setTimezone(TimeZone.getDefault());
+                participant.setResource(true);
+                participant.setDisplayName(resource.getDisplayName());
+                resourceParticipants.add(participant);
+            }
+        }
+        return resourceParticipants;
+    }
 }

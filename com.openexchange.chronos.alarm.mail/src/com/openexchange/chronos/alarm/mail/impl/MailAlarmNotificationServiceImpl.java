@@ -81,7 +81,7 @@ public class MailAlarmNotificationServiceImpl implements MailAlarmNotificationSe
     }
 
     @Override
-    public void send(Event event, int contextId, int userId) throws OXException {
+    public void send(Event event, int contextId, int userId, long trigger) throws OXException {
         if (event == null || contextId < 1 || userId < 1) {
             LOG.debug("Event is null or contextId/userId invalid. Cannot send alarm notification via mail.");
             return;
@@ -92,6 +92,6 @@ public class MailAlarmNotificationServiceImpl implements MailAlarmNotificationSe
         UserService userService = requireService(UserService.class, services);
         User targetUser = userService.getUser(userId, context);
 
-        this.mailAlarmNotificationHandler.send(event, targetUser, contextId);
+        this.mailAlarmNotificationHandler.send(event, targetUser, contextId, trigger);
     }
 }
