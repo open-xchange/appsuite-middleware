@@ -166,7 +166,7 @@ public final class Initialization {
         // Set timer interval
         timer.configure(configuration);
         // Setting up database connection pools.
-        pools = new Pools(management, timer);
+        pools = new Pools(management, timer, configurationService.getBoolProperty("com.openexchange.database.useChunkwiseRefreshing", true));
         // Setting up the replication monitor
         monitor = new ReplicationMonitor(configuration.getBoolean(REPLICATION_MONITOR, true), configuration.getBoolean(CHECK_WRITE_CONS, false), connectionListeners);
         management.addOverview(new Overview(pools, monitor));
