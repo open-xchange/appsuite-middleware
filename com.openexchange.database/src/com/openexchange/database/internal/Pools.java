@@ -55,8 +55,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -69,13 +73,26 @@ public final class Pools extends AbstractConfigurationListener implements Runnab
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Pools.class);
 
-    private final List<PoolLifeCycle>          lifeCycles = new ArrayList<PoolLifeCycle>(2);
-    private final Lock                         poolsLock  = new ReentrantLock(true);
-    private final Map<Integer, ConnectionPool> pools      = new HashMap<Integer, ConnectionPool>();
+    private final List<PoolLifeCycle> lifeCycles = new ArrayList<PoolLifeCycle>(2);
+
+    final Lock poolsLock = new ReentrantLock(true);
+
+    final Map<Integer, ConnectionPool> pools = new HashMap<Integer, ConnectionPool>();
+
+    private boolean useChunks;
+
+    ScheduledExecutorService chunkCleaner;
+
+    private
 
     Pools(Management management, Timer timer) {
+        this(management, timer, false);
+    }
+
+    Pools(Management management, Timer timer, boolean useChunks) {
         super(management, timer);
         timer.addTask(cleaner);
+        this.useChunks = useChunks;
     }
 
     /**
@@ -198,12 +215,43 @@ public final class Pools extends AbstractConfigurationListener implements Runnab
         /*
          * TODO Performance
          * Check if a chunk-wise refreshing of the cache performs better
+         * If so, maybe use TimerService instead
          */
-        poolsLock.lock();
-        try {
-            pools.clear();
-        } finally {
-            poolsLock.unlock();
+        // Kill all running clean-ups, cache gets invalidated again.
+        if (null != chunkCleaner && false == chunkCleaner.isShutdown()) {
+            chunkCleaner.shutdownNow();
         }
+        chunkCleaner = Executors.newSingleThreadScheduledExecutor();
+        Runnable run = new FreeChunkRunner(useChunks ? 10 : pools.size());
+        chunkCleaner.scheduleAtFixedRate(run, 0, 1, TimeUnit.MINUTES);
+    }
+
+    private class FreeChunkRunner implements Runnable {
+
+        private List<Integer> poolIds;
+
+        private int chunk;
+
+        public FreeChunkRunner(int chunk) {
+            super();
+            poolIds = pools.keySet().stream().sorted().collect(Collectors.toList());
+            this.chunk = chunk;
+        }
+
+        @Override
+        public void run() {
+            poolsLock.lock();
+            try {
+                for (int i = 0; i < chunk && false == poolIds.isEmpty(); i++) {
+                    pools.remove(poolIds.remove(0));
+                }
+            } finally {
+                poolsLock.unlock();
+            }
+            if (poolIds.isEmpty()) {
+                chunkCleaner.shutdown();
+            }
+        }
+
     }
 }
