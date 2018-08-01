@@ -119,7 +119,7 @@ public class MailAlarmMailGenerator {
                 ;
             return new MailAlarmMailGenerator(mailData.build(), services);
         } catch (AddressException | UnsupportedEncodingException e) {
-            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e,CalendarUtils.getURI(user.getMail()), I(user.getId()), CalendarUserType.INDIVIDUAL); // FIXME we might change the method signature to user CalendarUser instead of User
+            throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e,CalendarUtils.getURI(user.getMail()), I(user.getId()), CalendarUserType.INDIVIDUAL);
         }
     }
 
