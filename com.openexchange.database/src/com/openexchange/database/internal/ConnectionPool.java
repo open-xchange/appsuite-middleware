@@ -84,6 +84,11 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
         super(new ConnectionLifecycle(url, info), config);
         lifecycle = (ConnectionLifecycle) getLifecycle();
     }
+    
+    @Override
+    public void back(Connection pooled) throws PoolingException {
+        super.back(pooled);
+    }
 
     /**
      * Gets a connection that does not have any timeouts.

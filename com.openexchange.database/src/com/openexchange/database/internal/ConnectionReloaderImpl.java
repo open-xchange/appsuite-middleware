@@ -49,6 +49,7 @@
 
 package com.openexchange.database.internal;
 
+import java.security.KeyStore;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -149,7 +150,10 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
 
     @Override
     public boolean setConfigurationListener(ConfigurationListener listener) {
-        return listerners.add(listener);
+        if (null != listener) {
+            return listerners.add(listener);
+        }
+        return false;
     }
 
     @Override
@@ -158,8 +162,9 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
             Configuration configuration = new Configuration();
             configuration.readConfiguration(configService);
             // Check if key store was modified or configuration was changed and we need to notify
-            if (loadKeyStores(configuration) || false == this.configuration.equals(configuration)) {
-                notify(configuration);
+            boolean keyStoreUpdate = loadKeyStores(configuration);
+            if (keyStoreUpdate || false == this.configuration.equals(configuration)) {
+                notify(keyStoreUpdate, configuration);
                 this.configuration = configuration;
             }
         } catch (OXException e) {
@@ -176,13 +181,14 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
     /**
      * Notifies the {@link ConfigurationListener}. Looks up which properties has changed and notifies only relevant
      * 
+     * @param keyStoreUpdate <code>true</code> if a {@link KeyStore} was updated
      * @param configuration The new {@link Configuration}
      */
-    private void notify(Configuration configuration) {
-        if (checkForChangedProperties(this.configuration.getJdbcProps(), configuration.getJdbcProps())) {
-            listerners.forEach(l -> l.notify(configuration));
+    private void notify(boolean keyStoreUpdate, Configuration configuration) {
+        if (keyStoreUpdate || checkForChangedProperties(this.configuration.getJdbcProps(), configuration.getJdbcProps())) {
+            listerners.stream().sorted().forEach(l -> l.notify(configuration));
         } else if (checkForChangedProperties(this.configuration.getReadProps(), configuration.getReadProps()) || checkForChangedProperties(this.configuration.getWriteProps(), configuration.getWriteProps())) {
-            listerners.stream().filter(l -> ConfigDBListener.class.isAssignableFrom(l.getClass())).forEach(l -> l.notify(configuration));
+            listerners.stream().filter(l -> ConfigDBListener.class.isAssignableFrom(l.getClass())).sorted().forEach(l -> l.notify(configuration));
         }
     }
 

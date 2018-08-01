@@ -58,8 +58,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.GeneralDatabaseConnectionListener;
-import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.internal.reloadable.ConnectionReloader;
+import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.lock.LockService;
@@ -166,7 +166,7 @@ public final class Initialization {
         // Set timer interval
         timer.configure(configuration);
         // Setting up database connection pools.
-        pools = new Pools(timer);
+        pools = new Pools(management, timer);
         // Setting up the replication monitor
         monitor = new ReplicationMonitor(configuration.getBoolean(REPLICATION_MONITOR, true), configuration.getBoolean(CHECK_WRITE_CONS, false), connectionListeners);
         management.addOverview(new Overview(pools, monitor));
@@ -180,7 +180,10 @@ public final class Initialization {
             configDatabaseService.setCacheService(cacheService);
         }
         // Context pool life cycle.
-        pools.addLifeCycle(new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService));
+        ContextDatabaseLifeCycle contextLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService);
+        pools.addLifeCycle(contextLifeCycle);
+        reloader.setConfigurationListener(contextLifeCycle);
+        reloader.setConfigurationListener(pools);
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);
         try {

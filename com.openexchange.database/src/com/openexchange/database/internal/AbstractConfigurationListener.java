@@ -47,54 +47,65 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.database.internal;
 
-import com.openexchange.database.internal.Configuration;
+import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
+import com.openexchange.database.ConfigurationListener;
 
 /**
- * {@link ConfigurationListener}
+ * {@link AbstractConfigurationListener}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public interface ConfigurationListener extends Comparable<ConfigurationListener> {
+public abstract class AbstractConfigurationListener implements ConfigurationListener {
+
+    protected final Management management;
+
+    protected final Timer timer;
 
     /**
-     * Notifies this listener about an updated configuration for JDBC
+     * Initializes a new {@link AbstractConfigurationListener}.
      * 
-     * @param configuration The new {@link Configuration}
-     */
-    void notify(Configuration configuration);
-
-    /**
+     * @param management {@link Management} for MBean
+     * @param timer The {@link Timer} for cleanup task
      * 
-     * {@link ConfigDBListener} - Marker interface to avoid unnecessary reloading of user DBs
-     *
-     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
-     * @since v7.10.1
      */
-    interface ConfigDBListener {
-        // Marker interface to avoid unnecessary reloading of user DBs
+    public AbstractConfigurationListener(Management management, Timer timer) {
+        super();
+        this.management = management;
+        this.timer = timer;
     }
 
     /**
-     * Get the priority. (~DEFCON order)
-     * <p>
-     * <code>1<code></code> means highest, <b>reserved</b> for configDB, do not use!
-     * <code>100</code> means lowest and is the default value
+     * Set the new pool via given {@link Consumer} and uses given {@link Lock} to secure transient phase
      * 
-     * @return The priority
+     * @param poolid For the {@link Management} to add or remove
+     * @param cleanUp If the {@link ConnectionPool} should be removed from {@link Management} and {@link Timer}
+     * @param lock The {@link Lock} to secure the transient phase
+     * @param pool The new {@link ConnectionPool} to set
+     * @param setter A {@link Consumer} that sets the new {@link ConnectionPool} to the calling class
      */
-    default int getPriority() {
-        return 100;
-    }
-
-    @Override
-    default int compareTo(ConfigurationListener o) {
-        if (o.getPriority() == getPriority()) {
-            return 0;
+    protected void setPool(int poolid, boolean cleanUp, Lock lock, ConnectionPool pool, Consumer<ConnectionPool> setter) {
+        if (cleanUp) {
+            // Remove old pool
+            timer.removeTask(pool.getCleanerTask());
+            management.removePool(poolid);
         }
-        return getPriority() < o.getPriority() ? -1 : 1;
+        if (null != lock) {
+            lock.lock();
+        }
+        try {
+            // Set new pool to this class instance
+            setter.accept(pool);
+        } finally {
+            if (null != lock) {
+                lock.unlock();
+            }
+        }
+        // Add new pool back
+        timer.addTask(pool.getCleanerTask());
+        management.addPool(poolid, pool);
     }
-
 }

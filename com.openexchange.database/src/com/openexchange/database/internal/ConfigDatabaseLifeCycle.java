@@ -51,15 +51,14 @@ package com.openexchange.database.internal;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
-import com.openexchange.database.ConfigurationListener.ConfigDBListener;
+import com.openexchange.database.ConfigurationListener.ConfigDBListener;;
 
 /**
  * Creates the pools for the configuration database connections.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ConfigDatabaseLifeCycle implements PoolLifeCycle, ConfigDBListener {
+public final class ConfigDatabaseLifeCycle extends AbstractConfigurationListener implements PoolLifeCycle, ConfigDBListener {
 
     /*
      * TODO MW-1004 Bottleneck?
@@ -74,14 +73,8 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle, ConfigDBLis
 
     private ConnectionPool configDBRead;
 
-    private final Management management;
-
-    private final Timer timer;
-
     ConfigDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer) {
-        super();
-        this.management = management;
-        this.timer = timer;
+        super(management, timer);
         read = new ReentrantReadWriteLock(true);
         write = new ReentrantReadWriteLock(true);
         configure(configuration, false);
@@ -119,32 +112,24 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle, ConfigDBLis
         configure(configuration, true);
     }
 
+    @Override
+    public int getPriority() {
+        /*
+         * Highest prio.
+         * Nevertheless the cache should still deliver the old objects.
+         * After cache is flushed the new instances will get used.
+         */
+        return 1;
+    }
+
     private void configure(Configuration configuration, boolean cleanUp) {
         ConnectionPool newConfigDBWrite = new ConnectionPool(configuration.getWriteUrl(), configuration.getWriteProps(), configuration.getPoolConfig());
-        setPool(Constants.CONFIGDB_WRITE_ID, cleanUp, write, newConfigDBWrite, (ConnectionPool pool) -> {
+        setPool(Constants.CONFIGDB_WRITE_ID, cleanUp, write.writeLock(), newConfigDBWrite, (ConnectionPool pool) -> {
             this.configDBWrite = pool;
         });
         ConnectionPool newConfigDBRead = new ConnectionPool(configuration.getReadUrl(), configuration.getReadProps(), configuration.getPoolConfig());
-        setPool(Constants.CONFIGDB_READ_ID, cleanUp, read, newConfigDBRead, (ConnectionPool pool) -> {
+        setPool(Constants.CONFIGDB_READ_ID, cleanUp, read.writeLock(), newConfigDBRead, (ConnectionPool pool) -> {
             this.configDBRead = pool;
         });
-    }
-
-    private void setPool(int poolid, boolean cleanUp, ReadWriteLock lock, ConnectionPool pool, Consumer<ConnectionPool> setter) {
-        if (cleanUp) {
-            // Remove old pool
-            timer.removeTask(pool.getCleanerTask());
-            management.removePool(poolid);
-        }
-        lock.writeLock().lock();
-        try {
-            // Set new pool to this class instance
-            setter.accept(pool);
-        } finally {
-            lock.writeLock().unlock();
-        }
-        // Add new pool back
-        timer.addTask(pool.getCleanerTask());
-        management.addPool(poolid, pool);
     }
 }
