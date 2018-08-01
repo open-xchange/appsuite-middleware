@@ -194,14 +194,15 @@ msgstr ""
 msgid "Synchronize your address books and contacts."
 msgstr ""
 
-#: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/exception/MailAlarmExceptionMessages.java:63
-#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
-#: com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:62
-msgid "\"%1$s\" is not a valid email address."
-msgstr ""
-
+#. * The displayed name for the {@link EventField#ALARMS} property of an event
+#. -
+#. * MISC
+#.
+#. Reminder
 #: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:63
-msgid "Notification"
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
+msgid "Reminder"
 msgstr ""
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:62
@@ -1169,16 +1170,6 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
 msgid "Description"
-msgstr ""
-
-#. * The displayed name for the {@link EventField#ALARMS} property of an event
-#. -
-#. * MISC
-#.
-#. Reminder
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
-msgid "Reminder"
 msgstr ""
 
 #. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
@@ -9597,6 +9588,11 @@ msgstr ""
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:68
 msgid "The link \"%1$s\" is invalid."
+msgstr ""
+
+#: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
+#: com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:62
+msgid "\"%1$s\" is not a valid email address."
 msgstr ""
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:72
