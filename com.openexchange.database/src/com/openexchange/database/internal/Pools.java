@@ -62,18 +62,19 @@ import com.openexchange.exception.OXException;
 
 /**
  * This class stores all connection pools. It also removes pools that are empty.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Pools implements Runnable {
+public final class Pools extends AbstractConfigurationListener implements Runnable {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Pools.class);
 
-    private final List<PoolLifeCycle> lifeCycles = new ArrayList<PoolLifeCycle>(2);
-    private final Lock poolsLock = new ReentrantLock(true);
-    private final Map<Integer, ConnectionPool> pools = new HashMap<Integer, ConnectionPool>();
+    private final List<PoolLifeCycle>          lifeCycles = new ArrayList<PoolLifeCycle>(2);
+    private final Lock                         poolsLock  = new ReentrantLock(true);
+    private final Map<Integer, ConnectionPool> pools      = new HashMap<Integer, ConnectionPool>();
 
-    Pools(final Timer timer) {
-        super();
+    Pools(Management management, Timer timer) {
+        super(management, timer);
         timer.addTask(cleaner);
     }
 
@@ -122,6 +123,7 @@ public final class Pools implements Runnable {
     }
 
     private final Runnable cleaner = new Runnable() {
+
         @Override
         public void run() {
             try {
@@ -188,6 +190,20 @@ public final class Pools implements Runnable {
         if (!destroyed) {
             final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(I(poolId));
             LOG.error(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void notify(Configuration configuration) {
+        /*
+         * TODO Performance
+         * Check if a chunk-wise refreshing of the cache performs better
+         */
+        poolsLock.lock();
+        try {
+            pools.clear();
+        } finally {
+            poolsLock.unlock();
         }
     }
 }

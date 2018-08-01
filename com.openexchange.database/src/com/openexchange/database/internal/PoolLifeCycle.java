@@ -68,5 +68,12 @@ public interface PoolLifeCycle {
      */
     ConnectionPool create(int poolId) throws OXException;
 
+    /**
+     * Destroys a {@link ConnectionPool}
+     * 
+     * @param poolId The identifier of the pool
+     * @return <code>true</code> if the pool was within this life cycle and was destroyed
+     *         <code>false</code> otherwise
+     */
     boolean destroy(int poolId);
 }
