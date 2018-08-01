@@ -59,7 +59,6 @@ import java.security.cert.CertificateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseExceptionCodes;
-import com.openexchange.database.internal.reloadable.KeyStoreUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -178,7 +177,7 @@ public class ConfigAwareKeyStore {
         int result = 1;
         result = prime * result + ((password == null) ? 0 : password.hashCode());
         result = prime * result + ((path == null) ? 0 : path.hashCode());
-        result = prime * result + ((store == null) ? 0 : KeyStoreUtil.getHashSum(store));
+        result = prime * result + ((store == null) ? 0 : ConfigurationUtil.getHashSum(store));
         result = prime * result + storeHash;
         return result;
     }
@@ -213,7 +212,7 @@ public class ConfigAwareKeyStore {
             if (other.store != null) {
                 return false;
             }
-        } else if (0 != KeyStoreUtil.compare(store, other.store)) {
+        } else if (0 != ConfigurationUtil.compare(store, other.store)) {
             return false;
         }
         if (storeHash != other.storeHash) {
