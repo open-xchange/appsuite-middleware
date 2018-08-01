@@ -59,6 +59,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.GeneralDatabaseConnectionListener;
 import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
+import com.openexchange.database.internal.reloadable.ConnectionReloader;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.lock.LockService;
@@ -153,10 +154,11 @@ public final class Initialization {
      * @param migrationService The database migration service, or <code>null</code> if not available
      * @param connectionListeners The connection listeners
      * @param configuration The {@link Configuration}
+     * @param reloader {@link ConnectionReloader} to reload connection pools 
      * @return The database service
      * @throws OXException Various
      */
-    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService, ServiceListing<GeneralDatabaseConnectionListener> connectionListeners, Configuration configuration) throws OXException {
+    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService, ServiceListing<GeneralDatabaseConnectionListener> connectionListeners, Configuration configuration, ConnectionReloaderImpl reloader) throws OXException {
         this.configuration = configuration;
         if (null != databaseService) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
@@ -171,6 +173,7 @@ public final class Initialization {
         // Add life cycle for configuration database
         final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
         pools.addLifeCycle(configDBLifeCycle);
+        reloader.setConfigurationListener(configDBLifeCycle);
         // Configuration database connection pool service.
         configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor, LockMech.lockMechFor(configuration.getProperty(Configuration.Property.LOCK_MECH, LockMech.ROW_LOCK.getId())));
         if (null != cacheService) {

@@ -108,6 +108,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.Configuration;
+import com.openexchange.database.internal.ConnectionReloaderImpl;
 import com.openexchange.databaseold.Database;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
@@ -786,7 +787,8 @@ public final class Init {
             com.openexchange.database.internal.Initialization.getInstance().getTimer().setTimerService(timerService);
             Configuration configuration = new Configuration();
             configuration.readConfiguration(configurationService);
-            final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, configViewFactory, null, ServiceListings.emptyList(), configuration);
+            ConnectionReloaderImpl reloader = new ConnectionReloaderImpl(configuration);
+            final DatabaseService dbService = com.openexchange.database.internal.Initialization.getInstance().start(configurationService, configViewFactory, null, ServiceListings.emptyList(), configuration, reloader);
             services.put(DatabaseService.class, dbService);
             com.openexchange.database.internal.Initialization.getInstance().setCacheService(cacheService);
             Database.setDatabaseService(dbService);
