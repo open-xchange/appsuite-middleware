@@ -210,8 +210,14 @@ class SingleMailDeliveryTask implements Runnable {
             LOG.trace("Skipped mail alarm task for {}. Its trigger is not up to date!", new Key(ctx.getContextId(), account, trigger.getEventId(), alarm.getId()));
             return null;
         }
-        Event event = storage.getEventStorage().loadEvent(trigger.getEventId(), null);
-        storage.getUtilities().loadAdditionalEventData(trigger.getUserId(), event, null);
+        Event event = null;
+        try {
+            event = storage.getEventStorage().loadEvent(trigger.getEventId(), null);
+            storage.getUtilities().loadAdditionalEventData(trigger.getUserId(), event, null);
+        } catch (OXException e) {
+            LOG.trace("Unable to load event with id {}: {}",trigger.getEventId(), e.getMessage());
+            throw e;
+        }
         List<Alarm> alarms = event.getAlarms();
         for (Alarm tmpAlarm : alarms) {
             if (tmpAlarm.getId() == alarm.getId()) {
@@ -255,7 +261,7 @@ class SingleMailDeliveryTask implements Runnable {
         storage.updateEvent(eventUpdate);
     }
 
-    private void checkEvent(Connection writeCon, Event event) throws SQLException, OXException {
+    private void checkEvent(Connection writeCon, Event event) throws OXException {
         int cid = ctx.getContextId();
         List<AlarmTrigger> triggers = callback.checkEvents(writeCon, Collections.singletonList(event), cid, account, true);
         if (triggers.isEmpty() == false) {

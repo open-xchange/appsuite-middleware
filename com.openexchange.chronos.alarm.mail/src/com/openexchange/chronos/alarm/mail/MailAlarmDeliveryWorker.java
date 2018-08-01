@@ -211,7 +211,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
                         }
                     }
                 }
-                spawnDeliveryTaskForTriggers(lockedTriggers, until, currentUTCTime);
+                spawnDeliveryTaskForTriggers(lockedTriggers, currentUTCTime);
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
@@ -226,7 +226,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
         LOG.info("Mail Alarm delivery worker run finished!");
     }
 
-    private void spawnDeliveryTaskForTriggers(Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers, Calendar until, Calendar currentUTCTime) throws OXException {
+    private void spawnDeliveryTaskForTriggers(Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers, Calendar currentUTCTime) throws OXException {
         for (Entry<Pair<Integer, Integer>, List<AlarmTrigger>> entry : lockedTriggers.entrySet()) {
             int cid = entry.getKey().getFirst();
             int account = entry.getKey().getSecond();
