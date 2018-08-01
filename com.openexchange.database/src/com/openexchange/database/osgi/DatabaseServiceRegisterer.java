@@ -63,7 +63,7 @@ import com.openexchange.database.internal.AssignmentFactoryImpl;
 import com.openexchange.database.internal.Configuration;
 import com.openexchange.database.internal.DatabaseServiceImpl;
 import com.openexchange.database.internal.Initialization;
-import com.openexchange.database.internal.KeyStoreReloaderImpl;
+import com.openexchange.database.internal.ConnectionReloaderImpl;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.osgi.ServiceListing;
 
@@ -117,8 +117,9 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
                 // Parse configuration
                 Configuration configuration = new Configuration();
                 configuration.readConfiguration(configService);
-                context.registerService(Reloadable.class, new KeyStoreReloaderImpl(configuration), null);
-                databaseService = Initialization.getInstance().start(configService, configViewFactory, migrationService, connectionListeners, configuration);
+                ConnectionReloaderImpl reloader = new ConnectionReloaderImpl(configuration);
+                context.registerService(Reloadable.class, reloader, null);
+                databaseService = Initialization.getInstance().start(configService, configViewFactory, migrationService, connectionListeners, configuration, reloader);
                 LOG.info("Publishing DatabaseService.");
                 serviceRegistration = context.registerService(DatabaseService.class, databaseService, null);
             } catch (final Exception e) {
