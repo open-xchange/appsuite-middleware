@@ -166,14 +166,13 @@ public final class Initialization {
         // Set timer interval
         timer.configure(configuration);
         // Setting up database connection pools.
-        pools = new Pools(management, timer, configurationService.getBoolProperty("com.openexchange.database.useChunkwiseRefreshing", true));
+        pools = new Pools(timer);
         // Setting up the replication monitor
         monitor = new ReplicationMonitor(configuration.getBoolean(REPLICATION_MONITOR, true), configuration.getBoolean(CHECK_WRITE_CONS, false), connectionListeners);
         management.addOverview(new Overview(pools, monitor));
         // Add life cycle for configuration database
         final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
         pools.addLifeCycle(configDBLifeCycle);
-        reloader.setConfigurationListener(configDBLifeCycle);
         // Configuration database connection pool service.
         configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor, LockMech.lockMechFor(configuration.getProperty(Configuration.Property.LOCK_MECH, LockMech.ROW_LOCK.getId())));
         if (null != cacheService) {
@@ -182,8 +181,6 @@ public final class Initialization {
         // Context pool life cycle.
         ContextDatabaseLifeCycle contextLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService);
         pools.addLifeCycle(contextLifeCycle);
-        reloader.setConfigurationListener(contextLifeCycle);
-        reloader.setConfigurationListener(pools);
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);
         try {

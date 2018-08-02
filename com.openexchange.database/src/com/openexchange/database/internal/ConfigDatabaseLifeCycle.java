@@ -49,55 +49,37 @@
 
 package com.openexchange.database.internal;
 
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import com.openexchange.database.ConfigurationListener.ConfigDBListener;;
 
 /**
  * Creates the pools for the configuration database connections.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ConfigDatabaseLifeCycle extends AbstractConfigurationListener implements PoolLifeCycle, ConfigDBListener {
+public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
 
-    /*
-     * TODO MW-1004 Bottleneck?
-     * Find out if those new looks will create a bottleneck when fetching Connection pools
-     */
+    private final ConnectionPool configDBWrite;
 
-    private final ReadWriteLock read;
-
-    private final ReadWriteLock write;
-
-    private ConnectionPool configDBWrite;
-
-    private ConnectionPool configDBRead;
+    private final ConnectionPool configDBRead;
 
     ConfigDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer) {
-        super(management, timer);
-        read = new ReentrantReadWriteLock(true);
-        write = new ReentrantReadWriteLock(true);
-        configure(configuration, false);
+        super();
+        configDBWrite = new ConnectionPool(configuration.getWriteUrl(), configuration.getWriteProps(), configuration.getPoolConfig());
+        timer.addTask(configDBWrite.getCleanerTask());
+        management.addPool(Constants.CONFIGDB_WRITE_ID, configDBWrite);
+        configDBRead = new ConnectionPool(configuration.getReadUrl(), configuration.getReadProps(), configuration.getPoolConfig());
+        timer.addTask(configDBRead.getCleanerTask());
+        management.addPool(Constants.CONFIGDB_READ_ID, configDBRead);
     }
 
     @Override
     public ConnectionPool create(final int poolId) {
         switch (poolId) {
-            case Constants.CONFIGDB_WRITE_ID:
-                return get(write, configDBWrite);
-            case Constants.CONFIGDB_READ_ID:
-                return get(read, configDBRead);
-            default:
-                return null;
-        }
-    }
-
-    private ConnectionPool get(ReadWriteLock lock, ConnectionPool toReturn) {
-        lock.readLock().lock();
-        try {
-            return toReturn;
-        } finally {
-            lock.readLock().unlock();
+        case Constants.CONFIGDB_WRITE_ID:
+            return configDBWrite;
+        case Constants.CONFIGDB_READ_ID:
+            return configDBRead;
+        default:
+            return null;
         }
     }
 
@@ -105,31 +87,5 @@ public final class ConfigDatabaseLifeCycle extends AbstractConfigurationListener
     public boolean destroy(final int poolId) {
         // Pools to configuration database will not be destroyed.
         return poolId == Constants.CONFIGDB_WRITE_ID || poolId == Constants.CONFIGDB_READ_ID;
-    }
-
-    @Override
-    public void notify(Configuration configuration) {
-        configure(configuration, true);
-    }
-
-    @Override
-    public int getPriority() {
-        /*
-         * Highest prio.
-         * Nevertheless the cache should still deliver the old objects.
-         * After cache is flushed the new instances will get used.
-         */
-        return 1;
-    }
-
-    private void configure(Configuration configuration, boolean cleanUp) {
-        ConnectionPool newConfigDBWrite = new ConnectionPool(configuration.getWriteUrl(), configuration.getWriteProps(), configuration.getPoolConfig());
-        setPool(Constants.CONFIGDB_WRITE_ID, cleanUp, write.writeLock(), newConfigDBWrite, (ConnectionPool pool) -> {
-            this.configDBWrite = pool;
-        });
-        ConnectionPool newConfigDBRead = new ConnectionPool(configuration.getReadUrl(), configuration.getReadProps(), configuration.getPoolConfig());
-        setPool(Constants.CONFIGDB_READ_ID, cleanUp, read.writeLock(), newConfigDBRead, (ConnectionPool pool) -> {
-            this.configDBRead = pool;
-        });
     }
 }
