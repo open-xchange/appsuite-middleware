@@ -55,12 +55,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -69,30 +65,17 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Pools extends AbstractConfigurationListener implements Runnable {
+public final class Pools implements Runnable {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Pools.class);
 
     private final List<PoolLifeCycle> lifeCycles = new ArrayList<PoolLifeCycle>(2);
+    private final Lock poolsLock = new ReentrantLock(true);
+    private final Map<Integer, ConnectionPool> pools = new HashMap<Integer, ConnectionPool>();
 
-    final Lock poolsLock = new ReentrantLock(true);
-
-    final Map<Integer, ConnectionPool> pools = new HashMap<Integer, ConnectionPool>();
-
-    private boolean useChunks;
-
-    ScheduledExecutorService chunkCleaner;
-
-    private
-
-    Pools(Management management, Timer timer) {
-        this(management, timer, false);
-    }
-
-    Pools(Management management, Timer timer, boolean useChunks) {
-        super(management, timer);
+    Pools(final Timer timer) {
+        super();
         timer.addTask(cleaner);
-        this.useChunks = useChunks;
     }
 
     /**
@@ -208,50 +191,5 @@ public final class Pools extends AbstractConfigurationListener implements Runnab
             final OXException e = DBPoolingExceptionCodes.UNKNOWN_POOL.create(I(poolId));
             LOG.error(e.getMessage(), e);
         }
-    }
-
-    @Override
-    public void notify(Configuration configuration) {
-        /*
-         * TODO Performance
-         * Check if a chunk-wise refreshing of the cache performs better
-         * If so, maybe use TimerService instead
-         */
-        // Kill all running clean-ups, cache gets invalidated again.
-        if (null != chunkCleaner && false == chunkCleaner.isShutdown()) {
-            chunkCleaner.shutdownNow();
-        }
-        chunkCleaner = Executors.newSingleThreadScheduledExecutor();
-        Runnable run = new FreeChunkRunner(useChunks ? 10 : pools.size());
-        chunkCleaner.scheduleAtFixedRate(run, 0, 1, TimeUnit.MINUTES);
-    }
-
-    private class FreeChunkRunner implements Runnable {
-
-        private List<Integer> poolIds;
-
-        private int chunk;
-
-        public FreeChunkRunner(int chunk) {
-            super();
-            poolIds = pools.keySet().stream().sorted().collect(Collectors.toList());
-            this.chunk = chunk;
-        }
-
-        @Override
-        public void run() {
-            poolsLock.lock();
-            try {
-                for (int i = 0; i < chunk && false == poolIds.isEmpty(); i++) {
-                    pools.remove(poolIds.remove(0));
-                }
-            } finally {
-                poolsLock.unlock();
-            }
-            if (poolIds.isEmpty()) {
-                chunkCleaner.shutdown();
-            }
-        }
-
     }
 }
