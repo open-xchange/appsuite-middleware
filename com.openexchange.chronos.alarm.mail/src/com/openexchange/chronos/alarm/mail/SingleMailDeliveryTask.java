@@ -135,12 +135,14 @@ class SingleMailDeliveryTask implements Runnable {
             writeCon.commit();
             processFinished = true;
             if (event != null) {
-                isReadOnly = false;
+                Databases.autocommit(writeCon);
+                dbservice.backWritable(ctx, writeCon);
+                // send the mail
                 sendMail(event);
-            }
-            // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
-            if (event != null) {
-                checkEvent(writeCon, event);
+                // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
+                writeCon = dbservice.getWritable(ctx);
+                writeCon.setAutoCommit(false);
+                isReadOnly = checkEvent(writeCon, event);
                 writeCon.commit();
             }
         } catch (OXException | SQLException e) {
@@ -261,7 +263,7 @@ class SingleMailDeliveryTask implements Runnable {
         storage.updateEvent(eventUpdate);
     }
 
-    private void checkEvent(Connection writeCon, Event event) throws OXException {
+    private boolean checkEvent(Connection writeCon, Event event) throws OXException {
         int cid = ctx.getContextId();
         List<AlarmTrigger> triggers = callback.checkEvents(writeCon, Collections.singletonList(event), cid, account, true);
         if (triggers.isEmpty() == false) {
@@ -269,7 +271,9 @@ class SingleMailDeliveryTask implements Runnable {
             for (AlarmTrigger trigger : triggers) {
                 callback.scheduleTaskForEvent(writeCon, calStorage, new Key(cid, account, trigger.getEventId(), trigger.getAlarm()), trigger);
             }
+            return true;
         }
+        return false;
     }
 
     /**

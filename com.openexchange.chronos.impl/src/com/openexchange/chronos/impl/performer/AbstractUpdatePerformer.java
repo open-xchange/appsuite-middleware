@@ -111,7 +111,6 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -133,10 +132,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected final int calendarUserId;
     protected final CalendarFolder folder;
     protected final Date timestamp;
-
     protected final ResultTracker resultTracker;
     protected EnumSet<Role> roles;
-    private AlarmChecker alarmChecker;
 
     /**
      * Initializes a new {@link AbstractUpdatePerformer}.
@@ -154,7 +151,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.timestamp = new Date();
         this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime(), getSelfProtection());
         this.roles = roles;
-        this.alarmChecker = new AlarmChecker(Services.getServiceLookup());
     }
 
     /**
@@ -446,7 +442,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Map<Integer, List<Alarm>> newAlarmsByUserId = new HashMap<Integer, List<Alarm>>(alarmsByUserId.size());
         for (Entry<Integer, List<Alarm>> entry : alarmsByUserId.entrySet()) {
             List<Alarm> newAlarms = new ArrayList<Alarm>(entry.getValue().size());
-            alarmChecker.checkAlarmList(session.getSession(), entry.getValue());
+            AlarmPreparator.getInstance().prepareEMailAlarms(session, entry.getValue());
             for (Alarm alarm : entry.getValue()) {
                 Alarm newAlarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
                 newAlarm.setId(storage.getAlarmStorage().nextId());
@@ -487,7 +483,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @return <code>true</code> if there were any updates, <code>false</code>, otherwise
      */
     protected boolean updateAlarms(Event event, int userId, List<Alarm> originalAlarms, List<Alarm> updatedAlarms) throws OXException {
-        alarmChecker.checkAlarmList(session.getSession(), updatedAlarms);
+        AlarmPreparator.getInstance().prepareEMailAlarms(session, updatedAlarms);
         CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmUtils.getAlarmUpdates(originalAlarms, updatedAlarms);
         if (alarmUpdates.isEmpty()) {
             return false;

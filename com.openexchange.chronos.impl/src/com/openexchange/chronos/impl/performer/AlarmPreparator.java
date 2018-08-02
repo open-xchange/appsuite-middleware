@@ -55,55 +55,59 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
- * {@link AlarmChecker}
+ * {@link AlarmPreparator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class AlarmChecker {
+public class AlarmPreparator {
 
-    ServiceLookup services;
+
+    private static final AlarmPreparator INSTANCE = new AlarmPreparator();
+
+    public static AlarmPreparator getInstance() {
+        return INSTANCE;
+    }
+
 
     /**
-     * Initializes a new {@link AlarmChecker}.
+     * Initializes a new {@link AlarmPreparator}.
      */
-    public AlarmChecker(ServiceLookup lookup) {
-        this.services = lookup;
+    private AlarmPreparator() {
+        super();
     }
 
     /**
-     * Checks the given alarms if they contain mail alarms which doesn't contain all necessary fields and fills them up if possible.
+     * Prepares all eMail alarms
      *
-     * @param session The user session
+     * @param session The calendar session
      * @param alarms The alarms of the event
      * @throws OXException
      */
-    public void checkAlarmList(Session session, List<Alarm> alarms) throws OXException {
+    public void prepareEMailAlarms(CalendarSession session, List<Alarm> alarms) throws OXException {
         if(alarms!=null) {
             for (Alarm alarm : alarms) {
                 if (alarm.containsAction() && AlarmAction.EMAIL.equals(alarm.getAction())) {
-                    fillAlarm(session, alarm);
+                    prepareAlarm(session, alarm);
                 }
             }
         }
     }
 
     /**
-     * Fills all necessary fields of the alarm if possible
+     * Prepares a single eMail alarm
      *
-     * @param session The user session
+     * @param session The calendar session
      * @param alarm The mail alarm
      * @throws OXException
      */
-    private void fillAlarm(Session session, Alarm alarm) throws OXException {
-        fillAttendees(session, alarm);
+    private void prepareAlarm(CalendarSession session, Alarm alarm) throws OXException {
+        prepareAttendees(session, alarm);
         if (!alarm.containsSummary()) {
             alarm.setSummary("Reminder");
         }
@@ -113,15 +117,15 @@ public class AlarmChecker {
     }
 
     /**
-     * Fills the attendees of the given mail alarms with all necessary fields if possible
+     * Prepares the attendee list of an eMail alarm by setting it to only the current user
      *
-     * @param session The user session
+     * @param session The calendar session
      * @param alarm A mail alarm
      * @throws OXException
      */
-    private void fillAttendees(Session session, Alarm alarm) throws OXException {
+    private void prepareAttendees(CalendarSession session, Alarm alarm) throws OXException {
         // add current user as the only attendee
-        EntityResolver entityResolver = optEntityResolver(session.getContextId());
+        EntityResolver entityResolver = session.getEntityResolver();
         if (entityResolver != null) {
             Attendee attendee = new Attendee();
             attendee.setEntity(session.getUserId());
@@ -130,16 +134,4 @@ public class AlarmChecker {
             alarm.setAttendees(Collections.singletonList(attendee));
         }
     }
-
-    /**
-     * Optionally gets an entity resolver for the context.
-     *
-     * @param contextId The context id
-     * @return The entity resolver, or <code>null</code> if not available
-     */
-    protected EntityResolver optEntityResolver(int contextId) throws OXException {
-        CalendarUtilities calendarUtilities = services.getOptionalService(CalendarUtilities.class);
-        return null != calendarUtilities ? calendarUtilities.getEntityResolver(contextId) : null;
-    }
-
 }
