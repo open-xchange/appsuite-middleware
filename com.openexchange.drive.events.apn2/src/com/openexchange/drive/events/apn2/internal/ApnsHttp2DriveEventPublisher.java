@@ -220,9 +220,10 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
         return new ApnsHttp2Notification.Builder(subscription.getToken(), options.getTopic())
             .withCustomAlertLocKey("TRIGGER_SYNC")
             .withCustomAlertActionLocKey("OK")
+            .withCustomField("container-identifier", "NSFileProviderRootContainerItemIdentifier")
             .withCustomField("root", subscription.getRootFolderID())
             .withCustomField("action", "sync")
-            .build();
+        .build();
     }
 
     static boolean removeSubscription(Subscription subscription, DriveSubscriptionStore subscriptionStore) {
