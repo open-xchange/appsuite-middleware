@@ -52,7 +52,6 @@ package com.openexchange.chronos.common;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.SearchStrings.lengthWithoutWildcards;
 import static com.openexchange.tools.arrays.Arrays.contains;
-import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -66,7 +65,6 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
@@ -280,21 +278,6 @@ public class Check {
         if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
             if (null == alarm.getDescription() && (null == fields || contains(fields, AlarmField.DESCRIPTION))) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
-            }
-        } else if (AlarmAction.EMAIL.equals(alarm.getAction())) {
-            if (null == alarm.getDescription() && (null == fields || contains(fields, AlarmField.DESCRIPTION))) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
-            }
-            if (null == alarm.getSummary() && (null == fields || contains(fields, AlarmField.SUMMARY))) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.SUMMARY.toString());
-            }
-            if (null == fields || contains(fields, AlarmField.ATTENDEES)) {
-                if (isNullOrEmpty(alarm.getAttendees())) {
-                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
-                }
-                for (Attendee attendee : alarm.getAttendees()) {
-                    requireValidEMail(attendee);
-                }
             }
         }
         return alarm;
