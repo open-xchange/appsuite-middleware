@@ -16,15 +16,19 @@ ${mail.event.description!""}
 
 == ${labels.participantsLabel} ==
 
+<#if (mail.participants?has_content)>
 <#list mail.participants as participant>
 ${participantHelper.participantLine(participant)}
 </#list>
+</#if>
 
 == ${labels.resourcesLabel} ==
 
+<#if (mail.resources?has_content)>
 <#list mail.resources as participant>
 ${participantHelper.participantLine(participant)}
 </#list>
+</#if>
 
 == ${labels.detailsLabel} ==
 
