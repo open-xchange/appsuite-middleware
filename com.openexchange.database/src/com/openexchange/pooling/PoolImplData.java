@@ -63,7 +63,7 @@ import java.util.Map;
  * @param <T> type of objects to pool.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-class PoolImplData<T> {
+public class PoolImplData<T> implements PoolData<T> {
 
     /**
      * Idle pooled objects.
@@ -92,11 +92,8 @@ class PoolImplData<T> {
         activeByThread = new HashMap<Thread, PooledData<T>>();
     }
 
-    /**
-     * @return the topmost idle object or <code>null</code> if the idle stack is
-     *         empty.
-     */
-    PooledData<T> popIdle() {
+    @Override
+    public PooledData<T> popIdle() {
         PooledData<T> retval;
         final int pos = idle.size();
         if (0 == pos) {
@@ -108,92 +105,93 @@ class PoolImplData<T> {
         return retval;
     }
 
-    /**
-     * Adds a new active object.
-     * 
-     * @param newActive new active object to add.
-     */
-    void addActive(final PooledData<T> newActive) {
+    @Override
+    public void addActive(final PooledData<T> newActive) {
         active.put(newActive.getPooled(), newActive);
     }
 
-    PooledData<T> getActive(final T pooled) {
+    @Override
+    public PooledData<T> getActive(final T pooled) {
         return active.get(pooled);
     }
 
-    Iterator<PooledData<T>> listActive() {
+    @Override
+    public Iterator<PooledData<T>> listActive() {
         return active.values().iterator();
     }
 
-    /**
-     * Removes an active object.
-     * 
-     * @param toRemove object to remove.
-     * @return <code>true</code> if the object was removed successfully.
-     */
-    boolean removeActive(final PooledData<T> toRemove) {
+    @Override
+    public boolean removeActive(final PooledData<T> toRemove) {
         return toRemove.equals(active.remove(toRemove.getPooled()));
     }
 
-    void addCreating() {
+    @Override
+    public void addCreating() {
         creating++;
     }
 
-    void removeCreating() {
+    @Override
+    public void removeCreating() {
         creating--;
     }
 
-    int getCreating() {
+    @Override
+    public int getCreating() {
         return creating;
     }
 
-    /**
-     * @return the number of active objects.
-     */
-    int numActive() {
+    @Override
+    public int numActive() {
         return active.size() + creating;
     }
 
-    boolean isActiveEmpty() {
+    @Override
+    public boolean isActiveEmpty() {
         return active.isEmpty() && creating == 0;
     }
 
-    void addIdle(final PooledData<T> newIdle) {
+    @Override
+    public void addIdle(final PooledData<T> newIdle) {
         idle.add(newIdle);
     }
 
-    PooledData<T> getIdle(final int index) {
+    @Override
+    public PooledData<T> getIdle(final int index) {
         return idle.get(index);
     }
 
-    void removeIdle(final int index) {
+    @Override
+    public void removeIdle(final int index) {
         idle.remove(index);
     }
 
-    /**
-     * @return the number of idle objects.
-     */
-    int numIdle() {
+    @Override
+    public int numIdle() {
         return idle.size();
     }
 
-    boolean isIdleEmpty() {
+    @Override
+    public boolean isIdleEmpty() {
         return idle.isEmpty();
     }
 
-    void addByThread(final PooledData<T> toCheck) {
+    @Override
+    public void addByThread(final PooledData<T> toCheck) {
         activeByThread.put(toCheck.getThread(), toCheck);
     }
 
-    PooledData<T> getByThread(final Thread thread) {
+    @Override
+    public PooledData<T> getByThread(final Thread thread) {
         return activeByThread.get(thread);
     }
 
-    void removeByThread(final PooledData<T> toCheck) {
+    @Override
+    public void removeByThread(final PooledData<T> toCheck) {
         activeByThread.remove(toCheck.getThread());
     }
 
-    Collection<PooledData<T>> getActive() {
+    @Override
+    public Collection<PooledData<T>> getActive() {
         return new ArrayList<PooledData<T>>(active.values());
     }
 }

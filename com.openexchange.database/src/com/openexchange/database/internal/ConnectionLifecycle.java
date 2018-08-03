@@ -127,11 +127,18 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
     public void setURL(String url) {
         this.url = url;
     }
-
+    
+    public String getURL() {
+        return this.url;
+    }
     private Properties info;
 
     public void setProperties(Properties info) {
         this.info = info;
+    }
+    
+    public Properties getInfo() {
+        return this.info;
     }
 
     /**
