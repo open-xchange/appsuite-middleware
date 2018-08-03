@@ -84,14 +84,19 @@ specific field data of single or multiple objects.
 | 314 | subscribed |Boolean|Indicates whether this folder should appear in folder tree or not. Note: Standard folders cannot be unsubscribed.|
 | 315 | subscr_subflds |Boolean|Indicates whether subfolders should appear in folder tree or not.|
 | 316 | standard\_folder_type |Number|Indicates the default folder type. Zero for non-default folder. See [Standard folder types](#standard-folder-types)|
-| 317 | supported_capabilities |Array|Each element is a String identifying a supported folder capability as described in [supported capabilities](#supported-capabilities). Only applicable for non-mail folders. Read Only, Since 7.4.0.|
-| 318 | account_id |String|Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder. Since 7.8.0.|
+| 317 | supported_capabilities |Array|Each element is a String identifying a supported folder capability as described in [supported capabilities](#supported-capabilities). Only applicable for non-mail folders. Read Only.|
+| 318 | account_id |String|Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder.|
 | 319 | folder_name |String|The raw and therefore untranslated name of this folder|
-| 320 | origin |String|The folder's origin path. Since 7.10.0|
-| 3010 | com.openexchange.publish.publicationFlag |Boolean|Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin, since 6.14.|
-| 3020 | com.openexchange.subscribe.subscriptionFlag |Boolean|Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin, since 6.14.|
-| 3030 | com.openexchange.folderstorage.displayName |String|Provides the display of the folder's owner. Read Only, Since 6.20.|
-| 3060 | com.openexchange.share.extendedPermissions |Array|Each element is an object described in [Extended permission object](#extended-permission-object). Read Only, Since 7.8.0.|
+| 320 | origin |String|The folder's origin path.|
+| 3010 | com.openexchange.publish.publicationFlag |Boolean|Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin|
+| 3020 | com.openexchange.subscribe.subscriptionFlag |Boolean|Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin|
+| 3030 | com.openexchange.folderstorage.displayName |String|Provides the display of the folder's owner. Read Only|
+| 3060 | com.openexchange.share.extendedPermissions |Array|Each element is an object described in [Extended permission object](#extended-permission-object). Read Only.|
+| 3201 | com.openexchange.calendar.extendedProperties |Object|A json object containing the extended properties of an calendar folder as key value pairs. Each value can be an object, an array or a simple value itself.|
+| 3203 | com.openexchange.calendar.provider |String|The name of the calendar provider.|
+| 3204 | com.openexchange.calendar.accountError |Object| In case the account has errors this field contains a json object with fields related to this error. |
+| 3205 | com.openexchange.calendar.config |Object|A json object containing configuration data for the calendar account.|
+| 3220 | com.openexchange.caldav.url |String| The caldav url to this calendar folder.|
 
 ### Type of folder
 
