@@ -67,18 +67,15 @@ public interface ConfigurationListener extends Comparable<ConfigurationListener>
     void notify(Configuration configuration);
 
     /**
+     * The pool identifier of the pool to notify
      * 
-     * {@link ConfigDBListener} - Marker interface to avoid unnecessary reloading of user DBs
-     *
-     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
-     * @since v7.10.1
+     * @return The pool ID
      */
-    interface ConfigDBListener {
-        // Marker interface to avoid unnecessary reloading of user DBs
-    }
+    int getPoolId();
+
 
     /**
-     * Get the priority. (~DEFCON order)
+     * Get the priority.
      * <p>
      * <code>1<code></code> means highest, <b>reserved</b> for configDB, do not use!
      * <code>100</code> means lowest and is the default value
@@ -97,4 +94,14 @@ public interface ConfigurationListener extends Comparable<ConfigurationListener>
         return getPriority() < o.getPriority() ? -1 : 1;
     }
 
+    /**
+     * 
+     * {@link ConfigDBListener} - Marker interface to avoid unnecessary reloading of user DBs
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.1
+     */
+    interface ConfigDBListener extends ConfigurationListener {
+        // Marker interface to avoid unnecessary reloading of user DBs
+    }
 }
