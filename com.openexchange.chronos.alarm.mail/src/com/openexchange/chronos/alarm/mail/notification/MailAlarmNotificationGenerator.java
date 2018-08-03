@@ -119,7 +119,7 @@ public class MailAlarmNotificationGenerator {
         this.ctx = ctx;
         this.user = user;
 
-        if (event.containsOrganizer() && Strings.isNotEmpty(event.getOrganizer().getEMail())) {
+        if (null != event.getOrganizer() && Strings.isNotEmpty(event.getOrganizer().getEMail())) {
             this.recipient = new NotificationParticipant(event.getOrganizer().getEMail().equals(user.getMail()) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE, false, user.getMail(), user.getId());
         } else {
             this.recipient = new NotificationParticipant(ITipRole.ATTENDEE, false, user.getMail(), user.getId());
@@ -280,13 +280,14 @@ public class MailAlarmNotificationGenerator {
     }
 
     private static List<NotificationParticipant> getResources(ServiceLookup services, Event event, Context ctx, User user) throws OXException {
-        final List<Attendee> resources = CalendarUtils.filter(event.getAttendees(), Boolean.TRUE, CalendarUserType.RESOURCE);
-        if (resources == null) {
+        List<Attendee> resources = CalendarUtils.filter(event.getAttendees(), Boolean.TRUE, CalendarUserType.RESOURCE);
+        if (null == resources || resources.isEmpty()) {
             return Collections.emptyList();
         }
+
         ResourceService resourceService = requireService(ResourceService.class, services);
 
-        final List<NotificationParticipant> resourceParticipants = new ArrayList<NotificationParticipant>();
+        final List<NotificationParticipant> resourceParticipants = new ArrayList<NotificationParticipant>(resources.size());
         for (final Attendee attResource : resources) {
             Resource resource = resourceService.getResource(attResource.getEntity(), ctx);
             if (resource.getMail() != null) {

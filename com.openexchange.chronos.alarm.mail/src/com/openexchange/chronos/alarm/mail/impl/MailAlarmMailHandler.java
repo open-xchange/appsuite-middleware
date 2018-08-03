@@ -59,6 +59,12 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
 
+/**
+ * {@link MailAlarmMailHandler}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.1
+ */
 public class MailAlarmMailHandler {
 
     private final ServiceLookup services;

@@ -17,7 +17,7 @@
     <div class="note">
         ${labels.noteAsHTML}
     </div>
-    <#if mail.participants??>
+    <#if mail.participants?has_content>
     <div class="participants">
         <div class="label">
             ${labels.participantsLabel}
@@ -42,7 +42,7 @@
         <div class="participants-clear"></div>
     </div>
     </#if>
-    <#if mail.resources??>
+    <#if mail.resources?has_content>
     <div class="participants">
         <div class="label">
             ${labels.resourcesLabel}

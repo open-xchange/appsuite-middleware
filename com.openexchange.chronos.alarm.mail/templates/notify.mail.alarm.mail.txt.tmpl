@@ -14,7 +14,7 @@ ${labels.whenLabel} ${formatters.dateSpec} ${formatters.interval}
   ====================================
 </#if>
 
-<#if mail.participants??>
+<#if mail.participants?has_content>
   == ${labels.participantsLabel} ==
 
   <#list mail.participants as participant>
@@ -22,7 +22,7 @@ ${labels.whenLabel} ${formatters.dateSpec} ${formatters.interval}
   </#list>
 </#if>
 
-<#if mail.resources??>
+<#if mail.resources?has_content>
   == ${labels.resourcesLabel} ==
 
   <#list mail.resources as participant>
