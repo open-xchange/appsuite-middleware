@@ -257,6 +257,71 @@ public final class QuotedInternetAddress extends InternetAddress {
         return l.toArray(new InternetAddress[l.size()]);
     }
 
+    private static String dropComments(String str, boolean ignoreErrors) throws AddressException {
+        String s = str;
+        boolean nextRun = true;
+        int start = 0;
+        while (nextRun) {
+            boolean lookForBracket = true;
+            boolean found = false;
+            boolean quoted = false;
+            int pos = 0;
+            int nest = 0;
+            int length = s.length();
+            int i;
+            for (i = start; lookForBracket && i < length; i++) {
+                char c = s.charAt(i);
+                switch (c) {
+                    case '\\':
+                        i++; // skip both; '\' and the escaped character
+                        break;
+                    case '"':
+                        quoted = !quoted;
+                        break;
+                    case '(':
+                        if (!quoted) {
+                            nest++;
+                            if (nest == 1) {
+                                found = true;
+                                pos = i;
+                            }
+                        }
+                        break;
+                    case ')':
+                        if (!quoted) {
+                            nest--;
+                            if (nest == 0) {
+                                i++; // Skip closing bracket
+                                s = s.substring(0, pos) + s.substring(i);
+                                lookForBracket = false;
+                                start = pos + 1;
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if (nest > 0) {
+                if (!ignoreErrors) {
+                    throw new AddressException("Missing ')'", s, i);
+                }
+                // pretend the first paren was a regular character and
+                // continue parsing after it
+                i = pos + 1;
+                if (i < length) {
+                    s = s.substring(0, pos) + s.substring(i);
+                } else {
+                    s = s.substring(0, pos);
+                }
+            }
+            if (!found) {
+                nextRun = false;
+            }
+        }
+        return s;
+    }
+
     /*
      * RFC822 Address parser. XXX - This is complex enough that it ought to be a real parser, not this ad-hoc mess, and because of that,
      * this is not perfect. XXX - Deal with encoded Headers too.
@@ -267,43 +332,8 @@ public final class QuotedInternetAddress extends InternetAddress {
         String s = init(decodeFirst ? MimeMessageUtility.decodeMultiEncodedHeader(str) : str);
         boolean ignoreErrors = parseHdr && !strict;
 
+        s = dropComments(s, ignoreErrors);
         int length = s.length();
-        for (int pos; (pos = s.indexOf('(')) >= 0;) {
-            int i = pos;
-            int nest;
-            for (i++, nest = 1; i < length && nest > 0; i++) {
-                char c = s.charAt(i);
-                switch (c) {
-                case '\\':
-                    i++; // skip both '\' and the escaped char
-                    break;
-                case '(':
-                    nest++;
-                    break;
-                case ')':
-                    nest--;
-                    break;
-                default:
-                    break;
-                }
-            }
-            if (nest > 0) {
-                if (!ignoreErrors) {
-                    throw new AddressException("Missing ')'", s, i);
-                }
-                // pretend the first paren was a regular character and
-                // continue parsing after it
-                i = pos + 1;
-                break;
-            }
-            if (i < s.length()) {
-                s = s.substring(0, pos) + s.substring(i);
-            } else {
-                s = s.substring(0, pos);
-            }
-        }
-
-        length = s.length();
         List<InternetAddress> list = new LinkedList<InternetAddress>();
         boolean in_group = false; // we're processing a group term
         boolean route_addr = false; // address came from route-addr term
