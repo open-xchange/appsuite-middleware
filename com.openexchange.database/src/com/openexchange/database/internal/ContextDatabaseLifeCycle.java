@@ -58,10 +58,10 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.pooling.PoolConfig;
 import com.openexchange.pooling.ExhaustedActions;
 
 /**
@@ -71,8 +71,6 @@ import com.openexchange.pooling.ExhaustedActions;
  */
 public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
-    private static final Pattern pattern = Pattern.compile("[\\?\\&]([\\p{ASCII}&&[^=\\&]]*)=([\\p{ASCII}&&[^=\\&]]*)");
-
     private static final String SELECT = "SELECT url,driver,login,password,hardlimit,max,initial FROM db_pool WHERE db_pool_id=?";
 
     private final Management management;
@@ -81,7 +79,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private final ConfigDatabaseService configDatabaseService;
 
-    private final ConnectionPool.Config defaultPoolConfig;
+    private final PoolConfig defaultPoolConfig;
 
     private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
 
@@ -98,7 +96,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     @Override
     public ConnectionPool create(final int poolId) throws OXException {
-        final ConnectionData data = loadPoolData(poolId);
+        final ConnectionData data = loadPoolData(poolId, jdbcProperties);
         try {
             Class.forName(data.driverClass);
         } catch (final ClassNotFoundException e) {
@@ -123,8 +121,8 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         return true;
     }
 
-    private ConnectionPool.Config getConfig(final ConnectionData data) {
-        final ConnectionPool.Config retval = defaultPoolConfig.clone();
+    private PoolConfig getConfig(final ConnectionData data) {
+        final PoolConfig retval = defaultPoolConfig.clone();
         retval.maxActive = data.max;
         if (data.block) {
             retval.exhaustedAction = ExhaustedActions.BLOCK;
@@ -134,14 +132,14 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         return retval;
     }
 
-    private void removeParameters(ConnectionData retval) throws OXException {
+    private void removeParameters(ConnectionData retval) {
         int paramStart = retval.url.indexOf('?');
         if (paramStart != -1) {
             retval.url = retval.url.substring(0, paramStart);
         }
     }
 
-    ConnectionData loadPoolData(final int poolId) throws OXException {
+    ConnectionData loadPoolData(final int poolId, Properties jdbcProperties) throws OXException {
         ConnectionData retval = null;
         final Connection con = configDatabaseService.getReadOnly();
         PreparedStatement stmt = null;

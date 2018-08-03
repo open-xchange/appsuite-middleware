@@ -60,6 +60,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.pooling.ExhaustedActions;
+import com.openexchange.pooling.PoolConfig;
 
 /**
  * Contains the settings to connect to the configuration database.
@@ -82,7 +83,7 @@ public final class Configuration {
 
     private final Properties writeProps = new Properties();
 
-    private final ConnectionPool.Config poolConfig = ConnectionPool.DEFAULT_CONFIG;
+    private final PoolConfig poolConfig = PoolConfig.DEFAULT_CONFIG.clone();
 
     public Configuration() {
         super();
@@ -333,7 +334,7 @@ public final class Configuration {
     }
     
 
-    ConnectionPool.Config getPoolConfig() {
+    PoolConfig getPoolConfig() {
         return poolConfig;
     }
 

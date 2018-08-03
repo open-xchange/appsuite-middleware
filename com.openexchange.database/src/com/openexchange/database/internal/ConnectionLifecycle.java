@@ -122,13 +122,22 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     // ----------------------------------------------------------------------------------------------
 
-    private final String url;
-    private final Properties info;
+    private String url;
+
+    public void setURL(String url) {
+        this.url = url;
+    }
+
+    private Properties info;
+
+    public void setProperties(Properties info) {
+        this.info = info;
+    }
 
     /**
      * Time between checks if a connection still works.
      */
-    private final long checkTime = ConnectionPool.DEFAULT_CHECK_TIME;
+    private static final long DEFAULT_CHECK_TIME = 120000;
 
     public ConnectionLifecycle(final String url, final Properties info) {
         this.url = url;
@@ -143,7 +152,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         ResultSet result = null;
         try {
             retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(con, true);
-            if (retval && data.getLastPacketDiffFallbackToTimeDiff() > checkTime) {
+            if (retval && data.getLastPacketDiffFallbackToTimeDiff() > DEFAULT_CHECK_TIME) {
                 stmt = con.createStatement();
                 result = stmt.executeQuery(TEST_SELECT);
                 if (result.next()) {
@@ -182,7 +191,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
     public boolean deactivate(final PooledData<Connection> data) {
         boolean retval = true;
         try {
-            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(data.getPooled(), true);;
+            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(data.getPooled(), true);
         } catch (final SQLException e) {
             retval = false;
         }
