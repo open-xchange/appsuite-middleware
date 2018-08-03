@@ -81,6 +81,7 @@ import com.openexchange.groupware.notify.State;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
@@ -96,21 +97,21 @@ import com.openexchange.templating.TemplateService;
  */
 public class MailAlarmNotificationGenerator {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
-    private Event event;
+    private final Event event;
 
-    private Context ctx;
+    private final Context ctx;
 
-    private User user;
+    private final User user;
+
+    private final NotificationParticipant recipient;
+
+    private NotificationParticipant organizer;
 
     private List<NotificationParticipant> participants;
 
     private List<NotificationParticipant> resources;
-
-    private NotificationParticipant organizer;
-
-    private NotificationParticipant recipient;
 
     public MailAlarmNotificationGenerator(ServiceLookup services, Event event, User user, Context ctx) throws OXException {
         this.services = services;
@@ -118,22 +119,34 @@ public class MailAlarmNotificationGenerator {
         this.ctx = ctx;
         this.user = user;
 
-        this.organizer = new NotificationParticipant(ITipRole.ORGANIZER, false, event.getOrganizer().getEMail(), event.getOrganizer().getEntity());
-        this.recipient = new NotificationParticipant(event.getOrganizer().getEMail().equals(user.getMail()) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE, false, user.getMail(), user.getId());
-        this.resources = getResources(services, event, ctx, user);
+        if (event.containsOrganizer() && Strings.isNotEmpty(event.getOrganizer().getEMail())) {
+            this.recipient = new NotificationParticipant(event.getOrganizer().getEMail().equals(user.getMail()) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE, false, user.getMail(), user.getId());
+        } else {
+            this.recipient = new NotificationParticipant(ITipRole.ATTENDEE, false, user.getMail(), user.getId());
+        }
+        List<NotificationParticipant> lResources = getResources(services, event, ctx, user);
+        if (!lResources.isEmpty()) {
+            this.resources = lResources;
+        }
 
         List<Attendee> attendees = event.getAttendees();
-        this.participants = new ArrayList<>();
-        for (Attendee attendee : attendees) {
-            if (attendee.getCuType() != CalendarUserType.INDIVIDUAL) {
-                continue;
-            }
-            if (CalendarUtils.isExternalUser(attendee)) {
-                NotificationParticipant participant = new NotificationParticipant(ITipRole.ATTENDEE, true, attendee.getEMail());
-                participant.setConfirmStatus(attendee.getPartStat());
-                participants.add(participant);
-            } else {
-                NotificationParticipant participant = new NotificationParticipant(ITipRole.ATTENDEE, false, attendee.getEMail(), attendee.getEntity());
+        if (attendees != null && !attendees.isEmpty()) {
+            this.participants = new ArrayList<>();
+            for (Attendee attendee : attendees) {
+                if (attendee.getCuType() != CalendarUserType.INDIVIDUAL) {
+                    continue;
+                }
+                NotificationParticipant participant = null;
+                if (CalendarUtils.isOrganizer(event, attendee.getEntity())) {
+                    this.organizer = new NotificationParticipant(ITipRole.ORGANIZER, false, attendee.getEMail(), attendee.getEntity());
+                    this.organizer.setConfirmStatus(attendee.getPartStat());
+                    participants.add(this.organizer);
+                    continue;
+                } else if (CalendarUtils.isExternalUser(attendee)) {
+                    participant = new NotificationParticipant(ITipRole.ATTENDEE, true, attendee.getEMail());
+                } else {
+                    participant = new NotificationParticipant(ITipRole.ATTENDEE, false, attendee.getEMail(), attendee.getEntity());
+                }
                 participant.setConfirmStatus(attendee.getPartStat());
                 participants.add(participant);
             }
@@ -182,18 +195,18 @@ public class MailAlarmNotificationGenerator {
         }
         final NotificationParticipant participant = mail.getRecipient();
 
-        final TemplateService templates = services.getService(TemplateService.class);
-        if (templates == null) {
+        final TemplateService templateService = services.getService(TemplateService.class);
+        if (templateService == null) {
             return;
         }
-        final OXTemplate textTemplate = templates.loadTemplate(mail.getTemplateName() + ".txt.tmpl");
-        final OXTemplate htmlTemplate = templates.loadTemplate(mail.getTemplateName() + ".html.tmpl");
+        final OXTemplate textTemplate = templateService.loadTemplate(mail.getTemplateName() + ".txt.tmpl");
+        final OXTemplate htmlTemplate = templateService.loadTemplate(mail.getTemplateName() + ".html.tmpl");
 
         final Map<String, Object> env = new HashMap<String, Object>();
 
         TypeWrapper wrapper = new PassthroughWrapper();
         env.put("mail", mail);
-        env.put("templating", templates.createHelper(env, null, false));
+        env.put("templating", templateService.createHelper(env, null, false));
         env.put("formatters", dateHelperFor(mail.getRecipient()));
         env.put("participantHelper", new ParticipantHelper(participant.getLocale()));
         env.put("labels", getLabelHelper(mail, wrapper, participant));

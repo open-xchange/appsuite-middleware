@@ -4,36 +4,36 @@ ${labels.timezoneInfo!""}
 
 ${labels.whenLabel} ${formatters.dateSpec} ${formatters.interval}
 <#if mail.event.location??>
-${labels.whereLabel} ${mail.event.location!""}
+  ${labels.whereLabel} ${mail.event.location!""}
 </#if>
 
 
 <#if mail.event.description??>
-====================================
-${mail.event.description!""}
-====================================
+  ====================================
+  ${mail.event.description!""}
+  ====================================
 </#if>
 
-== ${labels.participantsLabel} ==
+<#if mail.participants??>
+  == ${labels.participantsLabel} ==
 
-<#if (mail.participants?has_content)>
-<#list mail.participants as participant>
-${participantHelper.participantLine(participant)}
-</#list>
+  <#list mail.participants as participant>
+  ${participantHelper.participantLine(participant)}
+  </#list>
 </#if>
 
-== ${labels.resourcesLabel} ==
+<#if mail.resources??>
+  == ${labels.resourcesLabel} ==
 
-<#if (mail.resources?has_content)>
-<#list mail.resources as participant>
-${participantHelper.participantLine(participant)}
-</#list>
+  <#list mail.resources as participant>
+    ${participantHelper.participantLine(participant)}
+  </#list>
 </#if>
 
 == ${labels.detailsLabel} ==
 
 ${labels.showAsLabel} ${labels.showAs}
-${labels.createdLabel} ${formatters.created} - ${labels.creator}
+${labels.createdLabel} ${formatters.created} <#if labels.creator??>- ${labels.creator}</#if>
 
 ${labels.directLink!""}
 

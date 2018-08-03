@@ -268,17 +268,17 @@ public class NotificationMail {
     }
 
     public boolean actionIsDoneOnBehalfOfAnother() throws OXException {
-        if (getActor().hasRole(ITipRole.PRINCIPAL)) {
+        if (actor == null || actor.hasRole(ITipRole.PRINCIPAL)) {
             return false;
         }
-        return !getActor().equals(getOnBehalfOf());
+        return !actor.equals(getOnBehalfOf());
     }
 
     public boolean actionIsDoneOnMyBehalf() throws OXException {
         if (isAboutActorsStateChangeOnly()) {
             return false;
         }
-        if (actor.hasRole(ITipRole.PRINCIPAL)) {
+        if (actor != null && actor.hasRole(ITipRole.PRINCIPAL)) {
             return false;
         }
 
@@ -292,6 +292,9 @@ public class NotificationMail {
 
     public List<NotificationParticipant> getParticipants() {
         if (!sortedParticipants) {
+            if (participants == null) {
+                return null;
+            }
             Collections.sort(participants, new Comparator<NotificationParticipant>() {
 
                 @Override

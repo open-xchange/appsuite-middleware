@@ -115,6 +115,8 @@ public class MailAlarmMailGenerator {
                 .addMailHeader("X-Open-Xchange-Alarm-Type", "EMAIL")
                 .addMailHeader(MessageHeaders.HDR_DATE, new MailDateFormat().format(new Date(trigger)))
                 .addMailHeader(MessageHeaders.HDR_MESSAGE_ID, ITipUtils.generateHeaderValue(event.getUid(), true))
+                .addMailHeader(MessageHeaders.HDR_REPLY_TO, ITipUtils.generateHeaderValue(event.getUid(), false))
+                .addMailHeader(MessageHeaders.HDR_REFERENCES, ITipUtils.generateHeaderValue(event.getUid(), false))
                 .setSubject(mail.getSubject())
                 ;
             return new MailAlarmMailGenerator(mailData.build(), services);
