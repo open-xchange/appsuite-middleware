@@ -108,7 +108,6 @@ public class MailAlarmDeliveryWorker implements Runnable {
     private final Map<Key, ScheduledTimerTask> scheduledTasks = new ConcurrentHashMap<>();
     private final CalendarStorageFactory factory;
     private final CalendarUtilities calUtil;
-    private volatile long lastCheck = 0;
 
     private final MailAlarmNotificationService mailService;
     private final int mailShift;
@@ -152,7 +151,6 @@ public class MailAlarmDeliveryWorker implements Runnable {
         try {
             List<Integer> ctxIds = ctxService.getDistinctContextsPerSchema();
             Calendar currentUTCTime = Calendar.getInstance(UTC);
-            lastCheck = currentUTCTime.getTimeInMillis();
             for (Integer ctxId : ctxIds) {
                 // Test if schema is ready
                 UpdateStatus status = Updater.getInstance().getStatus(ctxId);
@@ -395,10 +393,8 @@ public class MailAlarmDeliveryWorker implements Runnable {
      */
     List<AlarmTrigger> checkEvents(Connection con, List<Event> events, int cid, int account, boolean isWriteCon) throws OXException {
         Calendar cal = Calendar.getInstance(UTC);
-        if (lastCheck != 0) {
-            cal.setTimeInMillis(lastCheck);
-        }
         cal.add(Calendar.MINUTE, lookAhead);
+
         List<AlarmTrigger> result = null;
         for (Event event : events) {
             Map<Pair<Integer, Integer>, List<AlarmTrigger>> triggerMap = storage.getMailAlarmTriggers(con, cid, account, event.getId(), isWriteCon);
