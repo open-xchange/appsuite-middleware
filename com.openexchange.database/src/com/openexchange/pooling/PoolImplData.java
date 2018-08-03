@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.pooling;
 
 import java.util.ArrayList;
@@ -61,6 +59,7 @@ import java.util.Map;
 /**
  * Stores the data structures for a pool. Access to this class must be
  * synchronized because it isn't thread safe.
+ * 
  * @param <T> type of objects to pool.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -95,7 +94,7 @@ class PoolImplData<T> {
 
     /**
      * @return the topmost idle object or <code>null</code> if the idle stack is
-     * empty.
+     *         empty.
      */
     PooledData<T> popIdle() {
         PooledData<T> retval;
@@ -109,16 +108,9 @@ class PoolImplData<T> {
         return retval;
     }
 
-    PooledData<T> pushIdle(final T pooled) {
-        final PooledData<T> retval = active.remove(pooled);
-        if (null != retval) {
-            idle.add(retval);
-        }
-        return retval;
-    }
-
     /**
      * Adds a new active object.
+     * 
      * @param newActive new active object to add.
      */
     void addActive(final PooledData<T> newActive) {
@@ -135,6 +127,7 @@ class PoolImplData<T> {
 
     /**
      * Removes an active object.
+     * 
      * @param toRemove object to remove.
      * @return <code>true</code> if the object was removed successfully.
      */
