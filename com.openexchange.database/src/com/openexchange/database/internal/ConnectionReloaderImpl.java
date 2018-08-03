@@ -50,6 +50,7 @@
 package com.openexchange.database.internal;
 
 import java.security.KeyStore;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -152,6 +153,18 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
     public boolean setConfigurationListener(ConfigurationListener listener) {
         if (null != listener) {
             return listerners.add(listener);
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean removeConfigurationListener(int poolId) {
+        Iterator<ConfigurationListener> iterator = listerners.iterator();
+        while(iterator.hasNext()) {
+            if (poolId == iterator.next().getPoolId() ) {
+                iterator.remove();
+                return true;
+            }
         }
         return false;
     }

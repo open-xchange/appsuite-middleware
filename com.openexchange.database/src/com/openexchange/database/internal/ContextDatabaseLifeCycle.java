@@ -58,11 +58,12 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.pooling.PoolConfig;
 import com.openexchange.pooling.ExhaustedActions;
+import com.openexchange.pooling.PoolConfig;
 
 /**
  * Handles the life cycle of database connection pools for contexts databases.
@@ -77,6 +78,8 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private final Timer timer;
 
+    private final ConnectionReloaderImpl reloader;
+
     private final ConfigDatabaseService configDatabaseService;
 
     private final PoolConfig defaultPoolConfig;
@@ -85,10 +88,11 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private Properties jdbcProperties;
 
-    public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, final ConfigDatabaseService configDatabaseService) {
+    public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader, final ConfigDatabaseService configDatabaseService) {
         super();
         this.management = management;
         this.timer = timer;
+        this.reloader = reloader;
         this.configDatabaseService = configDatabaseService;
         this.defaultPoolConfig = configuration.getPoolConfig();
         this.jdbcProperties = configuration.getJdbcProps();
@@ -102,10 +106,18 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         } catch (final ClassNotFoundException e) {
             throw DBPoolingExceptionCodes.NO_DRIVER.create(e, data.driverClass);
         }
-        final ConnectionPool retval = new ConnectionPool(data.url, data.props, getConfig(data));
+        final ContextPoolAdapter retval = new ContextPoolAdapter(poolId, data, (ConnectionData c) -> {
+            return c.url;
+        }, (ConnectionData c) -> {
+            return c.props;
+        }, (ConnectionData c) -> {
+            return getConfig(c);
+        });
+
         pools.put(I(poolId), retval);
         timer.addTask(retval.getCleanerTask());
         management.addPool(poolId, retval);
+        reloader.setConfigurationListener(retval);
         return retval;
     }
 
@@ -117,6 +129,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         }
         management.removePool(poolId);
         timer.removeTask(toDestroy.getCleanerTask());
+        reloader.removeConfigurationListener(poolId);
         toDestroy.destroy();
         return true;
     }
@@ -173,5 +186,27 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
         removeParameters(retval);
         retval.props.putAll(jdbcProperties);
         return retval;
+    }
+
+    private class ContextPoolAdapter extends AbstractConfigurationListener<ConnectionData> {
+
+        public ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toInfo, Function<ConnectionData, PoolConfig> toConfig) {
+            super(poolId, data, toURL, toInfo, toConfig);
+        }
+
+        @Override
+        public void notify(Configuration configuration) {
+            ConnectionData data = null;
+            try {
+                data = loadPoolData(getPoolId(), configuration.getJdbcProps());
+                Class.forName(data.driverClass);
+                update(data);
+            } catch (OXException oxe) {
+                LOG.error("Unable to load pool data.", oxe);
+            } catch (final ClassNotFoundException e) {
+                OXException exception = DBPoolingExceptionCodes.NO_DRIVER.create(e, data.driverClass);
+                LOG.error("Unable to reload configuration", exception);
+            }
+        }
     }
 }

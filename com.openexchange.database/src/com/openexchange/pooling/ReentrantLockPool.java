@@ -81,12 +81,14 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     private boolean testOnDeactivate;
     private boolean testOnIdle;
     private boolean testThreads;
-    private final PoolImplData<T> data = new PoolImplData<T>();
     private final PoolableLifecycle<T> lifecycle;
-    private final ReentrantLock lock = new ReentrantLock(true);
-    private final Condition idleAvailable = lock.newCondition();
     private final long[] useTimes = new long[1000];
 
+    protected final PoolImplData<T> data = new PoolImplData<T>();
+    
+    protected final ReentrantLock lock = new ReentrantLock(true);
+    protected final Condition idleAvailable = lock.newCondition();
+    
     private boolean running = true;
     private int useTimePointer;
     private final AtomicBoolean brokenCreate = new AtomicBoolean();
@@ -169,6 +171,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             if (!poolable) {
                 numBroken++;
             }
+            poolable &= metaData.isDeprecated();
             poolable &= (maxLifeTime <= 0 || metaData.getLiveTime() < maxLifeTime);
         } else {
             poolable = false;

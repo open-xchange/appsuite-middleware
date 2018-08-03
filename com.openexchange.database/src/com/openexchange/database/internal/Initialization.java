@@ -163,6 +163,15 @@ public final class Initialization {
         if (null != databaseService) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
+        
+        
+        
+        
+        // TODO Add Listerner 
+        
+        
+        
+        
         // Set timer interval
         timer.configure(configuration);
         // Setting up database connection pools.
@@ -171,7 +180,7 @@ public final class Initialization {
         monitor = new ReplicationMonitor(configuration.getBoolean(REPLICATION_MONITOR, true), configuration.getBoolean(CHECK_WRITE_CONS, false), connectionListeners);
         management.addOverview(new Overview(pools, monitor));
         // Add life cycle for configuration database
-        final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
+        final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer, reloader);
         pools.addLifeCycle(configDBLifeCycle);
         // Configuration database connection pool service.
         configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor, LockMech.lockMechFor(configuration.getProperty(Configuration.Property.LOCK_MECH, LockMech.ROW_LOCK.getId())));
@@ -179,7 +188,7 @@ public final class Initialization {
             configDatabaseService.setCacheService(cacheService);
         }
         // Context pool life cycle.
-        ContextDatabaseLifeCycle contextLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService);
+        ContextDatabaseLifeCycle contextLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, reloader, configDatabaseService);
         pools.addLifeCycle(contextLifeCycle);
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);

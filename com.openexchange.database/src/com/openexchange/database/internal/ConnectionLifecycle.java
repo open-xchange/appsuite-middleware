@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -122,23 +123,26 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     // ----------------------------------------------------------------------------------------------
 
+    private ReentrantReadWriteLock lock;
+
+    public void lockForWrite() {
+        lock.writeLock().lock();
+    }
+
+    public void unlockForWrite() {
+        lock.writeLock().unlock();
+    }
+
     private String url;
 
     public void setURL(String url) {
         this.url = url;
     }
-    
-    public String getURL() {
-        return this.url;
-    }
+
     private Properties info;
 
-    public void setProperties(Properties info) {
+    public void setInfo(Properties info) {
         this.info = info;
-    }
-    
-    public Properties getInfo() {
-        return this.info;
     }
 
     /**
@@ -149,6 +153,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
     public ConnectionLifecycle(final String url, final Properties info) {
         this.url = url;
         this.info = info;
+        this.lock = new ReentrantReadWriteLock(true);
     }
 
     @Override
@@ -178,20 +183,30 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     @Override
     public Connection create() throws SQLException {
-        return DriverManager.getConnection(url, info);
+        lock.readLock().lock();
+        try {
+            return DriverManager.getConnection(url, info);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public Connection createWithoutTimeout() throws SQLException {
         final Properties withoutTimeout = new Properties();
-        withoutTimeout.putAll(info);
-        final Iterator<Object> iter = withoutTimeout.keySet().iterator();
-        while (iter.hasNext()) {
-            final Object test = iter.next();
-            if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
-                iter.remove();
+        lock.readLock().lock();
+        try {
+            withoutTimeout.putAll(info);
+            final Iterator<Object> iter = withoutTimeout.keySet().iterator();
+            while (iter.hasNext()) {
+                final Object test = iter.next();
+                if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
+                    iter.remove();
+                }
             }
+            return DriverManager.getConnection(url, withoutTimeout);
+        } finally {
+            lock.readLock().unlock();
         }
-        return DriverManager.getConnection(url, withoutTimeout);
     }
 
     @Override

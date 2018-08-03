@@ -81,4 +81,13 @@ public interface ConnectionReloader {
      * @return <code>true</code> if this set did not already contain the specified element
      */
     boolean setConfigurationListener(ConfigurationListener listener);
+
+    /**
+     * Remove a listener
+     * 
+     * @param poolId The ID of the pool the listener belongs to
+     * @return <code>true</code> if the listener was removed
+     *         <code>false</code> otherwise
+     */
+    boolean removeConfigurationListener(int poolId);
 }
