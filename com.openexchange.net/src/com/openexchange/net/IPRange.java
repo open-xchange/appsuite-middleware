@@ -112,8 +112,8 @@ public class IPRange {
             InetAddress startAddress = cidrUtils.getStartAddress();
             InetAddress endAddress = cidrUtils.getEndAddress();
             if (InetAddressValidator.getInstance().isValidInet4Address(startAddress.getHostAddress())) { //handle v4
-                byte[] octetsStart = IPAddressUtil.textToNumericFormatV4(startAddress.getHostName());
-                byte[] octetsEnd = IPAddressUtil.textToNumericFormatV4(endAddress.getHostName());
+                byte[] octetsStart = IPAddressUtil.textToNumericFormatV4(startAddress.getHostAddress());
+                byte[] octetsEnd = IPAddressUtil.textToNumericFormatV4(endAddress.getHostAddress());
 
                 final LongRange ipv4Range = new LongRange(ipToLong(octetsStart), ipToLong(octetsEnd));
                 return new IPRange(ipv4Range, null);
