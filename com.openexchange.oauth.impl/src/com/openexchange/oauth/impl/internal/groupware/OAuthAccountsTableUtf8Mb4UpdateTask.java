@@ -49,9 +49,6 @@
 
 package com.openexchange.oauth.impl.internal.groupware;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
