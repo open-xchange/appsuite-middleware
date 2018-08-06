@@ -142,13 +142,21 @@ public class ConfigAwareKeyStore {
         }
 
         if (keyStoreFile.hashCode() != storeHash) {
-            // (Re-) Load the key store
+            /*
+             * (Re-) Load the key store
+             * 
+             * We do this also knowing that the JDBC is loading the stores (for each connection) itself.
+             * See com.mysql.jdbc.ExportControlled.getSSLSocketFactoryDefaultOrConfigured(MysqlIO)
+             * 
+             * Advantage: We can avoid the generic 'CommunicationLinkFailiur' error by testing the SSL
+             *            properties and outline more helpful messages.
+             */
             try (FileInputStream in = new FileInputStream(keyStoreFile)) {
                 store.load(in, null == keystorePassword ? null : keystorePassword.toCharArray());
                 storeHash = keyStoreFile.hashCode();
                 return true;
             } catch (IOException | NoSuchAlgorithmException | CertificateException e) {
-                LOGGER.debug("Unable to load keystore!", e);
+                LOGGER.error("Unable to load keystore!", e);
                 throw DatabaseExceptionCodes.KEYSTORE_UNAVAILABLE.create(e, e.getMessage());
             }
         }
