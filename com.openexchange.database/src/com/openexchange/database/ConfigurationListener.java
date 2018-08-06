@@ -61,25 +61,25 @@ public interface ConfigurationListener extends Comparable<ConfigurationListener>
 
     /**
      * Notifies this listener about an updated configuration for JDBC
-     * 
+     *
      * @param configuration The new {@link Configuration}
      */
     void notify(Configuration configuration);
 
     /**
-     * The pool identifier of the pool to notify
-     * 
+     * Gets the identifier of the pool to notify
+     *
      * @return The pool ID
      */
     int getPoolId();
 
-
     /**
-     * Get the priority.
-     * <p>
-     * <code>1<code></code> means highest, <b>reserved</b> for configDB, do not use!
-     * <code>100</code> means lowest and is the default value
-     * 
+     * Gets the priority.
+     * <ul>
+     * <li><code>1<code></code> means highest, <b>reserved for configDB, do not use!</b></li>
+     * <li><code>100</code> means lowest and is the default value</li>
+     * </ul>
+     *
      * @return The priority
      */
     default int getPriority() {
@@ -88,14 +88,12 @@ public interface ConfigurationListener extends Comparable<ConfigurationListener>
 
     @Override
     default int compareTo(ConfigurationListener o) {
-        if (o.getPriority() == getPriority()) {
-            return 0;
-        }
-        return getPriority() < o.getPriority() ? -1 : 1;
+        int otherPriority = o.getPriority();
+        int thisPriority = getPriority();
+        return (thisPriority < otherPriority) ? -1 : ((otherPriority == thisPriority) ? 0 : 1);
     }
 
     /**
-     * 
      * {@link ConfigDBListener} - Marker interface to avoid unnecessary reloading of user DBs
      *
      * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
