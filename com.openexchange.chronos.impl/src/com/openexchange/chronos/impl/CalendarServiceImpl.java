@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.trackAttendeeUsage;
 import static com.openexchange.java.Autoboxing.L;
-import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
@@ -94,7 +93,7 @@ import com.openexchange.chronos.impl.performer.UpdatePerformer;
 import com.openexchange.chronos.impl.performer.UpdatesPerformer;
 import com.openexchange.chronos.impl.session.DefaultCalendarSession;
 import com.openexchange.chronos.service.CalendarEvent;
-import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
@@ -107,7 +106,6 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.ServiceSet;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 
@@ -120,16 +118,15 @@ import com.openexchange.threadpool.ThreadPools;
 public class CalendarServiceImpl implements CalendarService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CalendarServiceImpl.class.getName());
-    private final ServiceSet<CalendarHandler> calendarHandlers;
-
+    private final CalendarEventNotificationService notificationService;
     /**
      * Initializes a new {@link CalendarServiceImpl}.
      *
      * @param calendarHandlers The calendar handlers service set
      */
-    public CalendarServiceImpl(ServiceSet<CalendarHandler> calendarHandlers) {
+    public CalendarServiceImpl(CalendarEventNotificationService notificationService) {
         super();
-        this.calendarHandlers = calendarHandlers;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -530,23 +527,11 @@ public class CalendarServiceImpl implements CalendarService {
             if (trackAttendeeUsage) {
                 trackAttendeeUsage(result.getSession(), calendarEvent);
             }
-            notifyHandlers(calendarEvent);
+            notificationService.notifyHandlers(calendarEvent, false);
         };
 
         ThreadPools.submitElseExecute(ThreadPools.task(notifyRunnable));
         return result;
-    }
-
-    private void notifyHandlers(CalendarEvent event) {
-        for (CalendarHandler handler : calendarHandlers) {
-            long start = System.currentTimeMillis();
-            try {
-                handler.handle(event);
-                LOG.trace("{} handled successfully by {} ({} ms elapsed)", event, handler, L(System.currentTimeMillis() - start));
-            } catch (Exception e) {
-                getLogger(getClass()).warn("Unexpected error while handling {}: {}", event, e.getMessage(), e);
-            }
-        }
     }
 
 }

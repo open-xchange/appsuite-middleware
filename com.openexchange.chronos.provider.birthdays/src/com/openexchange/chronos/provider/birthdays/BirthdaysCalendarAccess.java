@@ -82,6 +82,7 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.extensions.SubscribeAware;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
@@ -255,7 +256,21 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         }
         Event originalEvent = eventConverter.getSeriesMaster(getBirthdayContact(eventID.getObjectID()));
         UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms);
-        return new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
+        DefaultCalendarResult result = new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
+        return notifyHandlers(result);
+    }
+
+    private DefaultCalendarResult notifyHandlers(DefaultCalendarResult result) throws OXException {
+        CalendarEventNotificationService notificationService = services.getServiceSafe(CalendarEventNotificationService.class);
+        notificationService.notifyHandlers(new BirthdayCalendarEvent(   session.getContextId(),
+                                                                        account.getAccountId(),
+                                                                        session.getUserId(),
+                                                                        Collections.singletonMap(session.getUserId(), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
+                                                                        result.getCreations(),
+                                                                        result.getUpdates(),
+                                                                        result.getDeletions(),
+                                                                        session));
+        return result;
     }
 
     @Override

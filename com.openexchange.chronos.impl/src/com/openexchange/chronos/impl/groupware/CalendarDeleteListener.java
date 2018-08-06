@@ -52,11 +52,9 @@ package com.openexchange.chronos.impl.groupware;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SUPPRESS_ITIP;
-import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -65,7 +63,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
-import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -100,19 +98,19 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public final class CalendarDeleteListener implements DeleteListener {
 
-    private final Set<CalendarHandler> calendarHandlers;
     private final CalendarUtilities calendarUtilities;
+    private final CalendarEventNotificationService notificationService;
 
     /**
      * Initializes a new {@link CalendarDeleteListener}.
      *
      * @param calendarUtilities A reference to the calendar utilities
-     * @param calendarHandlers The {@link CalendarHandler}s to notify
+     * @param notificationService The {@link CalendarEventNotificationService}
      */
-    public CalendarDeleteListener(CalendarUtilities calendarUtilities, Set<CalendarHandler> calendarHandlers) {
+    public CalendarDeleteListener(CalendarUtilities calendarUtilities, CalendarEventNotificationService notificationService) {
         super();
-        this.calendarHandlers = calendarHandlers;
         this.calendarUtilities = calendarUtilities;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -153,7 +151,7 @@ public final class CalendarDeleteListener implements DeleteListener {
     private void purgeUserData(DBProvider dbProvider, Context context, int userId, Integer destinationUserId, Session adminSession) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        StorageUpdater updater = new StorageUpdater(storage, entityResolver, userId, null != destinationUserId && 0 < i(destinationUserId) ? i(destinationUserId) : context.getMailadmin());
+        StorageUpdater updater = new StorageUpdater(storage, entityResolver, notificationService, userId, null == destinationUserId ? context.getMailadmin() : destinationUserId.intValue());
         /*
          * Get all events the user attends & distinguish between those that can be deleted completely, and those that need to be updated
          */
@@ -189,7 +187,7 @@ public final class CalendarDeleteListener implements DeleteListener {
         updater.deleteAccount();
 
         // Trigger calendar events
-        updater.notifyCalendarHandlers(adminSession, calendarHandlers, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
+        updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
     }
 
     /**
@@ -205,9 +203,9 @@ public final class CalendarDeleteListener implements DeleteListener {
     private void deleteAttendee(DBProvider dbProvider, Context context, int attendeeId, Session adminSession) throws OXException {
         EntityResolver entityResolver = calendarUtilities.getEntityResolver(context.getContextId());
         CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-        StorageUpdater updater = new StorageUpdater(storage, entityResolver, attendeeId, context.getMailadmin());
+        StorageUpdater updater = new StorageUpdater(storage, entityResolver, notificationService, attendeeId, context.getMailadmin());
         updater.removeAttendeeFrom(updater.searchEvents());
-        updater.notifyCalendarHandlers(adminSession, calendarHandlers, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
+        updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
     }
 
 }
