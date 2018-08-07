@@ -218,6 +218,51 @@ ConfigDB related properties are still saved within 'configdb.properties'. Those 
 All you need to do after editing and saving, is to trigger a 'reloadConfiguration' too. If you only changed configDB related properties, only Connections to the configDB will be replaced and updated.
 
 ## Update certificates
+### Client certificate rotation
+To switch client certificates you can either change the URL to new key stores containing the new certificates or you can add those certificates to the existing key stores. 
 
-To switch server or client certificates you can either change the URL to new keystores containing the new certificates or you can add those certificates to the existing keystores. The difference is that for the second variant you don't need to trigger a reload. The JDBC driver reloads the keystores each time it creates a new connection. So after a connection reaches its 'maxLifeTime' it will be replaced by a connection with updated certificates. Disadvantage of this method is that you can't be sure that after 'maxLifeTime' passed all connections will have updated certificates. Therefore you can't know when it's save to remove the old certificates from the server without risking server malfunctions.
+#### Recreating the key stores
+One way to update the client certificates is to simply create new key stores like explained above in the section 'Create key stores'. Once the new certificates are imported in the new key stores, you can change the URLs for those key stores in the 'dbconnector.yaml', see 'Set connector properties'. After saving the file the command line tool 'reloadconfiguration' needs to be run. 
+
+
+
+#### Change existing key store
+The other way to rotate client related certificates is to add the new certificates to the existing stores. Due to the fact that the JDBC driver reloads the key stores for each new created connection itself, new connections will be configured with those too. Afterwards the old certificates can be removed with the command
+
+```
+keytool -delete -alias mysqlcacert -keystore truststore
+```
+
+Efficiently this means that after all connections reaches 'maxLifeTime' they will be replaced by connections with updated certificates.
+
+The disadvantage of this method is that you can't be sure that after 'maxLifeTime' passed all connections will have updated certificates. Keep in mind that there is no explicit logic involved by the Open Xchange server (yet).
+
+
+
+Therefore we recommend that after the old certificates were removed from the key stores a 'reloadconfiguration' is run. The Open Xchange server will discover the changes on the key stores and then trigger an explicit update of the connections. Advantages of the explicit reload are
+
+* all new created connections will be configured using the new certificates instantly
+* all idle connections will be destroyed and replaced by new connections
+* connections that are used at the moment of the reload will be destroyed immediately after the connection isn't used anymore
+
+
+### Server certificate rotation
+#### Preparation
+Replacing certificates on the mysql server is not possible without downtimes. The certificates are linked to the configuration of the databases themselves and thus aren't reloadable. Therefore prepare well before switching the certificates to avoid bigger downtimes. Generate and verify new certificates beforehand. 
+
+To switch certificates simply replace the paths to the old certificates with the path to the new certificate within your database configuration. Don't overwrite those certificates!
+
+Note: Keep in mind that before you switch the CA all clients need to be updated. Add the new CA certificate to the trust store and generate new client certificates for the key store.
+
+#### Restart
+Once preparation is done restart the database service. E.g.
+
+```
+systemclt restart mysql
+```
+
+Note: Don't forget to remove all old certificates from the trust and the key store of the client.
+
+
+
 
