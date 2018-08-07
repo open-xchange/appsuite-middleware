@@ -58,10 +58,12 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.mslive.ContactsMSLiveSubscribeService;
 import com.openexchange.subscribe.mslive.groupware.MSLiveSubscriptionsOAuthAccountDeleteListener;
+import com.openexchange.subscribe.mslive.oauth.MSLiveContactsOAuthAccountAssociationProvider;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
@@ -103,9 +105,8 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
             ContextService contextService = services.getService(ContextService.class);
 
             try {
-                context.registerService(OAuthAccountDeleteListener.class, new MSLiveSubscriptionsOAuthAccountDeleteListener(
-                    msliveSubService,
-                    contextService), null);
+                context.registerService(OAuthAccountDeleteListener.class, new MSLiveSubscriptionsOAuthAccountDeleteListener(msliveSubService, contextService), null);
+                context.registerService(OAuthAccountAssociationProvider.class, new MSLiveContactsOAuthAccountAssociationProvider(), null);
             } catch (final Throwable t) {
                 logger.error("", t);
             }
@@ -129,6 +130,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
                 registration.unregister();
                 this.contactsRegistration = null;
             }
+            //TODO: unregister provider
         }
         context.ungetService(ref);
     }
