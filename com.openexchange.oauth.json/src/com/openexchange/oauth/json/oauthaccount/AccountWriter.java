@@ -99,7 +99,7 @@ public class AccountWriter extends AbstractOAuthWriter {
      * @throws OXException
      */
     public static JSONObject write(final OAuthAccount account, Collection<OAuthAccountAssociation> associations, Session session) throws JSONException, OXException {
-        final JSONObject jAccount = new JSONObject(5);
+        final JSONObject jAccount = new JSONObject(8);
         jAccount.put(AccountField.ID.getName(), account.getId());
         jAccount.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
         jAccount.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
