@@ -49,15 +49,19 @@
 
 package com.openexchange.file.storage.onedrive.oauth;
 
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
+import com.openexchange.oauth.association.Module;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.Status;
 import com.openexchange.oauth.association.Type;
+import com.openexchange.oauth.msliveconnect.MSLiveConnectOAuthScope;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link OneDriveOAuthAccountAssociation}
@@ -137,6 +141,37 @@ public class OneDriveOAuthAccountAssociation implements OAuthAccountAssociation 
             return Status.OK;
         }
         return Status.INVALID_GRANT;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
+     */
+    @Override
+    public String getModule() {
+        return Module.INFOSTORE.getModuleName();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
+     */
+    @Override
+    public String optFolder() {
+        // TODO: get the folder
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
+     */
+    @Override
+    public List<OAuthScope> getScopes() {
+        return Collections.singletonList(MSLiveConnectOAuthScope.drive);
     }
 
 }

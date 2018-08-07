@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
@@ -153,12 +154,11 @@ public class AccountWriter extends AbstractOAuthWriter {
         JSONObject associationJson = new JSONObject();
         associationJson.put(AssociationField.ID.getName(), association.getId());
         associationJson.put(AssociationField.NAME.getName(), association.getDisplayName());
-        /*
-         * TODO: Enable once the oauth account association is adjusted
-         * associationJson.put(AssociationField.SCOPES.getName(), association.getScopes());
-         * associationJson.put(AssociationField.MODULE.getName(), association.getModule());
-         * associationJson.put(AssociationField.FOLDER.getName(), association.getFolder());
-         */
+        associationJson.put(AssociationField.SCOPES.getName(), association.getScopes());
+        associationJson.put(AssociationField.MODULE.getName(), association.getModule());
+        if (Strings.isNotEmpty(association.optFolder())) {
+            associationJson.put(AssociationField.FOLDER.getName(), association.optFolder());
+        }
         return associationJson;
     }
 
