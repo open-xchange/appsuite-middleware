@@ -98,6 +98,13 @@ public class GoogleCalendarOAuthAccountAssociationProvider implements OAuthAccou
         return null == associations ? Collections.<OAuthAccountAssociation> emptyList() : associations;
     }
 
+    /**
+     * Returns the OAuth account identifier from associated account's internal configuration
+     *
+     * @param internalConfig The internal configuration
+     * @return The account identifier or <code>-1</code> if account identifier cannot be determined
+     * @throws IllegalArgumentException if the account identifier is present but cannot be parsed to integer
+     */
     private int getAccountId(JSONObject internalConfig) {
         if (internalConfig == null || internalConfig.isEmpty()) {
             return -1;
