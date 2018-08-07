@@ -112,7 +112,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
             }
         });
         valueSetters.put(ReturnType.BOOLEAN, (userData, method, preparedStatement, parameterIndex) -> {
-            boolean result = (Boolean) method.invoke(userData, (Object[]) null);
+            boolean result = ((Boolean) method.invoke(userData, (Object[]) null)).booleanValue();
             preparedStatement.setBoolean(parameterIndex, result);
         });
         valueSetters.put(ReturnType.DATE, (userData, method, preparedStatement, parameterIndex) -> {
