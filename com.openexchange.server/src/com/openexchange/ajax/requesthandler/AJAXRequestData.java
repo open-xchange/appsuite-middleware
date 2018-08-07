@@ -1631,11 +1631,7 @@ public class AJAXRequestData {
         }
         // Host name
         url.append(hostname);
-        // Set the server port only if it is an SSL connection and the port is other than the
-        // standard 443 port port, or is it's other than the default non-secture one.
-        if (serverPort > 0 && ((isSecure() && serverPort != 443) || serverPort != 80)) {
-            url.append(':').append(serverPort);
-        }
+        appendPort(url);
         // Path
         if (path != null) {
             if (!path.startsWith("/")) {
@@ -1648,6 +1644,25 @@ public class AJAXRequestData {
             url.append(";jsessionid=").append(route);
         }
         return url;
+    }
+
+    /**
+     * Appends the port if necessary, either:
+     * 
+     * a) if it is an SSL connection and the port is other
+     * than the standard 443 port port, or
+     * 
+     * b) if it's other than the default non-secure one.
+     * 
+     * @param urlBuilder The URL {@link StringBuilder}
+     */
+    private void appendPort(StringBuilder urlBuilder) {
+        if (serverPort < 0 || serverPort == 80 || serverPort == 443) {
+            return;
+        }
+        if (((isSecure() && serverPort != 443) || serverPort != 80)) {
+            urlBuilder.append(':').append(serverPort);
+        }
     }
 
     /**

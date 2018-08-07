@@ -106,7 +106,7 @@ public class UpdatesForModifiedAndDeletedTest extends AbstractAppointmentTest {
         // check modified with timestamp from last 
         Date lastModified = newAppointments.get(numberOfAppointments - 1).getLastModified();
         int[] cols = new int[] { Appointment.OBJECT_ID, Appointment.TITLE };
-        AppointmentUpdatesResponse modifiedAppointmentsResponse = listModifiedAppointments(appointmentFolderId, cols, lastModified, Ignore.NONE, false);
+        AppointmentUpdatesResponse modifiedAppointmentsResponse = listModifiedAppointments(appointmentFolderId, cols, lastModified, Ignore.NONE);
         assertTrue(modifiedAppointmentsResponse.getNewOrModifiedIds().containsAll(expectUpdatedAppointmentIds));
         assertTrue(modifiedAppointmentsResponse.getDeletedIds().containsAll(expectDeletedAppointmentIds));
 

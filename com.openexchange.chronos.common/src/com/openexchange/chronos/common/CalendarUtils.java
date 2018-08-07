@@ -80,6 +80,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
@@ -1654,6 +1655,30 @@ public class CalendarUtils {
      */
     public static ExtendedProperty optExtendedProperty(Event event, String name) {
         return optExtendedProperty(event.getExtendedProperties(), name);
+    }
+
+    /**
+     * Gets all extended properties with a specific name. Wildcards are supported in the name, e.g. <code>X-MOZ-SNOOZE-TIME*</code>.
+     * 
+     * @param extendedProperties The extended properties to check
+     * @param name The property name to match
+     * @return All matching properties, or an empty list if there are none
+     */
+    public static List<ExtendedProperty> findExtendedProperties(ExtendedProperties extendedProperties, String name) {
+        if (null == extendedProperties || extendedProperties.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (-1 == name.indexOf('*') && -1 == name.indexOf('?')) {
+            return extendedProperties.getAll(name);
+        }
+        List<ExtendedProperty> matchingProperties = new ArrayList<ExtendedProperty>();
+        Pattern pattern = Pattern.compile(Strings.wildcardToRegex(name));
+        for (ExtendedProperty property : extendedProperties) {
+            if (null != property.getName() && pattern.matcher(property.getName()).matches()) {
+                matchingProperties.add(property);
+            }
+        }
+        return matchingProperties;
     }
 
     protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {

@@ -66,7 +66,8 @@ import org.junit.runners.Suite.SuiteClasses;
     BasicTest.class,
     Bug17963Test.class,
     PreserveOriginalTest.class,
-    TestXProperties.class
+    TestXProperties.class,
+    Bug59654Test.class
 })
 public final class ICalTestSuite {
 

@@ -211,7 +211,7 @@ public class UpdateTest extends AppointmentTest {
         loadAppointment.removeUntil();   // TODO add expected until
         compareObject(appointmentObj, loadAppointment);
 
-        final List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, new Date(0), false, false, Ignore.DELETED, start, end);
+        final List<Appointment> appointmentArray = catm.updates(appointmentFolderId, _appointmentFields, new Date(0), false, Ignore.DELETED, start, end);
 
         boolean found = false;
 

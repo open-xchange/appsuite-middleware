@@ -105,6 +105,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -143,7 +144,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
 
     @Test
     public void testShouldFindABlockForAPrivateAppointmentViaAll() throws Exception {
-        CommonAllResponse response = client2.execute(new AllRequest(sharedFolder.getObjectID(), COLUMNS, startRange, endRange, TimeZone.getDefault(), true, true));
+        CommonAllResponse response = client2.execute(new AllRequest(sharedFolder.getObjectID(), COLUMNS, startRange, endRange, TimeZone.getDefault(), true));
         int namePos = response.getColumnPos(Appointment.TITLE);
         Object[][] objects = response.getArray();
         assertEquals("Should find two elements, a private and a public one", 2, objects.length);
@@ -171,7 +172,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
 
     @Test
     public void testShouldFindABlockForAPrivateAppointmentViaUpdates() throws Exception {
-        AppointmentUpdatesResponse response = client2.execute(new UpdatesRequest(sharedFolder.getObjectID(), COLUMNS, new Date(privateAppointment.getLastModified().getTime() - 1), true, true));
+        AppointmentUpdatesResponse response = client2.execute(new UpdatesRequest(sharedFolder.getObjectID(), COLUMNS, new Date(privateAppointment.getLastModified().getTime() - 1), true));
         int namePos = response.getColumnPos(Appointment.TITLE);
         Object[][] objects = response.getArray();
         assertEquals("Should find two elements, a private and a public one", 2, objects.length);

@@ -1688,6 +1688,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                 } catch (final RuntimeException e) {
                     LOG.warn("A runtime error occurred.", e);
+                } catch (OXException e) {
+                    LOG.debug("Unable to parse special part: " + e.getMessage(), e);
                 }
             }
         }

@@ -372,7 +372,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
         if (null != folder.getPermissions()) {
             for (Permission permission : folder.getPermissions()) {
                 if (permission.isAdmin() && false == permission.isGroup()) {
-                    return factory.getService(UserService.class).getUser(permission.getEntity(), folder.getContext());
+                    return factory.requireService(UserService.class).getUser(permission.getEntity(), folder.getContext());
                 }
             }
         }

@@ -765,13 +765,13 @@ public class EventUpdateProcessor implements EventUpdate {
             /*
              * start date change, determine start- and end-time of first occurrence
              */
-            RecurrenceIterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(originalEvent, null, null);
+            RecurrenceIterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(originalEvent.getRecurrenceRule(), originalSeriesStart));
             if (iterator.hasNext()) {
-                originalSeriesStart = iterator.next().getStartDate();
+                originalSeriesStart = iterator.next().getValue();
             }
-            iterator = session.getRecurrenceService().iterateEventOccurrences(updatedEvent, null, null);
+            iterator = session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(updatedEvent.getRecurrenceRule(), updatedSeriesStart));
             if (iterator.hasNext()) {
-                updatedSeriesStart = iterator.next().getStartDate();
+                updatedSeriesStart = iterator.next().getValue();
             }
             /*
              * shift recurrence identifiers for delete- and change-exception collections in changed event by same offset

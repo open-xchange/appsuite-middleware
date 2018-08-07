@@ -78,8 +78,7 @@ public final class UpdatesAction extends AppointmentAction {
 
     private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
         AJAXServlet.PARAMETER_IGNORE, AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END,
-        AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, AJAXServlet.PARAMETER_RECURRENCE_MASTER,
-        AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER
+        AJAXServlet.PARAMETER_RECURRENCE_MASTER, AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER
     );
 
     /**
@@ -105,9 +104,6 @@ public final class UpdatesAction extends AppointmentAction {
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         if (false == session.contains(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES)) {
             session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.TRUE);
-        }
-        if (false == session.contains(CalendarParameters.PARAMETER_SKIP_CLASSIFIED)) {
-            session.set(CalendarParameters.PARAMETER_SKIP_CLASSIFIED, Boolean.TRUE);
         }
         Date since = request.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
         String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);

@@ -66,6 +66,7 @@ import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.Picture;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
@@ -174,7 +175,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
     }
 
     private Picture searchByMailAddress(ServerSession session, String email, boolean withBytes) throws OXException {
-        if (email == null) {
+        if (Strings.isEmpty(email)) {
             return null;
         }
         ContactSearchObject cso = new ContactSearchObject();

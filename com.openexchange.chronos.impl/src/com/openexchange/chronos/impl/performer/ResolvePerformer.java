@@ -350,7 +350,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
             return null;
         }
         try {
-            return new EventPostProcessor(session, storage, false).process(events, folder).getEventsResult();
+            return new EventPostProcessor(session, storage).process(events, folder).getEventsResult();
         } catch (OXException e) {
             return new DefaultEventsResult(e);
         }

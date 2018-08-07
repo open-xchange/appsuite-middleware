@@ -31,6 +31,7 @@
  */
 package net.fortuna.ical4j.extensions.caldav.property;
 
+import net.fortuna.ical4j.model.Escapable;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyFactory;
@@ -45,7 +46,7 @@ import net.fortuna.ical4j.model.ValidationException;
  * @author probert
  *
  */
-public class Proximity extends Property {
+public class Proximity extends Property implements Escapable {
 
   private static final long serialVersionUID = 2182103734645261668L;
   
@@ -94,6 +95,7 @@ public class Proximity extends Property {
       super(new ParameterList(true), value);
     }
     
+    @Override
     public void setValue(String aValue) {
       throw new UnsupportedOperationException("Cannot modify constant instances");
     }
@@ -107,10 +109,12 @@ public class Proximity extends Property {
 
     private static final long serialVersionUID = 2099427445505899578L;
 
+    @Override
     public Property createProperty(String name) {
       return new Proximity(this);
     }
 
+    @Override
     public Property createProperty(String name, ParameterList parameters, String value) {
       Proximity property = null;
       if (DEPART.getValue().equals(value)) {
