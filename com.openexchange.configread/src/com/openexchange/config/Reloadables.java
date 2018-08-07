@@ -50,6 +50,9 @@
 package com.openexchange.config;
 
 import java.io.File;
+import java.util.Collection;
+import org.slf4j.Logger;
+import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.java.Strings;
 
 /**
@@ -60,11 +63,54 @@ import com.openexchange.java.Strings;
  */
 public class Reloadables {
 
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Reloadables.class);
+    }
+
     /**
      * Initializes a new {@link Reloadables}.
      */
     private Reloadables() {
         super();
+    }
+
+    /**
+     * Propagates the change for individual properties
+     *
+     * @param propertyNames The names of the properties that have been changed
+     */
+    public static void propagatePropertyChange(Collection<String> propertyNames) {
+        if (null == propertyNames || propertyNames.isEmpty()) {
+            return;
+        }
+
+        ConfigurationImpl configurationImpl = ConfigurationImpl.getConfigReference();
+        if (null == configurationImpl) {
+            LoggerHolder.LOG.warn("Cannot propagate change for properties since configuration instance has not been initialized");
+            return;
+        }
+
+        configurationImpl.reloadConfigurationFor(propertyNames.toArray(new String[propertyNames.size()]));
+    }
+
+    /**
+     * Propagates the change for individual properties
+     *
+     * @param propertyNames The names of the properties that have been changed
+     */
+    public static void propagatePropertyChange(String... propertyNames) {
+        if (null == propertyNames || propertyNames.length <= 0) {
+            return;
+        }
+
+        ConfigurationImpl configurationImpl = ConfigurationImpl.getConfigReference();
+        if (null == configurationImpl) {
+            LoggerHolder.LOG.warn("Cannot propagate change for properties since configuration instance has not been initialized");
+            return;
+        }
+
+        configurationImpl.reloadConfigurationFor(propertyNames);
     }
 
     /**

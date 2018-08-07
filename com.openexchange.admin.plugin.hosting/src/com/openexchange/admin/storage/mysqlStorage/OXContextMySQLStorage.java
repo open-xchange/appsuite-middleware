@@ -121,6 +121,7 @@ import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.Reloadables;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.Databases;
 import com.openexchange.database.SchemaInfo;
@@ -353,7 +354,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * Gets the users to delete
-     * 
+     *
      * @param ctx The {@link Context}
      * @param conForContext The {@link Connection}
      * @return A {@link List} with all users of the context, or an empty list if there are none.
@@ -1878,6 +1879,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         PreparedStatement insertStmt = null;
         PreparedStatement deleteStmt = null;
+        Set<String> changedConfigAttributes = new HashSet<>();
         try {
             int contextId = ctx.getId().intValue();
 
@@ -1903,6 +1905,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         insertStmt.setString(4, value);
                         insertStmt.addBatch();
                     }
+                    if ("config".equals(namespace)) {
+                        changedConfigAttributes.add(name);
+                    }
                 }
             }
 
@@ -1915,6 +1920,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 insertStmt.executeBatch();
                 Databases.closeSQLStuff(insertStmt);
                 insertStmt = null;
+            }
+
+            if (false == changedConfigAttributes.isEmpty()) {
+                Reloadables.propagatePropertyChange(changedConfigAttributes);
             }
 
             {
