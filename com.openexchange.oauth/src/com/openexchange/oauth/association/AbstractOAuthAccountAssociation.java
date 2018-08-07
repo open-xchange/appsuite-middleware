@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,46 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.oauth;
-
-import java.util.Collections;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.dropbox.DropboxConstants;
-import com.openexchange.file.storage.dropbox.access.DropboxOAuth2Access;
-import com.openexchange.file.storage.oauth.AbstractFileStorageOAuthAccountAssociation;
-import com.openexchange.oauth.access.AbstractOAuthAccess;
-import com.openexchange.oauth.dropbox.DropboxOAuthScope;
-import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.session.Session;
+package com.openexchange.oauth.association;
 
 /**
- * {@link DropboxOAuthAccountAssociation}
+ * {@link AbstractOAuthAccountAssociation}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.4
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class DropboxOAuthAccountAssociation extends AbstractFileStorageOAuthAccountAssociation {
+public abstract class AbstractOAuthAccountAssociation implements OAuthAccountAssociation {
+
+    private final int accountId;
+    private final int userId;
+    private final int contextId;
 
     /**
-     * Initializes a new {@link DropboxOAuthAccountAssociation}.
-     *
-     * @param oAuthAccountId The identifier of the OAuth account
-     * @param fileStorageAccount The association Dropbox file storage account
+     * Initialises a new {@link AbstractOAuthAccountAssociation}.
+     * 
+     * @param accountId The identifier of the OAuth account
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public DropboxOAuthAccountAssociation(int oAuthAccountId, FileStorageAccount fileStorageAccount, int userId, int contextId) {
-        super(oAuthAccountId, userId, contextId, fileStorageAccount);
+    public AbstractOAuthAccountAssociation(int accountId, int userId, int contextId) {
+        super();
+        this.accountId = accountId;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
     @Override
-    public String getServiceId() {
-        return DropboxConstants.ID;
+    public int getOAuthAccountId() {
+        return accountId;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.AbstractFileStorageOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
-     */
     @Override
-    protected AbstractOAuthAccess newAccess(Session session) throws OXException {
-        return new DropboxOAuth2Access(getFileStorageAccount(), session);
+    public int getUserId() {
+        return userId;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
-     */
     @Override
-    public List<OAuthScope> getScopes() {
-        return Collections.singletonList(DropboxOAuthScope.drive);
+    public int getContextId() {
+        return contextId;
     }
-
 }

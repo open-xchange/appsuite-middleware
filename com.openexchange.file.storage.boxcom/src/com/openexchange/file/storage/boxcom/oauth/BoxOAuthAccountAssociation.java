@@ -55,9 +55,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
-import com.openexchange.oauth.association.Module;
-import com.openexchange.oauth.association.OAuthAccountAssociation;
-import com.openexchange.oauth.association.Status;
+import com.openexchange.file.storage.oauth.AbstractFileStorageOAuthAccountAssociation;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.boxcom.BoxComOAuthScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
@@ -68,12 +67,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class BoxOAuthAccountAssociation implements OAuthAccountAssociation {
-
-    private final int oAuthAccountId;
-    private final FileStorageAccount fileStorageAccount;
-    private final int userId;
-    private final int contextId;
+public class BoxOAuthAccountAssociation extends AbstractFileStorageOAuthAccountAssociation {
 
     /**
      * Initializes a new {@link BoxOAuthAccountAssociation}.
@@ -84,27 +78,7 @@ public class BoxOAuthAccountAssociation implements OAuthAccountAssociation {
      * @param contextId The context identifier
      */
     public BoxOAuthAccountAssociation(int oAuthAccountId, FileStorageAccount fileStorageAccount, int userId, int contextId) {
-        super();
-        this.oAuthAccountId = oAuthAccountId;
-        this.fileStorageAccount = fileStorageAccount;
-        this.userId = userId;
-        this.contextId = contextId;
-
-    }
-
-    @Override
-    public int getOAuthAccountId() {
-        return oAuthAccountId;
-    }
-
-    @Override
-    public int getUserId() {
-        return userId;
-    }
-
-    @Override
-    public int getContextId() {
-        return contextId;
+        super(oAuthAccountId, userId, contextId, fileStorageAccount);
     }
 
     @Override
@@ -112,50 +86,14 @@ public class BoxOAuthAccountAssociation implements OAuthAccountAssociation {
         return BoxConstants.ID;
     }
 
-    @Override
-    public String getId() {
-        return fileStorageAccount.getId();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return fileStorageAccount.getDisplayName();
-    }
-
-    @Override
-    public Status getStatus(Session session) throws OXException {
-        BoxOAuthAccess access = new BoxOAuthAccess(fileStorageAccount, session);
-        try {
-            access.initialize();
-        } catch (OXException e) {
-            return Status.RECREATION_NEEDED;
-        }
-        boolean success = access.ping();
-        if (success) {
-            return Status.OK;
-        }
-        return Status.INVALID_GRANT;
-    }
-
     /*
      * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
+     * 
+     * @see com.openexchange.file.storage.oauth.AbstractFileStorageOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
      */
     @Override
-    public String getModule() {
-        return Module.INFOSTORE.getModuleName();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
-     */
-    @Override
-    public String optFolder() {
-        // TODO: get the folder
-        return null;
+    protected AbstractOAuthAccess newAccess(Session session) throws OXException {
+        return new BoxOAuthAccess(getFileStorageAccount(), session);
     }
 
     /*

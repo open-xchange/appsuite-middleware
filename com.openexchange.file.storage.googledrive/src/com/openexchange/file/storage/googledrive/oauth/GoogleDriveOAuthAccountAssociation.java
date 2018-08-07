@@ -53,13 +53,10 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
-import com.openexchange.oauth.association.Module;
-import com.openexchange.oauth.association.OAuthAccountAssociation;
-import com.openexchange.oauth.association.Status;
+import com.openexchange.file.storage.oauth.AbstractFileStorageOAuthAccountAssociation;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.google.GoogleOAuthScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
@@ -70,12 +67,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class GoogleDriveOAuthAccountAssociation implements OAuthAccountAssociation {
-
-    private final int oAuthAccountId;
-    private final FileStorageAccount fileStorageAccount;
-    private final int userId;
-    private final int contextId;
+public class GoogleDriveOAuthAccountAssociation extends AbstractFileStorageOAuthAccountAssociation {
 
     /**
      * Initializes a new {@link GoogleDriveOAuthAccountAssociation}.
@@ -86,27 +78,7 @@ public class GoogleDriveOAuthAccountAssociation implements OAuthAccountAssociati
      * @param contextId The context identifier
      */
     public GoogleDriveOAuthAccountAssociation(int oAuthAccountId, FileStorageAccount fileStorageAccount, int userId, int contextId) {
-        super();
-        this.oAuthAccountId = oAuthAccountId;
-        this.fileStorageAccount = fileStorageAccount;
-        this.userId = userId;
-        this.contextId = contextId;
-
-    }
-
-    @Override
-    public int getOAuthAccountId() {
-        return oAuthAccountId;
-    }
-
-    @Override
-    public int getUserId() {
-        return userId;
-    }
-
-    @Override
-    public int getContextId() {
-        return contextId;
+        super(oAuthAccountId, userId, contextId, fileStorageAccount);
     }
 
     @Override
@@ -115,48 +87,8 @@ public class GoogleDriveOAuthAccountAssociation implements OAuthAccountAssociati
     }
 
     @Override
-    public String getId() {
-        return fileStorageAccount.getId();
-    }
-
-    @Override
-    public String getDisplayName() {
-        return fileStorageAccount.getDisplayName();
-    }
-
-    @Override
-    public Status getStatus(Session session) throws OXException {
-        GoogleDriveOAuthAccess access = new GoogleDriveOAuthAccess(fileStorageAccount, session);
-        try {
-            access.initialize();
-        } catch (OXException e) {
-            return Status.RECREATION_NEEDED;
-        }
-        boolean success = access.ping();
-        if (success) {
-            return Status.OK;
-        }
-        return Status.INVALID_GRANT;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
-     */
-    @Override
-    public String getModule() {
-        return Module.INFOSTORE.getModuleName();
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
-     */
-    @Override
-    public String optFolder() {
-        return new FolderID(getServiceId(), getId(), FileStorageFolder.ROOT_FULLNAME).toUniqueID();
+    protected AbstractOAuthAccess newAccess(Session session) throws OXException {
+        return new GoogleDriveOAuthAccess(getFileStorageAccount(), session);
     }
 
     /*
@@ -168,5 +100,4 @@ public class GoogleDriveOAuthAccountAssociation implements OAuthAccountAssociati
     public List<OAuthScope> getScopes() {
         return Collections.singletonList(GoogleOAuthScope.drive);
     }
-
 }
