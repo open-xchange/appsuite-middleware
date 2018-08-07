@@ -74,37 +74,32 @@ public class ConfigAwareKeyStore {
 
     private final String propertyName;
     private final String password;
-
-    private KeyStore store;
-
+    private final KeyStore store;
     private int storeHash = -1;
 
     /**
      * Initializes a new {@link ConfigAwareKeyStore}.
-     * 
+     *
      * @param configuration The {@link Configuration} to get the values from
      * @param propertyName The name of the JDBC property for the store
      * @param password The optional password for the store
      * @param type The type of the store. See <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#KeystoreImplementation">JCA reference guide</a>
-     * 
+     *
      * @throws OXException If path is invalid or {@link KeyStore} can't be loaded
-     * 
+     *
      */
     public ConfigAwareKeyStore(Configuration configuration, String propertyName, String password, String type) throws OXException {
         super();
-
-        this.propertyName = propertyName;
         if (Strings.isEmpty(propertyName) || Strings.isEmpty(configuration.getJdbcProps().getProperty(propertyName))) {
             throw DatabaseExceptionCodes.KEYSTORE_FILE_ERROR.create(propertyName);
         }
-
+        this.propertyName = propertyName;
         this.password = password;
-
         try {
             String actualType = configuration.getJdbcProps().getProperty(type);
             this.store = KeyStore.getInstance(Strings.isEmpty(actualType) ? KeyStore.getDefaultType() : actualType);
         } catch (KeyStoreException e) {
-            LOGGER.debug("Was not able to load KeyStore for type {}.", type);
+            LOGGER.debug("Was not able to load keystore for type {}.", type);
             throw DatabaseExceptionCodes.KEYSTORE_UNAVAILABLE.create(e, e.getMessage());
         }
     }
@@ -121,11 +116,11 @@ public class ConfigAwareKeyStore {
     }
 
     /**
-     * (Re-) loads the {@link KeyStore} hold by this instance with given for given configuration
-     * 
+     * (Re-)loads the {@link KeyStore} held by this instance using given configuration
+     *
      * @param configuration The {@link Configuration} to get the values from
-     * @return <code>true</code> if the underlying {@link KeyStore} was (re)loaded
-     * @throws OXException In case store can't be found or accessed
+     * @return <code>true</code> if the underlying {@link KeyStore} was (re-)loaded; otherwise <code>false</code>
+     * @throws OXException If store can't be found or accessed
      */
     public boolean reloadStore(Configuration configuration) throws OXException {
         // Get path and password
@@ -144,10 +139,10 @@ public class ConfigAwareKeyStore {
         if (keyStoreFile.hashCode() != storeHash) {
             /*
              * (Re-) Load the key store
-             * 
+             *
              * We do this also knowing that the JDBC is loading the stores (for each connection) itself.
              * See com.mysql.jdbc.ExportControlled.getSSLSocketFactoryDefaultOrConfigured(MysqlIO)
-             * 
+             *
              * Advantage: We can avoid the generic 'CommunicationLinkFailiur' error by testing the SSL
              *            properties and outline more helpful messages.
              */
@@ -183,10 +178,10 @@ public class ConfigAwareKeyStore {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + storeHash;
         result = prime * result + ((password == null) ? 0 : password.hashCode());
         result = prime * result + ((propertyName == null) ? 0 : propertyName.hashCode());
         result = prime * result + ((store == null) ? 0 : ConfigurationUtil.getHashSum(store));
-        result = prime * result + storeHash;
         return result;
     }
 
@@ -202,6 +197,9 @@ public class ConfigAwareKeyStore {
             return false;
         }
         ConfigAwareKeyStore other = (ConfigAwareKeyStore) obj;
+        if (storeHash != other.storeHash) {
+            return false;
+        }
         if (password == null) {
             if (other.password != null) {
                 return false;
@@ -221,9 +219,6 @@ public class ConfigAwareKeyStore {
                 return false;
             }
         } else if (0 != ConfigurationUtil.compare(store, other.store)) {
-            return false;
-        }
-        if (storeHash != other.storeHash) {
             return false;
         }
         return true;

@@ -51,7 +51,7 @@ package com.openexchange.database.internal;
 
 import java.util.Properties;
 import java.util.function.Function;
-import com.openexchange.database.ConfigurationListener.ConfigDBListener;
+import com.openexchange.database.internal.ConfigurationListener.ConfigDBListener;
 import com.openexchange.pooling.PoolConfig;
 
 /**
@@ -71,7 +71,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
         configDBWrite = new ConfigPoolAdapter(Constants.CONFIGDB_WRITE_ID, configuration, (Configuration c) -> {
             return c.getWriteUrl();
         }, (Configuration c) -> {
-            return c.getWriteProps();
+            return c.getConfigDbWriteProps();
         }, (Configuration c) -> {
             return c.getPoolConfig();
         });
@@ -82,7 +82,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
         configDBRead = new ConfigPoolAdapter(Constants.CONFIGDB_READ_ID, configuration, (Configuration c) -> {
             return c.getReadUrl();
         }, (Configuration c) -> {
-            return c.getReadProps();
+            return c.getConfigDbReadProps();
         }, (Configuration c) -> {
             return c.getPoolConfig();
         });
@@ -111,7 +111,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
 
     private class ConfigPoolAdapter extends AbstractConfigurationListener<Configuration> implements ConfigDBListener {
 
-        public ConfigPoolAdapter(int poolId, Configuration configuration, Function<Configuration, String> toUrl, Function<Configuration, Properties> toInfo, Function<Configuration, PoolConfig> toConf) {
+        ConfigPoolAdapter(int poolId, Configuration configuration, Function<Configuration, String> toUrl, Function<Configuration, Properties> toInfo, Function<Configuration, PoolConfig> toConf) {
             super(poolId, configuration, toUrl, toInfo, toConf);
         }
 

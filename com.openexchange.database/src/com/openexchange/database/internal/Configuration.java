@@ -79,9 +79,9 @@ public final class Configuration {
 
     private Properties jdbcProps;
 
-    private final Properties readProps = new Properties();
+    private final Properties configDbReadProps = new Properties();
 
-    private final Properties writeProps = new Properties();
+    private final Properties configDbWriteProps = new Properties();
 
     private final PoolConfig poolConfig = PoolConfig.DEFAULT_CONFIG.clone();
 
@@ -93,16 +93,16 @@ public final class Configuration {
         return getProperty(Property.READ_URL);
     }
 
-    Properties getReadProps() {
-        return readProps;
+    Properties getConfigDbReadProps() {
+        return configDbReadProps;
     }
 
     String getWriteUrl() {
         return getProperty(Property.WRITE_URL);
     }
 
-    Properties getWriteProps() {
-        return writeProps;
+    Properties getConfigDbWriteProps() {
+        return configDbWriteProps;
     }
 
     Properties getJdbcProps() {
@@ -229,8 +229,8 @@ public final class Configuration {
     }
 
     private void separateReadWrite() {
-        readProps.putAll(jdbcProps);
-        writeProps.putAll(jdbcProps);
+        configDbReadProps.putAll(jdbcProps);
+        configDbWriteProps.putAll(jdbcProps);
         for (final Object tmp : props.keySet()) {
             final String key = (String) tmp;
             if (key.startsWith("readProperty.")) {
@@ -238,13 +238,13 @@ public final class Configuration {
                 final int equalSignPos = value.indexOf('=');
                 final String readKey = value.substring(0, equalSignPos);
                 final String readValue = value.substring(equalSignPos + 1);
-                readProps.put(readKey, readValue);
+                configDbReadProps.put(readKey, readValue);
             } else if (key.startsWith("writeProperty.")) {
                 final String value = props.getProperty(key);
                 final int equalSignPos = value.indexOf('=');
                 final String readKey = value.substring(0, equalSignPos);
                 final String readValue = value.substring(equalSignPos + 1);
-                writeProps.put(readKey, readValue);
+                configDbWriteProps.put(readKey, readValue);
             }
         }
     }
@@ -276,8 +276,8 @@ public final class Configuration {
     public void clear() {
         props = null;
         jdbcProps = null;
-        readProps.clear();
-        writeProps.clear();
+        configDbReadProps.clear();
+        configDbWriteProps.clear();
     }
 
     /**
@@ -345,8 +345,8 @@ public final class Configuration {
         result = prime * result + ((jdbcProps == null) ? 0 : jdbcProps.hashCode());
         result = prime * result + ((poolConfig == null) ? 0 : poolConfig.hashCode());
         result = prime * result + ((props == null) ? 0 : props.hashCode());
-        result = prime * result + ((readProps == null) ? 0 : readProps.hashCode());
-        result = prime * result + ((writeProps == null) ? 0 : writeProps.hashCode());
+        result = prime * result + ((configDbReadProps == null) ? 0 : configDbReadProps.hashCode());
+        result = prime * result + ((configDbWriteProps == null) ? 0 : configDbWriteProps.hashCode());
         return result;
     }
 
@@ -383,18 +383,18 @@ public final class Configuration {
         } else if (!ConfigurationUtil.matches(props, other.props)) {
             return false;
         }
-        if (readProps == null) {
-            if (other.readProps != null) {
+        if (configDbReadProps == null) {
+            if (other.configDbReadProps != null) {
                 return false;
             }
-        } else if (!ConfigurationUtil.matches(readProps, other.readProps)) {
+        } else if (!ConfigurationUtil.matches(configDbReadProps, other.configDbReadProps)) {
             return false;
         }
-        if (writeProps == null) {
-            if (other.writeProps != null) {
+        if (configDbWriteProps == null) {
+            if (other.configDbWriteProps != null) {
                 return false;
             }
-        } else if (!ConfigurationUtil.matches(writeProps, other.writeProps)) {
+        } else if (!ConfigurationUtil.matches(configDbWriteProps, other.configDbWriteProps)) {
             return false;
         }
         return true;

@@ -47,9 +47,7 @@
  *
  */
 
-package com.openexchange.database;
-
-import com.openexchange.database.internal.Configuration;
+package com.openexchange.database.internal;
 
 /**
  * {@link ConfigurationListener}

@@ -60,9 +60,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
-import com.openexchange.database.ConfigurationListener;
-import com.openexchange.database.ConfigurationListener.ConfigDBListener;
 import com.openexchange.database.DatabaseExceptionCodes;
+import com.openexchange.database.internal.ConfigurationListener.ConfigDBListener;
 import com.openexchange.database.internal.reloadable.ConnectionReloader;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentHashSet;
@@ -87,18 +86,18 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionReloaderImpl.class);
 
-    private ConcurrentHashSet<ConfigurationListener> listerners;
+    private final ConcurrentHashSet<ConfigurationListener> listerners;
 
-    private ConcurrentHashMap<String, ConfigAwareKeyStore> stores;
+    private final ConcurrentHashMap<String, ConfigAwareKeyStore> stores;
 
-    private Configuration configuration;
+    private volatile Configuration configuration;
 
     /**
      * Initializes a new {@link ConnectionReloaderImpl}.
-     * 
+     *
      * @param configuration The {@link Configuration} for connections
      * @throws OXException In case key store can't be loaded
-     * 
+     *
      */
     public ConnectionReloaderImpl(Configuration configuration) throws OXException {
         super();
@@ -156,7 +155,7 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
         }
         return false;
     }
-    
+
     @Override
     public boolean removeConfigurationListener(int poolId) {
         Iterator<ConfigurationListener> iterator = listerners.iterator();
@@ -193,14 +192,14 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
 
     /**
      * Notifies the {@link ConfigurationListener}. Looks up which properties has changed and notifies only relevant
-     * 
+     *
      * @param keyStoreUpdate <code>true</code> if a {@link KeyStore} was updated
      * @param configuration The new {@link Configuration}
      */
     private void notify(boolean keyStoreUpdate, Configuration configuration) {
         if (keyStoreUpdate || checkForChangedProperties(this.configuration.getJdbcProps(), configuration.getJdbcProps())) {
             listerners.stream().sorted().forEach(l -> l.notify(configuration));
-        } else if (checkForChangedProperties(this.configuration.getReadProps(), configuration.getReadProps()) || checkForChangedProperties(this.configuration.getWriteProps(), configuration.getWriteProps())) {
+        } else if (checkForChangedProperties(this.configuration.getConfigDbReadProps(), configuration.getConfigDbReadProps()) || checkForChangedProperties(this.configuration.getConfigDbWriteProps(), configuration.getConfigDbWriteProps())) {
             listerners.stream().filter(l -> ConfigDBListener.class.isAssignableFrom(l.getClass())).sorted().forEach(l -> l.notify(configuration));
         }
     }

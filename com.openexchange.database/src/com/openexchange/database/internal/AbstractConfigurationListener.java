@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.function.Function;
-import com.openexchange.database.ConfigurationListener;
 import com.openexchange.pooling.PoolConfig;
 import com.openexchange.pooling.PoolImplData;
 import com.openexchange.pooling.PooledData;
@@ -70,21 +69,22 @@ public abstract class AbstractConfigurationListener<T> extends ConnectionPool im
 
     private final int poolId;
 
-    protected Function<T, String> urlConverter;
+    protected final Function<T, String> urlConverter;
 
-    protected Function<T, Properties> infoConverter;
+    protected final Function<T, Properties> infoConverter;
 
-    protected Function<T, PoolConfig> poolConfigConverter;
+    protected final Function<T, PoolConfig> poolConfigConverter;
 
     /**
      * Initializes a new {@link AbstractConfigurationListener}.
-     * 
+     *
+     * @param poolId The pool identifier
      * @param data The initial data to feed the converters with
      * @param urlConverter Converter to get URL
      * @param infoConverter Converter to get info {@link Properties}
      * @param poolConfigConverter Converter to get {@link PoolConfig}
      */
-    public AbstractConfigurationListener(int poolId, T data, Function<T, String> urlConverter, Function<T, Properties> infoConverter, Function<T, PoolConfig> poolConfigConverter) {
+    protected AbstractConfigurationListener(int poolId, T data, Function<T, String> urlConverter, Function<T, Properties> infoConverter, Function<T, PoolConfig> poolConfigConverter) {
         super(urlConverter.apply(data), infoConverter.apply(data), poolConfigConverter.apply(data));
         this.poolId = poolId;
         this.urlConverter = urlConverter;
@@ -100,7 +100,7 @@ public abstract class AbstractConfigurationListener<T> extends ConnectionPool im
     /**
      * Updated the {@link ConnectionLifecycle} ({@link #getLifecycle()})
      * and the {@link PoolConfig} ({@link #setConfig(PoolConfig)})
-     * 
+     *
      * @param updatedData The updated data to feed the converters with
      */
     protected void update(T updatedData) {

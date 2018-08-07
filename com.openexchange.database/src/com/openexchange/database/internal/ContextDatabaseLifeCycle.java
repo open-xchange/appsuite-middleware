@@ -86,7 +86,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
 
-    private Properties jdbcProperties;
+    private final Properties jdbcProperties;
 
     public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader, final ConfigDatabaseService configDatabaseService) {
         super();
@@ -190,7 +190,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private class ContextPoolAdapter extends AbstractConfigurationListener<ConnectionData> {
 
-        public ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toInfo, Function<ConnectionData, PoolConfig> toConfig) {
+        ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toInfo, Function<ConnectionData, PoolConfig> toConfig) {
             super(poolId, data, toURL, toInfo, toConfig);
         }
 
