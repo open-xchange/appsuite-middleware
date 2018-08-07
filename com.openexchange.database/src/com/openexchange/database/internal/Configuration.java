@@ -63,7 +63,7 @@ import com.openexchange.pooling.ExhaustedActions;
 import com.openexchange.pooling.PoolConfig;
 
 /**
- * Contains the settings to connect to the configuration database.
+ * Contains the settings to connect to the configuration database as well as generic JDBC properties to use.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -332,7 +332,7 @@ public final class Configuration {
          // @formatter:on
         );
     }
-    
+
 
     PoolConfig getPoolConfig() {
         return poolConfig;
