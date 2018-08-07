@@ -53,6 +53,8 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.oauth.association.Module;
@@ -145,7 +147,7 @@ public class GoogleDriveOAuthAccountAssociation implements OAuthAccountAssociati
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
      */
     @Override
@@ -155,18 +157,17 @@ public class GoogleDriveOAuthAccountAssociation implements OAuthAccountAssociati
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
      */
     @Override
     public String optFolder() {
-        // TODO: get the folder
-        return null;
+        return new FolderID(getServiceId(), getId(), FileStorageFolder.ROOT_FULLNAME).toUniqueID();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
      */
     @Override
