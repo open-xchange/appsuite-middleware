@@ -60,6 +60,7 @@ import com.openexchange.oauth.association.Module;
 import com.openexchange.oauth.google.GoogleOAuthScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link GoogleCalendarOAuthAccountAssociation}
@@ -126,7 +127,7 @@ public class GoogleCalendarOAuthAccountAssociation extends AbstractOAuthAccountA
      */
     @Override
     public String optFolder() {
-        return getInternalConfigProperty("folder");
+        return IDMangler.mangle("cal", getId(), "0"); // FIXME: constant for root folder?
     }
 
     /*
