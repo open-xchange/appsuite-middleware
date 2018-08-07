@@ -52,6 +52,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custo
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -87,7 +88,7 @@ public class CustomUserAttributeChangers extends AbstractAttributeChangers {
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException {
         if (!userData.isUserAttributesset()) {
             return Collections.emptySet();
         }
@@ -138,7 +139,7 @@ public class CustomUserAttributeChangers extends AbstractAttributeChangers {
             Databases.closeSQLStuff(stmtDeleteAttribute);
         }
         if (false == changedConfigAttributes.isEmpty()) {
-            Reloadables.propagatePropertyChange(changedConfigAttributes);
+            pendingInvocations.add(() -> Reloadables.propagatePropertyChange(changedConfigAttributes));
         }
         return changedAttributes;
     }

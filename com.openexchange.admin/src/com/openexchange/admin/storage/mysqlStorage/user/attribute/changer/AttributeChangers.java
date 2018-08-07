@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -64,13 +65,14 @@ public interface AttributeChangers {
 
     /**
      * Changes the specified {@link UserMailSettingAttribute}
-     * 
+     *
      * @param userData The {@link User} data
      * @param userId the user identifier
      * @param contextId The context identifier
      * @param connection The {@link Connection} to use
+     * @param pendingInvocations A collection of tasks, which are supposed to be executed after successful change operation
      * @return An unmodifiable {@link Set} with all successfully changed attributes
      * @throws StorageException if an SQL error or any other error is occurred
      */
-    Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException;
+    Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException;
 }

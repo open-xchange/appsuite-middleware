@@ -52,6 +52,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user.
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import com.openexchange.admin.properties.AdminProperties;
@@ -70,7 +71,7 @@ import com.openexchange.admin.tools.AdminCache;
  */
 public class UserNameUserAttributeChangers extends AbstractAttributeChangers {
 
-    private AdminCache adminCache;
+    private final AdminCache adminCache;
 
     /**
      * Initialises a new {@link UserNameUserAttributeChangers}.
@@ -80,13 +81,8 @@ public class UserNameUserAttributeChangers extends AbstractAttributeChangers {
         this.adminCache = adminCache;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
-     */
     @Override
-    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException {
         // Updates the username in 'login2user' table only if the if 'USERNAME_CHANGEABLE' is set to 'true'
         if (!adminCache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false)) {
             return EMPTY_SET;

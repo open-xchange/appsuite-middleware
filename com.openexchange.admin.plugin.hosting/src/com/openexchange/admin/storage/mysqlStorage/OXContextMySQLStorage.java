@@ -1922,10 +1922,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 insertStmt = null;
             }
 
-            if (false == changedConfigAttributes.isEmpty()) {
-                Reloadables.propagatePropertyChange(changedConfigAttributes);
-            }
-
             {
                 // Invalidate caches
                 CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
@@ -1945,6 +1941,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         LOG.error("", e);
                     }
                 }
+            }
+
+            if (false == changedConfigAttributes.isEmpty()) {
+                Reloadables.propagatePropertyChange(changedConfigAttributes);
             }
         } finally {
             Databases.closeSQLStuff(insertStmt, deleteStmt);
