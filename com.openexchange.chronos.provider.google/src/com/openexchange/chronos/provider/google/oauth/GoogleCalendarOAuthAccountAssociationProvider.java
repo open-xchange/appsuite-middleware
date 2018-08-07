@@ -47,74 +47,72 @@
  *
  */
 
-package com.openexchange.oauth.association;
+package com.openexchange.chronos.provider.google.oauth;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import org.json.JSONObject;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.access.AbstractOAuthAccess;
+import com.openexchange.oauth.association.OAuthAccountAssociation;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.session.Session;
 
 /**
- * {@link AbstractOAuthAccountAssociation}
+ * {@link GoogleCalendarOAuthAccountAssociationProvider}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public abstract class AbstractOAuthAccountAssociation implements OAuthAccountAssociation {
-
-    private final int accountId;
-    private final int userId;
-    private final int contextId;
+public class GoogleCalendarOAuthAccountAssociationProvider implements OAuthAccountAssociationProvider {
 
     /**
-     * Initialises a new {@link AbstractOAuthAccountAssociation}.
-     * 
-     * @param accountId The identifier of the OAuth account
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * Initialises a new {@link GoogleCalendarOAuthAccountAssociationProvider}.
      */
-    public AbstractOAuthAccountAssociation(int accountId, int userId, int contextId) {
+    public GoogleCalendarOAuthAccountAssociationProvider() {
         super();
-        this.accountId = accountId;
-        this.userId = userId;
-        this.contextId = contextId;
     }
 
-    /**
-     * Initialises and returns a new {@link AbstractOAuthAccess}
+    /*
+     * (non-Javadoc)
      * 
-     * @param session The groupware {@link Session}
-     * @return The new oauth access
-     * @throws OXException if the oauth access cannot be initialised or any other error occurs
+     * @see com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider#getAssociationsFor(int, com.openexchange.session.Session)
      */
-    protected abstract AbstractOAuthAccess newAccess(Session session) throws OXException;
-
     @Override
-    public Status getStatus(Session session) throws OXException {
-        AbstractOAuthAccess access = newAccess(session);
+    public Collection<OAuthAccountAssociation> getAssociationsFor(int accountId, Session session) throws OXException {
+        CalendarAccountService accountStorage = Services.getService(CalendarAccountService.class);
+        Collection<OAuthAccountAssociation> associations = null;
+        for (CalendarAccount calendarAccount : accountStorage.getAccounts(session, null)) {
+            int oauthAccountId = getAccountId(calendarAccount.getInternalConfiguration());
+            if (oauthAccountId != accountId) {
+                continue;
+            }
+            if (null == associations) {
+                associations = new LinkedList<>();
+            }
+            associations.add(new GoogleCalendarOAuthAccountAssociation(accountId, session.getUserId(), session.getContextId(), calendarAccount));
+        }
+        return null == associations ? Collections.<OAuthAccountAssociation> emptyList() : associations;
+    }
+
+    private int getAccountId(JSONObject internalConfig) {
+        if (internalConfig == null || internalConfig.isEmpty()) {
+            return -1;
+        }
+        Object oauthId = internalConfig.opt("oauthId");
+        if (oauthId == null) {
+            return -1;
+        }
+        if (oauthId instanceof Integer) {
+            return ((Integer) oauthId).intValue();
+        }
         try {
-            access.initialize();
-        } catch (OXException e) {
-            return Status.RECREATION_NEEDED;
+            return Integer.parseInt(oauthId.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("The account identifier '" + oauthId.toString() + "' cannot be parsed as an integer.", e);
         }
-        boolean success = access.ping();
-        if (success) {
-            return Status.OK;
-        }
-        return Status.INVALID_GRANT;
-    }
-
-    @Override
-    public int getOAuthAccountId() {
-        return accountId;
-    }
-
-    @Override
-    public int getUserId() {
-        return userId;
-    }
-
-    @Override
-    public int getContextId() {
-        return contextId;
     }
 }

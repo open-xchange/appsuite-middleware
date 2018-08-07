@@ -73,6 +73,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+// FIXME: Maybe consolidate with GoogleOAuthAccess
 public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
 
     private final FileStorageAccount fsAccount;

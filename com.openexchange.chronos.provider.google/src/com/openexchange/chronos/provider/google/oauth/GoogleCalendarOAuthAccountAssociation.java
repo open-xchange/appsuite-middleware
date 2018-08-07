@@ -47,44 +47,69 @@
  *
  */
 
-package com.openexchange.file.storage.oauth;
+package com.openexchange.chronos.provider.google.oauth;
 
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.composition.FolderID;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.google.access.GoogleOAuthAccess;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.association.AbstractOAuthAccountAssociation;
 import com.openexchange.oauth.association.Module;
+import com.openexchange.oauth.google.GoogleOAuthScope;
+import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.session.Session;
 
 /**
- * {@link AbstractFileStorageOAuthAccountAssociation}
+ * {@link GoogleCalendarOAuthAccountAssociation}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public abstract class AbstractFileStorageOAuthAccountAssociation extends AbstractOAuthAccountAssociation {
+public class GoogleCalendarOAuthAccountAssociation extends AbstractOAuthAccountAssociation {
 
-    private final FileStorageAccount fileStorageAccount;
+    private final CalendarAccount calendarAccount;
 
     /**
-     * Initialises a new {@link AbstractFileStorageOAuthAccountAssociation}.
-     * 
-     * @param accountId
-     * @param userId
-     * @param contextId
+     * Initialises a new {@link GoogleCalendarOAuthAccountAssociation}.
      */
-    public AbstractFileStorageOAuthAccountAssociation(int accountId, int userId, int contextId, FileStorageAccount fileStorageAccount) {
+    public GoogleCalendarOAuthAccountAssociation(int accountId, int userId, int contextId, CalendarAccount calendarAccount) {
         super(accountId, userId, contextId);
-        this.fileStorageAccount = fileStorageAccount;
+        this.calendarAccount = calendarAccount;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getServiceId()
+     */
+    @Override
+    public String getServiceId() {
+        return calendarAccount.getProviderId();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getId()
+     */
     @Override
     public String getId() {
-        return fileStorageAccount.getId();
+        return Integer.toString(calendarAccount.getAccountId());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getDisplayName()
+     */
     @Override
     public String getDisplayName() {
-        return fileStorageAccount.getDisplayName();
+        if (calendarAccount.getInternalConfiguration() == null || calendarAccount.getInternalConfiguration().isEmpty()) {
+            return "";
+        }
+        return calendarAccount.getInternalConfiguration().optString("name");
     }
 
     /*
@@ -94,7 +119,7 @@ public abstract class AbstractFileStorageOAuthAccountAssociation extends Abstrac
      */
     @Override
     public String getModule() {
-        return Module.INFOSTORE.getModuleName();
+        return Module.CALENDAR.getModuleName();
     }
 
     /*
@@ -104,16 +129,27 @@ public abstract class AbstractFileStorageOAuthAccountAssociation extends Abstrac
      */
     @Override
     public String optFolder() {
-        return new FolderID(getServiceId(), getId(), FileStorageFolder.ROOT_FULLNAME).toUniqueID();
+        return null;
     }
 
-    /**
-     * Returns the {@link FileStorageAccount}
+    /*
+     * (non-Javadoc)
      * 
-     * @return the {@link FileStorageAccount}
+     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
      */
-    protected FileStorageAccount getFileStorageAccount() {
-        return fileStorageAccount;
+    @Override
+    protected AbstractOAuthAccess newAccess(Session session) throws OXException {
+        return new GoogleOAuthAccess(getOAuthAccountId(), session);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
+     */
+    @Override
+    public List<OAuthScope> getScopes() {
+        return Collections.singletonList(GoogleOAuthScope.calendar);
     }
 
 }
