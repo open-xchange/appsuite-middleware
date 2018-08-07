@@ -118,13 +118,14 @@ public class AccountWriter extends AbstractOAuthWriter {
      */
     private static void writeAssociationsFor(JSONObject jAccount, Collection<OAuthAccountAssociation> associations) throws JSONException {
         if (associations == null || associations.isEmpty()) {
-            return;
+            jAccount.put(AccountField.ASSOCIATIONS.getName(), JSONArray.EMPTY_ARRAY);
+        } else {
+            JSONArray jAssociations = new JSONArray(associations.size());
+            for (OAuthAccountAssociation association : associations) {
+                jAssociations.put(writeAssociation(association));
+            }
+            jAccount.put(AccountField.ASSOCIATIONS.getName(), jAssociations);
         }
-        JSONArray associationsArray = new JSONArray(associations.size());
-        for (OAuthAccountAssociation association : associations) {
-            associationsArray.put(writeAssociation(association));
-        }
-        jAccount.put(AccountField.ASSOCIATIONS.getName(), associationsArray);
     }
 
     /**
@@ -135,15 +136,15 @@ public class AccountWriter extends AbstractOAuthWriter {
      * @throws JSONException if a JSON error occurs
      */
     private static JSONObject writeAssociation(OAuthAccountAssociation association) throws JSONException {
-        JSONObject associationJson = new JSONObject();
-        associationJson.put(AssociationField.ID.getName(), association.getId());
-        associationJson.put(AssociationField.NAME.getName(), association.getDisplayName());
-        associationJson.put(AssociationField.SCOPES.getName(), association.getScopes());
-        associationJson.put(AssociationField.MODULE.getName(), association.getModule());
+        JSONObject jAssociation = new JSONObject(8);
+        jAssociation.put(AssociationField.ID.getName(), association.getId());
+        jAssociation.put(AssociationField.NAME.getName(), association.getDisplayName());
+        jAssociation.put(AssociationField.SCOPES.getName(), association.getScopes());
+        jAssociation.put(AssociationField.MODULE.getName(), association.getModule());
         if (Strings.isNotEmpty(association.optFolder())) {
-            associationJson.put(AssociationField.FOLDER.getName(), association.optFolder());
+            jAssociation.put(AssociationField.FOLDER.getName(), association.optFolder());
         }
-        return associationJson;
+        return jAssociation;
     }
 
     /**
