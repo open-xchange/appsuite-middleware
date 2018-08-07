@@ -60,7 +60,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
@@ -105,7 +104,6 @@ public class MailProxyConfig implements Reloadable {
      * @throws OXException
      */
     public List<String> getNonProxyHosts(int contextId, int userId) throws OXException {
-
         UserAndContext key = UserAndContext.newInstance(userId, contextId);
         List<String> result = CACHE_NON_PROXY_HOSTS.getIfPresent(key);
         if (null != result) {
@@ -140,7 +138,7 @@ public class MailProxyConfig implements Reloadable {
     protected List<String> doGetNonProxyHosts(int userId, int contextId) throws OXException {
         LeanConfigurationService leanConfigService = ServerServiceRegistry.getInstance().getService(LeanConfigurationService.class);
         if (null == leanConfigService) {
-            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
         }
 
         String property = leanConfigService.getProperty(userId, contextId, MAIL_NON_PROXY_HOSTS);
@@ -155,7 +153,7 @@ public class MailProxyConfig implements Reloadable {
     /**
      * Clears the cache.
      */
-    public void invalidateCache() {
+    private void invalidateCache() {
         CACHE_NON_PROXY_HOSTS.invalidateAll();
     }
 
