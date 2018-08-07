@@ -106,10 +106,7 @@ public class GoogleCalendarOAuthAccountAssociation extends AbstractOAuthAccountA
      */
     @Override
     public String getDisplayName() {
-        if (calendarAccount.getInternalConfiguration() == null || calendarAccount.getInternalConfiguration().isEmpty()) {
-            return "";
-        }
-        return calendarAccount.getInternalConfiguration().optString("name");
+        return getInternalConfigProperty("name");
     }
 
     /*
@@ -129,7 +126,7 @@ public class GoogleCalendarOAuthAccountAssociation extends AbstractOAuthAccountA
      */
     @Override
     public String optFolder() {
-        return null;
+        return getInternalConfigProperty("folder");
     }
 
     /*
@@ -152,4 +149,17 @@ public class GoogleCalendarOAuthAccountAssociation extends AbstractOAuthAccountA
         return Collections.singletonList(GoogleOAuthScope.calendar);
     }
 
+    /**
+     * Returns the value of the specified property or an empty string
+     * if no such property exists.
+     * 
+     * @param key The property's name
+     * @return The property's value or an empty string if no such property exists
+     */
+    private String getInternalConfigProperty(String key) {
+        if (calendarAccount.getInternalConfiguration() == null || calendarAccount.getInternalConfiguration().isEmpty()) {
+            return "";
+        }
+        return calendarAccount.getInternalConfiguration().optString(key);
+    }
 }
