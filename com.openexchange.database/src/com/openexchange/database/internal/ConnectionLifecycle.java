@@ -123,7 +123,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     // ----------------------------------------------------------------------------------------------
 
-    private ReentrantReadWriteLock lock;
+    private final ReentrantReadWriteLock lock;
 
     public void lockForWrite() {
         lock.writeLock().lock();
@@ -139,10 +139,10 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         this.url = url;
     }
 
-    private Properties info;
+    private Properties connectionArguments;
 
-    public void setInfo(Properties info) {
-        this.info = info;
+    public void setConnectionArguments(Properties info) {
+        this.connectionArguments = info;
     }
 
     /**
@@ -150,9 +150,15 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
      */
     private static final long DEFAULT_CHECK_TIME = 120000;
 
-    public ConnectionLifecycle(final String url, final Properties info) {
+    /**
+     * Initializes a new {@link ConnectionLifecycle}.
+     *
+     * @param url A database URL of the form <code> jdbc:<em>subprotocol</em>:<em>subname</em></code>
+     * @param connectionArguments A list of arbitrary string tag/value pairs as connection arguments; normally at least a "user" and "password" property should be included
+     */
+    public ConnectionLifecycle(final String url, final Properties connectionArguments) {
         this.url = url;
-        this.info = info;
+        this.connectionArguments = connectionArguments;
         this.lock = new ReentrantReadWriteLock(true);
     }
 
@@ -185,7 +191,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
     public Connection create() throws SQLException {
         lock.readLock().lock();
         try {
-            return DriverManager.getConnection(url, info);
+            return DriverManager.getConnection(url, connectionArguments);
         } finally {
             lock.readLock().unlock();
         }
@@ -195,7 +201,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         final Properties withoutTimeout = new Properties();
         lock.readLock().lock();
         try {
-            withoutTimeout.putAll(info);
+            withoutTimeout.putAll(connectionArguments);
             final Iterator<Object> iter = withoutTimeout.keySet().iterator();
             while (iter.hasNext()) {
                 final Object test = iter.next();

@@ -190,8 +190,8 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private class ContextPoolAdapter extends AbstractConfigurationListener<ConnectionData> {
 
-        ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toInfo, Function<ConnectionData, PoolConfig> toConfig) {
-            super(poolId, data, toURL, toInfo, toConfig);
+        ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toConnectionArguments, Function<ConnectionData, PoolConfig> toConfig) {
+            super(poolId, data, toURL, toConnectionArguments, toConfig);
         }
 
         @Override

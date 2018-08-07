@@ -111,8 +111,8 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
 
     private class ConfigPoolAdapter extends AbstractConfigurationListener<Configuration> implements ConfigDBListener {
 
-        ConfigPoolAdapter(int poolId, Configuration configuration, Function<Configuration, String> toUrl, Function<Configuration, Properties> toInfo, Function<Configuration, PoolConfig> toConf) {
-            super(poolId, configuration, toUrl, toInfo, toConf);
+        ConfigPoolAdapter(int poolId, Configuration configuration, Function<Configuration, String> toUrl, Function<Configuration, Properties> toConnectionArguments, Function<Configuration, PoolConfig> toConf) {
+            super(poolId, configuration, toUrl, toConnectionArguments, toConf);
         }
 
         @Override

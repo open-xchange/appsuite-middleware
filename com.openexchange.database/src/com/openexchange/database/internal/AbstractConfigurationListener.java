@@ -62,18 +62,15 @@ import com.openexchange.pooling.PooledData;
  * from {@link ConfigurationListener}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @param <T> The Class of the data to be process by the converters
+ * @param <T> The Class of the data to be processed by the converters
  * @since v7.10.1
  */
 public abstract class AbstractConfigurationListener<T> extends ConnectionPool implements ConfigurationListener {
 
     private final int poolId;
-
-    protected final Function<T, String> urlConverter;
-
-    protected final Function<T, Properties> infoConverter;
-
-    protected final Function<T, PoolConfig> poolConfigConverter;
+    private final Function<T, String> urlConverter;
+    private final Function<T, Properties> connectionArgumentsConverter;
+    private final Function<T, PoolConfig> poolConfigConverter;
 
     /**
      * Initializes a new {@link AbstractConfigurationListener}.
@@ -81,14 +78,14 @@ public abstract class AbstractConfigurationListener<T> extends ConnectionPool im
      * @param poolId The pool identifier
      * @param data The initial data to feed the converters with
      * @param urlConverter Converter to get URL
-     * @param infoConverter Converter to get info {@link Properties}
+     * @param connectionArgumentsConverter Converter to get connection arguments' {@link Properties}
      * @param poolConfigConverter Converter to get {@link PoolConfig}
      */
-    protected AbstractConfigurationListener(int poolId, T data, Function<T, String> urlConverter, Function<T, Properties> infoConverter, Function<T, PoolConfig> poolConfigConverter) {
-        super(urlConverter.apply(data), infoConverter.apply(data), poolConfigConverter.apply(data));
+    protected AbstractConfigurationListener(int poolId, T data, Function<T, String> urlConverter, Function<T, Properties> connectionArgumentsConverter, Function<T, PoolConfig> poolConfigConverter) {
+        super(urlConverter.apply(data), connectionArgumentsConverter.apply(data), poolConfigConverter.apply(data));
         this.poolId = poolId;
         this.urlConverter = urlConverter;
-        this.infoConverter = infoConverter;
+        this.connectionArgumentsConverter = connectionArgumentsConverter;
         this.poolConfigConverter = poolConfigConverter;
     }
 
@@ -109,7 +106,7 @@ public abstract class AbstractConfigurationListener<T> extends ConnectionPool im
         try {
             // Update data
             lifecycle.setURL(urlConverter.apply(updatedData));
-            lifecycle.setInfo(infoConverter.apply(updatedData));
+            lifecycle.setConnectionArguments(connectionArgumentsConverter.apply(updatedData));
         } finally {
             lifecycle.unlockForWrite();
         }
