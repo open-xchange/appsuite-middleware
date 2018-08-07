@@ -72,7 +72,7 @@ public class ConfigAwareKeyStore {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ConfigAwareKeyStore.class);
 
-    private final String path;
+    private final String propertyName;
     private final String password;
 
     private KeyStore store;
@@ -83,19 +83,19 @@ public class ConfigAwareKeyStore {
      * Initializes a new {@link ConfigAwareKeyStore}.
      * 
      * @param configuration The {@link Configuration} to get the values from
-     * @param path The path to the store
+     * @param propertyName The name of the JDBC property for the store
      * @param password The optional password for the store
      * @param type The type of the store. See <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#KeystoreImplementation">JCA reference guide</a>
      * 
      * @throws OXException If path is invalid or {@link KeyStore} can't be loaded
      * 
      */
-    public ConfigAwareKeyStore(Configuration configuration, String path, String password, String type) throws OXException {
+    public ConfigAwareKeyStore(Configuration configuration, String propertyName, String password, String type) throws OXException {
         super();
 
-        this.path = path;
-        if (Strings.isEmpty(path) || Strings.isEmpty(configuration.getJdbcProps().getProperty(path))) {
-            throw DatabaseExceptionCodes.KEYSTORE_FILE_ERROR.create(path);
+        this.propertyName = propertyName;
+        if (Strings.isEmpty(propertyName) || Strings.isEmpty(configuration.getJdbcProps().getProperty(propertyName))) {
+            throw DatabaseExceptionCodes.KEYSTORE_FILE_ERROR.create(propertyName);
         }
 
         this.password = password;
@@ -129,7 +129,7 @@ public class ConfigAwareKeyStore {
      */
     public boolean reloadStore(Configuration configuration) throws OXException {
         // Get path and password
-        String keystorePath = configuration.getJdbcProps().getProperty(path);
+        String keystorePath = configuration.getJdbcProps().getProperty(propertyName);
         String keystorePassword = configuration.getJdbcProps().getProperty(password);
 
         if (Strings.isEmpty(keystorePath)) {
@@ -172,7 +172,7 @@ public class ConfigAwareKeyStore {
     public String toString() {
         StringBuilder sb = new StringBuilder(ConfigAwareKeyStore.class.getName());
         sb.append("=[storeHash:").append(storeHash);
-        sb.append(",path:").append(path);
+        sb.append(",propertyName:").append(propertyName);
         sb.append(",password:").append(password);
         sb.append(",keystore:").append(store.toString());
         sb.append("]");
@@ -184,7 +184,7 @@ public class ConfigAwareKeyStore {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((password == null) ? 0 : password.hashCode());
-        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        result = prime * result + ((propertyName == null) ? 0 : propertyName.hashCode());
         result = prime * result + ((store == null) ? 0 : ConfigurationUtil.getHashSum(store));
         result = prime * result + storeHash;
         return result;
@@ -209,11 +209,11 @@ public class ConfigAwareKeyStore {
         } else if (!password.equals(other.password)) {
             return false;
         }
-        if (path == null) {
-            if (other.path != null) {
+        if (propertyName == null) {
+            if (other.propertyName != null) {
                 return false;
             }
-        } else if (!path.equals(other.path)) {
+        } else if (!propertyName.equals(other.propertyName)) {
             return false;
         }
         if (store == null) {
