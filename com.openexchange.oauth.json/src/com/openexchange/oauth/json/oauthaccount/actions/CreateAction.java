@@ -66,6 +66,7 @@ import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.association.OAuthAccountAssociationProviderRegistry;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.oauth.scope.OAuthScope;
@@ -129,7 +130,8 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             }
 
             // Write as JSON
-            final JSONObject jsonAccount = AccountWriter.write(newAccount, session);
+            OAuthAccountAssociationProviderRegistry registry = getOAuthAccountAssociationProviderRegistry();
+            final JSONObject jsonAccount = AccountWriter.write(newAccount, registry.getAssociationProviders(newAccount.getId()), session);
             // Return appropriate result
             return new AJAXRequestResult(new SecureContentWrapper(jsonAccount, "json"), SecureContentWrapper.CONTENT_TYPE);
         } catch (final JSONException e) {

@@ -49,60 +49,44 @@
 
 package com.openexchange.oauth.json.oauthaccount;
 
-import com.openexchange.oauth.OAuthConstants;
-
 /**
- * {@link AccountField} - Enumeration for OAuth account fields.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link AssociationField} - Enumeration for OAuth account association fields.
+ * 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public enum AccountField {
+public enum AssociationField {
 
     /**
      * The identifier
      */
     ID("id"),
     /**
-     * The display name
+     * The folder (optional)
      */
-    DISPLAY_NAME(OAuthConstants.ARGUMENT_DISPLAY_NAME),
+    FOLDER("folder"),
     /**
-     * The service identifier
+     * The module
      */
-    SERVICE_ID("serviceId"),
+    MODULE("module"),
     /**
-     * The token
+     * The scopes
      */
-    TOKEN("token"),
+    SCOPES("scopes"),
     /**
-     * The secret
+     * The name
      */
-    SECRET(OAuthConstants.ARGUMENT_SECRET),
-    /**
-     * The authorization URL
-     */
-    AUTH_URL("authUrl"),
-    /**
-     * The interaction type
-     */
-    INTERACTION_TYPE("type"),
-    /**
-     * The enabled OAuth scopes of the account
-     */
-    ENABLED_SCOPES("enabledScopes"),
-    /**
-     * The available scopes of the provider
-     */
-    AVAILABLE_SCOPES("availableScopes"),
-    /**
-     * The associated accounts of the different modules
-     */
-    ASSOCIATIONS("associations")
+    NAME("name"),
     ;
 
-    private final String name;
+    private String name;
 
-    private AccountField(final String name) {
+    /**
+     * Initialises a new {@link AssociationField}.
+     * 
+     * @param name The association's name
+     */
+    private AssociationField(String name) {
         this.name = name;
     }
 
@@ -114,5 +98,4 @@ public enum AccountField {
     public String getName() {
         return name;
     }
-
 }

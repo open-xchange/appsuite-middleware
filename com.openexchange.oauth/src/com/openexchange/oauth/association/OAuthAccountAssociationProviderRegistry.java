@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,28 @@
  *
  */
 
-package com.openexchange.oauth.json.oauthaccount;
+package com.openexchange.oauth.association;
 
-import com.openexchange.oauth.OAuthConstants;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 
 /**
- * {@link AccountField} - Enumeration for OAuth account fields.
+ * {@link OAuthAccountAssociationProviderRegistry}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public enum AccountField {
+public interface OAuthAccountAssociationProviderRegistry {
 
     /**
-     * The identifier
+     * Returns a {@link List} with all known {@link OAuthAccountAssociationProvider}s for the
+     * specified account
+     * 
+     * @param oauthAccountId The OAuth account's identifier
+     * @return a {@link List} with all known {@link OAuthAccountAssociationProvider}s for the
+     *         specified account
+     * @throws OXException if an error is occurred
      */
-    ID("id"),
-    /**
-     * The display name
-     */
-    DISPLAY_NAME(OAuthConstants.ARGUMENT_DISPLAY_NAME),
-    /**
-     * The service identifier
-     */
-    SERVICE_ID("serviceId"),
-    /**
-     * The token
-     */
-    TOKEN("token"),
-    /**
-     * The secret
-     */
-    SECRET(OAuthConstants.ARGUMENT_SECRET),
-    /**
-     * The authorization URL
-     */
-    AUTH_URL("authUrl"),
-    /**
-     * The interaction type
-     */
-    INTERACTION_TYPE("type"),
-    /**
-     * The enabled OAuth scopes of the account
-     */
-    ENABLED_SCOPES("enabledScopes"),
-    /**
-     * The available scopes of the provider
-     */
-    AVAILABLE_SCOPES("availableScopes"),
-    /**
-     * The associated accounts of the different modules
-     */
-    ASSOCIATIONS("associations")
-    ;
-
-    private final String name;
-
-    private AccountField(final String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets the name
-     *
-     * @return The name
-     */
-    public String getName() {
-        return name;
-    }
-
+    List<OAuthAccountAssociationProvider> getAssociationProviders(int oauthAccountId) throws OXException;
 }

@@ -65,6 +65,7 @@ import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.association.OAuthAccountAssociationProviderRegistry;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
@@ -114,7 +115,7 @@ public class CallbackAction extends AbstractOAuthTokenAction {
         }
         final Map<String, Object> arguments = processOAuthArguments(requestData, session, service);
         OAuthAccount oauthAccount = oAuthService.upsertAccount(session, serviceId, getAccountId(requestData), OAuthInteractionType.CALLBACK, arguments, scopes);
-        
+
         // Trigger a reauthorize task if a reauthorize was requested
         String actionHint = (String) arguments.get(OAuthConstants.URLPARAM_ACTION_HINT);
         if (Strings.isNotEmpty(actionHint) && REAUTHORIZE_ACTION_HINT.equals(actionHint)) {
@@ -122,7 +123,8 @@ public class CallbackAction extends AbstractOAuthTokenAction {
             clusterLockService.runClusterTask(new ReauthorizeClusterTask(requestData, session, Integer.toString(oauthAccount.getId()), serviceId), new ExponentialBackOffRetryPolicy());
         }
         try {
-            final JSONObject jsonAccount = AccountWriter.write(oauthAccount, session);
+            OAuthAccountAssociationProviderRegistry registry = getOAuthAccountAssociationProviderRegistry();
+            final JSONObject jsonAccount = AccountWriter.write(oauthAccount, registry.getAssociationProviders(oauthAccount.getId()), session);
             return new AJAXRequestResult(new SecureContentWrapper(jsonAccount, "json"), SecureContentWrapper.CONTENT_TYPE);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

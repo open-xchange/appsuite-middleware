@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.association.OAuthAccountAssociationProviderRegistry;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -84,25 +85,24 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             final String accountId = request.getParameter("id");
             if (null == accountId) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
             }
             /*
              * Request account
              */
             final OAuthService oAuthService = getOAuthService();
-            final OAuthAccount account = oAuthService.getAccount(
-                session,
-                getUnsignedInteger(accountId));
+            final OAuthAccount account = oAuthService.getAccount(session, getUnsignedInteger(accountId));
             /*
              * Write account as a JSON object
              */
-            final JSONObject jsonObject = AccountWriter.write(account, session);
+            OAuthAccountAssociationProviderRegistry registry = getOAuthAccountAssociationProviderRegistry();
+            final JSONObject jsonObject = AccountWriter.write(account, registry.getAssociationProviders(account.getId()), session);
             /*
              * Return appropriate result
              */
             return new AJAXRequestResult(jsonObject);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
