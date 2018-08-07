@@ -189,6 +189,8 @@ Note: Properties for the 'configdb' will be overwritten by the properties define
 
 Note: Based on the underlying JDK there might be problems with the available TLS versions. Newer JDK versions might only use TLSv1.1 or higher and the configured database might only accept TLSv1.
 
+For a full property overview please have a look at the official [documentation](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-configuration-properties.html).
+
 
 # Reload properties and certificates in production
 
