@@ -110,25 +110,18 @@ public interface OAuthAccountAssociation {
 
     /**
      * Returns the module which the OAuth account is associated with
-     * 
+     *
      * @return the module which the OAuth account is associated with
      */
     String getModule();
 
     /**
      * Returns the optional folder of the association
-     * 
+     *
      * @return the optional folder or <code>null</code> if no
      *         folder is associated with this {@link OAuthAccountAssociation}
      */
     String optFolder();
-
-    /**
-     * Gets the association's type.
-     *
-     * @return The type
-     */
-    Type getType();
 
     // ---------------------------------------------------------------------------------------------------------------------
 
@@ -143,7 +136,7 @@ public interface OAuthAccountAssociation {
 
     /**
      * Returns an unmodifiable {@link List} with all enabled scopes of the association
-     * 
+     *
      * @return an unmodifiable {@link List} with all enabled scopes of the association
      */
     List<OAuthScope> getScopes();

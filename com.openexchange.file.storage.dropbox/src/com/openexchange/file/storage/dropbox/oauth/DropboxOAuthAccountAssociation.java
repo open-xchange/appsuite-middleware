@@ -58,7 +58,6 @@ import com.openexchange.file.storage.dropbox.access.DropboxOAuth2Access;
 import com.openexchange.oauth.association.Module;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.Status;
-import com.openexchange.oauth.association.Type;
 import com.openexchange.oauth.dropbox.DropboxOAuthScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
@@ -124,11 +123,6 @@ public class DropboxOAuthAccountAssociation implements OAuthAccountAssociation {
     }
 
     @Override
-    public Type getType() {
-        return Type.FILE_STORAGE;
-    }
-
-    @Override
     public Status getStatus(Session session) throws OXException {
         DropboxOAuth2Access access = new DropboxOAuth2Access(fileStorageAccount, session);
         try {
@@ -145,7 +139,7 @@ public class DropboxOAuthAccountAssociation implements OAuthAccountAssociation {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
      */
     @Override
@@ -155,7 +149,7 @@ public class DropboxOAuthAccountAssociation implements OAuthAccountAssociation {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
      */
     @Override
@@ -166,7 +160,7 @@ public class DropboxOAuthAccountAssociation implements OAuthAccountAssociation {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
      */
     @Override

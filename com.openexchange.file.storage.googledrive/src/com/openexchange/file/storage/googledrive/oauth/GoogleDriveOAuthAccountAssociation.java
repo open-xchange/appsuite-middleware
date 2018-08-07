@@ -60,7 +60,6 @@ import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.oauth.association.Module;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.Status;
-import com.openexchange.oauth.association.Type;
 import com.openexchange.oauth.google.GoogleOAuthScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
@@ -123,11 +122,6 @@ public class GoogleDriveOAuthAccountAssociation implements OAuthAccountAssociati
     @Override
     public String getDisplayName() {
         return fileStorageAccount.getDisplayName();
-    }
-
-    @Override
-    public Type getType() {
-        return Type.FILE_STORAGE;
     }
 
     @Override

@@ -58,7 +58,6 @@ import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
 import com.openexchange.oauth.association.Module;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.Status;
-import com.openexchange.oauth.association.Type;
 import com.openexchange.oauth.boxcom.BoxComOAuthScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
@@ -124,11 +123,6 @@ public class BoxOAuthAccountAssociation implements OAuthAccountAssociation {
     }
 
     @Override
-    public Type getType() {
-        return Type.FILE_STORAGE;
-    }
-
-    @Override
     public Status getStatus(Session session) throws OXException {
         BoxOAuthAccess access = new BoxOAuthAccess(fileStorageAccount, session);
         try {
@@ -145,7 +139,7 @@ public class BoxOAuthAccountAssociation implements OAuthAccountAssociation {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#getModule()
      */
     @Override
@@ -155,7 +149,7 @@ public class BoxOAuthAccountAssociation implements OAuthAccountAssociation {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
      */
     @Override
@@ -166,7 +160,7 @@ public class BoxOAuthAccountAssociation implements OAuthAccountAssociation {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#getScopes()
      */
     @Override

@@ -56,6 +56,7 @@ package com.openexchange.oauth.association;
  * @since v7.10.1
  */
 public enum Module {
+
     INFOSTORE("infostore"),
     MAIL("mail"),
     CALENDAR("calendar"),
@@ -71,9 +72,9 @@ public enum Module {
     }
 
     /**
-     * Gets the moduleName
+     * Gets the module name
      *
-     * @return The moduleName
+     * @return The module name
      */
     public String getModuleName() {
         return moduleName;
