@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.association.OAuthAccountAssociationProviderRegistry;
+import com.openexchange.oauth.association.OAuthAccountAssociationService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -85,11 +85,11 @@ public final class AllAction extends AbstractOAuthAJAXActionService {
             // Request accounts
             OAuthService oAuthService = getOAuthService();
             List<OAuthAccount> accounts = (null == serviceId) ? oAuthService.getAccounts(session) : oAuthService.getAccounts(session, serviceId);
-            OAuthAccountAssociationProviderRegistry registry = getOAuthAccountAssociationProviderRegistry();
+            OAuthAccountAssociationService associationService = getOAuthAccountAssociationService();
             // Write accounts as a JSON array
             JSONArray jsonArray = new JSONArray();
             for (OAuthAccount oAuthAccount : accounts) {
-                jsonArray.put(AccountWriter.write(oAuthAccount, registry.getAssociationProviders(oAuthAccount.getId()), session));
+                jsonArray.put(AccountWriter.write(oAuthAccount, associationService.getAssociationsFor(oAuthAccount.getId(), session), session));
             }
             // Return appropriate result
             return new AJAXRequestResult(jsonArray);

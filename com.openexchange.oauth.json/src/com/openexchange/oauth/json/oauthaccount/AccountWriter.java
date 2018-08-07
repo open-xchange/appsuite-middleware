@@ -51,7 +51,6 @@ package com.openexchange.oauth.json.oauthaccount;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,7 +60,6 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
-import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.oauth.json.AbstractOAuthWriter;
 import com.openexchange.session.Session;
 
@@ -95,47 +93,33 @@ public class AccountWriter extends AbstractOAuthWriter {
      * Writes specified account as a JSON object.
      *
      * @param account The account
-     * @param associationProviders The {@link OAuthAccountAssociationProvider}s
+     * @param associations The OAuth account associations
      * @return The JSON object
      * @throws JSONException If writing to JSON fails
      * @throws OXException
      */
-    public static JSONObject write(final OAuthAccount account, List<OAuthAccountAssociationProvider> associationProviders, Session session) throws JSONException, OXException {
+    public static JSONObject write(final OAuthAccount account, Collection<OAuthAccountAssociation> associations, Session session) throws JSONException, OXException {
         final JSONObject jAccount = new JSONObject(5);
         jAccount.put(AccountField.ID.getName(), account.getId());
         jAccount.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
         jAccount.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
         jAccount.put(AccountField.ENABLED_SCOPES.getName(), write(account.getEnabledScopes()));
         jAccount.put(AccountField.AVAILABLE_SCOPES.getName(), write(account.getMetaData().getAvailableScopes(session.getUserId(), session.getContextId())));
-        writeAssociations(jAccount, account.getId(), session, associationProviders);
+        writeAssociationsFor(jAccount, associations);
         return jAccount;
     }
 
     /**
-     * Writes the specified associations
-     * 
-     * @param jAccount The oauth account as json object
-     * @param associationProviders The {@link OAuthAccountAssociationProvider}s
-     * @throws OXException if an error occurs
-     * @throws JSONException if a JSON error occurs
-     */
-    private static void writeAssociations(JSONObject jAccount, int accountId, Session session, List<OAuthAccountAssociationProvider> associationProviders) throws OXException, JSONException {
-        if (associationProviders == null || associationProviders.isEmpty()) {
-            return;
-        }
-        for (OAuthAccountAssociationProvider provider : associationProviders) {
-            writeAssociationsFor(jAccount, provider.getAssociationsFor(accountId, session));
-        }
-    }
-
-    /**
      * Writes the specified associations to the specified {@link JSONObject}
-     * 
+     *
      * @param jAccount The oauth account as json object
      * @param associations The {@link OAuthAccountAssociation}s to write
      * @throws JSONException if a JSON error occurs
      */
     private static void writeAssociationsFor(JSONObject jAccount, Collection<OAuthAccountAssociation> associations) throws JSONException {
+        if (associations == null || associations.isEmpty()) {
+            return;
+        }
         JSONArray associationsArray = new JSONArray(associations.size());
         for (OAuthAccountAssociation association : associations) {
             associationsArray.put(writeAssociation(association));
@@ -145,7 +129,7 @@ public class AccountWriter extends AbstractOAuthWriter {
 
     /**
      * Writes the specified {@link OAuthAccountAssociation} as a {@link JSONObject}
-     * 
+     *
      * @param association The {@link OAuthAccountAssociation}
      * @return The {@link JSONObject} with the association
      * @throws JSONException if a JSON error occurs

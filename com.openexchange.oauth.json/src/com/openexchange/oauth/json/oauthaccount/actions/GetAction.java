@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.association.OAuthAccountAssociationProviderRegistry;
+import com.openexchange.oauth.association.OAuthAccountAssociationService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -95,8 +95,8 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
             /*
              * Write account as a JSON object
              */
-            OAuthAccountAssociationProviderRegistry registry = getOAuthAccountAssociationProviderRegistry();
-            final JSONObject jsonObject = AccountWriter.write(account, registry.getAssociationProviders(account.getId()), session);
+            OAuthAccountAssociationService associationService = getOAuthAccountAssociationService();
+            final JSONObject jsonObject = AccountWriter.write(account, associationService.getAssociationsFor(account.getId(), session), session);
             /*
              * Return appropriate result
              */
