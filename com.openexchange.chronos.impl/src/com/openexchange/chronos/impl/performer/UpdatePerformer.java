@@ -82,6 +82,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
+import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -197,7 +198,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * reload the (now splitted) series event & apply the update, taking over a new recurrence rule as needed
              */
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
-            updatedEventData.setRecurrenceRule(chooseRecurrenceRuleAfterSplit(originalSeriesMaster, updatedMasterEvent, updatedEventData));
+            updatedEventData = applyRecurrenceRuleAfterSplit(originalSeriesMaster, updatedMasterEvent, updatedEventData);
             updateEvent(updatedMasterEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
         } else if (contains(originalSeriesMaster.getChangeExceptionDates(), recurrenceId)) {
             /*
@@ -543,38 +544,40 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param originalSeriesMaster The original series master event (before the split)
      * @param updatedSeriesMaster The updated series master event (after the split)
      * @param clientUpdate The updated event data as passed by the client
-     * @return The recurrence rule value to take over when updating the event
+     * @return The (possibly modified) updated event data to take over
      */
-    private static String chooseRecurrenceRuleAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster, Event clientUpdate) throws OXException {
+    private static Event applyRecurrenceRuleAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster, Event clientUpdate) throws OXException {
         Mapping<? extends Object, Event> rruleMapping = EventMapper.getInstance().get(EventField.RECURRENCE_RULE);
-        if (rruleMapping.isSet(clientUpdate) && false == rruleMapping.equals(originalSeriesMaster, clientUpdate) && false == rruleMapping.equals(clientUpdate, updatedSeriesMaster)) {
+        if (false == rruleMapping.isSet(clientUpdate) || rruleMapping.equals(updatedSeriesMaster, clientUpdate)) {
             /*
-             * rrule was actively updated by client, and different from value after split
+             * rrule not modified, nothing to do
              */
-            if (null == clientUpdate.getRecurrenceRule() || rruleMapping.equals(originalSeriesMaster, updatedSeriesMaster)) {
-                /*
-                 * rrule is removed or was not changed by split, so take over new rrule from client as-is
-                 */
-                return clientUpdate.getRecurrenceRule();
-            } else {
-                /*
-                 * rrule was modified during split, merge a possibly updated count value with client's rrule
-                 */
-                RecurrenceRule updatedRule = initRecurrenceRule(updatedSeriesMaster.getRecurrenceRule());
-                if (null != updatedRule.getCount()) {
-                    RecurrenceRule clientRule = initRecurrenceRule(clientUpdate.getRecurrenceRule());
-                    RecurrenceRule originalRule = initRecurrenceRule(originalSeriesMaster.getRecurrenceRule());
-                    if (null != clientRule.getCount() && clientRule.getCount().equals(originalRule.getCount())) {
-                        clientRule.setCount(updatedRule.getCount());
-                        return clientRule.toString();
-                    }
-                }
+            return clientUpdate;
+        }
+        if (null == clientUpdate.getRecurrenceRule() || rruleMapping.equals(originalSeriesMaster, updatedSeriesMaster)) {
+            /*
+             * rrule is removed or was not changed by split, so take over new rrule from client as-is
+             */
+            return clientUpdate;
+        }
+        /*
+         * rrule was modified during split, merge a possibly updated count value with client's rrule
+         */
+        RecurrenceRule updatedRule = initRecurrenceRule(updatedSeriesMaster.getRecurrenceRule());
+        if (null != updatedRule.getCount()) {
+            RecurrenceRule clientRule = initRecurrenceRule(clientUpdate.getRecurrenceRule());
+            RecurrenceRule originalRule = initRecurrenceRule(originalSeriesMaster.getRecurrenceRule());
+            if (null != clientRule.getCount() && clientRule.getCount().equals(originalRule.getCount())) {
+                clientRule.setCount(updatedRule.getCount());
+                clientUpdate = EventMapper.getInstance().copy(clientUpdate, null, (EventField[]) null);
+                clientUpdate.setRecurrenceRule(clientRule.toString());
+                return new UnmodifiableEvent(clientUpdate);
             }
         }
         /*
-         * fall back to rrule from splitted event series, otherwise
+         * stick with client-supplied data, otherwise
          */
-        return updatedSeriesMaster.getRecurrenceRule();
+        return clientUpdate;
     }
 
 }
