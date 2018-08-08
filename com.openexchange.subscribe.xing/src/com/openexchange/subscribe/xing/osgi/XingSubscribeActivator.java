@@ -58,6 +58,7 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.subscribe.SubscribeService;
@@ -65,6 +66,7 @@ import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.xing.Services;
 import com.openexchange.subscribe.xing.XingSubscribeService;
 import com.openexchange.subscribe.xing.groupware.XingSubscriptionsOAuthAccountDeleteListener;
+import com.openexchange.subscribe.xing.oauth.XingContactsOAuthAccountAssociationProvider;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
 
@@ -87,9 +89,7 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {
-            OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, XingOAuthAccessProvider.class,
-            ThreadPoolService.class };
+        return new Class[] { OAuthService.class, ContextService.class, SessiondService.class, DatabaseService.class, XingOAuthAccessProvider.class, ThreadPoolService.class };
     }
 
     @Override
@@ -102,9 +102,9 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
         /*
          * Register update task
          */
-        final DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(
-            new com.openexchange.subscribe.xing.groupware.XingCrawlerSubscriptionsRemoverTask());
+        final DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new com.openexchange.subscribe.xing.groupware.XingCrawlerSubscriptionsRemoverTask());
         registerService(UpdateTaskProviderService.class.getName(), providerService);
+        registerService(OAuthAccountAssociationProvider.class, new XingContactsOAuthAccountAssociationProvider());
     }
 
     @Override
@@ -118,18 +118,17 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
      * Registers the subscribe service.
      */
     public synchronized void registerSubscribeService() {
-        if (null == serviceRegistration) {
-            final XingSubscribeService xingSubscribeService = new XingSubscribeService(this);
-            serviceRegistration = context.registerService(SubscribeService.class, xingSubscribeService, null);
-            org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was started");
-
-            // Register the delete listener
-            final ContextService contextService = Services.getService(ContextService.class);
-            final XingSubscriptionsOAuthAccountDeleteListener deleteListener = new XingSubscriptionsOAuthAccountDeleteListener(
-                xingSubscribeService,
-                contextService);
-            deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, deleteListener, null);
+        if (null != serviceRegistration) {
+            return;
         }
+        final XingSubscribeService xingSubscribeService = new XingSubscribeService(this);
+        serviceRegistration = context.registerService(SubscribeService.class, xingSubscribeService, null);
+        org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was started");
+
+        // Register the delete listener
+        final ContextService contextService = Services.getService(ContextService.class);
+        final XingSubscriptionsOAuthAccountDeleteListener deleteListener = new XingSubscriptionsOAuthAccountDeleteListener(xingSubscribeService, contextService);
+        deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, deleteListener, null);
     }
 
     /**

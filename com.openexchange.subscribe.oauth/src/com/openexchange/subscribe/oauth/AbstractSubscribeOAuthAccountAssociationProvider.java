@@ -52,17 +52,15 @@ package com.openexchange.subscribe.oauth;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.session.Session;
-import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.subscribe.oauth.osgi.Services;
 
 /**
@@ -89,10 +87,9 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
      */
     @Override
     public Collection<OAuthAccountAssociation> getAssociationsFor(int accountId, Session session) throws OXException {
-        SubscriptionStorage subscriptionStorage = AbstractSubscribeService.STORAGE.get();
         Collection<OAuthAccountAssociation> associations = null;
         FolderService folderService = Services.getService(FolderService.class);
-        for (Subscription subscription : subscriptionStorage.getSubscriptionsOfUser(new ContextImpl(session.getContextId()), session.getUserId(), "com.openexchange.subscribe.mslive.contact")) {
+        for (Subscription subscription : getSubscriptionsOfUser(session)) {
             if (OAuthUtil.getAccountId(subscription.getConfiguration()) != accountId) {
                 continue;
             }
@@ -115,5 +112,14 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
      * @param contextId The context identifier
      * @param subscription The subscription
      */
-    public abstract OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription);
+    protected abstract OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription);
+
+    /**
+     * Returns a {@link List} with all {@link Subscription}s of the user
+     * 
+     * @param session the groupware {@link Session}
+     * @return A {@link List} with all {@link Subscription}s of the user.
+     * @throws OXException if an error is occurred
+     */
+    protected abstract List<Subscription> getSubscriptionsOfUser(Session session) throws OXException;
 }

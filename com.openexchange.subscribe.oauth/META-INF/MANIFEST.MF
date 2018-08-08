@@ -8,6 +8,7 @@ Automatic-Module-Name: com.openexchange.subscribe.oauth
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.exception,
  com.openexchange.folderstorage,
+ com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.generic,
  com.openexchange.oauth,

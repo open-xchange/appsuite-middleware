@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.oauth.osgi;
 
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -73,7 +74,7 @@ public class SubscribeOAuthActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { FolderService.class };
     }
 
     /*
