@@ -52,11 +52,11 @@ package com.openexchange.subscribe.mslive.oauth;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.session.Session;
@@ -93,7 +93,7 @@ public class MSLiveContactsOAuthAccountAssociationProvider implements OAuthAccou
         Collection<OAuthAccountAssociation> associations = null;
         FolderService folderService = Services.getService(FolderService.class);
         for (Subscription subscription : subscriptionStorage.getSubscriptionsOfUser(new ContextImpl(session.getContextId()), session.getUserId(), "com.openexchange.subscribe.mslive.contact")) {
-            if (getAccountId(subscription.getConfiguration()) != accountId) {
+            if (OAuthUtil.getAccountId(subscription.getConfiguration()) != accountId) {
                 continue;
             }
             if (null == associations) {
@@ -105,32 +105,5 @@ public class MSLiveContactsOAuthAccountAssociationProvider implements OAuthAccou
             associations.add(new MSLiveContactsOAuthAccountAssociation(accountId, session.getUserId(), session.getContextId(), folder.getName(), subscription));
         }
         return null == associations ? Collections.<OAuthAccountAssociation> emptyList() : associations;
-    }
-
-    /**
-     * Returns the OAuth account identifier from associated account's configuration
-     *
-     * @param configuration The configuration
-     * @return The account identifier or <code>-1</code> if account identifier cannot be determined
-     */
-    private int getAccountId(Map<String, Object> configuration) {
-        if (null == configuration) {
-            return -1;
-        }
-
-        Object accountId = configuration.get("account");
-        if (null == accountId) {
-            return -1;
-        }
-
-        if (accountId instanceof Integer) {
-            return ((Integer) accountId).intValue();
-        }
-
-        try {
-            return Integer.parseInt(accountId.toString());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
-        }
     }
 }

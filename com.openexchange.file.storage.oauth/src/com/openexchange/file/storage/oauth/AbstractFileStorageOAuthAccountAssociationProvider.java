@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.session.Session;
@@ -89,7 +90,7 @@ public abstract class AbstractFileStorageOAuthAccountAssociationProvider impleme
         List<FileStorageAccount> accounts = storageService.getAccounts(session);
         for (FileStorageAccount fileStorageAccount : accounts) {
             Map<String, Object> configuration = fileStorageAccount.getConfiguration();
-            if (getAccountId(configuration) != accountId) {
+            if (OAuthUtil.getAccountId(configuration) != accountId) {
                 continue;
             }
             if (null == associations) {
@@ -110,31 +111,4 @@ public abstract class AbstractFileStorageOAuthAccountAssociationProvider impleme
      * @param contextId The context identifier
      */
     public abstract OAuthAccountAssociation createAssociation(int accountId, FileStorageAccount account, int userId, int contextId);
-
-    /**
-     * Returns the OAuth account identifier from associated account's configuration
-     *
-     * @param configuration The configuration
-     * @return The account identifier or <code>-1</code> if account identifier cannot be determined
-     */
-    private int getAccountId(Map<String, Object> configuration) {
-        if (null == configuration) {
-            return -1;
-        }
-
-        Object accountId = configuration.get("account");
-        if (null == accountId) {
-            return -1;
-        }
-
-        if (accountId instanceof Integer) {
-            return ((Integer) accountId).intValue();
-        }
-
-        try {
-            return Integer.parseInt(accountId.toString());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
-        }
-    }
 }
