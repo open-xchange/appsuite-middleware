@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.config;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -93,27 +93,27 @@ public class MailProxyConfig implements Reloadable {
      */
     private static Property MAIL_NON_PROXY_HOSTS = DefaultProperty.valueOf("com.openexchange.mail.proxy.nonProxyHosts", null);
 
-    private final Cache<UserAndContext, List<String>> CACHE_NON_PROXY_HOSTS = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(30, TimeUnit.MINUTES).build();
+    private final Cache<UserAndContext, List<IPRange>> CACHE_NON_PROXY_HOSTS = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(30, TimeUnit.MINUTES).build();
 
     /**
      * Gets the whitelisted hosts
      *
      * @param contextId The context id
      * @param userId The user id
-     * @return A list of host names
+     * @return A list of {@link IPRange}
      * @throws OXException
      */
-    public List<String> getNonProxyHosts(int contextId, int userId) throws OXException {
+    public List<IPRange> getNonProxyHosts(int contextId, int userId) throws OXException {
         UserAndContext key = UserAndContext.newInstance(userId, contextId);
-        List<String> result = CACHE_NON_PROXY_HOSTS.getIfPresent(key);
+        List<IPRange> result = CACHE_NON_PROXY_HOSTS.getIfPresent(key);
         if (null != result) {
             return result;
         }
 
-        Callable<List<String>> loader = new Callable<List<String>>() {
+        Callable<List<IPRange>> loader = new Callable<List<IPRange>>() {
 
             @Override
-            public List<String> call() throws Exception {
+            public List<IPRange> call() throws Exception {
                 return doGetNonProxyHosts(userId, contextId);
             }
         };
@@ -135,7 +135,7 @@ public class MailProxyConfig implements Reloadable {
      * @throws OXException
      */
     @SuppressWarnings("unchecked")
-    protected List<String> doGetNonProxyHosts(int userId, int contextId) throws OXException {
+    protected List<IPRange> doGetNonProxyHosts(int userId, int contextId) throws OXException {
         LeanConfigurationService leanConfigService = ServerServiceRegistry.getInstance().getService(LeanConfigurationService.class);
         if (null == leanConfigService) {
             throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
@@ -147,7 +147,11 @@ public class MailProxyConfig implements Reloadable {
         }
 
         String[] splitByComma = Strings.splitByComma(property);
-        return Arrays.asList(splitByComma);
+        List<IPRange> result = new ArrayList<>(splitByComma.length);
+        for (String host : splitByComma) {
+            result.add(IPRange.parseRange(host));
+        }
+        return result;
     }
 
     /**

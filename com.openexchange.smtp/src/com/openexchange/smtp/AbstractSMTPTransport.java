@@ -107,6 +107,7 @@ import com.openexchange.mail.api.AuthenticationFailureHandlerResult;
 import com.openexchange.mail.api.AuthenticationFailureHandlerResult.Type;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.IPRange;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailProxyConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -432,9 +433,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     /*
                      * Remove proxy settings for whitelisted hosts
                      */
-                    List<String> nonProxyHosts = MailProxyConfig.getInstance().getNonProxyHosts(session.getContextId(), session.getUserId());
-                    for (String host : nonProxyHosts) {
-                        if (host.equalsIgnoreCase(smtpConfig.getServer())) {
+                    List<IPRange> nonProxyHosts = MailProxyConfig.getInstance().getNonProxyHosts(session.getContextId(), session.getUserId());
+                    for (IPRange host : nonProxyHosts) {
+                        if (host.contains(smtpConfig.getServer())) {
                             smtpProps.remove("mail.smtp.proxy.port");
                             smtpProps.remove("mail.smtp.proxy.port");
                             smtpProps.remove("mail.smtps.proxy.port");

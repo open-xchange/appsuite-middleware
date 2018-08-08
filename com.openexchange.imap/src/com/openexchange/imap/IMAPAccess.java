@@ -115,6 +115,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.cache.IMailAccessCache;
+import com.openexchange.mail.config.IPRange;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailProxyConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -771,9 +772,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Remove proxy settings for whitelisted hosts
              */
-            List<String> nonProxyHosts = MailProxyConfig.getInstance().getNonProxyHosts(session.getContextId(), session.getUserId());
-            for (String host : nonProxyHosts) {
-                if (host.equalsIgnoreCase(imapConfig.getServer())) {
+            List<IPRange> nonProxyHosts = MailProxyConfig.getInstance().getNonProxyHosts(session.getContextId(), session.getUserId());
+            for (IPRange host : nonProxyHosts) {
+                if (host.contains(imapConfig.getServer())) {
                     imapProps.remove("mail.imap.proxy.host");
                     imapProps.remove("mail.imap.proxy.port");
                     imapProps.remove("mail.imaps.proxy.host");
