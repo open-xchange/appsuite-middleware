@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,55 @@
  *
  */
 
-package com.openexchange.mail.oauth.google.osgi;
+package com.openexchange.mail.oauth.google;
 
-import com.openexchange.mail.oauth.MailOAuthProvider;
-import com.openexchange.mail.oauth.google.GoogleMailOAuthAccountAssociationProvider;
-import com.openexchange.mail.oauth.google.GoogleMailOAuthProvider;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
- * {@link GoogleMailOAuthActivator}
+ * {@link GoogleMailOAuthAccountAssociationProvider}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class GoogleMailOAuthActivator extends HousekeepingActivator {
+public class GoogleMailOAuthAccountAssociationProvider implements OAuthAccountAssociationProvider {
+
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link GoogleMailOAuthActivator}.
+     * Initialises a new {@link GoogleMailOAuthAccountAssociationProvider}.
      */
-    public GoogleMailOAuthActivator() {
+    public GoogleMailOAuthAccountAssociationProvider(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider#getAssociationsFor(int, com.openexchange.session.Session)
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(MailOAuthProvider.class, new GoogleMailOAuthProvider());
-        registerService(OAuthAccountAssociationProvider.class, new GoogleMailOAuthAccountAssociationProvider(this));
+    public Collection<OAuthAccountAssociation> getAssociationsFor(int accountId, Session session) throws OXException {
+        Collection<OAuthAccountAssociation> associations = null;
+        MailAccountStorageService storage = services.getService(MailAccountStorageService.class);
+        for (MailAccount mailAccount : storage.getUserMailAccounts(session.getUserId(), session.getContextId())) {
+            if (accountId != mailAccount.getMailOAuthId()) {
+                continue;
+            }
+            if (null == associations) {
+                associations = new LinkedList<>();
+            }
+            associations.add(new GoogleMailOAuthAccountAssociation(accountId, session.getUserId(), session.getContextId(), mailAccount));
+        }
+        return null == associations ? Collections.<OAuthAccountAssociation> emptyList() : associations;
     }
 }
