@@ -79,6 +79,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
@@ -872,7 +873,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
              * VCard
              */
             if (jMail.hasAndNotNull(MailJSONField.VCARD.getKey())) {
-                composedMail.setAppendVCard((jMail.getInt(MailJSONField.VCARD.getKey()) > 0));
+                composedMail.setAppendVCard(AJAXRequestDataTools.parseBoolParameter(jMail.getString(MailJSONField.VCARD.getKey())));
             }
             /*
              * Msg Ref
