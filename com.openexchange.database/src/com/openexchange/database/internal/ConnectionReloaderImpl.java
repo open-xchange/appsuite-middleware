@@ -121,7 +121,7 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
         try {
             stores.put(key, new ConfigAwareKeyStore(configuration, path, password, type));
         } catch (OXException e) {
-            LOGGER.debug("Unable to initialize keystore for " + key, e);
+            LOGGER.debug("Unable to initialize keystore for {}", key, e);
         }
     }
 
