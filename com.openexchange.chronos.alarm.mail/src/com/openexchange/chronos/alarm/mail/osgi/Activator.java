@@ -63,6 +63,7 @@ import com.openexchange.chronos.alarm.mail.MailAlarmDeliveryWorker;
 import com.openexchange.chronos.alarm.mail.MailAlarmDeliveryWorkerUpdateTask;
 import com.openexchange.chronos.alarm.mail.MailAlarmNotificationService;
 import com.openexchange.chronos.alarm.mail.impl.MailAlarmNotificationServiceImpl;
+import com.openexchange.chronos.provider.administrative.AdminstrativeCalendarUtilProvider;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
@@ -104,7 +105,7 @@ public class Activator extends HousekeepingActivator {
         return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class,
             LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
             ConfigurationService.class, ClusterTimerService.class, AdministrativeAlarmTriggerStorage.class, TemplateService.class,
-            ResourceService.class, HtmlService.class };
+            ResourceService.class, HtmlService.class, AdminstrativeCalendarUtilProvider.class };
     }
 
     @Override
@@ -131,6 +132,7 @@ public class Activator extends HousekeepingActivator {
         CalendarStorageFactory calendarStorageFactory = Tools.requireService(CalendarStorageFactory.class, this);
         ContextService ctxService = Tools.requireService(ContextService.class, this);
         CalendarUtilities calUtil = Tools.requireService(CalendarUtilities.class, this);
+        AdminstrativeCalendarUtilProvider alarmUtilProvider = Tools.requireService(AdminstrativeCalendarUtilProvider.class, this);
 
 
         int period = leanConfig.getIntProperty(MailAlarmConfig.PERIOD);
@@ -154,7 +156,17 @@ public class Activator extends HousekeepingActivator {
 
         boolean registeredCalendarHandler = false;
         for (int x = 0; x < workerCount; x++) {
-            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(storage, calendarStorageFactory, dbService, ctxService, calUtil, timerService, mailAlarmNotificationService, lookAhead, mailShift, overdueWaitTime);
+            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(   storage,
+                                                                            calendarStorageFactory,
+                                                                            dbService,
+                                                                            ctxService,
+                                                                            calUtil,
+                                                                            timerService,
+                                                                            mailAlarmNotificationService,
+                                                                            alarmUtilProvider,
+                                                                            lookAhead,
+                                                                            mailShift,
+                                                                            overdueWaitTime);
             ScheduledTimerTask scheduledTimerTask = clusterTimerService.scheduleAtFixedRate(CLUSTER_ID, worker, initialDelay, period, TimeUnit.MINUTES);
             scheduledTasks.put(scheduledTimerTask, worker);
             if (!registeredCalendarHandler) {

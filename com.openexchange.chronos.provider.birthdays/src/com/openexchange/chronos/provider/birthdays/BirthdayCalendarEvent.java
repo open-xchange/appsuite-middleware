@@ -62,10 +62,11 @@ import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.session.Session;
 
 /**
+ *
  * {@link BirthdayCalendarEvent}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.1
  */
 public class BirthdayCalendarEvent implements CalendarEvent {
 

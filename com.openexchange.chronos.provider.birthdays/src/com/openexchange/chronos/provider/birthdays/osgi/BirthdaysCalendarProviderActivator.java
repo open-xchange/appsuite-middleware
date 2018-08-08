@@ -56,6 +56,8 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.administrative.AdministrativeCalendarUtil;
+import com.openexchange.chronos.provider.birthdays.AdministrativeCalendarUtilImpl;
 import com.openexchange.chronos.provider.birthdays.BirthdaysCalendarProvider;
 import com.openexchange.chronos.provider.birthdays.ContactEventHandler;
 import com.openexchange.chronos.provider.birthdays.DefaultAlarmDate;
@@ -110,6 +112,7 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
              * register event handler for contact changes
              */
             registerService(EventHandler.class, new ContactEventHandler(this), singletonDictionary(EventConstants.EVENT_TOPIC, ContactEventHandler.TOPICS));
+            registerService(AdministrativeCalendarUtil.class, new AdministrativeCalendarUtilImpl(this));
         } catch (Exception e) {
             getLogger(BirthdaysCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

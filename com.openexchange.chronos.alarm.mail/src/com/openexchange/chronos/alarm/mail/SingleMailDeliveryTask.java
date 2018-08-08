@@ -60,6 +60,9 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.administrative.AdministrativeCalendarUtil;
+import com.openexchange.chronos.provider.administrative.AdminstrativeCalendarUtilProvider;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
@@ -96,19 +99,25 @@ class SingleMailDeliveryTask implements Runnable {
     private final DatabaseService dbservice;
     private final AdministrativeAlarmTriggerStorage storage;
     private final MailAlarmNotificationService mailService;
+    private final AdminstrativeCalendarUtilProvider utilProvider;
 
     /**
      * Initializes a new {@link SingleMailDeliveryTask}.
      *
+     * @param dbservice The {@link DatabaseService}
+     * @param storage The {@link AdministrativeAlarmTriggerStorage}
+     * @param mailService The {@link MailAlarmNotificationService}
      * @param factory The {@link CalendarStorageFactory}
      * @param calUtil The {@link CalendarUtilities}
+     * @param utilProvider The {@link AdminstrativeCalendarUtilProvider}
      * @param ctx The {@link Context}
      * @param account The account id
      * @param alarm The {@link Alarm}
      * @param trigger The {@link AlarmTrigger}
+     * @param callback The {@link MailAlarmDeliveryWorker} which started this task
      * @param processed The processed value
      */
-    public SingleMailDeliveryTask(DatabaseService dbservice, AdministrativeAlarmTriggerStorage storage, MailAlarmNotificationService mailService, CalendarStorageFactory factory, CalendarUtilities calUtil, Context ctx, int account, Alarm alarm, AlarmTrigger trigger, long processed, MailAlarmDeliveryWorker callback) {
+    public SingleMailDeliveryTask(DatabaseService dbservice, AdministrativeAlarmTriggerStorage storage, MailAlarmNotificationService mailService, CalendarStorageFactory factory, CalendarUtilities calUtil, AdminstrativeCalendarUtilProvider utilProvider, Context ctx, int account, Alarm alarm, AlarmTrigger trigger, long processed, MailAlarmDeliveryWorker callback) {
         this.ctx = ctx;
         this.alarm = alarm;
         this.factory = factory;
@@ -120,6 +129,8 @@ class SingleMailDeliveryTask implements Runnable {
         this.dbservice = dbservice;
         this.storage = storage;
         this.mailService = mailService;
+        this.utilProvider = utilProvider;
+
     }
 
     @Override
@@ -213,9 +224,19 @@ class SingleMailDeliveryTask implements Runnable {
             return null;
         }
         Event event = null;
+        AdministrativeCalendarUtil calUtil = null;
+        CalendarAccount calendarAccount = null;
         try {
-            event = storage.getEventStorage().loadEvent(trigger.getEventId(), null);
-            storage.getUtilities().loadAdditionalEventData(trigger.getUserId(), event, null);
+            calendarAccount = storage.getAccountStorage().loadAccount(trigger.getUserId(), account);
+            if (calendarAccount == null) {
+                event = tryLoadingViaEventStorage(storage);
+            } else {
+                calUtil = utilProvider.getAlarmUtil(calendarAccount.getProviderId());
+                if (calUtil == null) {
+                    event = tryLoadingViaEventStorage(storage);
+                }
+                event = calUtil.getEventByAlarm(ctx, calendarAccount, trigger.getUserId(), trigger.getEventId());
+            }
         } catch (OXException e) {
             LOG.trace("Unable to load event with id {}: {}",trigger.getEventId(), e.getMessage());
             throw e;
@@ -231,7 +252,17 @@ class SingleMailDeliveryTask implements Runnable {
         Map<Integer, List<Alarm>> loadAlarms = storage.getAlarmStorage().loadAlarms(event);
         storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
         storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
-        touch(storage.getEventStorage(), event.getId());
+        if (calUtil != null && calendarAccount != null) {
+            calUtil.touchEvent(ctx, calendarAccount, trigger.getUserId(), trigger.getEventId());
+        } else {
+            touch(storage.getEventStorage(), event.getId());
+        }
+        return event;
+    }
+
+    private Event tryLoadingViaEventStorage(CalendarStorage storage) throws OXException {
+        Event event = storage.getEventStorage().loadEvent(trigger.getEventId(), null);
+        storage.getUtilities().loadAdditionalEventData(trigger.getUserId(), event, null);
         return event;
     }
 
@@ -271,9 +302,9 @@ class SingleMailDeliveryTask implements Runnable {
             for (AlarmTrigger trigger : triggers) {
                 callback.scheduleTaskForEvent(writeCon, calStorage, new Key(cid, account, trigger.getEventId(), trigger.getAlarm()), trigger);
             }
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     /**

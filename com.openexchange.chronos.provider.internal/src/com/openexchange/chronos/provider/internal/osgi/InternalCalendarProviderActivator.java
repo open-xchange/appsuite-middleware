@@ -53,6 +53,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.administrative.AdministrativeCalendarUtil;
+import com.openexchange.chronos.provider.internal.AdministrativeCalendarUtilImpl;
 import com.openexchange.chronos.provider.internal.InternalCalendarProvider;
 import com.openexchange.chronos.provider.internal.InternalFreeBusyProvider;
 import com.openexchange.chronos.provider.internal.config.DefaultAlarmDate;
@@ -63,7 +65,9 @@ import com.openexchange.chronos.provider.internal.config.RestrictAllowedAttendee
 import com.openexchange.chronos.provider.internal.share.CalendarFolderHandlerModuleExtension;
 import com.openexchange.chronos.provider.internal.share.CalendarModuleAdjuster;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.folderstorage.FolderService;
@@ -71,6 +75,7 @@ import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Tools;
 import com.openexchange.share.core.ModuleAdjuster;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
@@ -95,7 +100,7 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             FolderService.class, CalendarService.class, RecurrenceService.class, UserService.class, ConversionService.class, ConfigurationService.class,
-            CalendarAccountService.class
+            CalendarAccountService.class, CalendarStorageFactory.class, CalendarUtilities.class
         };
     }
 
@@ -122,6 +127,7 @@ public class InternalCalendarProviderActivator extends HousekeepingActivator {
             registerService(JSlobEntry.class, new RestrictAllowedAttendeeChangesPublic(this));
             registerService(JSlobEntry.class, new DefaultAlarmDate(this));
             registerService(JSlobEntry.class, new DefaultAlarmDateTime(this));
+            registerService(AdministrativeCalendarUtil.class, new AdministrativeCalendarUtilImpl(Tools.requireService(CalendarStorageFactory.class, this), Tools.requireService(CalendarUtilities.class, this)));
         } catch (Exception e) {
             getLogger(InternalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;
