@@ -1097,6 +1097,77 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a specific recurrence identifier represents the <i>first</i> occurrence of a recurring event series
+     * or not.
+     *
+     * @param recurrenceId The recurrence identifier to check
+     * @param recurrenceData The associated recurrence data
+     * @param recurrenceService A reference to the recurrence service
+     * @return <code>true</code> if the recurrence identifier represents the <i>first</i> occurrence of a recurring event series, <code>false</code>, otherwise
+     * @see {@link EventFlag#FIRST_OCCURRENCE}
+     */
+    public static boolean isFirstOccurrence(RecurrenceId recurrenceId, RecurrenceData recurrenceData, RecurrenceService recurrenceService) throws OXException {
+        if (null == recurrenceData || null == recurrenceId) {
+            return false;
+        }
+        /*
+         * not the first occurrence if there is a prior exception date
+         */
+        long[] exceptionDates = recurrenceData.getExceptionDates();
+        if (null != exceptionDates && 0 < exceptionDates.length && exceptionDates[0] < recurrenceId.getValue().getTimestamp()) {
+            return false;
+        }
+        /*
+         * first occurrence if it matches the first occurrence produced by the recurrence rule
+         */
+        DefaultRecurrenceData plainRecurrenceData = new DefaultRecurrenceData(recurrenceData.getRecurrenceRule(), recurrenceData.getSeriesStart());
+        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(plainRecurrenceData);
+        return iterator.hasNext() && iterator.next().equals(recurrenceId);
+    }
+
+    /**
+     * Gets a value indicating whether a specific recurrence identifier represents the <i>last</i> occurrence of a recurring event series
+     * or not.
+     *
+     * @param recurrenceId The recurrence identifier to check
+     * @param recurrenceData The associated recurrence data
+     * @param recurrenceService A reference to the recurrence service
+     * @return <code>true</code> if the recurrence identifier represents the <i>last</i> occurrence of a recurring event series, <code>false</code>, otherwise
+     * @see {@link EventFlag#LAST_OCCURRENCE}
+     */
+    public static boolean isLastOccurrence(RecurrenceId recurrenceId, RecurrenceData recurrenceData, RecurrenceService recurrenceService) throws OXException {
+        if (null == recurrenceData || null == recurrenceId) {
+            return false;
+        }
+        /*
+         * not the last occurrence if there is a later exception date
+         */
+        long[] exceptionDates = recurrenceData.getExceptionDates();
+        if (null != exceptionDates && 0 < exceptionDates.length && exceptionDates[exceptionDates.length - 1] > recurrenceId.getValue().getTimestamp()) {
+            return false;
+        }
+        /*
+         * not the last occurrence if rule is unlimited
+         */
+        if (recurrenceService.isUnlimited(recurrenceData.getRecurrenceRule())) {
+            return false;
+        }
+        /*
+         * last occurrence if it matches the last occurrence produced by the recurrence rule
+         */
+        DefaultRecurrenceData plainRecurrenceData = new DefaultRecurrenceData(recurrenceData.getRecurrenceRule(), recurrenceData.getSeriesStart());
+        RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(plainRecurrenceData);
+        RecurrenceId lastRecurrenceId = null;
+        while (iterator.hasNext()) {
+            lastRecurrenceId = iterator.next();
+            if (lastRecurrenceId.getValue().after(recurrenceId.getValue())) {
+                break;
+            }
+        }
+        return null != lastRecurrenceId && lastRecurrenceId.equals(recurrenceId);
+    }
+
+    /**
      * Filters a list of attendees based on their calendaruser type, and whether they represent "internal" attendees or not.
      *
      * @param attendees The attendees to filter
@@ -1665,7 +1736,7 @@ public class CalendarUtils {
 
     /**
      * Gets all extended properties with a specific name. Wildcards are supported in the name, e.g. <code>X-MOZ-SNOOZE-TIME*</code>.
-     * 
+     *
      * @param extendedProperties The extended properties to check
      * @param name The property name to match
      * @return All matching properties, or an empty list if there are none
@@ -2052,9 +2123,10 @@ public class CalendarUtils {
      * @param event The event to get the flags for
      * @param calendarUser The identifier of the calendar user to get flags for
      * @param user The identifier of the current user, in case he is different from the calendar user
+     * @param additionals Additional event flags to include
      * @return The event flags
      */
-    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user) {
+    public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user, EventFlag... additionals) {
         EnumSet<EventFlag> flags = EnumSet.noneOf(EventFlag.class);
         if (null != event.getAttachments() && 0 < event.getAttachments().size()) {
             flags.add(EventFlag.ATTACHMENTS);
@@ -2107,6 +2179,9 @@ public class CalendarUtils {
             flags.add(EventFlag.SERIES);
         } else if (isSeriesException(event)) {
             flags.add(EventFlag.OVERRIDDEN);
+        }
+        if (null != additionals) {
+            flags.addAll(Arrays.asList(additionals));
         }
         return flags;
     }

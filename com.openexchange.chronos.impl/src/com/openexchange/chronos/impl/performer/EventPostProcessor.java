@@ -54,6 +54,9 @@ import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
+import static com.openexchange.chronos.common.CalendarUtils.isFirstOccurrence;
+import static com.openexchange.chronos.common.CalendarUtils.isLastOccurrence;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.sortEvents;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
@@ -66,15 +69,20 @@ import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -84,6 +92,7 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventsResult;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -102,7 +111,8 @@ public class EventPostProcessor {
     private final CalendarStorage storage;
     private final EventField[] requestedFields;
     private final List<Event> events;
-
+    private final Map<String, RecurrenceData> knownRecurrenceData;
+    
     private SelfProtection selfProtection;
     private long maximumTimestamp;
 
@@ -118,6 +128,12 @@ public class EventPostProcessor {
         this.storage = storage;
         this.events = new ArrayList<Event>();
         this.requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        this.knownRecurrenceData = new HashMap<String, RecurrenceData>();
+    }
+
+    public EventPostProcessor setSelfProtection(SelfProtection selfProtection) {
+        this.selfProtection = selfProtection;
+        return this;
     }
 
     /**
@@ -213,13 +229,16 @@ public class EventPostProcessor {
     }
 
     /**
-     * Gets the first event of all previously processed events.
-     *
-     * @return The first processed event, or <code>null</code> if there is none
+     * Gets the first event of the previously processed events.
+     * 
+     * @return The first event, or <code>null</code> if there is none
      */
     public Event getFirstEvent() throws OXException {
+        if (1 == events.size()) {
+            return events.get(0);
+        }
         List<Event> events = getEvents();
-        return 0 < events.size() ? events.get(0) : null;
+        return events.isEmpty() ? null : events.get(0);
     }
 
     /**
@@ -244,11 +263,13 @@ public class EventPostProcessor {
              * excluded if marked as hidden for the calendar user
              */
             //TODO: public folder?
-            return false;
+        }
+        if (isSeriesMaster(event)) {
+            knownRecurrenceData.put(event.getSeriesId(), new DefaultRecurrenceData(event));
         }
         event.setFolderId(folderId);
         if (null == requestedFields || Arrays.contains(requestedFields, EventField.FLAGS)) {
-            event.setFlags(getFlags(event, calendarUserId, session.getUserId()));
+            event = applyFlags(event, calendarUserId, session.getUserId());
         }
         maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
         event = anonymizeIfNeeded(session, event);
@@ -280,6 +301,43 @@ public class EventPostProcessor {
             return false;
         }
         return events.add(event);
+    }
+
+    private Event applyFlags(Event event, int calendarUser, int user) throws OXException {
+        EnumSet<EventFlag> flags = getFlags(event, calendarUser, session.getUserId());
+        if (isSeriesException(event)) {
+            RecurrenceData recurrenceData = optRecurrenceData(event);
+            if (null != recurrenceData) {
+                if (isLastOccurrence(event.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
+                    flags.add(EventFlag.LAST_OCCURRENCE);
+                }
+                if (isFirstOccurrence(event.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
+                    flags.add(EventFlag.FIRST_OCCURRENCE);
+                }
+            }
+        }
+        event.setFlags(flags);
+        return event;
+    }
+
+    private RecurrenceData optRecurrenceData(Event event) throws OXException {
+        String seriesId = event.getSeriesId();
+        if (null == seriesId) {
+            return null;
+        }
+        if (RecurrenceData.class.isInstance(event.getRecurrenceId())) {
+            return ((RecurrenceData) event.getRecurrenceId());
+        }
+        RecurrenceData recurrenceData = knownRecurrenceData.get(seriesId);
+        if (null == recurrenceData) {
+            EventField[] fields = new EventField[] { EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.RECURRENCE_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES };
+            Event seriesMaster = storage.getEventStorage().loadEvent(seriesId, fields);
+            if (null != seriesMaster) {
+                recurrenceData = new DefaultRecurrenceData(seriesMaster);
+                knownRecurrenceData.put(seriesId, recurrenceData);
+            }
+        }
+        return recurrenceData;
     }
 
     private void checkResultSizeNotExceeded() throws OXException {
