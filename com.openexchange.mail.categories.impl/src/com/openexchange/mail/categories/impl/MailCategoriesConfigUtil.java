@@ -250,7 +250,6 @@ public final class MailCategoriesConfigUtil implements Reloadable {
         return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? true : ("false".equalsIgnoreCase(value.trim()) ? false : defaultValue));
     }
 
-
     /**
      * Activates or deactivates the given category
      *
@@ -259,13 +258,15 @@ public final class MailCategoriesConfigUtil implements Reloadable {
      * @param session The user session
      * @throws OXException
      */
-    public static void activateProperty(String category, boolean activate, Session session) throws OXException{
+    public static void activateProperty(String category, boolean activate, Session session) throws OXException {
         ConfigViewFactory viewFactory = getConfigViewFactory();
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
-        ConfigProperty<String> property = view.property("user", MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, String.class);
+        String propertyName = MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE;
+        ConfigProperty<String> property = view.property("user", propertyName, String.class);
         property.set(String.valueOf(activate));
 
+        Reloadables.propagatePropertyChange(propertyName);
     }
 
     /**
@@ -282,6 +283,8 @@ public final class MailCategoriesConfigUtil implements Reloadable {
 
         ConfigProperty<String> confProperty = view.property("user", property, String.class);
         confProperty.set(value);
+
+        Reloadables.propagatePropertyChange(property);
     }
 
     @Override

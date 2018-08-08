@@ -50,6 +50,8 @@
 package com.openexchange.drive.events.apn2.osgi;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEventService;
@@ -60,6 +62,7 @@ import com.openexchange.drive.events.apn2.IOSApnsHttp2OptionsProvider;
 import com.openexchange.drive.events.apn2.internal.ApnsHttp2DriveEventPublisher;
 import com.openexchange.drive.events.apn2.internal.IOSApnsHttp2DriveEventPublisher;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -187,8 +190,12 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
         return new ApnsHttp2Options(new File(resourceName), password, production, topic);
     }
 
-    private ApnsHttp2Options createOptions(String privateKeyFile, String keyId, String teamId, boolean production, String topic) {
-        return new ApnsHttp2Options(new File(privateKeyFile), keyId, teamId, production, topic);
+    private ApnsHttp2Options createOptions(String privateKeyFile, String keyId, String teamId, boolean production, String topic) throws OXException {
+        try {
+            return new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
+        } catch (IOException e) {
+            throw ConfigurationExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

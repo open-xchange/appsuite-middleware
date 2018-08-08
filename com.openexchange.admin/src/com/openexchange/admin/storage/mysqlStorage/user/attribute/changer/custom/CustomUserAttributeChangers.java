@@ -52,6 +52,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.custo
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -60,6 +61,7 @@ import java.util.UUID;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractAttributeChangers;
+import com.openexchange.config.Reloadables;
 import com.openexchange.database.Databases;
 import com.openexchange.java.util.UUIDs;
 
@@ -82,17 +84,18 @@ public class CustomUserAttributeChangers extends AbstractAttributeChangers {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException {
         if (!userData.isUserAttributesset()) {
             return Collections.emptySet();
         }
         PreparedStatement stmtInsertAttribute = null;
         PreparedStatement stmtDeleteAttribute = null;
         Set<String> changedAttributes = new HashSet<>();
+        Set<String> changedConfigAttributes = new HashSet<>();
         try {
             for (Map.Entry<String, Map<String, String>> ns : userData.getUserAttributes().entrySet()) {
                 String namespace = ns.getKey();
@@ -117,6 +120,9 @@ public class CustomUserAttributeChangers extends AbstractAttributeChangers {
                         stmtInsertAttribute.addBatch();
                     }
                     changedAttributes.add(name);
+                    if ("config".equals(namespace)) {
+                        changedConfigAttributes.add(name);
+                    }
                 }
             }
 
@@ -132,12 +138,15 @@ public class CustomUserAttributeChangers extends AbstractAttributeChangers {
             Databases.closeSQLStuff(stmtInsertAttribute);
             Databases.closeSQLStuff(stmtDeleteAttribute);
         }
+        if (false == changedConfigAttributes.isEmpty()) {
+            pendingInvocations.add(() -> Reloadables.propagatePropertyChange(changedConfigAttributes));
+        }
         return changedAttributes;
     }
 
     /**
      * Prepare the specified statement with the context and user identifiers
-     * 
+     *
      * @param sqlStatement The SQL statement to prepare
      * @param contextId The context identifier
      * @param userId The user identifier

@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.guipref;
 
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -85,13 +86,8 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
         super(EnumSet.noneOf(EmptyAttribute.class));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
-     */
     @Override
-    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException {
         Map<String, String> guiPreferences = userData.getGuiPreferences();
         if (guiPreferences == null) {
             return EMPTY_SET;
@@ -122,7 +118,7 @@ public class GuiPreferenceUserAttributeChangers extends AbstractAttributeChanger
 
     /**
      * Returns the {@link SettingStorage} instance for the specified user in the specified context
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return the {@link SettingStorage} instance for the specified user in the specified context

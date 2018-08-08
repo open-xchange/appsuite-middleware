@@ -59,6 +59,7 @@ import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options.AuthType;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.ApnsClientBuilder;
 import com.turo.pushy.apns.auth.ApnsSigningKey;
@@ -116,7 +117,7 @@ public class ApnsHttp2Utility {
             } else {
                 clientBuilder = new ApnsClientBuilder()
                     .setApnsServer(options.isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
-                    .setSigningKey(ApnsSigningKey.loadFromPkcs8File(options.getPrivateKey(), options.getTeamId(), options.getKeyId()));
+                    .setSigningKey(ApnsSigningKey.loadFromInputStream(Streams.newByteArrayInputStream(options.getPrivateKey()), options.getTeamId(), options.getKeyId()));
             }
             return clientBuilder.build();
         } catch (FileNotFoundException e) {

@@ -619,6 +619,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
         @Override
         public Boolean call() throws Exception {
+            boolean success = false;
             try {
                 hasRun.set(STATUS_RUNNING);
 
@@ -643,15 +644,18 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                     SearchTerm<?> searchTerm = mailCategoriesService.getSearchTerm(rule);
                     MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullname(), searchTerm, rule.getFlag(), null);
                 }
+
+                success = true;
                 hasRun.set(STATUS_FINISHED);
-            } catch (Exception e) {
-                try {
-                    hasRun.set(STATUS_ERROR);
-                } catch (OXException ox) {
+            } finally {
+                if (false == success) {
+                    try {
+                        hasRun.set(STATUS_ERROR);
+                    } catch (OXException ox) {
+                    }
                 }
-                return false;
             }
-            return true;
+            return success;
         }
 
     }

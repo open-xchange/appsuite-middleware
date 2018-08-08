@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -73,7 +74,7 @@ public abstract class AbstractUserAttributeChangers extends AbstractAttributeCha
     private static final Logger LOG = LoggerFactory.getLogger(UserSettingMailAttributeChangers.class);
 
     private final Map<Attribute, UserAttributeChanger> changers;
-    private String table;
+    private final String table;
 
     /**
      * Initialises a new {@link AbstractUserAttributeChangers}.
@@ -86,18 +87,13 @@ public abstract class AbstractUserAttributeChangers extends AbstractAttributeCha
 
     /**
      * Initialises the changers
-     * 
+     *
      * @return a map with the changers
      */
     protected abstract Map<Attribute, UserAttributeChanger> initialiseChangers();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
-     */
     @Override
-    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException {
         Set<String> changedAttributes = new HashSet<>();
         for (Attribute attribute : getAttributes()) {
             if (change(attribute, userData, userId, contextId, connection)) {
@@ -109,7 +105,7 @@ public abstract class AbstractUserAttributeChangers extends AbstractAttributeCha
 
     /**
      * Changes the specified {@link Attribute}
-     * 
+     *
      * @param attribute The {@link Attribute} to change
      * @param userData The {@link User} data
      * @param userId the user identifier

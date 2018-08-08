@@ -52,6 +52,7 @@ package com.openexchange.config.json.actions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -111,6 +112,8 @@ public class SetPropertyAction extends AbstractConfigAction {
 
         ConfigProperty<String> property = view.property("context", propertyName, String.class);
         property.set(propertyValue); // Fails if protected
+
+        Reloadables.propagatePropertyChange(propertyName);
 
         return new AJAXRequestResult(new JSONObject(2).put("name", propertyName).put("value", property.get())); // Defaults to "json" format
     }
