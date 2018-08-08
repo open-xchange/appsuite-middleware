@@ -129,28 +129,33 @@ public class MailAlarmNotificationGenerator {
             this.resources = lResources;
         }
 
-        List<Attendee> attendees = event.getAttendees();
+        List<Attendee> attendees = CalendarUtils.filter(event.getAttendees(), null, CalendarUserType.INDIVIDUAL);
         if (attendees != null && !attendees.isEmpty()) {
             this.participants = new ArrayList<>();
             for (Attendee attendee : attendees) {
-                if (attendee.getCuType() != CalendarUserType.INDIVIDUAL) {
-                    continue;
-                }
                 NotificationParticipant participant = null;
+                String eMail = extractEMailAddress(attendee);
                 if (CalendarUtils.isOrganizer(event, attendee.getEntity())) {
-                    this.organizer = new NotificationParticipant(ITipRole.ORGANIZER, false, attendee.getEMail(), attendee.getEntity());
+                    this.organizer = new NotificationParticipant(ITipRole.ORGANIZER, false, eMail, attendee.getEntity());
                     this.organizer.setConfirmStatus(attendee.getPartStat());
                     participants.add(this.organizer);
                     continue;
                 } else if (CalendarUtils.isExternalUser(attendee)) {
-                    participant = new NotificationParticipant(ITipRole.ATTENDEE, true, attendee.getEMail());
+                    participant = new NotificationParticipant(ITipRole.ATTENDEE, true, eMail);
                 } else {
-                    participant = new NotificationParticipant(ITipRole.ATTENDEE, false, attendee.getEMail(), attendee.getEntity());
+                    participant = new NotificationParticipant(ITipRole.ATTENDEE, false, eMail, attendee.getEntity());
                 }
                 participant.setConfirmStatus(attendee.getPartStat());
                 participants.add(participant);
             }
         }
+    }
+
+    private String extractEMailAddress(Attendee attendee) {
+        if (Strings.isEmpty(attendee.getEMail())) {
+            return CalendarUtils.extractEMailAddress(attendee.getUri());
+        }
+        return attendee.getEMail();
     }
 
     public ExtendedNotificationMail create(String templateName) throws OXException {
