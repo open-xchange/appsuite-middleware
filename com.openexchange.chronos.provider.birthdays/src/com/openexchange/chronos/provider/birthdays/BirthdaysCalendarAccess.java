@@ -67,6 +67,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmPreparator;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -85,6 +86,7 @@ import com.openexchange.chronos.provider.extensions.SubscribeAware;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
@@ -255,6 +257,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), eventID.getRecurrenceID());
         }
         Event originalEvent = eventConverter.getSeriesMaster(getBirthdayContact(eventID.getObjectID()));
+        AlarmPreparator.getInstance().prepareEMailAlarms(session, services.getOptionalService(CalendarUtilities.class), alarms);
         UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms);
         DefaultCalendarResult result = new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
         return notifyHandlers(result);

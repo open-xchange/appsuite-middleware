@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.impl.performer;
+package com.openexchange.chronos;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,8 +56,10 @@ import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link AlarmPreparator}
@@ -93,7 +95,24 @@ public class AlarmPreparator {
         if(alarms!=null) {
             for (Alarm alarm : alarms) {
                 if (alarm.containsAction() && AlarmAction.EMAIL.equals(alarm.getAction())) {
-                    prepareAlarm(session, alarm);
+                    prepareAlarm(session.getEntityResolver(), session.getUserId(), alarm);
+                }
+            }
+        }
+    }
+
+    /**
+     * Prepares all eMail alarms
+     *
+     * @param session The calendar session
+     * @param alarms The alarms of the event
+     * @throws OXException
+     */
+    public void prepareEMailAlarms(Session session, CalendarUtilities calUtil, List<Alarm> alarms) throws OXException {
+        if(alarms!=null) {
+            for (Alarm alarm : alarms) {
+                if (alarm.containsAction() && AlarmAction.EMAIL.equals(alarm.getAction())) {
+                    prepareAlarm(calUtil == null ? null : calUtil.getEntityResolver(session.getContextId()), session.getUserId(), alarm);
                 }
             }
         }
@@ -106,8 +125,8 @@ public class AlarmPreparator {
      * @param alarm The mail alarm
      * @throws OXException
      */
-    private void prepareAlarm(CalendarSession session, Alarm alarm) throws OXException {
-        prepareAttendees(session, alarm);
+    private void prepareAlarm(EntityResolver resolver, int userId, Alarm alarm) throws OXException {
+        prepareAttendees(resolver, userId, alarm);
         if (!alarm.containsSummary()) {
             alarm.setSummary("Reminder");
         }
@@ -123,12 +142,11 @@ public class AlarmPreparator {
      * @param alarm A mail alarm
      * @throws OXException
      */
-    private void prepareAttendees(CalendarSession session, Alarm alarm) throws OXException {
+    private void prepareAttendees(EntityResolver entityResolver, int userId, Alarm alarm) throws OXException {
         // add current user as the only attendee
-        EntityResolver entityResolver = session.getEntityResolver();
         if (entityResolver != null) {
             Attendee attendee = new Attendee();
-            attendee.setEntity(session.getUserId());
+            attendee.setEntity(userId);
             attendee.setCuType(CalendarUserType.INDIVIDUAL);
             entityResolver.applyEntityData(attendee);
             alarm.setAttendees(Collections.singletonList(attendee));

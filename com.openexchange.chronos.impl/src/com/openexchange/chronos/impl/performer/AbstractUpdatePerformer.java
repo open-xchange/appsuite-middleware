@@ -89,6 +89,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.AlarmPreparator;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
