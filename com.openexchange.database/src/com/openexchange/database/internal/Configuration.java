@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -73,11 +74,11 @@ public final class Configuration {
 
     private static final String CONFIG_DB_FILENAME = "configdb.properties";
 
-    private Properties props;
+    private final AtomicReference<Properties> propsReference = new AtomicReference<Properties>();
 
     private static final String JDBC_CONFIG = "dbconnector.yaml";
 
-    private Properties jdbcProps;
+    private final AtomicReference<Properties> jdbcPropsReference = new AtomicReference<Properties>();
 
     private final Properties configDbReadProps = new Properties();
 
@@ -106,7 +107,7 @@ public final class Configuration {
     }
 
     Properties getJdbcProps() {
-        return jdbcProps;
+        return jdbcPropsReference.get();
     }
 
     private String getProperty(final Property property) {
@@ -120,6 +121,7 @@ public final class Configuration {
 
     private <T> T getUniversal(final Property property, final T def, final Convert<T> converter) {
         final T retval;
+        Properties props = propsReference.get();
         if (props != null && props.containsKey(property.getPropertyName())) {
             retval = converter.convert(props.getProperty(property.getPropertyName()));
         } else {
@@ -169,6 +171,7 @@ public final class Configuration {
     }
 
     public void readConfiguration(final ConfigurationService service) throws OXException {
+        Properties props = propsReference.get();
         if (null != props) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(this.getClass().getName());
         }
@@ -176,6 +179,7 @@ public final class Configuration {
         if (props.isEmpty()) {
             throw DBPoolingExceptionCodes.MISSING_CONFIGURATION.create();
         }
+        propsReference.set(props);
         readJdbcProps(service);
         separateReadWrite();
         loadDrivers();
@@ -183,7 +187,7 @@ public final class Configuration {
     }
 
     private void readJdbcProps(ConfigurationService config) {
-        jdbcProps = new Properties();
+        Properties jdbcProps = new Properties();
 
         // Set defaults:
         jdbcProps.setProperty("useUnicode", "true");
@@ -198,6 +202,7 @@ public final class Configuration {
 
         // Apply config
         jdbcProps.putAll(parseJdbcYaml(config));
+        jdbcPropsReference.set(jdbcProps);
     }
 
     private Map<String, String> parseJdbcYaml(ConfigurationService config) {
@@ -229,8 +234,10 @@ public final class Configuration {
     }
 
     private void separateReadWrite() {
+        Properties jdbcProps = jdbcPropsReference.get();
         configDbReadProps.putAll(jdbcProps);
         configDbWriteProps.putAll(jdbcProps);
+        Properties props = propsReference.get();
         for (final Object tmp : props.keySet()) {
             final String key = (String) tmp;
             if (key.startsWith("readProperty.")) {
@@ -274,8 +281,8 @@ public final class Configuration {
      * {@inheritDoc}
      */
     public void clear() {
-        props = null;
-        jdbcProps = null;
+        propsReference.set(null);
+        jdbcPropsReference.set(null);
         configDbReadProps.clear();
         configDbWriteProps.clear();
     }
@@ -342,8 +349,10 @@ public final class Configuration {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        Properties jdbcProps = jdbcPropsReference.get();
         result = prime * result + ((jdbcProps == null) ? 0 : jdbcProps.hashCode());
         result = prime * result + ((poolConfig == null) ? 0 : poolConfig.hashCode());
+        Properties props = propsReference.get();
         result = prime * result + ((props == null) ? 0 : props.hashCode());
         result = prime * result + ((configDbReadProps == null) ? 0 : configDbReadProps.hashCode());
         result = prime * result + ((configDbWriteProps == null) ? 0 : configDbWriteProps.hashCode());
@@ -362,11 +371,13 @@ public final class Configuration {
             return false;
         }
         Configuration other = (Configuration) obj;
+        Properties jdbcProps = jdbcPropsReference.get();
+        Properties otherJdbcProps = other.jdbcPropsReference.get();
         if (jdbcProps == null) {
-            if (other.jdbcProps != null) {
+            if (otherJdbcProps != null) {
                 return false;
             }
-        } else if (!jdbcProps.equals(other.jdbcProps)) {
+        } else if (!jdbcProps.equals(otherJdbcProps)) {
             return false;
         }
         if (poolConfig == null) {
@@ -376,11 +387,13 @@ public final class Configuration {
         } else if (!poolConfig.equals(other.poolConfig)) {
             return false;
         }
+        Properties props = propsReference.get();
+        Properties otherProps = other.propsReference.get();
         if (props == null) {
-            if (other.props != null) {
+            if (otherProps != null) {
                 return false;
             }
-        } else if (!ConfigurationUtil.matches(props, other.props)) {
+        } else if (!ConfigurationUtil.matches(props, otherProps)) {
             return false;
         }
         if (configDbReadProps == null) {

@@ -76,13 +76,13 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
 
     private static final String USE_SSL = "useSSL";
 
-    public static final String CLIENT_CERT_PATH_NAME     = "clientCertificateKeyStoreUrl";
-    public static final String CLIENT_CERT_PASSWORD_NAME = "clientCertificateKeyStorePassword";
-    public static final String CLIENT_CERT_TYPE          = "clientCertificateKeyStoreType";
+    private static final String CLIENT_CERT_PATH_NAME     = "clientCertificateKeyStoreUrl";
+    private static final String CLIENT_CERT_PASSWORD_NAME = "clientCertificateKeyStorePassword";
+    private static final String CLIENT_CERT_TYPE          = "clientCertificateKeyStoreType";
 
-    public static final String TRUST_CERT_PATH_NAME     = "trustCertificateKeyStoreUrl";
-    public static final String TRUST_CERT_PASSWORD_NAME = "trustCertificateKeyStorePassword";
-    public static final String TRUST_CERT_TYPE          = "trustCertificateKeyStoreType";
+    private static final String TRUST_CERT_PATH_NAME     = "trustCertificateKeyStoreUrl";
+    private static final String TRUST_CERT_PASSWORD_NAME = "trustCertificateKeyStorePassword";
+    private static final String TRUST_CERT_TYPE          = "trustCertificateKeyStoreType";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionReloaderImpl.class);
 
@@ -109,7 +109,7 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
         savePut("ClientStore", CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, CLIENT_CERT_TYPE);
 
         if (stores.isEmpty() && isSSL(configuration)) {
-            LOGGER.error("No keystores where added also 'useSSL' was set. SSL can't be used");
+            LOGGER.error("No keystores were added although 'useSSL' was set. SSL can't be used");
             throw DatabaseExceptionCodes.SQL_ERROR.create("No SSL keystores where configured");
         }
 
@@ -173,6 +173,11 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
         try {
             Configuration configuration = new Configuration();
             configuration.readConfiguration(configService);
+
+            // Ignore listeners on start up
+            loadKeyStores(configuration);
+
+
             // Check if key store was modified or configuration was changed and we need to notify
             boolean keyStoreUpdate = loadKeyStores(configuration);
             if (keyStoreUpdate || false == this.configuration.equals(configuration)) {
