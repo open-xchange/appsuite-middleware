@@ -47,34 +47,42 @@
  *
  */
 
-package com.openexchange.subscribe.mslive.oauth;
+package com.openexchange.subscribe.oauth.osgi;
 
-import com.openexchange.oauth.association.OAuthAccountAssociation;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link MSLiveContactsOAuthAccountAssociationProvider}
+ * {@link SubscribeOAuthActivator}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MSLiveContactsOAuthAccountAssociationProvider extends AbstractSubscribeOAuthAccountAssociationProvider {
+public class SubscribeOAuthActivator extends HousekeepingActivator {
 
     /**
-     * Initialises a new {@link MSLiveContactsOAuthAccountAssociationProvider}.
+     * Initialises a new {@link SubscribeOAuthActivator}.
      */
-    public MSLiveContactsOAuthAccountAssociationProvider() {
+    public SubscribeOAuthActivator() {
         super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider#createAssociation(int, int, int, java.lang.String, com.openexchange.subscribe.Subscription)
+     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
     @Override
-    public OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription) {
-        return new MSLiveContactsOAuthAccountAssociation(accountId, userId, contextId, folderName, subscription);
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     */
+    @Override
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
     }
 }

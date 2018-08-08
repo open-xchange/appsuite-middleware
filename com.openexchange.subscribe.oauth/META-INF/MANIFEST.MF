@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Subscribe OAuth Bundle
+Bundle-SymbolicName: com.openexchange.subscribe.oauth
+Bundle-Version: 7.10.1
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.subscribe.oauth
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.exception,
+ com.openexchange.folderstorage,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.generic,
+ com.openexchange.oauth,
+ com.openexchange.oauth.association,
+ com.openexchange.oauth.association.spi,
+ com.openexchange.osgi,
+ com.openexchange.secret,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.subscribe,
+ org.osgi.framework;version="1.9.0"
+Export-Package: com.openexchange.subscribe.oauth
+Bundle-Activator: com.openexchange.subscribe.oauth.osgi.SubscribeOAuthActivator

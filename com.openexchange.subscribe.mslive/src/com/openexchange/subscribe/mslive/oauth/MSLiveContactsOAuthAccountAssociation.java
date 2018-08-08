@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
-import com.openexchange.oauth.association.AbstractOAuthAccountAssociation;
 import com.openexchange.oauth.association.Module;
 import com.openexchange.oauth.association.Status;
 import com.openexchange.oauth.msliveconnect.MSLiveConnectOAuthScope;
@@ -62,6 +61,7 @@ import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.mslive.MSLiveApiClient;
+import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociation;
 
 /**
  * {@link MSLiveContactsOAuthAccountAssociation}
@@ -69,48 +69,13 @@ import com.openexchange.subscribe.mslive.MSLiveApiClient;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MSLiveContactsOAuthAccountAssociation extends AbstractOAuthAccountAssociation {
-
-    private final Subscription subscription;
-    private final String displayName;
+public class MSLiveContactsOAuthAccountAssociation extends AbstractSubscribeOAuthAccountAssociation {
 
     /**
      * Initialises a new {@link MSLiveContactsOAuthAccountAssociation}.
      */
     public MSLiveContactsOAuthAccountAssociation(int accountId, int userId, int contextId, String displayName, Subscription subscription) {
-        super(accountId, userId, contextId);
-        this.displayName = displayName;
-        this.subscription = subscription;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getServiceId()
-     */
-    @Override
-    public String getServiceId() {
-        return subscription.getSource().getId();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getId()
-     */
-    @Override
-    public String getId() {
-        return Integer.toString(subscription.getId());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getDisplayName()
-     */
-    @Override
-    public String getDisplayName() {
-        return displayName;
+        super(accountId, userId, contextId, displayName, subscription);
     }
 
     /*
@@ -121,16 +86,6 @@ public class MSLiveContactsOAuthAccountAssociation extends AbstractOAuthAccountA
     @Override
     public String getModule() {
         return Module.CONTACTS.getModuleName();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
-     */
-    @Override
-    public String optFolder() {
-        return subscription.getFolderId();
     }
 
     /*
@@ -172,6 +127,6 @@ public class MSLiveContactsOAuthAccountAssociation extends AbstractOAuthAccountA
     @Override
     protected AbstractOAuthAccess newAccess(Session session) throws OXException {
         // nope
-        return null;
+        throw new UnsupportedOperationException("There is no OAuthAccess for MSLive.");
     }
 }

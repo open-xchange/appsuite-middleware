@@ -47,34 +47,77 @@
  *
  */
 
-package com.openexchange.subscribe.mslive.oauth;
+package com.openexchange.subscribe.oauth;
 
-import com.openexchange.oauth.association.OAuthAccountAssociation;
+import com.openexchange.oauth.association.AbstractOAuthAccountAssociation;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider;
 
 /**
- * {@link MSLiveContactsOAuthAccountAssociationProvider}
+ * {@link AbstractSubscribeOAuthAccountAssociation}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MSLiveContactsOAuthAccountAssociationProvider extends AbstractSubscribeOAuthAccountAssociationProvider {
+public abstract class AbstractSubscribeOAuthAccountAssociation extends AbstractOAuthAccountAssociation {
+
+    private final Subscription subscription;
+    private final String displayName;
 
     /**
-     * Initialises a new {@link MSLiveContactsOAuthAccountAssociationProvider}.
+     * Initialises a new {@link MSLiveContactsOAuthAccountAssociation}.
      */
-    public MSLiveContactsOAuthAccountAssociationProvider() {
-        super();
+    public AbstractSubscribeOAuthAccountAssociation(int accountId, int userId, int contextId, String displayName, Subscription subscription) {
+        super(accountId, userId, contextId);
+        this.displayName = displayName;
+        this.subscription = subscription;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider#createAssociation(int, int, int, java.lang.String, com.openexchange.subscribe.Subscription)
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getServiceId()
      */
     @Override
-    public OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription) {
-        return new MSLiveContactsOAuthAccountAssociation(accountId, userId, contextId, folderName, subscription);
+    public String getServiceId() {
+        return subscription.getSource().getId();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getId()
+     */
+    @Override
+    public String getId() {
+        return Integer.toString(subscription.getId());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#getDisplayName()
+     */
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
+     */
+    @Override
+    public String optFolder() {
+        return subscription.getFolderId();
+    }
+
+    /**
+     * Returns the {@link Subscription}'s metadata
+     * 
+     * @return the {@link Subscription}'s metadata
+     */
+    protected Subscription getSubscription() {
+        return subscription;
     }
 }
