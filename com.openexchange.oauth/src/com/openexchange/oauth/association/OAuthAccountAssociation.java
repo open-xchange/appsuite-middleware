@@ -121,7 +121,7 @@ public interface OAuthAccountAssociation {
      * @return the optional folder or <code>null</code> if no
      *         folder is associated with this {@link OAuthAccountAssociation}
      */
-    String optFolder();
+    String getFolder();
 
     // ---------------------------------------------------------------------------------------------------------------------
 

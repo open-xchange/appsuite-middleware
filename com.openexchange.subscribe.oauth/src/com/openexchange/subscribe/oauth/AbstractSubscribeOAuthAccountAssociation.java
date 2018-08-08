@@ -108,7 +108,7 @@ public abstract class AbstractSubscribeOAuthAccountAssociation extends AbstractO
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
      */
     @Override
-    public String optFolder() {
+    public String getFolder() {
         return subscription.getFolderId();
     }
 

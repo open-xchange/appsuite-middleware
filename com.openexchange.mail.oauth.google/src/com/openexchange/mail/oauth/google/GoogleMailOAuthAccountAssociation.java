@@ -140,7 +140,7 @@ public class GoogleMailOAuthAccountAssociation extends AbstractOAuthAccountAssoc
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
      */
     @Override
-    public String optFolder() {
+    public String getFolder() {
         return mailAccount.getRootFolder();
     }
 

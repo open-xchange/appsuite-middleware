@@ -126,7 +126,7 @@ public class GoogleCalendarOAuthAccountAssociation extends AbstractOAuthAccountA
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
      */
     @Override
-    public String optFolder() {
+    public String getFolder() {
         return IDMangler.mangle("cal", getId(), "0"); // FIXME: constant for root folder?
     }
 

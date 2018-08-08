@@ -103,7 +103,7 @@ public abstract class AbstractFileStorageOAuthAccountAssociation extends Abstrac
      * @see com.openexchange.oauth.association.OAuthAccountAssociation#optFolder()
      */
     @Override
-    public String optFolder() {
+    public String getFolder() {
         return new FolderID(getServiceId(), getId(), FileStorageFolder.ROOT_FULLNAME).toUniqueID();
     }
 

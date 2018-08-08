@@ -119,13 +119,13 @@ public class AccountWriter extends AbstractOAuthWriter {
     private static void writeAssociationsFor(JSONObject jAccount, Collection<OAuthAccountAssociation> associations) throws JSONException {
         if (associations == null || associations.isEmpty()) {
             jAccount.put(AccountField.ASSOCIATIONS.getName(), JSONArray.EMPTY_ARRAY);
-        } else {
-            JSONArray jAssociations = new JSONArray(associations.size());
-            for (OAuthAccountAssociation association : associations) {
-                jAssociations.put(writeAssociation(association));
-            }
-            jAccount.put(AccountField.ASSOCIATIONS.getName(), jAssociations);
+            return;
         }
+        JSONArray jAssociations = new JSONArray(associations.size());
+        for (OAuthAccountAssociation association : associations) {
+            jAssociations.put(writeAssociation(association));
+        }
+        jAccount.put(AccountField.ASSOCIATIONS.getName(), jAssociations);
     }
 
     /**
@@ -141,8 +141,8 @@ public class AccountWriter extends AbstractOAuthWriter {
         jAssociation.put(AssociationField.NAME.getName(), association.getDisplayName());
         jAssociation.put(AssociationField.SCOPES.getName(), association.getScopes());
         jAssociation.put(AssociationField.MODULE.getName(), association.getModule());
-        if (Strings.isNotEmpty(association.optFolder())) {
-            jAssociation.put(AssociationField.FOLDER.getName(), association.optFolder());
+        if (Strings.isNotEmpty(association.getFolder())) {
+            jAssociation.put(AssociationField.FOLDER.getName(), association.getFolder());
         }
         return jAssociation;
     }
