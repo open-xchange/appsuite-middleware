@@ -49,13 +49,19 @@
 
 package com.openexchange.mail.oauth.google;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.services.gmail.Gmail;
 import com.openexchange.exception.OXException;
+import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.association.AbstractOAuthAccountAssociation;
 import com.openexchange.oauth.association.Module;
+import com.openexchange.oauth.association.Status;
 import com.openexchange.oauth.google.GoogleOAuthScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
@@ -151,11 +157,31 @@ public class GoogleMailOAuthAccountAssociation extends AbstractOAuthAccountAssoc
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#getStatus(com.openexchange.session.Session)
+     */
+    @Override
+    public Status getStatus(Session session) throws OXException {
+        try {
+            OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(getOAuthAccountId(), session);
+            GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, session);
+            if (credentials == null) {
+                throw new IllegalArgumentException("Cannot get credentials. Neither the oauth account nor the credentials can be 'null'.");
+            }
+            Gmail gmail = new Gmail.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
+            gmail.users().getProfile("me").execute();
+            return Status.OK;
+        } catch (OXException | IOException e) {
+            return Status.RECREATION_NEEDED;
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.association.AbstractOAuthAccountAssociation#newAccess(com.openexchange.session.Session)
      */
     @Override
     protected AbstractOAuthAccess newAccess(Session session) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("No OAuthAccess for Google Mail.");
     }
 }
