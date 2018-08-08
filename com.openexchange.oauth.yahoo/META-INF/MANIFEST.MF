@@ -66,5 +66,6 @@ Import-Package: com.fasterxml.jackson.core,
  org.scribe.services,
  org.scribe.utils,
  org.slf4j
-Export-Package: com.openexchange.oauth.yahoo
+Export-Package: com.openexchange.oauth.yahoo,
+ com.openexchange.oauth.yahoo.access
 Bundle-ClassPath: .
