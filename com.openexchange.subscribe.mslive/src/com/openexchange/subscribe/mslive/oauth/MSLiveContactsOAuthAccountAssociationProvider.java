@@ -57,6 +57,8 @@ import com.openexchange.session.Session;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionStorage;
+import com.openexchange.subscribe.mslive.AbstractMSLiveSubscribeService;
+import com.openexchange.subscribe.mslive.ContactsMSLiveSubscribeService;
 import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider;
 
 /**
@@ -66,6 +68,11 @@ import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociation
  * @since v7.10.1
  */
 public class MSLiveContactsOAuthAccountAssociationProvider extends AbstractSubscribeOAuthAccountAssociationProvider {
+
+    /**
+     * The source id
+     */
+    private static final String SOURCE_ID = AbstractMSLiveSubscribeService.SOURCE_ID_PREFIX + ContactsMSLiveSubscribeService.SOURCE_ID_APPENDIX;
 
     /**
      * Initialises a new {@link MSLiveContactsOAuthAccountAssociationProvider}.
@@ -83,13 +90,15 @@ public class MSLiveContactsOAuthAccountAssociationProvider extends AbstractSubsc
     public OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription) {
         return new MSLiveContactsOAuthAccountAssociation(accountId, userId, contextId, folderName, subscription);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider#getSubscriptionsOfUser(com.openexchange.session.Session)
      */
     @Override
     protected List<Subscription> getSubscriptionsOfUser(Session session) throws OXException {
         SubscriptionStorage subscriptionStorage = AbstractSubscribeService.STORAGE.get();
-        return subscriptionStorage.getSubscriptionsOfUser(new ContextImpl(session.getContextId()), session.getUserId(), "com.openexchange.subscribe.mslive.contact");
+        return subscriptionStorage.getSubscriptionsOfUser(new ContextImpl(session.getContextId()), session.getUserId(), SOURCE_ID);
     }
 }

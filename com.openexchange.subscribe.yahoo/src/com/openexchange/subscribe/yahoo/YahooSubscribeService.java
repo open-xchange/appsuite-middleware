@@ -62,26 +62,30 @@ import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.yahoo.osgi.Activator;
 
-
 /**
  * {@link YahooSubscribeService}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class YahooSubscribeService extends AbstractSubscribeService{
+public class YahooSubscribeService extends AbstractSubscribeService {
 
-private final Activator activator;
+    /**
+     * The source id
+     */
+    public static final String SOURCE_ID = "com.openexchange.subscribe.socialplugin.yahoo";
+
+    private final Activator activator;
 
     private final SubscriptionSource source = new SubscriptionSource();
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(YahooSubscribeService.class);
 
-    public YahooSubscribeService(final Activator activator){
+    public YahooSubscribeService(final Activator activator) {
         this.activator = activator;
 
         source.setDisplayName("Yahoo");
         source.setFolderModule(FolderObject.CONTACT);
-        source.setId("com.openexchange.subscribe.socialplugin.yahoo");
+        source.setId(SOURCE_ID);
         source.setSubscribeService(this);
 
         final DynamicFormDescription form = new DynamicFormDescription();
@@ -111,12 +115,12 @@ private final Activator activator;
 
     @Override
     public void modifyIncoming(final Subscription subscription) throws OXException {
-        if(subscription != null) {
+        if (subscription != null) {
             super.modifyIncoming(subscription);
-            if (subscription.getConfiguration() != null){
-                if (subscription.getConfiguration().get("account") != null){
+            if (subscription.getConfiguration() != null) {
+                if (subscription.getConfiguration().get("account") != null) {
                     subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
-                }else {
+                } else {
                     LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : {}", subscription.getConfiguration());
                 }
             } else {
@@ -130,16 +134,16 @@ private final Activator activator;
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         final String accountId = (String) subscription.getConfiguration().get("account");
-        if (null != accountId){
+        if (null != accountId) {
             final Integer accountIdInt = Integer.valueOf(accountId);
             if (null != accountIdInt) {
-                subscription.getConfiguration().put("account",accountIdInt);
+                subscription.getConfiguration().put("account", accountIdInt);
             }
             String displayName = null;
-            if(subscription.getSecret() != null) {
-                displayName = activator.getYahooService().getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+            if (subscription.getSecret() != null) {
+                displayName = activator.getYahooService().getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer) subscription.getConfiguration().get("account"));
             }
-            if (null != displayName && !"".equals(displayName)){
+            if (null != displayName && !"".equals(displayName)) {
                 subscription.setDisplayName(displayName);
             } else {
                 subscription.setDisplayName("Yahoo");

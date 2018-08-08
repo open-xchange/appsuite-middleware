@@ -58,6 +58,7 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider;
+import com.openexchange.subscribe.xing.XingSubscribeService;
 
 /**
  * {@link XingContactsOAuthAccountAssociationProvider}
@@ -92,6 +93,6 @@ public class XingContactsOAuthAccountAssociationProvider extends AbstractSubscri
     @Override
     protected List<Subscription> getSubscriptionsOfUser(Session session) throws OXException {
         SubscriptionStorage subscriptionStorage = AbstractSubscribeService.STORAGE.get();
-        return subscriptionStorage.getSubscriptionsOfUser(new ContextImpl(session.getContextId()), session.getUserId(), "com.openexchange.subscribe.xing");
+        return subscriptionStorage.getSubscriptionsOfUser(new ContextImpl(session.getContextId()), session.getUserId(), XingSubscribeService.SOURCE_ID);
     }
 }

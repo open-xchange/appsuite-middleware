@@ -102,6 +102,11 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public class XingSubscribeService extends AbstractSubscribeService {
 
+    /**
+     * The subscription source id
+     */
+    public static final String SOURCE_ID = "com.openexchange.subscribe.xing";
+
     /** The logger constant */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XingSubscribeService.class);
 
@@ -189,7 +194,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
         final SubscriptionSource source = new SubscriptionSource();
         source.setDisplayName("XING");
         source.setFolderModule(FolderObject.CONTACT);
-        source.setId("com.openexchange.subscribe.xing");
+        source.setId(SOURCE_ID);
         source.setSubscribeService(this);
 
         final DynamicFormDescription form = new DynamicFormDescription();

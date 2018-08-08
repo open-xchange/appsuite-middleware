@@ -66,26 +66,30 @@ import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.linkedin.osgi.Activator;
 
-
 /**
  * {@link LinkedInSubscribeService}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class LinkedInSubscribeService  extends AbstractSubscribeService {
+public class LinkedInSubscribeService extends AbstractSubscribeService {
+
+    /**
+     * The source id
+     */
+    public static final String SOURCE_ID = "com.openexchange.subscribe.socialplugin.linkedin";
 
     private final Activator activator;
 
     private final SubscriptionSource source;
 
-    public LinkedInSubscribeService(final Activator activator){
+    public LinkedInSubscribeService(final Activator activator) {
         super();
         this.activator = activator;
 
         source = new SubscriptionSource();
         source.setDisplayName("LinkedIn");
         source.setFolderModule(FolderObject.CONTACT);
-        source.setId("com.openexchange.subscribe.socialplugin.linkedin");
+        source.setId(SOURCE_ID);
         source.setSubscribeService(this);
 
         final DynamicFormDescription form = new DynamicFormDescription();
@@ -109,8 +113,8 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
             }
             final int contextId = subscription.getContext().getContextId();
             Map<String, Object> configuration = subscription.getConfiguration();
-            if ((configuration != null) && (configuration.get("account") != null)) {                
-                final int accountId = ((Integer)configuration.get("account")).intValue();
+            if ((configuration != null) && (configuration.get("account") != null)) {
+                final int accountId = ((Integer) configuration.get("account")).intValue();
                 return linkedInService.getContacts(subscription.getSession(), subscription.getUserId(), contextId, accountId);
             }
             return Collections.emptyList();
@@ -133,7 +137,7 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
     public void modifyIncoming(final Subscription subscription) throws OXException {
         super.modifyIncoming(subscription);
         final Integer accountId = (Integer) subscription.getConfiguration().get("account");
-        if(accountId != null) {
+        if (accountId != null) {
             subscription.getConfiguration().put("account", accountId.toString());
         }
     }
@@ -141,16 +145,16 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         final String accountId = (String) subscription.getConfiguration().get("account");
-        if (null != accountId){
+        if (null != accountId) {
             final Integer accountIdInt = Integer.valueOf(accountId);
             if (null != accountIdInt) {
-                subscription.getConfiguration().put("account",accountIdInt);
+                subscription.getConfiguration().put("account", accountIdInt);
             }
             String displayName = null;
-            if(subscription.getSecret() != null) {
-                displayName = activator.getLinkedInService().getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+            if (subscription.getSecret() != null) {
+                displayName = activator.getLinkedInService().getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer) subscription.getConfiguration().get("account"));
             }
-            if (null != displayName && !"".equals(displayName)){
+            if (null != displayName && !"".equals(displayName)) {
                 subscription.setDisplayName(displayName);
             } else {
                 subscription.setDisplayName("LinkedIn");

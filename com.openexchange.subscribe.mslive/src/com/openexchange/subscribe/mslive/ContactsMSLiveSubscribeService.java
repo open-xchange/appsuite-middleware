@@ -81,6 +81,11 @@ import com.openexchange.subscribe.mslive.internal.ContactParser;
  */
 public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeService implements SubscribeService {
 
+    /**
+     * The appendix of the source id
+     */
+    public static final String SOURCE_ID_APPENDIX = "contact";
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactsMSLiveSubscribeService.class);
 
     private final SubscriptionSource source;
@@ -93,7 +98,7 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
      */
     public ContactsMSLiveSubscribeService(OAuthServiceMetaData oAuthServiceMetaData, ServiceLookup services) {
         super(oAuthServiceMetaData, services);
-        source = initSS(FolderObject.CONTACT, "contact");
+        source = initSS(FolderObject.CONTACT, SOURCE_ID_APPENDIX);
     }
 
     @Override

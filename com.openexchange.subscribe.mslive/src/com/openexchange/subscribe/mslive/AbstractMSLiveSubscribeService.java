@@ -69,6 +69,11 @@ import com.openexchange.subscribe.SubscriptionSource;
  */
 public abstract class AbstractMSLiveSubscribeService extends AbstractSubscribeService {
 
+    /**
+     * The prefix of the source id
+     */
+    public static final String SOURCE_ID_PREFIX = "com.openexchange.subscribe.mslive.";
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMSLiveSubscribeService.class);
 
     /** The meta data of associated Google OAuth account */
@@ -102,7 +107,7 @@ public abstract class AbstractMSLiveSubscribeService extends AbstractSubscribeSe
         SubscriptionSource source = new SubscriptionSource();
         source.setDisplayName(DISPLAY_NAME);
         source.setFolderModule(module);
-        source.setId("com.openexchange.subscribe.mslive." + appendix);
+        source.setId(SOURCE_ID_PREFIX + appendix);
         source.setSubscribeService(this);
 
         final DynamicFormDescription form = new DynamicFormDescription();
@@ -119,8 +124,7 @@ public abstract class AbstractMSLiveSubscribeService extends AbstractSubscribeSe
         if (subscription != null) {
             super.modifyIncoming(subscription);
             if (subscription.getConfiguration() != null) {
-                if (subscription.getConfiguration().get("account") != null && !subscription.getConfiguration().get("account").toString().equals(
-                    "null")) {
+                if (subscription.getConfiguration().get("account") != null && !subscription.getConfiguration().get("account").toString().equals("null")) {
                     subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
                 } else {
                     throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("account");
