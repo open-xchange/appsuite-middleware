@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.mslive.oauth;
 
 import com.openexchange.oauth.association.OAuthAccountAssociation;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.mslive.AbstractMSLiveSubscribeService;
 import com.openexchange.subscribe.mslive.ContactsMSLiveSubscribeService;
@@ -71,8 +72,8 @@ public class MSLiveContactsOAuthAccountAssociationProvider extends AbstractSubsc
     /**
      * Initialises a new {@link MSLiveContactsOAuthAccountAssociationProvider}.
      */
-    public MSLiveContactsOAuthAccountAssociationProvider() {
-        super(SOURCE_ID);
+    public MSLiveContactsOAuthAccountAssociationProvider(ServiceLookup services) {
+        super(SOURCE_ID, services);
     }
 
     /*

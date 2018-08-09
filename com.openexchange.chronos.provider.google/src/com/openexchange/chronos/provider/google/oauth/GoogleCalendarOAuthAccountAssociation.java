@@ -70,6 +70,8 @@ import com.openexchange.tools.id.IDMangler;
  */
 public class GoogleCalendarOAuthAccountAssociation extends AbstractOAuthAccountAssociation {
 
+    private static final String ROOT_FOLDER = "0";
+
     private final CalendarAccount calendarAccount;
 
     /**
@@ -127,7 +129,7 @@ public class GoogleCalendarOAuthAccountAssociation extends AbstractOAuthAccountA
      */
     @Override
     public String getFolder() {
-        return IDMangler.mangle("cal", getId(), "0"); // FIXME: constant for root folder?
+        return IDMangler.mangle("cal", getId(), ROOT_FOLDER);
     }
 
     /*

@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.yahoo.oauth;
 
 import com.openexchange.oauth.association.OAuthAccountAssociation;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider;
 import com.openexchange.subscribe.yahoo.YahooSubscribeService;
@@ -65,8 +66,8 @@ public class YahooContactsOAuthAccountAssociationProvider extends AbstractSubscr
     /**
      * Initialises a new {@link YahooContactsOAuthAccountAssociationProvider}.
      */
-    public YahooContactsOAuthAccountAssociationProvider() {
-        super(YahooSubscribeService.SOURCE_ID);
+    public YahooContactsOAuthAccountAssociationProvider(ServiceLookup services) {
+        super(YahooSubscribeService.SOURCE_ID, services);
     }
 
     /*

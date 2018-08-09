@@ -71,6 +71,7 @@ public class Activator extends HousekeepingActivator {
     private volatile OAuthServiceMetaData oAuthServiceMetaData;
     private volatile YahooService yahooService;
     private ServiceRegistration<SubscribeService> serviceRegistration;
+    private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -80,16 +81,10 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
-        final ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData> metaDataTracker =
-            new ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData>(
-                context,
-                OAuthServiceMetaData.class,
-                new OAuthServiceMetaDataRegisterer(context, this));
+        ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData> metaDataTracker = new ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData>(context, OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
         rememberTracker(metaDataTracker);
         openTrackers();
         yahooService = getService(YahooService.class);
-        //registerSubscribeService();
-        registerService(OAuthAccountAssociationProvider.class, new YahooContactsOAuthAccountAssociationProvider());
     }
 
     /**
@@ -100,17 +95,28 @@ public class Activator extends HousekeepingActivator {
             serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(this), null);
             org.slf4j.LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was started");
         }
+
+        if (associationProviderRegistration == null) {
+            associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new YahooContactsOAuthAccountAssociationProvider(this), null);
+        }
     }
 
     /**
      * Un-registers the subscribe service.
      */
     public synchronized void unregisterSubscribeService() {
-        final ServiceRegistration<SubscribeService> serviceRegistration = this.serviceRegistration;
+        ServiceRegistration<SubscribeService> serviceRegistration = this.serviceRegistration;
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
             org.slf4j.LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was stopped");
+        }
+        {
+            ServiceRegistration<OAuthAccountAssociationProvider> registration = this.associationProviderRegistration;
+            if (null != registration) {
+                registration.unregister();
+                this.associationProviderRegistration = null;
+            }
         }
     }
 

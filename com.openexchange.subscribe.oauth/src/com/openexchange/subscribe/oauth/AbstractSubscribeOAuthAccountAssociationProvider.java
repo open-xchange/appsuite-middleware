@@ -60,11 +60,11 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionStorage;
-import com.openexchange.subscribe.oauth.osgi.Services;
 
 /**
  * {@link AbstractSubscribeOAuthAccountAssociationProvider}
@@ -76,13 +76,15 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
 
     private static final String TREE_ID = "1";
     private final String sourceId;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link AbstractSubscribeOAuthAccountAssociationProvider}.
      */
-    public AbstractSubscribeOAuthAccountAssociationProvider(String sourceId) {
+    public AbstractSubscribeOAuthAccountAssociationProvider(String sourceId, ServiceLookup services) {
         super();
         this.sourceId = sourceId;
+        this.services = services;
     }
 
     /*
@@ -93,7 +95,7 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
     @Override
     public Collection<OAuthAccountAssociation> getAssociationsFor(int accountId, Session session) throws OXException {
         Collection<OAuthAccountAssociation> associations = null;
-        FolderService folderService = Services.getService(FolderService.class);
+        FolderService folderService = services.getService(FolderService.class);
         for (Subscription subscription : getSubscriptionsOfUser(session)) {
             if (OAuthUtil.getAccountId(subscription.getConfiguration()) != accountId) {
                 continue;

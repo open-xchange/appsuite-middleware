@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.xing.oauth;
 
 import com.openexchange.oauth.association.OAuthAccountAssociation;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider;
 import com.openexchange.subscribe.xing.XingSubscribeService;
@@ -65,8 +66,8 @@ public class XingContactsOAuthAccountAssociationProvider extends AbstractSubscri
     /**
      * Initialises a new {@link XingContactsOAuthAccountAssociationProvider}.
      */
-    public XingContactsOAuthAccountAssociationProvider() {
-        super(XingSubscribeService.SOURCE_ID);
+    public XingContactsOAuthAccountAssociationProvider(ServiceLookup services) {
+        super(XingSubscribeService.SOURCE_ID, services);
     }
 
     /*

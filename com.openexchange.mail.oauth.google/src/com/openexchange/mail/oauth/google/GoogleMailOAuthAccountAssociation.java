@@ -77,8 +77,6 @@ public class GoogleMailOAuthAccountAssociation extends AbstractOAuthAccountAssoc
     /**
      * The identifier for Google Mail service.
      */
-    // FIXME: are there any known OX constants for that similar to GoogleDriveConstants.ID?
-    // If yes feel free to replace that...
     private static final String serviceId = "googlemail";
     private final MailAccount mailAccount;
 
