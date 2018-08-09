@@ -127,3 +127,25 @@ Open-Xchange monitors the replication from master to slave for every context/ten
 - java.lang:name=CMS Old Gen,type=MemoryPool,Usage = [used=32447696]
 
 In total those three memory spaces reflect the total usage of non application memory usage for the Java virtual machine. Eden is used for new objects with the youngest lifetime, Survivor for older objects, and Old Gen for the oldest objects. In total this gives you the information how much memory is used for all your sessions. Divided through the number of sessions it gives you the indication of how much memory is used per session.
+
+
+# Remote JMX Access
+
+Connecting to JMX via remote can be difficult, especially in environments with NAT and firewalls. A simple solution to this would be to use SSH to create a SOCKS tunnel as described [here](https://stackoverflow.com/a/19706256/2944578) and connect through that tunnel. The following assumes the default configuration for `/opt/open-xchange/etc/management.properties`:
+ 
+	JMXPort=9999
+	JMXServerPort=-1
+	JMXBindAddress=localhost
+	JMXLogin=
+	JMXPassword=
+
+On the JMX client machine, pick an arbitrary port (e.g. 7777), and create a SOCKS tunnel with SSH ("centos" is the remote user on the target / middleware machine "10.20.28.116"):
+
+	$ ssh -fN -D 7777 centos@10.20.28.116
+
+Clients like JConsole can then connect to the middleware using the standard (localhost) URL and some additional -J parameters. Example:
+
+	$ jconsole -J-DsocksProxyHost=localhost -J-DsocksProxyPort=7777 \
+		-J-DsocksNonProxyHosts= service:jmx:rmi:///jndi/rmi://localhost:9999/server
+ 
+
