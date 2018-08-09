@@ -53,10 +53,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
@@ -130,6 +130,7 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
      */
     protected List<Subscription> getSubscriptionsOfUser(Session session) throws OXException {
         SubscriptionStorage subscriptionStorage = AbstractSubscribeService.STORAGE.get();
-        return subscriptionStorage.getSubscriptionsOfUser(new ContextImpl(session.getContextId()), session.getUserId(), sourceId);
+        ContextService contextService = services.getService(ContextService.class);
+        return subscriptionStorage.getSubscriptionsOfUser(contextService.getContext(session.getContextId()), session.getUserId(), sourceId);
     }
 }
