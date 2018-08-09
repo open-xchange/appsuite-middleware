@@ -81,6 +81,7 @@ public class AccountWriter extends AbstractOAuthWriter {
      * Writes specified account as a JSON object.
      *
      * @param account The account
+     * @param session The session
      * @return The JSON object
      * @throws JSONException If writing to JSON fails
      * @throws OXException
@@ -94,6 +95,7 @@ public class AccountWriter extends AbstractOAuthWriter {
      *
      * @param account The account
      * @param associations The OAuth account associations
+     * @param session The session
      * @return The JSON object
      * @throws JSONException If writing to JSON fails
      * @throws OXException
