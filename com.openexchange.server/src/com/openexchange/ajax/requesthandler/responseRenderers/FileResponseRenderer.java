@@ -381,7 +381,10 @@ public class FileResponseRenderer implements ResponseRenderer {
                 /*
                  * Set headers...
                  */
-                if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
+                if (checkedDownload.isAttachment()) {
+                    // Force attachment download
+                    resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
+                } else if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
                     if (isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     } else {
@@ -397,9 +400,6 @@ public class FileResponseRenderer implements ResponseRenderer {
                             }
                         }
                     }
-                } else if (checkedDownload.isAttachment()) {
-                    // Force attachment download
-                    resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                 } else if (delivery.equalsIgnoreCase(VIEW) && null != fileName) {
                     final StringBuilder sb = new StringBuilder(32);
                     sb.append("inline");
