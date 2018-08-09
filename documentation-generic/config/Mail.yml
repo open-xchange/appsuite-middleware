@@ -874,7 +874,7 @@ properties:
       tags: ["Mail"]
     - key: com.openexchange.mail.proxy.nonProxyHosts
       description: |
-        A comma separated list of hosts that should be accessed without going through the proxy.
+        A comma separated list of hosts or IP ranges that should be accessed without going through the proxy.
       defaultValue:
       version: 7.10.1
       reloadable: true

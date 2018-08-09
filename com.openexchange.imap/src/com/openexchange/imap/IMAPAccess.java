@@ -115,7 +115,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.cache.IMailAccessCache;
-import com.openexchange.mail.config.IPRange;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailProxyConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -124,6 +123,7 @@ import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
@@ -772,15 +772,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Remove proxy settings for whitelisted hosts
              */
-            List<IPRange> nonProxyHosts = MailProxyConfig.getInstance().getNonProxyHosts(session.getContextId(), session.getUserId());
-            for (IPRange host : nonProxyHosts) {
-                if (host.contains(imapConfig.getServer())) {
-                    imapProps.remove("mail.imap.proxy.host");
-                    imapProps.remove("mail.imap.proxy.port");
-                    imapProps.remove("mail.imaps.proxy.host");
-                    imapProps.remove("mail.imaps.proxy.host");
-                    break;
-                }
+            HostList nonProxyHosts = MailProxyConfig.getInstance().getNonProxyHostList(session.getContextId(), session.getUserId());
+            if (nonProxyHosts.contains(imapConfig.getServer())) {
+                imapProps.remove("mail.imap.proxy.host");
+                imapProps.remove("mail.imap.proxy.port");
+                imapProps.remove("mail.imaps.proxy.host");
+                imapProps.remove("mail.imaps.proxy.host");
             }
 
             /*
