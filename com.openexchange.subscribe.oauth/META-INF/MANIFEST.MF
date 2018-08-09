@@ -14,11 +14,8 @@ Import-Package: com.openexchange.context,
  com.openexchange.oauth,
  com.openexchange.oauth.association,
  com.openexchange.oauth.association.spi,
- com.openexchange.osgi,
  com.openexchange.secret,
  com.openexchange.server,
  com.openexchange.session,
- com.openexchange.subscribe,
- org.osgi.framework,
- org.slf4j
+ com.openexchange.subscribe
 Export-Package: com.openexchange.subscribe.oauth

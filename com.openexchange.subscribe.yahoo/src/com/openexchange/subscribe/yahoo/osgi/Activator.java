@@ -52,6 +52,7 @@ package com.openexchange.subscribe.yahoo.osgi;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
@@ -75,7 +76,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, ContextService.class, YahooService.class };
+        return new Class[] { OAuthService.class, ContextService.class, YahooService.class, FolderService.class };
     }
 
     @Override
