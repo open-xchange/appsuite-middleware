@@ -132,7 +132,6 @@ public class MailProxyConfig implements Reloadable {
      * @return The list of non proxy hosts
      * @throws OXException
      */
-    @SuppressWarnings("unchecked")
     protected HostList doGetNonProxyHosts(int userId, int contextId) throws OXException {
         LeanConfigurationService leanConfigService = ServerServiceRegistry.getInstance().getService(LeanConfigurationService.class);
         if (null == leanConfigService) {
