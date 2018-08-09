@@ -20,6 +20,6 @@ Import-Package: com.openexchange.context,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.subscribe,
- org.osgi.framework;version="1.9.0"
+ org.osgi.framework,
+ org.slf4j
 Export-Package: com.openexchange.subscribe.oauth
-Bundle-Activator: com.openexchange.subscribe.oauth.osgi.SubscribeOAuthActivator

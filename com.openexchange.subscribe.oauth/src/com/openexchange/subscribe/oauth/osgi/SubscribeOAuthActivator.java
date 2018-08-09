@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.oauth.osgi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -84,6 +86,7 @@ public class SubscribeOAuthActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+        Logger logger = LoggerFactory.getLogger(SubscribeOAuthActivator.class);
+        logger.info("Starting com.openexchange.suibscribe.oauth bundle");
     }
 }
