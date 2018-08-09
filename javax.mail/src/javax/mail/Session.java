@@ -1106,6 +1106,12 @@ public final class Session {
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtps", "com.sun.mail.smtp.SMTPSSLTransport",
 			"Oracle", "1.6.1"));
+	    addProvider(new Provider(Provider.Type.STORE,
+            "gimap", "com.sun.mail.gimap.GmailStore",
+            "Oracle", "1.6.1"));
+        addProvider(new Provider(Provider.Type.STORE,
+            "gimap", "com.sun.mail.gimap.GmailSSLStore",
+            "Oracle", "1.6.1"));
 	}
 
 	if (logger.isLoggable(Level.CONFIG)) {
