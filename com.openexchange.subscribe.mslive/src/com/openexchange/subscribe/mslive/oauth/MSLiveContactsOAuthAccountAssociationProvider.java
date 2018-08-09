@@ -49,14 +49,8 @@
 
 package com.openexchange.subscribe.mslive.oauth;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
-import com.openexchange.session.Session;
-import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.subscribe.mslive.AbstractMSLiveSubscribeService;
 import com.openexchange.subscribe.mslive.ContactsMSLiveSubscribeService;
 import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider;
@@ -78,7 +72,7 @@ public class MSLiveContactsOAuthAccountAssociationProvider extends AbstractSubsc
      * Initialises a new {@link MSLiveContactsOAuthAccountAssociationProvider}.
      */
     public MSLiveContactsOAuthAccountAssociationProvider() {
-        super();
+        super(SOURCE_ID);
     }
 
     /*
@@ -89,16 +83,5 @@ public class MSLiveContactsOAuthAccountAssociationProvider extends AbstractSubsc
     @Override
     public OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription) {
         return new MSLiveContactsOAuthAccountAssociation(accountId, userId, contextId, folderName, subscription);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider#getSubscriptionsOfUser(com.openexchange.session.Session)
-     */
-    @Override
-    protected List<Subscription> getSubscriptionsOfUser(Session session) throws OXException {
-        SubscriptionStorage subscriptionStorage = AbstractSubscribeService.STORAGE.get();
-        return subscriptionStorage.getSubscriptionsOfUser(new ContextImpl(session.getContextId()), session.getUserId(), SOURCE_ID);
     }
 }

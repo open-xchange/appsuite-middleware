@@ -56,11 +56,14 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.session.Session;
+import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionStorage;
 import com.openexchange.subscribe.oauth.osgi.Services;
 
 /**
@@ -72,12 +75,14 @@ import com.openexchange.subscribe.oauth.osgi.Services;
 public abstract class AbstractSubscribeOAuthAccountAssociationProvider implements OAuthAccountAssociationProvider {
 
     private static final String TREE_ID = "1";
+    private final String sourceId;
 
     /**
      * Initialises a new {@link AbstractSubscribeOAuthAccountAssociationProvider}.
      */
-    public AbstractSubscribeOAuthAccountAssociationProvider() {
+    public AbstractSubscribeOAuthAccountAssociationProvider(String sourceId) {
         super();
+        this.sourceId = sourceId;
     }
 
     /*
@@ -121,5 +126,8 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
      * @return A {@link List} with all {@link Subscription}s of the user.
      * @throws OXException if an error is occurred
      */
-    protected abstract List<Subscription> getSubscriptionsOfUser(Session session) throws OXException;
+    protected List<Subscription> getSubscriptionsOfUser(Session session) throws OXException {
+        SubscriptionStorage subscriptionStorage = AbstractSubscribeService.STORAGE.get();
+        return subscriptionStorage.getSubscriptionsOfUser(new ContextImpl(session.getContextId()), session.getUserId(), sourceId);
+    }
 }
