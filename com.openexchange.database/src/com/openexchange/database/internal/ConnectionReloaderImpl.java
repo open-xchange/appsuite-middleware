@@ -64,6 +64,7 @@ import com.openexchange.database.internal.ConfigurationListener.ConfigDBListener
 import com.openexchange.database.internal.reloadable.ConnectionReloader;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentHashSet;
+import com.openexchange.java.ConfigAwareKeyStore;
 
 /**
  * {@link ConnectionReloaderImpl}
@@ -102,8 +103,8 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
         stores = new ConcurrentHashMap<>(4);
         this.configuration = configuration;
 
-        stores.put("CAStore", new ConfigAwareKeyStore(configuration, TRUST_CERT_PATH_NAME, TRUST_CERT_PASSWORD_NAME, TRUST_CERT_TYPE));
-        stores.put("ClientStore", new ConfigAwareKeyStore(configuration, CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, CLIENT_CERT_TYPE));
+        stores.put("CAStore", new ConfigAwareKeyStore(configuration.getJdbcProps(), TRUST_CERT_PATH_NAME, TRUST_CERT_PASSWORD_NAME, TRUST_CERT_TYPE));
+        stores.put("ClientStore", new ConfigAwareKeyStore(configuration.getJdbcProps(), CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, CLIENT_CERT_TYPE));
 
         // Ignore listeners on start up
         loadKeyStores(configuration);
@@ -119,8 +120,8 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
         boolean retval = false;
         for (Entry<String, ConfigAwareKeyStore> entry : stores.entrySet()) {
             try {
-                retval |= entry.getValue().reloadStore(configuration);
-            } catch (OXException e) {
+                retval |= entry.getValue().reloadStore(configuration.getJdbcProps());
+            } catch (Exception e) {
                 LOGGER.error("Unable to load keystore!", e);
             }
         }

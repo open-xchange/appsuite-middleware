@@ -47,26 +47,25 @@
  *
  */
 
-package com.openexchange.database.internal;
+package com.openexchange.java;
 
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
 import java.util.Enumeration;
-import java.util.Map.Entry;
-import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link ConfigurationUtil}
+ * {@link KeyStoreUtil}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class ConfigurationUtil {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationUtil.class);
+public class KeyStoreUtil {
+    
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyStoreUtil.class);
 
     /**
      * Calculates the hashCode for a KeyStore
@@ -112,36 +111,6 @@ public class ConfigurationUtil {
         }
 
         return hashSum > hashSum2 ? 1 : -1;
-    }
-
-    /**
-     * Matches if two {@link Properties} can be considered equal
-     * 
-     * @param p1 The first {@link Properties}
-     * @param p2 The second {@link Properties}
-     * @return <code>true</code> if both properties contain equal objects
-     *         <code>false</code> otherwise
-     */
-    public static boolean matches(Properties p1, Properties p2) {
-        if (p1.size() != p2.size()) {
-            return false;
-        }
-        for (Entry<Object, Object> f : p1.entrySet()) {
-            if (false == p2.contains(f.getKey())) {
-                return false;
-            }
-            Object p2Value = p2.get(f.getKey());
-            if (null == p2Value) {
-                if (null != f.getValue()) {
-                    return false;
-                }
-            } else {
-                if (false == p2Value.equals(f.getValue())) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
 }

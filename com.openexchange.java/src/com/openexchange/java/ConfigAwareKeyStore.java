@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.database.internal;
+package com.openexchange.java;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -58,14 +59,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
+import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.database.DatabaseExceptionCodes;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 
 /**
- * {@link ConfigAwareKeyStore} - Links a {@link KeyStore} to the {@link Configuration}
+ * {@link ConfigAwareKeyStore} - Links a {@link KeyStore} to its configuration via {@link Properties}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
@@ -86,21 +85,21 @@ public class ConfigAwareKeyStore {
     /**
      * Initializes a new {@link ConfigAwareKeyStore}.
      *
-     * @param configuration The {@link Configuration} to get the values from
+     * @param properties The {@link Properties} to get the values from
      * @param propertyName The name of the JDBC property for the store
      * @param passwordPropertyName The optional password for the store
      * @param typePropertyName The type of the store. See <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#KeystoreImplementation">JCA reference guide</a>
      */
-    public ConfigAwareKeyStore(Configuration configuration, String propertyName, String passwordPropertyName, String typePropertyName) {
+    public ConfigAwareKeyStore(Properties properties, String propertyName, String passwordPropertyName, String typePropertyName) {
         super();
-        if (Strings.isNotEmpty(propertyName) && Strings.isNotEmpty(configuration.getJdbcProps().getProperty(propertyName))) {
-            filePath = configuration.getJdbcProps().getProperty(propertyName);
+        if (Strings.isNotEmpty(propertyName) && Strings.isNotEmpty(properties.getProperty(propertyName))) {
+            filePath = properties.getProperty(propertyName);
         }
         this.propertyName = propertyName;
         this.passwordPropertyName = passwordPropertyName;
         this.typePropertyName = typePropertyName;
         try {
-            initializeKeyStore(configuration, typePropertyName);
+            initializeKeyStore(properties, typePropertyName);
         } catch (KeyStoreException e) {
             LOGGER.error("Unable to load keystore for type {}.", typePropertyName, e);
         }
@@ -110,14 +109,14 @@ public class ConfigAwareKeyStore {
     /**
      * (Re-)loads the {@link KeyStore} held by this instance using given configuration
      *
-     * @param configuration The {@link Configuration} to get the values from
+     * @param properties The {@link Properties} to get the values from
      * @return <code>true</code> if the underlying {@link KeyStore} was (re-)loaded; otherwise <code>false</code>
-     * @throws OXException If store can't be found or accessed
+     * @throws FileNotFoundException If store can't be found
      */
-    public boolean reloadStore(Configuration configuration) throws OXException {
+    public boolean reloadStore(Properties properties) throws FileNotFoundException {
         // Get path and password
-        String keystorePath = configuration.getJdbcProps().getProperty(propertyName);
-        String keystorePassword = configuration.getJdbcProps().getProperty(passwordPropertyName);
+        String keystorePath = properties.getProperty(propertyName);
+        String keystorePassword = properties.getProperty(passwordPropertyName);
 
         // Check if this instance is used
         if (Strings.isEmpty(keystorePath)) {
@@ -134,40 +133,59 @@ public class ConfigAwareKeyStore {
 
         File keyStoreFile = new File(stripPath(keystorePath));
         if (false == keyStoreFile.exists() || false == keyStoreFile.isFile()) {
-            throw DatabaseExceptionCodes.KEYSTORE_FILE_ERROR.create(stripPath(keystorePath));
+            throw new FileNotFoundException("The key store does not exist.");
         }
 
-        int currentHash = getBytes(keyStoreFile);
-        if (storeHash != currentHash) {
-            /*
-             * (Re-) Load the key store
-             *
-             * We do this also knowing that the JDBC is loading the stores (for each connection) itself.
-             * See com.mysql.jdbc.ExportControlled.getSSLSocketFactoryDefaultOrConfigured(MysqlIO)
-             *
-             * Advantage: We can avoid the generic 'CommunicationLinkFailure' error by testing the SSL
-             *            properties and outline more helpful messages.
-             */
-            try (FileInputStream in = new FileInputStream(keyStoreFile)) {
+        FileInputStream in = null;
+        try {
+            int currentHash = getBytes(keyStoreFile);
+            if (storeHash != currentHash) {
+                /*
+                 * (Re-) Load the key store
+                 */
+                in = new FileInputStream(keyStoreFile);
                 if (null == store) {
-                    initializeKeyStore(configuration, typePropertyName);
+                    initializeKeyStore(properties, typePropertyName);
                 }
                 store.load(in, null == keystorePassword ? null : keystorePassword.toCharArray());
                 storeHash = currentHash;
                 return true;
 
-            } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
-                throw DatabaseExceptionCodes.KEYSTORE_UNAVAILABLE.create(e, e.getMessage());
             }
+        } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
+            FileNotFoundException notFoundException = new FileNotFoundException("Unable to access key store: " + e.getMessage());
+            notFoundException.setStackTrace(e.getStackTrace());
+            throw notFoundException;
+        } finally {
+            Streams.close(in);
         }
         return false;
+    }
+    
+    /**
+     * Get a value indicating if the underlying key store is well defined, configured and accessible
+     * 
+     * @return <code>true</code> If the key store is defined, configured and accessible
+     *         <code>false</code> otherwise
+     */
+    public boolean isConfigured() {
+        return storeHash != -1 && null != store && Strings.isNotEmpty(filePath);
+    }
+    
+    /**
+     * Get the key store
+     * 
+     * @return The {@link KeyStore}
+     */
+    public KeyStore getKeyStore() {
+        return store;
     }
 
     private String stripPath(String keystorePath) {
         return keystorePath.substring(keystorePath.lastIndexOf(":") + 1, keystorePath.length());
     }
 
-    private int getBytes(File f) throws OXException {
+    private int getBytes(File f) throws FileNotFoundException, IOException, NoSuchAlgorithmException  {
         try (FileInputStream in = new FileInputStream(f)) {
             MessageDigest md5 = MessageDigest.getInstance("md5");
             byte[] block = new byte[4096];
@@ -176,13 +194,11 @@ public class ConfigAwareKeyStore {
                 md5.update(block, 0, length);
             }
             return Arrays.hashCode(md5.digest());
-        } catch (Exception e) {
-            throw DatabaseExceptionCodes.KEYSTORE_UNAVAILABLE.create(e, e.getMessage());
         }
     }
 
-    private void initializeKeyStore(Configuration configuration, String typePropertyName) throws KeyStoreException {
-        String actualType = configuration.getJdbcProps().getProperty(typePropertyName);
+    private void initializeKeyStore(Properties properties, String typePropertyName) throws KeyStoreException {
+        String actualType = properties.getProperty(typePropertyName);
         this.store = KeyStore.getInstance(Strings.isEmpty(actualType) ? KeyStore.getDefaultType() : actualType);
     }
 
@@ -204,7 +220,7 @@ public class ConfigAwareKeyStore {
         result = prime * result + storeHash;
         result = prime * result + ((passwordPropertyName == null) ? 0 : passwordPropertyName.hashCode());
         result = prime * result + ((propertyName == null) ? 0 : propertyName.hashCode());
-        result = prime * result + ((store == null) ? 0 : ConfigurationUtil.getHashSum(store));
+        result = prime * result + ((store == null) ? 0 : KeyStoreUtil.getHashSum(store));
         return result;
     }
 
@@ -241,10 +257,11 @@ public class ConfigAwareKeyStore {
             if (other.store != null) {
                 return false;
             }
-        } else if (0 != ConfigurationUtil.compare(store, other.store)) {
+        } else if (0 != KeyStoreUtil.compare(store, other.store)) {
             return false;
         }
         return true;
     }
 
 }
+

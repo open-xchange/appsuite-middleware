@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -393,22 +394,52 @@ public final class Configuration {
             if (otherProps != null) {
                 return false;
             }
-        } else if (!ConfigurationUtil.matches(props, otherProps)) {
+        } else if (!matches(props, otherProps)) {
             return false;
         }
         if (configDbReadProps == null) {
             if (other.configDbReadProps != null) {
                 return false;
             }
-        } else if (!ConfigurationUtil.matches(configDbReadProps, other.configDbReadProps)) {
+        } else if (!matches(configDbReadProps, other.configDbReadProps)) {
             return false;
         }
         if (configDbWriteProps == null) {
             if (other.configDbWriteProps != null) {
                 return false;
             }
-        } else if (!ConfigurationUtil.matches(configDbWriteProps, other.configDbWriteProps)) {
+        } else if (!matches(configDbWriteProps, other.configDbWriteProps)) {
             return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Matches if two {@link Properties} can be considered equal
+     * 
+     * @param p1 The first {@link Properties}
+     * @param p2 The second {@link Properties}
+     * @return <code>true</code> if both properties contain equal objects
+     *         <code>false</code> otherwise
+     */
+    private static boolean matches(Properties p1, Properties p2) {
+        if (p1.size() != p2.size()) {
+            return false;
+        }
+        for (Entry<Object, Object> f : p1.entrySet()) {
+            if (false == p2.contains(f.getKey())) {
+                return false;
+            }
+            Object p2Value = p2.get(f.getKey());
+            if (null == p2Value) {
+                if (null != f.getValue()) {
+                    return false;
+                }
+            } else {
+                if (false == p2Value.equals(f.getValue())) {
+                    return false;
+                }
+            }
         }
         return true;
     }
