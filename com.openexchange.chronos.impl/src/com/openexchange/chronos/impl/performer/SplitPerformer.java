@@ -162,6 +162,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         detachedSeriesMaster.setId(storage.getEventStorage().nextId());
         detachedSeriesMaster.setSeriesId(detachedSeriesMaster.getId());
         detachedSeriesMaster.setUid(Strings.isNotEmpty(uid) ? Check.uidIsUnique(session, storage, uid) : UUID.randomUUID().toString());
+        detachedSeriesMaster.setFilename(null);
         detachedSeriesMaster.setRelatedTo(relatedTo);
         Consistency.setCreated(session, timestamp, detachedSeriesMaster, session.getUserId());
         Consistency.setModified(session, timestamp, detachedSeriesMaster, session.getUserId());
@@ -245,7 +246,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         for (Event originalChangeException : originalChangeExceptions) {
             if (0 > compare(originalChangeException.getRecurrenceId().getValue(), splitPoint, timeZone)) {
                 Event exceptionUpdate = EventMapper.getInstance().copy(originalChangeException, null, EventField.ID);
-                EventMapper.getInstance().copy(detachedSeriesMaster, exceptionUpdate, EventField.SERIES_ID, EventField.UID, EventField.RELATED_TO);
+                EventMapper.getInstance().copy(detachedSeriesMaster, exceptionUpdate, EventField.SERIES_ID, EventField.UID, EventField.FILENAME, EventField.RELATED_TO);
                 Consistency.setModified(session, timestamp, exceptionUpdate, session.getUserId());
                 storage.getEventStorage().updateEvent(exceptionUpdate);
                 resultTracker.trackUpdate(originalChangeException, loadEventData(originalChangeException.getId()));

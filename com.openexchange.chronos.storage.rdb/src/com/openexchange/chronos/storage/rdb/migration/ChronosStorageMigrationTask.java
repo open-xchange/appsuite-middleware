@@ -56,6 +56,7 @@ import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -129,7 +130,11 @@ public class ChronosStorageMigrationTask extends UpdateTaskAdapter {
                     }
                     throw e;
                 }
-                new CalendarDataMigration(progress, config, context, connection).perform();
+                try {
+                    new CalendarDataMigration(progress, config, context, connection).perform();
+                } catch (Exception e) {
+                    throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, "Error performing calendar migration in context " + contextId);
+                }
                 progress.nextContext();
             }
             if (config.isUncommitted()) {
