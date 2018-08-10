@@ -103,8 +103,8 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
         stores = new ConcurrentHashMap<>(4);
         this.configuration = configuration;
 
-        stores.put("CAStore", new ConfigAwareKeyStore(configuration.getJdbcProps(), TRUST_CERT_PATH_NAME, TRUST_CERT_PASSWORD_NAME, TRUST_CERT_TYPE));
-        stores.put("ClientStore", new ConfigAwareKeyStore(configuration.getJdbcProps(), CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, CLIENT_CERT_TYPE));
+        stores.put("CAStore", new ConfigAwareKeyStore(TRUST_CERT_PATH_NAME, TRUST_CERT_PASSWORD_NAME, TRUST_CERT_TYPE));
+        stores.put("ClientStore", new ConfigAwareKeyStore(CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, CLIENT_CERT_TYPE));
 
         // Ignore listeners on start up
         loadKeyStores(configuration);
@@ -139,16 +139,12 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
 
     @Override
     public boolean setConfigurationListener(ConfigurationListener listener) {
-        if (null != listener) {
-            return listerners.add(listener);
-        }
-        return false;
+        return null == listener ? false : listerners.add(listener);
     }
 
     @Override
     public boolean removeConfigurationListener(int poolId) {
-        Iterator<ConfigurationListener> iterator = listerners.iterator();
-        while (iterator.hasNext()) {
+        for (Iterator<ConfigurationListener> iterator = listerners.iterator(); iterator.hasNext();) {
             if (poolId == iterator.next().getPoolId()) {
                 iterator.remove();
                 return true;

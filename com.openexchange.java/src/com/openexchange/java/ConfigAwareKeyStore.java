@@ -60,8 +60,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * {@link ConfigAwareKeyStore} - Links a {@link KeyStore} to its configuration via {@link Properties}
@@ -71,43 +70,79 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigAwareKeyStore {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ConfigAwareKeyStore.class);
+    private static class KeyStoreInfo {
 
-    private final String propertyName;
+        final KeyStore store;
+        final int storeHash;
+
+        KeyStoreInfo(KeyStore store, int storeHash) {
+            super();
+            this.store = store;
+            this.storeHash = storeHash;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + storeHash;
+            result = prime * result + ((store == null) ? 0 : KeyStoreUtil.getHashSum(store));
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (!(obj instanceof KeyStoreInfo)) {
+                return false;
+            }
+            KeyStoreInfo other = (KeyStoreInfo) obj;
+            if (storeHash != other.storeHash) {
+                return false;
+            }
+            if (store == null) {
+                if (other.store != null) {
+                    return false;
+                }
+            } else if (0 != KeyStoreUtil.compare(store, other.store)) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static final KeyStoreInfo NO_KEYSTORE = new KeyStoreInfo(null, -1);
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final String keystorePathPropertyName;
     private final String passwordPropertyName;
     private final String typePropertyName;
-    private String filePath;
-    private KeyStore store;
-    private int storeHash = -1;
-
-
+    private final AtomicReference<KeyStoreInfo> storeReference;
 
     /**
      * Initializes a new {@link ConfigAwareKeyStore}.
      *
-     * @param properties The {@link Properties} to get the values from
-     * @param propertyName The name of the JDBC property for the store
-     * @param passwordPropertyName The optional password for the store
-     * @param typePropertyName The type of the store. See <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#KeystoreImplementation">JCA reference guide</a>
+     * @param keystorePathPropertyName The name of the path property for the store
+     * @param passwordPropertyName The optional name of the password property for the store
+     * @param typePropertyName The optional name of the type property for the store. See <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#KeystoreImplementation">JCA reference guide</a>
      */
-    public ConfigAwareKeyStore(Properties properties, String propertyName, String passwordPropertyName, String typePropertyName) {
+    public ConfigAwareKeyStore(String keystorePathPropertyName, String passwordPropertyName, String typePropertyName) {
         super();
-        if (Strings.isNotEmpty(propertyName) && Strings.isNotEmpty(properties.getProperty(propertyName))) {
-            filePath = properties.getProperty(propertyName);
-        }
-        this.propertyName = propertyName;
+        storeReference = new AtomicReference<>(NO_KEYSTORE);
+        this.keystorePathPropertyName = keystorePathPropertyName;
         this.passwordPropertyName = passwordPropertyName;
         this.typePropertyName = typePropertyName;
-        try {
-            initializeKeyStore(properties, typePropertyName);
-        } catch (KeyStoreException e) {
-            LOGGER.error("Unable to load keystore for type {}.", typePropertyName, e);
-        }
     }
 
-    
+
     /**
-     * (Re-)loads the {@link KeyStore} held by this instance using given configuration
+     * (Re-)loads the {@link KeyStore} held by this instance using given properties.
      *
      * @param properties The {@link Properties} to get the values from
      * @return <code>true</code> if the underlying {@link KeyStore} was (re-)loaded; otherwise <code>false</code>
@@ -115,21 +150,19 @@ public class ConfigAwareKeyStore {
      */
     public boolean reloadStore(Properties properties) throws FileNotFoundException {
         // Get path and password
-        String keystorePath = properties.getProperty(propertyName);
+        String keystorePath = properties.getProperty(keystorePathPropertyName);
         String keystorePassword = properties.getProperty(passwordPropertyName);
 
         // Check if this instance is used
         if (Strings.isEmpty(keystorePath)) {
-            if (Strings.isEmpty(filePath)) {
+            if (NO_KEYSTORE == storeReference.get()) {
                 // No store configured
                 return false;
-            } else {
-                // Store was removed
-                store = null;
-                storeHash = -1;
-                filePath = null;
-                return true;
             }
+
+            // Store was removed
+            storeReference.set(NO_KEYSTORE);
+            return true;
         }
 
         File keyStoreFile = new File(stripPath(keystorePath));
@@ -140,19 +173,16 @@ public class ConfigAwareKeyStore {
         FileInputStream in = null;
         try {
             int currentHash = getBytes(keyStoreFile);
-            if (storeHash != currentHash) {
+            KeyStoreInfo prevStore = storeReference.get();
+            if (prevStore.storeHash != currentHash) {
                 /*
                  * (Re-) Load the key store
                  */
                 in = new FileInputStream(keyStoreFile);
-                if (null == store) {
-                    initializeKeyStore(properties, typePropertyName);
-                }
+                KeyStore store = initializeKeyStore(properties, typePropertyName);
                 store.load(in, null == keystorePassword ? null : keystorePassword.toCharArray());
-                storeHash = currentHash;
-                this.filePath = keystorePath;
+                storeReference.set(new KeyStoreInfo(store, currentHash));
                 return true;
-
             }
         } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
             FileNotFoundException notFoundException = new FileNotFoundException("Unable to access key store: " + e.getMessage());
@@ -163,24 +193,25 @@ public class ConfigAwareKeyStore {
         }
         return false;
     }
-    
+
     /**
      * Get a value indicating if the underlying key store is well defined, configured and accessible
-     * 
+     *
      * @return <code>true</code> If the key store is defined, configured and accessible
      *         <code>false</code> otherwise
      */
     public boolean isConfigured() {
-        return storeHash != -1 && null != store && Strings.isNotEmpty(filePath);
+        KeyStoreInfo storeInfo = storeReference.get();
+        return storeInfo.storeHash != -1 && null != storeInfo.store;
     }
-    
+
     /**
      * Get the key store
-     * 
+     *
      * @return The {@link KeyStore}
      */
     public KeyStore getKeyStore() {
-        return store;
+        return storeReference.get().store;
     }
 
     private String stripPath(String keystorePath) {
@@ -199,30 +230,32 @@ public class ConfigAwareKeyStore {
         }
     }
 
-    private void initializeKeyStore(Properties properties, String typePropertyName) throws KeyStoreException {
+    private KeyStore initializeKeyStore(Properties properties, String typePropertyName) throws KeyStoreException {
         String actualType = properties.getProperty(typePropertyName);
-        this.store = KeyStore.getInstance(Strings.isEmpty(actualType) ? KeyStore.getDefaultType() : actualType);
+        return KeyStore.getInstance(Strings.isEmpty(actualType) ? KeyStore.getDefaultType() : actualType);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(ConfigAwareKeyStore.class.getName());
-        sb.append("=[storeHash:").append(storeHash);
-        sb.append(",propertyName:").append(propertyName);
-        sb.append(",password:").append(passwordPropertyName);
-        sb.append(",keystore:").append(null != store ? store.toString() : "");
+        KeyStoreInfo storeInfo = storeReference.get();
+        sb.append("=[storeHash:").append(storeInfo.storeHash);
+        sb.append(",keystorePathPropertyName:").append(keystorePathPropertyName);
+        sb.append(",passwordPropertyName:").append(passwordPropertyName);
+        sb.append(",keystore:").append(null != storeInfo.store ? storeInfo.store.toString() : "");
         sb.append("]");
         return sb.toString();
     }
 
     @Override
     public int hashCode() {
+        KeyStoreInfo storeInfo = storeReference.get();
         final int prime = 31;
         int result = 1;
-        result = prime * result + storeHash;
+        result = prime * result + (storeInfo.storeHash);
         result = prime * result + ((passwordPropertyName == null) ? 0 : passwordPropertyName.hashCode());
-        result = prime * result + ((propertyName == null) ? 0 : propertyName.hashCode());
-        result = prime * result + ((store == null) ? 0 : KeyStoreUtil.getHashSum(store));
+        result = prime * result + ((keystorePathPropertyName == null) ? 0 : keystorePathPropertyName.hashCode());
+        result = prime * result + ((storeInfo.store == null) ? 0 : KeyStoreUtil.getHashSum(storeInfo.store));
         return result;
     }
 
@@ -238,7 +271,13 @@ public class ConfigAwareKeyStore {
             return false;
         }
         ConfigAwareKeyStore other = (ConfigAwareKeyStore) obj;
-        if (storeHash != other.storeHash) {
+        KeyStoreInfo storeInfo = storeReference.get();
+        KeyStoreInfo otherStoreInfo = other.storeReference.get();
+        if (storeInfo == null) {
+            if (otherStoreInfo != null) {
+                return false;
+            }
+        } else if (!storeInfo.equals(otherStoreInfo)) {
             return false;
         }
         if (passwordPropertyName == null) {
@@ -248,18 +287,11 @@ public class ConfigAwareKeyStore {
         } else if (!passwordPropertyName.equals(other.passwordPropertyName)) {
             return false;
         }
-        if (propertyName == null) {
-            if (other.propertyName != null) {
+        if (keystorePathPropertyName == null) {
+            if (other.keystorePathPropertyName != null) {
                 return false;
             }
-        } else if (!propertyName.equals(other.propertyName)) {
-            return false;
-        }
-        if (store == null) {
-            if (other.store != null) {
-                return false;
-            }
-        } else if (0 != KeyStoreUtil.compare(store, other.store)) {
+        } else if (!keystorePathPropertyName.equals(other.keystorePathPropertyName)) {
             return false;
         }
         return true;
