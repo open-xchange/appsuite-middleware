@@ -110,6 +110,15 @@ public interface ListLsubEntry {
     String getFullName();
 
     /**
+     * Gets the original full name (present in case the full name advertised by IMAP server is different from chosen one)
+     *
+     * @return The original full name or <code>null</code>
+     */
+    default String optOriginalFullName() {
+        return null;
+    }
+
+    /**
      * Gets the attributes
      *
      * @return The attributes
