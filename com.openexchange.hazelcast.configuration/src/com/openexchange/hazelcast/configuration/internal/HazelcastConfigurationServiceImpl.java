@@ -307,10 +307,9 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         if (configService.getBoolProperty("com.openexchange.hazelcast.network.symmetricEncryption", false)) {
             config.getNetworkConfig().setSymmetricEncryptionConfig(new SymmetricEncryptionConfig().setEnabled(true)
                 .setAlgorithm(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.algorithm", "PBEWithMD5AndDES"))
-                .setSalt(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.salt", "2mw67LqNDEb3"))
-                .setPassword(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.password", "D2xhL8mPkjsF"))
-                .setIterationCount(configService.getIntProperty("com.openexchange.hazelcast.network.symmetricEncryption.iterationCount", 19)))
-            ;
+                .setSalt(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.salt", "X-k4nY-Y*v38f=dSJrr)"))
+                .setPassword(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.password", "&3sFs<^6[cKbWDW#du9s"))
+                .setIterationCount(configService.getIntProperty("com.openexchange.hazelcast.network.symmetricEncryption.iterationCount", 19)));
         }
         /*
          * Miscellaneous
