@@ -663,9 +663,9 @@ public class Utils {
     }
 
     /**
-     * Gets a value indicating whether an event in a specific folder is visible to the the current user or not, either based on the
-     * user's permissions in the calendar folder representing the actual view on the event, or based on the user participating in the
-     * event as organizer or attendee.
+     * Gets a value indicating whether an event in a specific folder is visible to the current user or not, either based on the user's
+     * permissions in the calendar folder representing the actual view on the event, together with its classification, or based on the
+     * user participating in the event as organizer or attendee.
      *
      * @param folder The calendar folder the event is read in
      * @param event The event to check
@@ -673,6 +673,9 @@ public class Utils {
      */
     public static boolean isVisible(CalendarFolder folder, Event event) {
         int userId = folder.getSession().getUserId();
+        if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, userId)) {
+            return false;
+        }
         Permission ownPermission = folder.getOwnPermission();
         if (ownPermission.getReadPermission() >= Permission.READ_ALL_OBJECTS) {
             return true;

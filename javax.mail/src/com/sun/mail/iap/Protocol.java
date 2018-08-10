@@ -245,7 +245,7 @@ public class Protocol {
 	this.user = null;
 	this.props = props;
 	this.quote = false;
-	tagPrefix = computePrefix(props, "mail.imap");
+	tagPrefix = null == props ? null : computePrefix(props, "mail.imap");
 	logger = new MailLogger(this.getClass(), "DEBUG", debug, System.out);
 	traceLogger = logger.getSubLogger("protocol", null);
 

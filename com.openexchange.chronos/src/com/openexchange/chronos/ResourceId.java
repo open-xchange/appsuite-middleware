@@ -121,6 +121,9 @@ public class ResourceId {
             } else if (uuidString.startsWith("uuid:")) {
                 uuidString = uuidString.substring(5);
             }
+            if (36 != uuidString.length()) {
+                return null;
+            }
             try {
                 UUID uuid = UUID.fromString(uuidString);
                 if (0 == uuid.getLeastSignificantBits() >> 32) {

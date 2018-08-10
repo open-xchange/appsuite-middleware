@@ -69,6 +69,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.RequestConstants;
 import com.openexchange.ajax.fields.ResponseFields;
@@ -402,6 +403,7 @@ public class Multiple extends SessionServlet {
     protected static final AJAXState doAction(final String module, final String action, final JSONObject jsonObj, final ServerSession session, final HttpServletRequest req, final OXJSONWriter jsonWriter, final AJAXState ajaxState) {
         AJAXState state = ajaxState;
         try {
+            setLogProperty(jsonObj);
             /*
              * Look up appropriate multiple handler first, then step through if-else-statement
              */
@@ -667,6 +669,19 @@ public class Multiple extends SessionServlet {
             LOG.error("", e);
         }
         return state;
+    }
+
+    private static void setLogProperty(final JSONObject jsonObject) {
+        if (jsonObject == null || jsonObject.equals(JSONObject.NULL) || jsonObject.isEmpty()) {
+            return;
+        }
+        try {
+            JSONObject copyJsonObject = new JSONObject(jsonObject).putSafe("module", null).putSafe("data", null);
+            String join = Joiner.on("&").withKeyValueSeparator("=").join(copyJsonObject.asMap());
+            LogProperties.putProperty(LogProperties.Name.AJAX_MULTIPLE_QUERY_STRING, join);
+        } catch (Exception exception) {
+            LOG.info("Unable to set LogProperty '{}'.", LogProperties.Name.AJAX_MULTIPLE_QUERY_STRING.toString(), exception);
+        }
     }
 
     /**
