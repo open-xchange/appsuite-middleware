@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.sender;
 
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.EventNotificationPoolService;
@@ -77,12 +78,17 @@ public class PoolingMailSenderService implements MailSenderService {
             return;
         }
         try {
-
             // Pool messages if this is a create mail or a modify mail
             // Dump messages if the appointment is deleted
             if (isDeleteMail(mail)) {
                 pool.drop(mail.getEvent(), session);
                 delegate.sendMail(mail, session, principal);
+                return;
+            }
+
+            // Direct send reply messages to external organizers.
+            if (mail.isAboutActorsStateChangeOnly() && !CalendarUtils.isInternal(mail.getOriginal().getOrganizer(), CalendarUserType.INDIVIDUAL)) {
+                poolAwareDirectSend(mail, session, principal);
                 return;
             }
 
