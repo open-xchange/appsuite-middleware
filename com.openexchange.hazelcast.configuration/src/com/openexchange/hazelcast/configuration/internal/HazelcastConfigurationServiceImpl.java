@@ -67,6 +67,7 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MapIndexConfig;
 import com.hazelcast.config.MultiMapConfig;
 import com.hazelcast.config.QueueConfig;
+import com.hazelcast.config.SSLConfig;
 import com.hazelcast.config.SemaphoreConfig;
 import com.hazelcast.config.SymmetricEncryptionConfig;
 import com.hazelcast.config.TopicConfig;
@@ -300,18 +301,28 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             config.setProperty(GroupProperty.PREFER_IPv4_STACK.getName(), "false");
         }
         config.setProperty(GroupProperty.SOCKET_BIND_ANY.getName(), String.valueOf(
-            configService.getBoolProperty("com.openexchange.hazelcast.socket.bindAny", false)));
+        configService.getBoolProperty("com.openexchange.hazelcast.socket.bindAny", false)));
+        
         /*
          * Encryption
          */
-        if (configService.getBoolProperty("com.openexchange.hazelcast.network.symmetricEncryption", false)) {
+        // Only one encryption method can be use. so start with strongest
+        if (configService.getBoolProperty("com.openexchange.hazelcast.network.ssl", false)) {
+            // TODO MW-1023 register reloadable
+            HazelcastSSLFactory hazelcastSSLFactory = new HazelcastSSLFactory(configService);
+            config.getNetworkConfig().setSSLConfig(new SSLConfig().setEnabled(true)
+                .setFactoryImplementation(hazelcastSSLFactory)
+                .setFactoryClassName(HazelcastSSLFactory.class.getName())
+                .setProperties(hazelcastSSLFactory.getPropertiesFromService(configService)));
+        } else if (configService.getBoolProperty("com.openexchange.hazelcast.network.symmetricEncryption", false)) {
             config.getNetworkConfig().setSymmetricEncryptionConfig(new SymmetricEncryptionConfig()
                 .setEnabled(true)
                 .setAlgorithm(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.algorithm", "PBEWithMD5AndDES"))
                 .setSalt(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.salt", "X-k4nY-Y*v38f=dSJrr)"))
                 .setPassword(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.password", "&3sFs<^6[cKbWDW#du9s"))
                 .setIterationCount(configService.getIntProperty("com.openexchange.hazelcast.network.symmetricEncryption.iterationCount", 19)));
-        }
+        } 
+    
         /*
          * Miscellaneous
          */

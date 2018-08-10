@@ -72,7 +72,7 @@ public class HazelcastConfigurationActivator extends HousekeepingActivator {
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastConfigurationActivator.class);
 
     /**
-     * Initializes a new {@link HazelcastActivator}.
+     * Initializes a new {@link HazelcastConfigurationActivator}.
      */
     public HazelcastConfigurationActivator() {
         super();
