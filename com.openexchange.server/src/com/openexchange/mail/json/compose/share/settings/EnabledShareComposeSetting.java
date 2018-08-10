@@ -52,6 +52,9 @@ package com.openexchange.mail.json.compose.share.settings;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.session.Session;
@@ -70,6 +73,23 @@ public class EnabledShareComposeSetting extends AbstractShareComposeSetting<Bool
      */
     public EnabledShareComposeSetting(ShareComposeHandler shareComposeHandler) {
         super("enabled", shareComposeHandler);
+    }
+
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                setting.setSingleValue(getSettingValue(session, ctx, user, userConfig));
+            }
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
+            }
+
+        };
     }
 
     @Override

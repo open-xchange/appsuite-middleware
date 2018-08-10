@@ -122,13 +122,15 @@ public abstract class AbstractShareComposeSetting<V> implements PreferencesItemS
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                Object value = getSettingValue(session, ctx, user, userConfig);
-                if (value instanceof Object[]) {
-                    for (Object obj : (Object[]) value) {
-                        setting.addMultiValue(obj);
+                if (shareComposeHandler.isEnabled(session)) {
+                    Object value = getSettingValue(session, ctx, user, userConfig);
+                    if (value instanceof Object[]) {
+                        for (Object obj : (Object[]) value) {
+                            setting.addMultiValue(obj);
+                        }
+                    } else {
+                        setting.setSingleValue(value);
                     }
-                } else {
-                    setting.setSingleValue(value);
                 }
             }
 
