@@ -149,6 +149,7 @@ public class ConfigAwareKeyStore {
                 }
                 store.load(in, null == keystorePassword ? null : keystorePassword.toCharArray());
                 storeHash = currentHash;
+                this.filePath = keystorePath;
                 return true;
 
             }
