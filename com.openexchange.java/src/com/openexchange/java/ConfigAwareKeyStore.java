@@ -127,6 +127,7 @@ public class ConfigAwareKeyStore {
                 // Store was removed
                 store = null;
                 storeHash = -1;
+                filePath = null;
                 return true;
             }
         }
