@@ -390,7 +390,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
                     try {
                         ResourceId resourceId = ResourceId.parse(specificPart.substring(5));
-                        if (ctx.getContextId() == resourceId.getContextID()) {
+                        if (null != resourceId && ctx.getContextId() == resourceId.getContextID()) {
                             if (CalendarUserType.GROUP.equals(resourceId.getCalendarUserType())) {
                                 GroupService groupService = GROUP_SERVICE_REFERENCE.get();
                                 if (null == groupService) {
