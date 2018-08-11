@@ -172,9 +172,12 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
             // Invalid account, but at least allow people to delete it.
             LOG.debug("Cannot convert '{}' to integer", accountId);
         }
-        String displayName = null;
+        String displayName = subscription.getDisplayName();
+        if (Strings.isNotEmpty(displayName)) {
+            super.modifyOutgoing(subscription);
+            return;
+        }
         if (Strings.isNotEmpty(subscription.getSecret())) {
-            // TODO: Get the display name from the metadata or from the OAuth account?
             displayName = metadata.getDisplayName();
         }
         subscription.setDisplayName(Strings.isNotEmpty(displayName) ? displayName : this.displayName);

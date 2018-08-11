@@ -49,15 +49,12 @@
 
 package com.openexchange.subscribe.yahoo.osgi;
 
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.YahooService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.yahoo.YahooSubscribeService;
 
 /**
  * {@link Activator}
@@ -65,10 +62,6 @@ import com.openexchange.subscribe.yahoo.YahooSubscribeService;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class Activator extends HousekeepingActivator {
-
-    private volatile OAuthServiceMetaData oAuthServiceMetaData;
-    private volatile YahooService yahooService;
-    private ServiceRegistration<SubscribeService> serviceRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -78,53 +71,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         // react dynamically to the appearance/disappearance of OAuthMetaDataService for MSN
-        final ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData> metaDataTracker =
-            new ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData>(
-                context,
-                OAuthServiceMetaData.class,
-                new OAuthServiceMetaDataRegisterer(context, this));
-        rememberTracker(metaDataTracker);
+        rememberTracker(new ServiceTracker<OAuthServiceMetaData, OAuthServiceMetaData>(context, OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this)));
         openTrackers();
-        yahooService = getService(YahooService.class);
-        //registerSubscribeService();
     }
-
-    /**
-     * Registers the subscribe service.
-     */
-    public synchronized void registerSubscribeService() {
-        if (null == serviceRegistration) {
-            serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(this), null);
-            org.slf4j.LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was started");
-        }
-    }
-
-    /**
-     * Un-registers the subscribe service.
-     */
-    public synchronized void unregisterSubscribeService() {
-        final ServiceRegistration<SubscribeService> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
-            serviceRegistration.unregister();
-            this.serviceRegistration = null;
-            org.slf4j.LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was stopped");
-        }
-    }
-
-    public OAuthServiceMetaData getOAuthServiceMetaData() {
-        return oAuthServiceMetaData;
-    }
-
-    public void setOAuthServiceMetaData(final OAuthServiceMetaData authServiceMetaData) {
-        oAuthServiceMetaData = authServiceMetaData;
-    }
-
-    public YahooService getYahooService() {
-        return yahooService;
-    }
-
-    public void setYahooService(final YahooService yahooService) {
-        this.yahooService = yahooService;
-    }
-
 }
