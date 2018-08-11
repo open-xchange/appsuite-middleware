@@ -632,7 +632,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
                 try {
                     ResourceId resourceId = ResourceId.parse(specificPart.substring(5));
-                    if (context.getContextId() == resourceId.getContextID() && CalendarUserType.RESOURCE.equals(resourceId.getCalendarUserType())) {
+                    if (null != resourceId && context.getContextId() == resourceId.getContextID() && CalendarUserType.RESOURCE.equals(resourceId.getCalendarUserType())) {
                         return resourceResolver.load(resourceId.getEntity(), context);
                     }
                 } catch (IllegalArgumentException | OXException e) {
