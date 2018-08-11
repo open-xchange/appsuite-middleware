@@ -59,10 +59,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,25 +80,20 @@ import com.google.gdata.data.extensions.PhoneNumber;
 import com.google.gdata.data.extensions.PostalAddress;
 import com.google.gdata.data.extensions.StructuredPostalAddress;
 import com.google.gdata.util.ServiceException;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -111,7 +104,7 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class GoogleContactsSubscribeService extends AbstractSubscribeService {
+public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
 
@@ -120,8 +113,6 @@ public class GoogleContactsSubscribeService extends AbstractSubscribeService {
      */
     private static final String FEED_URL = "https://www.google.com/m8/feeds/contacts/default/full";
     private static final String APP_NAME = "ox-appsuite";
-    private static final String sourceId = KnownApi.GOOGLE.getFullName();
-    private static final String DISPLAY_NAME = "Google Contacts";
     private static final int CHUNK_SIZE = 25;
     /**
      * The birthday {@link Date} format
@@ -143,57 +134,16 @@ public class GoogleContactsSubscribeService extends AbstractSubscribeService {
         }
     };
 
-    private final SubscriptionSource source;
-    private final OAuthServiceMetaData oauthServiceMetadata;
-    private final ServiceLookup services;
     private final ContactsService googleContactsService;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link GoogleContactsSubscribeService}.
      */
     public GoogleContactsSubscribeService(OAuthServiceMetaData oauthServiceMetadata, ServiceLookup services) {
-        super();
-        this.oauthServiceMetadata = oauthServiceMetadata;
+        super(oauthServiceMetadata, KnownApi.GOOGLE.getFullName() + ".contact", FolderObject.CONTACT, "Google Contacts", services);
         this.services = services;
-        source = initSS(FolderObject.CONTACT);
         googleContactsService = new ContactsService(APP_NAME);
-    }
-
-    private SubscriptionSource initSS(int module) {
-        SubscriptionSource source = new SubscriptionSource();
-        source.setDisplayName(DISPLAY_NAME);
-        source.setFolderModule(module);
-        source.setId(sourceId + ".contacts");
-        source.setSubscribeService(this);
-
-        final DynamicFormDescription form = new DynamicFormDescription();
-        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
-        oauthAccount.setOption("type", oauthServiceMetadata.getId());
-        form.add(oauthAccount);
-
-        source.setFormDescription(form);
-        return source;
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.SubscribeService#getSubscriptionSource()
-     */
-    @Override
-    public SubscriptionSource getSubscriptionSource() {
-        return source;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.subscribe.SubscribeService#handles(int)
-     */
-    @Override
-    public boolean handles(int folderModule) {
-        return FolderObject.CONTACT == folderModule;
     }
 
     /*
@@ -204,7 +154,7 @@ public class GoogleContactsSubscribeService extends AbstractSubscribeService {
     @Override
     public Collection<?> getContent(Subscription subscription) throws OXException {
         Session session = subscription.getSession();
-        OAuthAccount oauthAccount = getOAuthAccount(subscription, session);
+        OAuthAccount oauthAccount = GoogleApiClients.reacquireIfExpired(session, true, getOAuthAccount(session, subscription));
         googleContactsService.setOAuth2Credentials(GoogleApiClients.getCredentials(oauthAccount, session));
 
         try {
@@ -267,15 +217,6 @@ public class GoogleContactsSubscribeService extends AbstractSubscribeService {
                 return null;
             }
         });
-    }
-
-    private OAuthAccount getOAuthAccount(Subscription subscription, Session session) throws OXException {
-        Object accountId = subscription.getConfiguration().get("account");
-        if (null == accountId) {
-            return GoogleApiClients.getDefaultGoogleAccount(session);
-        }
-        OAuthService service = services.getService(OAuthService.class);
-        return service.getAccount(session, accountId instanceof Integer ? ((Integer) accountId).intValue() : Integer.parseInt(accountId.toString()));
     }
 
     private List<Contact> parseFeed(ContactFeed feed) throws FileNotFoundException {
@@ -498,27 +439,13 @@ public class GoogleContactsSubscribeService extends AbstractSubscribeService {
         return contacts;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
+     */
     @Override
-    public void modifyIncoming(final Subscription subscription) throws OXException {
-        if (subscription != null) {
-            super.modifyIncoming(subscription);
-            if (subscription.getConfiguration() != null) {
-                if (subscription.getConfiguration().get("account") != null) {
-                    subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
-                } else {
-                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : {}", subscription.getConfiguration());
-                }
-            } else {
-                LOG.error("subscription.getConfiguration() is null");
-            }
-        } else {
-            LOG.error("subscription is null");
-        }
-    }
-
-    public void deleteAllUsingOAuthAccount(Context context, int id) throws OXException {
-        Map<String, Object> query = new HashMap<String, Object>();
-        query.put("account", String.valueOf(id));
-        removeWhereConfigMatches(context, query);
+    protected KnownApi getKnownApi() {
+        return KnownApi.GOOGLE;
     }
 }

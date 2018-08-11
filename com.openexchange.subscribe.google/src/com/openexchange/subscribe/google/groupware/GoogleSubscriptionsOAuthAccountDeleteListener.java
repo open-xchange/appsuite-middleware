@@ -76,7 +76,7 @@ public class GoogleSubscriptionsOAuthAccountDeleteListener implements OAuthAccou
 
     @Override
     public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
-        contactSubsrcibeService.deleteAllUsingOAuthAccount(getContext(cid), id);
+        contactSubsrcibeService.deleteSubscription(getContext(cid), id);
     }
 
     private Context getContext(int cid) throws OXException {
