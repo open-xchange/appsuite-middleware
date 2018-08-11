@@ -55,7 +55,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.subscribe.mslive.ContactsMSLiveSubscribeService;
+import com.openexchange.subscribe.mslive.MSLiveContactsSubscribeService;
 
 
 /**
@@ -65,10 +65,10 @@ import com.openexchange.subscribe.mslive.ContactsMSLiveSubscribeService;
  */
 public class MSLiveSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
 
-    private final ContactsMSLiveSubscribeService contactSubsrcibeService;
+    private final MSLiveContactsSubscribeService contactSubsrcibeService;
     private final ContextService contexts;
 
-    public MSLiveSubscriptionsOAuthAccountDeleteListener(final ContactsMSLiveSubscribeService contactService, final ContextService contexts) {
+    public MSLiveSubscriptionsOAuthAccountDeleteListener(final MSLiveContactsSubscribeService contactService, final ContextService contexts) {
         super();
         this.contactSubsrcibeService = contactService;
         this.contexts = contexts;

@@ -75,21 +75,21 @@ import com.openexchange.subscribe.mslive.internal.ContactParser;
 import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
 
 /**
- * {@link ContactsMSLiveSubscribeService}
+ * {@link MSLiveContactsSubscribeService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ContactsMSLiveSubscribeService extends AbstractOAuthSubscribeService {
+public class MSLiveContactsSubscribeService extends AbstractOAuthSubscribeService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ContactsMSLiveSubscribeService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MSLiveContactsSubscribeService.class);
 
     /**
-     * Initialises a new {@link ContactsMSLiveSubscribeService}.
+     * Initialises a new {@link MSLiveContactsSubscribeService}.
      *
      * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
      * @param services The {@link ServiceLookup}
      */
-    public ContactsMSLiveSubscribeService(OAuthServiceMetaData oAuthServiceMetaData, ServiceLookup services) {
+    public MSLiveContactsSubscribeService(OAuthServiceMetaData oAuthServiceMetaData, ServiceLookup services) {
         super(oAuthServiceMetaData, KnownApi.MS_LIVE_CONNECT.getFullName() + ".contact", FolderObject.CONTACT, "MS Live", services);
     }
 
