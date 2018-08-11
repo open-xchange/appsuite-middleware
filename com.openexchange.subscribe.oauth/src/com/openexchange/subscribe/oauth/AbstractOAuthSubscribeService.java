@@ -57,8 +57,15 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.subscribe.AbstractSubscribeService;
+import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -69,7 +76,7 @@ import com.openexchange.subscribe.SubscriptionSource;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeService {
+public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeService implements SubscribeService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOAuthSubscribeService.class);
 
@@ -78,6 +85,7 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
     private final String sourceId;
     private final String displayName;
     private final SubscriptionSource source;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link AbstractOAuthSubscribeService}.
@@ -86,14 +94,36 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
      * @param sourceId The subscription's source identifier
      * @param module The module
      * @param displayName The display name
+     * @param services The {@link ServiceLookup}
      */
-    public AbstractOAuthSubscribeService(OAuthServiceMetaData metadata, String sourceId, int module, String displayName) {
+    public AbstractOAuthSubscribeService(OAuthServiceMetaData metadata, String sourceId, int module, String displayName, ServiceLookup services) {
         super();
         this.metadata = metadata;
         this.sourceId = sourceId;
         this.module = module;
         this.displayName = displayName;
+        this.services = services;
         this.source = initialiseSubscriptionSource();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.subscribe.SubscribeService#getSubscriptionSource()
+     */
+    @Override
+    public SubscriptionSource getSubscriptionSource() {
+        return source;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.subscribe.SubscribeService#handles(int)
+     */
+    @Override
+    public boolean handles(int folderModule) {
+        return folderModule == module;
     }
 
     /*
@@ -158,9 +188,37 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
      * @param id The subscription's identifier
      * @throws OXException if an error is occurred
      */
-    protected void deleteSubscription(Context context, int id) throws OXException {
+    public void deleteSubscription(Context context, int id) throws OXException {
         removeWhereConfigMatches(context, Collections.singletonMap("account", String.valueOf(id)));
     }
+
+    /**
+     * Returns the {@link OAuthAccount} of the user and the specified {@link Subscription}
+     * 
+     * @param session The {@link Session}
+     * @param subscription The {@link Subscription}
+     * @return The {@link OAuthAccount}
+     * @throws OXException if the {@link OAuthService} is absent or any other error occurs
+     */
+    protected OAuthAccount getOAuthAccount(Session session, Subscription subscription) throws OXException {
+        OAuthService oAuthService = services.getService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
+        }
+
+        Object accountId = subscription.getConfiguration().get("account");
+        if (null == accountId) {
+            return oAuthService.getDefaultAccount(getKnownApi(), session);
+        }
+        return oAuthService.getAccount(session, accountId instanceof Integer ? ((Integer) accountId).intValue() : Integer.parseInt(accountId.toString()));
+    }
+
+    /**
+     * Get the {@link KnownApi}
+     * 
+     * @return the {@link KnownApi}
+     */
+    protected abstract KnownApi getKnownApi();
 
     /**
      * Initialises the subscription source
