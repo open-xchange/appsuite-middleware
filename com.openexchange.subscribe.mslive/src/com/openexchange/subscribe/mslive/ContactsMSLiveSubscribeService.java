@@ -58,52 +58,39 @@ import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.mslive.internal.ContactParser;
+import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
 
 /**
  * {@link ContactsMSLiveSubscribeService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeService implements SubscribeService {
+public class ContactsMSLiveSubscribeService extends AbstractOAuthSubscribeService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactsMSLiveSubscribeService.class);
-
-    private final SubscriptionSource source;
+    private static final Logger LOG = LoggerFactory.getLogger(ContactsMSLiveSubscribeService.class);
 
     /**
-     * Initializes a new {@link ContactsMSLiveSubscribeService}.
+     * Initialises a new {@link ContactsMSLiveSubscribeService}.
      *
-     * @param oAuthServiceMetaData
-     * @param services
+     * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
+     * @param services The {@link ServiceLookup}
      */
     public ContactsMSLiveSubscribeService(OAuthServiceMetaData oAuthServiceMetaData, ServiceLookup services) {
-        super(oAuthServiceMetaData, services);
-        source = initSS(FolderObject.CONTACT, "contact");
-    }
-
-    @Override
-    public SubscriptionSource getSubscriptionSource() {
-        return source;
-    }
-
-    @Override
-    public boolean handles(int folderModule) {
-        return FolderObject.CONTACT == folderModule;
+        super(oAuthServiceMetaData, KnownApi.MS_LIVE_CONNECT.getFullName() + ".contact", FolderObject.CONTACT, "MS Live", services);
     }
 
     /*
@@ -114,28 +101,9 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
     @Override
     public Collection<?> getContent(Subscription subscription) throws OXException {
         Session session = subscription.getSession();
-
-        // Load associated OAuth account
-        OAuthAccount oauthAccount;
-        {
-            Object accountId = subscription.getConfiguration().get("account");
-            if (null == accountId) {
-                oauthAccount = MSLiveApiClient.getDefaultOAuthAccount(session);
-            } else {
-                int iAccountId;
-                if (accountId instanceof Integer) {
-                    iAccountId = ((Integer) accountId).intValue();
-                } else {
-                    iAccountId = Integer.parseInt(accountId.toString());
-                }
-                OAuthService service = services.getService(OAuthService.class);
-                oauthAccount = service.getAccount(session, iAccountId);
-            }
-        }
-
+        OAuthAccount oauthAccount = getOAuthAccount(session, subscription);
         String accessToken = MSLiveApiClient.getAccessToken(oauthAccount, session);
-        JSONObject contacts = fetchData(accessToken);
-        return ContactParser.getInstance().parse(contacts);
+        return ContactParser.getInstance().parse(fetchData(accessToken));
     }
 
     /**
@@ -165,7 +133,6 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
                 }
                 throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(error.getString("message"));
             }
-
         } catch (final HttpException e) {
             LOG.error("", e);
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e, e.getMessage());
@@ -177,5 +144,15 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
             throw SubscriptionErrorMessage.ParseException.create(e, e.getMessage());
         }
         return wholeResponse;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
+     */
+    @Override
+    protected KnownApi getKnownApi() {
+        return KnownApi.MS_LIVE_CONNECT;
     }
 }
