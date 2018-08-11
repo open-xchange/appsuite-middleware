@@ -59,8 +59,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +88,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.java.util.TimeZones;
@@ -511,5 +514,11 @@ public class GoogleContactsSubscribeService extends AbstractSubscribeService {
         } else {
             LOG.error("subscription is null");
         }
+    }
+
+    public void deleteAllUsingOAuthAccount(Context context, int id) throws OXException {
+        Map<String, Object> query = new HashMap<String, Object>();
+        query.put("account", String.valueOf(id));
+        removeWhereConfigMatches(context, query);
     }
 }
