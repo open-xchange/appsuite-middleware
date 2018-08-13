@@ -60,7 +60,6 @@ import java.util.Map;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.mdimension.jchronic.utils.StringUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
@@ -172,15 +171,12 @@ public class ContactEventHandler implements EventHandler {
 
     /**
      * Checks if the updated contact contains any relevant changes for the EMail alarm
-     * 
+     *
      * @param originalContact The original {@link Contact}
      * @param updatedContact The updated {@link Contact}
      * @return true if the updated {@link Contact} contains any relevant changes
      */
     private boolean containsChangesForEmailAlarms(Contact originalContact, Contact updatedContact) {
-        // TODO QS-KR: Maybe a comparator in the Contact class would be nicer and reusable. This way you could also replace
-        //your own equals method with org.apache.commons.lang.StringUtils.equals(String, String), which should do
-        //    what you want to do.
         return  equals(originalContact.getGivenName(), updatedContact.getGivenName()) == false ||
                 equals(originalContact.getSurName(), updatedContact.getSurName()) == false ||
                 equals(originalContact.getDisplayName(), updatedContact.getDisplayName()) == false ||
@@ -218,8 +214,7 @@ public class ContactEventHandler implements EventHandler {
 
     private com.openexchange.chronos.Event loadEvent(Contact contact, Context context, CalendarAccount account) throws OXException {
         com.openexchange.chronos.Event event = getEventConverter(account).getSeriesMaster(contact);
-        event = getAlarmHelper(context, account).applyAlarms(event);
-        return event;
+        return getAlarmHelper(context, account).applyAlarms(event);
     }
 
     private void processChangedBirthday(int contextId, Collection<Integer> affectedUserIds, Contact contact) throws OXException {

@@ -224,21 +224,19 @@ class SingleMailDeliveryTask implements Runnable {
             return null;
         }
         Event event = null;
-        // TODO QS-KR: calUtil - parameter name hides class member with same name
-        AdministrativeCalendarUtil calUtil = null;
+        AdministrativeCalendarUtil adminCalUtil = null;
         CalendarAccount calendarAccount = null;
         try {
             calendarAccount = storage.getAccountStorage().loadAccount(trigger.getUserId(), account);
             if (calendarAccount == null) {
                 event = tryLoadingViaEventStorage(storage);
             } else {
-                calUtil = utilProvider.getAlarmUtil(calendarAccount.getProviderId());
-                if (calUtil == null) {
-                    // TODO QS-KR: needless setting of event parameter, is overwritten afterwards
+                adminCalUtil = utilProvider.getAlarmUtil(calendarAccount.getProviderId());
+                if (adminCalUtil == null) {
                     event = tryLoadingViaEventStorage(storage);
+                } else {
+                    event = adminCalUtil.getEventByAlarm(ctx, calendarAccount, trigger.getUserId(), trigger.getEventId());
                 }
-             // TODO QS-KR: Potential null-pointer on calling calUtil
-                event = calUtil.getEventByAlarm(ctx, calendarAccount, trigger.getUserId(), trigger.getEventId());
             }
         } catch (OXException e) {
             LOG.trace("Unable to load event with id {}: {}",trigger.getEventId(), e.getMessage());
@@ -255,8 +253,8 @@ class SingleMailDeliveryTask implements Runnable {
         Map<Integer, List<Alarm>> loadAlarms = storage.getAlarmStorage().loadAlarms(event);
         storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
         storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
-        if (calUtil != null && calendarAccount != null) {
-            calUtil.touchEvent(ctx, calendarAccount, trigger.getUserId(), trigger.getEventId());
+        if (adminCalUtil != null && calendarAccount != null) {
+            adminCalUtil.touchEvent(ctx, calendarAccount, trigger.getUserId(), trigger.getEventId());
         } else {
             touch(storage.getEventStorage(), event.getId());
         }
