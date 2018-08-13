@@ -87,7 +87,16 @@ import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.CryptoConfiguration;
 import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.amazonaws.services.s3.model.Region;
+import com.amazonaws.services.s3.model.SetBucketPolicyRequest;
 import com.amazonaws.services.s3.model.StaticEncryptionMaterialsProvider;
+import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.auth.policy.Principal;
+import com.amazonaws.auth.policy.Resource;
+import com.amazonaws.auth.policy.Statement;
+import com.amazonaws.auth.policy.actions.S3Actions;
+import com.amazonaws.auth.policy.conditions.BooleanCondition;
+import com.amazonaws.auth.policy.conditions.StringCondition;
+import com.amazonaws.auth.policy.conditions.StringCondition.StringComparisonType;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -169,8 +178,9 @@ public class S3FileStorageFactory implements FileStorageProvider {
                 AmazonS3ClientInfo clientInfo = initClient(filestoreID, propNameBuilder, configService);
                 AmazonS3Client client = clientInfo.client;
                 String bucketName = initBucket(client, filestoreID, propNameBuilder, configService);
+                boolean serverSideEncryption = optBoolProperty(filestoreID, "sse.encryption", false, propNameBuilder, configService);
                 LOG.debug("Using \"{}\" as bucket name.", bucketName);
-                S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
+                S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, serverSideEncryption, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
                 storage = storages.putIfAbsent(uri, newStorage);
                 if (null == storage) {
                     storage = newStorage;
@@ -393,6 +403,10 @@ public class S3FileStorageFactory implements FileStorageProvider {
             String region = optProperty(filestoreID, "region", "us-west-2", propNameBuilder, configService);
             try {
                 s3client.createBucket(new CreateBucketRequest(bucketName, Region.fromValue(region)));
+                Boolean encryption = optBoolProperty(filestoreID, "sse.encryption", false, propNameBuilder, configService);
+                if (encryption) {
+                    s3client.setBucketPolicy(new SetBucketPolicyRequest(bucketName, getSSEOnlyBucketPolicy(bucketName)));
+                }
             } catch (IllegalArgumentException e) {
                 throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
             } catch (AmazonS3Exception e) {
@@ -411,6 +425,30 @@ public class S3FileStorageFactory implements FileStorageProvider {
         }
 
         return bucketName;
+    }
+
+    /**
+     * Gets the bucket policy for a server side encryption only bucket.
+     *
+     * @param bucket_name The name of the bucket
+     * @return The encryption only policy
+     */
+    private String getSSEOnlyBucketPolicy(String bucket_name) {
+        Policy bucket_policy = new Policy().withStatements(
+            new Statement(Statement.Effect.Deny)
+                .withId("DenyIncorrectEncryptionHeader")
+                .withPrincipals(Principal.AllUsers)
+                .withActions(S3Actions.PutObject)
+                .withResources(new Resource("arn:aws:s3:::" + bucket_name + "/*"))
+                .withConditions(new StringCondition(StringComparisonType.StringNotEquals, "s3:x-amz-server-side-encryption", "AES256")),
+            new Statement(Statement.Effect.Deny)
+                .withId("DenyUnEncryptedObjectUploads")
+                .withPrincipals(Principal.AllUsers)
+                .withActions(S3Actions.PutObject)
+                .withResources(new Resource("arn:aws:s3:::" + bucket_name + "/*"))
+                .withConditions(new BooleanCondition("s3:x-amz-server-side-encryption", true))
+                );
+        return bucket_policy.toJson();
     }
 
     /**

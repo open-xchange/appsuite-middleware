@@ -121,7 +121,7 @@ properties:
       related: 
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore", "Encryption"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].encryption.rsa.keyStore
       description: |
@@ -136,7 +136,7 @@ properties:
       related: com.openexchange.filestore.s3.[filestoreID].encryption
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore"]
+      tags: ["Filestore", "Encryption"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].encryption.rsa.password
       description: |
@@ -151,7 +151,7 @@ properties:
       related: com.openexchange.filestore.s3.[filestoreID].encryption
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore", "Credential"]
+      tags: ["Filestore", "Encryption", "Credential"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].signerOverride
       description: |
@@ -201,3 +201,15 @@ properties:
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
       tags: ["Filestore", "Metrics"]
+      
+    - key: com.openexchange.filestore.s3.radosgw.sse.encryption
+      description: Enables server side encryption.
+      defaultValue: false
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore", "Encryption"]
+      

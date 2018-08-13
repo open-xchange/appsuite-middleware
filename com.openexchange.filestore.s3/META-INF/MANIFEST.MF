@@ -7,6 +7,9 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.amazonaws,
  com.amazonaws.auth,
+ com.amazonaws.auth.policy,
+ com.amazonaws.auth.policy.actions,
+ com.amazonaws.auth.policy.conditions,
  com.amazonaws.client.builder,
  com.amazonaws.handlers,
  com.amazonaws.http,
