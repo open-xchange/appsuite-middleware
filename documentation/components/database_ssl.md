@@ -37,7 +37,7 @@ Before we generate the certificates, create a subdirectory in your SQL folder. T
 * A client certificate to later copy to the Middleware
 
 
-Note: This commands use the 'rsa' command to build a private key that begins with '-----BEGIN RSA PRIVATE KEY-----'. This is needed for yaSSL. The library expects the key to begin in this manner and fails if it does not. Therefore the guid uses this approach to generate SSL keys.
+Note: This commands use the 'rsa' command to build a private key that begins with '-----BEGIN RSA PRIVATE KEY-----'. This is needed for yaSSL. The library expects the key to begin in this manner and fails if it does not. Therefore the guide uses this approach to generate SSL keys.
 
 ```
 mkdir /etc/mysql/ssl
