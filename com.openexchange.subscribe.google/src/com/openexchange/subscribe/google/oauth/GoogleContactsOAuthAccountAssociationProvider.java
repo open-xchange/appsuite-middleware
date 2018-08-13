@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,39 @@
  *
  */
 
-package com.openexchange.subscribe.google.osgi;
+package com.openexchange.subscribe.google.oauth;
 
-import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.context.ContextService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.oauth.association.OAuthAccountAssociation;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.google.GoogleContactsSubscribeService;
+import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider;
 
 /**
- * {@link GoogleContactsActivator}
+ * {@link GoogleContactsOAuthAccountAssociationProvider}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since 7.10.1
+ * @since v7.10.1
  */
-public class GoogleContactsActivator extends HousekeepingActivator {
+public class GoogleContactsOAuthAccountAssociationProvider extends AbstractSubscribeOAuthAccountAssociationProvider {
+
+    private final GoogleContactsSubscribeService subscriptionService;
+
+    /**
+     * Initialises a new {@link GoogleContactsOAuthAccountAssociationProvider}.
+     */
+    public GoogleContactsOAuthAccountAssociationProvider(ServiceLookup services, GoogleContactsSubscribeService subscriptionService) {
+        super(GoogleContactsSubscribeService.SOURCE_ID, services);
+        this.subscriptionService = subscriptionService;
+    }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider#createAssociation(int, int, int, java.lang.String, com.openexchange.subscribe.Subscription)
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class, FolderService.class };
+    public OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription) {
+        return new GoogleContactsOAuthAccountAssociation(accountId, userId, contextId, folderName, subscription, subscriptionService);
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
-        openTrackers();
-    }
-
 }
