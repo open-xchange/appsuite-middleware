@@ -72,7 +72,7 @@ public class AdminstrativeCalendarUtilProvider implements ServiceTrackerCustomiz
      * Initializes a new {@link AdminstrativeCalendarUtilProvider}.
      */
     public AdminstrativeCalendarUtilProvider(BundleContext bundleContext) {
-        this.utils = new ConcurrentHashMap<String, AdministrativeCalendarUtil>();
+        this.utils = new ConcurrentHashMap<>();
         this.context = bundleContext;
     }
 

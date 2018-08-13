@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.mdimension.jchronic.utils.StringUtils;
 import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
@@ -177,6 +178,9 @@ public class ContactEventHandler implements EventHandler {
      * @return true if the updated {@link Contact} contains any relevant changes
      */
     private boolean containsChangesForEmailAlarms(Contact originalContact, Contact updatedContact) {
+        // TODO QS-KR: Maybe a comparator in the Contact class would be nicer and reusable. This way you could also replace
+        //your own equals method with org.apache.commons.lang.StringUtils.equals(String, String), which should do
+        //    what you want to do.
         return  equals(originalContact.getGivenName(), updatedContact.getGivenName()) == false ||
                 equals(originalContact.getSurName(), updatedContact.getSurName()) == false ||
                 equals(originalContact.getDisplayName(), updatedContact.getDisplayName()) == false ||
@@ -186,7 +190,7 @@ public class ContactEventHandler implements EventHandler {
 
     }
 
-    public static boolean equals(String s1, String s2) {
+    private static boolean equals(String s1, String s2) {
         if (null == s1) {
             return null == s2;
         }
@@ -206,18 +210,22 @@ public class ContactEventHandler implements EventHandler {
     private void processNewBirthday(int contextId, Collection<Integer> affectedUserIds, Contact contact) throws OXException {
         Context context = services.getService(ContextService.class).getContext(contextId);
         for (CalendarAccount account : getBirthdaysCalendarAccounts(context, affectedUserIds)) {
-            com.openexchange.chronos.Event event = getEventConverter(account).getSeriesMaster(contact);
-            event = getAlarmHelper(context, account).applyAlarms(event);
+            com.openexchange.chronos.Event event = loadEvent(contact, context, account);
             insertDefaultAlarms(context, account, contact);
             notifyHandlers(context, account, event, contact);
         }
     }
 
+    private com.openexchange.chronos.Event loadEvent(Contact contact, Context context, CalendarAccount account) throws OXException {
+        com.openexchange.chronos.Event event = getEventConverter(account).getSeriesMaster(contact);
+        event = getAlarmHelper(context, account).applyAlarms(event);
+        return event;
+    }
+
     private void processChangedBirthday(int contextId, Collection<Integer> affectedUserIds, Contact contact) throws OXException {
         Context context = services.getService(ContextService.class).getContext(contextId);
         for (CalendarAccount account : getBirthdaysCalendarAccounts(context, affectedUserIds)) {
-            com.openexchange.chronos.Event event = getEventConverter(account).getSeriesMaster(contact);
-            event = getAlarmHelper(context, account).applyAlarms(event);
+            com.openexchange.chronos.Event event = loadEvent(contact, context, account);
             recreateAlarms(context, account, contact);
             notifyHandlers(context, account, event, contact);
         }
@@ -231,8 +239,7 @@ public class ContactEventHandler implements EventHandler {
     private void processRemovedBirthday(int contextId, Collection<Integer> affectedUserIds, Contact contact) throws OXException {
         Context context = services.getService(ContextService.class).getContext(contextId);
         for (CalendarAccount account : getBirthdaysCalendarAccounts(context, affectedUserIds)) {
-            com.openexchange.chronos.Event event = getEventConverter(account).getSeriesMaster(contact);
-            event = getAlarmHelper(context, account).applyAlarms(event);
+            com.openexchange.chronos.Event event = loadEvent(contact, context, account);
             deleteAlarms(context, account, contact);
             notifyHandlers(context, account, event, contact);
         }
@@ -244,8 +251,7 @@ public class ContactEventHandler implements EventHandler {
     }
 
     private void notifyHandlers(Context context, CalendarAccount account, com.openexchange.chronos.Event original, Contact contact) throws OXException {
-        com.openexchange.chronos.Event updated = getEventConverter(account).getSeriesMaster(contact);
-        updated = getAlarmHelper(context, account).applyAlarms(updated);
+        com.openexchange.chronos.Event updated = loadEvent(contact, context, account);
         CalendarEvent event = getEvent(context, account, original, updated);
         services.getService(CalendarEventNotificationService.class).notifyHandlers(event);
     }

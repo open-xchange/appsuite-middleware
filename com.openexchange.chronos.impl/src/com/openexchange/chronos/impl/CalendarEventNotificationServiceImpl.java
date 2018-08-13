@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.java.Autoboxing.L;
-import static org.slf4j.LoggerFactory.getLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.service.CalendarEvent;
@@ -104,7 +103,7 @@ public class CalendarEventNotificationServiceImpl implements CalendarEventNotifi
                 handler.handle(event);
                 LOG.trace("{} handled successfully by {} ({} ms elapsed)", event, handler, L(System.currentTimeMillis() - start));
             } catch (Exception e) {
-                getLogger(getClass()).warn("Unexpected error while handling {}: {}", event, e.getMessage(), e);
+                LOG.warn("Unexpected error while handling {}: {}", event, e.getMessage(), e);
             }
         }
     }

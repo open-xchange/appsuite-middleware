@@ -224,6 +224,7 @@ class SingleMailDeliveryTask implements Runnable {
             return null;
         }
         Event event = null;
+        // TODO QS-KR: calUtil - parameter name hides class member with same name
         AdministrativeCalendarUtil calUtil = null;
         CalendarAccount calendarAccount = null;
         try {
@@ -233,8 +234,10 @@ class SingleMailDeliveryTask implements Runnable {
             } else {
                 calUtil = utilProvider.getAlarmUtil(calendarAccount.getProviderId());
                 if (calUtil == null) {
+                    // TODO QS-KR: needless setting of event parameter, is overwritten afterwards
                     event = tryLoadingViaEventStorage(storage);
                 }
+             // TODO QS-KR: Potential null-pointer on calling calUtil
                 event = calUtil.getEventByAlarm(ctx, calendarAccount, trigger.getUserId(), trigger.getEventId());
             }
         } catch (OXException e) {
