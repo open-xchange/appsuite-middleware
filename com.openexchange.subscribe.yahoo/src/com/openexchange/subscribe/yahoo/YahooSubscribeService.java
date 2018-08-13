@@ -77,7 +77,6 @@ public class YahooSubscribeService extends AbstractOAuthSubscribeService {
      * @param services The {@link ServiceLookup}
      */
     public YahooSubscribeService(OAuthServiceMetaData metadata, ServiceLookup services) {
-        // TODO: update task for renaming the sourceId to KnownApi.YAHOO.getFullName()
         super(metadata, "com.openexchange.subscribe.socialplugin.yahoo", FolderObject.CONTACT, "Yahoo!", services);
         this.services = services;
     }
