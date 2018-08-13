@@ -28,7 +28,7 @@ Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces >= @OXVERSION@
-Requires:      open-xchange-hazelcast
+Requires:      open-xchange-hazelcast >= @OXVERSION@
 Requires(pre): open-xchange-system >= @OXVERSION@
 Obsoletes:     open-xchange-freebusy < %{version}
 
