@@ -322,7 +322,6 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 .setPassword(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.password", "&3sFs<^6[cKbWDW#du9s"))
                 .setIterationCount(configService.getIntProperty("com.openexchange.hazelcast.network.symmetricEncryption.iterationCount", 19)));
         } 
-    
         /*
          * Miscellaneous
          */
