@@ -115,7 +115,7 @@ class HazelcastSSLFactory implements SSLContextFactory, Reloadable {
         super();
         // Find out protocol
         String protocol = null;
-        String[] candidates = Strings.splitByComma(configService.getProperty(SSL_PROTOCOLS, "TLS,TLSv1,TLSv1.1,SSL,SSLv2,SSLv3"));
+        String[] candidates = Strings.splitByComma(configService.getProperty(SSL_PROTOCOLS, "TLS,TLSv1,TLSv1.1,TLSv1.3"));
         for (int i = candidates.length - 1; i >= 0; i--) {
             try {
                 sslContext = SSLContext.getInstance(candidates[i]);
