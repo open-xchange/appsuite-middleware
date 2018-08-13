@@ -154,6 +154,12 @@ public class UploadException extends OXException {
          * Image upload denied. Resolution is too high. (current=%1$s, max=%2$s)
          */
         IMAGE_RESOLUTION_TOO_HIGH("Image upload denied. Resolution is too high. (current=%1$s, max=%2$s)", UploadExceptionMessage.IMAGE_RESOLUTION_TOO_HIGH_MSG, CATEGORY_USER_INPUT, 17),
+        /**
+         * Failed to stream-wise processes request's upload
+         * <p>
+         * This error's {@link OXException#getArgument(String) arguments} contains the legacy <code>com.openexchange.groupware.upload.impl.UploadEvent</code> referenced by name <code>"__uploadEvent"</code> as fall-back
+         */
+        FAILED_STREAMED_UPLOAD("Failed to stream-wise processes request's upload", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 18)
 
         ;
 

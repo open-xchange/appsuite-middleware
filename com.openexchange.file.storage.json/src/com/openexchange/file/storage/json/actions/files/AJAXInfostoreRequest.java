@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -73,8 +75,8 @@ import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthentic
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.FileID;
@@ -82,15 +84,19 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.crypto.CryptographyMode;
-import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.FileFieldCollector;
+import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.ParameterBasedFileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
+import com.openexchange.groupware.infostore.utils.UploadSizeValidation;
 import com.openexchange.groupware.upload.StreamedUploadFile;
 import com.openexchange.groupware.upload.StreamedUploadFileIterator;
+import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
+import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
@@ -138,13 +144,15 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private Transport notificationTransport;
     private String notificationMessage;
     protected AJAXRequestData data;
-    private StreamedUploadFile uploadFile;
-    private StreamedUploadFileIterator uploadFiles;
+    private StreamedUploadFile streamedUploadFile;
+    private StreamedUploadFileIterator streamedUploadFiles;
+    private boolean streamedUploadFailed;
 
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
         super();
         this.data = requestData;
         this.session = session;
+        streamedUploadFailed = false;
     }
 
     @Override
@@ -493,19 +501,48 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public InputStream getUploadedFileData() throws OXException {
-        StreamedUploadFile uploadFile = this.uploadFile;
-        if (null == uploadFile) {
+        if (streamedUploadFailed) {
             long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
             if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L, true)) {
-                StreamedUploadFileIterator uploadFiles = data.getStreamedUpload(-1, maxSize > 0 ? maxSize : -1L).getUploadFiles();
-                this.uploadFiles = uploadFiles;
-                uploadFile = uploadFiles.next();
-                this.uploadFile = uploadFile;
+                try {
+                    final UploadFile uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
+                    UploadSizeValidation.checkSize(uploadFile.getSize());
+                    java.io.File tmpFile = uploadFile.getTmpFile();
+                    return new FileKnowingInputStream(new FileInputStream(tmpFile), tmpFile);
+                } catch (final FileNotFoundException e) {
+                    throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
             }
         }
-        if (null != uploadFile) {
+
+        StreamedUploadFile streamedUploadFile = this.streamedUploadFile;
+        if (null == streamedUploadFile && !streamedUploadFailed) {
+            long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+            if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L, true)) {
+                try {
+                    StreamedUploadFileIterator uploadFiles = data.getStreamedUpload(-1, maxSize > 0 ? maxSize : -1L).getUploadFiles();
+                    this.streamedUploadFiles = uploadFiles;
+                    streamedUploadFile = uploadFiles.next();
+                    this.streamedUploadFile = streamedUploadFile;
+                } catch (OXException e) {
+                    if (!UploadCode.FAILED_STREAMED_UPLOAD.equals(e)) {
+                        throw e;
+                    }
+                    streamedUploadFailed = true;
+                    try {
+                        final UploadFile uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
+                        UploadSizeValidation.checkSize(uploadFile.getSize());
+                        java.io.File tmpFile = uploadFile.getTmpFile();
+                        return new FileKnowingInputStream(new FileInputStream(tmpFile), tmpFile);
+                    } catch (final FileNotFoundException fnfe) {
+                        throw AjaxExceptionCodes.IO_ERROR.create(fnfe, fnfe.getMessage());
+                    }
+                }
+            }
+        }
+        if (null != streamedUploadFile) {
             try {
-                return uploadFile.getStream();
+                return streamedUploadFile.getStream();
             } catch (IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
@@ -519,7 +556,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public void uploadFinished() throws OXException {
-        StreamedUploadFileIterator uploadFiles = this.uploadFiles;
+        StreamedUploadFileIterator uploadFiles = this.streamedUploadFiles;
         if (null != uploadFiles) {
             uploadFiles.hasNext();
         }
@@ -567,7 +604,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public boolean hasUploads() throws OXException {
-        StreamedUploadFile uploadFile = this.uploadFile;
+        StreamedUploadFile uploadFile = this.streamedUploadFile;
         if (null != uploadFile) {
             return true;
         }
@@ -854,21 +891,45 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 }
             }
 
-            StreamedUploadFile uploadFile = this.uploadFile;
-            if (null == uploadFile) {
+            UploadFile uploadFile = null;
+            StreamedUploadFile streamedUploadFile = this.streamedUploadFile;
+            if (null == streamedUploadFile && !streamedUploadFailed) {
                 long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
                 if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L, true)) {
-                    StreamedUploadFileIterator uploadFiles = data.getStreamedUpload(-1, maxSize > 0 ? maxSize : -1L).getUploadFiles();
-                    this.uploadFiles = uploadFiles;
-                    uploadFile = uploadFiles.next();
-                    this.uploadFile = uploadFile;
+                    try {
+                        StreamedUploadFileIterator uploadFiles = data.getStreamedUpload(-1, maxSize > 0 ? maxSize : -1L).getUploadFiles();
+                        this.streamedUploadFiles = uploadFiles;
+                        streamedUploadFile = uploadFiles.next();
+                        this.streamedUploadFile = streamedUploadFile;
+                    } catch (OXException e) {
+                        if (!UploadCode.FAILED_STREAMED_UPLOAD.equals(e)) {
+                            throw e;
+                        }
+                        streamedUploadFailed = true;
+                        uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
+                    }
                 }
             }
 
             FileMetadataParser parser = FileMetadataParser.getInstance();
             file = parser.parse(jFile);
             fields = parser.getFields(jFile);
-            if (uploadFile != null) {
+            if (streamedUploadFile != null) {
+                if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
+                    file.setFileName(streamedUploadFile.getPreparedFileName());
+                    fields.add(File.Field.FILENAME);
+                }
+
+                if (!fields.contains(File.Field.FILE_MIMETYPE)) {
+                    file.setFileMIMEType(streamedUploadFile.getContentType());
+                    fields.add(File.Field.FILE_MIMETYPE);
+                }
+
+                // Not known in case of a streamed upload
+                //file.setFileSize(uploadFile.getSize());
+                //fields.add(File.Field.FILE_SIZE);
+                // TODO: Guess Content-Type
+            } else if (uploadFile != null) {
                 if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
                     file.setFileName(uploadFile.getPreparedFileName());
                     fields.add(File.Field.FILENAME);
@@ -879,9 +940,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                     fields.add(File.Field.FILE_MIMETYPE);
                 }
 
-                // Not known in case of a streamed upload
-                //file.setFileSize(uploadFile.getSize());
-                //fields.add(File.Field.FILE_SIZE);
+                file.setFileSize(uploadFile.getSize());
+                fields.add(File.Field.FILE_SIZE);
                 // TODO: Guess Content-Type
             }
 
@@ -924,14 +984,23 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 
-        StreamedUploadFile uploadFile = this.uploadFile;
-        if (null == uploadFile) {
+        UploadFile uploadFile = null;
+        StreamedUploadFile streamedUploadFile = this.streamedUploadFile;
+        if (null == streamedUploadFile && !streamedUploadFailed) {
             long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
             if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L, true)) {
-                StreamedUploadFileIterator uploadFiles = data.getStreamedUpload(-1, maxSize > 0 ? maxSize : -1L).getUploadFiles();
-                this.uploadFiles = uploadFiles;
-                uploadFile = uploadFiles.next();
-                this.uploadFile = uploadFile;
+                try {
+                    StreamedUploadFileIterator uploadFiles = data.getStreamedUpload(-1, maxSize > 0 ? maxSize : -1L).getUploadFiles();
+                    this.streamedUploadFiles = uploadFiles;
+                    streamedUploadFile = uploadFiles.next();
+                    this.streamedUploadFile = streamedUploadFile;
+                } catch (OXException e) {
+                    if (!UploadCode.FAILED_STREAMED_UPLOAD.equals(e)) {
+                        throw e;
+                    }
+                    streamedUploadFailed = true;
+                    uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
+                }
             }
         }
 
@@ -939,7 +1008,21 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         fields = ParameterBasedFileMetadataParser.getInstance().getFields(data);
         if (file != null) {
 
-            if (uploadFile != null) {
+            if (streamedUploadFile != null) {
+                if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
+                    file.setFileName(streamedUploadFile.getPreparedFileName());
+                    fields.add(File.Field.FILENAME);
+                }
+
+                if (!fields.contains(File.Field.FILE_MIMETYPE)) {
+                    file.setFileMIMEType(streamedUploadFile.getContentType());
+                    fields.add(File.Field.FILE_MIMETYPE);
+                }
+
+                // Not known in case of a streamed upload
+                //file.setFileSize(uploadFile.getSize());
+                //fields.add(File.Field.FILE_SIZE);
+            } else if (uploadFile != null) {
                 if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
                     file.setFileName(uploadFile.getPreparedFileName());
                     fields.add(File.Field.FILENAME);
@@ -950,9 +1033,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                     fields.add(File.Field.FILE_MIMETYPE);
                 }
 
-                // Not known in case of a streamed upload
-                //file.setFileSize(uploadFile.getSize());
-                //fields.add(File.Field.FILE_SIZE);
+                file.setFileSize(uploadFile.getSize());
+                fields.add(File.Field.FILE_SIZE);
+                // TODO: Guess Content-Type
             }
 
             if (!fields.contains(File.Field.FILENAME) && file.getFileName() != null && file.getFileName().trim().length() != 0) {

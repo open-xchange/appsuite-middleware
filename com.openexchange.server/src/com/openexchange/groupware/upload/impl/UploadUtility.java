@@ -351,6 +351,7 @@ public final class UploadUtility {
     /**
      * Stream-wise processes specified request's upload provided that request is of content type <code>multipart/*</code>.
      *
+     * @param requireStartingFormField <code>true</code> to require that multipart upload request starts with at least one simple form field; otherwise <code>false</code>
      * @param req The HTTP request
      * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
      * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
@@ -358,7 +359,7 @@ public final class UploadUtility {
      * @return The streamed upload
      * @throws OXException If streamed upload cannot be returned
      */
-    public static StreamedUpload processStreamedUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
+    public static StreamedUpload processStreamedUpload(boolean requireStartingFormField, HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
         if (!Tools.isMultipartContent(req)) {
             // No multipart content
             throw UploadException.UploadCode.NO_MULTIPART_CONTENT.create();
@@ -389,7 +390,23 @@ public final class UploadUtility {
 
         // Create the upload instance
         String fileName = req.getParameter("filename");
-        return new MultipartStreamedUpload(iter, uuid, listeners, action, fileName, req.getCharacterEncoding(), session);
+        try {
+            return new MultipartStreamedUpload(iter, uuid, listeners, action, fileName, req.getCharacterEncoding(), requireStartingFormField, session);
+        } catch (MultipartStreamedUpload.MissingStartingFormField e) {
+            // Get the currently available listeners
+            List<UploadFileListener> uploadListeners = Collections.emptyList();
+            {
+                ServiceListing<UploadFileListener> listing = LISTENERS.get();
+                if (null != listing) {
+                    uploadListeners = new ArrayList<>(listing.getServiceList());
+                }
+            }
+
+            UploadEvent uploadEvent = doProcessUpload(req, maxFileSize, maxOverallSize, e.getItem(), iter, uuid, action, uploadListeners, session);
+            UploadException uploadException = UploadException.UploadCode.FAILED_STREAMED_UPLOAD.create(e);
+            uploadException.setArgument("__uploadEvent", uploadEvent);
+            throw uploadException;
+        }
     }
 
     /**
@@ -431,6 +448,10 @@ public final class UploadUtility {
         // Yield an ID
         String uuid = UUIDs.getUnformattedStringFromRandom();
 
+        return doProcessUpload(req, maxFileSize, maxOverallSize, null, iter, uuid, action, listeners, session);
+    }
+
+    private static UploadEvent doProcessUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, FileItemStream optFirstItem, FileItemIterator iter, String uuid, String action, List<UploadFileListener> listeners, Session session) throws OXException {
         // Create the upload event
         UploadEvent uploadEvent = new UploadEvent();
         uploadEvent.setAction(action);
@@ -448,8 +469,15 @@ public final class UploadUtility {
             String fileName = req.getParameter("filename");
             long current = 0L;
 
-            while (iter.hasNext()) {
-                FileItemStream item = iter.next();
+            FileItemStream ofi = optFirstItem;
+            while (null != ofi || iter.hasNext()) {
+                FileItemStream item;
+                if (null != ofi) {
+                    item = ofi;
+                    ofi = null;
+                } else {
+                    item = iter.next();
+                }
                 if (item.isFormField()) {
                     uploadEvent.addFormField(item.getFieldName(), Streams.stream2string(item.openStream(), charEnc));
                 } else {
@@ -533,6 +561,7 @@ public final class UploadUtility {
     /**
      * (Statically) Processes specified request's upload for a simple binary upload.
      *
+     * @param requireStartingFormField <code>true</code> to require that multipart upload request starts with at least one simple form field; otherwise <code>false</code>
      * @param req The request whose upload shall be processed
      * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
      * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
