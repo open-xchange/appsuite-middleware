@@ -10,6 +10,7 @@ BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
+BuildRequires: open-xchange-hazelcast
 %if 0%{?suse_version}
 BuildRequires: java-1_8_0-openjdk-devel
 %else
@@ -27,6 +28,7 @@ Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces >= @OXVERSION@
+Requires:      open-xchange-hazelcast
 Requires(pre): open-xchange-system >= @OXVERSION@
 Obsoletes:     open-xchange-freebusy < %{version}
 

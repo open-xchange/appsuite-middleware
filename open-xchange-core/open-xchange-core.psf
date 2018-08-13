@@ -5,7 +5,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.android.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.guava"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.annotation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.authentication.driver.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>

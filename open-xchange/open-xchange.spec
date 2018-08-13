@@ -29,6 +29,7 @@ Source2:          open-xchange.service
 %define           dropin_example limits.conf
 Summary:          The Open-Xchange backend
 Requires:         open-xchange-core >= @OXVERSION@
+Requires:         open-xchange-hazelcast
 Requires:         open-xchange-authentication
 Requires:         open-xchange-authorization
 Requires:         open-xchange-mailstore
