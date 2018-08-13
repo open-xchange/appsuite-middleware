@@ -47,41 +47,18 @@
  *
  */
 
-package com.openexchange.subscribe.xing.groupware;
+package com.openexchange.subscribe.oauth;
 
-import java.sql.Connection;
-import java.util.Map;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.subscribe.xing.XingSubscribeService;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link XingSubscriptionsOAuthAccountDeleteListener}
+ * {@link FormStrings}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.1
  */
-public class XingSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
+public class FormStrings implements LocalizableStrings {
 
-    private XingSubscribeService xingService;
-    private ContextService contextService;
+    public static final String ACCOUNT_LABEL = "Select an existing account";
 
-    /**
-     * Initializes a new {@link XingSubscriptionsOAuthAccountDeleteListener}.
-     */
-    public XingSubscriptionsOAuthAccountDeleteListener(final XingSubscribeService xingService, final ContextService contextService) {
-        super();
-        this.xingService = xingService;
-        this.contextService = contextService;
-    }
-
-    @Override
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        xingService.deleteSubscription(contextService.getContext(cid), id);
-    }
-
-    @Override
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // no op
-    }
 }

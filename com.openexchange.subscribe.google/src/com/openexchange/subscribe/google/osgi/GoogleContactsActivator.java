@@ -47,41 +47,36 @@
  *
  */
 
-package com.openexchange.subscribe.xing.groupware;
+package com.openexchange.subscribe.google.osgi;
 
-import java.sql.Connection;
-import java.util.Map;
+import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.subscribe.xing.XingSubscribeService;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link XingSubscriptionsOAuthAccountDeleteListener}
+ * {@link GoogleContactsActivator}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.1
  */
-public class XingSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
+public class GoogleContactsActivator extends HousekeepingActivator {
 
-    private XingSubscribeService xingService;
-    private ContextService contextService;
-
-    /**
-     * Initializes a new {@link XingSubscriptionsOAuthAccountDeleteListener}.
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
-    public XingSubscriptionsOAuthAccountDeleteListener(final XingSubscribeService xingService, final ContextService contextService) {
-        super();
-        this.xingService = xingService;
-        this.contextService = contextService;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class };
     }
 
     @Override
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        xingService.deleteSubscription(contextService.getContext(cid), id);
+    protected void startBundle() throws Exception {
+        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
+        openTrackers();
     }
 
-    @Override
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // no op
-    }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,58 @@
  *
  */
 
-package com.openexchange.subscribe.xing.groupware;
+package com.openexchange.subscribe.google.parser.consumers;
 
-import java.sql.Connection;
-import java.util.Map;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.subscribe.xing.XingSubscribeService;
+import java.util.function.BiConsumer;
+import com.google.gdata.data.contacts.ContactEntry;
+import com.google.gdata.data.extensions.FamilyName;
+import com.google.gdata.data.extensions.GivenName;
+import com.google.gdata.data.extensions.Name;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link XingSubscriptionsOAuthAccountDeleteListener}
+ * {@link NameConsumer} - Parses the given name, family name and full name of the specified contact
+ * along with their yomi representations if available.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class XingSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
-
-    private XingSubscribeService xingService;
-    private ContextService contextService;
+public class NameConsumer implements BiConsumer<ContactEntry, Contact> {
 
     /**
-     * Initializes a new {@link XingSubscriptionsOAuthAccountDeleteListener}.
+     * Initialises a new {@link NameConsumer}.
      */
-    public XingSubscriptionsOAuthAccountDeleteListener(final XingSubscribeService xingService, final ContextService contextService) {
+    public NameConsumer() {
         super();
-        this.xingService = xingService;
-        this.contextService = contextService;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
+     */
     @Override
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        xingService.deleteSubscription(contextService.getContext(cid), id);
-    }
-
-    @Override
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // no op
+    public void accept(ContactEntry t, Contact u) {
+        if (!t.hasName()) {
+            return;
+        }
+        Name name = t.getName();
+        if (name.hasGivenName()) {
+            GivenName given = name.getGivenName();
+            u.setGivenName(t.getName().getGivenName().getValue());
+            if (given.hasYomi()) {
+                u.setYomiFirstName(given.getYomi());
+            }
+        }
+        if (name.hasFamilyName()) {
+            FamilyName familyName = name.getFamilyName();
+            u.setSurName(familyName.getValue());
+            if (familyName.hasYomi()) {
+                u.setYomiLastName(familyName.getYomi());
+            }
+        }
+        if (name.hasFullName()) {
+            u.setDisplayName(name.getFullName().getValue());
+        }
     }
 }

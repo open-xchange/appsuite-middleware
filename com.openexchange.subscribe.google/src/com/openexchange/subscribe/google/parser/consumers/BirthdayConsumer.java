@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,72 @@
  *
  */
 
-package com.openexchange.subscribe.xing.groupware;
+package com.openexchange.subscribe.google.parser.consumers;
 
-import java.sql.Connection;
-import java.util.Map;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.subscribe.xing.XingSubscribeService;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.function.BiConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.gdata.data.contacts.Birthday;
+import com.google.gdata.data.contacts.ContactEntry;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.util.TimeZones;
+import com.openexchange.subscribe.google.GoogleContactsSubscribeService;
 
 /**
- * {@link XingSubscriptionsOAuthAccountDeleteListener}
+ * {@link BirthdayConsumer} - Parses the birthday of the contact
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class XingSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
+public class BirthdayConsumer implements BiConsumer<ContactEntry, Contact> {
 
-    private XingSubscribeService xingService;
-    private ContextService contextService;
+    private static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
 
     /**
-     * Initializes a new {@link XingSubscriptionsOAuthAccountDeleteListener}.
+     * The birthday {@link Date} format
+     * 
+     * @see <a href="https://developers.google.com/contacts/v3/reference#gcBirthday">gContact:birthday</a>
      */
-    public XingSubscriptionsOAuthAccountDeleteListener(final XingSubscribeService xingService, final ContextService contextService) {
+    private final static String dateFormatPattern = "yyyy-MM-dd";
+
+    /**
+     * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd" as pattern.
+     */
+    private static final ThreadLocal<SimpleDateFormat> BIRTHDAY_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatPattern);
+            dateFormat.setTimeZone(TimeZones.UTC);
+            return dateFormat;
+        }
+    };
+
+    /**
+     * Initialises a new {@link BirthdayConsumer}.
+     */
+    public BirthdayConsumer() {
         super();
-        this.xingService = xingService;
-        this.contextService = contextService;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
+     */
     @Override
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        xingService.deleteSubscription(contextService.getContext(cid), id);
-    }
-
-    @Override
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // no op
+    public void accept(ContactEntry t, Contact u) {
+        if (!t.hasBirthday()) {
+            return;
+        }
+        Birthday birthday = t.getBirthday();
+        try {
+            u.setBirthday(BIRTHDAY_FORMAT.get().parse(birthday.getValue()));
+        } catch (ParseException e) {
+            LOG.warn("Unable to parse '{}' as a birthday.", birthday.getValue());
+        }
     }
 }

@@ -47,41 +47,46 @@
  *
  */
 
-package com.openexchange.subscribe.xing.groupware;
+package com.openexchange.subscribe.google.groupware;
 
 import java.sql.Connection;
 import java.util.Map;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.subscribe.xing.XingSubscribeService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.google.GoogleContactsSubscribeService;
 
 /**
- * {@link XingSubscriptionsOAuthAccountDeleteListener}
+ * {@link GoogleSubscriptionsOAuthAccountDeleteListener}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class XingSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
+public class GoogleSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
 
-    private XingSubscribeService xingService;
-    private ContextService contextService;
+    private final GoogleContactsSubscribeService contactSubsrcibeService;
+    private final ServiceLookup services;
 
-    /**
-     * Initializes a new {@link XingSubscriptionsOAuthAccountDeleteListener}.
-     */
-    public XingSubscriptionsOAuthAccountDeleteListener(final XingSubscribeService xingService, final ContextService contextService) {
+    public GoogleSubscriptionsOAuthAccountDeleteListener(GoogleContactsSubscribeService contactService, ServiceLookup services) {
         super();
-        this.xingService = xingService;
-        this.contextService = contextService;
+        this.contactSubsrcibeService = contactService;
+        this.services = services;
     }
 
     @Override
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        xingService.deleteSubscription(contextService.getContext(cid), id);
+    public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
+        contactSubsrcibeService.deleteSubscription(getContext(cid), id);
+    }
+
+    private Context getContext(int cid) throws OXException {
+        ContextService contextService = services.getService(ContextService.class);
+        return contextService.getContext(cid);
     }
 
     @Override
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // no op
+    public void onBeforeOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
+        // Nothing to do
+
     }
 }

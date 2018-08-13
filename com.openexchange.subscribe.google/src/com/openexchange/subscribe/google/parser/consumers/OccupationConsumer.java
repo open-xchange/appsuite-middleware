@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,36 @@
  *
  */
 
-package com.openexchange.subscribe.xing.groupware;
+package com.openexchange.subscribe.google.parser.consumers;
 
-import java.sql.Connection;
-import java.util.Map;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.subscribe.xing.XingSubscribeService;
+import java.util.function.BiConsumer;
+import com.google.gdata.data.contacts.ContactEntry;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link XingSubscriptionsOAuthAccountDeleteListener}
+ * {@link OccupationConsumer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class XingSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
-
-    private XingSubscribeService xingService;
-    private ContextService contextService;
+public class OccupationConsumer implements BiConsumer<ContactEntry, Contact> {
 
     /**
-     * Initializes a new {@link XingSubscriptionsOAuthAccountDeleteListener}.
+     * Initialises a new {@link OccupationConsumer}.
      */
-    public XingSubscriptionsOAuthAccountDeleteListener(final XingSubscribeService xingService, final ContextService contextService) {
+    public OccupationConsumer() {
         super();
-        this.xingService = xingService;
-        this.contextService = contextService;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
+     */
     @Override
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        xingService.deleteSubscription(contextService.getContext(cid), id);
-    }
-
-    @Override
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // no op
+    public void accept(ContactEntry t, Contact u) {
+        if (t.hasOccupation()) {
+            u.setProfession(t.getOccupation().getValue());
+        }
     }
 }

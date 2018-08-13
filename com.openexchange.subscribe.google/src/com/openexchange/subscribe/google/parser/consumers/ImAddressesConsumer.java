@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,53 @@
  *
  */
 
-package com.openexchange.subscribe.xing.groupware;
+package com.openexchange.subscribe.google.parser.consumers;
 
-import java.sql.Connection;
-import java.util.Map;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.subscribe.xing.XingSubscribeService;
+import java.util.function.BiConsumer;
+import com.google.gdata.data.contacts.ContactEntry;
+import com.google.gdata.data.extensions.Im;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link XingSubscriptionsOAuthAccountDeleteListener}
+ * {@link ImAddressesConsumer} - Parses the instant messaging addresses. Note that google
+ * can store an unlimited mount of instant messaging addresses for a contact due to their
+ * different data model (probably EAV). Our contacts API however can only store two,
+ * therefore we only fetch the first two we encounter.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class XingSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
-
-    private XingSubscribeService xingService;
-    private ContextService contextService;
+public class ImAddressesConsumer implements BiConsumer<ContactEntry, Contact> {
 
     /**
-     * Initializes a new {@link XingSubscriptionsOAuthAccountDeleteListener}.
+     * Initialises a new {@link ImAddressesConsumer}.
      */
-    public XingSubscriptionsOAuthAccountDeleteListener(final XingSubscribeService xingService, final ContextService contextService) {
+    public ImAddressesConsumer() {
         super();
-        this.xingService = xingService;
-        this.contextService = contextService;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
+     */
     @Override
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        xingService.deleteSubscription(contextService.getContext(cid), id);
-    }
-
-    @Override
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // no op
+    public void accept(ContactEntry t, Contact u) {
+        if (!t.hasImAddresses()) {
+            return;
+        }
+        int count = 0;
+        for (Im im : t.getImAddresses()) {
+            switch (count++) {
+                case 0:
+                    u.setInstantMessenger1(im.getAddress());
+                    break;
+                case 1:
+                    u.setInstantMessenger2(im.getAddress());
+                    break;
+                default:
+                    return;
+            }
+        }
     }
 }

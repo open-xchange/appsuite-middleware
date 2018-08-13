@@ -50,109 +50,72 @@
 package com.openexchange.subscribe.yahoo;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.subscribe.AbstractSubscribeService;
+import com.openexchange.java.Strings;
+import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.yahoo.YahooService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.SubscriptionSource;
-import com.openexchange.subscribe.yahoo.osgi.Activator;
-
+import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
 
 /**
  * {@link YahooSubscribeService}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class YahooSubscribeService extends AbstractSubscribeService{
+public class YahooSubscribeService extends AbstractOAuthSubscribeService {
 
-private final Activator activator;
+    private final ServiceLookup services;
 
-    private final SubscriptionSource source = new SubscriptionSource();
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(YahooSubscribeService.class);
-
-    public YahooSubscribeService(final Activator activator){
-        this.activator = activator;
-
-        source.setDisplayName("Yahoo");
-        source.setFolderModule(FolderObject.CONTACT);
-        source.setId("com.openexchange.subscribe.socialplugin.yahoo");
-        source.setSubscribeService(this);
-
-        final DynamicFormDescription form = new DynamicFormDescription();
-
-        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
-        oauthAccount.setOption("type", activator.getOAuthServiceMetaData().getId());
-        form.add(oauthAccount);
-
-        source.setFormDescription(form);
+    /**
+     * Initialises a new {@link YahooSubscribeService}.
+     * 
+     * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
+     * @param services The {@link ServiceLookup}
+     */
+    public YahooSubscribeService(OAuthServiceMetaData metadata, ServiceLookup services) {
+        super(metadata, "com.openexchange.subscribe.socialplugin.yahoo", FolderObject.CONTACT, "Yahoo!", services);
+        this.services = services;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
+     */
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         int oauthAccountId = ((Integer) subscription.getConfiguration().get("account")).intValue();
-        return activator.getYahooService().getContacts(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), oauthAccountId);
+        YahooService yahooService = services.getService(YahooService.class);
+        return yahooService.getContacts(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), oauthAccountId);
     }
 
-    @Override
-    public SubscriptionSource getSubscriptionSource() {
-        return source;
-    }
-
-    @Override
-    public boolean handles(final int folderModule) {
-        return FolderObject.CONTACT == folderModule;
-    }
-
-    @Override
-    public void modifyIncoming(final Subscription subscription) throws OXException {
-        if(subscription != null) {
-            super.modifyIncoming(subscription);
-            if (subscription.getConfiguration() != null){
-                if (subscription.getConfiguration().get("account") != null){
-                    subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
-                }else {
-                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : {}", subscription.getConfiguration());
-                }
-            } else {
-                LOG.error("subscription.getConfiguration() is null");
-            }
-        } else {
-            LOG.error("subscription is null");
-        }
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#modifyOutgoing(com.openexchange.subscribe.Subscription)
+     */
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
-        final String accountId = (String) subscription.getConfiguration().get("account");
-        if (null != accountId){
-            final Integer accountIdInt = Integer.valueOf(accountId);
-            if (null != accountIdInt) {
-                subscription.getConfiguration().put("account",accountIdInt);
-            }
-            String displayName = null;
-            if(subscription.getSecret() != null) {
-                displayName = activator.getYahooService().getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
-            }
-            if (null != displayName && !"".equals(displayName)){
-                subscription.setDisplayName(displayName);
-            } else {
-                subscription.setDisplayName("Yahoo");
-            }
-
+        if (Strings.isNotEmpty(subscription.getSecret())) {
+            YahooService yahooService = services.getService(YahooService.class);
+            // No extra null or empty check, it will be checked on super
+            String displayName = yahooService.getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer) subscription.getConfiguration().get("account"));
+            subscription.setDisplayName(displayName);
         }
         super.modifyOutgoing(subscription);
     }
 
-    public void deleteAllUsingOAuthAccount(final Context context, final int id) throws OXException {
-        final Map<String, Object> query = new HashMap<String, Object>();
-        query.put("account", String.valueOf(id));
-        removeWhereConfigMatches(context, query);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
+     */
+    @Override
+    protected KnownApi getKnownApi() {
+        return KnownApi.YAHOO;
     }
-
 }
