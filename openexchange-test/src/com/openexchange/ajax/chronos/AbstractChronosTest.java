@@ -130,7 +130,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         Exception exception = null;
         try {
             if (eventIds != null) {
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<>(eventIds), null, null, false, false);
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<>(eventIds), null, null, false, false, null);
             }
         } catch (Exception e) {
             exception = e;
