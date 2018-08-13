@@ -52,6 +52,7 @@ package com.openexchange.subscribe.yahoo;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.YahooService;
@@ -72,8 +73,8 @@ public class YahooSubscribeService extends AbstractOAuthSubscribeService {
     /**
      * Initialises a new {@link YahooSubscribeService}.
      * 
-     * @param metadata
-     * @param services
+     * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
+     * @param services The {@link ServiceLookup}
      */
     public YahooSubscribeService(OAuthServiceMetaData metadata, ServiceLookup services) {
         // TODO: update task for renaming the sourceId to KnownApi.YAHOO.getFullName()
@@ -100,7 +101,7 @@ public class YahooSubscribeService extends AbstractOAuthSubscribeService {
      */
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
-        if (subscription.getSecret() != null) {
+        if (Strings.isNotEmpty(subscription.getSecret())) {
             YahooService yahooService = services.getService(YahooService.class);
             // No extra null or empty check, it will be checked on super
             String displayName = yahooService.getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer) subscription.getConfiguration().get("account"));
