@@ -107,7 +107,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
      * @param services The {@link ServiceLookup}
      */
     public GoogleContactsSubscribeService(OAuthServiceMetaData oauthServiceMetadata, ServiceLookup services) {
-        super(oauthServiceMetadata, SOURCE_ID, FolderObject.CONTACT, "Google Contacts", services);
+        super(oauthServiceMetadata, SOURCE_ID, FolderObject.CONTACT, "Google", services);
         this.services = services;
 
     }
