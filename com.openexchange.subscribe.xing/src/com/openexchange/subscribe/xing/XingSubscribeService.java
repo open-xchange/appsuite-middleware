@@ -57,27 +57,23 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
@@ -99,8 +95,9 @@ import com.openexchange.xing.session.WebAuthSession;
  * {@link XingSubscribeService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class XingSubscribeService extends AbstractSubscribeService {
+public class XingSubscribeService extends AbstractOAuthSubscribeService {
 
     /**
      * The subscription source id
@@ -108,7 +105,7 @@ public class XingSubscribeService extends AbstractSubscribeService {
     public static final String SOURCE_ID = "com.openexchange.subscribe.xing";
 
     /** The logger constant */
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(XingSubscribeService.class);
+    static final Logger LOG = LoggerFactory.getLogger(XingSubscribeService.class);
 
     // -------------------------------------------------------------------------------------------------------------------------- //
 
@@ -180,64 +177,23 @@ public class XingSubscribeService extends AbstractSubscribeService {
     // -------------------------------------------------------------------------------------------------------------------------- //
 
     private final ServiceLookup services;
-    private final SubscriptionSource source;
 
     /**
      * Initializes a new {@link XingSubscribeService}.
      *
-     * @param services The service look-up
+     * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
+     * @param services The {@link ServiceLookup}
      */
-    public XingSubscribeService(final ServiceLookup services) {
-        super();
+    public XingSubscribeService(OAuthServiceMetaData oauthServiceMetadata, ServiceLookup services) {
+        super(oauthServiceMetadata, "com.openexchange.subscribe.xing", FolderObject.CONTACT, "XING", services);
         this.services = services;
-
-        final SubscriptionSource source = new SubscriptionSource();
-        source.setDisplayName("XING");
-        source.setFolderModule(FolderObject.CONTACT);
-        source.setId(SOURCE_ID);
-        source.setSubscribeService(this);
-
-        final DynamicFormDescription form = new DynamicFormDescription();
-
-        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
-        oauthAccount.setOption("type", services.getService(OAuthServiceMetaData.class).getId());
-        form.add(oauthAccount);
-
-        source.setFormDescription(form);
-        this.source = source;
     }
 
-    /**
-     * Gets the XING OAuth access.
-     *
-     * @param subscription The subscription information
-     * @param session The associated session
-     * @return The XING OAuth access
-     * @throws OXException If XING OAuth access cannot be returned
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
      */
-    protected XingOAuthAccess getXingOAuthAccess(Subscription subscription, ServerSession session) throws OXException {
-        final XingOAuthAccessProvider provider = services.getService(XingOAuthAccessProvider.class);
-        if (null == provider) {
-            throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
-        }
-
-        int xingOAuthAccount;
-        {
-            Object accountId = subscription.getConfiguration().get("account");
-            if (null == accountId) {
-                xingOAuthAccount = provider.getXingOAuthAccount(session);
-            } else {
-                if (accountId instanceof Integer) {
-                    xingOAuthAccount = ((Integer) accountId).intValue();
-                } else {
-                    xingOAuthAccount = Integer.parseInt(accountId.toString());
-                }
-            }
-        }
-
-        return provider.accessFor(xingOAuthAccount, session);
-    }
-
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
@@ -315,6 +271,35 @@ public class XingSubscribeService extends AbstractSubscribeService {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#modifyOutgoing(com.openexchange.subscribe.Subscription)
+     */
+    @Override
+    public void modifyOutgoing(final Subscription subscription) throws OXException {
+        if (Strings.isNotEmpty(subscription.getSecret())) {
+            try {
+                // No extra null or empty check, it will be checked on super
+                String displayName = getOAuthAccount(subscription.getSession(), subscription).getDisplayName();
+                subscription.setDisplayName(displayName);
+            } catch (Exception e) {
+                LOG.debug("Failed to get OAuth account's display name", e);
+            }
+        }
+        super.modifyOutgoing(subscription);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService#getKnownApi()
+     */
+    @Override
+    protected KnownApi getKnownApi() {
+        return KnownApi.XING;
+    }
+
     /**
      * Converts specified XING users to contacts
      *
@@ -330,80 +315,35 @@ public class XingSubscribeService extends AbstractSubscribeService {
         return ret;
     }
 
-    @Override
-    public SubscriptionSource getSubscriptionSource() {
-        return source;
-    }
-
-    @Override
-    public boolean handles(final int folderModule) {
-        return FolderObject.CONTACT == folderModule;
-    }
-
-    @Override
-    public void modifyIncoming(final Subscription subscription) throws OXException {
-        if (subscription != null) {
-            super.modifyIncoming(subscription);
-            if (subscription.getConfiguration() != null) {
-                final Object accountId = subscription.getConfiguration().get("account");
-                if (accountId != null) {
-                    subscription.getConfiguration().put("account", accountId.toString());
-                } else {
-                    LOG.error("subscription.getConfiguration().get(\"account\") is null. Complete configuration is : {}", subscription.getConfiguration());
-                }
-            } else {
-                LOG.error("subscription.getConfiguration() is null");
-            }
-        } else {
-            LOG.error("subscription is null");
-        }
-    }
-
     /**
-     * Gets the XING OAuth account.
+     * Gets the XING OAuth access.
      *
+     * @param subscription The subscription information
      * @param session The associated session
-     * @return The XING OAuth account
-     * @throws OXException If XING OAuth account cannot be returned
+     * @return The XING OAuth access
+     * @throws OXException If XING OAuth access cannot be returned
      */
-    protected OAuthAccount getXingOAuthAccount(final ServerSession session) throws OXException {
-        final OAuthService oAuthService = services.getService(OAuthService.class);
-        if (null == oAuthService) {
-            throw ServiceExceptionCode.absentService(OAuthService.class);
+    protected XingOAuthAccess getXingOAuthAccess(Subscription subscription, ServerSession session) throws OXException {
+        final XingOAuthAccessProvider provider = services.getService(XingOAuthAccessProvider.class);
+        if (null == provider) {
+            throw ServiceExceptionCode.absentService(XingOAuthAccessProvider.class);
         }
-        return oAuthService.getDefaultAccount(KnownApi.XING, session);
-    }
 
-    @Override
-    public void modifyOutgoing(final Subscription subscription) throws OXException {
-        final String accountId = (String) subscription.getConfiguration().get("account");
-        if (null != accountId) {
-            final Integer accountIdInt = Integer.valueOf(accountId);
-            if (null != accountIdInt) {
-                subscription.getConfiguration().put("account", accountIdInt);
-            }
-            String displayName = null;
-            if (subscription.getSecret() != null) {
-                try {
-                    displayName = getXingOAuthAccount(subscription.getSession()).getDisplayName();
-                } catch (Exception e) {
-                    LOG.debug("Failed to get OAuth account's display name", e);
+        int xingOAuthAccount;
+        {
+            Object accountId = subscription.getConfiguration().get("account");
+            if (null == accountId) {
+                xingOAuthAccount = provider.getXingOAuthAccount(session);
+            } else {
+                if (accountId instanceof Integer) {
+                    xingOAuthAccount = ((Integer) accountId).intValue();
+                } else {
+                    xingOAuthAccount = Integer.parseInt(accountId.toString());
                 }
             }
-            if (com.openexchange.java.Strings.isEmpty(displayName)) {
-                subscription.setDisplayName("XING");
-            } else {
-                subscription.setDisplayName(displayName);
-            }
-
         }
-        super.modifyOutgoing(subscription);
-    }
 
-    public void deleteAllUsingOAuthAccount(final Context context, final int id) throws OXException {
-        final Map<String, Object> query = new HashMap<String, Object>();
-        query.put("account", Integer.toString(id));
-        removeWhereConfigMatches(context, query);
+        return provider.accessFor(xingOAuthAccount, session);
     }
 
     private Contact convert(final User xingUser, final PhotoHandler optPhotoHandler, Subscription subscription, final ServerSession session) {

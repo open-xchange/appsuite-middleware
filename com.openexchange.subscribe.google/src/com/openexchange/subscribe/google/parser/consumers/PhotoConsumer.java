@@ -47,36 +47,77 @@
  *
  */
 
-package com.openexchange.subscribe.mslive.oauth;
+package com.openexchange.subscribe.google.parser.consumers;
 
-import com.openexchange.oauth.association.OAuthAccountAssociation;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.mslive.MSLiveContactsSubscribeService;
-import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.function.BiConsumer;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.gdata.client.Service.GDataRequest;
+import com.google.gdata.client.contacts.ContactsService;
+import com.google.gdata.data.Link;
+import com.google.gdata.data.contacts.ContactEntry;
+import com.google.gdata.util.ServiceException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.subscribe.google.GoogleContactsSubscribeService;
 
 /**
- * {@link MSLiveContactsOAuthAccountAssociationProvider}
+ * {@link PhotoConsumer} - Parses the birthday of the contact
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MSLiveContactsOAuthAccountAssociationProvider extends AbstractSubscribeOAuthAccountAssociationProvider {
+public class PhotoConsumer implements BiConsumer<ContactEntry, Contact> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
+
+    private final ContactsService googleContactsService;
 
     /**
-     * Initialises a new {@link MSLiveContactsOAuthAccountAssociationProvider}.
+     * Initialises a new {@link PhotoConsumer}.
      */
-    public MSLiveContactsOAuthAccountAssociationProvider(ServiceLookup services) {
-        super(MSLiveContactsSubscribeService.SOURCE_ID, services);
+    public PhotoConsumer(ContactsService googleContactsService) {
+        super();
+        this.googleContactsService = googleContactsService;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider#createAssociation(int, int, int, java.lang.String, com.openexchange.subscribe.Subscription)
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
      */
     @Override
-    public OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription) {
-        return new MSLiveContactsOAuthAccountAssociation(accountId, userId, contextId, folderName, subscription);
+    public void accept(ContactEntry t, Contact u) {
+        Link photoLink = t.getContactPhotoLink();
+        if (photoLink == null) {
+            return;
+        }
+        GDataRequest request = null;
+        InputStream resultStream = null;
+        ByteArrayOutputStream out = null;
+        try {
+            request = googleContactsService.createLinkQueryRequest(photoLink);
+            request.execute();
+            resultStream = request.getResponseStream();
+            out = new ByteArrayOutputStream();
+            int read = 0;
+            byte[] buffer = new byte[4096];
+            while ((read = resultStream.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            u.setImage1(out.toByteArray());
+            u.setImageContentType(photoLink.getType());
+        } catch (IOException | ServiceException e) {
+            LOG.debug("Error fetching contact's image from '{}'", photoLink.getHref());
+        } finally {
+            if (request != null) {
+                request.end();
+            }
+            IOUtils.closeQuietly(resultStream);
+            IOUtils.closeQuietly(out);
+        }
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,58 @@
  *
  */
 
-package com.openexchange.utils.osgi;
+package com.openexchange.subscribe.google.parser.consumers;
 
-import com.openexchange.exception.OXException;
-
+import java.util.function.BiConsumer;
+import com.google.gdata.data.contacts.ContactEntry;
+import com.google.gdata.data.extensions.FamilyName;
+import com.google.gdata.data.extensions.GivenName;
+import com.google.gdata.data.extensions.Name;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * An interface which all classes have to implement which use the
- * {@link OSGiAbstractor#addService(Class, AbstractInitializer, java.util.Dictionary, Class[], com.openexchange.utils.propertyhandling.PropertyInterface[])}
- * method
- * 
- * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ * {@link NameConsumer} - Parses the given name, family name and full name of the specified contact
+ * along with their yomi representations if available.
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public interface AbstractInitializer {
+public class NameConsumer implements BiConsumer<ContactEntry, Contact> {
 
     /**
-     * Sets the required service objects. The order in which the service objects are given corresponds to the order the services are
-     * presented in the
-     * {@link OSGiAbstractor#addService(Class, AbstractInitializer, java.util.Dictionary, Class[], com.openexchange.utils.propertyhandling.PropertyInterface[])}
-     * method, see parameter {@code dependingServices}
-     * 
-     * @param obj an array of object in the same order like described above. The object need to be casted by yourself 
-     * @throws OXException if anything wents wrong
+     * Initialises a new {@link NameConsumer}.
      */
-    public void setObjects(final Object[] obj) throws OXException;
+    public NameConsumer() {
+        super();
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
+     */
+    @Override
+    public void accept(ContactEntry t, Contact u) {
+        if (!t.hasName()) {
+            return;
+        }
+        Name name = t.getName();
+        if (name.hasGivenName()) {
+            GivenName given = name.getGivenName();
+            u.setGivenName(t.getName().getGivenName().getValue());
+            if (given.hasYomi()) {
+                u.setYomiFirstName(given.getYomi());
+            }
+        }
+        if (name.hasFamilyName()) {
+            FamilyName familyName = name.getFamilyName();
+            u.setSurName(familyName.getValue());
+            if (familyName.hasYomi()) {
+                u.setYomiLastName(familyName.getYomi());
+            }
+        }
+        if (name.hasFullName()) {
+            u.setDisplayName(name.getFullName().getValue());
+        }
+    }
 }

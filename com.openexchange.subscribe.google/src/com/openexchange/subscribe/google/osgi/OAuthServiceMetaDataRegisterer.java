@@ -47,86 +47,88 @@
  *
  */
 
-package com.openexchange.subscribe.yahoo.osgi;
+package com.openexchange.subscribe.google.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.oauth.KnownApi;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.yahoo.YahooSubscribeService;
-import com.openexchange.subscribe.yahoo.oauth.YahooContactsOAuthAccountAssociationProvider;
+import com.openexchange.subscribe.google.GoogleContactsSubscribeService;
+import com.openexchange.subscribe.google.groupware.GoogleSubscriptionsOAuthAccountDeleteListener;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.1
  */
 public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
 
+    private final String oauthIdentifier;
+    private final ServiceLookup services;
     private final BundleContext context;
-    private final String yahooIdentifier;
-    private volatile ServiceRegistration<SubscribeService> serviceRegistration;
-    private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration;
+    private volatile ServiceRegistration<SubscribeService> contactsRegistration;
+    private volatile ServiceRegistration<OAuthAccountDeleteListener> deleteListenerRegistration;
 
-    private ServiceLookup services;
-
-    public OAuthServiceMetaDataRegisterer(final BundleContext context, ServiceLookup services) {
-        this.context = context;
+    /**
+     * Initialises a new {@link OAuthServiceMetaDataRegisterer}.
+     *
+     * @param services The service look-up
+     * @param context The bundle context
+     */
+    public OAuthServiceMetaDataRegisterer(ServiceLookup services, BundleContext context) {
+        super();
         this.services = services;
-        yahooIdentifier = KnownApi.YAHOO.getFullName();
+        this.context = context;
+        oauthIdentifier = KnownApi.GOOGLE.getFullName();
     }
 
     @Override
-    public OAuthServiceMetaData addingService(final ServiceReference<OAuthServiceMetaData> reference) {
-        final OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
-        if (yahooIdentifier.equals(oAuthServiceMetaData.getId())) {
-            if (null == serviceRegistration) {
-                serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(oAuthServiceMetaData, services), null);
-                org.slf4j.LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was started");
-            }
-
-            if (associationProviderRegistration == null) {
-                associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new YahooContactsOAuthAccountAssociationProvider(services), null);
-            }
-            if (null == serviceRegistration) {
-                serviceRegistration = context.registerService(SubscribeService.class, new YahooSubscribeService(oAuthServiceMetaData, services), null);
-                LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was started");
-            }
+    public OAuthServiceMetaData addingService(ServiceReference<OAuthServiceMetaData> ref) {
+        Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
+        OAuthServiceMetaData oAuthServiceMetaData = context.getService(ref);
+        if (oauthIdentifier.equals(oAuthServiceMetaData.getId())) {
+            logger.info("Registering Google Contact subscription services.");
+            GoogleContactsSubscribeService subscribeService = new GoogleContactsSubscribeService(oAuthServiceMetaData, services);
+            contactsRegistration = context.registerService(SubscribeService.class, subscribeService, null);
+            deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, new GoogleSubscriptionsOAuthAccountDeleteListener(subscribeService, services), null);
         }
         return oAuthServiceMetaData;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<OAuthServiceMetaData> arg0, final OAuthServiceMetaData arg1) {
-        //nothing to do here
+    public void modifiedService(ServiceReference<OAuthServiceMetaData> arg0, OAuthServiceMetaData arg1) {
+        // nothing
     }
 
     @Override
-    public void removedService(final ServiceReference<OAuthServiceMetaData> reference, final OAuthServiceMetaData arg1) {
-        final OAuthServiceMetaData oAuthServiceMetaData = arg1;
-        if (yahooIdentifier.equals(oAuthServiceMetaData.getId())) {
-            ServiceRegistration<SubscribeService> serviceRegistration = this.serviceRegistration;
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                this.serviceRegistration = null;
-                LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was stopped");
-            }
+    public void removedService(ServiceReference<OAuthServiceMetaData> ref, OAuthServiceMetaData service) {
+        Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
+        if (service.getId().equals(oauthIdentifier)) {
+            logger.info("Unregistering Google Contacts subscription services.");
+
             {
-                ServiceRegistration<OAuthAccountAssociationProvider> registration = this.associationProviderRegistration;
+                ServiceRegistration<SubscribeService> registration = this.contactsRegistration;
                 if (null != registration) {
                     registration.unregister();
-                    this.associationProviderRegistration = null;
+                    this.contactsRegistration = null;
                 }
             }
-            LoggerFactory.getLogger(Activator.class).info("YahooSubscribeService was stopped");
+            {
+                ServiceRegistration<OAuthAccountDeleteListener> registration = this.deleteListenerRegistration;
+                if (null != registration) {
+                    registration.unregister();
+                    this.deleteListenerRegistration = null;
+                }
+            }
         }
-        context.ungetService(reference);
+        context.ungetService(ref);
     }
 }

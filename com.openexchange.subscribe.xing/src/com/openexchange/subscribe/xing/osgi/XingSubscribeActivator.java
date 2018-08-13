@@ -120,7 +120,7 @@ public final class XingSubscribeActivator extends HousekeepingActivator {
      */
     public synchronized void registerSubscribeService() {
         if (null == serviceRegistration) {
-            XingSubscribeService xingSubscribeService = new XingSubscribeService(this);
+            XingSubscribeService xingSubscribeService = new XingSubscribeService(getService(OAuthServiceMetaData.class), this);
             serviceRegistration = context.registerService(SubscribeService.class, xingSubscribeService, null);
             org.slf4j.LoggerFactory.getLogger(XingSubscribeActivator.class).info("XingSubscribeService was started");
 

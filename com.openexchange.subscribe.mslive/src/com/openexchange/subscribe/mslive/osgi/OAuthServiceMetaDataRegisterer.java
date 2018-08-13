@@ -62,7 +62,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
-import com.openexchange.subscribe.mslive.ContactsMSLiveSubscribeService;
+import com.openexchange.subscribe.mslive.MSLiveContactsSubscribeService;
 import com.openexchange.subscribe.mslive.groupware.MSLiveSubscriptionsOAuthAccountDeleteListener;
 import com.openexchange.subscribe.mslive.oauth.MSLiveContactsOAuthAccountAssociationProvider;
 
@@ -105,7 +105,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
 
         Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
         logger.info("Registering MS Live subscription services.");
-        ContactsMSLiveSubscribeService msliveSubService = new ContactsMSLiveSubscribeService(oAuthServiceMetaData, services);
+        MSLiveContactsSubscribeService msliveSubService = new MSLiveContactsSubscribeService(oAuthServiceMetaData, services);
         contactsRegistration = context.registerService(SubscribeService.class, msliveSubService, null);
 
         try {

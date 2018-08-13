@@ -47,36 +47,79 @@
  *
  */
 
-package com.openexchange.subscribe.mslive.oauth;
+package com.openexchange.subscribe.google.parser.consumers;
 
-import com.openexchange.oauth.association.OAuthAccountAssociation;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.subscribe.Subscription;
-import com.openexchange.subscribe.mslive.MSLiveContactsSubscribeService;
-import com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider;
+import java.util.function.BiConsumer;
+import com.google.gdata.data.contacts.ContactEntry;
+import com.google.gdata.data.extensions.PhoneNumber;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link MSLiveContactsOAuthAccountAssociationProvider}
+ * {@link PhoneNumbersConsumer} - Parses the contact's phone numbers. Note that google
+ * can store an unlimited mount of phone numbers for a contact due to their different
+ * data model (probably EAV). Our contacts API however can only store a handful, therefore
+ * we only fetch the first seven we encounter.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MSLiveContactsOAuthAccountAssociationProvider extends AbstractSubscribeOAuthAccountAssociationProvider {
+public class PhoneNumbersConsumer implements BiConsumer<ContactEntry, Contact> {
 
     /**
-     * Initialises a new {@link MSLiveContactsOAuthAccountAssociationProvider}.
+     * Initialises a new {@link PhoneNumbersConsumer}.
      */
-    public MSLiveContactsOAuthAccountAssociationProvider(ServiceLookup services) {
-        super(MSLiveContactsSubscribeService.SOURCE_ID, services);
+    public PhoneNumbersConsumer() {
+        super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.subscribe.oauth.AbstractSubscribeOAuthAccountAssociationProvider#createAssociation(int, int, int, java.lang.String, com.openexchange.subscribe.Subscription)
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
      */
     @Override
-    public OAuthAccountAssociation createAssociation(int accountId, int userId, int contextId, String folderName, Subscription subscription) {
-        return new MSLiveContactsOAuthAccountAssociation(accountId, userId, contextId, folderName, subscription);
+    public void accept(ContactEntry t, Contact u) {
+        if (!t.hasPhoneNumbers()) {
+            return;
+        }
+        int count = 0;
+        for (PhoneNumber pn : t.getPhoneNumbers()) {
+            if (pn.getPrimary()) {
+                u.setTelephonePrimary(pn.getPhoneNumber());
+            }
+            // Unfortunately we do not have enough information
+            // about the type of the telephone number, nor we
+            // can make an educated guess. So we simply fetching
+            // as much as possible.
+            switch (count++) {
+                case 0:
+                    u.setTelephoneOther(pn.getPhoneNumber());
+                    break;
+                case 1:
+                    u.setTelephoneHome1(pn.getPhoneNumber());
+                    break;
+                case 2:
+                    u.setTelephoneHome2(pn.getPhoneNumber());
+                    break;
+                case 3:
+                    u.setTelephoneBusiness1(pn.getPhoneNumber());
+                    break;
+                case 4:
+                    u.setTelephoneBusiness2(pn.getPhoneNumber());
+                    break;
+                case 5:
+                    u.setTelephoneAssistant(pn.getPhoneNumber());
+                    break;
+                case 6:
+                    u.setTelephoneCompany(pn.getPhoneNumber());
+                    break;
+                case 7:
+                    u.setTelephoneCallback(pn.getPhoneNumber());
+                    break;
+                // Maybe add more?
+                default:
+                    return;
+            }
+        }
     }
 }
