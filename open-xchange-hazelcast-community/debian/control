@@ -11,6 +11,8 @@ Architecture: all
 Depends: ${misc:Depends}
 Conflicts: open-xchange-hazelcast-enterprise
 Provides: open-xchange-hazelcast
-Description: This package installs the community version of Hazelcast. The implementation uses the freely available version of Hazelcast
- with a limited set of features (e. g. encrypted transport is missing).
- This Hazelcast module is mutually exclusive with the enterprise version open-xchange-hazelcast-enterprise
+Description: This package installs the community version of Hazelcast. The
+ implementation uses the freely available version of Hazelcast with a limited
+ set of features (e. g. encrypted transport is missing). This Hazelcast module
+ is mutually exclusive with the enterprise version
+ open-xchange-hazelcast-enterprise
