@@ -56,6 +56,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
@@ -147,8 +148,7 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
             throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("account");
         }
 
-        // TODO: revisit for proper value conversion
-        subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
+        subscription.getConfiguration().put("account", Integer.toString(Autoboxing.a2i(subscription.getConfiguration().get("account"))));
     }
 
     /*
@@ -213,7 +213,17 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
         if (null == accountId) {
             return oAuthService.getDefaultAccount(getKnownApi(), session);
         }
-        return oAuthService.getAccount(session, accountId instanceof Integer ? ((Integer) accountId).intValue() : Integer.parseInt(accountId.toString()));
+        return oAuthService.getAccount(session, Autoboxing.a2i(accountId));
+    }
+
+    /**
+     * Converts the specified accountId to its String representation
+     * 
+     * @param accountId The account identifier
+     * @return The string representation of the account identifier
+     */
+    private String toString(Object accountId) {
+        return accountId instanceof Integer ? (Integer.toString((Integer) accountId)) : accountId.toString();
     }
 
     /**
