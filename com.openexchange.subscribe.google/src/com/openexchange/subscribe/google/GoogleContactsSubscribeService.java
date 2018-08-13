@@ -139,6 +139,9 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
 
     /**
      * Initialises a new {@link GoogleContactsSubscribeService}.
+     * 
+     * @param oAuthServiceMetaData The {@link OAuthServiceMetaData}
+     * @param services The {@link ServiceLookup}
      */
     public GoogleContactsSubscribeService(OAuthServiceMetaData oauthServiceMetadata, ServiceLookup services) {
         super(oauthServiceMetadata, KnownApi.GOOGLE.getFullName() + ".contact", FolderObject.CONTACT, "Google Contacts", services);
