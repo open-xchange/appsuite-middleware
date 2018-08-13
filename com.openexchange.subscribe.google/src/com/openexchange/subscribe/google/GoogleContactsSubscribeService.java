@@ -49,36 +49,14 @@
 
 package com.openexchange.subscribe.google;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.gdata.client.Query;
-import com.google.gdata.client.Service.GDataRequest;
 import com.google.gdata.client.contacts.ContactsService;
-import com.google.gdata.data.Link;
-import com.google.gdata.data.contacts.Birthday;
-import com.google.gdata.data.contacts.ContactEntry;
 import com.google.gdata.data.contacts.ContactFeed;
-import com.google.gdata.data.extensions.Email;
-import com.google.gdata.data.extensions.FamilyName;
-import com.google.gdata.data.extensions.GivenName;
-import com.google.gdata.data.extensions.Im;
-import com.google.gdata.data.extensions.Name;
-import com.google.gdata.data.extensions.PhoneNumber;
-import com.google.gdata.data.extensions.PostalAddress;
-import com.google.gdata.data.extensions.StructuredPostalAddress;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
@@ -86,13 +64,13 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.google.parser.ContactParser;
 import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -106,36 +84,16 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
  */
 public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
-
     /**
      * The Google Contacts' feed URL
      */
     private static final String FEED_URL = "https://www.google.com/m8/feeds/contacts/default/full";
     private static final String APP_NAME = "ox-appsuite";
     private static final int CHUNK_SIZE = 25;
-    /**
-     * The birthday {@link Date} format
-     * 
-     * @see <a href="https://developers.google.com/contacts/v3/reference#gcBirthday">gContact:birthday</a>
-     */
-    private final static String dateFormatPattern = "yyyy-MM-dd";
-
-    /**
-     * Thread local {@link SimpleDateFormat} using "yyyy-MM-dd" as pattern.
-     */
-    private static final ThreadLocal<SimpleDateFormat> BIRTHDAY_FORMAT = new ThreadLocal<SimpleDateFormat>() {
-
-        @Override
-        protected SimpleDateFormat initialValue() {
-            SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatPattern);
-            dateFormat.setTimeZone(TimeZones.UTC);
-            return dateFormat;
-        }
-    };
 
     private final ContactsService googleContactsService;
     private final ServiceLookup services;
+    private final ContactParser parser;
 
     /**
      * Initialises a new {@link GoogleContactsSubscribeService}.
@@ -147,6 +105,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
         super(oauthServiceMetadata, KnownApi.GOOGLE.getFullName() + ".contact", FolderObject.CONTACT, "Google Contacts", services);
         this.services = services;
         googleContactsService = new ContactsService(APP_NAME);
+        parser = new ContactParser(googleContactsService);
     }
 
     /*
@@ -165,10 +124,10 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
             cQuery.setMaxResults(CHUNK_SIZE);
             ContactFeed feed = googleContactsService.query(cQuery, ContactFeed.class);
             if (CHUNK_SIZE > feed.getTotalResults()) {
-                return parseFeed(feed);
+                return parser.parseFeed(feed);
             }
 
-            List<Contact> firstBatch = parseFeed(feed);
+            List<Contact> firstBatch = parser.parseFeed(feed);
             int total = feed.getTotalResults();
             int startOffset = firstBatch.size();
 
@@ -185,6 +144,16 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
         }
     }
 
+    /**
+     * Fetches all contacts in the foreground (blocking thread)
+     * 
+     * @param cQuery The {@link Query}
+     * @param feed The {@link ContactFeed} with the first batch
+     * @param firstBatch The first batch of contacts
+     * @return A {@link List} with all fetched contacts
+     * @throws IOException if an I/O error is occurred
+     * @throws ServiceException if a remote service error is occurred
+     */
     private List<Contact> fetchInForeground(Query cQuery, ContactFeed feed, List<Contact> firstBatch) throws IOException, ServiceException {
         int total = feed.getTotalResults();
         int offset = firstBatch.size();
@@ -195,7 +164,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
         while (total > offset) {
             cQuery.setStartIndex(offset);
             feed = googleContactsService.query(cQuery, ContactFeed.class);
-            List<Contact> batch = parseFeed(feed);
+            List<Contact> batch = parser.parseFeed(feed);
             contacts.addAll(batch);
             offset += batch.size();
         }
@@ -203,6 +172,16 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
         return contacts;
     }
 
+    /**
+     * Schedules a task to fetch all contacts and executes it in the background
+     * 
+     * @param subscription The {@link Subscription}
+     * @param cQuery The {@link Query}
+     * @param total The amount of all contacts
+     * @param startOffset The stating 1-based index offset
+     * @param threadPool the {@link ThreadPoolService}
+     * @param folderUpdater The {@link FolderUpdaterService}
+     */
     private void scheduleInBackground(Subscription subscription, Query cQuery, int total, int startOffset, ThreadPoolService threadPool, FolderUpdaterService<Contact> folderUpdater) {
         // Schedule task for remainder...
         threadPool.submit(new AbstractTask<Void>() {
@@ -213,233 +192,13 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
                 while (total > offset) {
                     cQuery.setStartIndex(offset);
                     ContactFeed feed = googleContactsService.query(cQuery, ContactFeed.class);
-                    List<Contact> batch = parseFeed(feed);
+                    List<Contact> batch = parser.parseFeed(feed);
                     folderUpdater.save(new SearchIteratorDelegator<Contact>(batch), subscription);
                     offset += batch.size();
                 }
                 return null;
             }
         });
-    }
-
-    private List<Contact> parseFeed(ContactFeed feed) throws FileNotFoundException {
-        List<Contact> contacts = new LinkedList<Contact>();
-        for (ContactEntry contact : feed.getEntries()) {
-            Contact c = new Contact();
-            if (contact.hasName()) {
-                Name name = contact.getName();
-                if (name.hasGivenName()) {
-                    GivenName given = name.getGivenName();
-                    c.setGivenName(contact.getName().getGivenName().getValue());
-                    if (given.hasYomi()) {
-                        c.setYomiFirstName(given.getYomi());
-                    }
-                }
-                if (name.hasFamilyName()) {
-                    FamilyName familyName = name.getFamilyName();
-                    c.setSurName(familyName.getValue());
-                    if (familyName.hasYomi()) {
-                        c.setYomiLastName(familyName.getYomi());
-                    }
-                }
-                if (name.hasFullName()) {
-                    c.setDisplayName(name.getFullName().getValue());
-                }
-            }
-
-            if (contact.hasEmailAddresses()) {
-                int count = 0;
-                for (Email email : contact.getEmailAddresses()) {
-                    switch (count++) {
-                        case 0:
-                            c.setEmail1(email.getAddress());
-                            break;
-                        case 1:
-                            c.setEmail1(email.getAddress());
-                            break;
-                        case 2:
-                            c.setEmail1(email.getAddress());
-                            break;
-                    }
-                }
-            }
-
-            if (contact.hasBirthday()) {
-                Birthday birthday = contact.getBirthday();
-                try {
-                    c.setBirthday(BIRTHDAY_FORMAT.get().parse(birthday.getValue()));
-                } catch (ParseException e) {
-                    LOG.warn("Unable to parse '{}' as a birthday.", birthday.getValue());
-                }
-            }
-
-            if (contact.hasImAddresses()) {
-                int count = 0;
-                for (Im im : contact.getImAddresses()) {
-                    switch (count++) {
-                        case 0:
-                            c.setInstantMessenger1(im.getAddress());
-                            break;
-                        case 1:
-                            c.setInstantMessenger2(im.getAddress());
-                    }
-                }
-            }
-            if (contact.hasNickname()) {
-                c.setNickname(contact.getNickname().getValue());
-            }
-
-            if (contact.hasOccupation()) {
-                c.setProfession(contact.getOccupation().getValue());
-            }
-
-            if (contact.hasPhoneNumbers()) {
-                int count = 0;
-                for (PhoneNumber pn : contact.getPhoneNumbers()) {
-                    if (pn.getPrimary()) {
-                        c.setTelephonePrimary(pn.getPhoneNumber());
-                    }
-                    // Unfortunately we do not have enough information
-                    // about the type of the telephone number, nor we
-                    // can make an educated guess. So we simply fetching
-                    // as much as possible.
-                    switch (count++) {
-                        case 0:
-                            c.setTelephoneOther(pn.getPhoneNumber());
-                            break;
-                        case 1:
-                            c.setTelephoneHome1(pn.getPhoneNumber());
-                            break;
-                        case 2:
-                            c.setTelephoneHome2(pn.getPhoneNumber());
-                            break;
-                        case 3:
-                            c.setTelephoneBusiness1(pn.getPhoneNumber());
-                            break;
-                        case 4:
-                            c.setTelephoneBusiness2(pn.getPhoneNumber());
-                            break;
-                        case 5:
-                            c.setTelephoneAssistant(pn.getPhoneNumber());
-                            break;
-                        case 6:
-                            c.setTelephoneCompany(pn.getPhoneNumber());
-                            break;
-                        // Maybe add more?
-                    }
-                }
-            }
-
-            if (contact.hasPostalAddresses()) {
-                int count = 0;
-                for (PostalAddress pa : contact.getPostalAddresses()) {
-                    if (pa.getPrimary()) {
-                        c.setAddressHome(pa.getValue());
-                    }
-                    switch (count++) {
-                        case 0:
-                            c.setAddressBusiness(pa.getValue());
-                            break;
-                        case 1:
-                            c.setAddressOther(pa.getValue());
-                            break;
-                    }
-                }
-            }
-
-            if (contact.hasStructuredPostalAddresses()) {
-                int count = 0;
-                for (StructuredPostalAddress spa : contact.getStructuredPostalAddresses()) {
-                    if (spa.getPrimary()) {
-                        if (spa.hasFormattedAddress()) {
-                            c.setAddressHome(spa.getFormattedAddress().getValue());
-                        } else {
-                            if (spa.hasStreet()) {
-                                c.setAddressHome(spa.getStreet().getValue());
-                            }
-                            if (spa.hasPostcode()) {
-                                c.setPostalCodeHome(spa.getPobox().getValue());
-                            }
-                            if (spa.hasCity()) {
-                                c.setCityHome(spa.getCity().getValue());
-                            }
-                            if (spa.hasCountry()) {
-                                c.setCountryHome(spa.getCountry().getValue());
-                            }
-                        }
-                    } else {
-
-                        switch (count++) {
-                            case 0:
-                                if (spa.hasFormattedAddress()) {
-                                    c.setAddressBusiness(spa.getFormattedAddress().getValue());
-                                } else {
-                                    if (spa.hasStreet()) {
-                                        c.setAddressBusiness(spa.getStreet().getValue());
-                                    }
-                                    if (spa.hasPostcode()) {
-                                        c.setPostalCodeBusiness(spa.getPobox().getValue());
-                                    }
-                                    if (spa.hasCity()) {
-                                        c.setCityBusiness(spa.getCity().getValue());
-                                    }
-                                    if (spa.hasCountry()) {
-                                        c.setCountryBusiness(spa.getCountry().getValue());
-                                    }
-                                }
-                                break;
-                            case 1:
-                                if (spa.hasFormattedAddress()) {
-                                    c.setAddressOther(spa.getFormattedAddress().getValue());
-                                } else {
-                                    if (spa.hasStreet()) {
-                                        c.setAddressOther(spa.getStreet().getValue());
-                                    }
-                                    if (spa.hasPostcode()) {
-                                        c.setPostalCodeOther(spa.getPobox().getValue());
-                                    }
-                                    if (spa.hasCity()) {
-                                        c.setCityOther(spa.getCity().getValue());
-                                    }
-                                    if (spa.hasCountry()) {
-                                        c.setCountryOther(spa.getCountry().getValue());
-                                    }
-                                }
-                                break;
-                        }
-                    }
-                }
-            }
-            Link photoLink = contact.getContactPhotoLink();
-            if (photoLink != null) {
-                GDataRequest request = null;
-                InputStream resultStream = null;
-                ByteArrayOutputStream out = null;
-                try {
-                    request = googleContactsService.createLinkQueryRequest(photoLink);
-                    request.execute();
-                    resultStream = request.getResponseStream();
-                    out = new ByteArrayOutputStream();
-                    int read = 0;
-                    byte[] buffer = new byte[4096];
-                    while ((read = resultStream.read(buffer)) != -1) {
-                        out.write(buffer, 0, read);
-                    }
-                    c.setImage1(out.toByteArray());
-                    c.setImageContentType(photoLink.getType());
-                } catch (IOException | ServiceException e) {
-                    LOG.debug("Error fetching contact's image from '{}'", photoLink.getHref());
-                } finally {
-                    if (request != null) {
-                        request.end();
-                    }
-                    IOUtils.closeQuietly(resultStream);
-                    IOUtils.closeQuietly(out);
-                }
-            }
-            contacts.add(c);
-        }
-        return contacts;
     }
 
     /*
