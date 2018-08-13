@@ -78,7 +78,7 @@ public class MailAlarmDeliveryWorkerUpdateTask extends UpdateTaskAdapter {
             rollback = true;
             Column col = new Column("processed", "bigint(20) NOT NULL DEFAULT 0");
             Tools.checkAndAddColumns(con, TABLE , col);
-            Tools.createIndex(con, TABLE, new String[] {"action", "triggerDate"});
+            Tools.createIndex(con, TABLE, "action", new String[] {"action", "triggerDate"}, false);
             con.commit();
             rollback = false;
         } catch (SQLException e) {

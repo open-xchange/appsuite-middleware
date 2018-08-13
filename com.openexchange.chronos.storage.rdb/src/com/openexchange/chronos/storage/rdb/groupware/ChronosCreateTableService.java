@@ -285,6 +285,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "PRIMARY KEY (cid,account,alarm)," +
                 "KEY triggerDate (cid,account,user,triggerDate)," +
                 "KEY event (cid,account,user,eventId)" +
+                "KEY action (action, triggerDate)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
 
