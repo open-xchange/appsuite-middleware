@@ -54,6 +54,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.gdata.client.Query;
 import com.google.gdata.client.contacts.ContactsService;
 import com.google.gdata.data.contacts.ContactFeed;
@@ -70,6 +72,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.google.parser.ContactParser;
 import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
 import com.openexchange.threadpool.AbstractTask;
@@ -83,6 +86,8 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
  * @since v7.10.1
  */
 public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
 
     /**
      * The Google Contacts' feed URL
@@ -139,8 +144,12 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
             }
             scheduleInBackground(subscription, cQuery, total, startOffset, threadPool, folderUpdater);
             return firstBatch;
-        } catch (IOException | ServiceException e) {
-            throw new OXException(666, "cannot fetch contacts", e);
+        } catch (IOException e) {
+            LOG.error("", e);
+            throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        } catch (ServiceException e) {
+            LOG.error("", e);
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e, e.getMessage());
         }
     }
 
