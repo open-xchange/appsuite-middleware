@@ -101,25 +101,12 @@ public abstract class AbstractConfigurationListener<T> extends ConnectionPool im
      * @param updatedData The updated data to feed the converters with
      */
     protected void update(T updatedData) {
-        // Lock lifecycle, so that connections without timeouts won't pass
-        lifecycle.lockForWrite();
-        try {
-            // Update data
-            lifecycle.setURL(urlConverter.apply(updatedData));
-            lifecycle.setConnectionArguments(connectionArgumentsConverter.apply(updatedData));
-        } finally {
-            lifecycle.unlockForWrite();
-        }
-
-        /*
-         * New connections will be initialized with updated configuration.
-         * This means in the next step we might deprecate connections that are totally fine.
-         * Alternative would be holding two locks at once..
-         */
-
         // Lock pool
         lock.lock();
         try {
+            // Apply new JDBC URL and connection arguments
+            lifecycle.setUrlAndConnectionArgs(urlConverter.apply(updatedData), connectionArgumentsConverter.apply(updatedData));
+
             // Destroy all idle
             PoolImplData<Connection> poolData = this.data;
             while (false == poolData.isIdleEmpty()) {
@@ -139,4 +126,5 @@ public abstract class AbstractConfigurationListener<T> extends ConnectionPool im
             lock.unlock();
         }
     }
+
 }

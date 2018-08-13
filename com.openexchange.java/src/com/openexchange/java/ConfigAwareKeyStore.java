@@ -58,7 +58,6 @@ import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -73,19 +72,19 @@ public class ConfigAwareKeyStore {
     private static class KeyStoreInfo {
 
         final KeyStore store;
-        final int storeHash;
+        final String md5Sum;
 
-        KeyStoreInfo(KeyStore store, int storeHash) {
+        KeyStoreInfo(KeyStore store, String md5Sum) {
             super();
             this.store = store;
-            this.storeHash = storeHash;
+            this.md5Sum = md5Sum;
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + storeHash;
+            result = prime * result + (md5Sum == null ? 0 : md5Sum.hashCode());
             result = prime * result + ((store == null) ? 0 : KeyStoreUtil.getHashSum(store));
             return result;
         }
@@ -102,7 +101,11 @@ public class ConfigAwareKeyStore {
                 return false;
             }
             KeyStoreInfo other = (KeyStoreInfo) obj;
-            if (storeHash != other.storeHash) {
+            if (md5Sum == null) {
+                if (other.md5Sum != null) {
+                    return false;
+                }
+            } else if (false == md5Sum.equals(other.md5Sum)) {
                 return false;
             }
             if (store == null) {
@@ -116,7 +119,7 @@ public class ConfigAwareKeyStore {
         }
     }
 
-    private static final KeyStoreInfo NO_KEYSTORE = new KeyStoreInfo(null, -1);
+    private static final KeyStoreInfo NO_KEYSTORE = new KeyStoreInfo(null, null);
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -172,16 +175,17 @@ public class ConfigAwareKeyStore {
 
         FileInputStream in = null;
         try {
-            int currentHash = getBytes(keyStoreFile);
+            String currentMd5Sum = getMd5Sum(keyStoreFile);
             KeyStoreInfo prevStore = storeReference.get();
-            if (prevStore.storeHash != currentHash) {
+            if (false == currentMd5Sum.equals(prevStore.md5Sum)) {
                 /*
                  * (Re-) Load the key store
                  */
                 in = new FileInputStream(keyStoreFile);
-                KeyStore store = initializeKeyStore(properties, typePropertyName);
+                String optKeyStoreType = properties.getProperty(typePropertyName);
+                KeyStore store = KeyStore.getInstance(Strings.isEmpty(optKeyStoreType) ? KeyStore.getDefaultType() : optKeyStoreType);
                 store.load(in, null == keystorePassword ? null : keystorePassword.toCharArray());
-                storeReference.set(new KeyStoreInfo(store, currentHash));
+                storeReference.set(new KeyStoreInfo(store, currentMd5Sum));
                 return true;
             }
         } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
@@ -202,7 +206,7 @@ public class ConfigAwareKeyStore {
      */
     public boolean isConfigured() {
         KeyStoreInfo storeInfo = storeReference.get();
-        return storeInfo.storeHash != -1 && null != storeInfo.store;
+        return storeInfo.md5Sum != null && null != storeInfo.store;
     }
 
     /**
@@ -218,7 +222,7 @@ public class ConfigAwareKeyStore {
         return keystorePath.substring(keystorePath.lastIndexOf(":") + 1, keystorePath.length());
     }
 
-    private int getBytes(File f) throws FileNotFoundException, IOException, NoSuchAlgorithmException  {
+    private static String getMd5Sum(File f) throws FileNotFoundException, IOException, NoSuchAlgorithmException  {
         try (FileInputStream in = new FileInputStream(f)) {
             MessageDigest md5 = MessageDigest.getInstance("md5");
             byte[] block = new byte[4096];
@@ -226,20 +230,15 @@ public class ConfigAwareKeyStore {
             while ((length = in.read(block)) != -1) {
                 md5.update(block, 0, length);
             }
-            return Arrays.hashCode(md5.digest());
+            return Strings.asHex(md5.digest());
         }
-    }
-
-    private KeyStore initializeKeyStore(Properties properties, String typePropertyName) throws KeyStoreException {
-        String actualType = properties.getProperty(typePropertyName);
-        return KeyStore.getInstance(Strings.isEmpty(actualType) ? KeyStore.getDefaultType() : actualType);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(ConfigAwareKeyStore.class.getName());
         KeyStoreInfo storeInfo = storeReference.get();
-        sb.append("=[storeHash:").append(storeInfo.storeHash);
+        sb.append("=[storeHash:").append(storeInfo.md5Sum);
         sb.append(",keystorePathPropertyName:").append(keystorePathPropertyName);
         sb.append(",passwordPropertyName:").append(passwordPropertyName);
         sb.append(",keystore:").append(null != storeInfo.store ? storeInfo.store.toString() : "");
@@ -252,10 +251,9 @@ public class ConfigAwareKeyStore {
         KeyStoreInfo storeInfo = storeReference.get();
         final int prime = 31;
         int result = 1;
-        result = prime * result + (storeInfo.storeHash);
+        result = prime * result + (storeInfo == null ? 0 : storeInfo.hashCode());
         result = prime * result + ((passwordPropertyName == null) ? 0 : passwordPropertyName.hashCode());
         result = prime * result + ((keystorePathPropertyName == null) ? 0 : keystorePathPropertyName.hashCode());
-        result = prime * result + ((storeInfo.store == null) ? 0 : KeyStoreUtil.getHashSum(storeInfo.store));
         return result;
     }
 

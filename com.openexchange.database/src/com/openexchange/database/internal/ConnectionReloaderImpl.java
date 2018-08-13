@@ -130,11 +130,7 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
     }
 
     private boolean isSSL(Configuration configuration) {
-        Boolean useSSL = Boolean.valueOf(configuration.getJdbcProps().getProperty(USE_SSL));
-        if (null != useSSL && useSSL.booleanValue()) {
-            return true;
-        }
-        return false;
+        return Boolean.parseBoolean(configuration.getJdbcProps().getProperty(USE_SSL));
     }
 
     @Override

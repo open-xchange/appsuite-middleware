@@ -85,10 +85,10 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     private final long[] useTimes = new long[1000];
 
     protected final PoolImplData<T> data = new PoolImplData<T>();
-    
+
     protected final ReentrantLock lock = new ReentrantLock(true);
     protected final Condition idleAvailable = lock.newCondition();
-    
+
     private boolean running = true;
     private int useTimePointer;
     private final AtomicBoolean brokenCreate = new AtomicBoolean();
@@ -128,7 +128,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     protected PoolableLifecycle<T> getLifecycle() {
         return lifecycle;
     }
-    
+
     protected void setConfig(PoolConfig config) {
         maxIdle = config.maxIdle;
         maxIdleTime = config.maxIdleTime;
@@ -387,7 +387,12 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     }
 
     public boolean isStopped() {
-        return !running;
+        lock.lock();
+        try {
+            return !running;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
