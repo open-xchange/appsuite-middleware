@@ -89,5 +89,4 @@ public class GoogleSubscriptionsOAuthAccountDeleteListener implements OAuthAccou
         // Nothing to do
 
     }
-
 }
