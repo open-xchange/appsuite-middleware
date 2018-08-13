@@ -10,3 +10,12 @@ com.mysql.jdbc:
     socketTimeout: 15000
 # SSL/TLS
     useSSL: false
+    requireSSL: false
+    verifyServerCertificate: false
+    enabledTLSProtocols: TLSv1,TLSv1.1,TLSv1.2
+    #trustCertificateKeyStoreUrl: file:path_to_your_CA_key_store
+    #trustCertificateKeyStorePassword: secret
+    #trustCertificateKeyStoreType: JKS
+    #clientCertificateKeyStoreUrl: file:path_to_your_client_key_store
+    #clientCertificateKeyStorePassword: secret
+    #clientCertificateKeyStoreType: JKS
