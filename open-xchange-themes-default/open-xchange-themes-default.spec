@@ -18,7 +18,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:	@OXVERSION@
-%define        ox_release 38
+%define        ox_release 39
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -63,6 +63,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Tue Aug 14 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2018-08-20 (4862)
 * Mon Jul 30 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2018-08-06 (4850)
 * Thu Jul 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
