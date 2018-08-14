@@ -53,8 +53,10 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -62,12 +64,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.hazelcast.instance.BuildInfoProvider;
 import com.hazelcast.nio.ssl.SSLContextFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.java.ConfigAwareKeyStore;
 import com.openexchange.java.Strings;
 
@@ -77,7 +75,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-class HazelcastSSLFactory implements SSLContextFactory, Reloadable {
+class HazelcastSSLFactory implements SSLContextFactory {
 
     private static final String SSL_PROTOCOLS = "com.openexchange.hazelcast.ssl.protocols";
 
@@ -92,112 +90,136 @@ class HazelcastSSLFactory implements SSLContextFactory, Reloadable {
     /* Hazelcast only accepts JKS key stores */
     private static final String TYPE = "JKS";
 
-    /** All necessary properties for Hazelcast to run SSL. */
-    private static final String[] SSL_PROPERTIES = new String[] {
-        SSL_PROTOCOLS, TRUST_STORE, TRUST_PASSWORD, TRUST_TYPE, KEY_STORE, KEY_PASSWORD, KEY_TYPE
-    };
-
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastSSLFactory.class);
 
-    private SSLContext sslContext;
+    private AtomicReference<SSLContext> sslContext;
 
-    private final String protocol;
-
-    private final ReentrantLock lock = new ReentrantLock(true);
+    private final ConcurrentHashMap<String, ConfigAwareKeyStore> stores;
 
     /**
      * Initializes a new {@link HazelcastSSLFactory}.
      * 
      * @param configService The {@link ConfigurationService}
-     * 
+     * @throws IllegalArgumentException If no {@link SSLContext} can be found
+     *
      */
-    public HazelcastSSLFactory(ConfigurationService configService) {
+    public HazelcastSSLFactory(ConfigurationService configService) throws IllegalArgumentException {
         super();
-        // Find out protocol
-        String protocol = null;
-        String[] candidates = Strings.splitByComma(configService.getProperty(SSL_PROTOCOLS, "TLS,TLSv1,TLSv1.1,TLSv1.3"));
-        for (int i = candidates.length - 1; i >= 0; i--) {
-            try {
-                sslContext = SSLContext.getInstance(candidates[i]);
-                protocol = candidates[i];
-                break;
-            } catch (Throwable e) {
-                LOGGER.info("Didn't find SSLContext for {}", candidates[i], e);
-            }
-        }
-        this.protocol = protocol;
+        this.stores = new ConcurrentHashMap<>(3);
+        stores.put("truststore", new ConfigAwareKeyStore(TRUST_STORE, TRUST_PASSWORD, TYPE));
+        stores.put("keystore", new ConfigAwareKeyStore(KEY_STORE, KEY_PASSWORD, TYPE));
+        this.sslContext = new AtomicReference<SSLContext>(null);
     }
 
     @Override
     public SSLContext getSSLContext() {
-        lock.lock();
-        try {
-            return sslContext;
-        } finally {
-            lock.unlock();
-        }
+        return sslContext.get();
     }
 
     @Override
     public void init(Properties properties) throws Exception {
-        lock.lock();
+        if (properties.isEmpty()) {
+            LOGGER.error("Can't initialize SSLContext without properties");
+            return;
+        }
+
+        SSLContext context = this.sslContext.get();
+        String protocols = properties.getProperty(SSL_PROTOCOLS, "TLS,TLSv1,TLSv1.1,TLSv1.3");
+        if (Strings.isEmpty(protocols)) {
+            throw new IllegalArgumentException("\"com.openexchange.hazelcast.ssl.protocols\" must not be empty!");
+        }
+
+        // Check if this is a reload
+        if (null == context) {
+            // Not yet initialized
+            context = getSSLContext(protocols, true);
+            loadKeyStore(properties);
+        } else {
+            SSLContext reloadedContext = getSSLContext(protocols, false);
+            if (false == context.getProtocol().equals(reloadedContext.getProtocol())) {
+                // New protocol, we need to reload
+                context = reloadedContext;
+            } else if (false == loadKeyStore(properties)) {
+                // Nothing changed
+                return;
+            }
+        }
+
         try {
-            if (Strings.isEmpty(protocol)) {
-                LOGGER.debug("No SSLContext loaded. Nothing to initialize.");
-                return;
-            }
-            if (properties.isEmpty()) {
-                LOGGER.debug("Can't initialize SSLContext without properties");
-                return;
-            }
-            ConfigAwareKeyStore trustStore = new ConfigAwareKeyStore(properties, TRUST_STORE, TRUST_PASSWORD, TYPE);
-            ConfigAwareKeyStore keyStore = new ConfigAwareKeyStore(properties, KEY_STORE, KEY_PASSWORD, TYPE);
-
-            loadKeyStore(properties, trustStore);
-            loadKeyStore(properties, keyStore);
-
             // Initialize SSLContext
-            try {
-                TrustManagerFactory trustManagerFactory = null;
-                KeyManagerFactory keyManagerFactory = null;
+            TrustManagerFactory trustManagerFactory = null;
+            KeyManagerFactory keyManagerFactory = null;
 
-                if (trustStore.isConfigured()) {
-                    trustManagerFactory = TrustManagerFactory.getInstance(properties.getProperty(TRUST_TYPE, TrustManagerFactory.getDefaultAlgorithm()));
-                    trustManagerFactory.init(trustStore.getKeyStore());
-                }
-
-                if (keyStore.isConfigured()) {
-                    keyManagerFactory = KeyManagerFactory.getInstance(properties.getProperty(KEY_TYPE, KeyManagerFactory.getDefaultAlgorithm()));
-                    keyManagerFactory.init(keyStore.getKeyStore(), null != properties.getProperty(KEY_PASSWORD) ? properties.getProperty(KEY_PASSWORD).toCharArray() : null);
-                }
-
-                sslContext.init(null == keyManagerFactory ? new KeyManager[] {} : keyManagerFactory.getKeyManagers(), null == trustManagerFactory ? new TrustManager[] {} : trustManagerFactory.getTrustManagers(), null);
-            } catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException e) {
-                LOGGER.error("Unable to initialize SSLContext for Hazelcast.", e);
-                throw e;
+            ConfigAwareKeyStore trustStore = stores.get("truststore");
+            if (null != trustStore && trustStore.isConfigured()) {
+                trustManagerFactory = TrustManagerFactory.getInstance(properties.getProperty(TRUST_TYPE, TrustManagerFactory.getDefaultAlgorithm()));
+                trustManagerFactory.init(trustStore.getKeyStore());
             }
-        } finally {
-            lock.unlock();
+
+            ConfigAwareKeyStore keyStore = stores.get("keystore");
+            if (null != keyStore && keyStore.isConfigured()) {
+                keyManagerFactory = KeyManagerFactory.getInstance(properties.getProperty(KEY_TYPE, KeyManagerFactory.getDefaultAlgorithm()));
+                keyManagerFactory.init(keyStore.getKeyStore(), null != properties.getProperty(KEY_PASSWORD) ? properties.getProperty(KEY_PASSWORD).toCharArray() : null);
+            }
+
+            context.init(null == keyManagerFactory ? new KeyManager[] {} : keyManagerFactory.getKeyManagers(), null == trustManagerFactory ? new TrustManager[] {} : trustManagerFactory.getTrustManagers(), null);
+            this.sslContext.set(context);
+        } catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException e) {
+            LOGGER.error("Unable to initialize SSLContext for Hazelcast.", e);
+            throw e;
         }
     }
 
-    private void loadKeyStore(Properties properties, ConfigAwareKeyStore store) {
-        try {
-            store.reloadStore(properties);
-        } catch (Exception e) {
-            LOGGER.error("Unable to load key stoer {}", store, e);
+    /**
+     * Get the {@link SSLContext} to the first matching protocol
+     * 
+     * @param protocols Comma separated list of protocols to get the {@link SSLContext} for
+     * @param log <code>true</code> if log messages should be written
+     * @return The {@link SSLContext} for the first protocol that matches. See {@link SSLContext#getInstance(String)}
+     * @throws IllegalStateException If no SSLContext could be loaded
+     */
+    private SSLContext getSSLContext(String protocols, boolean log) throws IllegalStateException {
+        String[] candidates = Strings.splitByComma(protocols);
+        for (int i = candidates.length - 1; i >= 0; i--) {
+            try {
+                SSLContext context = SSLContext.getInstance(candidates[i]);
+                if (log) {
+                    LOGGER.info("Using {} for Hazelcast encryption", candidates[i]);
+                }
+                return context;
+            } catch (Throwable e) {
+                if (log) {
+                    LOGGER.info("Didn't find SSLContext for {}. Trying next protocol in list.", candidates[i]);
+                }
+            }
         }
+        throw new IllegalStateException("Unable to find SSLContexts for " + candidates);
+    }
+
+    private boolean loadKeyStore(Properties properties) {
+        boolean retval = false;
+        for (Entry<String, ConfigAwareKeyStore> entry : stores.entrySet()) {
+            try {
+                retval |= entry.getValue().reloadStore(properties);
+            } catch (Exception e) {
+                LOGGER.error("Unable to load keystore!", e);
+            }
+        }
+        return retval;
     }
 
     /**
      * Get all necessary properties for a SSL configuration
      * 
      * @param configService The {@link ConfigurationService} to get the properties from
-     * @return The {@link #SSL_PROPERTIES} as {@link Properties}
+     * @return The SSL properties as {@link Properties}
      */
     Properties getPropertiesFromService(ConfigurationService configService) {
         Properties properties = new Properties();
-        for (String property : SSL_PROPERTIES) {
+        String[] sslProperties = new String[] {
+            SSL_PROTOCOLS, TRUST_STORE, TRUST_PASSWORD, TRUST_TYPE, KEY_STORE, KEY_PASSWORD, KEY_TYPE
+        };
+        for (String property : sslProperties) {
             String value = configService.getProperty(property);
             if (Strings.isNotEmpty(value)) {
                 properties.setProperty(property, value);
@@ -205,24 +227,4 @@ class HazelcastSSLFactory implements SSLContextFactory, Reloadable {
         }
         return properties;
     }
-
-    /* ############### Reloadable ############### */
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        if (BuildInfoProvider.getBuildInfo().isEnterprise()) {
-            try {
-                // Locks itself
-                init(getPropertiesFromService(configService));
-            } catch (Exception e) {
-                LOGGER.error("Unable to reload {}.", HazelcastSSLFactory.class.getSimpleName(), e);
-            }
-        }
-    }
-
-    @Override
-    public Interests getInterests() {
-        return Reloadables.interestsForProperties(SSL_PROPERTIES);
-    }
-
 }

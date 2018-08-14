@@ -47,57 +47,63 @@
  *
  */
 
+package com.openexchange.hazelcast.configuration.internal;
 
-package com.openexchange.hazelcast.configuration.osgi;
-
-import org.eclipse.osgi.framework.console.CommandProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.hazelcast.config.Config;
+import com.hazelcast.instance.BuildInfoProvider;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.hazelcast.configuration.internal.AddNodeUtilCommandProvider;
-import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
-import com.openexchange.hazelcast.configuration.internal.HazelcastReloadable;
-import com.openexchange.hazelcast.configuration.internal.HazelcastSSLReloadable;
-import com.openexchange.hazelcast.configuration.internal.Services;
-import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.strings.StringParser;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadables;
 
 /**
- * {@link HazelcastConfigurationActivator}
+ * {@link HazelcastSSLReloadable}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.1
  */
-public class HazelcastConfigurationActivator extends HousekeepingActivator {
+public class HazelcastSSLReloadable implements ForcedReloadable {
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastConfigurationActivator.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(HazelcastSSLReloadable.class);
+
+    private final HazelcastConfigurationServiceImpl hzConfiguration;
 
     /**
-     * Initializes a new {@link HazelcastConfigurationActivator}.
+     * Initializes a new {@link HazelcastSSLReloadable}.
+     * 
      */
-    public HazelcastConfigurationActivator() {
+    public HazelcastSSLReloadable(HazelcastConfigurationServiceImpl hzConfiguration) {
         super();
+        this.hzConfiguration = hzConfiguration;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, StringParser.class, DynamicPortableFactory.class};
+    public void reloadConfiguration(ConfigurationService configService) {
+        if (false == BuildInfoProvider.getBuildInfo().isEnterprise()) {
+            return;
+        }
+        Config config = hzConfiguration.getConfigDirect();
+        if (null == config) {
+            // Hazelcast has not yet been initialized
+            return;
+        }
+
+        Object factory = config.getNetworkConfig().getSSLConfig().getFactoryImplementation();
+        if (null != factory && HazelcastSSLFactory.class.isAssignableFrom(factory.getClass())) {
+            HazelcastSSLFactory hazelcastSSLFactory = (HazelcastSSLFactory) factory;
+            try {
+                hazelcastSSLFactory.init(hazelcastSSLFactory.getPropertiesFromService(configService));
+            } catch (Exception e) {
+                LOGGER.error("Unable to reload {}.", HazelcastSSLFactory.class.getSimpleName(), e);
+            }
+        }
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.set(this);
-        HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl();
-        registerService(HazelcastConfigurationService.class, configService);
-        registerService(Reloadable.class, new HazelcastReloadable(configService));
-        registerService(Reloadable.class, new HazelcastSSLReloadable(configService));
-        registerService(CommandProvider.class, new AddNodeUtilCommandProvider(configService));
+    public Interests getInterests() {
+        // Force reloadable for key stores
+        return Reloadables.getInterestsForAll();
     }
-
-    @Override
-    public void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.set(null);
-    }
-
 }

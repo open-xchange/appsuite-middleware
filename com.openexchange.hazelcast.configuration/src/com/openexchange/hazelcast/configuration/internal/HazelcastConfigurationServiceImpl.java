@@ -308,7 +308,6 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          */
         // Only one encryption method can be use. so start with strongest
         if (configService.getBoolProperty("com.openexchange.hazelcast.network.ssl", false)) {
-            // TODO MW-1023 register reloadable
             HazelcastSSLFactory hazelcastSSLFactory = new HazelcastSSLFactory(configService);
             config.getNetworkConfig().setSSLConfig(new SSLConfig().setEnabled(true)
                 .setFactoryImplementation(hazelcastSSLFactory)
