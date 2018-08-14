@@ -77,15 +77,15 @@ import com.openexchange.java.Strings;
  */
 class HazelcastSSLFactory implements SSLContextFactory {
 
-    private static final String SSL_PROTOCOLS = "com.openexchange.hazelcast.ssl.protocols";
+    private static final String SSL_PROTOCOLS = "com.openexchange.hazelcast.network.ssl.protocols";
 
-    private static final String TRUST_STORE    = "com.openexchange.hazelcast.ssl.trustStore";
-    private static final String TRUST_PASSWORD = "com.openexchange.hazelcast.ssl.trustStorePassword";
-    private static final String TRUST_TYPE     = "com.openexchange.hazelcast.ssl.trustManagerAlgorithm";
+    private static final String TRUST_STORE    = "com.openexchange.hazelcast.network.ssl.trustStore";
+    private static final String TRUST_PASSWORD = "com.openexchange.hazelcast.network.ssl.trustStorePassword";
+    private static final String TRUST_TYPE     = "com.openexchange.hazelcast.network.ssl.trustManagerAlgorithm";
 
-    private static final String KEY_STORE    = "com.openexchange.hazelcast.ssl.keyStore";
-    private static final String KEY_PASSWORD = "com.openexchange.hazelcast.ssl.keyStorePassword";
-    private static final String KEY_TYPE     = "com.openexchange.hazelcast.ssl.keyManagerAlgorithm";
+    private static final String KEY_STORE    = "com.openexchange.hazelcast.network.ssl.keyStore";
+    private static final String KEY_PASSWORD = "com.openexchange.hazelcast.network.ssl.keyStorePassword";
+    private static final String KEY_TYPE     = "com.openexchange.hazelcast.network.ssl.keyManagerAlgorithm";
 
     /* Hazelcast only accepts JKS key stores */
     private static final String TYPE = "JKS";
