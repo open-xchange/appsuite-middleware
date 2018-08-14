@@ -53,7 +53,8 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
-import java.util.Map.Entry;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -64,6 +65,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableList;
 import com.hazelcast.nio.ssl.SSLContextFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.ConfigAwareKeyStore;
@@ -92,18 +94,14 @@ class HazelcastSSLFactory implements SSLContextFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastSSLFactory.class);
 
-    private AtomicReference<SSLContext> sslContext;
+    private final AtomicReference<SSLContext> sslContext;
 
     private final ConcurrentHashMap<String, ConfigAwareKeyStore> stores;
 
     /**
      * Initializes a new {@link HazelcastSSLFactory}.
-     * 
-     * @param configService The {@link ConfigurationService}
-     * @throws IllegalArgumentException If no {@link SSLContext} can be found
-     *
      */
-    public HazelcastSSLFactory(ConfigurationService configService) throws IllegalArgumentException {
+    public HazelcastSSLFactory() {
         super();
         this.stores = new ConcurrentHashMap<>(3);
         stores.put("truststore", new ConfigAwareKeyStore(TRUST_STORE, TRUST_PASSWORD, TYPE));
@@ -172,7 +170,7 @@ class HazelcastSSLFactory implements SSLContextFactory {
 
     /**
      * Get the {@link SSLContext} to the first matching protocol
-     * 
+     *
      * @param protocols Comma separated list of protocols to get the {@link SSLContext} for
      * @param log <code>true</code> if log messages should be written
      * @return The {@link SSLContext} for the first protocol that matches. See {@link SSLContext#getInstance(String)}
@@ -198,7 +196,7 @@ class HazelcastSSLFactory implements SSLContextFactory {
 
     private boolean loadKeyStore(Properties properties) {
         boolean retval = false;
-        for (Entry<String, ConfigAwareKeyStore> entry : stores.entrySet()) {
+        for (Map.Entry<String, ConfigAwareKeyStore> entry : stores.entrySet()) {
             try {
                 retval |= entry.getValue().reloadStore(properties);
             } catch (Exception e) {
@@ -208,18 +206,17 @@ class HazelcastSSLFactory implements SSLContextFactory {
         return retval;
     }
 
+    private static final List<String> SSL_PROPERTY_NAMES = ImmutableList.of(SSL_PROTOCOLS, TRUST_STORE, TRUST_PASSWORD, TRUST_TYPE, KEY_STORE, KEY_PASSWORD, KEY_TYPE);
+
     /**
-     * Get all necessary properties for a SSL configuration
-     * 
+     * Gets all necessary properties for an SSL configuration
+     *
      * @param configService The {@link ConfigurationService} to get the properties from
-     * @return The SSL properties as {@link Properties}
+     * @return The SSL properties
      */
-    Properties getPropertiesFromService(ConfigurationService configService) {
+    static Properties getPropertiesFromService(ConfigurationService configService) {
         Properties properties = new Properties();
-        String[] sslProperties = new String[] {
-            SSL_PROTOCOLS, TRUST_STORE, TRUST_PASSWORD, TRUST_TYPE, KEY_STORE, KEY_PASSWORD, KEY_TYPE
-        };
-        for (String property : sslProperties) {
+        for (String property : SSL_PROPERTY_NAMES) {
             String value = configService.getProperty(property);
             if (Strings.isNotEmpty(value)) {
                 properties.setProperty(property, value);

@@ -72,7 +72,7 @@ public class HazelcastSSLReloadable implements ForcedReloadable {
 
     /**
      * Initializes a new {@link HazelcastSSLReloadable}.
-     * 
+     *
      */
     public HazelcastSSLReloadable(HazelcastConfigurationServiceImpl hzConfiguration) {
         super();
@@ -94,7 +94,7 @@ public class HazelcastSSLReloadable implements ForcedReloadable {
         if (null != factory && HazelcastSSLFactory.class.isAssignableFrom(factory.getClass())) {
             HazelcastSSLFactory hazelcastSSLFactory = (HazelcastSSLFactory) factory;
             try {
-                hazelcastSSLFactory.init(hazelcastSSLFactory.getPropertiesFromService(configService));
+                hazelcastSSLFactory.init(HazelcastSSLFactory.getPropertiesFromService(configService));
             } catch (Exception e) {
                 LOGGER.error("Unable to reload {}.", HazelcastSSLFactory.class.getSimpleName(), e);
             }

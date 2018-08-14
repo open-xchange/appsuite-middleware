@@ -7,7 +7,10 @@ Bundle-Activator: com.openexchange.hazelcast.configuration.osgi.HazelcastConfigu
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
-Import-Package: com.hazelcast.config,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.hazelcast.config,
  com.hazelcast.instance,
  com.hazelcast.nio.serialization,
  com.hazelcast.nio.ssl,
@@ -24,7 +27,7 @@ Import-Package: com.hazelcast.config,
  com.openexchange.tools.strings,
  javax.net.ssl,
  org.apache.commons.logging,
- org.eclipse.osgi.framework.console;version="1.1.0",
+ org.eclipse.osgi.framework.console,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

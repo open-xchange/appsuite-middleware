@@ -308,11 +308,11 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          */
         // Only one encryption method can be use. so start with strongest
         if (configService.getBoolProperty("com.openexchange.hazelcast.network.ssl", false)) {
-            HazelcastSSLFactory hazelcastSSLFactory = new HazelcastSSLFactory(configService);
+            HazelcastSSLFactory hazelcastSSLFactory = new HazelcastSSLFactory();
             config.getNetworkConfig().setSSLConfig(new SSLConfig().setEnabled(true)
                 .setFactoryImplementation(hazelcastSSLFactory)
                 .setFactoryClassName(HazelcastSSLFactory.class.getName())
-                .setProperties(hazelcastSSLFactory.getPropertiesFromService(configService)));
+                .setProperties(HazelcastSSLFactory.getPropertiesFromService(configService)));
         } else if (configService.getBoolProperty("com.openexchange.hazelcast.network.symmetricEncryption", false)) {
             config.getNetworkConfig().setSymmetricEncryptionConfig(new SymmetricEncryptionConfig()
                 .setEnabled(true)
@@ -320,7 +320,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 .setSalt(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.salt", "X-k4nY-Y*v38f=dSJrr)"))
                 .setPassword(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.password", "&3sFs<^6[cKbWDW#du9s"))
                 .setIterationCount(configService.getIntProperty("com.openexchange.hazelcast.network.symmetricEncryption.iterationCount", 19)));
-        } 
+        }
         /*
          * Miscellaneous
          */
