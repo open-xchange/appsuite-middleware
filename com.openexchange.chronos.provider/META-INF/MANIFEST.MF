@@ -22,7 +22,6 @@ Import-Package: com.google.common.io,
  com.openexchange.osgi.annotation,
  com.openexchange.osgi.util,
  com.openexchange.quota,
- com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.id,
  com.openexchange.tx,
@@ -34,10 +33,8 @@ Import-Package: com.google.common.io,
  org.slf4j
 Export-Package: com.openexchange.chronos.provider,
  com.openexchange.chronos.provider.account,
- com.openexchange.chronos.provider.administrative,
  com.openexchange.chronos.provider.basic,
  com.openexchange.chronos.provider.composition,
  com.openexchange.chronos.provider.extensions,
  com.openexchange.chronos.provider.folder,
  com.openexchange.chronos.provider.groupware
-Bundle-Activator: com.openexchange.chronos.provider.osgi.Activator

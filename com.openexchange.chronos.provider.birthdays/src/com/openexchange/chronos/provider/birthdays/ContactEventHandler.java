@@ -160,40 +160,13 @@ public class ContactEventHandler implements EventHandler {
             }
             return;
         } else if (null != updatedContact.getBirthday()) {
-            if (false == originalContact.getBirthday().equals(updatedContact.getBirthday()) || containsChangesForEmailAlarms(originalContact, updatedContact)) {
+            if (false == originalContact.getBirthday().equals(updatedContact.getBirthday())) {
                 processChangedBirthday(contextId, affectedUserIds, updatedContact);
             }
             return;
         } else {
             processRemovedBirthday(contextId, affectedUserIds, originalContact);
         }
-    }
-
-    /**
-     * Checks if the updated contact contains any relevant changes for the EMail alarm
-     *
-     * @param originalContact The original {@link Contact}
-     * @param updatedContact The updated {@link Contact}
-     * @return true if the updated {@link Contact} contains any relevant changes
-     */
-    private boolean containsChangesForEmailAlarms(Contact originalContact, Contact updatedContact) {
-        return  equals(originalContact.getGivenName(), updatedContact.getGivenName()) == false ||
-                equals(originalContact.getSurName(), updatedContact.getSurName()) == false ||
-                equals(originalContact.getDisplayName(), updatedContact.getDisplayName()) == false ||
-                equals(originalContact.getDepartment(), updatedContact.getDepartment()) == false ||
-                originalContact.getParentFolderID() != updatedContact.getParentFolderID() ||
-                equals(originalContact.getEmail1(), updatedContact.getEmail1()) == false;
-
-    }
-
-    private static boolean equals(String s1, String s2) {
-        if (null == s1) {
-            return null == s2;
-        }
-        if (null == s2) {
-            return false;
-        }
-        return s1.equals(s2);
     }
 
     public void handleDelete(int contextId, Set<Integer> affectedUserIds, Contact deletedContact) throws OXException {

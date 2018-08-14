@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.administrative.AdminstrativeCalendarUtilProvider;
+import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
@@ -111,13 +111,12 @@ public class MailAlarmDeliveryWorker implements Runnable {
     private final CalendarUtilities calUtil;
 
     private final MailAlarmNotificationService mailService;
-    private final AdminstrativeCalendarUtilProvider alarmUtilProvider;
+    private final CalendarProviderRegistry calendarProvider;
     private final int mailShift;
     private final int lookAhead;
     private final int overdueWaitTime;
 
     /**
-     *
      * Initializes a new {@link MailAlarmDeliveryWorker}.
      *
      * @param storage An {@link AdministrativeAlarmTriggerStorage}
@@ -127,13 +126,23 @@ public class MailAlarmDeliveryWorker implements Runnable {
      * @param calUtil A {@link CalendarUtilities} to perform addition
      * @param timerService A {@link TimerService} to provide {@link EntityResolver} for each context
      * @param mailService The {@link MailAlarmNotificationService} to send the mails with
-     * @param alarmUtilProvider The {@link AdminstrativeCalendarUtilProvider}
+     * @param calProviderRegistry The {@link CalendarProviderRegistry}
      * @param lookAhead The time value in minutes the worker is looking ahead.
      * @param mailShift The time in milliseconds the mail send is shifter forward.
      * @param overdueWaitTime The time in minutes to wait until an old trigger is picked up.
      * @throws OXException If not administrative storage could be created.
      */
-    public MailAlarmDeliveryWorker(AdministrativeAlarmTriggerStorage storage, CalendarStorageFactory factory, DatabaseService dbservice, ContextService ctxService, CalendarUtilities calUtil, TimerService timerService, MailAlarmNotificationService mailService, AdminstrativeCalendarUtilProvider alarmUtilProvider, int lookAhead, int mailShift, int overdueWaitTime) throws OXException {
+    public MailAlarmDeliveryWorker( AdministrativeAlarmTriggerStorage storage,
+                                    CalendarStorageFactory factory,
+                                    DatabaseService dbservice,
+                                    ContextService ctxService,
+                                    CalendarUtilities calUtil,
+                                    TimerService timerService,
+                                    MailAlarmNotificationService mailService,
+                                    CalendarProviderRegistry calProviderRegistry,
+                                    int lookAhead,
+                                    int mailShift,
+                                    int overdueWaitTime) throws OXException {
         this.storage = storage;
         this.dbservice = dbservice;
         this.ctxService = ctxService;
@@ -144,7 +153,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
         this.lookAhead = lookAhead;
         this.mailShift = mailShift;
         this.overdueWaitTime = overdueWaitTime;
-        this.alarmUtilProvider = alarmUtilProvider;
+        this.calendarProvider = calProviderRegistry;
 
     }
 
@@ -278,7 +287,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
      * @throws OXException If the context couldn't be loaded
      */
     private SingleMailDeliveryTask createTask(int cid, int account, Alarm alarm, AlarmTrigger trigger, long processed) throws OXException {
-        return new SingleMailDeliveryTask(dbservice, storage, mailService, factory, calUtil, alarmUtilProvider, ctxService.getContext(cid), account, alarm, trigger, processed, this);
+        return new SingleMailDeliveryTask(dbservice, storage, mailService, factory, calUtil, calendarProvider, ctxService.getContext(cid), account, alarm, trigger, processed, this);
     }
 
     /**

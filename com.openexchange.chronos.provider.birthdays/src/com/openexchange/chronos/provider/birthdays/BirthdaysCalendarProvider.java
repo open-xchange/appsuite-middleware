@@ -63,10 +63,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.AdministrativeCalendarProvider;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
@@ -74,12 +76,15 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -91,7 +96,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoProvisioningCalendarProvider {
+public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoProvisioningCalendarProvider, AdministrativeCalendarProvider {
 
     /** The identifier of the calendar provider */
     public static final String PROVIDER_ID = "birthdays";
@@ -319,6 +324,22 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
     private BirthdaysCalendarAccess getAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         return new BirthdaysCalendarAccess(services, serverSession, account, parameters);
+    }
+
+    @Override
+    public Event getEventByAlarm(Context context, CalendarAccount account, String eventId) throws OXException {
+        ServerSession session = ServerSessionAdapter.valueOf(account.getUserId(), context.getContextId());
+        EventConverter eventConverter = new EventConverter(services, session.getUser().getLocale(), account.getUserId());
+        int[] decodeEventId = eventConverter.decodeEventId(eventId);
+        ContactService contactService = Tools.requireService(ContactService.class, services);
+        Contact contact = contactService.getContact(session, String.valueOf(decodeEventId[0]), String.valueOf(decodeEventId[1]));
+        Event seriesMaster = eventConverter.getSeriesMaster(contact);
+        return new AlarmHelper(services, context, account).applyAlarms(seriesMaster);
+    }
+
+    @Override
+    public void touchEvent(Context context, CalendarAccount account, String eventId) throws OXException {
+        // nothing to do
     }
 
 }
