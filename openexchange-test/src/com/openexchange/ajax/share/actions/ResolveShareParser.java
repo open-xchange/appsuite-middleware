@@ -94,7 +94,7 @@ public class ResolveShareParser extends AbstractRedirectParser<ResolveShareRespo
     protected ResolveShareResponse createResponse(String location) {
         Map<String, String> map = Collections.emptyMap();
         String path = location;
-        if (false == Strings.isEmpty(location)) {
+        if (Strings.isNotEmpty(location)) {
             int fragIndex = location.indexOf('#');
             if (-1 != fragIndex) {
                 path = location.substring(0, fragIndex);

@@ -248,7 +248,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
          * configure client
          */
         String endpoint = optProperty(filestoreID, "endpoint", null, propNameBuilder, configService);
-        if (false == Strings.isEmpty(endpoint)) {
+        if (Strings.isNotEmpty(endpoint)) {
             clientBuilder.setEndpointConfiguration(new EndpointConfiguration(endpoint, null));
         } else {
             String region = optProperty(filestoreID, "region", "us-west-2", propNameBuilder, configService);
@@ -275,7 +275,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
     private ClientConfiguration getClientConfiguration(String filestoreID, PropertyNameBuilder propNameBuilder, ConfigurationService configService) {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
         String signerOverride = optProperty(filestoreID, "signerOverride", "S3SignerType", propNameBuilder, configService);
-        if (false == Strings.isEmpty(signerOverride)) {
+        if (Strings.isNotEmpty(signerOverride)) {
             clientConfiguration.setSignerOverride(signerOverride);
         }
 

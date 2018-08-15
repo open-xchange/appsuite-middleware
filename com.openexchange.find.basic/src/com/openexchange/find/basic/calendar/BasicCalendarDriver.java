@@ -151,7 +151,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         List<Facet> facets = new ArrayList<Facet>();
         String prefix = autocompleteRequest.getPrefix();
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+        if (Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
             /*
              * add prefix-aware field facets
              */
@@ -447,7 +447,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     private static Set<String> extractEmailAddresses(Contact contact) {
         Set<String> emailAddresses = new HashSet<String>(3);
         for (String email : new String[] { contact.getEmail1(), contact.getEmail2(), contact.getEmail3() }) {
-            if (false == Strings.isEmpty(email)) {
+            if (Strings.isNotEmpty(email)) {
                 emailAddresses.add(email);
             }
         }

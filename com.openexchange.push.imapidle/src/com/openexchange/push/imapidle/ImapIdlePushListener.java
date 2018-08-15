@@ -317,7 +317,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             Map<String, Object> messageData = new LinkedHashMap<>(2);
             messageData.put(PushNotificationField.FOLDER.getId(), MailFolderUtility.prepareFullname(accountId, fullName));
             String ids = (String) props.get(PushEventConstants.PROPERTY_IDS);
-            if (false == Strings.isEmpty(ids)) {
+            if (Strings.isNotEmpty(ids)) {
                 messageData.put(PushNotificationField.ID.getId(), Strings.splitByComma(ids));
             }
             return Collections.<PushNotification> singleton(DefaultPushNotification.builder()

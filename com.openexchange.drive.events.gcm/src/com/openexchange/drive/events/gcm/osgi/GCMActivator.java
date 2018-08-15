@@ -89,7 +89,7 @@ public class GCMActivator extends HousekeepingActivator {
              * register GCM key provider if specified via config file (with a low ranking)
              */
             final String configuredKey = configService.getProperty("com.openexchange.drive.events.gcm.key");
-            if (false == Strings.isEmpty(configuredKey)) {
+            if (Strings.isNotEmpty(configuredKey)) {
                 registerService(GCMKeyProvider.class, new GCMKeyProvider() {
 
                     @Override

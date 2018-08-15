@@ -140,7 +140,7 @@ public final class HTMLDetector {
             if (null != tags && tags.length > 0) {
                 for (int i = tags.length; i-- > 0;) {
                     final String tag = tags[i];
-                    if (!Strings.isEmpty(tag) && (lc.indexOf(tag) >= 0)) {
+                    if (Strings.isNotEmpty(tag) && (lc.indexOf(tag) >= 0)) {
                         return true;
                     }
                 }

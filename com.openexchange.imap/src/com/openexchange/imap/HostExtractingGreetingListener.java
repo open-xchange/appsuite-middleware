@@ -75,12 +75,12 @@ public class HostExtractingGreetingListener implements GreetingListener {
 
     @Override
     public void onGreetingProcessed(String greeting, String host, int port) {
-        if (false == Strings.isEmpty(greeting)) {
+        if (Strings.isNotEmpty(greeting)) {
             Matcher matcher = pattern.matcher(greeting);
             if (matcher.find()) {
                 int groupCount = matcher.groupCount();
                 String endpoint = groupCount <= 0 ? matcher.group() : matcher.group(1);
-                if (false == Strings.isEmpty(endpoint)) {
+                if (Strings.isNotEmpty(endpoint)) {
                     LogProperties.put(LogProperties.Name.MAIL_ENDPOINT, endpoint);
                 }
             }

@@ -116,7 +116,7 @@ public class MobileConfigSigner extends Writer {
         l.add("-outform");
         l.add("der");
         l.add("-nodetach");
-        if (!Strings.isEmpty(pemFile)) {
+        if (Strings.isNotEmpty(pemFile)) {
             l.add("-certfile");
             l.add(pemFile);
         }

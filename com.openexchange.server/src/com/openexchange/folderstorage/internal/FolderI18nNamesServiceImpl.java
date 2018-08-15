@@ -274,9 +274,9 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (null != configService) {
             String text = configService.getText("folder-reserved-names");
-            if (false == Strings.isEmpty(text)) {
+            if (Strings.isNotEmpty(text)) {
                 for (String line : text.split("\r?\n")) {
-                    if (false == Strings.isEmpty(line) && '#' != line.charAt(0)) {
+                    if (Strings.isNotEmpty(line) && '#' != line.charAt(0)) {
                         for (String value : line.split(" *, *")) {
                             String processedValue = processValue(value);
                             if (null != processedValue) {

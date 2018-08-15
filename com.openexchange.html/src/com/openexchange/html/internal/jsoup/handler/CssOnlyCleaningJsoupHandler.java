@@ -419,7 +419,7 @@ public final class CssOnlyCleaningJsoupHandler implements JsoupHandler {
                  * Handle style attribute
                  */
                 String css = attribute.getValue();
-                if (!Strings.isEmpty(css)) {
+                if (Strings.isNotEmpty(css)) {
                     if (dropExternalImages) {
                         imageURLFound |= checkCSS(cssBuffer.append(css), FilterMaps.getImageStyleMap(), true, false);
                         css = cssBuffer.toString();

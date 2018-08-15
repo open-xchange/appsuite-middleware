@@ -205,14 +205,14 @@ public class DefaultMailAccountParser extends DataParser {
 
             if (json.hasAndNotNull(MailAccountFields.MAIL_PROTOCOL)) {
                 final String mailProtocol = json.optString(MailAccountFields.MAIL_PROTOCOL, null);
-                if (!Strings.isEmpty(mailProtocol) && !mailProtocol.equals(account.getMailProtocol())) {
+                if (Strings.isNotEmpty(mailProtocol) && !mailProtocol.equals(account.getMailProtocol())) {
                     account.setMailProtocol(mailProtocol);
                 }
             }
 
             if (json.hasAndNotNull(MailAccountFields.MAIL_SERVER)) {
                 final String mailServer = json.optString(MailAccountFields.MAIL_SERVER, null);
-                if (!Strings.isEmpty(mailServer) && !mailServer.equals(account.getMailServer())) {
+                if (Strings.isNotEmpty(mailServer) && !mailServer.equals(account.getMailServer())) {
                     account.setMailServer(mailServer);
                 }
             }
@@ -268,14 +268,14 @@ public class DefaultMailAccountParser extends DataParser {
 
             if (json.hasAndNotNull(MailAccountFields.TRANSPORT_PROTOCOL)) {
                 final String transportProtocol = json.optString(MailAccountFields.TRANSPORT_PROTOCOL, null);
-                if (!Strings.isEmpty(transportProtocol) && !transportProtocol.equals(account.getTransportProtocol())) {
+                if (Strings.isNotEmpty(transportProtocol) && !transportProtocol.equals(account.getTransportProtocol())) {
                     account.setTransportProtocol(transportProtocol);
                 }
             }
 
             if (json.hasAndNotNull(MailAccountFields.TRANSPORT_SERVER)) {
                 final String transportServer = json.optString(MailAccountFields.TRANSPORT_SERVER, null);
-                if (!Strings.isEmpty(transportServer) && !transportServer.equals(account.getTransportServer())) {
+                if (Strings.isNotEmpty(transportServer) && !transportServer.equals(account.getTransportServer())) {
                     account.setTransportServer(transportServer);
                 }
             }

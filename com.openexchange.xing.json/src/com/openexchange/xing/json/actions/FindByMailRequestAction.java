@@ -86,7 +86,7 @@ public final class FindByMailRequestAction extends AbstractXingAction {
         {
             String token = req.getParameter("testToken");
             String secret = req.getParameter("testSecret");
-            if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+            if (Strings.isNotEmpty(token) && Strings.isNotEmpty(secret)) {
                 xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
             } else {
                 xingOAuthAccess = getXingOAuthAccess(req);

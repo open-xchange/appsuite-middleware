@@ -152,7 +152,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
                 }
                 String prefix = getPrefix(samlBackend);
                 String path = samlBackend.getPath();
-                if (!Strings.isEmpty(path)) {
+                if (Strings.isNotEmpty(path)) {
                     // path must be validated if it is not empty
                     validatePath(path);
                     serviceRegistrations.push(context.registerService(ComputedServerConfigValueService.class, getSamlPathComputedValue(samlBackend, config),null));
@@ -253,7 +253,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
         prefixBuilder.append(services.getService(DispatcherPrefixService.class).getPrefix());
         prefixBuilder.append("saml/");
         String path = samlBackend.getPath();
-        if (!Strings.isEmpty(path)) {
+        if (Strings.isNotEmpty(path)) {
             prefixBuilder.append(path).append("/");
         }
         return prefixBuilder.toString();
@@ -294,7 +294,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
                     return;
                 }
                 for (String hostIdentifer: hosts) {
-                    if (!Strings.isEmpty(hostIdentifer) && hostIdentifer.equalsIgnoreCase(hostName)) {
+                    if (Strings.isNotEmpty(hostIdentifer) && hostIdentifer.equalsIgnoreCase(hostName)) {
                         serverConfig.put("samlSingleLogout", true);
                         return;
                     }
@@ -325,7 +325,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
                     return;
                 }
                 for (String hostIdentifer: hosts) {
-                    if (!Strings.isEmpty(hostIdentifer) && hostIdentifer.equalsIgnoreCase(hostName)) {
+                    if (Strings.isNotEmpty(hostIdentifer) && hostIdentifer.equalsIgnoreCase(hostName)) {
                         serverConfig.put("samlPath", samlBackend.getPath());
                         return;
                     }

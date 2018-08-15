@@ -234,7 +234,7 @@ public abstract class PasswordChangeService {
              * Check against "allowed" pattern if defined
              */
             String allowedPattern = service.getProperty("com.openexchange.passwordchange.allowedPattern");
-            if (false == Strings.isEmpty(allowedPattern)) {
+            if (Strings.isNotEmpty(allowedPattern)) {
                 try {
                     if (false == Pattern.matches(allowedPattern, event.getNewPassword())) {
                         String allowedPatternHint = service.getProperty("com.openexchange.passwordchange.allowedPatternHint");

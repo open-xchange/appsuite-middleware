@@ -1209,7 +1209,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean considerAsImage = false;
             if (null == ct) {
                 realFilename = getRealFilename(part);
-                if (false == Strings.isEmpty(realFilename) && MimeType2ExtMap.getContentType(realFilename, "").startsWith("image/")) {
+                if (Strings.isNotEmpty(realFilename) && MimeType2ExtMap.getContentType(realFilename, "").startsWith("image/")) {
                     considerAsImage = true;
                 }
             } else if (ct.startsWith("image/")) {
