@@ -841,7 +841,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         JSONObject object = (JSONObject) data.getData();
         if (object == null) {
             try {
-                object = new JSONObject(data.getParameter(JSON));
+                String json = data.getParameter(JSON);
+                if (Strings.isEmpty(json)) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(JSON);
+                }
+                object = new JSONObject(json);
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
             }
