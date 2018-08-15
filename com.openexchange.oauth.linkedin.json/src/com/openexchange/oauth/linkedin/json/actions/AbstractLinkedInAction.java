@@ -84,7 +84,7 @@ public abstract class AbstractLinkedInAction implements AJAXActionService {
             throw ServiceExceptionCode.absentService(LinkedInService.class);
         }
 
-        List<OAuthAccount> oauthAccount = oAuthService.getAccounts(session, KnownApi.LINKEDIN.getFullName());
+        List<OAuthAccount> oauthAccount = oAuthService.getAccounts(session, KnownApi.LINKEDIN.getServiceId());
 
         if (oauthAccount.isEmpty()) {
             throw OAuthExceptionCodes.INVALID_ACCOUNT.create();

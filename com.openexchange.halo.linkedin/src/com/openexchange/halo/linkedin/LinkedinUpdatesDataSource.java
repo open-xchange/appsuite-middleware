@@ -81,7 +81,7 @@ public class LinkedinUpdatesDataSource extends AbstractLinkedinDataSource {
         final int uid = session.getUserId();
         final int cid = session.getContextId();
 
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(session, KnownApi.LINKEDIN.getFullName());
+        final List<OAuthAccount> accounts = getOauthService().getAccounts(session, KnownApi.LINKEDIN.getServiceId());
         if (accounts.isEmpty()) {
             throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }

@@ -713,7 +713,7 @@ public class MimeMailException extends OXException {
                         }
                         if (null != oAuthAccount) {
                             API api = oAuthAccount.getAPI();
-                            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(authenticationFailedException, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
+                            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(authenticationFailedException, api.getDisplayName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
                         }
                     }
                 }

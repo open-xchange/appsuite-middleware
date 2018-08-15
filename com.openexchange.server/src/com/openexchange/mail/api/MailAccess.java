@@ -862,7 +862,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                             OAuthAccount oAuthAccount = oauthService.getAccount(session, oauthAccountId);
                             API api = oAuthAccount.getAPI();
                             Throwable cause = e.getCause();
-                            return AuthenticationFailureHandlerResult.createErrorResult(OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId())));
+                            return AuthenticationFailureHandlerResult.createErrorResult(OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getDisplayName(), I(oAuthAccount.getId()), I(session.getUserId()), I(session.getContextId())));
                         } catch (Exception x) {
                             LOG.warn("Failed to handle failed OAuth authentication", x);
                         }

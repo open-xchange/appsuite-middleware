@@ -89,7 +89,7 @@ public class GoogleContactsSubscribeService extends AbstractOAuthSubscribeServic
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleContactsSubscribeService.class);
 
-    public static final String SOURCE_ID = KnownApi.GOOGLE.getFullName() + ".contact";
+    public static final String SOURCE_ID = KnownApi.GOOGLE.getServiceId() + ".contact";
 
     /**
      * The Google Contacts' feed URL

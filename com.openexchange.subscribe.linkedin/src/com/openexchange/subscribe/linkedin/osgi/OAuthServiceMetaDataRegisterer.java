@@ -74,7 +74,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
     public OAuthServiceMetaData addingService(final ServiceReference<OAuthServiceMetaData> reference) {
         final OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
         // TODO Please use a service property or the service description to let the ServiceTracker filter the only wanted service.
-        if (KnownApi.LINKEDIN.getFullName().equals(oAuthServiceMetaData.getId())) {
+        if (KnownApi.LINKEDIN.getServiceId().equals(oAuthServiceMetaData.getId())) {
             activator.setOAuthServiceMetadata(oAuthServiceMetaData);
             activator.registerServices();
         }
@@ -89,7 +89,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
     @Override
     public void removedService(final ServiceReference<OAuthServiceMetaData> reference, final OAuthServiceMetaData arg1) {
         final OAuthServiceMetaData oAuthServiceMetaData = arg1;
-        if (KnownApi.LINKEDIN.getFullName().equals(oAuthServiceMetaData.getId())) {
+        if (KnownApi.LINKEDIN.getServiceId().equals(oAuthServiceMetaData.getId())) {
             activator.setOAuthServiceMetadata(null);
             activator.unregisterServices();
         }

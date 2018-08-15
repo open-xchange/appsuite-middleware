@@ -86,6 +86,8 @@ public class PhotoConsumer implements BiConsumer<JSONObject, Contact> {
     private static final String GET_PHOTO_METADATA_END_POINT = "https://graph.microsoft.com/v1.0/me/contacts/%s/photo";
 
     private final CloseableHttpClient httpClient;
+    
+    /////////////////// ! \\\\\\\\\\\\\\ FIXME TO BE REMOVED!!!! ONLY FOR TESTING !!!!
     private ContactParser parser;
 
     /**

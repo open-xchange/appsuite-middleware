@@ -49,8 +49,6 @@
 
 package com.openexchange.oauth;
 
-import java.util.Collection;
-
 /**
  * {@link API} - Represents an OAuth API from a certain service provider.
  *
@@ -67,24 +65,16 @@ public interface API {
     String getServiceId();
 
     /**
-     * Gets the name
+     * Gets the display name
      *
-     * @return The name
+     * @return The display name
      */
-    String getName();
+    String getDisplayName();
 
     /**
-     * Gets the short name for displaying purposes.
-     *
-     * @return The short name
-     */
-    String getShortName();
-
-    /**
-     * Returns the aliases of a certain service provider
+     * Returns the capability name
      * 
-     * @return The aliases
+     * @return the capability name
      */
-    Collection<String> getAliases();
-
+    String getCapability();
 }

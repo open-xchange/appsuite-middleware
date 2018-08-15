@@ -217,7 +217,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
             return false;
         }
         try {
-            OAuthServiceMetaData metaData = service.getService(KnownApi.GOOGLE.getFullName(), session.getUserId(), session.getContextId());
+            OAuthServiceMetaData metaData = service.getService(KnownApi.GOOGLE.getServiceId(), session.getUserId(), session.getContextId());
             return metaData == null ? false : metaData.isEnabled(session.getUserId(), session.getContextId());
         } catch (OXException e) {
             return false;

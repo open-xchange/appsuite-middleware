@@ -148,6 +148,6 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
 
     @Override
     public String getProviderId() {
-        return KnownApi.GOOGLE.getFullName();
+        return KnownApi.GOOGLE.getServiceId();
     }
 }

@@ -98,9 +98,9 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
                     Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                     if (null != userId) {
                         OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(api.getFullName());
+                        OAuthAccessRegistry registry = registryService.get(api.getServiceId());
                         if (registry.removeIfLast(contextId, userId)) {
-                            LOG.debug("{} access removed for user {} in context {}", api.getShortName(), userId, contextId);
+                            LOG.debug("{} access removed for user {} in context {}", api.getDisplayName(), userId, contextId);
                         }
                     }
                 }

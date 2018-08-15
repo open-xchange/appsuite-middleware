@@ -95,7 +95,7 @@ public abstract class AbstractReauthorizeClusterTask {
         builder.append(session.getUserId()).append("@");
         builder.append(session.getContextId());
         builder.append(":").append(cachedAccount.getId());
-        builder.append(":").append(cachedAccount.getAPI().getName());
+        builder.append(":").append(cachedAccount.getAPI().getDisplayName());
 
         taskName = builder.toString();
     }

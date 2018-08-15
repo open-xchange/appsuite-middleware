@@ -49,12 +49,9 @@
 
 package com.openexchange.oauth;
 
-import java.util.Collection;
-import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.BoxApi;
 import org.scribe.builder.api.CopyApi;
-import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.Google2Api;
 import org.scribe.builder.api.LinkedInApi;
@@ -63,8 +60,9 @@ import org.scribe.builder.api.TumblrApi;
 import org.scribe.builder.api.TwitterApi;
 import org.scribe.builder.api.VkontakteApi;
 import org.scribe.builder.api.XingApi;
-import org.scribe.builder.api.YahooApi;
-import com.google.common.collect.ImmutableList;
+import com.openexchange.oauth.api.DropboxApi2;
+import com.openexchange.oauth.api.MicrosoftGraphApi;
+import com.openexchange.oauth.api.YahooApi2;
 
 /**
  * {@link KnownApi} - An enumeration for available APIs.
@@ -73,143 +71,117 @@ public enum KnownApi implements API {
     /**
      * Twitter
      */
-    TWITTER("Twitter", "com.openexchange.oauth.twitter", new String[] { "twitter" }, TwitterApi.class),
+    TWITTER("Twitter", "com.openexchange.oauth.twitter", "twitter", TwitterApi.class),
     /**
      * LinkedIn
      */
-    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin", new String[] { "linkedin" }, LinkedInApi.class),
+    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin", "linkedin", LinkedInApi.class),
     /**
      * Other/unknown
      */
-    OTHER("Other", "com.openexchange.oauth.other", new String[] { "other" }, Api.class),
+    OTHER("Other", "com.openexchange.oauth.other", "other", Api.class),
     /**
      * MSN
      */
-    MSN("MSN", "com.openexchange.oauth.msn", new String[] { "msn" }, MsLiveConnectApi.class),
+    MSN("MSN", "com.openexchange.oauth.msn", "msn", MsLiveConnectApi.class),
     /**
      * Yahoo
      */
-    YAHOO("Yahoo", "com.openexchange.oauth.yahoo", new String[] { "yahoo" }, YahooApi.class),
+    YAHOO("Yahoo", "com.openexchange.oauth.yahoo", "yahoo", YahooApi2.class),
     /**
      * Tumblr
      */
-    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr", new String[] { "tumblr" }, TumblrApi.class),
+    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr", "tumblr", TumblrApi.class),
     /**
      * Flickr
      */
-    FLICKR("Flickr", "com.openexchange.oauth.flickr", new String[] { "flickr" }, FlickrApi.class),
+    FLICKR("Flickr", "com.openexchange.oauth.flickr", "flickr", FlickrApi.class),
     /**
      * Dropbox
      */
-    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox", new String[] { "dropbox" }, DropBoxApi.class),
+    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox", "dropbox", DropboxApi2.class),
     /**
      * XING
      */
-    XING("XING", "com.openexchange.oauth.xing", new String[] { "xing" }, XingApi.class),
+    XING("XING", "com.openexchange.oauth.xing", "xing", XingApi.class),
     /**
      * vkontakte
      */
-    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte", new String[] { "vkontakte" }, VkontakteApi.class),
+    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte", "vkontakte", VkontakteApi.class),
     /**
      * Google
      */
-    GOOGLE("Google", "com.openexchange.oauth.google", new String[] { "google" }, Google2Api.class),
+    GOOGLE("Google", "com.openexchange.oauth.google", "google", Google2Api.class),
     /**
      * Box.com
      */
-    BOX_COM("Box.com", "com.openexchange.oauth.boxcom", new String[] { "boxcom" }, BoxApi.class),
+    BOX_COM("Box.com", "com.openexchange.oauth.boxcom", "boxcom", BoxApi.class),
     /**
      * Microsoft Live Connect
      * 
      * @deprecated Use {@link #MICROSOFT_GRAPH} instead
      */
-    MS_LIVE_CONNECT("MS Live", "Microsoft Live Connect", "com.openexchange.oauth.msliveconnect", new String[] { "msliveconnect" }, MsLiveConnectApi.class),
+    MS_LIVE_CONNECT("MS Live", "com.openexchange.oauth.msliveconnect", "msliveconnect", MsLiveConnectApi.class),
     /**
      * Copy.com
      */
-    COPY_COM("Copy.com", "com.openexchange.oauth.copycom", new String[] { "copycom" }, CopyApi.class),
+    COPY_COM("Copy.com", "com.openexchange.oauth.copycom", "copycom", CopyApi.class),
     /**
      * Microsoft Graph
      * 
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/overview">Microsoft Graph</a>
      */
-    MICROSOFT_GRAPH("Microsoft", "com.openexchange.oauth.microsoft.graph", new String[] { "microsoftgraph" }, Api.class);
+    MICROSOFT_GRAPH("Microsoft", "com.openexchange.oauth.microsoft.graph", "microsoftgraph", MicrosoftGraphApi.class);
     ;
 
     private final String serviceId;
-    private final String name;
     private final String displayName;
-    private final Collection<String> aliases;
+    private final String capability;
     private final Class<? extends Api> apiClass;
 
     /**
      * Initializes a new {@link KnownApi}.
      *
-     * @param shortName The short name of the API
-     * @param fullName The full name of the API
+     * @param displayName The display name
+     * @param serviceId The service identifier
+     * @param capability The capability name
+     * @param apiClass The api class
      */
-    private KnownApi(String shortName, String fullName, String[] aliases, Class<? extends Api> apiClass) {
-        name = shortName;
-        serviceId = fullName;
-        this.apiClass = apiClass;
-        this.displayName = null;
-        this.aliases = (null == aliases || aliases.length == 0) ? Collections.emptyList() : ImmutableList.copyOf(aliases);
-    }
-
-    /**
-     * Initializes a new {@link KnownApi}.
-     *
-     * @param displayName An optional display name
-     * @param shortName The short name of the API
-     * @param fullName The full name of the API
-     */
-    private KnownApi(String displayName, String shortName, String fullName, String[] aliases, Class<? extends Api> apiClass) {
+    private KnownApi(String displayName, String serviceId, String capability, Class<? extends Api> apiClass) {
         this.displayName = displayName;
-        name = shortName;
-        serviceId = fullName;
+        this.serviceId = serviceId;
+        this.capability = capability;
         this.apiClass = apiClass;
-        this.aliases = (null == aliases || aliases.length == 0) ? Collections.emptyList() : ImmutableList.copyOf(aliases);
     }
 
-    /**
-     * Gets possible alias identifiers
-     *
-     * @return The alias identifiers or an empty collection
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.API#getServiceId()
      */
-    public Collection<String> getAliases() {
-        return aliases;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
     @Override
     public String getServiceId() {
         return serviceId;
     }
 
-    /**
-     * Gets the short name for displaying purposes.
-     *
-     * @return The short name
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.API#getDisplayName()
      */
     @Override
-    public String getShortName() {
-        if (displayName != null) {
-            return displayName;
-        }
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    /**
-     * Gets the full name aka. service identifier
-     *
-     * @return The full name
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.API#getCapability()
      */
-    public String getFullName() {
-        return serviceId;
+    @Override
+    public String getCapability() {
+        return capability;
     }
 
     /**
@@ -233,7 +205,7 @@ public enum KnownApi implements API {
         }
 
         for (KnownApi api : KnownApi.values()) {
-            if (api.getFullName().equals(serviceId)) {
+            if (api.getServiceId().equals(serviceId)) {
                 return api;
             }
         }

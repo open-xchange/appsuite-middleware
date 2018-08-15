@@ -212,7 +212,7 @@ public final class OAuthUtil {
         builder.append(determineHost(hostData));
         builder.append(hostData.getDispatcherPrefix());
         builder.append("oauth/accounts?action=init");
-        builder.append("&serviceId=").append(account.getAPI().getName());
+        builder.append("&serviceId=").append(account.getAPI().getDisplayName());
         builder.append("&id=").append(account.getId());
         builder.append('&').append(OAuthConstants.ARGUMENT_DISPLAY_NAME).append('=').append(urlEncode(account.getDisplayName()));
         builder.append("&scopes=").append(urlEncode(OAuthUtil.oxScopesToString(account.getEnabledScopes())));

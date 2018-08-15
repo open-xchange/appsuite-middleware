@@ -118,7 +118,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
     @Override
     public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
-        OAuthAccessRegistry registry = registryService.get(KnownApi.YAHOO.getFullName());
+        OAuthAccessRegistry registry = registryService.get(KnownApi.YAHOO.getServiceId());
         OAuthAccess oAuthAccess = registry.get(cid, user, id);
         if (oAuthAccess == null || oAuthAccess.getAccountId() != id) {
             return;
@@ -222,7 +222,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
      */
     private OAuthAccess getOAuthAccess(Session session, int accountId) throws OXException {
         OAuthAccessRegistryService service = services.getService(OAuthAccessRegistryService.class);
-        OAuthAccessRegistry oAuthAccessRegistry = service.get(KnownApi.YAHOO.getFullName());
+        OAuthAccessRegistry oAuthAccessRegistry = service.get(KnownApi.YAHOO.getServiceId());
         OAuthAccess oAuthAccess = oAuthAccessRegistry.get(session.getContextId(), session.getUserId(), accountId);
         if (oAuthAccess == null) {
             OAuthAccess access = new YahooOAuthAccess(session, accountId);

@@ -87,7 +87,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         super();
         this.services = services;
         this.context = context;
-        oauthIdentifier = KnownApi.GOOGLE.getFullName();
+        oauthIdentifier = KnownApi.GOOGLE.getServiceId();
     }
 
     @Override

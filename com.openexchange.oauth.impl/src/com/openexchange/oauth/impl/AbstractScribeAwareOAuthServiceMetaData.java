@@ -108,7 +108,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         this.api = api;
 
         setId(api.getServiceId());
-        setDisplayName(api.getShortName());
+        setDisplayName(api.getDisplayName());
 
         // Common properties for all OAuthServiceMetaData implementations.
         propertyNames = new ArrayList<>();

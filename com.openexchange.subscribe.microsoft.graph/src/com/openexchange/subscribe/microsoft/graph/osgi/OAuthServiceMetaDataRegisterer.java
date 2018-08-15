@@ -91,7 +91,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         super();
         this.services = services;
         this.context = context;
-        oauthIdentifier = KnownApi.MICROSOFT_GRAPH.getFullName();
+        oauthIdentifier = KnownApi.MICROSOFT_GRAPH.getServiceId();
     }
 
     @Override

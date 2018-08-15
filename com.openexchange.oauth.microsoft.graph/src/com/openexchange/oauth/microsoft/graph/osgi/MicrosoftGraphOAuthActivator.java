@@ -116,16 +116,16 @@ public final class MicrosoftGraphOAuthActivator extends HousekeepingActivator {
             getService(CapabilityService.class).declareCapability(CAPABILITY_NAME);
 
             // Register the update task
-            //final DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new RemoveOAuthAccountsTask());
+            //DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new MigrateMSLiveAccountsTask());
             //registerService(UpdateTaskProviderService.class.getName(), providerService);
 
             // Register the scope
             OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
             scopeRegistry.registerScopes(metadata.getAPI(), MicrosoftGraphOAuthScope.values());
 
-            log.info("Successfully initialized MS Live Connect OAuth service");
+            log.info("Successfully initialized Microsoft Graph OAuth service");
         } catch (final Exception e) {
-            log.warn("Could not start-up MS Live Connect OAuth service", e);
+            log.warn("Could not start-up Microsoft Graph OAuth service", e);
             throw e;
         }
     }

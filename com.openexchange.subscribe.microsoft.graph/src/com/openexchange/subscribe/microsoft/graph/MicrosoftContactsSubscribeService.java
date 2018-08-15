@@ -87,7 +87,7 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
     private static final Logger LOG = LoggerFactory.getLogger(MicrosoftContactsSubscribeService.class);
 
     private static final String LIST_CONTACTS_END_POINT = "https://graph.microsoft.com/v1.0/me/contacts";
-    private static final String SOURCE_ID = KnownApi.MICROSOFT_GRAPH.getFullName() + ".contact";
+    private static final String SOURCE_ID = KnownApi.MICROSOFT_GRAPH.getServiceId() + ".contact";
     private static final String USER_AGENT = "Open-Xchange Microsoft Graph REST Client";
 
     private final CloseableHttpClient httpClient;
@@ -125,7 +125,7 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
     }
 
     private JSONValue fetchData(String accessToken) throws OXException {
-        /////////////////// ! \\\\\\\\\\\\\\ TO BE REMOVED!!!! ONLY FOR TESTING !!!!
+        /////////////////// ! \\\\\\\\\\\\\\ FIXME TO BE REMOVED!!!! ONLY FOR TESTING !!!!
         parser.setAccessToken(accessToken);
         /////////////////// ! \\\\\\\\\\\\\\ TO BE REMOVED!!!! ONLY FOR TESTING !!!!
         CloseableHttpResponse httpResponse = null;

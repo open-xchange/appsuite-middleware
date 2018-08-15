@@ -103,8 +103,8 @@ public abstract class AbstractLinkedinDataSource implements HaloContactDataSourc
     protected boolean hasAccount(ServerSession session) throws OXException {
         int uid = session.getUserId();
         int cid = session.getContextId();
-        if (getOauthService().getMetaDataRegistry().containsService(KnownApi.LINKEDIN.getFullName(), uid, cid)) {
-            return !getOauthService().getAccounts(session, KnownApi.LINKEDIN.getFullName()).isEmpty();
+        if (getOauthService().getMetaDataRegistry().containsService(KnownApi.LINKEDIN.getServiceId(), uid, cid)) {
+            return !getOauthService().getAccounts(session, KnownApi.LINKEDIN.getServiceId()).isEmpty();
         }
 
         return false;

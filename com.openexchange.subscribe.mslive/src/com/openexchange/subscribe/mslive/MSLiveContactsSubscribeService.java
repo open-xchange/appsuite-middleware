@@ -90,7 +90,7 @@ public class MSLiveContactsSubscribeService extends AbstractOAuthSubscribeServic
      * @param services The {@link ServiceLookup}
      */
     public MSLiveContactsSubscribeService(OAuthServiceMetaData oAuthServiceMetaData, ServiceLookup services) {
-        super(oAuthServiceMetaData, KnownApi.MS_LIVE_CONNECT.getFullName() + ".contact", FolderObject.CONTACT, "MS Live", services);
+        super(oAuthServiceMetaData, KnownApi.MS_LIVE_CONNECT.getServiceId() + ".contact", FolderObject.CONTACT, "MS Live", services);
     }
 
     /*
@@ -129,7 +129,7 @@ public class MSLiveContactsSubscribeService extends AbstractOAuthSubscribeServic
                 JSONObject error = wholeResponse.getJSONObject("error");
                 String code = error.getString("code");
                 if (code.equals("request_token_unauthorized")) {
-                    throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(KnownApi.MS_LIVE_CONNECT.getShortName(), OXScope.contacts_ro.getDisplayName());
+                    throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(KnownApi.MS_LIVE_CONNECT.getDisplayName(), OXScope.contacts_ro.getDisplayName());
                 }
                 throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(error.getString("message"));
             }

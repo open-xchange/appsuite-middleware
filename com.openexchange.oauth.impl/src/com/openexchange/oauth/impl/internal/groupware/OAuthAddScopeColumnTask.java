@@ -123,15 +123,15 @@ public class OAuthAddScopeColumnTask extends AbstractOAuthUpdateTask {
     }
 
     private enum Scope {
-        BOXCOM(KnownApi.BOX_COM.getFullName(), OXScope.drive),
-        DROPBOX(KnownApi.DROPBOX.getFullName(), OXScope.drive),
-        GOOGLE(KnownApi.GOOGLE.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
-        MSLIVE_CONNECT(KnownApi.MS_LIVE_CONNECT.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
-        LINKEDIN(KnownApi.LINKEDIN.getFullName(), OXScope.contacts_ro),
-        VKONTAKTE(KnownApi.VKONTAKTE.getFullName(), OXScope.contacts_ro),
-        XING(KnownApi.XING.getFullName(), OXScope.contacts_ro),
-        YAHOO(KnownApi.YAHOO.getFullName(), OXScope.contacts_ro),
-        TWITTER(KnownApi.TWITTER.getFullName(), OXScope.generic),
+        BOXCOM(KnownApi.BOX_COM.getServiceId(), OXScope.drive),
+        DROPBOX(KnownApi.DROPBOX.getServiceId(), OXScope.drive),
+        GOOGLE(KnownApi.GOOGLE.getServiceId(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
+        MSLIVE_CONNECT(KnownApi.MS_LIVE_CONNECT.getServiceId(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
+        LINKEDIN(KnownApi.LINKEDIN.getServiceId(), OXScope.contacts_ro),
+        VKONTAKTE(KnownApi.VKONTAKTE.getServiceId(), OXScope.contacts_ro),
+        XING(KnownApi.XING.getServiceId(), OXScope.contacts_ro),
+        YAHOO(KnownApi.YAHOO.getServiceId(), OXScope.contacts_ro),
+        TWITTER(KnownApi.TWITTER.getServiceId(), OXScope.generic),
         ;
 
         private String scope;
