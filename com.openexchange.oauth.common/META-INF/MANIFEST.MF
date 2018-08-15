@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange OAuth Common Bundle
+Bundle-SymbolicName: com.openexchange.oauth.common
+Bundle-Version: 7.10.0
+Bundle-Vendor: Open-Xchange Inc.
+Automatic-Module-Name: com.openexchange.oauth.common
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.capabilities,
+ com.openexchange.config,
+ com.openexchange.dispatcher,
+ com.openexchange.groupware.ldap,
+ com.openexchange.http.deferrer,
+ com.openexchange.oauth,
+ com.openexchange.oauth.scope,
+ com.openexchange.osgi,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ org.osgi.framework;version="1.9.0",
+ org.slf4j;version="1.7.25"
+Export-Package: com.openexchange.oauth.common.osgi
