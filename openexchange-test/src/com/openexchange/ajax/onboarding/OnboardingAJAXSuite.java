@@ -53,6 +53,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import com.openexchange.ajax.onboarding.tests.ConfigTest;
 import com.openexchange.ajax.onboarding.tests.DAVSyncProfileTest;
+import com.openexchange.ajax.onboarding.tests.DownloadLinkTest;
 import com.openexchange.ajax.onboarding.tests.DownloadTest;
 import com.openexchange.ajax.onboarding.tests.EASSyncProfileTest;
 import com.openexchange.ajax.onboarding.tests.EMClientURLTest;
@@ -78,6 +79,7 @@ import com.openexchange.ajax.onboarding.tests.PlistSMSUserLimitTest;
     PlistSMSRateLimitTest.class,
     MailSyncProfileTest.class,
     DownloadTest.class,
+    DownloadLinkTest.class,
 
 })
 public class OnboardingAJAXSuite {
