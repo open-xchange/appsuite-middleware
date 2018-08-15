@@ -141,7 +141,7 @@ $ mysql --protocol=tcp -h localhost -u root -psecret --ssl-ca=/etc/mysql/ssl/ca-
 
 ## Set the certificates
 ### Create key stores
-The JDBC connector uses Java KeyStore to mange the different certificates. Therefore we need to create those based on the CA and client certificates. Following commands will create 
+The JDBC connector uses Java KeyStore to manage the different certificates. Therefore we need to create those based on the CA and client certificates. Following commands will create 
 
 * A truststore file for the CA certifacte
 * A keystore file for the client certificate
@@ -158,7 +158,7 @@ keytool -list -v -keystore keystore
 ```
 
 ### Set connector properties
-To activate SSL you have to set a bunch of properties in the 'dbconnector.yaml'. For a two way authentication the file should look like this
+To activate SSL you have to set a bunch of properties in the configuration file 'dbconnector.yaml'. For a two way authentication, the file should look like this
 
 ```
 
@@ -204,7 +204,7 @@ For a full property overview please have a look at the official [documentation](
 
 The server is capable to reload the JDBC properties as well as the used certificates. To trigger such a rotation the command line tool "reloadConfiguration" is used.
 
-A reload will clear all current unused instances of a 'Connection' hold by different connection pool and update the properties used to create connection with the JDBC client. Therefore all newly created connections after a reload will automatically run with the updated properties.
+A reload will clear all current unused instances of a 'Connection' held in the connection pools and update the properties used to spawn new connections with the JDBC client. Therefore all newly created connections after a reload will automatically run with the updated properties.
 Connections that are still used will get marked deprecated, so that these connections will be replaced by updated once after they finished their work.
 
 ## Change JDBC properties
@@ -223,9 +223,10 @@ ConfigDB related properties are still saved within 'configdb.properties'. Those 
 * the DB user
 * the DB users password
 
-All you need to do after editing and saving, is to trigger a 'reloadConfiguration' too. If you only changed configDB related properties, only Connections to the configDB will be replaced and updated.
+All you need to do after editing and saving, is to trigger a 'reloadConfiguration' too. If you only changed configDB related properties, only connections to the configDB will be replaced and updated.
 
-## Update certificates
+## Key Rotation (certificate updates)
+
 ### Client certificate rotation
 To switch client certificates you can either change the URL to new key stores containing the new certificates or you can add those certificates to the existing key stores. 
 
@@ -233,21 +234,18 @@ To switch client certificates you can either change the URL to new key stores co
 One way to update the client certificates is to simply create new key stores like explained above in the section 'Create key stores'. Once the new certificates are imported in the new key stores, you can change the URLs for those key stores in the 'dbconnector.yaml', see 'Set connector properties'. After saving the file the command line tool 'reloadconfiguration' needs to be run. 
 
 
-
 #### Change existing key store
-The other way to rotate client related certificates is to add the new certificates to the existing stores. Due to the fact that the JDBC driver reloads the key stores for each new created connection itself, new connections will be configured with those too. Afterwards the old certificates can be removed with the command
+The other way to rotate client related certificates is to add the new certificates to the existing stores. Due to the fact that the JDBC driver reloads the key stores for each new created connection itself, new connections will be configured with those too. Afterwards, the old certificates can be removed with the command
 
 ```
 keytool -delete -alias mysqlcacert -keystore truststore
 ```
 
-Efficiently this means that after all connections reaches 'maxLifeTime' they will be replaced by connections with updated certificates.
+Effectively, this means that after all connections reached 'maxLifeTime', they will be replaced by connections with updated certificates.
 
-The disadvantage of this method is that you can't be sure that after 'maxLifeTime' passed all connections will have updated certificates. Keep in mind that there is no explicit logic involved by the Open Xchange server (yet).
+The disadvantage of this method is that you can't be sure that after 'maxLifeTime' passed, all connections will have updated certificates. Keep in mind that there is no explicit logic involved by the Open-Xchange server (yet).
 
-
-
-Therefore we recommend that after the old certificates were removed from the key stores a 'reloadconfiguration' is run. The Open Xchange server will discover the changes on the key stores and then trigger an explicit update of the connections. Advantages of the explicit reload are
+Therefore we recommend that after the old certificates were removed from the key stores a 'reloadconfiguration' is run. The Open-Xchange server will discover the changes on the key stores, and then trigger an explicit update of the connections. Advantages of the explicit reload are
 
 * all new created connections will be configured using the new certificates instantly
 * all idle connections will be destroyed and replaced by new connections
@@ -255,12 +253,13 @@ Therefore we recommend that after the old certificates were removed from the key
 
 
 ### Server certificate rotation
+
 #### Preparation
 Replacing certificates on the mysql server is not possible without downtimes. The certificates are linked to the configuration of the databases themselves and thus aren't reloadable. Therefore prepare well before switching the certificates to avoid bigger downtimes. Generate and verify new certificates beforehand. 
 
 To switch certificates simply replace the paths to the old certificates with the path to the new certificate within your database configuration. Don't overwrite those certificates!
 
-Note: Keep in mind that before you switch the CA all clients need to be updated. Add the new CA certificate to the trust store and generate new client certificates for the key store.
+Note: Keep in mind that before you switch the CA, all clients need to be updated. Add the new CA certificate to the trust store and generate new client certificates for the key store.
 
 #### Restart
 Once preparation is done restart the database service. E.g.
@@ -270,7 +269,5 @@ systemclt restart mysql
 ```
 
 Note: Don't forget to remove all old certificates from the trust and the key store of the client.
-
-
 
 
