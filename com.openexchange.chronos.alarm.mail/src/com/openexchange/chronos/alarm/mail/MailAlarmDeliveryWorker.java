@@ -69,6 +69,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
@@ -112,6 +113,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
 
     private final MailAlarmNotificationService mailService;
     private final CalendarProviderRegistry calendarProvider;
+    private final AdministrativeCalendarAccountService administrativeCalendarAccountService;
     private final int mailShift;
     private final int lookAhead;
     private final int overdueWaitTime;
@@ -127,6 +129,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
      * @param timerService A {@link TimerService} to provide {@link EntityResolver} for each context
      * @param mailService The {@link MailAlarmNotificationService} to send the mails with
      * @param calProviderRegistry The {@link CalendarProviderRegistry}
+     * @param administrativeCalendarAccountService The {@link AdministrativeCalendarAccountService}
      * @param lookAhead The time value in minutes the worker is looking ahead.
      * @param mailShift The time in milliseconds the mail send is shifter forward.
      * @param overdueWaitTime The time in minutes to wait until an old trigger is picked up.
@@ -140,6 +143,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
                                     TimerService timerService,
                                     MailAlarmNotificationService mailService,
                                     CalendarProviderRegistry calProviderRegistry,
+                                    AdministrativeCalendarAccountService administrativeCalendarAccountService,
                                     int lookAhead,
                                     int mailShift,
                                     int overdueWaitTime) throws OXException {
@@ -154,6 +158,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
         this.mailShift = mailShift;
         this.overdueWaitTime = overdueWaitTime;
         this.calendarProvider = calProviderRegistry;
+        this.administrativeCalendarAccountService = administrativeCalendarAccountService;
 
     }
 
@@ -287,7 +292,19 @@ public class MailAlarmDeliveryWorker implements Runnable {
      * @throws OXException If the context couldn't be loaded
      */
     private SingleMailDeliveryTask createTask(int cid, int account, Alarm alarm, AlarmTrigger trigger, long processed) throws OXException {
-        return new SingleMailDeliveryTask(dbservice, storage, mailService, factory, calUtil, calendarProvider, ctxService.getContext(cid), account, alarm, trigger, processed, this);
+        return new SingleMailDeliveryTask(  dbservice, 
+                                            storage, 
+                                            mailService, 
+                                            factory, 
+                                            calUtil, 
+                                            calendarProvider, 
+                                            administrativeCalendarAccountService, 
+                                            ctxService.getContext(cid), 
+                                            account, 
+                                            alarm, 
+                                            trigger, 
+                                            processed, 
+                                            this);
     }
 
     /**

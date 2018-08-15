@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.common;
 
 import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
 import java.util.Collections;
@@ -69,6 +69,9 @@ import com.openexchange.session.Session;
  * @since v7.10.0
  */
 public class DefaultCalendarEvent implements CalendarEvent {
+
+    /** The fixed identifier for an account of the internal calendar provider */
+    public static final int ACCOUNT_ID = 0;
 
     private final int contextId;
     private final int accountId;
@@ -120,7 +123,7 @@ public class DefaultCalendarEvent implements CalendarEvent {
      * @param updates The update results, or <code>null</code> if there are none
      */
     public DefaultCalendarEvent(CalendarSession session, int calendarUserId, Map<Integer, List<String>> affectedFoldersPerUser, List<CreateResult> creations, List<UpdateResult> updates, List<DeleteResult> deletions) {
-        this(session.getContextId(), Utils.ACCOUNT_ID, calendarUserId, affectedFoldersPerUser, creations, updates, deletions, session.getSession(), session.getEntityResolver(), session);
+        this(session.getContextId(), ACCOUNT_ID, calendarUserId, affectedFoldersPerUser, creations, updates, deletions, session.getSession(), session.getEntityResolver(), session);
     }
 
     @Override

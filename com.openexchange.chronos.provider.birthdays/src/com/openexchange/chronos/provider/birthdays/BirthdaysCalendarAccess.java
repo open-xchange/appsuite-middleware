@@ -67,14 +67,15 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmPreparator;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.common.AlarmPreparator;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarEvent;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -265,14 +266,16 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
 
     private DefaultCalendarResult notifyHandlers(DefaultCalendarResult result) throws OXException {
         CalendarEventNotificationService notificationService = services.getServiceSafe(CalendarEventNotificationService.class);
-        notificationService.notifyHandlers(new BirthdayCalendarEvent(   session.getContextId(),
+        notificationService.notifyHandlers(new DefaultCalendarEvent(    session.getContextId(),
                                                                         account.getAccountId(),
                                                                         session.getUserId(),
                                                                         Collections.singletonMap(session.getUserId(), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
                                                                         result.getCreations(),
                                                                         result.getUpdates(),
                                                                         result.getDeletions(),
-                                                                        session));
+                                                                        session,
+                                                                        null,
+                                                                        null));
         return result;
     }
 

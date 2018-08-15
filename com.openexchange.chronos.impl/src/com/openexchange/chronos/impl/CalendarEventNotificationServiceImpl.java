@@ -67,7 +67,7 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class CalendarEventNotificationServiceImpl implements CalendarEventNotificationService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CalendarEventNotificationService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CalendarEventNotificationServiceImpl.class);
     private final ServiceSet<CalendarHandler> handlers;
 
     /**

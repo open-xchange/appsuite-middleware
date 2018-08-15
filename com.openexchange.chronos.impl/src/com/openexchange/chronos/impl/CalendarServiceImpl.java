@@ -119,10 +119,11 @@ public class CalendarServiceImpl implements CalendarService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CalendarServiceImpl.class.getName());
     private final CalendarEventNotificationService notificationService;
+    
     /**
      * Initializes a new {@link CalendarServiceImpl}.
      *
-     * @param calendarHandlers The calendar handlers service set
+     * @param CalendarEventNotificationService The {@link CalendarEventNotificationService}
      */
     public CalendarServiceImpl(CalendarEventNotificationService notificationService) {
         super();

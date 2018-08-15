@@ -64,6 +64,7 @@ import com.openexchange.chronos.alarm.mail.MailAlarmDeliveryWorkerUpdateTask;
 import com.openexchange.chronos.alarm.mail.MailAlarmNotificationService;
 import com.openexchange.chronos.alarm.mail.impl.MailAlarmNotificationServiceImpl;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
@@ -133,6 +134,7 @@ public class Activator extends HousekeepingActivator {
         ContextService ctxService = Tools.requireService(ContextService.class, this);
         CalendarUtilities calUtil = Tools.requireService(CalendarUtilities.class, this);
         CalendarProviderRegistry calendarProviderRegistry = Tools.requireService(CalendarProviderRegistry.class, this);
+        AdministrativeCalendarAccountService administrativeCalendarAccountService = Tools.requireService(AdministrativeCalendarAccountService.class, this);
 
 
         int period = leanConfig.getIntProperty(MailAlarmConfig.PERIOD);
@@ -164,6 +166,7 @@ public class Activator extends HousekeepingActivator {
                                                                             timerService,
                                                                             mailAlarmNotificationService,
                                                                             calendarProviderRegistry,
+                                                                            administrativeCalendarAccountService,
                                                                             lookAhead,
                                                                             mailShift,
                                                                             overdueWaitTime);
