@@ -55,13 +55,14 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import com.hazelcast.nio.serialization.Portable;
 
 /**
@@ -202,6 +203,9 @@ public class Hazelcasts {
         return executeByMembersAndFilter(task, remoteMembers, executor, filter, null);
     }
 
+    /** The constant to signal no result was available from remote nodes */
+    static final Object NO_RESULT = new Object();
+
     /**
      * Executes specified ({@link Portable portable}) task by remote members and filters results.
      * <p>
@@ -264,10 +268,11 @@ public class Hazelcasts {
         }
 
         // Use ExecutorService to obtain results from submitted tasks to remote members
-        BlockingQueue<Object> resultReference = new ArrayBlockingQueue<Object>(1);
+        BlockingReference<Object> resultReference = new BlockingReference<Object>();
         Map<Future<Void>, RemoteFetch<R, F>> submittedLookups = new LinkedHashMap<Future<Void>, Hazelcasts.RemoteFetch<R,F>>(size);
+        AtomicInteger counter = new AtomicInteger(size);
         for (Future<R> future : futureMap.values()) {
-            RemoteFetch<R, F> remoteFetch = new RemoteFetch<>(resultReference, future, filter);
+            RemoteFetch<R, F> remoteFetch = new RemoteFetch<>(resultReference, future, filter, counter);
             Future<Void> remoteFetchFuture = fetcher.submit(remoteFetch);
             submittedLookups.put(remoteFetchFuture, remoteFetch);
         }
@@ -275,7 +280,7 @@ public class Hazelcasts {
         // Await result
         Object result;
         try {
-            result = resultReference.take();
+            result = resultReference.getNonNull();
         } catch (InterruptedException e) {
             // Interrupted - Keep interrupted state
             Thread.currentThread().interrupt();
@@ -289,6 +294,10 @@ public class Hazelcasts {
         }
 
         // Return result
+        if (NO_RESULT == result) {
+            // No result was available from remote nodes
+            return null;
+        }
         if (result instanceof Throwable) {
             Throwable cause = (Throwable) result;
             if (cause instanceof RuntimeException) {
@@ -317,57 +326,121 @@ public class Hazelcasts {
 
     private static class RemoteFetch<R, F> implements Callable<Void> {
 
-        private final BlockingQueue<Object> resultReference;
+        private final BlockingReference<Object> resultReference;
         private final Future<R> toTakeFrom;
         private final Filter<R, F> filter;
+        private final AtomicInteger counter;
 
-        RemoteFetch(BlockingQueue<Object> resultReference, Future<R> toTakeFrom, Filter<R, F> filter) {
+        RemoteFetch(BlockingReference<Object> resultReference, Future<R> toTakeFrom, Filter<R, F> filter, AtomicInteger counter) {
             super();
             this.resultReference = resultReference;
             this.toTakeFrom = toTakeFrom;
             this.filter = filter;
+            this.counter = counter;
         }
 
         @Override
         public Void call() throws Exception {
-            int retryCount = 3;
-            Thread currentThread = Thread.currentThread();
-            while (retryCount-- > 0 && !currentThread.isInterrupted()) {
-                try {
-                    R result = toTakeFrom.get();
-                    retryCount = 0;
-                    F accepted = filter.accept(result);
-                    if (null != accepted) {
-                        resultReference.offer(accepted);
-                    }
-                } catch (InterruptedException e) {
-                    // Interrupted - Keep interrupted state
-                    currentThread.interrupt();
-                    retryCount = 0;
-                } catch (CancellationException e) {
-                    // Canceled
-                    retryCount = 0;
-                } catch (ExecutionException e) {
-                    Throwable cause = e.getCause();
+            try {
+                int retryCount = 3;
+                Thread currentThread = Thread.currentThread();
+                while (retryCount-- > 0 && !currentThread.isInterrupted()) {
+                    try {
+                        R result = toTakeFrom.get();
+                        retryCount = 0;
+                        F accepted = filter.accept(result);
+                        if (null != accepted) {
+                            resultReference.setNonNull(accepted);
+                        }
+                    } catch (InterruptedException e) {
+                        // Interrupted - Keep interrupted state
+                        currentThread.interrupt();
+                        retryCount = 0;
+                    } catch (CancellationException e) {
+                        // Canceled
+                        retryCount = 0;
+                    } catch (ExecutionException e) {
+                        Throwable cause = e.getCause();
 
-                    // Check for Hazelcast timeout
-                    if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                        resultReference.offer(cause);
-                        return null;
-                    }
+                        // Check for Hazelcast timeout
+                        if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                            resultReference.setNonNull(cause);
+                            return null;
+                        }
 
-                    // Timeout while awaiting remote result
-                    if (retryCount <= 0) {
-                        // No further retry
-                        cancelFutureSafe(toTakeFrom);
+                        // Timeout while awaiting remote result
+                        if (retryCount <= 0) {
+                            // No further retry
+                            cancelFutureSafe(toTakeFrom);
+                        }
                     }
                 }
+                return null;
+            } finally {
+                int numOfRemainingTasks = counter.decrementAndGet();
+                if (numOfRemainingTasks <= 0 && false == resultReference.isSetNonNull()) {
+                    // All tasks are through, but nothing was set so far
+                    resultReference.setNonNull(NO_RESULT);
+                }
             }
-            return null;
         }
 
         public void abortRemoteFetch() {
             toTakeFrom.cancel(true);
+        }
+    }
+
+    private static class BlockingReference<T> {
+
+        private final ReentrantLock lock;
+        private final Condition notEmpty;
+        private T reference;
+
+        /**
+         * Initializes a new {@link Hazelcasts.BlockingReference}.
+         */
+        BlockingReference() {
+            super();
+            lock = new ReentrantLock();
+            notEmpty = lock.newCondition();
+        }
+
+        T getNonNull() throws InterruptedException {
+            ReentrantLock lock = this.lock;
+            lock.lockInterruptibly();
+            try {
+                while (reference == null) {
+                    notEmpty.await();
+                }
+                return reference;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        void setNonNull(T t) {
+            if (t == null) {
+                throw new NullPointerException();
+            }
+
+            ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                reference = t;
+                notEmpty.signal();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        boolean isSetNonNull() {
+            ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                return reference != null;
+            } finally {
+                lock.unlock();
+            }
         }
     }
 
