@@ -120,20 +120,12 @@ public enum KnownApi implements API {
     BOX_COM("Box.com", "com.openexchange.oauth.boxcom", new String[] { "boxcom" }, BoxApi.class),
     /**
      * Microsoft Live Connect
-     * 
-     * @deprecated Use {@link #MICROSOFT_GRAPH} instead
      */
     MS_LIVE_CONNECT("MS Live", "Microsoft Live Connect", "com.openexchange.oauth.msliveconnect", new String[] { "msliveconnect" }, MsLiveConnectApi.class),
     /**
      * Copy.com
      */
     COPY_COM("Copy.com", "com.openexchange.oauth.copycom", new String[] { "copycom" }, CopyApi.class),
-    /**
-     * Microsoft Graph
-     * 
-     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/overview">Microsoft Graph</a>
-     */
-    MICROSOFT_GRAPH("Microsoft", "com.openexchange.oauth.microsoft.graph", new String[] { "microsoftgraph" }, Api.class);
     ;
 
     private final String serviceId;
@@ -153,7 +145,11 @@ public enum KnownApi implements API {
         serviceId = fullName;
         this.apiClass = apiClass;
         this.displayName = null;
-        this.aliases = (null == aliases || aliases.length == 0) ? Collections.emptyList() : ImmutableList.copyOf(aliases);
+        if (null == aliases || aliases.length == 0) {
+            this.aliases = Collections.emptyList();
+        } else {
+            this.aliases = ImmutableList.copyOf(aliases);
+        }
     }
 
     /**
@@ -168,7 +164,12 @@ public enum KnownApi implements API {
         name = shortName;
         serviceId = fullName;
         this.apiClass = apiClass;
-        this.aliases = (null == aliases || aliases.length == 0) ? Collections.emptyList() : ImmutableList.copyOf(aliases);
+
+        if (null == aliases || aliases.length == 0) {
+            this.aliases = Collections.emptyList();
+        } else {
+            this.aliases = ImmutableList.copyOf(aliases);
+        }
     }
 
     /**

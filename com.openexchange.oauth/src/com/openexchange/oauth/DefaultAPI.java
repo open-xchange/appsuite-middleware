@@ -49,9 +49,6 @@
 
 package com.openexchange.oauth;
 
-import java.util.Collection;
-import java.util.Collections;
-import com.google.common.collect.ImmutableList;
 
 /**
  * {@link DefaultAPI} - The default API implementation.
@@ -65,19 +62,16 @@ public class DefaultAPI implements API {
     private final String serviceId;
     private final String name;
     private final int hash;
-    private Collection<String> aliases;
 
     /**
      * Initializes a new {@link DefaultAPI}.
      *
      * @param serviceId The service identifier
      * @param name The API's name
-     * @param aliases The optional aliases of the provider
      */
-    public DefaultAPI(String serviceId, String name, String... aliases) {
-        this.serviceId = serviceId;
-        this.name = name;
-        this.aliases = (null == aliases || aliases.length == 0) ? Collections.emptyList() : ImmutableList.copyOf(aliases);
+    public DefaultAPI(String serviceId, String name){
+        this.serviceId=serviceId;
+        this.name=name;
         int prime = 31;
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -98,11 +92,6 @@ public class DefaultAPI implements API {
     @Override
     public int hashCode() {
         return hash;
-    }
-
-    @Override
-    public Collection<String> getAliases() {
-        return aliases;
     }
 
     @Override
