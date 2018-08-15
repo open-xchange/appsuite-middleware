@@ -57,8 +57,10 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
@@ -75,7 +77,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public abstract class AbstractOAuthActivator extends HousekeepingActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOAuthActivator.class);
-    private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class, OAuthScopeRegistry.class };
+    protected static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, ConfigViewFactory.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class, OAuthScopeRegistry.class, SSLConfigurationService.class };
 
     /**
      * Initialises a new {@link AbstractOAuthActivator}.

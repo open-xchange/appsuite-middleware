@@ -49,32 +49,19 @@
 
 package com.openexchange.oauth.twitter.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
-import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.scope.OAuthScopeRegistry;
-import com.openexchange.oauth.twitter.TwitterOAuthServiceMetaData;
+import com.openexchange.oauth.common.osgi.AbstractOAuthActivator;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.twitter.TwitterOAuthScope;
+import com.openexchange.oauth.twitter.TwitterOAuthServiceMetaData;
 import com.openexchange.oauth.twitter.TwitterOAuthServiceRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link TwitterOAuthActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterOAuthActivator extends HousekeepingActivator {
+public final class TwitterOAuthActivator extends AbstractOAuthActivator {
 
     /**
      * Initializes a new {@link TwitterOAuthActivator}.
@@ -84,61 +71,16 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CapabilityService.class, ConfigViewFactory.class, DeferringURLService.class, DispatcherPrefixService.class, OAuthScopeRegistry.class };
-    }
-
-    @Override
     protected void startBundle() throws Exception {
-        try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            TwitterOAuthServiceRegistry.setServiceLookup(this);
-            /*
-             * Register service
-             */
-            final TwitterOAuthServiceMetaData service = new TwitterOAuthServiceMetaData(this);
-            registerService(OAuthServiceMetaData.class, service);
-            registerService(Reloadable.class, service);
-
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "twitter");
-            registerService(CapabilityChecker.class, new CapabilityChecker() {
-
-                @Override
-                public boolean isEnabled(String capability, Session ses) throws OXException {
-                    if ("twitter".equals(capability)) {
-                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous() || session.getUser().isGuest()) {
-                            return false;
-                        }
-
-                        return service.isEnabled(session.getUserId(), session.getContextId());
-                    }
-
-                    return true;
-                }
-            }, properties);
-
-            getService(CapabilityService.class).declareCapability("twitter");
-
-            // Register the scope
-            OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
-            scopeRegistry.registerScopes(service.getAPI(), TwitterOAuthScope.values());
-        } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(TwitterOAuthActivator.class).error("", e);
-            throw e;
-        }
+        TwitterOAuthServiceRegistry.setServiceLookup(this);
+        super.startBundle();
     }
 
     @Override
     protected void stopBundle() throws Exception {
         try {
             super.stopBundle();
-            /*
-             * Clear service registry
-             */
+            //Clear service registry
             TwitterOAuthServiceRegistry.setServiceLookup(null);
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(TwitterOAuthActivator.class).error("", e);
@@ -146,4 +88,23 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getOAuthServiceMetaData()
+     */
+    @Override
+    protected OAuthServiceMetaData getOAuthServiceMetaData() {
+        return new TwitterOAuthServiceMetaData(this);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getScopes()
+     */
+    @Override
+    protected OAuthScope[] getScopes() {
+        return TwitterOAuthScope.values();
+    }
 }

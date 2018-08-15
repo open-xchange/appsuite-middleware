@@ -8,9 +8,11 @@ Automatic-Module-Name: com.openexchange.oauth.common
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.capabilities,
  com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.dispatcher,
  com.openexchange.groupware.ldap,
  com.openexchange.http.deferrer,
+ com.openexchange.net.ssl.config,
  com.openexchange.oauth,
  com.openexchange.oauth.scope,
  com.openexchange.osgi,

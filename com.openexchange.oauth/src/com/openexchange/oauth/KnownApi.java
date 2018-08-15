@@ -131,7 +131,8 @@ public enum KnownApi implements API {
      * 
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/overview">Microsoft Graph</a>
      */
-    MICROSOFT_GRAPH("Microsoft", "com.openexchange.oauth.microsoft.graph", "microsoftgraph", MicrosoftGraphApi.class);
+    //TODO switch to 'microsoftgraph' once the UI fixed their hard-coded values...
+    MICROSOFT_GRAPH("Microsoft", "com.openexchange.oauth.microsoft.graph", "msliveconnect", MicrosoftGraphApi.class);
     ;
 
     private final String serviceId;

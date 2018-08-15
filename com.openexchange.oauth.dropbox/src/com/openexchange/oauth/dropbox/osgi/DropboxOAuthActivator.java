@@ -49,77 +49,33 @@
 
 package com.openexchange.oauth.dropbox.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
-import com.openexchange.http.deferrer.DeferringURLService;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.common.osgi.AbstractOAuthActivator;
 import com.openexchange.oauth.dropbox.DropboxOAuthScope;
 import com.openexchange.oauth.dropbox.DropboxOAuthServiceMetaData;
-import com.openexchange.oauth.scope.OAuthScopeRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.oauth.scope.OAuthScope;
 
 /**
  * {@link DropboxOAuthActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxOAuthActivator extends HousekeepingActivator {
+public final class DropboxOAuthActivator extends AbstractOAuthActivator {
 
+    /**
+     * Initialises a new {@link DropboxOAuthActivator}.
+     */
     public DropboxOAuthActivator() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, OAuthScopeRegistry.class, DispatcherPrefixService.class, SSLConfigurationService.class };
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         DropboxOAuthServices.setServices(this);
-        final DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(this);
-
         track(DatabaseService.class, new DatabaseUpdateTaskServiceTracker(context));
         openTrackers();
-
-        registerService(OAuthServiceMetaData.class, service);
-        registerService(Reloadable.class, service);
-
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "dropbox");
-        registerService(CapabilityChecker.class, new CapabilityChecker() {
-
-            @Override
-            public boolean isEnabled(String capability, Session ses) throws OXException {
-                if ("dropbox".equals(capability)) {
-                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                    if (session.isAnonymous() || session.getUser().isGuest()) {
-                        return false;
-                    }
-
-                    return service.isEnabled(session.getUserId(), session.getContextId());
-                }
-
-                return true;
-            }
-        }, properties);
-
-        getService(CapabilityService.class).declareCapability("dropbox");
-
-        // Register the scope
-        OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
-        scopeRegistry.registerScope(service.getAPI(), DropboxOAuthScope.drive);
+        super.startBundle();
     }
 
     @Override
@@ -127,7 +83,6 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
         try {
             // Clear service registry
             DropboxOAuthServices.setServices(null);
-
             super.stopBundle();
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(DropboxOAuthActivator.class).error("", e);
@@ -135,4 +90,23 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getOAuthServiceMetaData()
+     */
+    @Override
+    protected OAuthServiceMetaData getOAuthServiceMetaData() {
+        return new DropboxOAuthServiceMetaData(this);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getScopes()
+     */
+    @Override
+    protected OAuthScope[] getScopes() {
+        return DropboxOAuthScope.values();
+    }
 }

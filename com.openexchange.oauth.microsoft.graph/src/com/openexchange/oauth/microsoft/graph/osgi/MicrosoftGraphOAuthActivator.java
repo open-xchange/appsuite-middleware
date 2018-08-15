@@ -49,34 +49,29 @@
 
 package com.openexchange.oauth.microsoft.graph.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.common.osgi.AbstractOAuthActivator;
 import com.openexchange.oauth.microsoft.graph.MicrosoftGraphOAuthScope;
 import com.openexchange.oauth.microsoft.graph.MicrosoftGraphOAuthServiceMetaData;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link MicrosoftGraphOAuthActivator} - The activator for MS Live Connect OAuth service.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link MicrosoftGraphOAuthActivator} - The activator for the Microsoft Graph OAuth service.
+ * 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class MicrosoftGraphOAuthActivator extends HousekeepingActivator {
+public final class MicrosoftGraphOAuthActivator extends AbstractOAuthActivator {
 
-    private static final String CAPABILITY_NAME = "msliveconnect"; //TODO switch to 'microsoftgraph' once the UI fixed their hard-coded values...
-
+    /**
+     * Initialises a new {@link MicrosoftGraphOAuthActivator}.
+     */
     public MicrosoftGraphOAuthActivator() {
         super();
     }
@@ -86,47 +81,23 @@ public final class MicrosoftGraphOAuthActivator extends HousekeepingActivator {
         return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class, DatabaseService.class, OAuthScopeRegistry.class };
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getOAuthServiceMetaData()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MicrosoftGraphOAuthActivator.class);
-        try {
-            MicrosoftGraphOAuthServiceMetaData metadata = new MicrosoftGraphOAuthServiceMetaData(this);
-            registerService(OAuthServiceMetaData.class, metadata);
-            registerService(Reloadable.class, metadata);
+    protected OAuthServiceMetaData getOAuthServiceMetaData() {
+        return new MicrosoftGraphOAuthServiceMetaData(this);
+    }
 
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, CAPABILITY_NAME);
-            registerService(CapabilityChecker.class, new CapabilityChecker() {
-
-                @Override
-                public boolean isEnabled(String capability, Session ses) throws OXException {
-                    if (CAPABILITY_NAME.equals(capability)) {
-                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous() || session.getUser().isGuest()) {
-                            return false;
-                        }
-
-                        return metadata.isEnabled(session.getUserId(), session.getContextId());
-                    }
-
-                    return true;
-                }
-            }, properties);
-
-            getService(CapabilityService.class).declareCapability(CAPABILITY_NAME);
-
-            // Register the update task
-            //DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new MigrateMSLiveAccountsTask());
-            //registerService(UpdateTaskProviderService.class.getName(), providerService);
-
-            // Register the scope
-            OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
-            scopeRegistry.registerScopes(metadata.getAPI(), MicrosoftGraphOAuthScope.values());
-
-            log.info("Successfully initialized Microsoft Graph OAuth service");
-        } catch (final Exception e) {
-            log.warn("Could not start-up Microsoft Graph OAuth service", e);
-            throw e;
-        }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getScopes()
+     */
+    @Override
+    protected OAuthScope[] getScopes() {
+        return MicrosoftGraphOAuthScope.values();
     }
 }

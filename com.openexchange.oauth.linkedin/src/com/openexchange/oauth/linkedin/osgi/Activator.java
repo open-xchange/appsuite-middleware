@@ -49,33 +49,26 @@
 
 package com.openexchange.oauth.linkedin.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.common.osgi.AbstractOAuthActivator;
 import com.openexchange.oauth.linkedin.LinkedInOAuthScope;
+import com.openexchange.oauth.linkedin.LinkedInOAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
-import com.openexchange.oauth.linkedin.LinkedInOAuthServiceMetaData;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Activator for LinkedIn OAuth bundle.
  */
-public class Activator extends HousekeepingActivator {
+public class Activator extends AbstractOAuthActivator {
 
     private LinkedInServiceImpl linkedInService;
 
@@ -99,40 +92,11 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected synchronized void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
-
-        final LinkedInOAuthServiceMetaData linkedInMetaDataService = new LinkedInOAuthServiceMetaData(this);
-        registerService(OAuthServiceMetaData.class, linkedInMetaDataService, null);
-        registerService(Reloadable.class, linkedInMetaDataService);
-        logger.info("OAuthServiceMetaData for LinkedIn was started");
-
-        final LinkedInServiceImpl linkedInService = new LinkedInServiceImpl(this);
+        LinkedInServiceImpl linkedInService = new LinkedInServiceImpl(this);
         this.linkedInService = linkedInService;
         registerService(LinkedInService.class, linkedInService, null);
         logger.info("LinkedInService was started.");
-
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "linkedin");
-        registerService(CapabilityChecker.class, new CapabilityChecker() {
-
-            @Override
-            public boolean isEnabled(String capability, Session ses) throws OXException {
-                if ("linkedin".equals(capability)) {
-                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                    if (session.isAnonymous() || session.getUser().isGuest()) {
-                        return false;
-                    }
-
-                    return linkedInMetaDataService.isEnabled(session.getUserId(), session.getContextId());
-                }
-
-                return true;
-            }
-        }, properties);
-        getService(CapabilityService.class).declareCapability("linkedin");
-
-        // Register the scope
-        OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
-        scopeRegistry.registerScope(linkedInMetaDataService.getAPI(), LinkedInOAuthScope.contacts_ro);
+        super.startBundle();
     }
 
     @Override
@@ -144,6 +108,26 @@ public class Activator extends HousekeepingActivator {
         }
 
         super.stopBundle();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getOAuthServiceMetaData()
+     */
+    @Override
+    protected OAuthServiceMetaData getOAuthServiceMetaData() {
+        return new LinkedInOAuthServiceMetaData(this);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getScopes()
+     */
+    @Override
+    protected OAuthScope[] getScopes() {
+        return LinkedInOAuthScope.values();
     }
 
 }
