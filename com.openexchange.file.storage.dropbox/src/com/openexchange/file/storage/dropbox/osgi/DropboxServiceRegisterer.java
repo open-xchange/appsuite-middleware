@@ -80,8 +80,8 @@ public final class DropboxServiceRegisterer extends AbstractCloudStorageServiceR
      * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup)
      */
     @Override
-    protected AbstractOAuthFileStorageService getCloudFileStorageService(ServiceLookup serviceLookup) {
-        return new DropboxFileStorageService(serviceLookup);
+    protected AbstractOAuthFileStorageService getCloudFileStorageService() {
+        return new DropboxFileStorageService(getServiceLookup());
     }
 
     /*
@@ -90,8 +90,8 @@ public final class DropboxServiceRegisterer extends AbstractCloudStorageServiceR
      * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup, com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider)
      */
     @Override
-    protected AbstractOAuthFileStorageService getCloudFileStorageService(ServiceLookup serviceLookup, CompositeFileStorageAccountManagerProvider compositeProvider) {
-        return new DropboxFileStorageService(serviceLookup, compositeProvider);
+    protected AbstractOAuthFileStorageService getCloudFileStorageService(CompositeFileStorageAccountManagerProvider compositeProvider) {
+        return new DropboxFileStorageService(getServiceLookup(), compositeProvider);
     }
 
     /*

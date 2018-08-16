@@ -80,8 +80,8 @@ public final class BoxServiceRegisterer extends AbstractCloudStorageServiceRegis
      * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup)
      */
     @Override
-    protected AbstractOAuthFileStorageService getCloudFileStorageService(ServiceLookup serviceLookup) {
-        return new BoxFileStorageService(serviceLookup);
+    protected AbstractOAuthFileStorageService getCloudFileStorageService() {
+        return new BoxFileStorageService(getServiceLookup());
     }
 
     /*
@@ -90,8 +90,8 @@ public final class BoxServiceRegisterer extends AbstractCloudStorageServiceRegis
      * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup, com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider)
      */
     @Override
-    protected AbstractOAuthFileStorageService getCloudFileStorageService(ServiceLookup serviceLookup, CompositeFileStorageAccountManagerProvider compositeProvider) {
-        return new BoxFileStorageService(serviceLookup, compositeProvider);
+    protected AbstractOAuthFileStorageService getCloudFileStorageService(CompositeFileStorageAccountManagerProvider compositeProvider) {
+        return new BoxFileStorageService(getServiceLookup(), compositeProvider);
     }
 
     /*

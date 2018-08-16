@@ -98,19 +98,19 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
      */
     @Override
     public FileStorageAccountManagerProvider addingService(ServiceReference<FileStorageAccountManagerProvider> reference) {
-        FileStorageAccountManagerProvider provider = context.getService(reference);
+        FileStorageAccountManagerProvider provider = getContext().getService(reference);
         if (false == provider.supports(getProviderId())) {
-            context.ungetService(reference);
+            getContext().ungetService(reference);
             return null;
         }
         synchronized (this) {
             AbstractOAuthFileStorageService service = this.service;
             if (null == service) {
                 // Try to create the service
-                service = getCloudFileStorageService(serviceLookup);
-                this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
-                this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
-                this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, getOAuthAccountAssociationProvider(service), null);
+                service = getCloudFileStorageService();
+                this.serviceRegistration = getContext().registerService(FileStorageService.class, service, null);
+                this.listenerRegistration = getContext().registerService(OAuthAccountDeleteListener.class, service, null);
+                this.associationProviderRegistration = getContext().registerService(OAuthAccountAssociationProvider.class, getOAuthAccountAssociationProvider(service), null);
                 this.service = service;
                 this.provider = provider;
             } else {
@@ -120,10 +120,10 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
                     compositeProvider = new CompositeFileStorageAccountManagerProvider();
                     compositeProvider.addProvider(this.provider);
                     unregisterService(null);
-                    service = getCloudFileStorageService(serviceLookup, compositeProvider);
-                    this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
-                    this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
-                    this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, getOAuthAccountAssociationProvider(service), null);
+                    service = getCloudFileStorageService(compositeProvider);
+                    this.serviceRegistration = getContext().registerService(FileStorageService.class, service, null);
+                    this.listenerRegistration = getContext().registerService(OAuthAccountDeleteListener.class, service, null);
+                    this.associationProviderRegistration = getContext().registerService(OAuthAccountAssociationProvider.class, getOAuthAccountAssociationProvider(service), null);
                     this.service = service;
                     this.provider = compositeProvider;
                 }
@@ -140,15 +140,14 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
      * 
      * @return the cloud file storage service
      */
-    protected abstract AbstractOAuthFileStorageService getCloudFileStorageService(ServiceLookup serviceLookup);
+    protected abstract AbstractOAuthFileStorageService getCloudFileStorageService();
 
     /**
      * 
-     * @param serviceLookup
      * @param compositeProvider
      * @return
      */
-    protected abstract AbstractOAuthFileStorageService getCloudFileStorageService(ServiceLookup serviceLookup, CompositeFileStorageAccountManagerProvider compositeProvider);
+    protected abstract AbstractOAuthFileStorageService getCloudFileStorageService(CompositeFileStorageAccountManagerProvider compositeProvider);
 
     /**
      * 
@@ -223,9 +222,27 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
 
         ServiceReference<FileStorageAccountManagerProvider> ref = reference;
         if (null != ref) {
-            context.ungetService(ref);
+            getContext().ungetService(ref);
         }
         LOG.info("Cloud storage service for '{}' unregistered successfully", getProviderId());
         this.service = null;
+    }
+
+    /**
+     * Gets the context
+     *
+     * @return The context
+     */
+    public BundleContext getContext() {
+        return context;
+    }
+
+    /**
+     * Gets the serviceLookup
+     *
+     * @return The serviceLookup
+     */
+    public ServiceLookup getServiceLookup() {
+        return serviceLookup;
     }
 }
