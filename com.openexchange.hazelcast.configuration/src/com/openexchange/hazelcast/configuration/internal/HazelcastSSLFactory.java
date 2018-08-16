@@ -122,7 +122,7 @@ class HazelcastSSLFactory implements SSLContextFactory {
         }
 
         SSLContext context = this.sslContext.get();
-        String protocols = properties.getProperty(SSL_PROTOCOLS, "TLS,TLSv1,TLSv1.1,TLSv1.3");
+        String protocols = properties.getProperty(SSL_PROTOCOLS, "TLS,TLSv1,TLSv1.1,TLSv1.2,TLSv1.3");
         if (Strings.isEmpty(protocols)) {
             throw new IllegalArgumentException("\"com.openexchange.hazelcast.ssl.protocols\" must not be empty!");
         }
