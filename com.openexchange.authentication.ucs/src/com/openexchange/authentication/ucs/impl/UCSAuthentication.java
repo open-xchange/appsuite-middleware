@@ -109,6 +109,28 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
     private static final String LOGINATTR_OPTION = "com.openexchange.authentication.ucs.loginAttribute";
     private static final String LDAPPOOL_OPTION = "com.openexchange.authentication.ucs.useLdapPool";
 
+    private final class AuthenticatedImpl implements Authenticated {
+
+        private final String login;
+        private final String contextIdOrName;
+
+        AuthenticatedImpl(String login, String contextIdOrName) {
+            super();
+            this.login = login;
+            this.contextIdOrName = contextIdOrName;
+        }
+
+        @Override
+        public String getContextInfo() {
+            return contextIdOrName;
+        }
+
+        @Override
+        public String getUserInfo() {
+            return login;
+        }
+    } // End of class AuthenticatedImpl
+
     private static class Config {
 
         private static class Builder {
@@ -208,7 +230,7 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
             this.mailAttr = mailAttr;
             this.loginAttr = loginAttr;
         }
-    }
+    } // End of class Config
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -394,18 +416,7 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
             LOG.debug("Returning context={}, user={} to OX API!", contextIdOrName, login);
 
             // return username AND context-name to the OX API
-            return new Authenticated() {
-
-                @Override
-                public String getContextInfo() {
-                    return contextIdOrName;
-                }
-
-                @Override
-                public String getUserInfo() {
-                    return login;
-                }
-            };
+            return new AuthenticatedImpl(login, contextIdOrName);
         } catch (final InvalidNameException e) {
             LOG.error("Invalid name error", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
@@ -430,106 +441,143 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
     }
 
     /**
-     * Escape string to be used as ldap filter
+     * Escape string to be used as LDAP filter expression.
      *
-     * @param input
-     * @return
+     * @param input The input to escape
+     * @return The escaped input ready for being used as LDAP filter expression
      */
     private static final String escapeString(String input) {
-        StringBuffer sb = new StringBuffer();
+        StringBuffer sb = null;
         for (int i = 0; i < input.length(); i++) {
             char cur = input.charAt(i);
             switch (cur) {
             case '\\':
+                if (null == sb) {
+                    sb = initStringBuilder(input, i);
+                }
                 sb.append("\\5c");
                 break;
             case '*':
+                if (null == sb) {
+                    sb = initStringBuilder(input, i);
+                }
                 sb.append("\\2a");
                 break;
             case '(':
+                if (null == sb) {
+                    sb = initStringBuilder(input, i);
+                }
                 sb.append("\\28");
                 break;
             case ')':
+                if (null == sb) {
+                    sb = initStringBuilder(input, i);
+                }
                 sb.append("\\29");
                 break;
             case '\u0000':
+                if (null == sb) {
+                    sb = initStringBuilder(input, i);
+                }
                 sb.append("\\00");
                 break;
             default:
-                sb.append(cur);
+                if (null != sb) {
+                    sb.append(cur);
+                }
             }
         }
-        return sb.toString();
+        return null == sb ? input : sb.toString();
+    }
+
+    private static StringBuffer initStringBuilder(String input, int currentPos) {
+        StringBuffer sb = new StringBuffer(input.length() + 10);
+        if (currentPos > 0) {
+            sb.append(input, 0, currentPos);
+        }
+        return sb;
     }
 
     private Config parseConfigFrom(Properties props) throws OXException {
         Config.Builder config = new Config.Builder();
 
         String ldapUrl = props.getProperty(LDAPURL_OPTION);
-        if( null == ldapUrl || ldapUrl.length() == 0) {
+        if (null == ldapUrl || ldapUrl.length() == 0) {
             OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LDAPURL_OPTION);
             LOG.error("", e);
             throw e;
         }
         config.withLdapUrl(ldapUrl);
 
-        String baseDn = props.getProperty(LDAPBASE_OPTION);
-        if( null == baseDn || baseDn.length() == 0) {
-            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LDAPBASE_OPTION);
-            LOG.error("", e);
-            throw e;
-        }
-        config.withBaseDn(baseDn);
-
-        String searchFilter = props.getProperty(SEARCHFILTER_OPTION);
-        if( null == searchFilter || searchFilter.length() == 0) {
-            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + SEARCHFILTER_OPTION);
-            LOG.error("", e);
-            throw e;
-        }
-        config.withSearchFilter(searchFilter);
-
-        String mailAttr = props.getProperty(MAILATTR_OPTION);
-        if( null == mailAttr || mailAttr.length() == 0) {
-            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + MAILATTR_OPTION);
-            LOG.error("", e);
-            throw e;
-        }
-        config.withMailAttr(mailAttr);
-
-        String loginAttr = props.getProperty(LOGINATTR_OPTION);
-        if( null == loginAttr || loginAttr.length() == 0) {
-            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LOGINATTR_OPTION);
-            LOG.error("", e);
-            throw e;
-        }
-        config.withLoginAttr(loginAttr);
-
-        String sURL = (String) props.get(PASSWORD_CHANGE_URL_OPTION);
-        if( null == sURL || sURL.length() == 0) {
-            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + PASSWORD_CHANGE_URL_OPTION);
-            LOG.error("", e);
-            throw e;
-        }
-        try {
-            config.withPasswordChangeURL(new URL(sURL));
-        } catch (MalformedURLException e) {
-            throw LoginExceptionCodes.UNKNOWN.create("Invalid option " + PASSWORD_CHANGE_URL_OPTION + ": " + sURL);
+        {
+            String baseDn = props.getProperty(LDAPBASE_OPTION);
+            if (null == baseDn || baseDn.length() == 0) {
+                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LDAPBASE_OPTION);
+                LOG.error("", e);
+                throw e;
+            }
+            config.withBaseDn(baseDn);
         }
 
-        Hashtable<String, String> ldapConfigDefaults = new Hashtable<String, String>();
-        String usepool = (String) props.get(LDAPPOOL_OPTION);
-        if ( null != usepool && usepool.trim().equalsIgnoreCase("true")) {
-            ldapConfigDefaults.put("com.sun.jndi.ldap.connect.pool", "true");
+        {
+            String searchFilter = props.getProperty(SEARCHFILTER_OPTION);
+            if (null == searchFilter || searchFilter.length() == 0) {
+                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + SEARCHFILTER_OPTION);
+                LOG.error("", e);
+                throw e;
+            }
+            config.withSearchFilter(searchFilter);
         }
 
-        ldapConfigDefaults.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-
-        ldapConfigDefaults.put(Context.PROVIDER_URL, ldapUrl);
-        if (ldapUrl.startsWith("ldaps")) {
-            ldapConfigDefaults.put("java.naming.ldap.factory.socket", TrustAllSSLSocketFactory.class.getName());
+        {
+            String mailAttr = props.getProperty(MAILATTR_OPTION);
+            if (null == mailAttr || mailAttr.length() == 0) {
+                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + MAILATTR_OPTION);
+                LOG.error("", e);
+                throw e;
+            }
+            config.withMailAttr(mailAttr);
         }
-        config.withLdapConfigDefaults(ldapConfigDefaults);
+
+        {
+            String loginAttr = props.getProperty(LOGINATTR_OPTION);
+            if (null == loginAttr || loginAttr.length() == 0) {
+                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LOGINATTR_OPTION);
+                LOG.error("", e);
+                throw e;
+            }
+            config.withLoginAttr(loginAttr);
+        }
+
+        {
+            String sURL = (String) props.get(PASSWORD_CHANGE_URL_OPTION);
+            if (null == sURL || sURL.length() == 0) {
+                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + PASSWORD_CHANGE_URL_OPTION);
+                LOG.error("", e);
+                throw e;
+            }
+            try {
+                config.withPasswordChangeURL(new URL(sURL));
+            } catch (MalformedURLException e) {
+                throw LoginExceptionCodes.UNKNOWN.create(e, "Invalid option " + PASSWORD_CHANGE_URL_OPTION + ": " + sURL);
+            }
+        }
+
+        {
+            Hashtable<String, String> ldapConfigDefaults = new Hashtable<String, String>(6);
+            String usepool = (String) props.get(LDAPPOOL_OPTION);
+            if (null != usepool && usepool.trim().equalsIgnoreCase("true")) {
+                ldapConfigDefaults.put("com.sun.jndi.ldap.connect.pool", "true");
+            }
+
+            ldapConfigDefaults.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+
+            ldapConfigDefaults.put(Context.PROVIDER_URL, ldapUrl);
+            if (ldapUrl.startsWith("ldaps")) {
+                ldapConfigDefaults.put("java.naming.ldap.factory.socket", TrustAllSSLSocketFactory.class.getName());
+            }
+            config.withLdapConfigDefaults(ldapConfigDefaults);
+        }
 
         config.withBinddn(props.getProperty(BINDDN_OPTION));
         config.withBindpw(props.getProperty(BINDPW_OPTION));
