@@ -53,6 +53,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
@@ -68,6 +70,8 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.10.1
  */
 public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractCloudStorageServiceRegisterer.class);
 
     private final BundleContext context;
     private final ServiceLookup serviceLookup;
@@ -127,6 +131,7 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
             }
 
         }
+        LOG.info("Cloud storage service for '{}' registered successfully", getProviderId());
         return provider;
     }
 
@@ -220,7 +225,7 @@ public abstract class AbstractCloudStorageServiceRegisterer implements ServiceTr
         if (null != ref) {
             context.ungetService(ref);
         }
-
+        LOG.info("Cloud storage service for '{}' unregistered successfully", getProviderId());
         this.service = null;
     }
 }
