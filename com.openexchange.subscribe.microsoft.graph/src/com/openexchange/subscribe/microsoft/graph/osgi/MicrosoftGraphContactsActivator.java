@@ -52,9 +52,12 @@ package com.openexchange.subscribe.microsoft.graph.osgi;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.context.ContextService;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.subscribe.microsoft.graph.groupware.MigrateMSLiveSubscriptionsTask;
 
 /**
  * {@link MicrosoftGraphContactsActivator}
@@ -77,6 +80,8 @@ public class MicrosoftGraphContactsActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
         openTrackers();
+        // Register the update task
+        DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new MigrateMSLiveSubscriptionsTask());
+        registerService(UpdateTaskProviderService.class.getName(), providerService);
     }
-
 }

@@ -102,7 +102,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
         }
 
         Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
-        logger.info("Registering MS Live subscription services.");
+        logger.info("Registering Microsoft Graph subscription services.");
         MicrosoftContactsSubscribeService msliveSubService = new MicrosoftContactsSubscribeService(oAuthServiceMetaData, services);
         contactsRegistration = context.registerService(SubscribeService.class, msliveSubService, null);
 
@@ -129,7 +129,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
     public void removedService(ServiceReference<OAuthServiceMetaData> ref, OAuthServiceMetaData service) {
         if (service.getId().equals(oauthIdentifier)) {
             Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
-            logger.info("Unregistering MS Live subscription services.");
+            logger.info("Unregistering Microsoft Graph subscription services.");
 
             {
                 ServiceRegistration<SubscribeService> registration = this.contactsRegistration;

@@ -68,6 +68,7 @@ public class MicrosoftGraphOAuthServiceMetaData extends AbstractExtendedScribeAw
 
     private static final String IDENTITY_URL = "https://graph.microsoft.com/v1.0/me";
     private static final String IDENTITY_FIELD_NAME = "id";
+    private static final String PROPERTY_IDENTIFIER = "microsoft.graph";
 
     /**
      * Initialises a new {@link MicrosoftGraphOAuthServiceMetaData}.
@@ -125,7 +126,7 @@ public class MicrosoftGraphOAuthServiceMetaData extends AbstractExtendedScribeAw
      */
     @Override
     protected String getPropertyId() {
-        return "msliveconnect"; //TODO switch to 'microsoftgraph' once the UI fixed their hard-coded values...
+        return PROPERTY_IDENTIFIER;
     }
 
     /*
