@@ -197,7 +197,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
         for (int i = off; null == decrypted && i >= 0; i--) {
             SecretService current = tokenList.get(i);
             secret = current.getSecret(session);
-            if (!Strings.isEmpty(secret)) {
+            if (Strings.isNotEmpty(secret)) {
                 try {
                     decrypted = crypto.decrypt(toDecrypt, secret);
                 } catch (final OXException x) {

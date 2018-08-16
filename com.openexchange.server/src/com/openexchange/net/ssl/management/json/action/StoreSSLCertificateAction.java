@@ -83,7 +83,7 @@ public class StoreSSLCertificateAction extends AbstractSSLCertificateManagementA
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Try storing from cache
         String fingerprint = requestData.getParameter("fingerprint", String.class, true);
-        if (!Strings.isEmpty(fingerprint)) {
+        if (Strings.isNotEmpty(fingerprint)) {
             String hostname = requestData.getParameter("hostname", String.class, false);
             Boolean trust = requestData.getParameter("trust", Boolean.class, false);
 

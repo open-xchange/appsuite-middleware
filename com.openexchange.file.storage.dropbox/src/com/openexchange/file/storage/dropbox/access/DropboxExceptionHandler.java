@@ -448,7 +448,7 @@ final class DropboxExceptionHandler {
      */
     private static final String toPath(String folderId, String fileId) {
         String path = folderId;
-        if (!Strings.isEmpty(fileId)) {
+        if (Strings.isNotEmpty(fileId)) {
             path = new StringBuilder(path).append('/').append(fileId).toString();
         }
         return path;

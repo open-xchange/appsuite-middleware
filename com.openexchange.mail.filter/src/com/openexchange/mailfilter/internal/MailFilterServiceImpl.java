@@ -795,7 +795,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             Iterator<Rule> ruleIter = rules.getRulelist().iterator();
             while (ruleIter.hasNext()) {
                 Rule rule = ruleIter.next();
-                if (!Strings.isEmpty(rule.getErrormsg())) {
+                if (Strings.isNotEmpty(rule.getErrormsg())) {
                     ruleIter.remove();
                 }
             }

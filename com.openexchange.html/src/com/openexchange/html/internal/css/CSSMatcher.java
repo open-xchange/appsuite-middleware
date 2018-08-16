@@ -818,7 +818,7 @@ public final class CSSMatcher {
                 }
                 modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                 
-                if (!Strings.isEmpty(match)) {
+                if (Strings.isNotEmpty(match)) {
                     cssElemsBuffer.insert(0, match).append('}').append('\n');
                     // Add to main builder
                     cssBuilder.append(prefix);

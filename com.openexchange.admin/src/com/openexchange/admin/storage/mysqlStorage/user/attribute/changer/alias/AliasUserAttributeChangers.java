@@ -92,7 +92,7 @@ public class AliasUserAttributeChangers extends AbstractAttributeChangers {
 
             Set<String> aliasesToSet = new LinkedHashSet<>(aliases.size());
             for (String alias : aliases) {
-                if (false == Strings.isEmpty(alias)) {
+                if (Strings.isNotEmpty(alias)) {
                     alias = alias.trim();
                     aliasesToSet.add(alias);
                 }

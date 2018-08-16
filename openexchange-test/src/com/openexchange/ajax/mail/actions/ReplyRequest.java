@@ -176,7 +176,7 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
             list.add(new Parameter(Mail.PARAMETER_VIEW, getView().toString()));
         }
 
-        if (!Strings.isEmpty(csid)) {
+        if (Strings.isNotEmpty(csid)) {
             list.add(new Parameter(Mail.PARAMETER_CSID, csid));
         }
 

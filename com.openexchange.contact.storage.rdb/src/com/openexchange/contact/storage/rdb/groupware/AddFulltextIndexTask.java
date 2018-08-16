@@ -126,27 +126,27 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
                  */
                 {
                     String tmp = getConfigOption("innodb_ft_min_token_size", connection);
-                    if (!Strings.isEmpty(tmp)) {
+                    if (Strings.isNotEmpty(tmp)) {
                         updates.add(tmp);
                     }
                     tmp = getConfigOption("innodb_ft_max_token_size", connection);
-                    if (!Strings.isEmpty(tmp)) {
+                    if (Strings.isNotEmpty(tmp)) {
                         updates.add(tmp);
                     }
                     tmp = getConfigOption("innodb_ft_server_stopword_table", connection);
-                    if (!Strings.isEmpty(tmp)) {
+                    if (Strings.isNotEmpty(tmp)) {
                         updates.add(tmp);
                     }
                     tmp = getConfigOption("innodb_ft_user_stopword_table", connection);
-                    if (!Strings.isEmpty(tmp)) {
+                    if (Strings.isNotEmpty(tmp)) {
                         updates.add(tmp);
                     }
                     tmp = getConfigOption("innodb_ft_enable_stopword", connection);
-                    if (!Strings.isEmpty(tmp)) {
+                    if (Strings.isNotEmpty(tmp)) {
                         updates.add(tmp);
                     }
                     tmp = getConfigOption("ngram_token_size", connection);
-                    if (!Strings.isEmpty(tmp)) {
+                    if (Strings.isNotEmpty(tmp)) {
                         updates.add(tmp);
                     }
                 }

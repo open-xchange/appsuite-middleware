@@ -51,7 +51,6 @@ package com.openexchange.saml.oauth.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.lock.LockService;
 import com.openexchange.mail.api.AuthenticationFailedHandler;
@@ -105,10 +104,6 @@ public class Activator extends HousekeepingActivator {
                 SAMLOAuthConfig.invalidateCache();
             }
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
         });
 
         registerService(OAuthAccessTokenService.class, tokenService);

@@ -591,7 +591,7 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         properties.put(DataProperties.PROPERTY_CHARSET, charsetName);
         {
             String fileName = jAttachment.optString(ATTACHMENT_FILE_NAME, null);
-            if (!Strings.isEmpty(fileName)) {
+            if (Strings.isNotEmpty(fileName)) {
                 properties.put(DataProperties.PROPERTY_NAME, fileName);
             }
         }

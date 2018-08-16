@@ -252,7 +252,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                 while (searchIterator.hasNext()) {
                     File file = searchIterator.next();
                     String md5 = file.getFileMD5Sum();
-                    if (false == Strings.isEmpty(md5)) {
+                    if (Strings.isNotEmpty(md5)) {
                         FileChecksum fileChecksum = new FileChecksum(
                             DriveUtils.getFileID(file), file.getVersion(), file.getSequenceNumber(), md5);
                         checksumsToInsert.add(fileChecksum);

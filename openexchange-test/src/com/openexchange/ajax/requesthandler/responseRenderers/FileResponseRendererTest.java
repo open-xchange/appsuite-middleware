@@ -207,7 +207,7 @@ public class FileResponseRendererTest {
             assertTrue("HTTP header \"cache-control\" is missing", resp.containsHeader("cache-control"));
 
             String sCacheControl = resp.getHeaders().get("cache-control");
-            assertTrue("HTTP header \"cache-control\" is missing", !Strings.isEmpty(sCacheControl));
+            assertTrue("HTTP header \"cache-control\" is missing", Strings.isNotEmpty(sCacheControl));
 
             assertTrue("Invalid HTTP header \"cache-control\"", sCacheControl.indexOf("max-age=3600") > 0);
         } catch (final Exception e) {

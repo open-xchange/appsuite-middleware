@@ -164,7 +164,7 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
 
     public int getUserId() {
         String id = parameters.get("user_id");
-        if (false == Strings.isEmpty(id)) {
+        if (Strings.isNotEmpty(id)) {
             return Integer.valueOf(id);
         }
         return 0;

@@ -401,7 +401,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
     private void applyEnableTls(Properties imapprops, ConfigurationService configuration) {
         String sEnableTls = configuration.getProperty("com.openexchange.imap.primary.enableTls", "").trim();
-        if (false == Strings.isEmpty(sEnableTls)) {
+        if (Strings.isNotEmpty(sEnableTls)) {
             imapprops.put("mail.imap.starttls.enable", Boolean.parseBoolean(sEnableTls) ? "true" : "false");
         }
 
@@ -413,7 +413,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
     private void applySslProtocols(Properties imapprops, ConfigurationService configuration) {
         String sslProtocols = configuration.getProperty("com.openexchange.imap.primary.ssl.protocols", "").trim();
-        if (false == Strings.isEmpty(sslProtocols)) {
+        if (Strings.isNotEmpty(sslProtocols)) {
             imapprops.put("mail.imap.ssl.protocols", sslProtocols);
         }
 
@@ -423,12 +423,12 @@ public class IMAPAuthentication implements AuthenticationService {
 
     private void applySslCipherSuites(Properties imapprops, ConfigurationService configuration) {
         String cipherSuites = configuration.getProperty("com.openexchange.imap.primary.ssl.ciphersuites", "").trim();
-        if (false == Strings.isEmpty(cipherSuites)) {
+        if (Strings.isNotEmpty(cipherSuites)) {
             imapprops.put("mail.imap.ssl.ciphersuites", cipherSuites);
         }
 
         cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
-        if (false == Strings.isEmpty(cipherSuites)) {
+        if (Strings.isNotEmpty(cipherSuites)) {
             imapprops.put("mail.imap.ssl.ciphersuites", cipherSuites);
         }
     }

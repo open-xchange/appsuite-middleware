@@ -104,7 +104,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
      */
     @Override
@@ -135,7 +135,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#addOptions(org.apache.commons.cli.Options)
      */
     @Override
@@ -149,7 +149,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override
@@ -209,7 +209,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getFooter()
      */
     @Override
@@ -219,7 +219,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getName()
      */
     @Override
@@ -229,7 +229,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getContext()
      */
     @Override
@@ -245,7 +245,7 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
             boolean updated = false;
             StringBuilder builder = new StringBuilder(96);
             for (String line; (line = br.readLine()) != null;) {
-                if (!line.startsWith("#") && !Strings.isEmpty(line)) {
+                if (!line.startsWith("#") && Strings.isNotEmpty(line)) {
                     lines.add(builder.append(context.get(Parameter.adminuser)).append(":").append(context.get(Parameter.encryption)).append(":").append(context.get(Parameter.adminpass)).toString());
                     updated = true;
                 } else {

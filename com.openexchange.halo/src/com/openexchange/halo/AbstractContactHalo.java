@@ -89,19 +89,19 @@ public abstract class AbstractContactHalo implements HaloContactDataSource {
         final Set<String> addresses = new LinkedHashSet<String>(8);
         if (contact.containsEmail1()) {
             String s = contact.getEmail1();
-            if (false == Strings.isEmpty(s)) {
+            if (Strings.isNotEmpty(s)) {
                 addresses.add(s);
             }
         }
         if (contact.containsEmail2()) {
             String s = contact.getEmail2();
-            if (false == Strings.isEmpty(s)) {
+            if (Strings.isNotEmpty(s)) {
                 addresses.add(s);
             }
         }
         if (contact.containsEmail3()) {
             String s = contact.getEmail3();
-            if (false == Strings.isEmpty(s)) {
+            if (Strings.isNotEmpty(s)) {
                 addresses.add(s);
             }
         }

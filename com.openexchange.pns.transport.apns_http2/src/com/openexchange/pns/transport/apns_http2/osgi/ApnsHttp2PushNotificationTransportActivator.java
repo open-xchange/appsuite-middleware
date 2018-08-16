@@ -138,10 +138,6 @@ public class ApnsHttp2PushNotificationTransportActivator extends HousekeepingAct
                 ApnsHttp2PushNotificationTransport.invalidateEnabledCache();
             }
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
         });
 
         registerService(Reloadable.class, this);

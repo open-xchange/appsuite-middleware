@@ -195,7 +195,7 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
 
         //add field facets
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+        if (Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
             /*
              * add prefix-aware field facets
              */

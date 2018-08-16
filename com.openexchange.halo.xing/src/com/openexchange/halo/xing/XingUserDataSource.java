@@ -270,7 +270,7 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
     }
 
     private static void addMailAddress(String address, List<String> mailAddresses) {
-        if (!Strings.isEmpty(address)) {
+        if (Strings.isNotEmpty(address)) {
             mailAddresses.add(address);
         }
     }

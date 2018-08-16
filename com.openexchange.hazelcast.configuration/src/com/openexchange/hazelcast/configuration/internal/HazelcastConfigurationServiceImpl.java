@@ -194,13 +194,13 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         }
         String join = configService.getProperty("com.openexchange.hazelcast.network.join", NETWORK_JOIN_EMPTY);
         String groupName = configService.getProperty("com.openexchange.hazelcast.group.name");
-        if (false == Strings.isEmpty(groupName)) {
+        if (Strings.isNotEmpty(groupName)) {
             config.getGroupConfig().setName(groupName);
         } else if (false == NETWORK_JOIN_EMPTY.equalsIgnoreCase(join)) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");
         }
         String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
-        if (false == Strings.isEmpty(groupPassword)) {
+        if (Strings.isNotEmpty(groupPassword)) {
             if ("wtV6$VQk8#+3ds!a".equalsIgnoreCase(groupPassword)) {
                 LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from its "
                     + "default. Please do so to restrict access to your cluster.");
@@ -225,7 +225,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 configService.getProperty("com.openexchange.hazelcast.network.join.static.nodes"));
             if (null != members && 0 < members.length) {
                 for (String member : members) {
-                    if (false == Strings.isEmpty(member)) {
+                    if (Strings.isNotEmpty(member)) {
                         try {
                             config.getNetworkConfig().getJoin().getTcpIpConfig().addMember(InetAddress.getByName(member).getHostAddress());
                         } catch (UnknownHostException e) {
@@ -279,7 +279,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String[] interfaces = Strings.splitByComma(configService.getProperty("com.openexchange.hazelcast.network.interfaces"));
         if (null != interfaces && 0 < interfaces.length) {
             for (String interfaze : interfaces) {
-                if (false == Strings.isEmpty(interfaze)) {
+                if (Strings.isNotEmpty(interfaze)) {
                     config.getNetworkConfig().getInterfaces().setEnabled(true).addInterface(interfaze);
                 }
             }
@@ -291,7 +291,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             configService.getProperty("com.openexchange.hazelcast.network.outboundPortDefinitions"));
         if (null != outboundPortDefinitions && 0 < outboundPortDefinitions.length) {
             for (String portDefintion : outboundPortDefinitions) {
-                if (false == Strings.isEmpty(portDefintion)) {
+                if (Strings.isNotEmpty(portDefintion)) {
                     config.getNetworkConfig().addOutboundPortDefinition(portDefintion);
                 }
             }
@@ -331,7 +331,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         if (null != properties && !properties.isEmpty()) {
             for (Entry<String, String> entry : properties.entrySet()) {
                 String value = entry.getValue();
-                if (!Strings.isEmpty(value)) {
+                if (Strings.isNotEmpty(value)) {
                     config.setProperty(entry.getKey(), value.trim());
                 }
             }
@@ -368,7 +368,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             if (propertyName.startsWith("com.openexchange.hazelcast.configuration.map")) {
                 MapConfig mapConfig = createDataConfig(properties, MapConfig.class);
                 String attributes = properties.getProperty("com.openexchange.hazelcast.configuration.map.indexes.attributes");
-                if (false == Strings.isEmpty(attributes)) {
+                if (Strings.isNotEmpty(attributes)) {
                     String[] attrs = attributes.split(" *, *");
                     if (null != attrs && 0 < attrs.length) {
                         for (String attribute : attrs) {
@@ -378,7 +378,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 }
                 String orderedAttributes = properties.getProperty(
                     "com.openexchange.hazelcast.configuration.map.indexes.orderedAttributes");
-                if (false == Strings.isEmpty(orderedAttributes)) {
+                if (Strings.isNotEmpty(orderedAttributes)) {
                     String[] attrs = orderedAttributes.split(" *, *");
                     if (null != attrs && 0 < attrs.length) {
                         for (String attribute : attrs) {

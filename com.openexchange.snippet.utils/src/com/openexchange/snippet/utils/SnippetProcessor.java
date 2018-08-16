@@ -279,7 +279,7 @@ public class SnippetProcessor {
             }
 
             String contentType = con.getHeaderField("content-type");
-            if (!Strings.isEmpty(contentType) && !Strings.asciiLowerCase(contentType).startsWith("image/")) {
+            if (Strings.isNotEmpty(contentType) && !Strings.asciiLowerCase(contentType).startsWith("image/")) {
                 throw SnippetExceptionCodes.INVALID_IMAGE_DATA.create();
             }
             contentType = Strings.isEmpty(contentType) ? "image/jpeg" : contentType;
@@ -328,7 +328,7 @@ public class SnippetProcessor {
             }
 
             String contentType = httpCon.getHeaderField("content-type");
-            if (!Strings.isEmpty(contentType) && !Strings.asciiLowerCase(contentType).startsWith("image/")) {
+            if (Strings.isNotEmpty(contentType) && !Strings.asciiLowerCase(contentType).startsWith("image/")) {
                 throw SnippetExceptionCodes.INVALID_IMAGE_DATA.create();
             }
             contentType = Strings.isEmpty(contentType) ? "image/jpeg" : contentType;

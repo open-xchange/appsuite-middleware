@@ -543,7 +543,7 @@ public class SieveHandler {
         String psm = null;
         {
             psm = leanConfigService.getProperty(userId, contextId, MailFilterProperty.preferredSaslMech);
-            if (!Strings.isEmpty(psm)) {
+            if (Strings.isNotEmpty(psm)) {
                 try {
                     configuredPreferredSASLMechanism = PreferredSASLMech.valueOf(psm);
                 } catch (IllegalArgumentException e) {

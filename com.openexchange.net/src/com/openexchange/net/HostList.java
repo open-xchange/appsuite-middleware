@@ -57,7 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
-import com.openexchange.net.utils.Strings;
+import com.openexchange.java.Strings;
 
 /**
  *
@@ -90,7 +90,7 @@ public class HostList {
         Set<String> matchingAppendixHostNames = new HashSet<String>(tokens.length);
         List<IPRange> ipRanges = new ArrayList<IPRange>(tokens.length);
         for (String token : tokens) {
-            if (false == Strings.isEmpty(token)) {
+            if (Strings.isNotEmpty(token)) {
                 token = Strings.asciiLowerCase(token);
                 boolean isIp = false;
                 try {

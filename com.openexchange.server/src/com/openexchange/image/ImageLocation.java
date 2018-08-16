@@ -332,7 +332,7 @@ public final class ImageLocation {
             builder.append("properties=").append(properties);
         }
         String auth = authRef.get();
-        if (false == Strings.isEmpty(auth)) {
+        if (Strings.isNotEmpty(auth)) {
             builder.append("auth=").append(auth);
         }
         builder.append(']');

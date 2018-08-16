@@ -115,7 +115,7 @@ public class ThreadedAllRequest implements AJAXRequest<ConversationResponse> {
         List<Parameter> list = new LinkedList<>();
         list.add(new Parameter(PARAMETER_ACTION, ACTION_THREADED_ALL));
 
-        if (!Strings.isEmpty(categoryId)) {
+        if (Strings.isNotEmpty(categoryId)) {
             list.add(new Parameter(PARAMETER_CATEGORY_ID, categoryId));
         }
 

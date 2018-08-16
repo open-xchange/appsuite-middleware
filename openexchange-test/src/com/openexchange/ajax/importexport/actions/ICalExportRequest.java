@@ -90,7 +90,7 @@ public class ICalExportRequest extends AbstractExportRequest<ICalExportResponse>
         if (this.getFolderId() < 0) {
             parameters = parametersToRemove(AJAXServlet.PARAMETER_FOLDERID, parameters);
         }
-        if (!Strings.isEmpty(body)) {
+        if (Strings.isNotEmpty(body)) {
             parameters = parametersToAdd(new Parameter("body", body), parameters);
         }
         return parameters;

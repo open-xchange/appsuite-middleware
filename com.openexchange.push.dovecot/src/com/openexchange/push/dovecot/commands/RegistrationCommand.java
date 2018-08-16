@@ -113,7 +113,7 @@ public class RegistrationCommand implements ProtocolCommand {
             /*-
              * Currently not needed as statically configured in Dovecot plug-in
              *
-            if (!Strings.isEmpty(authLogin) && !Strings.isEmpty(authPassword)) {
+            if (Strings.isNotEmpty(authLogin) && Strings.isNotEmpty(authPassword)) {
                 cmdBuilder.append('\t').append("auth=basic:").append(authLogin).append(':').append(authPassword);
             }
             */

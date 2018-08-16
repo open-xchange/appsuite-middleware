@@ -58,7 +58,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
@@ -156,10 +155,6 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
                 DefaultGrizzlyWebSocketApplication.invalidateEnabledCache();
             }
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
         });
 
         registerService(CustomPortableFactory.class, new PortableMessageDistributorFactory(), null);

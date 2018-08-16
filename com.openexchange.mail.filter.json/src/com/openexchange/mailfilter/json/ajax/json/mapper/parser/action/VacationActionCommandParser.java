@@ -149,7 +149,7 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
                 }
             }
 
-            if (!Strings.isEmpty(from)) {
+            if (Strings.isNotEmpty(from)) {
                 arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.from));
                 arrayList.add(CommandParserJSONUtil.stringToList(from));
             }

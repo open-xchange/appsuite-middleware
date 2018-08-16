@@ -101,7 +101,7 @@ public abstract class AbstractSchemaRMIToolkit extends ObjectNamingAbstraction {
      * @throws InvalidDataException - If RMI host is null
      */
     protected SchemaMoveRemote getSchemaMoveRemoteInterface(String rmiHost) throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException {
-        if(false == Strings.isEmpty(rmiHost)) {
+        if (Strings.isNotEmpty(rmiHost)) {
             StringBuffer sb = new StringBuffer(64);
             if(false == rmiHost.startsWith("rmi://")) {
                sb.append("rmi://");

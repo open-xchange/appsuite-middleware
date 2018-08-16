@@ -772,7 +772,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
         checkFolderExistence(file.getFolderId());
 
-        if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName()) && file.getId() != FileStorageFileAccess.NEW)
+        if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && Strings.isNotEmpty(file.getFileName()) && file.getId() != FileStorageFileAccess.NEW)
         /*
          * first check if there is already such a file
          */

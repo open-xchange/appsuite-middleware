@@ -247,12 +247,12 @@ public class ExportFileNameCreator {
         } else {
             if (Strings.isEmpty(contactObj.getGivenName()) && Strings.isEmpty(contactObj.getSurName())) {
                 sb.append(getLocalizedFileName(session, ExportDefaultFileNames.CONTACTS_NAME));
-            } else if (!Strings.isEmpty(contactObj.getGivenName()) && !Strings.isEmpty(contactObj.getSurName())) {
+            } else if (Strings.isNotEmpty(contactObj.getGivenName()) && Strings.isNotEmpty(contactObj.getSurName())) {
                 sb.append(contactObj.getGivenName() + " " + contactObj.getSurName());
             } else {
-                if (!Strings.isEmpty(contactObj.getGivenName()) && Strings.isEmpty(contactObj.getSurName())) {
+                if (Strings.isNotEmpty(contactObj.getGivenName()) && Strings.isEmpty(contactObj.getSurName())) {
                     sb.append(contactObj.getGivenName());
-                } else if (Strings.isEmpty(contactObj.getGivenName()) && !Strings.isEmpty(contactObj.getSurName())) {
+                } else if (Strings.isEmpty(contactObj.getGivenName()) && Strings.isNotEmpty(contactObj.getSurName())) {
                     sb.append(contactObj.getSurName());
                 }
             }

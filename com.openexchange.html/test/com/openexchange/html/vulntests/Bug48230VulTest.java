@@ -103,7 +103,7 @@ public class Bug48230VulTest extends AbstractSanitizing {
             + "<img src=\"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/4ge4SUNDX1BST0ZJTEUAAQEAAAeoYXBwb...inCBARRRTSsBKEwOtOAA6UUUwFooooAKKKKAP/Z\">"
             + "</body></html>";
         String sanitized = getHtmlService().sanitize(content, null, false, null, null);
-        if (!Strings.isEmpty(sanitized)) {
+        if (Strings.isNotEmpty(sanitized)) {
             sanitized = sanitized.toLowerCase();
         }
         assertTrue("Sanitzed content does no more contain data URI for JPEG image:\n" + sanitized, sanitized.indexOf("data:image/") >= 0);

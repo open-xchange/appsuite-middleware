@@ -2397,7 +2397,7 @@ public final class HtmlServiceImpl implements HtmlService {
             tmp.setLength(0);
             tmp.append('<').append(m.group(1));
             String appendix = m.group(3);
-            if (!Strings.isEmpty(appendix)) {
+            if (Strings.isNotEmpty(appendix)) {
                 tmp.append(m.group(2)).append(appendix);
             }
             tmp.append('>');

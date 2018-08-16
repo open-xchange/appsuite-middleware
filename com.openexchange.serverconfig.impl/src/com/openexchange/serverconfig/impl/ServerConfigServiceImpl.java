@@ -222,7 +222,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
         }
 
         // We need a host name for the host and hostRegex check
-        if ( !Strings.isEmpty(hostName) ) {
+        if ( Strings.isNotEmpty(hostName) ) {
 
             // Check "host"
             {

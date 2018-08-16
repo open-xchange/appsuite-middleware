@@ -141,7 +141,7 @@ public class ContactReader {
                         throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Unable to load mail settings.");
                     }
                     String defaultSendAddress = userSettingMail.getSendAddr();
-                    if (false == Strings.isEmpty(defaultSendAddress)) {
+                    if (Strings.isNotEmpty(defaultSendAddress)) {
                         contact.setEmail1(defaultSendAddress);
                     }
                 } else {

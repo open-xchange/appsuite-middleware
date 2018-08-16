@@ -429,7 +429,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 }
             } else if (null != uri) {
                 String specificPart = uri.getSchemeSpecificPart();
-                if (false == Strings.isEmpty(specificPart)) {
+                if (Strings.isNotEmpty(specificPart)) {
                     String mail = null;
                     if ("mailto".equalsIgnoreCase(uri.getScheme())) {
                         /*
@@ -449,7 +449,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     /*
                      * add iCal participant if parsed successfully
                      */
-                    if (false == Strings.isEmpty(mail)) {
+                    if (Strings.isNotEmpty(mail)) {
                         addMail(index, mail, mails, attendee, comment, warnings);
                     }
                 }

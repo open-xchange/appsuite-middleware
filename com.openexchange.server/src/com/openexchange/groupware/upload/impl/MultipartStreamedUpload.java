@@ -89,6 +89,36 @@ import com.openexchange.session.Session;
  * @since v7.10.1
  */
 public class MultipartStreamedUpload implements StreamedUpload {
+    
+    /**
+     * Thrown in case <code>requireStartingFormField</code> parameter is set to <code>true</code> and multipart upload does not start with a
+     * simple form field.
+     */
+    public static final class MissingStartingFormField extends RuntimeException {
+
+        private final FileItemStream item;
+
+        MissingStartingFormField(FileItemStream item) {
+            super("missing starting simple form field");
+            this.item = item;
+        }
+
+        @Override
+        public synchronized Throwable fillInStackTrace() {
+            return this;
+        }
+        
+        /**
+         * Gets the first file item, which is <b>not</b> a simple form field.
+         *
+         * @return The file item
+         */
+        public FileItemStream getItem() {
+            return item;
+        }
+    }
+    
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final Map<String, String> formFields;
     private boolean iteratorCreated;
@@ -103,8 +133,11 @@ public class MultipartStreamedUpload implements StreamedUpload {
 
     /**
      * Initializes a new {@link MultipartStreamedUpload}.
+     * 
+     * @throws MissingStartingFormField If <code>requireStartingFormField</code> parameter is set to <code>true</code> and multipart upload
+     * does not start with a simple form field.
      */
-    public MultipartStreamedUpload(FileItemIterator iter, String uuid, List<StreamedUploadFileListener> listeners, String action, String fileName, String requestCharacterEncoding, Session session) throws OXException {
+    public MultipartStreamedUpload(FileItemIterator iter, String uuid, List<StreamedUploadFileListener> listeners, String action, String fileName, String requestCharacterEncoding, boolean requireStartingFormField, Session session) throws OXException {
         super();
         formFields = new HashMap<String, String>();
         iteratorCreated = false;
@@ -123,12 +156,22 @@ public class MultipartStreamedUpload implements StreamedUpload {
                 if (item.isFormField()) {
                     addFormField(item.getFieldName(), Streams.stream2string(item.openStream(), charEnc));
                 } else {
+                    if (requireStartingFormField && formFields.isEmpty()) {
+                        // No simple form field added, yet
+                        throw new MissingStartingFormField(item);
+                    }
                     String name = item.getName();
                     if (!isEmpty(name)) {
                         current = item;
                     }
                 }
             }
+        } catch (MissingStartingFormField e) {
+            UploadException exception = UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
+            for (StreamedUploadFileListener listener : listeners) {
+                listener.onUploadFailed(uuid, exception, session);
+            }
+            throw e;
         } catch (Exception e) {
             throw handleException(uuid, e, action, session, listeners);
         }
