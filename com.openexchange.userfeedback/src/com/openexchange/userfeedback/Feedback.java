@@ -50,7 +50,7 @@
 package com.openexchange.userfeedback;
 
 /**
- * 
+ *
  * {@link Feedback}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -84,7 +84,7 @@ public class Feedback extends FeedbackMetaData {
 
     public static class Builder extends FeedbackMetaData.Builder {
 
-        private Object content;
+        Object content;
 
         Builder(FeedbackMetaData meta) {
             super(meta);
@@ -92,7 +92,7 @@ public class Feedback extends FeedbackMetaData {
 
         /**
          * Sets the stored content for this feedback
-         * 
+         *
          * @param content The content to set
          * @return This builder
          */
