@@ -81,16 +81,15 @@ class HazelcastSSLFactory implements SSLContextFactory {
 
     private static final String SSL_PROTOCOLS = "com.openexchange.hazelcast.network.ssl.protocols";
 
-    private static final String TRUST_STORE    = "com.openexchange.hazelcast.network.ssl.trustStore";
-    private static final String TRUST_PASSWORD = "com.openexchange.hazelcast.network.ssl.trustStorePassword";
-    private static final String TRUST_TYPE     = "com.openexchange.hazelcast.network.ssl.trustManagerAlgorithm";
+    private static final String TRUST_STORE     = "com.openexchange.hazelcast.network.ssl.trustStore";
+    private static final String TRUST_PASSWORD  = "com.openexchange.hazelcast.network.ssl.trustStorePassword";
+    private static final String TRUST_TYPE      = "com.openexchange.hazelcast.network.ssl.trustStoreType";
+    private static final String TRUST_ALGORITHM = "com.openexchange.hazelcast.network.ssl.trustManagerAlgorithm";
 
-    private static final String KEY_STORE    = "com.openexchange.hazelcast.network.ssl.keyStore";
-    private static final String KEY_PASSWORD = "com.openexchange.hazelcast.network.ssl.keyStorePassword";
-    private static final String KEY_TYPE     = "com.openexchange.hazelcast.network.ssl.keyManagerAlgorithm";
-
-    /* Hazelcast only accepts JKS key stores */
-    private static final String TYPE = "JKS";
+    private static final String KEY_STORE     = "com.openexchange.hazelcast.network.ssl.keyStore";
+    private static final String KEY_PASSWORD  = "com.openexchange.hazelcast.network.ssl.keyStorePassword";
+    private static final String KEY_TYPE      = "com.openexchange.hazelcast.network.ssl.keyStoreType";
+    private static final String KEY_ALGORITHM = "com.openexchange.hazelcast.network.ssl.keyManagerAlgorithm";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastSSLFactory.class);
 
@@ -104,8 +103,8 @@ class HazelcastSSLFactory implements SSLContextFactory {
     public HazelcastSSLFactory() {
         super();
         this.stores = new ConcurrentHashMap<>(3);
-        stores.put("truststore", new ConfigAwareKeyStore(TRUST_STORE, TRUST_PASSWORD, TYPE));
-        stores.put("keystore", new ConfigAwareKeyStore(KEY_STORE, KEY_PASSWORD, TYPE));
+        stores.put("truststore", new ConfigAwareKeyStore(TRUST_STORE, TRUST_PASSWORD, TRUST_TYPE));
+        stores.put("keystore", new ConfigAwareKeyStore(KEY_STORE, KEY_PASSWORD, KEY_TYPE));
         this.sslContext = new AtomicReference<SSLContext>(null);
     }
 
@@ -150,13 +149,13 @@ class HazelcastSSLFactory implements SSLContextFactory {
 
             ConfigAwareKeyStore trustStore = stores.get("truststore");
             if (null != trustStore && trustStore.isConfigured()) {
-                trustManagerFactory = TrustManagerFactory.getInstance(properties.getProperty(TRUST_TYPE, TrustManagerFactory.getDefaultAlgorithm()));
+                trustManagerFactory = TrustManagerFactory.getInstance(properties.getProperty(TRUST_ALGORITHM, TrustManagerFactory.getDefaultAlgorithm()));
                 trustManagerFactory.init(trustStore.getKeyStore());
             }
 
             ConfigAwareKeyStore keyStore = stores.get("keystore");
             if (null != keyStore && keyStore.isConfigured()) {
-                keyManagerFactory = KeyManagerFactory.getInstance(properties.getProperty(KEY_TYPE, KeyManagerFactory.getDefaultAlgorithm()));
+                keyManagerFactory = KeyManagerFactory.getInstance(properties.getProperty(KEY_ALGORITHM, KeyManagerFactory.getDefaultAlgorithm()));
                 keyManagerFactory.init(keyStore.getKeyStore(), null != properties.getProperty(KEY_PASSWORD) ? properties.getProperty(KEY_PASSWORD).toCharArray() : null);
             }
 
@@ -206,7 +205,7 @@ class HazelcastSSLFactory implements SSLContextFactory {
         return retval;
     }
 
-    private static final List<String> SSL_PROPERTY_NAMES = ImmutableList.of(SSL_PROTOCOLS, TRUST_STORE, TRUST_PASSWORD, TRUST_TYPE, KEY_STORE, KEY_PASSWORD, KEY_TYPE);
+    private static final List<String> SSL_PROPERTY_NAMES = ImmutableList.of(SSL_PROTOCOLS, TRUST_STORE, TRUST_PASSWORD, TRUST_TYPE, TRUST_ALGORITHM, KEY_STORE, KEY_PASSWORD, KEY_TYPE, KEY_ALGORITHM);
 
     /**
      * Gets all necessary properties for an SSL configuration

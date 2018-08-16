@@ -421,6 +421,17 @@ properties:
       related: com.openexchange.hazelcast.ssl.keyStore
       file: 
       packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"] 
+    - key: com.openexchange.hazelcast.ssl.keyStoreType
+      description: |
+        The type for the key store. If not set the default type of Java KeyStore is used.
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.ssl.keyStore
+      file: 
+      packageName: open-xchange-core
       tags: ["Hazelcast", "Encryption"]  
     - key: com.openexchange.hazelcast.ssl.keyManagerAlgorithm
       description: |
@@ -447,6 +458,17 @@ properties:
     - key: com.openexchange.hazelcast.ssl.trustStorePassword
       description: |
         The password for the trust store. 
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.ssl.trustStore
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"] 
+    - key: com.openexchange.hazelcast.ssl.trustStoreType
+      description: |
+        The type for the trust store. If not set the default type of Java KeyStore is used.
       defaultValue:
       version: 7.10.1
       reloadable: true
