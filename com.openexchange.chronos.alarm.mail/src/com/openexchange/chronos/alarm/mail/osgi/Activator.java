@@ -158,18 +158,19 @@ public class Activator extends HousekeepingActivator {
 
         boolean registeredCalendarHandler = false;
         for (int x = 0; x < workerCount; x++) {
-            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker(   storage,
-                                                                            calendarStorageFactory,
-                                                                            dbService,
-                                                                            ctxService,
-                                                                            calUtil,
-                                                                            timerService,
-                                                                            mailAlarmNotificationService,
-                                                                            calendarProviderRegistry,
-                                                                            administrativeCalendarAccountService,
-                                                                            lookAhead,
-                                                                            mailShift,
-                                                                            overdueWaitTime);
+            MailAlarmDeliveryWorker worker = new MailAlarmDeliveryWorker.Builder()
+                                                 .setStorage(storage)
+                                                 .setCalendarStorageFactory(calendarStorageFactory)
+                                                 .setDbService(dbService)
+                                                 .setCtxService(ctxService)
+                                                 .setCalUtil(calUtil)
+                                                 .setTimerService(timerService)
+                                                 .setMailAlarmNotificationService(mailAlarmNotificationService)
+                                                 .setCalendarProviderRegistry(calendarProviderRegistry)
+                                                 .setAdministrativeCalendarAccountService(administrativeCalendarAccountService)
+                                                 .setLookAhead(lookAhead)
+                                                 .setMailShift(mailShift)
+                                                 .setOverdueWaitTime(overdueWaitTime).build();
             ScheduledTimerTask scheduledTimerTask = clusterTimerService.scheduleAtFixedRate(CLUSTER_ID, worker, initialDelay, period, TimeUnit.MINUTES);
             scheduledTasks.put(scheduledTimerTask, worker);
             if (!registeredCalendarHandler) {

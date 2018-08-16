@@ -99,6 +99,103 @@ import com.openexchange.timer.TimerService;
  */
 public class MailAlarmDeliveryWorker implements Runnable {
 
+    /**
+     *
+     * {@link Builder} a builder for {@link MailAlarmDeliveryWorker}
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.1
+     */
+    public static class Builder {
+        private AdministrativeAlarmTriggerStorage storage;
+        private CalendarStorageFactory calendarStorageFactory;
+        private DatabaseService dbService;
+        private ContextService ctxService;
+        private CalendarUtilities calUtil;
+        private TimerService timerService;
+        private MailAlarmNotificationService mailAlarmNotificationService;
+        private CalendarProviderRegistry calendarProviderRegistry;
+        private AdministrativeCalendarAccountService administrativeCalendarAccountService;
+        private int lookAhead;
+        private int mailShift;
+        private int overdueWaitTime;
+
+        public Builder setStorage(AdministrativeAlarmTriggerStorage storage) {
+            this.storage = storage;
+            return this;
+        }
+
+        public Builder setCalendarStorageFactory(CalendarStorageFactory calendarStorageFactory) {
+            this.calendarStorageFactory = calendarStorageFactory;
+            return this;
+        }
+
+        public Builder setDbService(DatabaseService dbService) {
+            this.dbService = dbService;
+            return this;
+        }
+
+        public Builder setCtxService(ContextService ctxService) {
+            this.ctxService = ctxService;
+            return this;
+        }
+
+        public Builder setCalUtil(CalendarUtilities calUtil) {
+            this.calUtil = calUtil;
+            return this;
+        }
+
+        public Builder setTimerService(TimerService timerService) {
+            this.timerService = timerService;
+            return this;
+        }
+
+        public Builder setMailAlarmNotificationService(MailAlarmNotificationService mailAlarmNotificationService) {
+            this.mailAlarmNotificationService = mailAlarmNotificationService;
+            return this;
+        }
+
+        public Builder setCalendarProviderRegistry(CalendarProviderRegistry calendarProviderRegistry) {
+            this.calendarProviderRegistry = calendarProviderRegistry;
+            return this;
+        }
+
+        public Builder setAdministrativeCalendarAccountService(AdministrativeCalendarAccountService administrativeCalendarAccountService) {
+            this.administrativeCalendarAccountService = administrativeCalendarAccountService;
+            return this;
+        }
+
+        public Builder setLookAhead(int lookAhead) {
+            this.lookAhead = lookAhead;
+            return this;
+        }
+
+        public Builder setMailShift(int mailShift) {
+            this.mailShift = mailShift;
+            return this;
+        }
+
+        public Builder setOverdueWaitTime(int overdueWaitTime) {
+            this.overdueWaitTime = overdueWaitTime;
+            return this;
+        }
+
+        public MailAlarmDeliveryWorker build() throws OXException {
+            return new MailAlarmDeliveryWorker( storage,
+                                                calendarStorageFactory,
+                                                dbService,
+                                                ctxService,
+                                                calUtil,
+                                                timerService,
+                                                mailAlarmNotificationService,
+                                                calendarProviderRegistry,
+                                                administrativeCalendarAccountService,
+                                                lookAhead,
+                                                mailShift,
+                                                overdueWaitTime);
+        }
+    }
+
     protected static final Logger LOG = LoggerFactory.getLogger(MailAlarmDeliveryWorker.class);
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
@@ -112,7 +209,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
     private final CalendarUtilities calUtil;
 
     private final MailAlarmNotificationService mailService;
-    private final CalendarProviderRegistry calendarProvider;
+    private final CalendarProviderRegistry calendarProviderRegistry;
     private final AdministrativeCalendarAccountService administrativeCalendarAccountService;
     private final int mailShift;
     private final int lookAhead;
@@ -135,7 +232,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
      * @param overdueWaitTime The time in minutes to wait until an old trigger is picked up.
      * @throws OXException If not administrative storage could be created.
      */
-    public MailAlarmDeliveryWorker( AdministrativeAlarmTriggerStorage storage,
+    protected MailAlarmDeliveryWorker( AdministrativeAlarmTriggerStorage storage,
                                     CalendarStorageFactory factory,
                                     DatabaseService dbservice,
                                     ContextService ctxService,
@@ -157,7 +254,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
         this.lookAhead = lookAhead;
         this.mailShift = mailShift;
         this.overdueWaitTime = overdueWaitTime;
-        this.calendarProvider = calProviderRegistry;
+        this.calendarProviderRegistry = calProviderRegistry;
         this.administrativeCalendarAccountService = administrativeCalendarAccountService;
 
     }
@@ -292,19 +389,20 @@ public class MailAlarmDeliveryWorker implements Runnable {
      * @throws OXException If the context couldn't be loaded
      */
     private SingleMailDeliveryTask createTask(int cid, int account, Alarm alarm, AlarmTrigger trigger, long processed) throws OXException {
-        return new SingleMailDeliveryTask(  dbservice, 
-                                            storage, 
-                                            mailService, 
-                                            factory, 
-                                            calUtil, 
-                                            calendarProvider, 
-                                            administrativeCalendarAccountService, 
-                                            ctxService.getContext(cid), 
-                                            account, 
-                                            alarm, 
-                                            trigger, 
-                                            processed, 
-                                            this);
+        return new SingleMailDeliveryTask.Builder()
+                                         .setDbservice(dbservice)
+                                         .setStorage(storage)
+                                         .setMailService(mailService)
+                                         .setFactory(factory)
+                                         .setCalUtil(calUtil)
+                                         .setCalendarProviderRegistry(calendarProviderRegistry)
+                                         .setAdministrativeCalendarAccountService(administrativeCalendarAccountService)
+                                         .setCtx(ctxService.getContext(cid))
+                                         .setAccount(account)
+                                         .setAlarm(alarm)
+                                         .setTrigger(trigger)
+                                         .setProcessed(processed)
+                                         .setCallback(this).build();
     }
 
     /**

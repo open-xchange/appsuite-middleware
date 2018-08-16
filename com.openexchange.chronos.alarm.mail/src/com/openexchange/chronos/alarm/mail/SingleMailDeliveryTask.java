@@ -87,6 +87,103 @@ import com.openexchange.java.util.Pair;
  */
 class SingleMailDeliveryTask implements Runnable {
 
+    public static class Builder {
+        Context ctx;
+        private Alarm alarm;
+        private CalendarStorageFactory factory;
+        private AlarmTrigger trigger;
+        private CalendarUtilities calUtil;
+        private long processed;
+        private int account;
+        private MailAlarmDeliveryWorker callback;
+        private DatabaseService dbservice;
+        private AdministrativeAlarmTriggerStorage storage;
+        private MailAlarmNotificationService mailService;
+        private CalendarProviderRegistry calendarProviderRegistry;
+        private AdministrativeCalendarAccountService administrativeCalendarAccountService;
+
+        public Builder setCtx(Context ctx) {
+            this.ctx = ctx;
+            return this;
+        }
+
+        public Builder setAlarm(Alarm alarm) {
+            this.alarm = alarm;
+            return this;
+        }
+
+        public Builder setFactory(CalendarStorageFactory factory) {
+            this.factory = factory;
+            return this;
+        }
+
+        public Builder setTrigger(AlarmTrigger trigger) {
+            this.trigger = trigger;
+            return this;
+        }
+
+        public Builder setCalUtil(CalendarUtilities calUtil) {
+            this.calUtil = calUtil;
+            return this;
+        }
+
+        public Builder setProcessed(long processed) {
+            this.processed = processed;
+            return this;
+        }
+
+        public Builder setAccount(int account) {
+            this.account = account;
+            return this;
+        }
+
+        public Builder setCallback(MailAlarmDeliveryWorker callback) {
+            this.callback = callback;
+            return this;
+        }
+
+        public Builder setDbservice(DatabaseService dbservice) {
+            this.dbservice = dbservice;
+            return this;
+        }
+
+        public Builder setStorage(AdministrativeAlarmTriggerStorage storage) {
+            this.storage = storage;
+            return this;
+        }
+
+        public Builder setMailService(MailAlarmNotificationService mailService) {
+            this.mailService = mailService;
+            return this;
+        }
+
+        public Builder setCalendarProviderRegistry(CalendarProviderRegistry calendarProviderRegistry) {
+            this.calendarProviderRegistry = calendarProviderRegistry;
+            return this;
+        }
+
+        public Builder setAdministrativeCalendarAccountService(AdministrativeCalendarAccountService administrativeCalendarAccountService) {
+            this.administrativeCalendarAccountService = administrativeCalendarAccountService;
+            return this;
+        }
+
+        public SingleMailDeliveryTask build() {
+            return new SingleMailDeliveryTask(  dbservice,
+                                                storage,
+                                                mailService,
+                                                factory,
+                                                calUtil,
+                                                calendarProviderRegistry,
+                                                administrativeCalendarAccountService,
+                                                ctx,
+                                                account,
+                                                alarm,
+                                                trigger,
+                                                processed,
+                                                callback);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(SingleMailDeliveryTask.class);
 
     Context ctx;
@@ -120,19 +217,19 @@ class SingleMailDeliveryTask implements Runnable {
      * @param callback The {@link MailAlarmDeliveryWorker} which started this task
      * @param processed The processed value
      */
-    public SingleMailDeliveryTask(  DatabaseService dbservice,
-                                    AdministrativeAlarmTriggerStorage storage,
-                                    MailAlarmNotificationService mailService,
-                                    CalendarStorageFactory factory,
-                                    CalendarUtilities calUtil,
-                                    CalendarProviderRegistry calendarProviderRegistry,
-                                    AdministrativeCalendarAccountService administrativeCalendarAccountService,
-                                    Context ctx,
-                                    int account,
-                                    Alarm alarm,
-                                    AlarmTrigger trigger,
-                                    long processed,
-                                    MailAlarmDeliveryWorker callback) {
+    protected SingleMailDeliveryTask(   DatabaseService dbservice,
+                                        AdministrativeAlarmTriggerStorage storage,
+                                        MailAlarmNotificationService mailService,
+                                        CalendarStorageFactory factory,
+                                        CalendarUtilities calUtil,
+                                        CalendarProviderRegistry calendarProviderRegistry,
+                                        AdministrativeCalendarAccountService administrativeCalendarAccountService,
+                                        Context ctx,
+                                        int account,
+                                        Alarm alarm,
+                                        AlarmTrigger trigger,
+                                        long processed,
+                                        MailAlarmDeliveryWorker callback) {
         this.ctx = ctx;
         this.alarm = alarm;
         this.factory = factory;
