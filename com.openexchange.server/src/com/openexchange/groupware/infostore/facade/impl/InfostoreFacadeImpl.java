@@ -428,7 +428,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * check client E-Tag if supplied
          */
         String eTag = getETag(metadata);
-        if (false == Strings.isEmpty(clientETag) && clientETag.equals(eTag)) {
+        if (Strings.isNotEmpty(clientETag) && clientETag.equals(eTag)) {
             return new DocumentAndMetadataImpl(metadata, null, eTag);
         }
         /*

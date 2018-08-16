@@ -1339,6 +1339,12 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User searchUser(final String email, final Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException {
+        if (null == email) {
+            // Garbage in, garbage out
+            //FIXME: javadoc claims to return null if not found...
+            throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
+        }
+
         final Connection con = DBPool.pickup(context);
         try {
             final String pattern = StringCollection.prepareForSearch(email, false, true);

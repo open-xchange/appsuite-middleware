@@ -838,7 +838,7 @@ public class OnboardingUtility {
             boolean first = true;
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 String key = entry.getKey();
-                if (!Strings.isEmpty(key)) {
+                if (Strings.isNotEmpty(key)) {
                     if (first) {
                         url.append('?');
                         first = false;
@@ -847,7 +847,7 @@ public class OnboardingUtility {
                     }
                     url.append(AJAXUtility.encodeUrl(key, true));
                     String value = entry.getValue();
-                    if (!Strings.isEmpty(value)) {
+                    if (Strings.isNotEmpty(value)) {
                         url.append('=').append(AJAXUtility.encodeUrl(value, true));
                     }
                 }

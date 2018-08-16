@@ -130,7 +130,7 @@ public class DefaultShareLinkGenerator implements ShareLinkGenerator {
 
         // Generate associated share link
         String url = guest.generateLink(hostData, targetPath);
-        if (!Strings.isEmpty(queryString)) {
+        if (Strings.isNotEmpty(queryString)) {
             url = new StringBuilder(url).append('?').append(queryString).toString();
         }
 
@@ -141,7 +141,7 @@ public class DefaultShareLinkGenerator implements ShareLinkGenerator {
     public ShareComposeLink generatePersonalShareLink(ShareTarget shareTarget, HostData hostData, String queryString, ServerSession session) {
         String module = Module.getForFolderConstant(shareTarget.getModule()).getName();
         String url = Links.generateInternalLink(module, shareTarget.getFolder(), shareTarget.getItem(), hostData);
-        if (!Strings.isEmpty(queryString)) {
+        if (Strings.isNotEmpty(queryString)) {
             url = new StringBuilder(url).append('?').append(queryString).toString();
         }
 

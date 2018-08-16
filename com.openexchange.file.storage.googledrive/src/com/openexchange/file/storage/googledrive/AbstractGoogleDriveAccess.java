@@ -198,7 +198,7 @@ public abstract class AbstractGoogleDriveAccess {
      */
     private boolean hasInvalidGrant(HttpResponseException e) {
         String content = e.getContent();
-        return !Strings.isEmpty(content) && content.contains("invalid_grant");
+        return Strings.isNotEmpty(content) && content.contains("invalid_grant");
     }
 
     /**

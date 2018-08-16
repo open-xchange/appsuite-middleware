@@ -176,7 +176,7 @@ public final class MonitoringActivator extends HousekeepingActivator implements 
                 int[] filterPorts = null;
                 {
                     String filterExpression = configService.getProperty("com.openexchange.monitoring.sockets.tracing.filter.ports", "").trim();
-                    if (!Strings.isEmpty(filterExpression)) {
+                    if (Strings.isNotEmpty(filterExpression)) {
                         try {
                             String[] sPorts = Strings.splitByComma(filterExpression);
                             filterPorts = new int[sPorts.length];

@@ -72,6 +72,7 @@ public class Bug35129Test extends AbstractAJAXSession {
 
     private AJAXClient myClient;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         AJAXConfig.init();
@@ -80,10 +81,11 @@ public class Bug35129Test extends AbstractAJAXSession {
         myClient.getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
-            if (null != myClient && false == Strings.isEmpty(myClient.getSession().getId())) {
+            if (null != myClient && Strings.isNotEmpty(myClient.getSession().getId())) {
                 myClient.logout();
             }
         } finally {

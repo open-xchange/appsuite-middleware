@@ -134,7 +134,7 @@ public class ResourceCaches {
             if (isAcceptableParameter(name)) {
                 sb.append('-').append(name);
                 String parameter = requestData.getParameter(name);
-                if (!Strings.isEmpty(parameter)) {
+                if (Strings.isNotEmpty(parameter)) {
                     sb.append('=').append(parameter);
                 }
             }
@@ -165,7 +165,7 @@ public class ResourceCaches {
                 if (isAcceptableParameter(name)) {
                     sb.append('-').append(name);
                     String parameter = requestData.getParameter(name);
-                    if (!Strings.isEmpty(parameter)) {
+                    if (Strings.isNotEmpty(parameter)) {
                         sb.append('=').append(parameter);
                     }
                 }
@@ -175,7 +175,7 @@ public class ResourceCaches {
         // Append additional parameters, if given
         if (null != additionalParams) {
             for (String additionalParam : additionalParams) {
-                if (!Strings.isEmpty(additionalParam)) {
+                if (Strings.isNotEmpty(additionalParam)) {
                     sb.append('-').append(additionalParam);
                 }
             }

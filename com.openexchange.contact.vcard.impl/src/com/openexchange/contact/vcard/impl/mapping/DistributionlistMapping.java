@@ -178,7 +178,7 @@ public class DistributionlistMapping extends AbstractMapping {
                 return null;
             }
             String oxReference = member.getParameter(X_OX_REF);
-            if (false == Strings.isEmpty(oxReference)) {
+            if (Strings.isNotEmpty(oxReference)) {
                 // TODO: decode context id, contact id & email field
             } else {
                 entry.setEmailfield(DistributionListEntryObject.INDEPENDENT);
@@ -252,7 +252,7 @@ public class DistributionlistMapping extends AbstractMapping {
                 uriString = email;
             }
             Member member = new Member(uriString);
-            if (false == Strings.isEmpty(entry.getDisplayname())) {
+            if (Strings.isNotEmpty(entry.getDisplayname())) {
                 member.addParameter(X_OX_FN, entry.getDisplayname());
             }
             if (DistributionListEntryObject.INDEPENDENT != entry.getEmailfield()) {

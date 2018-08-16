@@ -253,11 +253,11 @@ public class StorageTransfer {
 
     private List<OXException> collectWarnings(File sourceFile, FileStorageFolder[] sourcePath, FolderID targetFolderID) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
-        if (false == Strings.isEmpty(sourceFile.getDescription())) {
+        if (Strings.isNotEmpty(sourceFile.getDescription())) {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_NOTES.create(sourceFile.getFileName(), getPathString(sourcePath),
                 getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }
-        if (false == Strings.isEmpty(sourceFile.getCategories())) {
+        if (Strings.isNotEmpty(sourceFile.getCategories())) {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_CATEGORIES.create(sourceFile.getFileName(), getPathString(sourcePath),
                 getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }

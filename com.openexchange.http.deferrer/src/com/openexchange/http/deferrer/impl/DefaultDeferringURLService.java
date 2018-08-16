@@ -126,7 +126,7 @@ public abstract class DefaultDeferringURLService implements DeferringURLService 
 
     @Override
     public boolean isDeferrerURLAvailable(int userId, int contextId) {
-        return !Strings.isEmpty(getDeferrerURL(userId, contextId));
+        return Strings.isNotEmpty(getDeferrerURL(userId, contextId));
     }
 
     @Override

@@ -224,7 +224,7 @@ public abstract class DefaultContactStorage implements ContactStorage {
     @Override
     public SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         String pattern = query;
-        if (false == Strings.isEmpty(pattern) && false == "*".equals(pattern) && '*' != pattern.charAt(pattern.length() - 1)) {
+        if (Strings.isNotEmpty(pattern) && false == "*".equals(pattern) && '*' != pattern.charAt(pattern.length() - 1)) {
             pattern = pattern + "*";
         }
         ContactSearchObject preparedSearchObject = new ContactSearchObject();

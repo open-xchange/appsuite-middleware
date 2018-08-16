@@ -91,7 +91,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
         public boolean authenticate(Credentials credentials, User user, int contextId) throws OXException {
             // In case of anonymous guest user, only the password is relevant
             String password = credentials.getPassword();
-            return (false == Strings.isEmpty(password) && password.equals(decrypt(user.getUserPassword())));
+            return (Strings.isNotEmpty(password) && password.equals(decrypt(user.getUserPassword())));
         }
     };
 
@@ -243,7 +243,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
      * @throws IOException If an I/O error occurs
      */
     public void sendUnauthorized(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (false == Strings.isEmpty(user.getMail()) || false == Strings.isEmpty(user.getPasswordMech())) {
+        if (Strings.isNotEmpty(user.getMail()) || Strings.isNotEmpty(user.getPasswordMech())) {
             StringBuilder builder = appendRealm(new StringBuilder(32).append("Basic realm=\""));
             builder.append("\", encoding=\"UTF-8\"");
             response.setHeader("WWW-Authenticate", builder.toString());

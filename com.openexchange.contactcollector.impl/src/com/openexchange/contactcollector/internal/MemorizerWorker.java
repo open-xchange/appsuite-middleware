@@ -585,7 +585,7 @@ public final class MemorizerWorker {
             retval.setParentFolderID(getFolderId(session));
             final String addr = decodeMultiEncodedValue(IDNA.toIDN(address.getAddress()));
             retval.setEmail1(addr);
-            if (false == Strings.isEmpty(address.getPersonal())) {
+            if (Strings.isNotEmpty(address.getPersonal())) {
                 String displayName = decodeMultiEncodedValue(address.getPersonal());
                 retval.setDisplayName(displayName);
             } else {

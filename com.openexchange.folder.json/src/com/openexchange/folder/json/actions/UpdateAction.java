@@ -226,7 +226,7 @@ public final class UpdateAction extends AbstractFolderAction implements Enqueuab
     }
 
     private static String getFolderNameSafe(Session session, Folder folder, String folderID, String treeID, FolderService folderService) {
-        if (null != folder && false == Strings.isEmpty(folder.getName())) {
+        if (null != folder && Strings.isNotEmpty(folder.getName())) {
             return folder.getName();
         }
         String id = null != folderID ? folderID : null != folder ? folder.getID() : null;

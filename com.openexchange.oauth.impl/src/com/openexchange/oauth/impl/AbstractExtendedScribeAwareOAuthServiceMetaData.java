@@ -194,7 +194,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
         // Add requested scopes
         String mappings = OAuthUtil.providerScopesToString(scopes);
-        if (!Strings.isEmpty(mappings)) {
+        if (Strings.isNotEmpty(mappings)) {
             serviceBuilder.scope(mappings);
         }
 

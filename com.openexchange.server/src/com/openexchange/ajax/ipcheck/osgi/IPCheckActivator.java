@@ -52,7 +52,6 @@ package com.openexchange.ajax.ipcheck.osgi;
 import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -88,10 +87,6 @@ public class IPCheckActivator extends HousekeepingActivator {
                     IPCheckServiceImpl.invalidateCaches();
                 }
 
-                @Override
-                public Interests getInterests() {
-                    return null;
-                }
             };
             registerService(ForcedReloadable.class, reloadable);
         }

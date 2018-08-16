@@ -211,7 +211,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 com.google.api.services.drive.model.File savedFile = new com.google.api.services.drive.model.File();
                 if (FileStorageFileAccess.NEW != file.getId()) {
                     savedFile.setId(file.getId());
-                    if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName()) && false == drive.files().get(file.getId()).execute().getTitle().equals(file.getFileName())) {
+                    if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && Strings.isNotEmpty(file.getFileName()) && false == drive.files().get(file.getId()).execute().getTitle().equals(file.getFileName())) {
                         /*
                          * first check if there is already such a file
                          */
@@ -342,7 +342,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             copy.setTitle(title);
             copy.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(destId)));
             if (null != update) {
-                if (false == Strings.isEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getTitle())) {
+                if (Strings.isNotEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getTitle())) {
                     copy.setTitle(update.getTitle());
                 }
             }
@@ -406,7 +406,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             com.google.api.services.drive.model.File patch = new com.google.api.services.drive.model.File();
             patch.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(destId)));
             if (null != update) {
-                if (false == Strings.isEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getTitle())) {
+                if (Strings.isNotEmpty(update.getTitle()) && (null == modifiedFields || modifiedFields.contains(File.Field.FILENAME)) && false == update.getTitle().equals(srcFile.getTitle())) {
                     patch.setTitle(update.getTitle());
                     title=update.getTitle();
                 }
@@ -645,7 +645,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
              *
              * Upload new version of existing file, adjusting metadata as requested
              */
-            if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName()) && false == drive.files().get(file.getId()).execute().getTitle().equals(file.getFileName())) {
+            if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && Strings.isNotEmpty(file.getFileName()) && false == drive.files().get(file.getId()).execute().getTitle().equals(file.getFileName())) {
                 /*
                  * first check if there is already such a file
                  */

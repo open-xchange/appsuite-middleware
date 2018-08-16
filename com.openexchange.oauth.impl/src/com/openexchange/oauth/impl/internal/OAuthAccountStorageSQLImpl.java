@@ -438,7 +438,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                         LOG.debug("{}", e.getMessage(), e);
                     }
                     String scopes = rs.getString(6);
-                    if (!Strings.isEmpty(scopes)) {
+                    if (Strings.isNotEmpty(scopes)) {
                         Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
                         account.setEnabledScopes(enabledScopes);
                     }
@@ -600,11 +600,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 try {
                     // Try using the new secret. Maybe this account doesn't need the migration
                     final String accessToken = rs.getString(2);
-                    if (!Strings.isEmpty(accessToken)) {
+                    if (Strings.isNotEmpty(accessToken)) {
                         cryptoService.decrypt(accessToken, newSecret);
                     }
                     final String accessSecret = rs.getString(3);
-                    if (!Strings.isEmpty(accessSecret)) {
+                    if (Strings.isNotEmpty(accessSecret)) {
                         cryptoService.decrypt(accessSecret, newSecret);
                     }
                 } catch (final OXException e) {
@@ -668,11 +668,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 try {
                     // Try using the secret.
                     final String accessToken = rs.getString(2);
-                    if (!Strings.isEmpty(accessToken)) {
+                    if (Strings.isNotEmpty(accessToken)) {
                         cryptoService.decrypt(accessToken, secret);
                     }
                     final String accessSecret = rs.getString(3);
-                    if (!Strings.isEmpty(accessSecret)) {
+                    if (Strings.isNotEmpty(accessSecret)) {
                         cryptoService.decrypt(accessSecret, secret);
                     }
                 } catch (final OXException e) {
@@ -742,11 +742,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 try {
                     // Try using the secret.
                     final String accessToken = rs.getString(2);
-                    if (!Strings.isEmpty(accessToken)) {
+                    if (Strings.isNotEmpty(accessToken)) {
                         cryptoService.decrypt(accessToken, secret);
                     }
                     final String accessSecret = rs.getString(3);
-                    if (!Strings.isEmpty(accessSecret)) {
+                    if (Strings.isNotEmpty(accessSecret)) {
                         cryptoService.decrypt(accessSecret, secret);
                     }
                 } catch (final OXException e) {

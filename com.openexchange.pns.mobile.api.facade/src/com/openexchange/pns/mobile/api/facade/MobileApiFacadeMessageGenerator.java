@@ -138,7 +138,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 String path = MessageDataUtil.getPath(messageData);
                 int unread = MessageDataUtil.getUnread(messageData);
 
-                if (false == Strings.isEmpty(subject) && false == Strings.isEmpty(sender)) {
+                if (Strings.isNotEmpty(subject) && Strings.isNotEmpty(sender)) {
                     // Non-silent push
                     StringBuilder sb = new StringBuilder(sender);
                     sb.append("\n");

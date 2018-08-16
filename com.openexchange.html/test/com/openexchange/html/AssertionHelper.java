@@ -68,7 +68,7 @@ public class AssertionHelper {
         try {
             String sanitized = service.sanitize(html, null, false, null, null);
             if (ignoreCase) {
-                if (!Strings.isEmpty(sanitized)) {
+                if (Strings.isNotEmpty(sanitized)) {
                     sanitized = sanitized.toLowerCase();
                 }
                 assertEquals("Unexpected HTML sanitize result", expected.toLowerCase(), sanitized);
@@ -94,7 +94,7 @@ public class AssertionHelper {
     public static void assertSanitized(HtmlService service, String html, String[] maliciousParams, AssertExpression ae) {
         try {
             String sanitized = service.sanitize(html, null, false, null, null);
-            if (!Strings.isEmpty(sanitized)) {
+            if (Strings.isNotEmpty(sanitized)) {
                 sanitized = sanitized.toLowerCase();
             }
             if (AssertExpression.NOT_CONTAINED.equals(ae)) {

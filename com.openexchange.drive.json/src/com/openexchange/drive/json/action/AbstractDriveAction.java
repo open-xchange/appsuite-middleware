@@ -166,7 +166,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * extract device name information if present
          */
         String device = requestData.getParameter("device");
-        if (false == Strings.isEmpty(device)) {
+        if (Strings.isNotEmpty(device)) {
             driveSession.setDeviceName(device);
         }
         /*
@@ -179,21 +179,21 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * extract push token if present
          */
         String pushToken = requestData.getParameter("pushToken");
-        if (false == Strings.isEmpty(pushToken)) {
+        if (Strings.isNotEmpty(pushToken)) {
             session.setParameter(DriveSession.PARAMETER_PUSH_TOKEN, pushToken);
         }
         /*
          * extract diagnostics parameter if present
          */
         String diagnostics = requestData.getParameter("diagnostics");
-        if (false == Strings.isEmpty(diagnostics)) {
+        if (Strings.isNotEmpty(diagnostics)) {
             driveSession.setDiagnostics(Boolean.valueOf(diagnostics));
         }
         /*
          * extract columns parameter to fields if present
          */
         String columnsValue = requestData.getParameter("columns");
-        if (false == Strings.isEmpty(columnsValue)) {
+        if (Strings.isNotEmpty(columnsValue)) {
             String[] splitted = Strings.splitByComma(columnsValue);
             int[] columnIDs = new int[splitted.length];
             for (int i = 0; i < splitted.length; i++) {

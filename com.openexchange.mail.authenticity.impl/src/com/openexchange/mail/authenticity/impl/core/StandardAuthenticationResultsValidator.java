@@ -305,7 +305,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
 
         if (!unknownResults.containsKey("reason")) {
             final String reason = extractComment(mechanism.getValue());
-            if (!Strings.isEmpty(reason)) {
+            if (Strings.isNotEmpty(reason)) {
                 unknownResults.put("reason", reason);
             }
         }

@@ -59,9 +59,7 @@ import com.openexchange.apps.manifests.json.ManifestBuilder;
 import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
@@ -204,10 +202,4 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
             manifestBuilder.reinitialize(initialManifests);
         }
     }
-
-    @Override
-    public Interests getInterests() {
-        return Reloadables.getInterestsForAll();
-    }
-
 }

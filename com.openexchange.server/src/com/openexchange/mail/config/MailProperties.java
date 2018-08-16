@@ -439,7 +439,7 @@ public final class MailProperties implements IMailProperties {
         {
             HostList ranges = HostList.EMPTY;
             String tmp = ConfigViews.getNonEmptyPropertyFrom("com.openexchange.mail.rateLimitDisabledRange", view);
-            if (false == Strings.isEmpty(tmp)) {
+            if (Strings.isNotEmpty(tmp)) {
                 ranges = HostList.valueOf(tmp);
             }
             params.ranges = ranges;
@@ -1156,7 +1156,7 @@ public final class MailProperties implements IMailProperties {
         {
             HostList ranges = HostList.EMPTY;
             String tmp = configuration.getProperty("com.openexchange.mail.rateLimitDisabledRange", "").trim();
-            if (false == Strings.isEmpty(tmp)) {
+            if (Strings.isNotEmpty(tmp)) {
                 ranges = HostList.valueOf(tmp);
             }
             this.ranges = ranges;

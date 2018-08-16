@@ -134,11 +134,11 @@ public class WrappingFilter implements Filter {
         this.protocolHeader = config.getProtocolHeader();
         this.isConsiderXForwards = config.isConsiderXForwards();
         this.echoHeaderName = config.getEchoHeader();
-        this.considerEchoHeader = !Strings.isEmpty(echoHeaderName);
+        this.considerEchoHeader = Strings.isNotEmpty(echoHeaderName);
         this.robotsMetaTag = config.getRobotsMetaTag();
-        this.considerRobotsMetaTag = !Strings.isEmpty(robotsMetaTag);
+        this.considerRobotsMetaTag = Strings.isNotEmpty(robotsMetaTag);
         this.contentSecurityPolicy = config.getContentSecurityPolicy();
-        this.considerContentSecurityPolicy = !Strings.isEmpty(contentSecurityPolicy);
+        this.considerContentSecurityPolicy = Strings.isNotEmpty(contentSecurityPolicy);
 
         this.checkTrackingIdInRequestParameters = config.isCheckTrackingIdInRequestParameters();
     }

@@ -259,7 +259,7 @@ public class ContactHaloImpl implements ContactHalo {
             // Load the associated contact
             resultContact = contactService.getUser(session, user.getId(), fields);
             contactsToMerge.add(resultContact);
-        } else if (false == Strings.isEmpty(resultContact.getEmail1())){
+        } else if (Strings.isNotEmpty(resultContact.getEmail1())) {
             // Try to find a contact
             ContactSearchObject contactSearch = new ContactSearchObject();
             String email = resultContact.getEmail1();
@@ -299,7 +299,7 @@ public class ContactHaloImpl implements ContactHalo {
          * try to decompose display name if no other "name" properties are already set and the contact is "new"
          */
         if (false == resultContact.containsObjectID() &&
-            resultContact.containsDisplayName() && false == Strings.isEmpty(resultContact.getDisplayName()) &&
+            resultContact.containsDisplayName() && Strings.isNotEmpty(resultContact.getDisplayName()) &&
             false == resultContact.containsGivenName() && false == resultContact.containsSurName() &&
             false == resultContact.containsNickname() && false == resultContact.containsCompany()) {
             new ParsedDisplayName(resultContact.getDisplayName()).applyTo(resultContact);

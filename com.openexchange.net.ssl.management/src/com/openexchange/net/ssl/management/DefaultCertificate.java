@@ -78,41 +78,41 @@ public class DefaultCertificate implements Certificate {
         Builder b = new Builder();
 
         String str = source.getFingerprint();
-        if (false == Strings.isEmpty(str)) {
+        if (Strings.isNotEmpty(str)) {
             b.fingerprint(str);
         }
 
         str = source.getCommonName();
-        if (false == Strings.isEmpty(str)) {
+        if (Strings.isNotEmpty(str)) {
             b.commonName(str);
         }
 
         b.expirationTimestamp(source.getExpirationTimestamp());
 
         str = source.getFailureReason();
-        if (false == Strings.isEmpty(str)) {
+        if (Strings.isNotEmpty(str)) {
             b.failureReason(str);
         }
 
         str = source.getHostName();
-        if (false == Strings.isEmpty(str)) {
+        if (Strings.isNotEmpty(str)) {
             b.hostName(str);
         }
 
         b.issuedOnTimestamp(source.getIssuedOnTimestamp());
 
         str = source.getIssuer();
-        if (false == Strings.isEmpty(str)) {
+        if (Strings.isNotEmpty(str)) {
             b.issuer(str);
         }
 
         str = source.getSerialNumber();
-        if (false == Strings.isEmpty(str)) {
+        if (Strings.isNotEmpty(str)) {
             b.serialNumber(str);
         }
 
         str = source.getSignature();
-        if (false == Strings.isEmpty(str)) {
+        if (Strings.isNotEmpty(str)) {
             b.signature(str);
         }
 

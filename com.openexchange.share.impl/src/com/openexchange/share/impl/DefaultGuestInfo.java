@@ -147,7 +147,7 @@ public class DefaultGuestInfo implements GuestInfo {
     public String getPassword() {
         if (AuthenticationMode.ANONYMOUS_PASSWORD == getAuthentication()) {
             String cryptedPassword = guestUser.getUserPassword();
-            if (false == Strings.isEmpty(cryptedPassword)) {
+            if (Strings.isNotEmpty(cryptedPassword)) {
                 try {
                     return services.getService(PasswordMechFactory.class).get(guestUser.getPasswordMech()).decode(cryptedPassword);
                 } catch (OXException e) {

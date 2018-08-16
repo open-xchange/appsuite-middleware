@@ -361,7 +361,7 @@ public final class SieveTextFilter {
         final Map<String, List<Rule>> flagged = new HashMap<String, List<Rule>>();
         ClientRulesAndRequire retval = new ClientRulesAndRequire(requires, rules);
         // The flag is checked here because if no flag is given we can omit some checks which increases performance
-        if (!Strings.isEmpty(flag)) {
+        if (Strings.isNotEmpty(flag)) {
             for (final Rule rule : rules) {
                 final RuleComment ruleComment = rule.getRuleComment();
                 final RequireCommand requireCommand = rule.getRequireCommand();

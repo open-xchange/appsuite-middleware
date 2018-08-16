@@ -133,10 +133,6 @@ public class GcmPushNotificationTransportActivator extends HousekeepingActivator
                 GcmPushNotificationTransport.invalidateEnabledCache();
             }
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
         });
 
         registerService(Reloadable.class, this);

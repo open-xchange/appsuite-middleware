@@ -60,6 +60,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import javax.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IExecutorService;
@@ -79,7 +80,10 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Runnable, CallbackRegistry {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CallbackRegistryImpl.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CallbackRegistryImpl.class);
+    }
 
     /** A value kept in managed map */
     private static final class UrlAndStamp {
@@ -216,8 +220,7 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
                 }
             }
         } catch (final Exception e) {
-            final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CallbackRegistryImpl.class);
-            logger.error("", e);
+            LoggerHolder.LOG.error("", e);
         }
     }
 

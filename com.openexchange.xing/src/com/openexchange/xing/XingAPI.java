@@ -829,7 +829,7 @@ public class XingAPI<S extends Session> {
             // Add parameters limit & offset
             final List<String> params = new ArrayList<String>(4);
 
-            if (!Strings.isEmpty(optMessage)) {
+            if (Strings.isNotEmpty(optMessage)) {
                 params.add("message");
                 params.add(optMessage);
             }
@@ -871,7 +871,7 @@ public class XingAPI<S extends Session> {
             params.add("to_emails");
             params.add(collectionToCsv(addresses));
 
-            if (!Strings.isEmpty(optMessage)) {
+            if (Strings.isNotEmpty(optMessage)) {
                 params.add("message");
                 params.add(optMessage);
             }
@@ -1425,20 +1425,20 @@ public class XingAPI<S extends Session> {
             final JSONObject jLeadDesc = new JSONObject(10);
             {
                 final String tmp = leadDescription.getEmail();
-                if (!Strings.isEmpty(tmp)) {
+                if (Strings.isNotEmpty(tmp)) {
                     email = tmp;
                     jLeadDesc.put("email", tmp);
                 }
             }
             {
                 final String tmp = leadDescription.getFirstName();
-                if (!Strings.isEmpty(tmp)) {
+                if (Strings.isNotEmpty(tmp)) {
                     jLeadDesc.put("first_name", tmp);
                 }
             }
             {
                 final String tmp = leadDescription.getLastName();
-                if (!Strings.isEmpty(tmp)) {
+                if (Strings.isNotEmpty(tmp)) {
                     jLeadDesc.put("last_name", tmp);
                 }
             }

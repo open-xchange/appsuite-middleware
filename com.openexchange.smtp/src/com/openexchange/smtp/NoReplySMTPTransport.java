@@ -191,7 +191,7 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
 
         @Override
         public boolean isSmtpAuth() {
-            return !Strings.isEmpty(noReplyConfig.getLogin()) && !Strings.isEmpty(noReplyConfig.getPassword());
+            return Strings.isNotEmpty(noReplyConfig.getLogin()) && Strings.isNotEmpty(noReplyConfig.getPassword());
         }
 
         @Override

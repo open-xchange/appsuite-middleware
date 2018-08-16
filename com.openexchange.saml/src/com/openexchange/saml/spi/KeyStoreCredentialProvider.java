@@ -108,7 +108,7 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
 
         try {
             KeyStore keyStore = initKeyStore(keyStorePath, keyStorePassword);
-            if (!Strings.isEmpty(idpCertAlias)) {
+            if (Strings.isNotEmpty(idpCertAlias)) {
                 Certificate certificate = keyStore.getCertificate(idpCertAlias);
                 if (certificate == null) {
                     throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create("key store contains no certificate for alias '" + idpCertAlias + "'");

@@ -583,7 +583,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     // Move to trash
                     int defaultFolderId = oxfolderAccess.getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE, FolderObject.PUBLIC);
                     int folderId = fo.getObjectID();
-                    String name = fo.containsFolderName() && !Strings.isEmpty(fo.getFolderName()) ? fo.getFolderName() : storageObject.getFolderName();
+                    String name = fo.containsFolderName() && Strings.isNotEmpty(fo.getFolderName()) ? fo.getFolderName() : storageObject.getFolderName();
                     try {
                         while (-1 != OXFolderSQL.lookUpFolderOnUpdate(folderId, newParentFolderID, name, storageObject.getModule(), readCon, ctx)) {
                             name = incrementSequenceNumber(name);

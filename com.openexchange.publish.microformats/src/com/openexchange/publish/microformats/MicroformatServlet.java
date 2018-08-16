@@ -226,7 +226,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 if (null != hostnameService) {
                     try {
                         String hostName = hostnameService.getHostname(publication.getUserId(), publication.getContext().getContextId());
-                        if (false == Strings.isEmpty(hostName)) {
+                        if (Strings.isNotEmpty(hostName)) {
                             // Set server name as returned by HostnameService
                             httpRequest = new CustomizableHttpServletRequest(httpRequest).setServerName(hostName);
                         }

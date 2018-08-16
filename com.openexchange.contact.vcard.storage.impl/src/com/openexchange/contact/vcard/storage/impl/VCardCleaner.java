@@ -95,7 +95,7 @@ public class VCardCleaner implements EventHandler {
                 Contact contact = (Contact) commonEvent.getActionObj();
                 if (null != contact) {
                     String vCardID = contact.getVCardId();
-                    if (!Strings.isEmpty(vCardID)) {
+                    if (Strings.isNotEmpty(vCardID)) {
                         try {
                             VCardStorageService vCardStorageService = vCardStorageFactory.getVCardStorageService(configViewFactory, contextID);
                             if (vCardStorageService != null) {

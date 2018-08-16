@@ -682,7 +682,7 @@ public class DispatcherServlet extends SessionServlet {
                 // Status code (202) indicating that a request was accepted for processing, but was not completed.
                 httpServletResponse.setContentType(null);
                 String retryAfter = result.getHeader(RETRY_AFTER);
-                if (!Strings.isEmpty(retryAfter)) {
+                if (Strings.isNotEmpty(retryAfter)) {
                     httpServletResponse.addHeader(RETRY_AFTER, retryAfter);
                 }
                 break;

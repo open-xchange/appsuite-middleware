@@ -108,7 +108,7 @@ public class CookieLifetime implements PreferencesItemService {
                  * Check if auto-login is enabled
                  */
                 String hostName = (String) session.getParameter(Session.PARAM_HOST_NAME);
-                if (null != service && ((!Strings.isEmpty(hostName) && LoginServlet.isAutologinActivated(hostName)) || service.getBoolProperty("com.openexchange.sessiond.autologin", false))) {
+                if (null != service && ((Strings.isNotEmpty(hostName) && LoginServlet.isAutologinActivated(hostName)) || service.getBoolProperty("com.openexchange.sessiond.autologin", false))) {
                     maxAge = ConfigTools.parseTimespanSecs(service.getProperty("com.openexchange.cookie.ttl", "1W"));
                 } 
                 setting.setSingleValue(Integer.valueOf(maxAge));

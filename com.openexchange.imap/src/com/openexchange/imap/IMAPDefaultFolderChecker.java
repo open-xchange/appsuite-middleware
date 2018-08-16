@@ -962,7 +962,7 @@ public class IMAPDefaultFolderChecker {
                         return desiredFullName;
                     }
                     // Check for possibly wrong namespace
-                    if (!Strings.isEmpty(namespace) && !isFullNameLocatedInNamespace(desiredFullName, namespace, sep)) {
+                    if (Strings.isNotEmpty(namespace) && !isFullNameLocatedInNamespace(desiredFullName, namespace, sep)) {
                         int sepPos = desiredFullName.lastIndexOf(sep);
                         String name = sepPos > 0 ? desiredFullName.substring(sepPos + 1) : desiredFullName;
                         String checkedFullName = doCheckFullNameFor(index, "", namespace + name, sep, type, subscribe, namespace, specialUseInfo, modified, accountChanged);

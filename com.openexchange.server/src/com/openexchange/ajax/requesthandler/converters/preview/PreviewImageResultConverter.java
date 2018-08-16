@@ -192,7 +192,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
             // Get eTag from result that provides the IFileHolder
             final String eTag = result.getHeader("ETag");
-            final boolean isValidEtag = !Strings.isEmpty(eTag);
+            final boolean isValidEtag = Strings.isNotEmpty(eTag);
             final String previewLanguage = getUserLanguage(session);
             if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                 final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, requestData, previewLanguage);

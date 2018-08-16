@@ -89,7 +89,7 @@ public class ListenAction extends AbstractDriveAction {
          */
         long timeout;
         String timeoutValue = requestData.getParameter("timeout");
-        if (false == Strings.isEmpty(timeoutValue)) {
+        if (Strings.isNotEmpty(timeoutValue)) {
             try {
                 timeout = Long.valueOf(timeoutValue).longValue();
             } catch (NumberFormatException e) {
@@ -162,7 +162,7 @@ public class ListenAction extends AbstractDriveAction {
         ConfigurationService configurationService = Services.getService(ConfigurationService.class);
         if (null != configurationService) {
             String value = configurationService.getProperty("com.openexchange.drive.listenTimeout");
-            if (false == Strings.isEmpty(value)) {
+            if (Strings.isNotEmpty(value)) {
                 try {
                     return Long.valueOf(value).longValue();
                 } catch (NumberFormatException e) {

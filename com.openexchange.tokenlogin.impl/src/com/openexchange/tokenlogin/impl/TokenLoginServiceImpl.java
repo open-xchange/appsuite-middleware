@@ -159,7 +159,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             final Map<String, TokenLoginSecret> map = new LinkedHashMap<String, TokenLoginSecret>(16);
             String line;
             while ((line = reader.readLine()) != null) {
-                if (!Strings.isEmpty(line)) {
+                if (Strings.isNotEmpty(line)) {
                     line = line.trim();
                     if (!line.startsWith("#") && !line.startsWith("!")) {
                         // Parse secret + parameters
@@ -195,7 +195,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     }
 
     private static void parseParameter(final String param, final Map<String, Object> params) {
-        if (!Strings.isEmpty(param)) {
+        if (Strings.isNotEmpty(param)) {
             final int pos = param.indexOf('=');
             if (pos < 0) {
                 params.put(param, Boolean.TRUE);

@@ -190,7 +190,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
                 }
             }
         } else {
-            if (!Strings.isEmpty(tmp)) {
+            if (Strings.isNotEmpty(tmp)) {
                 throw new InvalidDataException("\"" + OPT_NAME_NUMBER_OF_SCHMEMAS_LONG + "\" option can only be set, if \"" + OPT_NAME_CREATE_SCHMEMAS_LONG + "\" is set to \"true\"");
             }
             numberOfSchemas = Integer.valueOf(0);
