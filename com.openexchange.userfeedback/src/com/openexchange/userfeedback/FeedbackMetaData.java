@@ -57,14 +57,14 @@ package com.openexchange.userfeedback;
  */
 public class FeedbackMetaData {
 
-    private final String type;
-    private final long date;
-    private final int ctxId;
-    private final int userId;
-    private final String loginName;
-    private final long typeId;
-    private final String uiVersion;
-    private final String serverVersion;
+    final String type;
+    final long date;
+    final int ctxId;
+    final int userId;
+    final String loginName;
+    final long typeId;
+    final String uiVersion;
+    final String serverVersion;
 
     FeedbackMetaData(String type, long date, int ctxId, int userId, String loginName, long typeId, String uiVersion, String serverVersion) {
         super();
@@ -156,14 +156,14 @@ public class FeedbackMetaData {
     /** The builder for an <code>FeedbackMetaData</code> instance */
     public static class Builder {
 
-        private String type;
-        private long date;
-        private int ctxId;
-        private int userId;
-        private String loginName;
-        private long typeId;
-        private String uiVersion;
-        private String serverVersion;
+        String type;
+        long date;
+        int ctxId;
+        int userId;
+        String loginName;
+        long typeId;
+        String uiVersion;
+        String serverVersion;
 
         Builder() {
             super();
@@ -182,7 +182,7 @@ public class FeedbackMetaData {
 
         /**
          * Sets the feedback type
-         * 
+         *
          * @param type The type to set
          * @return This builder
          */
@@ -193,7 +193,7 @@ public class FeedbackMetaData {
 
         /**
          * Sets the date
-         * 
+         *
          * @param date The date to set
          * @return This builder
          */
@@ -204,7 +204,7 @@ public class FeedbackMetaData {
 
         /**
          * Sets the context id
-         * 
+         *
          * @param type The ctxId to set
          * @return This builder
          */
@@ -215,7 +215,7 @@ public class FeedbackMetaData {
 
         /**
          * Sets the user id
-         * 
+         *
          * @param type The user id to set
          * @return This builder
          */
@@ -226,7 +226,7 @@ public class FeedbackMetaData {
 
         /**
          * Sets the loginName
-         * 
+         *
          * @param type The loginName to set
          * @return This builder
          */
@@ -237,7 +237,7 @@ public class FeedbackMetaData {
 
         /**
          * Sets the feedback type id
-         * 
+         *
          * @param type The type id to set
          * @return This builder
          */
@@ -248,7 +248,7 @@ public class FeedbackMetaData {
 
         /**
          * Sets the UI Version
-         * 
+         *
          * @param type The uiVersion to set
          * @return This builder
          */
@@ -259,7 +259,7 @@ public class FeedbackMetaData {
 
         /**
          * Sets the Server Version
-         * 
+         *
          * @param type The serverVersion to set
          * @return This builder
          */
