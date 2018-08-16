@@ -60,10 +60,9 @@ import com.openexchange.server.ServiceLookup;
  * {@link OAuthServiceMetaDataRegisterer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OAuthServiceMetaDataRegisterer extends AbstractCloudStorageOAuthServiceMetaDataRegisterer {
-
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
@@ -71,8 +70,7 @@ public class OAuthServiceMetaDataRegisterer extends AbstractCloudStorageOAuthSer
      * @param context The bundle context
      */
     public OAuthServiceMetaDataRegisterer(BundleContext context, ServiceLookup services) {
-        super(context, KnownApi.BOX_COM.getServiceId());
-        this.services = services;
+        super(context, services, KnownApi.BOX_COM.getServiceId());
     }
 
     /*
@@ -81,7 +79,7 @@ public class OAuthServiceMetaDataRegisterer extends AbstractCloudStorageOAuthSer
      * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageOAuthServiceMetaDataRegisterer#getRegisterer(org.osgi.framework.BundleContext)
      */
     @Override
-    protected ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer(BundleContext context) {
-        return new BoxServiceRegisterer(context, services);
+    protected ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer() {
+        return new BoxServiceRegisterer(getContext(), getServiceLookup());
     }
 }

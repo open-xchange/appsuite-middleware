@@ -55,6 +55,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link AbstractCloudStorageOAuthServiceMetaDataRegisterer}
@@ -65,23 +66,26 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 public abstract class AbstractCloudStorageOAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
 
     private final BundleContext context;
+    private final ServiceLookup services;
     private final String identifier;
     private volatile ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker;
 
     /**
      * Initialises a new {@link AbstractCloudStorageOAuthServiceMetaDataRegisterer}.
+     * 
+     * @param services TODO
      */
-    public AbstractCloudStorageOAuthServiceMetaDataRegisterer(BundleContext context, String identifier) {
+    public AbstractCloudStorageOAuthServiceMetaDataRegisterer(BundleContext context, ServiceLookup services, String identifier) {
         super();
         this.context = context;
+        this.services = services;
         this.identifier = identifier;
     }
 
     /**
-     * @param context
      * @return
      */
-    protected abstract ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer(BundleContext context);
+    protected abstract ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer();
 
     /*
      * (non-Javadoc)
@@ -90,13 +94,13 @@ public abstract class AbstractCloudStorageOAuthServiceMetaDataRegisterer impleme
      */
     @Override
     public OAuthServiceMetaData addingService(ServiceReference<OAuthServiceMetaData> reference) {
-        OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
+        OAuthServiceMetaData oAuthServiceMetaData = getContext().getService(reference);
         if (false == identifier.equals(oAuthServiceMetaData.getId())) {
             // Not of interest
-            context.ungetService(reference);
+            getContext().ungetService(reference);
             return null;
         }
-        ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker = new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, getRegisterer(context));
+        ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker = new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(getContext(), FileStorageAccountManagerProvider.class, getRegisterer());
         this.tracker = tracker;
         tracker.open();
         return oAuthServiceMetaData;
@@ -130,6 +134,24 @@ public abstract class AbstractCloudStorageOAuthServiceMetaDataRegisterer impleme
                 this.tracker = null;
             }
         }
-        context.ungetService(reference);
+        getContext().ungetService(reference);
+    }
+
+    /**
+     * Gets the context
+     *
+     * @return The context
+     */
+    public BundleContext getContext() {
+        return context;
+    }
+
+    /**
+     * Gets the services
+     *
+     * @return The services
+     */
+    public ServiceLookup getServiceLookup() {
+        return services;
     }
 }

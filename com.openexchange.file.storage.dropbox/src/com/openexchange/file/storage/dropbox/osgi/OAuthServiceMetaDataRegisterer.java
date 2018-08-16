@@ -64,16 +64,13 @@ import com.openexchange.server.ServiceLookup;
  */
 public class OAuthServiceMetaDataRegisterer extends AbstractCloudStorageOAuthServiceMetaDataRegisterer {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
      *
      * @param context The bundle context
      */
     public OAuthServiceMetaDataRegisterer(BundleContext context, ServiceLookup services) {
-        super(context, KnownApi.DROPBOX.getServiceId());
-        this.services = services;
+        super(context, services, KnownApi.DROPBOX.getServiceId());
     }
 
     /*
@@ -82,7 +79,7 @@ public class OAuthServiceMetaDataRegisterer extends AbstractCloudStorageOAuthSer
      * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageOAuthServiceMetaDataRegisterer#getRegisterer(org.osgi.framework.BundleContext)
      */
     @Override
-    protected ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer(BundleContext context) {
-        return new DropboxServiceRegisterer(context, services);
+    protected ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer() {
+        return new DropboxServiceRegisterer(getContext(), getServiceLookup());
     }
 }
