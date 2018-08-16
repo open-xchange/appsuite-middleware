@@ -171,7 +171,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             if (!poolable) {
                 numBroken++;
             }
-            poolable &= metaData.isDeprecated();
+            poolable &= !metaData.isDeprecated(); 
             poolable &= (maxLifeTime <= 0 || metaData.getLiveTime() < maxLifeTime);
         } else {
             poolable = false;

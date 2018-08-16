@@ -196,7 +196,7 @@ public class PooledData<T> {
      * Get a value indicating if the pooled object is deprecated. If so the object needs to be destroyed
      *
      * @return <code>true</code> if the pooled object is deprecated
-     *         <code>false</code>otherwise
+     *         <code>false</code> otherwise
      *
      */
     public boolean isDeprecated() {
