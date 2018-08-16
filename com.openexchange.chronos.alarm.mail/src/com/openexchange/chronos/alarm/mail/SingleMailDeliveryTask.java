@@ -348,7 +348,7 @@ class SingleMailDeliveryTask implements Runnable {
                 CalendarProvider calendarProvider = calendarProviderRegistry.getCalendarProvider(calendarAccount.getProviderId());
                 if (calendarProvider instanceof AdministrativeCalendarProvider) {
                     adminCalProvider = (AdministrativeCalendarProvider) calendarProvider;
-                    event = adminCalProvider.getEventByAlarm(ctx, calendarAccount, trigger.getEventId());
+                    event = adminCalProvider.getEventByAlarm(ctx, calendarAccount, trigger.getEventId(), trigger.getRecurrenceId());
                 } else {
                     LOG.trace("Unable to load event for the given provider.");
                     return null;

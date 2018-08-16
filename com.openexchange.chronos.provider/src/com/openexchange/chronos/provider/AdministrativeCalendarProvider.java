@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider;
 
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
@@ -67,10 +68,11 @@ public interface AdministrativeCalendarProvider extends CalendarProvider {
      * @param context The context
      * @param account The {@link CalendarAccount}
      * @param eventId The event id
+     * @param recurrence An optional event {@link RecurrenceId}
      * @return The event for the alarm
      * @throws OXException
      */
-    public Event getEventByAlarm(Context context, CalendarAccount account, String eventId) throws OXException;
+    public Event getEventByAlarm(Context context, CalendarAccount account, String eventId, RecurrenceId recurrence) throws OXException;
 
     /**
      * Touches the event defined by the event id

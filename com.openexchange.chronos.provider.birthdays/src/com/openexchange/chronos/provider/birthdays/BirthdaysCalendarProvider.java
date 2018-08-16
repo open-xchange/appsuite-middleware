@@ -65,6 +65,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.UserConfigWrapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -327,14 +328,20 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
     }
 
     @Override
-    public Event getEventByAlarm(Context context, CalendarAccount account, String eventId) throws OXException {
+    public Event getEventByAlarm(Context context, CalendarAccount account, String eventId, RecurrenceId recurrenceId) throws OXException {
         ServerSession session = ServerSessionAdapter.valueOf(account.getUserId(), context.getContextId());
         EventConverter eventConverter = new EventConverter(services, session.getUser().getLocale(), account.getUserId());
         int[] decodeEventId = eventConverter.decodeEventId(eventId);
         ContactService contactService = Tools.requireService(ContactService.class, services);
         Contact contact = contactService.getContact(session, String.valueOf(decodeEventId[0]), String.valueOf(decodeEventId[1]));
-        Event seriesMaster = eventConverter.getSeriesMaster(contact);
-        return new AlarmHelper(services, context, account).applyAlarms(seriesMaster);
+        Event event = null;
+        if(recurrenceId != null) {
+            event = eventConverter.getOccurrence(contact, recurrenceId);
+        } else {
+            event = eventConverter.getSeriesMaster(contact);
+        }
+
+        return new AlarmHelper(services, context, account).applyAlarms(event);
     }
 
     @Override

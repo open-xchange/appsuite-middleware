@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AdministrativeCalendarProvider;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
@@ -176,10 +177,15 @@ public class InternalCalendarProvider implements FolderCalendarProvider, AutoPro
     }
 
     @Override
-    public Event getEventByAlarm(Context context, CalendarAccount account, String eventId) throws OXException {
+    public Event getEventByAlarm(Context context, CalendarAccount account, String eventId, RecurrenceId recurrenceId) throws OXException {
         CalendarStorageFactory factory = Tools.requireService(CalendarStorageFactory.class, services);
         CalendarStorage storage = factory.create(context, account.getAccountId(), optEntityResolver(context.getContextId()));
-        Event result = storage.getEventStorage().loadEvent(eventId, null);
+        Event result;
+        if(recurrenceId == null) {
+            result = storage.getEventStorage().loadEvent(eventId, null);
+        } else {
+            result = storage.getEventStorage().loadException(eventId, recurrenceId, null);
+        }
         return storage.getUtilities().loadAdditionalEventData(account.getUserId(), result, null);
     }
 
