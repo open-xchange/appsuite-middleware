@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.exception.OXException;
@@ -72,6 +73,7 @@ import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.image.ImageDataSource;
@@ -353,7 +355,17 @@ public class PermissionResolver {
                 }
             }
         }
-        cachePermissionEntities(userIDs, groupIDs);
+        boolean allEntitiesFound = cachePermissionEntities(userIDs, groupIDs);
+        if (false == allEntitiesFound) {
+            // Invalidate cache
+            for (FolderObject folder : folders) {
+                try {
+                    FolderCacheManager.getInstance().removeFolderObject(folder.getObjectID(), session.getContext());
+                } catch (final OXException e) {
+                    LOGGER.debug("Failed to drop folder cache entry", e);
+                }
+            }
+        }
     }
 
     /**
@@ -388,16 +400,19 @@ public class PermissionResolver {
      *
      * @param userIDs The identifiers of the users to cache
      * @param groupIDs The identifiers of the groups to cache
+     * @return <code>true</code> if all users/groups were found; otherwise <code>false</code>
      */
-    private void cachePermissionEntities(Set<Integer> userIDs, Set<Integer> groupIDs) {
+    private boolean cachePermissionEntities(Set<Integer> userIDs, Set<Integer> groupIDs) {
         /*
          * fetch users & user contacts
          */
+        boolean allEntitiesFound = true;
         if (0 < userIDs.size()) {
+            UserService userService = services.getService(UserService.class);
             List<Integer> guestUserIDs = new ArrayList<Integer>();
             List<Integer> regularUserIDs = new ArrayList<Integer>();
             try {
-                for (User user : services.getService(UserService.class).getUser(session.getContext(), I2i(userIDs))) {
+                for (User user : userService.getUser(session.getContext(), I2i(userIDs))) {
                     Integer id = I(user.getId());
                     knownUsers.put(id, user);
                     if (user.isGuest()) {
@@ -407,7 +422,28 @@ public class PermissionResolver {
                     }
                 }
             } catch (OXException e) {
-                LOGGER.error("Error getting users for permission entities", e);
+                if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                    // Retry one-by-one...
+                    for (Integer userID : userIDs) {
+                        try {
+                            User user = userService.getUser(userID.intValue(), session.getContext());
+                            knownUsers.put(userID, user);
+                            if (user.isGuest()) {
+                                guestUserIDs.add(userID);
+                            } else {
+                                regularUserIDs.add(userID);
+                            }
+                        } catch (OXException x) {
+                            if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                                LOGGER.error("Error getting users for permission entities", x);
+                            }
+                            // Apparently no such user exists. Ignore
+                            allEntitiesFound = false;
+                        }
+                    }
+                } else {
+                    LOGGER.error("Error getting users for permission entities", e);
+                }
             }
             if (0 < regularUserIDs.size()) {
                 SearchIterator<Contact> searchIterator = null;
@@ -444,10 +480,16 @@ public class PermissionResolver {
                 try {
                     knownGroups.put(groupID, groupService.getGroup(session.getContext(), i(groupID)));
                 } catch (OXException e) {
-                    LOGGER.error("Error getting groups for permission entities", e);
+                    if (LdapExceptionCode.GROUP_NOT_FOUND.equals(e)) {
+                        // Apparently no such group exists. Ignore
+                        allEntitiesFound = false;
+                    } else {
+                        LOGGER.error("Error getting groups for permission entities", e);
+                    }
                 }
             }
         }
+        return allEntitiesFound;
     }
 
 }
