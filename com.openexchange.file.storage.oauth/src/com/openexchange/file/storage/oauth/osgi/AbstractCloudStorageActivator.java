@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,57 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.osgi;
+package com.openexchange.file.storage.oauth.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator;
-import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.timer.TimerService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
- * {@link DropboxActivator} - Activator for Dropbox bundle.
+ * {@link AbstractCloudStorageActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class DropboxActivator extends AbstractCloudStorageActivator {
+public abstract class AbstractCloudStorageActivator extends HousekeepingActivator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractCloudStorageActivator.class);
 
     /**
-     * Initializes a new {@link DropboxActivator}.
+     * Initialises a new {@link AbstractCloudStorageActivator}.
      */
-    public DropboxActivator() {
+    public AbstractCloudStorageActivator() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, OAuthAccessRegistryService.class, SSLConfigurationService.class, ConfigViewFactory.class };
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     */
     @Override
     protected void startBundle() throws Exception {
-        DropboxServices.setServices(this);
-        super.startBundle();
-    }
-
-    @Override
-    public <S> void registerService(final Class<S> clazz, final S service) {
-        super.registerService(clazz, service);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
         try {
-            super.stopBundle();
-            cleanUp();
-            DropboxServices.setServices(null);
+            BundleContext context = this.context;
+            // Register the OAuthServiceMetadata tracker
+            track(OAuthServiceMetaData.class, getServiceRegisterer(context));
+            openTrackers();
+            // Register event handler
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
+            registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, getAPI()), serviceProperties);
         } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(DropboxActivator.class).error("", e);
+            LOG.error("", e);
             throw e;
         }
     }
@@ -110,20 +105,25 @@ public final class DropboxActivator extends AbstractCloudStorageActivator {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getServiceRegisterer(org.osgi.framework.BundleContext)
+     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
      */
     @Override
-    protected ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> getServiceRegisterer(BundleContext context) {
-        return new OAuthServiceMetaDataRegisterer(context, this);
+    public void stop(BundleContext context) throws Exception {
+        super.stop(context);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns the {@link ServiceTrackerCustomizer} for the {@link OAuthServiceMetaData} relevant for the
+     * specific cloud storage
      * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getAPI()
+     * @return the {@link ServiceTrackerCustomizer} for the {@link OAuthServiceMetaData} relevant for the
      */
-    @Override
-    protected KnownApi getAPI() {
-        return KnownApi.DROPBOX;
-    }
+    protected abstract ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> getServiceRegisterer(BundleContext context);
+
+    /**
+     * Returns the {@link KnownApi} for the cloud storage
+     * 
+     * @return the {@link KnownApi} for the cloud storage
+     */
+    protected abstract KnownApi getAPI();
 }

@@ -50,66 +50,39 @@
 package com.openexchange.file.storage.dropbox.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageOAuthServiceMetaDataRegisterer;
+import com.openexchange.oauth.KnownApi;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> {
+public class OAuthServiceMetaDataRegisterer extends AbstractCloudStorageOAuthServiceMetaDataRegisterer {
 
-    private final BundleContext context;
-    private final String identifier;
-    private volatile ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
      *
      * @param context The bundle context
      */
-    public OAuthServiceMetaDataRegisterer(BundleContext context) {
-        super();
-        identifier = "com.openexchange.oauth.dropbox";
-        this.context = context;
+    public OAuthServiceMetaDataRegisterer(BundleContext context, ServiceLookup services) {
+        super(context, KnownApi.DROPBOX.getServiceId());
+        this.services = services;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageOAuthServiceMetaDataRegisterer#getRegisterer(org.osgi.framework.BundleContext)
+     */
     @Override
-    public OAuthServiceMetaData addingService(ServiceReference<OAuthServiceMetaData> reference) {
-        OAuthServiceMetaData oAuthServiceMetaData = context.getService(reference);
-        if (identifier.equals(oAuthServiceMetaData.getId())) {
-            DropboxServiceRegisterer registerer = new DropboxServiceRegisterer(context);
-            ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker = new ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider>(context, FileStorageAccountManagerProvider.class, registerer);
-            this.tracker = tracker;
-            tracker.open();
-            return oAuthServiceMetaData;
-        }
-        // Not of interest
-        context.ungetService(reference);
-        return null;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<OAuthServiceMetaData> reference, OAuthServiceMetaData service) {
-        // nothing to do here
-    }
-
-    @Override
-    public void removedService(ServiceReference<OAuthServiceMetaData> reference, OAuthServiceMetaData service) {
-        if (null != service) {
-            OAuthServiceMetaData oAuthServiceMetaData = service;
-            if (identifier.equals(oAuthServiceMetaData.getId())) {
-                ServiceTracker<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> tracker = this.tracker;
-                if (null != tracker) {
-                    tracker.close();
-                    this.tracker = null;
-                }
-            }
-            context.ungetService(reference);
-        }
+    protected ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer(BundleContext context) {
+        return new DropboxServiceRegisterer(context, services);
     }
 }

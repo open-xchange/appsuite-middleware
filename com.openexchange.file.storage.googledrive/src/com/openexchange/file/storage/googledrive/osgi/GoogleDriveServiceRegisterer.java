@@ -50,136 +50,68 @@
 package com.openexchange.file.storage.googledrive.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageAccountDeleteListener;
-import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
 import com.openexchange.file.storage.googledrive.GoogleDriveFileStorageService;
 import com.openexchange.file.storage.googledrive.oauth.GoogleDriveOAuthAccountAssociationProvider;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
+import com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link GoogleDriveServiceRegisterer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class GoogleDriveServiceRegisterer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
-
-    private final BundleContext context;
-    private FileStorageAccountManagerProvider provider; // guarded by synchronized
-    private GoogleDriveFileStorageService service; // guarded by synchronized
-    private ServiceRegistration<FileStorageService> serviceRegistration; // guarded by synchronized
-    private ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration; // guarded by synchronized
-    private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration; // guarded by synchronized
-    private ServiceRegistration<FileStorageAccountDeleteListener> deleteListenerRegistration;
+public final class GoogleDriveServiceRegisterer extends AbstractCloudStorageServiceRegisterer {
 
     /**
      * Initializes a new {@link GoogleDriveServiceRegisterer}.
      */
-    public GoogleDriveServiceRegisterer(final BundleContext context) {
-        super();
-        this.context = context;
+    public GoogleDriveServiceRegisterer(BundleContext context, ServiceLookup services) {
+        super(context, services);
     }
 
-    /** For testing only */
-    public GoogleDriveFileStorageService getService() {
-        return service;
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup)
+     */
     @Override
-    public FileStorageAccountManagerProvider addingService(final ServiceReference<FileStorageAccountManagerProvider> reference) {
-        final FileStorageAccountManagerProvider provider = context.getService(reference);
-        if (!provider.supports(GoogleDriveConstants.ID)) {
-            context.ungetService(reference);
-            return null;
-        }
-        synchronized (this) {
-            GoogleDriveFileStorageService service = this.service;
-            if (null == service) {
-                /*
-                 * Try to create Google Drive service
-                 */
-                service = new GoogleDriveFileStorageService(Services.getServiceLookup());
-                this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
-                this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
-                this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new GoogleDriveOAuthAccountAssociationProvider(service), null);
-                this.deleteListenerRegistration = context.registerService(FileStorageAccountDeleteListener.class, service, null);
-                this.service = service;
-                this.provider = provider;
-            } else {
-                /*
-                 * Already created before, but new provider
-                 */
-                CompositeFileStorageAccountManagerProvider compositeProvider = service.getCompositeAccountManager();
-                if (null == compositeProvider) {
-                    compositeProvider = new CompositeFileStorageAccountManagerProvider();
-                    compositeProvider.addProvider(this.provider);
-                    unregisterService(null);
-                    service = new GoogleDriveFileStorageService(Services.getServiceLookup(), compositeProvider);
-                    this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
-                    this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
-                    this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new GoogleDriveOAuthAccountAssociationProvider(service), null);
-                    this.service = service;
-                    this.provider = compositeProvider;
-                }
-                compositeProvider.addProvider(provider);
-            }
-        }
-        return provider;
+    protected AbstractOAuthFileStorageService getCloudFileStorageService(ServiceLookup serviceLookup) {
+        return new GoogleDriveFileStorageService(serviceLookup);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup, com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider)
+     */
     @Override
-    public void modifiedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider provider) {
-        // Ignore
+    protected AbstractOAuthFileStorageService getCloudFileStorageService(ServiceLookup serviceLookup, CompositeFileStorageAccountManagerProvider compositeProvider) {
+        return new GoogleDriveFileStorageService(serviceLookup, compositeProvider);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getOAuthAccountAssociationProvider(com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService)
+     */
     @Override
-    public void removedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider provider) {
-        if (null != provider) {
-            synchronized (this) {
-                final CompositeFileStorageAccountManagerProvider compositeProvider = this.service.getCompositeAccountManager();
-                if (null == compositeProvider) {
-                    unregisterService(reference);
-                } else {
-                    compositeProvider.removeProvider(provider);
-                    if (!compositeProvider.hasAnyProvider()) {
-                        unregisterService(reference);
-                    }
-                }
-            }
-        }
+    protected OAuthAccountAssociationProvider getOAuthAccountAssociationProvider(AbstractOAuthFileStorageService storageService) {
+        return new GoogleDriveOAuthAccountAssociationProvider((GoogleDriveFileStorageService) storageService);
     }
 
-    private void unregisterService(final ServiceReference<FileStorageAccountManagerProvider> ref) {
-        ServiceRegistration<FileStorageService> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
-            this.serviceRegistration = null;
-            serviceRegistration.unregister();
-        }
-
-        ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration = this.listenerRegistration;
-        if (null != listenerRegistration) {
-            this.listenerRegistration = null;
-            listenerRegistration.unregister();
-        }
-
-        ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration = this.associationProviderRegistration;
-        if (null != associationProviderRegistration) {
-            this.associationProviderRegistration = null;
-            associationProviderRegistration.unregister();
-        }
-
-        ServiceReference<FileStorageAccountManagerProvider> reference = ref;
-        if (null != reference) {
-            context.ungetService(reference);
-        }
-
-        this.service = null;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getProviderId()
+     */
+    @Override
+    protected String getProviderId() {
+        return GoogleDriveConstants.ID;
     }
 
 }

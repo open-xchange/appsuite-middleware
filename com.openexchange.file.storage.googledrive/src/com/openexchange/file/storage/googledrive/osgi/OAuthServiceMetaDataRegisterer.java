@@ -47,83 +47,42 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.osgi;
+package com.openexchange.file.storage.googledrive.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator;
-import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageOAuthServiceMetaDataRegisterer;
 import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.timer.TimerService;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link DropboxActivator} - Activator for Dropbox bundle.
+ * {@link OAuthServiceMetaDataRegisterer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DropboxActivator extends AbstractCloudStorageActivator {
+public class OAuthServiceMetaDataRegisterer extends AbstractCloudStorageOAuthServiceMetaDataRegisterer {
+
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link DropboxActivator}.
+     * Initializes a new {@link OAuthServiceMetaDataRegisterer}.
+     *
+     * @param context The bundle context
      */
-    public DropboxActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, OAuthAccessRegistryService.class, SSLConfigurationService.class, ConfigViewFactory.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        DropboxServices.setServices(this);
-        super.startBundle();
-    }
-
-    @Override
-    public <S> void registerService(final Class<S> clazz, final S service) {
-        super.registerService(clazz, service);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            super.stopBundle();
-            cleanUp();
-            DropboxServices.setServices(null);
-        } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(DropboxActivator.class).error("", e);
-            throw e;
-        }
+    public OAuthServiceMetaDataRegisterer(BundleContext context, ServiceLookup services) {
+        super(context, KnownApi.GOOGLE.getServiceId());
+        this.services = services;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getServiceRegisterer(org.osgi.framework.BundleContext)
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageOAuthServiceMetaDataRegisterer#getRegisterer(org.osgi.framework.BundleContext)
      */
     @Override
-    protected ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> getServiceRegisterer(BundleContext context) {
-        return new OAuthServiceMetaDataRegisterer(context, this);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getAPI()
-     */
-    @Override
-    protected KnownApi getAPI() {
-        return KnownApi.DROPBOX;
+    protected ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> getRegisterer(BundleContext context) {
+        return new GoogleDriveServiceRegisterer(context, services);
     }
 }
