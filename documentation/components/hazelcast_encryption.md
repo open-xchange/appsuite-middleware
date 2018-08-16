@@ -103,7 +103,7 @@ com.openexchange.hazelcast.network.ssl.trustStorePassword=changeit
 Additionally, the algorithm for the managing entity of each store can be adjusted. Those properties are backed up by lean configuration and have the standard values shown below.
 
 ```
-com.openexchange.hazelcast.network.ssl.protocols=TLSv1,TLSv1.1,TLSv1.3,SSLv3
+com.openexchange.hazelcast.network.ssl.protocols=TLSv1,TLSv1.1,TLSv1.2
 com.openexchange.hazelcast.network.ssl.trustManagerAlgorithm=SunX509
 com.openexchange.hazelcast.network.ssl.keyManagerAlgorithm=SunX509
 ```
