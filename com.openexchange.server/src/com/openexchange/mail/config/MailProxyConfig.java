@@ -49,24 +49,7 @@
 
 package com.openexchange.mail.config;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.lean.DefaultProperty;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.config.lean.Property;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.UserAndContext;
 
 /**
  * {@link MailProxyConfig}
@@ -74,9 +57,11 @@ import com.openexchange.session.UserAndContext;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class MailProxyConfig implements Reloadable {
+public class MailProxyConfig {
 
     private static MailProxyConfig INSTANCE = new MailProxyConfig();
+    private HostList imapHostList;
+    private HostList smtpHostList;
 
     public static MailProxyConfig getInstance() {
         return INSTANCE;
@@ -86,80 +71,32 @@ public class MailProxyConfig implements Reloadable {
         // hide constructor
     }
 
-    /**
-     * A comma separated list of hosts that should be accessed without going through the proxy.
-     */
-    private static Property MAIL_NON_PROXY_HOSTS = DefaultProperty.valueOf("com.openexchange.mail.proxy.nonProxyHosts", null);
+    private static final String IMAP_NON_PROXY_HOST = "mail.imap.proxy.nonProxyHosts";
+    private static final String SMTP_NON_PROXY_HOST = "mail.smtp.proxy.nonProxyHosts";
 
-    private final Cache<UserAndContext, HostList> CACHE_NON_PROXY_HOSTS = CacheBuilder.newBuilder().maximumSize(65536).expireAfterAccess(30, TimeUnit.MINUTES).build();
 
-    /**
-     * Gets the whitelisted hosts
-     *
-     * @param contextId The context id
-     * @param userId The user id
-     * @return A list of {@link IPRange}
-     * @throws OXException
-     */
-    public HostList getNonProxyHostList(int contextId, int userId) throws OXException {
-        UserAndContext key = UserAndContext.newInstance(userId, contextId);
-        HostList result = CACHE_NON_PROXY_HOSTS.getIfPresent(key);
-        if (null != result) {
-            return result;
-        }
-
-        Callable<HostList> loader = new Callable<HostList>() {
-
-            @Override
-            public HostList call() throws Exception {
-                return doGetNonProxyHosts(userId, contextId);
+    public HostList getImapNonProxyHostList() {
+        if(imapHostList == null) {
+            synchronized (this) {
+                if(imapHostList == null) {
+                    String property = System.getProperty(IMAP_NON_PROXY_HOST);
+                    imapHostList = HostList.valueOf(property);
+                }
             }
-        };
-
-        try {
-            return CACHE_NON_PROXY_HOSTS.get(key, loader);
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            throw cause instanceof OXException ? (OXException) cause : new OXException(cause);
         }
+        return imapHostList;
     }
 
-    /**
-     * Loads the non proxy hosts
-     *
-     * @param userId The user id
-     * @param contextId The context id
-     * @return The list of non proxy hosts
-     * @throws OXException
-     */
-    protected HostList doGetNonProxyHosts(int userId, int contextId) throws OXException {
-        LeanConfigurationService leanConfigService = ServerServiceRegistry.getInstance().getService(LeanConfigurationService.class);
-        if (null == leanConfigService) {
-            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
+    public HostList getSmtpNonProxyHostList() {
+        if(smtpHostList == null) {
+            synchronized (this) {
+                if(smtpHostList == null) {
+                    String property = System.getProperty(SMTP_NON_PROXY_HOST);
+                    smtpHostList = HostList.valueOf(property);
+                }
+            }
         }
-
-        String property = leanConfigService.getProperty(userId, contextId, MAIL_NON_PROXY_HOSTS);
-        if (Strings.isEmpty(property)) {
-            return HostList.EMPTY;
-        }
-        return HostList.valueOf(property);
-    }
-
-    /**
-     * Clears the cache.
-     */
-    private void invalidateCache() {
-        CACHE_NON_PROXY_HOSTS.invalidateAll();
-    }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        invalidateCache();
-    }
-
-    @Override
-    public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest(MAIL_NON_PROXY_HOSTS.getFQPropertyName()).build();
+        return smtpHostList;
     }
 
 }

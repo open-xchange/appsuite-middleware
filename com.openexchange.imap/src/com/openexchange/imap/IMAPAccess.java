@@ -772,7 +772,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Remove proxy settings for whitelisted hosts
              */
-            HostList nonProxyHosts = MailProxyConfig.getInstance().getNonProxyHostList(session.getContextId(), session.getUserId());
+            HostList nonProxyHosts = MailProxyConfig.getInstance().getImapNonProxyHostList();
             if (nonProxyHosts.contains(imapConfig.getServer())) {
                 imapProps.remove("mail.imap.proxy.host");
                 imapProps.remove("mail.imap.proxy.port");
