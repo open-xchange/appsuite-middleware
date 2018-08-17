@@ -49,83 +49,24 @@
 
 package com.openexchange.rest.client;
 
-import java.io.InputStream;
-import java.util.Map;
-import org.json.JSONValue;
-
 /**
- * {@link RESTResponseImpl}
+ * {@link RESTMimeType}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @deprecated Use the {@link AbstractRESTClient} instead.
+ * @since v7.10.1
  */
-public class RESTResponseImpl implements RESTResponse {
-
-    private int statusCode;
-    private Object responseBody;
+public enum RESTMimeType {
 
     /**
-     * Initialises a new {@link RESTResponseImpl}.
-     * 
-     * @param statusCode
-     * @param resp
+     * application/json
      */
-    public RESTResponseImpl(int statusCode) {
-        super();
-        this.statusCode = statusCode;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponse#getStream()
+    JSON,
+    /**
+     * text/calendar
      */
-    @Override
-    public InputStream getStream() {
-        throw new UnsupportedOperationException("The RESTExecutor is deprecated. Use AbstractRESTClient instead");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponse#getResponseBody()
+    CALENDAR,
+    /**
+     * image/*
      */
-    @Override
-    public Object getResponseBody() {
-        return responseBody;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponse#getStatusCode()
-     */
-    @Override
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponse#getHeaders()
-     */
-    @Override
-    public Map<String, String> getHeaders() {
-        throw new UnsupportedOperationException("The RESTExecutor is deprecated. Use AbstractRESTClient instead");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponse#getHeader(java.lang.String)
-     */
-    @Override
-    public String getHeader(String headerName) {
-        throw new UnsupportedOperationException("The RESTExecutor is deprecated. Use AbstractRESTClient instead");
-    }
-
-    void setResponseBody(JSONValue json) {
-        responseBody = json;
-    }
+    IMAGE;
 }

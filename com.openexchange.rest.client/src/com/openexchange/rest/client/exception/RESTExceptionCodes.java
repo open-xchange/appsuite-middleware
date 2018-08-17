@@ -153,6 +153,21 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
      * <li>A remote server error occurred: %1$s</li>
      */
     REMOTE_SERVER_ERROR("A remote server error occurred: %1$s", RESTExceptionMessages.REMOTE_SERVER_ERROR_MSG, CATEGORY_ERROR, 19),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>An I/O error occurred: %1$s</li>
+     */
+    IO_ERROR("An I/O error occurred: %1$s", MESSAGE, CATEGORY_ERROR, 20),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>A JSON error occurred: %1$s</li>
+     */
+    JSON_ERROR("A JSON error occurred: %1$s", MESSAGE, CATEGORY_ERROR, 21),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>No stream parser found for the specified content type '%1$s'</li>
+     */
+    NO_STREAM_PARSER("No stream parser found for the specified content type '%1$s'", MESSAGE, CATEGORY_ERROR, 22);
 
     ;
 

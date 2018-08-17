@@ -47,58 +47,28 @@
  *
  */
 
-package com.openexchange.microsoft.graph.api.client;
+package com.openexchange.rest.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpRequestBase;
+import java.io.InputStream;
+import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.client.AbstractRESTClient;
-import com.openexchange.rest.client.RESTResponse;
-import com.openexchange.rest.client.exception.RESTExceptionCodes;
 
 /**
- * {@link MicrosoftGraphRESTClient}
+ * {@link RESTResponseBodyParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MicrosoftGraphRESTClient extends AbstractRESTClient {
-
-    private static final String USER_AGENT = "Open-Xchange Microsoft Graph Client";
-    private static final String API_URL = "graph.microsoft.com";
-    private static final String API_VERSION = "v1.0";
-    private static final String SCHEME = "https";
+public interface RESTResponseBodyParser {
 
     /**
-     * Initialises a new {@link MicrosoftGraphRESTClient}.
-     * 
-     * @param userAgent
+     * Parses the {@link InputStream} from the specified {@link RESTResponse}
+     *
+     * @param response The {@link SchedJoulesResponse}
+     * @return The parsed {@link R} object
+     * @throws OXException if a parsing error occurs
      */
-    public MicrosoftGraphRESTClient() {
-        super(USER_AGENT, new MicrosoftGraphRESTResponseParser());
-    }
+    Object parse(RESTResponse response) throws OXException;
 
-    /**
-     * 
-     * @param request
-     * @return
-     * @throws OXException
-     */
-    public RESTResponse execute(MicrosoftGraphRequest request) throws OXException {
-        return executeRequest(prepareRequest(request));
-    }
-
-    private HttpRequestBase prepareRequest(MicrosoftGraphRequest request) throws OXException {
-        HttpRequestBase httpRequest = createRequest(request.getMethod());
-        try {
-            httpRequest.setURI(new URI(SCHEME, API_URL, "/" + API_VERSION + request.getEndPoint(), null, null));
-            httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + request.getAccessToken());
-            httpRequest.addHeader(HttpHeaders.ACCEPT, "application/json");
-            return httpRequest;
-        } catch (URISyntaxException e) {
-            throw RESTExceptionCodes.INVALID_URI_PATH.create(e, API_VERSION + request.getEndPoint());
-        }
-    }
+    Set<String> getContentTypes();
 }

@@ -49,18 +49,8 @@
 
 package com.openexchange.microsoft.graph.api.client;
 
-import java.io.IOException;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.microsoft.graph.api.client.auxiliary.MicrosoftGraphResponseParser;
-import com.openexchange.rest.client.RESTResponse;
-import com.openexchange.rest.client.RESTResponseParser;
-import com.openexchange.rest.client.exception.RESTExceptionCodes;
+import com.openexchange.rest.client.AbstractRESTResponseParser;
+import com.openexchange.rest.client.RESTMimeType;
 
 /**
  * {@link MicrosoftGraphRESTResponseParser}
@@ -68,7 +58,7 @@ import com.openexchange.rest.client.exception.RESTExceptionCodes;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MicrosoftGraphRESTResponseParser implements RESTResponseParser {
+public class MicrosoftGraphRESTResponseParser extends AbstractRESTResponseParser {
 
     private static final String REMOTE_SERVICE = "Microsoft Graph";
 
@@ -77,99 +67,17 @@ public class MicrosoftGraphRESTResponseParser implements RESTResponseParser {
      */
     public MicrosoftGraphRESTResponseParser() {
         super();
+        responseBodyParsers.put(RESTMimeType.IMAGE, new MicrosoftGraphImageRESTResponseBodyParser());
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.rest.client.RESTResponseParser#parse(com.openexchange.rest.client.CloseableHttpResponse)
+     * @see com.openexchange.rest.client.AbstractRESTResponseParser#getRemoveServiceName()
      */
     @Override
-    public RESTResponse parse(CloseableHttpResponse response) throws OXException, IOException {
-        HttpEntity entity = response.getEntity();
-        if (entity == null) {
-            throw RESTExceptionCodes.PARSE_ERROR.create("The response entity is 'null'");
-        }
-        int statusCode = assertStatusCode(response);
-        // TODO: assert the code
-
-        return prepareResponse(response);
-    }
-
-    /**
-     * Prepares the {@link SchedJoulesResponse} from the specified {@link HttpResponse}
-     *
-     * @param httpResponse The {@link HttpResponse} to extract the content from
-     * @return the {@link SchedJoulesResponse}
-     * @throws IOException if an I/O error is occurred
-     * @throws OXException if any other error is occurred
-     */
-    private MicrosoftGraphResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
-        MicrosoftGraphResponse response = new MicrosoftGraphResponse(httpResponse.getStatusLine().getStatusCode());
-        String value = getHeaderValue(httpResponse, HttpHeaders.CONTENT_TYPE);
-        if (Strings.isNotEmpty(value)) {
-            int indexOf = value.indexOf(';');
-            response.addHeader(HttpHeaders.CONTENT_TYPE, indexOf < 0 ? value : value.substring(0, indexOf));
-        }
-        HttpEntity entity = httpResponse.getEntity();
-        if (entity == null) {
-            return response;
-        }
-        response.setStream(entity.getContent());
-        response.setResponseBody(MicrosoftGraphResponseParser.parse(response));
-        return response;
-    }
-    
-    
-
-    /**
-     * @param httpResponse
-     * @param contentType
-     * @return
-     */
-    private String getHeaderValue(HttpResponse httpResponse, String headerName) {
-        Header ctHeader = httpResponse.getFirstHeader(headerName);
-        if (ctHeader == null) {
-            return null;
-        }
-        String value = ctHeader.getValue();
-        if (Strings.isEmpty(value)) {
-            return null;
-        }
-        return value;
-    }
-
-    /**
-     * Asserts the status code for any errors
-     *
-     * @param httpResponse The {@link HttpResponse}'s status code to assert
-     * @return The status code
-     * @throws OXException if an HTTP error is occurred (4xx or 5xx)
-     */
-    private int assertStatusCode(HttpResponse httpResponse) throws OXException {
-        int statusCode = httpResponse.getStatusLine().getStatusCode();
-        // Assert the 4xx codes
-        switch (statusCode) {
-            case 401:
-                throw RESTExceptionCodes.UNAUTHORIZED.create(httpResponse.getStatusLine().getReasonPhrase());
-            case 404:
-                throw RESTExceptionCodes.PAGE_NOT_FOUND.create();
-        }
-        if (statusCode >= 400 && statusCode <= 499) {
-            throw RESTExceptionCodes.UNEXPECTED_ERROR.create(httpResponse.getStatusLine());
-        }
-
-        // Assert the 5xx codes
-        switch (statusCode) {
-            case 500:
-                throw RESTExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase(), REMOTE_SERVICE);
-            case 503:
-                throw RESTExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase(), REMOTE_SERVICE);
-        }
-        if (statusCode >= 500 && statusCode <= 599) {
-            throw RESTExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine(), REMOTE_SERVICE);
-        }
-        return statusCode;
+    protected String getRemoveServiceName() {
+        return REMOTE_SERVICE;
     }
 
 }

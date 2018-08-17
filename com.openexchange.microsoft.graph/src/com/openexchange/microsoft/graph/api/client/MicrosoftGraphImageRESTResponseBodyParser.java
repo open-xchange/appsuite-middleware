@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,56 +49,68 @@
 
 package com.openexchange.microsoft.graph.api.client;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpRequestBase;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import org.apache.commons.io.IOUtils;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.client.AbstractRESTClient;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.rest.client.RESTResponse;
-import com.openexchange.rest.client.exception.RESTExceptionCodes;
+import com.openexchange.rest.client.RESTResponseBodyParser;
 
 /**
- * {@link MicrosoftGraphRESTClient}
+ * {@link MicrosoftGraphImageRESTResponseBodyParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
  */
-public class MicrosoftGraphRESTClient extends AbstractRESTClient {
+public class MicrosoftGraphImageRESTResponseBodyParser implements RESTResponseBodyParser {
 
-    private static final String USER_AGENT = "Open-Xchange Microsoft Graph Client";
-    private static final String API_URL = "graph.microsoft.com";
-    private static final String API_VERSION = "v1.0";
-    private static final String SCHEME = "https";
+    private final Set<String> contentTypes;
 
     /**
-     * Initialises a new {@link MicrosoftGraphRESTClient}.
-     * 
-     * @param userAgent
+     * Initialises a new {@link MicrosoftGraphImageRESTResponseBodyParser}.
      */
-    public MicrosoftGraphRESTClient() {
-        super(USER_AGENT, new MicrosoftGraphRESTResponseParser());
+    public MicrosoftGraphImageRESTResponseBodyParser() {
+        Set<String> ct = new HashSet<>(4);
+        ct.add("image/jpeg");
+        ct.add("image/png");
+        ct.add("image/gif");
+        this.contentTypes = Collections.unmodifiableSet(ct);
     }
 
-    /**
+    /*
+     * (non-Javadoc)
      * 
-     * @param request
-     * @return
-     * @throws OXException
+     * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
      */
-    public RESTResponse execute(MicrosoftGraphRequest request) throws OXException {
-        return executeRequest(prepareRequest(request));
-    }
-
-    private HttpRequestBase prepareRequest(MicrosoftGraphRequest request) throws OXException {
-        HttpRequestBase httpRequest = createRequest(request.getMethod());
-        try {
-            httpRequest.setURI(new URI(SCHEME, API_URL, "/" + API_VERSION + request.getEndPoint(), null, null));
-            httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + request.getAccessToken());
-            httpRequest.addHeader(HttpHeaders.ACCEPT, "application/json");
-            return httpRequest;
-        } catch (URISyntaxException e) {
-            throw RESTExceptionCodes.INVALID_URI_PATH.create(e, API_VERSION + request.getEndPoint());
+    @Override
+    public Object parse(RESTResponse response) throws OXException {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            if (response.getStream() == null) {
+                return null;
+            }
+            int read = 0;
+            byte[] buffer = new byte[4096];
+            while ((read = response.getStream().read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw MicrosoftGraphAPIExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            IOUtils.closeQuietly(response.getStream());
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponseBodyParser#getContentTypes()
+     */
+    @Override
+    public Set<String> getContentTypes() {
+        return contentTypes;
     }
 }

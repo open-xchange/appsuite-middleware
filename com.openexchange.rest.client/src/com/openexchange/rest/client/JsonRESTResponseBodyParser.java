@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,117 +47,70 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api.client;
+package com.openexchange.rest.client;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.java.Strings;
-import com.openexchange.rest.client.RESTResponse;
+import java.util.Collections;
+import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.rest.client.exception.RESTExceptionCodes;
 
 /**
- * {@link SchedJoulesResponse}
+ * {@link JsonRESTResponseBodyParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class SchedJoulesResponse implements RESTResponse {
+public class JsonRESTResponseBodyParser implements RESTResponseBodyParser {
 
-    private InputStream stream;
-    private final int statusCode;
-    private Object responseBody;
-    private final Map<String, String> headers;
+    private static final String CHARSET = "UTF-8";
+    private final Set<String> contentTypes;
 
     /**
-     * Initialises a new {@link SchedJoulesResponse}.
+     * Initialises a new {@link JsonRESTResponseBodyParser}.
      */
-    public SchedJoulesResponse(int statusCode) {
+    public JsonRESTResponseBodyParser() {
         super();
-        this.statusCode = statusCode;
-        headers = new HashMap<>(4);
+        contentTypes = Collections.singleton("application/json");
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.rest.client.RESTResponse#getStream()
+     * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
      */
     @Override
-    public InputStream getStream() {
-        return stream;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponse#getStatusCode()
-     */
-    @Override
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponse#getResponseBody()
-     */
-    @Override
-    public Object getResponseBody() {
-        return responseBody;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponse#getHeaders()
-     */
-    @Override
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponse#getHeader(java.lang.String)
-     */
-    @Override
-    public String getHeader(String headerName) {
-        return headers.get(headerName);
-    }
-
-    //////////////////////////// SETTERS //////////////////////////////
-
-    /**
-     * Sets the responseBody
-     *
-     * @param responseBody The responseBody to set
-     */
-    void setResponseBody(Object responseBody) {
-        this.responseBody = responseBody;
-    }
-
-    /**
-     * Sets the stream
-     *
-     * @param stream The stream to set
-     */
-    void setStream(InputStream stream) {
-        this.stream = stream;
-    }
-
-    /**
-     * The response's headers
-     * 
-     * @param headers the headers to set
-     */
-    void addHeader(String key, String value) {
-        if (Strings.isEmpty(key)) {
-            return;
+    public Object parse(RESTResponse response) throws OXException {
+        try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
+            String string = Streams.stream2string(inputStream, CHARSET);
+            char c = string.charAt(0);
+            switch (c) {
+                case '{':
+                    return new JSONObject(string);
+                case '[':
+                    return new JSONArray(string);
+                default:
+                    throw RESTExceptionCodes.JSON_ERROR.create("Unexpected start token detected '" + c + "'");
+            }
+        } catch (IOException e) {
+            throw RESTExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (JSONException e) {
+            throw RESTExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-        if (Strings.isEmpty(value)) {
-            return;
-        }
-        headers.put(key, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponseBodyParser#getContentTypes()
+     */
+    @Override
+    public Set<String> getContentTypes() {
+        return contentTypes;
     }
 }

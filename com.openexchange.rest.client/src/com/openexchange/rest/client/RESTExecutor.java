@@ -159,7 +159,7 @@ public class RESTExecutor {
         final List<Integer> expectedStatusCodes = restRequest.getExpectedStatusCodes();
         final HttpResponse resp = execute(restRequest.getSession(), req, -1, expectedStatusCodes);
         final int statusCode = resp.getStatusLine().getStatusCode();
-        final RESTResponseImpl restResponse = new RESTResponseImpl(statusCode);
+        final RESTResponse restResponse = new RESTResponse(statusCode);
 
         if (expectResponseBody) {
             final JSONValue json = parseAsJSON(resp, restRequest.getExpectedStatusCodes());

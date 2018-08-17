@@ -50,7 +50,9 @@
 package com.openexchange.rest.client;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.java.Strings;
 
 /**
  * {@link RESTResponse}
@@ -58,35 +60,57 @@ import java.util.Map;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.10.1
  */
-public interface RESTResponse {
+public class RESTResponse {
+
+    private final int statusCode;
+    private InputStream stream;
+    private Object responseBody;
+    private final Map<String, String> headers;
+
+    /**
+     * Initialises a new {@link MicrosoftGraphResponse}.
+     */
+    public RESTResponse(int statusCode) {
+        super();
+        this.statusCode = statusCode;
+        headers = new HashMap<>(4);
+    }
 
     /**
      * Returns the {@link InputStream} of the response
      * 
      * @return the {@link InputStream} of the response
      */
-    InputStream getStream();
-
-    /**
-     * Returns the response body (if any)
-     * 
-     * @return the response body or <code>null</code>
-     */
-    Object getResponseBody();
+    public InputStream getStream() {
+        return stream;
+    }
 
     /**
      * Returns the status code of the response
      * 
      * @return the status code of the response
      */
-    int getStatusCode();
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    /**
+     * Returns the response body (if any)
+     * 
+     * @return the response body or <code>null</code>
+     */
+    public Object getResponseBody() {
+        return responseBody;
+    }
 
     /**
      * Returns an unmodifiable {@link Map} with the headers
      * 
      * @return an unmodifiable {@link Map} with the headers
      */
-    Map<String, String> getHeaders();
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
 
     /**
      * Returns the value of a specific header or <code>null</code>
@@ -96,5 +120,42 @@ public interface RESTResponse {
      * @return the value of a specific header or <code>null</code>
      *         if that header is absent.
      */
-    String getHeader(String headerName);
+    public String getHeader(String headerName) {
+        return headers.get(headerName);
+    }
+
+    //////////////////////////// SETTERS //////////////////////////////
+
+    /**
+     * Sets the responseBody
+     *
+     * @param responseBody The responseBody to set
+     */
+    public void setResponseBody(Object responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    /**
+     * Sets the stream
+     *
+     * @param stream The stream to set
+     */
+    public void setStream(InputStream stream) {
+        this.stream = stream;
+    }
+
+    /**
+     * The response's headers
+     * 
+     * @param headers the headers to set
+     */
+    public void addHeader(String key, String value) {
+        if (Strings.isEmpty(key)) {
+            return;
+        }
+        if (Strings.isEmpty(value)) {
+            return;
+        }
+        headers.put(key, value);
+    }
 }

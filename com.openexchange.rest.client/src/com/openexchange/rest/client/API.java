@@ -59,6 +59,7 @@ import com.openexchange.rest.client.session.Session;
  * {@link API}. Defines an Abstract REST API class, which encapsulates a {@link Session} and a {@link RequestAndResponse} object
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @deprecated
  */
 public abstract class API<S extends Session> {
 
