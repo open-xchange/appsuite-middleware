@@ -116,6 +116,11 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
      * Error parsing following response body: "%1$s".
      */
     PARSE_ERROR("Error parsing following response body: \"%1$s\".", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 12),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>An HTTP client protocol error occurred: %1$s</li>
+     */
+    CLIENT_PROTOCOL_ERROR("An HTTP client protocol error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 13),
 
     ;
 
