@@ -68,24 +68,53 @@ public class MicrosoftGraphContactsAPI extends AbstractMicrosoftGraphAPI {
     /**
      * Initialises a new {@link MicrosoftGraphContactsAPI}.
      * 
-     * @param client the microsoft graph rest client
+     * @param client the {@link MicrosoftGraphRESTClient}
      */
     public MicrosoftGraphContactsAPI(MicrosoftGraphRESTClient client) {
         super(client);
     }
 
+    /**
+     * Retrieves all contacts of the current user.
+     * 
+     * Required OAuth scopes:
+     * <ul>
+     * <li>Contacts.Read</li>
+     * </ul>
+     * 
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/user_list_contacts">List Contacts</a>
+     * @param accessToken The OAuth access token previously acquired by the OAuthService
+     * @return a {@link JSONObject} with all the user's contacts
+     * @throws OXException if an error is occurred
+     */
     public JSONObject getContacts(String accessToken) throws OXException {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath());
         request.setAccessToken(accessToken);
         return ((JSONValue) client.execute(request).getResponseBody()).toObject();
     }
 
+    /**
+     * Retrieves the photo of the contact with the specified identifier
+     * 
+     * @param contactId The contact identifier
+     * @param accessToken The OAuth access token previously acquired by the OAuthService
+     * @return The byte array with the photo's contents
+     * @throws OXException if an error is occurred
+     */
     public byte[] getContactPhoto(String contactId, String accessToken) throws OXException {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath() + "/" + contactId + "/photo/$value");
         request.setAccessToken(accessToken);
         return (byte[]) client.execute(request).getResponseBody();
     }
 
+    /**
+     * Retrieves the metadata of the photo of the contact with the specified identifier
+     * 
+     * @param contactId The contact identifier
+     * @param accessToken The OAuth access token previously acquired by the OAuthService
+     * @return a {@link JSONObject} with the photo's metadata
+     * @throws OXException if an error is occurred
+     */
     public JSONObject getContactPhotoMetadata(String contactId, String accessToken) throws OXException {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath() + "/" + contactId + "/photo");
         request.setAccessToken(accessToken);

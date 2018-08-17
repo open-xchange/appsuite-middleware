@@ -86,8 +86,7 @@ public class MicrosoftGraphAPIActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        MicrosoftGraphAPI api = new MicrosoftGraphAPI();
-        registerService(MicrosoftGraphContactsService.class, new MicrosoftGraphContactsServiceImpl(api.contacts()));
+        registerService(MicrosoftGraphContactsService.class, new MicrosoftGraphContactsServiceImpl(new MicrosoftGraphAPI().contacts()));
     }
 
 }
