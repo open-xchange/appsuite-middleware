@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,14 @@
  *
  */
 
-package com.openexchange.chronos.schedjoules.api;
-
-import java.net.URL;
-import java.util.Collections;
-import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCalendar;
-import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.rest.client.RESTMethod;
-import com.openexchange.rest.client.RESTResponse;
+package com.openexchange.rest.client;
 
 /**
- * {@link SchedJoulesCalendarAPI}
+ * {@link RESTMethod}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class SchedJoulesCalendarAPI extends AbstractSchedJoulesAPI {
-
-    /**
-     * Initialises a new {@link SchedJoulesCalendarAPI}.
-     */
-    SchedJoulesCalendarAPI(SchedJoulesRESTClient client) {
-        super(client);
-    }
-
-    /**
-     * Retrieves the iCal from the specified {@link URL}
-     *
-     * @param url The {@link URL} for the iCal
-     * @return The iCal parsed as a {@link SchedJoulesCalendar}
-     * @throws OXException if a parsing error is occurred
-     */
-    public SchedJoulesCalendar getCalendar(URL url) throws OXException {
-        RESTResponse response = client.executeRequest(url);
-        return (SchedJoulesCalendar) response.getResponseBody();
-    }
-
-    /**
-     * Retrieves the iCal from the specified {@link URL}
-     *
-     * @param url The {@link URL} for the iCal
-     * @param eTag The last known etag
-     * @param lastModified The last modified to use
-     * @return The iCal parsed as a {@link SchedJoulesCalendar}
-     * @throws OXException if an error is occurred
-     */
-    public SchedJoulesCalendar getCalendar(URL url, String eTag, long lastModified) throws OXException {
-        if (Strings.isNotEmpty(eTag) || 0 < lastModified) {
-            RESTResponse response = client.executeRequest(url, RESTMethod.HEAD, eTag, lastModified);
-            if (response.getStatusCode() == 304) {
-                return new SchedJoulesCalendar(null, Collections.emptyList(), eTag, lastModified); // Nothing modified
-            }
-        }
-        return getCalendar(url);
-    }
+public enum RESTMethod {
+    PUT, GET, POST, DELETE, OPTIONS, PATCH, HEAD;
 }

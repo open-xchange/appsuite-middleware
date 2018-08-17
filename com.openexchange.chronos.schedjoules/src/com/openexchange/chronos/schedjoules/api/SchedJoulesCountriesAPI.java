@@ -55,12 +55,12 @@ import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesAPIDefaultV
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesPage;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesPage.SchedJoulesPageBuilder;
-import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.RESTMethod;
 import com.openexchange.rest.client.RESTResponse;
 import com.openexchange.rest.client.ResponseUtil;
 
@@ -115,7 +115,7 @@ public class SchedJoulesCountriesAPI extends AbstractSchedJoulesAPI {
     public boolean isModified(String locale, String etag, long lastModified) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath());
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(locale) ? SchedJoulesAPIDefaultValues.DEFAULT_LOCALE : locale);
-        RESTResponse response = client.executeRequest(request, HttpMethod.HEAD, etag, lastModified);
+        RESTResponse response = client.executeRequest(request, RESTMethod.HEAD, etag, lastModified);
         return response.getStatusCode() != 304;
     }
 }

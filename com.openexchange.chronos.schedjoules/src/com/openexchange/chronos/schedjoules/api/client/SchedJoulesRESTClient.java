@@ -64,6 +64,7 @@ import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCod
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.AbstractRESTClient;
+import com.openexchange.rest.client.RESTMethod;
 import com.openexchange.rest.client.RESTResponse;
 
 /**
@@ -174,7 +175,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * @return The new {@link HttpRequestBase}
      * @throws OXException if an unknown HTTP method is provided
      */
-    private HttpRequestBase createRequest(HttpMethod httpMethod) throws OXException {
+    private HttpRequestBase createRequest(RESTMethod httpMethod) throws OXException {
         HttpRequestBase httpRequest;
         switch (httpMethod) {
             case GET:
@@ -200,7 +201,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * @throws OXException if an unknown HTTP method is provided
      * @throws URISyntaxException If an invalid URL is provided
      */
-    private HttpRequestBase prepareRequest(URL url, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
+    private HttpRequestBase prepareRequest(URL url, RESTMethod httpMethod, String eTag, long lastModified) throws OXException {
         HttpRequestBase httpRequest = createRequest(httpMethod);
         prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), url.getQuery(), eTag, lastModified);
         return httpRequest;
@@ -249,7 +250,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * @throws OXException if an error is occurred
      */
     public RESTResponse executeRequest(URL url) throws OXException {
-        return executeRequest(url, HttpMethod.GET, null, -1);
+        return executeRequest(url, RESTMethod.GET, null, -1);
     }
 
     /**
@@ -262,7 +263,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
      */
-    public RESTResponse executeRequest(SchedJoulesRequest request, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
+    public RESTResponse executeRequest(SchedJoulesRequest request, RESTMethod httpMethod, String eTag, long lastModified) throws OXException {
         HttpRequestBase httpRequest = createRequest(httpMethod);
         prepareRequest(httpRequest, this.scheme, this.host, request.getPath(), prepareQuery(request.getQueryParameters()), eTag, lastModified);
         httpRequest.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
@@ -279,7 +280,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
      */
-    public RESTResponse executeRequest(URL url, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
+    public RESTResponse executeRequest(URL url, RESTMethod httpMethod, String eTag, long lastModified) throws OXException {
         return executeRequest(prepareRequest(url, httpMethod, eTag, lastModified));
     }
 }

@@ -52,6 +52,7 @@ package com.openexchange.chronos.schedjoules.api.client;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.openexchange.rest.client.RESTMethod;
 
 /**
  * {@link SchedJoulesRequest}
@@ -62,7 +63,7 @@ public class SchedJoulesRequest {
 
     private final String path;
     private final Map<String, String> queryParameters;
-    private final HttpMethod method;
+    private final RESTMethod method;
     private String eTag;
 
     /**
@@ -78,13 +79,13 @@ public class SchedJoulesRequest {
      * Initialises a new {@link SchedJoulesRequest}.
      */
     public SchedJoulesRequest(String path) {
-        this(HttpMethod.GET, path);
+        this(RESTMethod.GET, path);
     }
 
     /**
      * Initialises a new {@link SchedJoulesRequest}.
      */
-    public SchedJoulesRequest(HttpMethod method, String path) {
+    public SchedJoulesRequest(RESTMethod method, String path) {
         super();
         this.method = method;
         this.path = path;
@@ -125,7 +126,7 @@ public class SchedJoulesRequest {
      *
      * @return The method
      */
-    public HttpMethod getMethod() {
+    public RESTMethod getMethod() {
         return method;
     }
 
