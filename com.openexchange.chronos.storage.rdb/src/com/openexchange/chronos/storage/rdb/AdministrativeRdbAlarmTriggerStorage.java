@@ -95,7 +95,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
 
     private Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Long until, Long overdueTime, boolean lock) throws OXException {
         try {
-            AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
+            AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID, AlarmTriggerField.RECURRENCE_ID};
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
 
             stringBuilder.append(" action=?");
@@ -178,7 +178,7 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
     @Override
     public Map<Pair<Integer, Integer>, List<AlarmTrigger>> getMailAlarmTriggers(Connection con, int cid, int account, String eventId, boolean lock) throws OXException {
         try {
-            AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID };
+            AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID, AlarmTriggerField.RECURRENCE_ID };
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
             stringBuilder.append(" cid=? AND account=? AND action=? AND eventId=? AND processed=0");
             if(lock) {
