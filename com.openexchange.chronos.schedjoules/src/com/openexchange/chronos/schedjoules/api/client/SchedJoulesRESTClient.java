@@ -90,8 +90,8 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
     private static final String USER_AGENT = "Open-Xchange SchedJoules Client";
     private static final int API_VERSION = 1;
 
-    private static final String ACCEPT_HEADER = "application/vnd.schedjoules; version={{version}}";
-    private static final String AUTHORIZATION_HEADER = "Token token=\"{{token}}\"";
+    private static final String ACCEPT_HEADER = "application/vnd.schedjoules; version=%s";
+    private static final String AUTHORIZATION_HEADER = "Token token=\"%s\"";
 
     private String authorizationHeader;
     private final String acceptHeader;
@@ -106,27 +106,8 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
 
         this.scheme = scheme;
         this.host = host;
-        authorizationHeader = prepareAuthorizationHeader(apiKey);
-        acceptHeader = prepareAcceptHeader();
-    }
-
-    /**
-     * Prepares the 'Authorization' header
-     *
-     * @param contextId the context identifier
-     * @return The authorisation header
-     */
-    private String prepareAuthorizationHeader(String apiKey) {
-        return AUTHORIZATION_HEADER.replaceFirst("\\{\\{token\\}\\}", apiKey);
-    }
-
-    /**
-     * Prepares the 'Accept' header
-     *
-     * @return the 'Accept' header
-     */
-    private String prepareAcceptHeader() {
-        return ACCEPT_HEADER.replaceFirst("\\{\\{version\\}\\}", Integer.toString(API_VERSION));
+        authorizationHeader = String.format(AUTHORIZATION_HEADER, apiKey);
+        acceptHeader = String.format(ACCEPT_HEADER, Integer.toString(API_VERSION));
     }
 
     /**
