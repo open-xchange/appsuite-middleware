@@ -47,36 +47,36 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.api;
 
-import java.util.function.BiConsumer;
-import org.json.JSONObject;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 
 /**
- * {@link FamilyConsumer}
+ * {@link MicrosoftGraphAPI}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class FamilyConsumer implements BiConsumer<JSONObject, Contact> {
+public class MicrosoftGraphAPI {
+
+    private final MicrosoftGraphRESTClient client;
+    private final MicrosoftGraphContactsAPI contactsAPI;
 
     /**
-     * Initialises a new {@link FamilyConsumer}.
+     * Initialises a new {@link MicrosoftGraphAPI}.
      */
-    public FamilyConsumer() {
+    public MicrosoftGraphAPI() {
         super();
+        client = new MicrosoftGraphRESTClient();
+        contactsAPI = new MicrosoftGraphContactsAPI(client);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns the contacts API
      * 
-     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
+     * @return the contacts API
      */
-    @Override
-    public void accept(JSONObject t, Contact u) {
-        if (t.hasAndNotNull("spouseName")) {
-            u.setSpouseName(t.optString("spouseName"));
-        }
+    public MicrosoftGraphContactsAPI contacts() {
+        return contactsAPI;
     }
 }

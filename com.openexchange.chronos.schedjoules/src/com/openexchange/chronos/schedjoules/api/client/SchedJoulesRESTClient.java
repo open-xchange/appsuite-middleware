@@ -56,8 +56,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
@@ -165,28 +163,6 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
         // Prepare the request
         HttpRequestBase httpRequest = createRequest(request.getMethod());
         prepareAuthorizedRequest(httpRequest, this.scheme, this.host, request.getPath(), query);
-        return httpRequest;
-    }
-
-    /**
-     * Creates an {@link HttpRequestBase} with the specified {@link HttpMethod}
-     *
-     * @param httpMethod The {@link HttpMethod}
-     * @return The new {@link HttpRequestBase}
-     * @throws OXException if an unknown HTTP method is provided
-     */
-    private HttpRequestBase createRequest(RESTMethod httpMethod) throws OXException {
-        HttpRequestBase httpRequest;
-        switch (httpMethod) {
-            case GET:
-                httpRequest = new HttpGet();
-                break;
-            case HEAD:
-                httpRequest = new HttpHead();
-                break;
-            default:
-                throw SchedJoulesAPIExceptionCodes.UNKNOWN_HTTP_METHOD.create(httpMethod);
-        }
         return httpRequest;
     }
 

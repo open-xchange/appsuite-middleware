@@ -47,24 +47,25 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.parser.consumers;
 
 import java.util.function.BiConsumer;
 import org.json.JSONObject;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link NoteConsumer}
+ * {@link NameConsumer} - Parses the given name, family name and full name of the specified contact
+ * along with their yomi representations if available.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class NoteConsumer implements BiConsumer<JSONObject, Contact> {
+public class NameConsumer implements BiConsumer<JSONObject, Contact> {
 
     /**
-     * Initialises a new {@link NoteConsumer}.
+     * Initialises a new {@link NameConsumer}.
      */
-    public NoteConsumer() {
+    public NameConsumer() {
         super();
     }
 
@@ -75,8 +76,29 @@ public class NoteConsumer implements BiConsumer<JSONObject, Contact> {
      */
     @Override
     public void accept(JSONObject t, Contact u) {
-        if (t.hasAndNotNull("personalNotes")) {
-            u.setNote(t.optString("personalNotes"));
+        if (t.hasAndNotNull("displayName")) {
+            u.setDisplayName(t.optString("displayName"));
+        }
+        if (t.hasAndNotNull("givenName")) {
+            u.setGivenName(t.optString("givenName"));
+        }
+        if (t.hasAndNotNull("middleName")) {
+            u.setMiddleName(t.optString("middleName"));
+        }
+        if (t.hasAndNotNull("nickName")) {
+            u.setNickname(t.optString("nickName"));
+        }
+        if (t.hasAndNotNull("surname")) {
+            u.setSurName(t.optString("surname"));
+        }
+        if (t.hasAndNotNull("title")) {
+            u.setTitle(t.optString("title"));
+        }
+        if (t.hasAndNotNull("yomiGivenName")) {
+            u.setYomiFirstName(t.optString("yomiGivenName"));
+        }
+        if (t.hasAndNotNull("yomiSurname")) {
+            u.setYomiLastName(t.optString("yomiSurname"));
         }
     }
 }

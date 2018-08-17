@@ -55,6 +55,8 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -130,6 +132,28 @@ public abstract class AbstractRESTClient implements Closeable {
     }
 
     //////////////////////////////// HELPERS ////////////////////////////
+
+    /**
+     * Creates an {@link HttpRequestBase} with the specified {@link HttpMethod}
+     *
+     * @param httpMethod The {@link HttpMethod}
+     * @return The new {@link HttpRequestBase}
+     * @throws OXException if an unknown HTTP method is provided
+     */
+    protected HttpRequestBase createRequest(RESTMethod httpMethod) throws OXException {
+        HttpRequestBase httpRequest;
+        switch (httpMethod) {
+            case GET:
+                httpRequest = new HttpGet();
+                break;
+            case HEAD:
+                httpRequest = new HttpHead();
+                break;
+            default:
+                throw RESTExceptionCodes.UNSUPPORTED_METHOD.create(httpMethod);
+        }
+        return httpRequest;
+    }
 
     /**
      * Initialises the HTTP client

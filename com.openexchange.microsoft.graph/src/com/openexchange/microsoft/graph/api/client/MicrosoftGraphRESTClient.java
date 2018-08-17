@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,58 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.osgi;
+package com.openexchange.microsoft.graph.api.client;
 
-import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.context.ContextService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.microsoft.graph.groupware.MigrateMSLiveSubscriptionsTask;
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.HttpRequestBase;
+import com.openexchange.exception.OXException;
+import com.openexchange.rest.client.AbstractRESTClient;
+import com.openexchange.rest.client.RESTResponse;
+import com.openexchange.rest.client.exception.RESTExceptionCodes;
 
 /**
- * {@link MicrosoftGraphContactsActivator}
+ * {@link MicrosoftGraphRESTClient}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class MicrosoftGraphContactsActivator extends HousekeepingActivator {
+public class MicrosoftGraphRESTClient extends AbstractRESTClient {
 
-    /*
-     * (non-Javadoc)
+    private static final String USER_AGENT = "Open-Xchange Microsoft Graph Client";
+    private static final String API_URL = "graph.microsoft.com";
+    private static final String API_VERSION = "v1.0";
+    private static final String SCHEME = "https";
+
+    /**
+     * Initialises a new {@link MicrosoftGraphRESTClient}.
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @param userAgent
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class, FolderService.class, MicrosoftGraphContactsService.class };
+    public MicrosoftGraphRESTClient() {
+        super(USER_AGENT, new MicrosoftGraphRESTResponseParser());
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
-        openTrackers();
-        // Register the update task
-        DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new MigrateMSLiveSubscriptionsTask());
-        registerService(UpdateTaskProviderService.class.getName(), providerService);
+    /**
+     * 
+     * @param request
+     * @return
+     * @throws OXException
+     */
+    public RESTResponse execute(MicrosoftGraphRequest request) throws OXException {
+        return executeRequest(prepareRequest(request));
+    }
+
+    private HttpRequestBase prepareRequest(MicrosoftGraphRequest request) throws OXException {
+        HttpRequestBase httpRequest = createRequest(request.getMethod());
+        try {
+            httpRequest.setURI(new URI(SCHEME, API_URL,  "/" + API_VERSION + request.getEndPoint(), null, null));
+            httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + request.getAccessToken());
+            httpRequest.addHeader(HttpHeaders.ACCEPT, "application/json");
+            return httpRequest;
+        } catch (URISyntaxException e) {
+            throw RESTExceptionCodes.INVALID_URI_PATH.create(e, API_VERSION + request.getEndPoint());
+        }
     }
 }

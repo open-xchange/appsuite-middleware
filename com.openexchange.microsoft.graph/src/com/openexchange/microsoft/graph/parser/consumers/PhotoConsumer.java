@@ -47,31 +47,36 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.parser.consumers;
 
 import java.util.function.BiConsumer;
-import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.microsoft.graph.api.MicrosoftGraphContactsAPI;
 
 /**
- * {@link EmailAddressesConsumer} - Parses the contact's e-mail addresses. Note that Microsoft
- * can store an unlimited mount of e-mail addresses for a contact due to their different
- * data model (probably EAV). Our contacts API however can only store three, therefore
- * we only fetch the first three we encounter.
+ * {@link PhotoConsumer} - Parses the birthday of the contact
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class EmailAddressesConsumer implements BiConsumer<JSONObject, Contact> {
+public class PhotoConsumer implements BiConsumer<JSONObject, Contact> {
 
-    private static final int MAXIMUM_SUPPORTED_EMAIL_ADDRESSES = 3;
+    private static final Logger LOG = LoggerFactory.getLogger(PhotoConsumer.class);
+
+    private final MicrosoftGraphContactsAPI api;
+    private String accessToken;
 
     /**
-     * Initialises a new {@link EmailAddressesConsumer}.
+     * Initialises a new {@link PhotoConsumer}.
      */
-    public EmailAddressesConsumer() {
+    public PhotoConsumer(MicrosoftGraphContactsAPI api, String accessToken) {
         super();
+        this.api = api;
+        this.accessToken = accessToken;
     }
 
     /*
@@ -81,27 +86,12 @@ public class EmailAddressesConsumer implements BiConsumer<JSONObject, Contact> {
      */
     @Override
     public void accept(JSONObject t, Contact u) {
-        if (!t.hasAndNotNull("emailAddresses")) {
-            return;
-        }
-        JSONArray addresses = t.optJSONArray("emailAddresses");
-        int count = 0;
-        for (int index = 0; index < MAXIMUM_SUPPORTED_EMAIL_ADDRESSES; index++) {
-            JSONObject email = addresses.optJSONObject(index);
-            String address = email.optString("address");
-            switch (count++) {
-                case 0:
-                    u.setEmail1(address);
-                    break;
-                case 1:
-                    u.setEmail2(address);
-                    break;
-                case 2:
-                    u.setEmail3(address);
-                    break;
-                default:
-                    return;
-            }
+        String id = t.optString("id");
+        try {
+            u.setImage1(api.getContactPhoto(id, accessToken));
+            u.setImageContentType(api.getContactPhotoMetadata(id, accessToken).optString("@odata.mediaContentType"));
+        } catch (OXException e) {
+            LOG.warn("Cannot get photo for contact with id '{}'", id);
         }
     }
 }

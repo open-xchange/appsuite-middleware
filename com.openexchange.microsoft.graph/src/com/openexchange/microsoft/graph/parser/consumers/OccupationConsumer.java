@@ -47,24 +47,24 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.parser.consumers;
 
 import java.util.function.BiConsumer;
 import org.json.JSONObject;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link PostalAddressesConsumer}
+ * {@link OccupationConsumer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class PostalAddressesConsumer implements BiConsumer<JSONObject, Contact> {
+public class OccupationConsumer implements BiConsumer<JSONObject, Contact> {
 
     /**
-     * Initialises a new {@link PostalAddressesConsumer}.
+     * Initialises a new {@link OccupationConsumer}.
      */
-    public PostalAddressesConsumer() {
+    public OccupationConsumer() {
         super();
     }
 
@@ -75,61 +75,26 @@ public class PostalAddressesConsumer implements BiConsumer<JSONObject, Contact> 
      */
     @Override
     public void accept(JSONObject t, Contact u) {
-        if (t.hasAndNotNull("homeAddress")) {
-            JSONObject homeAddress = t.optJSONObject("homeAddress");
-            if (homeAddress.hasAndNotNull("street")) {
-                u.setStreetHome(homeAddress.optString("street"));
-            }
-            if (homeAddress.hasAndNotNull("city")) {
-                u.setCityHome(homeAddress.optString("city"));
-            }
-            if (homeAddress.hasAndNotNull("postalCode")) {
-                u.setPostalCodeHome(homeAddress.optString("postalCode"));
-            }
-            if (homeAddress.hasAndNotNull("country")) {
-                u.setCountryHome(homeAddress.optString("country"));
-            }
-            if (homeAddress.hasAndNotNull("state")) {
-                u.setStateHome(homeAddress.optString("state"));
-            }
+        if (t.hasAndNotNull("jobTitle")) {
+            u.setPosition(t.optString("jobTitle"));
         }
-
-        if (t.hasAndNotNull("businessAddress")) {
-            JSONObject businessAddress = t.optJSONObject("businessAddress");
-            if (businessAddress.hasAndNotNull("street")) {
-                u.setStreetBusiness(businessAddress.optString("street"));
-            }
-            if (businessAddress.hasAndNotNull("city")) {
-                u.setCityBusiness(businessAddress.optString("city"));
-            }
-            if (businessAddress.hasAndNotNull("postalCode")) {
-                u.setPostalCodeBusiness(businessAddress.optString("postalCode"));
-            }
-            if (businessAddress.hasAndNotNull("country")) {
-                u.setCountryBusiness(businessAddress.optString("country"));
-            }
-            if (businessAddress.hasAndNotNull("state")) {
-                u.setStateBusiness(businessAddress.optString("state"));
-            }
+        if (t.hasAndNotNull("profession")) {
+            u.setProfession(t.optString("profession"));
         }
-
-        if (t.hasAndNotNull("otherAddress")) {
-            JSONObject otherAddress = t.optJSONObject("otherAddress");
-            if (otherAddress.hasAndNotNull("street")) {
-                u.setStreetOther(otherAddress.optString("street"));
-            }
-            if (otherAddress.hasAndNotNull("city")) {
-                u.setCityOther(otherAddress.optString("city"));
-            }
-            if (otherAddress.hasAndNotNull("postalCode")) {
-                u.setPostalCodeOther(otherAddress.optString("postalCode"));
-            }
-            if (otherAddress.hasAndNotNull("country")) {
-                u.setCountryOther(otherAddress.optString("country"));
-            }
-            if (otherAddress.hasAndNotNull("state")) {
-                u.setStateOther(otherAddress.optString("state"));
-            }
+        if (t.hasAndNotNull("department")) {
+            u.setDepartment(t.optString("department"));
+        }
+        if (t.hasAndNotNull("companyName")) {
+            u.setCompany(t.optString("companyName"));
+        }
+        if (t.hasAndNotNull("yomiCompanyName")) {
+            u.setYomiCompany(t.optString("yomiCompanyName"));
+        }
+        if (t.hasAndNotNull("assistantName")) {
+            u.setAssistantName(t.optString("assistantName"));
+        }
+        if (t.hasAndNotNull("manager")) {
+            u.setManagerName(t.optString("manager"));
         }
     }
 }

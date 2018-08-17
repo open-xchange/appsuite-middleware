@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,15 +46,37 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.chronos.schedjoules.api.client;
 
+package com.openexchange.microsoft.graph.parser.consumers;
+
+import java.util.function.BiConsumer;
+import org.json.JSONObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link HttpMethod}
+ * {@link FamilyConsumer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public enum HttpMethod {
-    GET,
-    HEAD;
+public class FamilyConsumer implements BiConsumer<JSONObject, Contact> {
+
+    /**
+     * Initialises a new {@link FamilyConsumer}.
+     */
+    public FamilyConsumer() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
+     */
+    @Override
+    public void accept(JSONObject t, Contact u) {
+        if (t.hasAndNotNull("spouseName")) {
+            u.setSpouseName(t.optString("spouseName"));
+        }
+    }
 }

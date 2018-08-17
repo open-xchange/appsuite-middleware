@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,25 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.osgi;
+package com.openexchange.microsoft.graph.api;
 
-import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.context.ContextService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.microsoft.graph.groupware.MigrateMSLiveSubscriptionsTask;
+import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 
 /**
- * {@link MicrosoftGraphContactsActivator}
+ * {@link AbstractMicrosoftGraphAPI}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class MicrosoftGraphContactsActivator extends HousekeepingActivator {
+abstract class AbstractMicrosoftGraphAPI {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+    final MicrosoftGraphRESTClient client;
+
+    /**
+     * Initialises a new {@link AbstractMicrosoftGraphAPI}.
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class, FolderService.class, MicrosoftGraphContactsService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
-        openTrackers();
-        // Register the update task
-        DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new MigrateMSLiveSubscriptionsTask());
-        registerService(UpdateTaskProviderService.class.getName(), providerService);
+    public AbstractMicrosoftGraphAPI(MicrosoftGraphRESTClient client) {
+        super();
+        this.client = client;
     }
 }

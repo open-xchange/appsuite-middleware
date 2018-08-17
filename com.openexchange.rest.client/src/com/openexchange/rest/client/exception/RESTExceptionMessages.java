@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,24 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.osgi;
+package com.openexchange.rest.client.exception;
 
-import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.context.ContextService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.microsoft.graph.groupware.MigrateMSLiveSubscriptionsTask;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MicrosoftGraphContactsActivator}
+ * {@link RESTExceptionMessages}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class MicrosoftGraphContactsActivator extends HousekeepingActivator {
+final class RESTExceptionMessages implements LocalizableStrings {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class, FolderService.class, MicrosoftGraphContactsService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
-        openTrackers();
-        // Register the update task
-        DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new MigrateMSLiveSubscriptionsTask());
-        registerService(UpdateTaskProviderService.class.getName(), providerService);
-    }
+    // The requested page was not found.
+    public static final String PAGE_NOT_FOUND = "The requested page was not found.";
+    // The remote '%1$s' service is unavailable at the moment. There is nothing we can do about it. Please try again later.
+    public static final String REMOTE_SERVICE_UNAVAILABLE_MSG = "The remote '%2$s' service is unavailable at the moment. There is nothing we can do about it. Please try again later.";
+    // An internal server error occurred on '%1$s' side. There is nothing we can do about it.
+    public static final String REMOTE_INTERNAL_SERVER_ERROR_MSG = "An internal server error occurred on '%2$s' side. There is nothing we can do about it.";
+    // A remote server error occurred on '%1$s' side. There is nothing we can do about it.
+    public static final String REMOTE_SERVER_ERROR_MSG = "A remote server error occurred on '%2$s' side. There is nothing we can do about it.";
 }

@@ -47,54 +47,40 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.impl;
 
-import java.util.function.BiConsumer;
-import org.json.JSONObject;
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
+import com.openexchange.microsoft.graph.api.MicrosoftGraphContactsAPI;
+import com.openexchange.microsoft.graph.parser.ContactParser;
 
 /**
- * {@link OccupationConsumer}
+ * {@link MicrosoftGraphContactsServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class OccupationConsumer implements BiConsumer<JSONObject, Contact> {
+public class MicrosoftGraphContactsServiceImpl implements MicrosoftGraphContactsService {
+
+    private final MicrosoftGraphContactsAPI api;
 
     /**
-     * Initialises a new {@link OccupationConsumer}.
+     * Initialises a new {@link MicrosoftGraphContactsServiceImpl}.
      */
-    public OccupationConsumer() {
+    public MicrosoftGraphContactsServiceImpl(MicrosoftGraphContactsAPI api) {
         super();
+        this.api = api;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
+     * @see com.openexchange.microsoft.graph.MicrosoftGraphContactsService#getContacts(java.lang.String)
      */
     @Override
-    public void accept(JSONObject t, Contact u) {
-        if (t.hasAndNotNull("jobTitle")) {
-            u.setPosition(t.optString("jobTitle"));
-        }
-        if (t.hasAndNotNull("profession")) {
-            u.setProfession(t.optString("profession"));
-        }
-        if (t.hasAndNotNull("department")) {
-            u.setDepartment(t.optString("department"));
-        }
-        if (t.hasAndNotNull("companyName")) {
-            u.setCompany(t.optString("companyName"));
-        }
-        if (t.hasAndNotNull("yomiCompanyName")) {
-            u.setYomiCompany(t.optString("yomiCompanyName"));
-        }
-        if (t.hasAndNotNull("assistantName")) {
-            u.setAssistantName(t.optString("assistantName"));
-        }
-        if (t.hasAndNotNull("manager")) {
-            u.setManagerName(t.optString("manager"));
-        }
+    public List<Contact> getContacts(String accessToken) throws OXException {
+        return new ContactParser(api, accessToken).parseFeed(api.getContacts(accessToken));
     }
 }

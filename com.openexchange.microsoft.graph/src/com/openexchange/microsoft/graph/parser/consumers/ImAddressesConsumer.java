@@ -47,25 +47,28 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.parser.consumers;
 
 import java.util.function.BiConsumer;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link NameConsumer} - Parses the given name, family name and full name of the specified contact
- * along with their yomi representations if available.
+ * {@link ImAddressesConsumer} - Parses the instant messaging addresses. Note that Microsoft
+ * can store an unlimited mount of instant messaging addresses for a contact due to their
+ * different data model (probably EAV). Our contacts API however can only store two,
+ * therefore we only fetch the first two we encounter.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class NameConsumer implements BiConsumer<JSONObject, Contact> {
+public class ImAddressesConsumer implements BiConsumer<JSONObject, Contact> {
 
     /**
-     * Initialises a new {@link NameConsumer}.
+     * Initialises a new {@link ImAddressesConsumer}.
      */
-    public NameConsumer() {
+    public ImAddressesConsumer() {
         super();
     }
 
@@ -76,29 +79,23 @@ public class NameConsumer implements BiConsumer<JSONObject, Contact> {
      */
     @Override
     public void accept(JSONObject t, Contact u) {
-        if (t.hasAndNotNull("displayName")) {
-            u.setDisplayName(t.optString("displayName"));
+        if (!t.hasAndNotNull("imAddresses")) {
+            return;
         }
-        if (t.hasAndNotNull("givenName")) {
-            u.setGivenName(t.optString("givenName"));
-        }
-        if (t.hasAndNotNull("middleName")) {
-            u.setMiddleName(t.optString("middleName"));
-        }
-        if (t.hasAndNotNull("nickName")) {
-            u.setNickname(t.optString("nickName"));
-        }
-        if (t.hasAndNotNull("surname")) {
-            u.setSurName(t.optString("surname"));
-        }
-        if (t.hasAndNotNull("title")) {
-            u.setTitle(t.optString("title"));
-        }
-        if (t.hasAndNotNull("yomiGivenName")) {
-            u.setYomiFirstName(t.optString("yomiGivenName"));
-        }
-        if (t.hasAndNotNull("yomiSurname")) {
-            u.setYomiLastName(t.optString("yomiSurname"));
+        JSONArray addressesArray = t.optJSONArray("imAddresses");
+        int count = 0;
+        for (int index = 0; index < addressesArray.length(); index++) {
+            String address = addressesArray.optString(index);
+            switch (count++) {
+                case 0:
+                    u.setInstantMessenger1(address);
+                    break;
+                case 1:
+                    u.setInstantMessenger2(address);
+                    break;
+                default:
+                    return;
+            }
         }
     }
 }

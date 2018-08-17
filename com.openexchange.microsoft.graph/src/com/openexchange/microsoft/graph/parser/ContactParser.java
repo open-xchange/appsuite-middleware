@@ -47,26 +47,26 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.parser;
+package com.openexchange.microsoft.graph.parser;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiConsumer;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.subscribe.microsoft.graph.parser.consumers.BirthdayConsumer;
-import com.openexchange.subscribe.microsoft.graph.parser.consumers.EmailAddressesConsumer;
-import com.openexchange.subscribe.microsoft.graph.parser.consumers.FamilyConsumer;
-import com.openexchange.subscribe.microsoft.graph.parser.consumers.ImAddressesConsumer;
-import com.openexchange.subscribe.microsoft.graph.parser.consumers.NameConsumer;
-import com.openexchange.subscribe.microsoft.graph.parser.consumers.NoteConsumer;
-import com.openexchange.subscribe.microsoft.graph.parser.consumers.OccupationConsumer;
-import com.openexchange.subscribe.microsoft.graph.parser.consumers.PhoneNumbersConsumer;
-import com.openexchange.subscribe.microsoft.graph.parser.consumers.PhotoConsumer;
-import com.openexchange.subscribe.microsoft.graph.parser.consumers.PostalAddressesConsumer;
+import com.openexchange.microsoft.graph.api.MicrosoftGraphContactsAPI;
+import com.openexchange.microsoft.graph.parser.consumers.BirthdayConsumer;
+import com.openexchange.microsoft.graph.parser.consumers.EmailAddressesConsumer;
+import com.openexchange.microsoft.graph.parser.consumers.FamilyConsumer;
+import com.openexchange.microsoft.graph.parser.consumers.ImAddressesConsumer;
+import com.openexchange.microsoft.graph.parser.consumers.NameConsumer;
+import com.openexchange.microsoft.graph.parser.consumers.NoteConsumer;
+import com.openexchange.microsoft.graph.parser.consumers.OccupationConsumer;
+import com.openexchange.microsoft.graph.parser.consumers.PhoneNumbersConsumer;
+import com.openexchange.microsoft.graph.parser.consumers.PhotoConsumer;
+import com.openexchange.microsoft.graph.parser.consumers.PostalAddressesConsumer;
 
 /**
  * {@link ContactParser}
@@ -78,16 +78,12 @@ public class ContactParser {
 
     private final List<BiConsumer<JSONObject, Contact>> elementParsers;
 
-    /////////////////// ! \\\\\\\\\\\\\\ FIXME TO BE REMOVED!!!! ONLY FOR TESTING !!!!
-    private String accessToken;
-    /////////////////// ! \\\\\\\\\\\\\\ FIXME TO BE REMOVED!!!! ONLY FOR TESTING !!!!
-
     /**
      * Initialises a new {@link ContactParser}.
      * 
      * @param googleContactsService The Google's {@link ContactsService}
      */
-    public ContactParser(CloseableHttpClient httpClient) {
+    public ContactParser(MicrosoftGraphContactsAPI api, String accessToken) {
         ImmutableList.Builder<BiConsumer<JSONObject, Contact>> listBuilder = ImmutableList.builder();
         listBuilder.add(new NameConsumer());
         listBuilder.add(new EmailAddressesConsumer());
@@ -98,7 +94,7 @@ public class ContactParser {
         listBuilder.add(new FamilyConsumer());
         listBuilder.add(new ImAddressesConsumer());
         listBuilder.add(new NoteConsumer());
-        listBuilder.add(new PhotoConsumer(httpClient, this));
+        listBuilder.add(new PhotoConsumer(api, accessToken));
         elementParsers = listBuilder.build();
     }
 
@@ -130,25 +126,4 @@ public class ContactParser {
         }
         return c;
     }
-
-    /////////////////// ! \\\\\\\\\\\\\\ FIXME TO BE REMOVED!!!! ONLY FOR TESTING !!!!
-    /**
-     * Gets the accessToken
-     *
-     * @return The accessToken
-     */
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    /**
-     * Sets the accessToken
-     *
-     * @param accessToken The accessToken to set
-     */
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-    /////////////////// ! \\\\\\\\\\\\\\ FIXME TO BE REMOVED!!!! ONLY FOR TESTING !!!!
-
 }

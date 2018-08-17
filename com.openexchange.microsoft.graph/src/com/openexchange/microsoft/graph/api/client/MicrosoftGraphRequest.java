@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,83 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.osgi;
+package com.openexchange.microsoft.graph.api.client;
 
-import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.context.ContextService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.microsoft.graph.groupware.MigrateMSLiveSubscriptionsTask;
+import com.openexchange.rest.client.RESTMethod;
 
 /**
- * {@link MicrosoftGraphContactsActivator}
+ * {@link MicrosoftGraphRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class MicrosoftGraphContactsActivator extends HousekeepingActivator {
+public class MicrosoftGraphRequest {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+    private final String endPoint;
+    private final RESTMethod method;
+    private String accessToken;
+
+    /**
+     * Initialises a new {@link MicrosoftGraphRequest}.
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class, FolderService.class, MicrosoftGraphContactsService.class };
+    public MicrosoftGraphRequest(MicrosoftGraphRESTEndPoint endPoint) {
+        this(endPoint.getAbsolutePath());
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
-        openTrackers();
-        // Register the update task
-        DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new MigrateMSLiveSubscriptionsTask());
-        registerService(UpdateTaskProviderService.class.getName(), providerService);
+    /**
+     * Initialises a new {@link MicrosoftGraphRequest}.
+     * 
+     * @param endPoint
+     */
+    public MicrosoftGraphRequest(String endPoint) {
+        this(RESTMethod.GET, endPoint);
+    }
+
+    /**
+     * Initialises a new {@link MicrosoftGraphRequest}.
+     * 
+     * @param method
+     * @param endPoint
+     */
+    public MicrosoftGraphRequest(RESTMethod method, String endPoint) {
+        super();
+        this.method = method;
+        this.endPoint = endPoint;
+    }
+
+    /**
+     * Gets the endPoint
+     *
+     * @return The endPoint
+     */
+    public String getEndPoint() {
+        return endPoint;
+    }
+
+    /**
+     * Gets the method
+     *
+     * @return The method
+     */
+    public RESTMethod getMethod() {
+        return method;
+    }
+
+    /**
+     * Gets the accessToken
+     *
+     * @return The accessToken
+     */
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    /**
+     * Sets the accessToken
+     *
+     * @param accessToken The accessToken to set
+     */
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 }

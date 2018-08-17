@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,61 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.osgi;
+package com.openexchange.microsoft.graph.parser.consumers;
 
-import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.context.ContextService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.subscribe.microsoft.graph.groupware.MigrateMSLiveSubscriptionsTask;
+import java.util.function.BiConsumer;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link MicrosoftGraphContactsActivator}
+ * {@link EmailAddressesConsumer} - Parses the contact's e-mail addresses. Note that Microsoft
+ * can store an unlimited mount of e-mail addresses for a contact due to their different
+ * data model (probably EAV). Our contacts API however can only store three, therefore
+ * we only fetch the first three we encounter.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class MicrosoftGraphContactsActivator extends HousekeepingActivator {
+public class EmailAddressesConsumer implements BiConsumer<JSONObject, Contact> {
+
+    private static final int MAXIMUM_SUPPORTED_EMAIL_ADDRESSES = 3;
+
+    /**
+     * Initialises a new {@link EmailAddressesConsumer}.
+     */
+    public EmailAddressesConsumer() {
+        super();
+    }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthService.class, ContextService.class, ClusterLockService.class, FolderService.class, MicrosoftGraphContactsService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(this, context));
-        openTrackers();
-        // Register the update task
-        DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new MigrateMSLiveSubscriptionsTask());
-        registerService(UpdateTaskProviderService.class.getName(), providerService);
+    public void accept(JSONObject t, Contact u) {
+        if (!t.hasAndNotNull("emailAddresses")) {
+            return;
+        }
+        JSONArray addresses = t.optJSONArray("emailAddresses");
+        int count = 0;
+        for (int index = 0; index < MAXIMUM_SUPPORTED_EMAIL_ADDRESSES; index++) {
+            JSONObject email = addresses.optJSONObject(index);
+            String address = email.optString("address");
+            switch (count++) {
+                case 0:
+                    u.setEmail1(address);
+                    break;
+                case 1:
+                    u.setEmail2(address);
+                    break;
+                case 2:
+                    u.setEmail3(address);
+                    break;
+                default:
+                    return;
+            }
+        }
     }
 }

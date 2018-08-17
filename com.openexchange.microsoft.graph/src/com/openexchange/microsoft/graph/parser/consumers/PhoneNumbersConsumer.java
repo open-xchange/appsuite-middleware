@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.parser.consumers;
 
 import java.util.function.BiConsumer;
 import org.json.JSONArray;
