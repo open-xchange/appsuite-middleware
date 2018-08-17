@@ -108,10 +108,10 @@ public abstract class AbstractRESTClient implements Closeable {
      * premises.
      * 
      * @param httpRequest The HTTP request to execute
-     * @return The parsed HTTP response
+     * @return The parsed HTTP REST response
      * @throws OXException if a client protocol error or an I/O error occurs
      */
-    public <T> T executeRequest(HttpRequestBase httpRequest) throws OXException {
+    public RESTResponse executeRequest(HttpRequestBase httpRequest) throws OXException {
         CloseableHttpResponse httpResponse = null;
         try {
             LOGGER.debug("Executing request: '{}'", httpRequest.getURI());

@@ -49,23 +49,32 @@
 
 package com.openexchange.rest.client;
 
-import java.io.IOException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import com.openexchange.exception.OXException;
+import org.apache.http.HttpHeaders;
+import com.openexchange.java.Strings;
 
 /**
- * {@link RESTResponseParser}
+ * {@link ResponseUtil}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public interface RESTResponseParser {
+public final class ResponseUtil {
 
     /**
-     * Parses the specified {@link CloseableHttpResponse}
+     * Returns the Last-Modified value from the specified {@link RESTResponse}
+     * if present
      * 
-     * @param response The response to parse
-     * @return The parsed {@link RESTResponse}.
+     * @param response The {@link RESTResponse}
+     * @return The Last-Modified value or <code>0</code> if the header is absent or if
+     *         the header's value is indeed <code>0</code>.
      */
-    RESTResponse parse(CloseableHttpResponse response) throws OXException, IOException;
+    public static long getLastModified(RESTResponse response) {
+        String value = response.getHeader(HttpHeaders.LAST_MODIFIED);
+        try {
+            return Strings.isEmpty(value) ? 0 : Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
 }

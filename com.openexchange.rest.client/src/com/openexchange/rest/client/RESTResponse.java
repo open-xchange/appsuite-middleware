@@ -49,76 +49,52 @@
 
 package com.openexchange.rest.client;
 
-import org.apache.http.HttpResponse;
-import org.json.JSONValue;
+import java.io.InputStream;
+import java.util.Map;
 
 /**
  * {@link RESTResponse}
  * 
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.1
  */
-public class RESTResponse {
-
-    private JSONValue responseBody;
-
-    private final int statusCode;
-
-    private final HttpResponse response;
-    
-    private boolean hasResponseBody = false;
+public interface RESTResponse {
 
     /**
-     * Initializes a new {@link RESTResponse}.
-     */
-    public RESTResponse(final int statusCode, final HttpResponse response) {
-        super();
-        this.statusCode = statusCode;
-        this.response = response;
-    }
-
-    /**
-     * Sets the responseBody
-     *
-     * @param responseBody The responseBody to set
-     */
-    public void setResponseBody(final JSONValue responseBody) {
-        this.responseBody = responseBody;
-        hasResponseBody = true;
-    }
-
-    /**
-     * Gets the responseBody
+     * Returns the {@link InputStream} of the response
      * 
-     * @return The responseBody
+     * @return the {@link InputStream} of the response
      */
-    public JSONValue getResponseBody() {
-        return responseBody;
-    }
+    InputStream getStream();
 
     /**
-     * Gets the statusCode
+     * Returns the response body (if any)
      * 
-     * @return The statusCode
+     * @return the response body or <code>null</code>
      */
-    public int getStatusCode() {
-        return statusCode;
-    }
+    Object getResponseBody();
 
     /**
-     * Gets the response
-     *
-     * @return The response
+     * Returns the status code of the response
+     * 
+     * @return the status code of the response
      */
-    public HttpResponse getResponse() {
-        return response;
-    }
+    int getStatusCode();
 
     /**
-     * Gets the hasResponseBody
-     *
-     * @return The hasResponseBody
+     * Returns an unmodifiable {@link Map} with the headers
+     * 
+     * @return an unmodifiable {@link Map} with the headers
      */
-    public boolean hasResponseBody() {
-        return hasResponseBody;
-    }
+    Map<String, String> getHeaders();
+
+    /**
+     * Returns the value of a specific header or <code>null</code>
+     * if that header is absent.
+     * 
+     * @param headerName the header's name
+     * @return the value of a specific header or <code>null</code>
+     *         if that header is absent.
+     */
+    String getHeader(String headerName);
 }

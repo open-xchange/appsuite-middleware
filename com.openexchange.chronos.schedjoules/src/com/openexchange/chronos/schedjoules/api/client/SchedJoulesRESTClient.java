@@ -64,6 +64,7 @@ import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCod
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.AbstractRESTClient;
+import com.openexchange.rest.client.RESTResponse;
 
 /**
  * {@link SchedJoulesRESTClient}
@@ -255,7 +256,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
      */
-    public SchedJoulesResponse executeRequest(SchedJoulesRequest request) throws OXException {
+    public RESTResponse executeRequest(SchedJoulesRequest request) throws OXException {
         return executeRequest(prepareRequest(request));
     }
 
@@ -266,7 +267,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
      */
-    public SchedJoulesResponse executeRequest(URL url) throws OXException {
+    public RESTResponse executeRequest(URL url) throws OXException {
         return executeRequest(url, HttpMethod.GET, null, -1);
     }
 
@@ -280,7 +281,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
      */
-    public SchedJoulesResponse executeRequest(SchedJoulesRequest request, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
+    public RESTResponse executeRequest(SchedJoulesRequest request, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
         HttpRequestBase httpRequest = createRequest(httpMethod);
         prepareRequest(httpRequest, this.scheme, this.host, request.getPath(), prepareQuery(request.getQueryParameters()), eTag, lastModified);
         httpRequest.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
@@ -297,7 +298,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
      */
-    public SchedJoulesResponse executeRequest(URL url, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
+    public RESTResponse executeRequest(URL url, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
         return executeRequest(prepareRequest(url, httpMethod, eTag, lastModified));
     }
 }

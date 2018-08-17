@@ -50,20 +50,22 @@
 package com.openexchange.chronos.schedjoules.api.client;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.java.Strings;
+import com.openexchange.rest.client.RESTResponse;
 
 /**
  * {@link SchedJoulesResponse}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesResponse {
+public class SchedJoulesResponse implements RESTResponse {
 
     private InputStream stream;
     private final int statusCode;
-    private String contentType;
-    private String eTag;
-    private long lastModified;
     private Object responseBody;
+    private final Map<String, String> headers;
 
     /**
      * Initialises a new {@link SchedJoulesResponse}.
@@ -71,6 +73,7 @@ public class SchedJoulesResponse {
     public SchedJoulesResponse(int statusCode) {
         super();
         this.statusCode = statusCode;
+        headers = new HashMap<>(4);
     }
 
     /**
@@ -101,42 +104,6 @@ public class SchedJoulesResponse {
     }
 
     /**
-     * Gets the contentType
-     *
-     * @return The contentType
-     */
-    public String getContentType() {
-        return contentType;
-    }
-
-    /**
-     * Sets the contentType
-     *
-     * @param contentType The contentType to set
-     */
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    /**
-     * Gets the eTag
-     *
-     * @return The eTag
-     */
-    public String getETag() {
-        return eTag;
-    }
-
-    /**
-     * Sets the eTag
-     *
-     * @param eTag The eTag to set
-     */
-    public void setETag(String eTag) {
-        this.eTag = eTag;
-    }
-
-    /**
      * Gets the responseBody
      *
      * @return The responseBody
@@ -155,20 +122,37 @@ public class SchedJoulesResponse {
     }
 
     /**
-     * Gets the lastModified
-     *
-     * @return The lastModified
+     * The response's headers
+     * 
+     * @param headers the headers to set
      */
-    public long getLastModified() {
-        return lastModified;
+    void addHeader(String key, String value) {
+        if (Strings.isEmpty(key)) {
+            return;
+        }
+        if (Strings.isEmpty(value)) {
+            return;
+        }
+        headers.put(key, value);
     }
 
-    /**
-     * Sets the lastModified
-     *
-     * @param lastModified The lastModified to set
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponse#getHeaders()
      */
-    public void setLastModified(long lastModified) {
-        this.lastModified = lastModified;
+    @Override
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponse#getHeader(java.lang.String)
+     */
+    @Override
+    public String getHeader(String headerName) {
+        return headers.get(headerName);
     }
 }

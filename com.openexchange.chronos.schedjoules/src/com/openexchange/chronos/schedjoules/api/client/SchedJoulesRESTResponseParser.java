@@ -67,6 +67,7 @@ import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCod
 import com.openexchange.chronos.schedjoules.impl.SchedJoulesProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.RESTResponse;
 import com.openexchange.rest.client.RESTResponseParser;
 
 /**
@@ -110,7 +111,7 @@ public class SchedJoulesRESTResponseParser implements RESTResponseParser {
                 return;
             }
             try {
-                schedjoulesResponse.setLastModified(LAST_MODIFIED_DATE_PARSER.get().parse(value).getTime());
+                schedjoulesResponse.addHeader(HttpHeaders.LAST_MODIFIED, Long.toString(LAST_MODIFIED_DATE_PARSER.get().parse(value).getTime()));
             } catch (ParseException e) {
                 LOGGER.debug("Could not parse the value of the 'Last-Modified' header '{}'", value, e);
             }
@@ -119,7 +120,7 @@ public class SchedJoulesRESTResponseParser implements RESTResponseParser {
         // ETag header parser
         headerParsers.put(HttpHeaders.ETAG, (schedjoulesResponse, httpResponse) -> {
             String value = getHeaderValue(httpResponse, HttpHeaders.ETAG);
-            schedjoulesResponse.setETag(value);
+            schedjoulesResponse.addHeader(HttpHeaders.ETAG, value);
         });
 
         // Content-Type header parser
@@ -129,7 +130,7 @@ public class SchedJoulesRESTResponseParser implements RESTResponseParser {
                 return;
             }
             int indexOf = value.indexOf(';');
-            schedjoulesResponse.setContentType(indexOf < 0 ? value : value.substring(0, indexOf));
+            schedjoulesResponse.addHeader(HttpHeaders.CONTENT_TYPE, indexOf < 0 ? value : value.substring(0, indexOf));
         });
     }
 
@@ -139,16 +140,16 @@ public class SchedJoulesRESTResponseParser implements RESTResponseParser {
      * @see com.openexchange.rest.client.RESTResponseParser#parse(org.apache.http.client.methods.CloseableHttpResponse)
      */
     @Override
-    public <T> T parse(CloseableHttpResponse response) throws OXException, IOException {
+    public RESTResponse parse(CloseableHttpResponse response) throws OXException, IOException {
         // Get the response code and assert
         int statusCode = assertStatusCode(response);
         if (statusCode == 304) {
             // OK, nothing was modified, no response body, return as is
-            return (T) new SchedJoulesResponse(statusCode);
+            return new SchedJoulesResponse(statusCode);
         }
 
         // Prepare the response
-        return (T) prepareResponse(response);
+        return prepareResponse(response);
     }
 
     /**

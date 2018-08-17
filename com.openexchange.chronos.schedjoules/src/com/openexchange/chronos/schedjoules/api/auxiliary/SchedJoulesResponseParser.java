@@ -51,6 +51,7 @@ package com.openexchange.chronos.schedjoules.api.auxiliary;
 
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.http.HttpHeaders;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +64,7 @@ import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.ResponseUtil;
 
 /**
  * {@link SchedJoulesResponseParser} - Defines the types of the available stream parsers and their implementations
@@ -108,7 +110,7 @@ public enum SchedJoulesResponseParser {
 
             try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
                 Calendar calendar = iCalService.importICal(inputStream, parameters);
-                return new SchedJoulesCalendar(calendar.getName(), calendar.getEvents(), response.getETag(), response.getLastModified());
+                return new SchedJoulesCalendar(calendar.getName(), calendar.getEvents(), response.getHeader(HttpHeaders.ETAG), ResponseUtil.getLastModified(response));
             } catch (IOException e) {
                 throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
@@ -145,7 +147,7 @@ public enum SchedJoulesResponseParser {
      * @throws OXException if a parsing error occurs
      */
     public static Object parse(SchedJoulesResponse response) throws OXException {
-        String contentType = response.getContentType();
+        String contentType = response.getHeader(HttpHeaders.CONTENT_TYPE);
         if (Strings.isEmpty(contentType)) {
             throw new IllegalArgumentException("The content type can be neither 'null' nor empty");
         }

@@ -54,9 +54,9 @@ import java.util.Collections;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCalendar;
 import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
-import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.RESTResponse;
 
 /**
  * {@link SchedJoulesCalendarAPI}
@@ -80,7 +80,7 @@ public class SchedJoulesCalendarAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if a parsing error is occurred
      */
     public SchedJoulesCalendar getCalendar(URL url) throws OXException {
-        SchedJoulesResponse response = client.executeRequest(url);
+        RESTResponse response = client.executeRequest(url);
         return (SchedJoulesCalendar) response.getResponseBody();
     }
 
@@ -95,7 +95,7 @@ public class SchedJoulesCalendarAPI extends AbstractSchedJoulesAPI {
      */
     public SchedJoulesCalendar getCalendar(URL url, String eTag, long lastModified) throws OXException {
         if (Strings.isNotEmpty(eTag) || 0 < lastModified) {
-            SchedJoulesResponse response = client.executeRequest(url, HttpMethod.HEAD, eTag, lastModified);
+            RESTResponse response = client.executeRequest(url, HttpMethod.HEAD, eTag, lastModified);
             if (response.getStatusCode() == 304) {
                 return new SchedJoulesCalendar(null, Collections.emptyList(), eTag, lastModified); // Nothing modified
             }

@@ -49,23 +49,83 @@
 
 package com.openexchange.rest.client;
 
-import java.io.IOException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import com.openexchange.exception.OXException;
+import java.io.InputStream;
+import java.util.Map;
+import org.json.JSONValue;
 
 /**
- * {@link RESTResponseParser}
+ * {@link RESTResponseImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @deprecated Use the {@link AbstractRESTClient} instead.
  */
-public interface RESTResponseParser {
+public class RESTResponseImpl implements RESTResponse {
+
+    private int statusCode;
+    private Object responseBody;
 
     /**
-     * Parses the specified {@link CloseableHttpResponse}
+     * Initialises a new {@link RESTResponseImpl}.
      * 
-     * @param response The response to parse
-     * @return The parsed {@link RESTResponse}.
+     * @param statusCode
+     * @param resp
      */
-    RESTResponse parse(CloseableHttpResponse response) throws OXException, IOException;
+    public RESTResponseImpl(int statusCode) {
+        super();
+        this.statusCode = statusCode;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponse#getStream()
+     */
+    @Override
+    public InputStream getStream() {
+        throw new UnsupportedOperationException("The RESTExecutor is deprecated. Use AbstractRESTClient instead");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponse#getResponseBody()
+     */
+    @Override
+    public Object getResponseBody() {
+        return responseBody;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponse#getStatusCode()
+     */
+    @Override
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponse#getHeaders()
+     */
+    @Override
+    public Map<String, String> getHeaders() {
+        throw new UnsupportedOperationException("The RESTExecutor is deprecated. Use AbstractRESTClient instead");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponse#getHeader(java.lang.String)
+     */
+    @Override
+    public String getHeader(String headerName) {
+        throw new UnsupportedOperationException("The RESTExecutor is deprecated. Use AbstractRESTClient instead");
+    }
+
+    void setResponseBody(JSONValue json) {
+        responseBody = json;
+    }
 }

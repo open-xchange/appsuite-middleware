@@ -49,13 +49,14 @@
 
 package com.openexchange.chronos.schedjoules.api;
 
+import org.apache.http.HttpHeaders;
 import org.json.JSONObject;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesAPIDefaultValues;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCategory;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCommonParameter;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesPage;
-import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesSearchParameter;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesPage.SchedJoulesPageBuilder;
+import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesSearchParameter;
 import com.openexchange.chronos.schedjoules.api.client.HttpMethod;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
@@ -63,6 +64,8 @@ import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.client.RESTResponse;
+import com.openexchange.rest.client.ResponseUtil;
 
 /**
  * {@link SchedJoulesPagesAPI}
@@ -166,7 +169,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
     public boolean isModified(int pageId, String locale, String etag, long lastModified) throws OXException {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.pages.getAbsolutePath() + "/" + pageId);
         request.setQueryParameter(SchedJoulesCommonParameter.locale.name(), Strings.isEmpty(locale) ? SchedJoulesAPIDefaultValues.DEFAULT_LOCALE : locale);
-        SchedJoulesResponse response = client.executeRequest(request, HttpMethod.HEAD, etag, lastModified);
+        RESTResponse response = client.executeRequest(request, HttpMethod.HEAD, etag, lastModified);
         return response.getStatusCode() != 304;
     }
 
@@ -196,7 +199,7 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      * @throws OXException if an error is occurred
      */
     private SchedJoulesPage executeRequest(SchedJoulesRequest request) throws OXException {
-        SchedJoulesResponse response = client.executeRequest(request);
-        return new SchedJoulesPageBuilder().itemData((JSONObject) response.getResponseBody()).etag(response.getETag()).lastModified(response.getLastModified()).build();
+        RESTResponse response = client.executeRequest(request);
+        return new SchedJoulesPageBuilder().itemData((JSONObject) response.getResponseBody()).etag(response.getHeader(HttpHeaders.ETAG)).lastModified(ResponseUtil.getLastModified(response)).build();
     }
 }
