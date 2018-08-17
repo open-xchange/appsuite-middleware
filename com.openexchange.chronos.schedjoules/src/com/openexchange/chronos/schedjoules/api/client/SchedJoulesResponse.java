@@ -76,64 +76,34 @@ public class SchedJoulesResponse implements RESTResponse {
         headers = new HashMap<>(4);
     }
 
-    /**
-     * Gets the data
-     *
-     * @return The data
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponse#getStream()
      */
+    @Override
     public InputStream getStream() {
         return stream;
     }
 
-    /**
-     * Gets the statusCode
-     *
-     * @return The statusCode
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponse#getStatusCode()
      */
+    @Override
     public int getStatusCode() {
         return statusCode;
     }
 
-    /**
-     * Sets the stream
-     *
-     * @param stream The stream to set
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponse#getResponseBody()
      */
-    public void setStream(InputStream stream) {
-        this.stream = stream;
-    }
-
-    /**
-     * Gets the responseBody
-     *
-     * @return The responseBody
-     */
+    @Override
     public Object getResponseBody() {
         return responseBody;
-    }
-
-    /**
-     * Sets the responseBody
-     *
-     * @param responseBody The responseBody to set
-     */
-    public void setResponseBody(Object responseBody) {
-        this.responseBody = responseBody;
-    }
-
-    /**
-     * The response's headers
-     * 
-     * @param headers the headers to set
-     */
-    void addHeader(String key, String value) {
-        if (Strings.isEmpty(key)) {
-            return;
-        }
-        if (Strings.isEmpty(value)) {
-            return;
-        }
-        headers.put(key, value);
     }
 
     /*
@@ -154,5 +124,40 @@ public class SchedJoulesResponse implements RESTResponse {
     @Override
     public String getHeader(String headerName) {
         return headers.get(headerName);
+    }
+
+    //////////////////////////// SETTERS //////////////////////////////
+
+    /**
+     * Sets the responseBody
+     *
+     * @param responseBody The responseBody to set
+     */
+    void setResponseBody(Object responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    /**
+     * Sets the stream
+     *
+     * @param stream The stream to set
+     */
+    void setStream(InputStream stream) {
+        this.stream = stream;
+    }
+
+    /**
+     * The response's headers
+     * 
+     * @param headers the headers to set
+     */
+    void addHeader(String key, String value) {
+        if (Strings.isEmpty(key)) {
+            return;
+        }
+        if (Strings.isEmpty(value)) {
+            return;
+        }
+        headers.put(key, value);
     }
 }
