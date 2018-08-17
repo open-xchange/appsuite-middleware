@@ -74,6 +74,7 @@ import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
 import com.openexchange.chronos.itip.generators.ParticipantHelper;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.chronos.provider.composition.IDMangling;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -113,7 +114,7 @@ public class MailAlarmNotificationGenerator {
 
     private List<NotificationParticipant> resources;
 
-    public MailAlarmNotificationGenerator(ServiceLookup services, Event event, User user, Context ctx) throws OXException {
+    public MailAlarmNotificationGenerator(ServiceLookup services, Event event, User user, Context ctx, int accountId) throws OXException {
         this.services = services;
         this.event = event;
         this.ctx = ctx;
@@ -124,6 +125,8 @@ public class MailAlarmNotificationGenerator {
         } else {
             this.recipient = new NotificationParticipant(ITipRole.ATTENDEE, false, user.getMail(), user.getId());
         }
+        recipient.setFolderId(IDMangling.getUniqueFolderId(accountId, event.getFolderId()));
+
         List<NotificationParticipant> lResources = getResources(services, event, ctx, user);
         if (!lResources.isEmpty()) {
             this.resources = lResources;

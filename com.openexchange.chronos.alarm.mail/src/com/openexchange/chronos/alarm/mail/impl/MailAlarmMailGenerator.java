@@ -94,11 +94,11 @@ public class MailAlarmMailGenerator {
         this.mailData = mailData;
     }
 
-    public static MailAlarmMailGenerator init(Event event, User user, int contextId, long trigger, ServiceLookup services) throws OXException {
+    public static MailAlarmMailGenerator init(Event event, User user, int contextId, int accountId, long trigger, ServiceLookup services) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         Context context = contextService.getContext(contextId);
 
-        MailAlarmNotificationGenerator notificationMailGenerator = new MailAlarmNotificationGenerator(services, event, user, context);
+        MailAlarmNotificationGenerator notificationMailGenerator = new MailAlarmNotificationGenerator(services, event, user, context, accountId);
         ExtendedNotificationMail mail = notificationMailGenerator.create("notify.mail.alarm.mail");
 
         ServerConfigService serverConfigService = requireService(ServerConfigService.class, services);

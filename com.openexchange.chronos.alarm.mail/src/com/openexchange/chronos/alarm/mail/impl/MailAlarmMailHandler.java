@@ -74,9 +74,9 @@ public class MailAlarmMailHandler {
         this.services = services;
     }
 
-    public void send(Event event, User user, int contextId, long trigger) throws OXException {
+    public void send(Event event, User user, int contextId, int accountId, long trigger) throws OXException {
         TransportProvider transportProvider = getTransportProvider();
-        ComposedMailMessage mail = MailAlarmMailGenerator.init(event, user, contextId, trigger, services).compose();
+        ComposedMailMessage mail = MailAlarmMailGenerator.init(event, user, contextId, accountId, trigger, services).compose();
 
         sendMail(transportProvider.createNewNoReplyTransport(contextId, true), mail);
     }

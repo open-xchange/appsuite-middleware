@@ -60,6 +60,6 @@ import com.openexchange.exception.OXException;
  */
 public interface MailAlarmNotificationService {
 
-    void send(Event event, int contextId, int userId, long trigger) throws OXException;
+    void send(Event event, int contextId, int accountId, int userId, long trigger) throws OXException;
 
 }
