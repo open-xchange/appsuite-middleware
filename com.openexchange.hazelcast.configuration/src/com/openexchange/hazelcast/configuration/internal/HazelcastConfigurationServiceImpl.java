@@ -317,8 +317,8 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             config.getNetworkConfig().setSymmetricEncryptionConfig(new SymmetricEncryptionConfig()
                 .setEnabled(true)
                 .setAlgorithm(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.algorithm", "PBEWithMD5AndDES"))
-                .setSalt(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.salt", "X-k4nY-Y*v38f=dSJrr)"))
-                .setPassword(configService.getProperty("com.openexchange.hazelcast.network.symmetricEncryption.password", "&3sFs<^6[cKbWDW#du9s"))
+                .setSalt(getPassword(configService, "com.openexchange.hazelcast.network.symmetricEncryption.salt", "X-k4nY-Y*v38f=dSJrr)"))
+                .setPassword(getPassword(configService, "com.openexchange.hazelcast.network.symmetricEncryption.password", "&3sFs<^6[cKbWDW#du9s"))
                 .setIterationCount(configService.getIntProperty("com.openexchange.hazelcast.network.symmetricEncryption.iterationCount", 19)));
         }
         /*
@@ -361,6 +361,14 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          * Config ready
          */
         return config;
+    }
+
+    private static String getPassword( ConfigurationService configurationService, String propertyName, String defaultPassword) {
+        String property = configurationService.getProperty(propertyName);
+        if (Strings.isNotEmpty(property) && defaultPassword.equalsIgnoreCase(property)) {
+            LOG.warn("The value '{}' for '{}' has not been changed from its default. Please do so to restrict access to your cluster.", defaultPassword, propertyName);
+        }
+        return property;
     }
 
     private static void applyDataStructures(Config config, File[] propertyFiles) throws OXException {
