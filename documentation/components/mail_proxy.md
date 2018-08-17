@@ -27,7 +27,7 @@ For example:
 
 ```
 -Dmail.imap.proxy.nonProxyHosts=my.local.imap.server
--Dmail.smtps.proxy.nonProxyHosts=my.local.smtp.server
+-Dmail.smtp.proxy.nonProxyHosts=my.local.smtp.server
 ```
 
 This properties are applied to both secure and non-secure connections.
