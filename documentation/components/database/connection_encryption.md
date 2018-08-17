@@ -1,24 +1,24 @@
 ---
-title: SSL for databases
+title: Database connection encryption
 ---
 
 # Introduction
-This guide will help you to setup SSL for your database and configure it for your OX system. Due to the fact that different operating systems and databases are supported by OX the guide might not cover everything needed for a successful setup. Therefore please use the references below if errors occure. Any suggestion on how to improve the guide are welcomed.
+This guide will help you to setup SSL for your database and configure it for your OX system. Due to the fact that different operating systems and databases are supported by OX the guide might not cover everything needed for a successful setup. Therefore, please use the references below if errors occur. Any suggestion on how to improve the guide are welcome.
 
 ## Further reading
-* MariaDB and SSL https://www.cyberciti.biz/faq/how-to-setup-mariadb-ssl-and-secure-connections-from-clients/ 
-* Ubuntu and MySQL https://www.digitalocean.com/community/tutorials/how-to-configure-ssl-tls-for-mysql-on-ubuntu-16-04
-* MySQL with user privileges (german) https://www.thomas-krenn.com/de/wiki/MySQL_Verbindungen_mit_SSL_verschl%C3%BCsseln
-* Official MySQL guide for SSL setup (JDBC) https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-using-ssl.html
+* [MariaDB and SSL](https://www.cyberciti.biz/faq/how-to-setup-mariadb-ssl-and-secure-connections-from-clients/) 
+* [Ubuntu and MySQL](https://www.digitalocean.com/community/tutorials/how-to-configure-ssl-tls-for-mysql-on-ubuntu-16-04)
+* [MySQL with user privileges (german)](https://www.thomas-krenn.com/de/wiki/MySQL_Verbindungen_mit_SSL_verschl%C3%BCsseln)
+* [Official MySQL guide for SSL setup (JDBC)](https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-using-ssl.html)
 
 # Configure your Database
 First things first. Before we can configure the Middleware, which is acting as the client, we need to setup the database (or rather the server) to use SSL. Therefore we need certificates.
 
 ## Certificate generation
-The database you use makes a huge difference on how you can generate SSL certificates. If you e.g. use the enterprise version of MySQL you can use the parameter 'auto_generate_certs' (see https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_auto_generate_certs for details) you don't need to do anything. For all other cases see the next chapters.
+The database you use makes a huge difference on how you can generate SSL certificates. If you e.g. use the enterprise version of MySQL you can use the parameter 'auto_generate_certs' (see [MySQL system variables](https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_auto_generate_certs) for details) and don't need to do anything. For all other cases see the next chapters.
 
 ### MySQL (community edition)
-The community edition (since 5.7) ships a tool called 'mysql_ssl_rsa_setup' (see https://dev.mysql.com/doc/refman/5.7/en/mysql-ssl-rsa-setup.html for details). This tool will generate all needed certificates in just one simple step. E.g.
+The community edition (since 5.7) ships a tool called 'mysql_ssl_rsa_setup' (see [MySQL SSL setup](https://dev.mysql.com/doc/refman/5.7/en/mysql-ssl-rsa-setup.html) for details). This tool will generate all needed certificates in just one simple step. E.g.
 
 ```
 mysql_ssl_rsa_setup --datadir=/etc/mysql/ssl --suffix OX
@@ -37,7 +37,7 @@ Before we generate the certificates, create a subdirectory in your SQL folder. T
 * A client certificate to later copy to the Middleware
 
 
-Note: This commands use the 'rsa' command to build a private key that begins with '-----BEGIN RSA PRIVATE KEY-----'. This is needed for yaSSL. The library expects the key to begin in this manner and fails if it does not. Therefore the guide uses this approach to generate SSL keys.
+Note: This commands use the 'rsa' command to build a private key that begins with `-----BEGIN RSA PRIVATE KEY-----`. This is needed for yaSSL. The library expects the key to begin in this manner and fails if it does not. Therefore the guide uses this approach to generate SSL keys.
 
 ```
 mkdir /etc/mysql/ssl
@@ -69,7 +69,7 @@ chown mysql:mysql *
 The last command might not be necessary for all databases, but you need for some and is a point of failure. This command too should be run at the client after copying certificates to the client.
 
 ## Activate SSL in the configuration
-This step is the one with the most diversity. E.g. Debian ships MariaDB binaries that where compiled to use yaSSL (or rather with the new name wolfSSL). Therefore the configuration to activate SSL is 'ssl on'. If the binaries where compiled to use OpenSSL the configuration param would look like this 'ssl-cipher=TLSv1.2'. On MySQl it might be "ssl=1 or just "ssl". Therefore the configuration showed below might not be working for your system:
+This step is the one with the most diversity. E.g. Debian ships MariaDB binaries that where compiled to use yaSSL (or rather with the new name wolfSSL). Therefore the configuration to activate SSL is `ssl on`. If the binaries were compiled to use OpenSSL the configuration param would look like this `ssl-cipher=TLSv1.2`. On MySQl it might be `ssl=1` or just `ssl`. Therefore the configuration showed below might not be working for your system:
 
 
 ### MySQL
@@ -115,7 +115,7 @@ systemctl restart mysql
 
 # Configure your OX
 ## Copy the certificates
-Before we can configure the OX Middleware we need to copy some certificates. For the rest of the guide we assume the certificates were copied to "/opt/openexchange/etc/ssl/".
+Before we can configure the OX Middleware we need to copy some certificates. For the rest of the guide we assume the certificates were copied to `/opt/openexchange/etc/ssl/database`.
 
 For a two way authentication we need 
 
@@ -123,14 +123,14 @@ For a two way authentication we need
 * client-cert.pem
 * client-key-pem
 
-Note: You can generate the certificates on the client too but keep in mind to use the same CA certificate. If you don't your connections will fail with an generic "CommunicationLinkFailure".
+Note: You can generate the certificates on the client, too, but keep in mind to use the same CA certificate. If you don't, your connections will fail with a generic `CommunicationLinkFailure`.
 
 ### Test with local client
 Before you configure the Middleware to use SSL you should test if the configuration. Therefore run e.g.:
 
 ```
-mysql -uopenexchange -p -h10.50.0.170 --ssl-mode=VERIFY_CA --ssl-ca=/opt/openexchange/etc/ssl/ca-cert.pem --ssl-cert=/opt/openexchange/etc/ssl/client-cert.pem \
-      --ssl-key=/opt/openexchange/etc/ssl/client-key.pem
+mysql -uopenexchange -p -h10.50.0.170 --ssl-mode=VERIFY_CA --ssl-ca=/opt/openexchange/etc/ssl/database/ca-cert.pem --ssl-cert=/opt/openexchange/etc/ssl/database/client-cert.pem \
+      --ssl-key=/opt/openexchange/etc/ssl/database/client-key.pem
 ```
 
 It is possible to use a connection without client certificates, too:
@@ -177,15 +177,23 @@ com.mysql.jdbc:
     requireSSL: true
     verifyServerCertificate: true
     # Deactivate if you just want a server authentication
-    clientCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/keystore
+    clientCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/keystore
     clientCertificateKeyStorePassword: changeit
     clientCertificateKeyStoreType: JKS
-    trustCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/truststore
+    trustCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/truststore
     trustCertificateKeyStorePassword: changeit
     trustCertificateKeyStoreType: JKS
 ```
 
-Note: Properties for the 'configdb' will be overwritten by the properties defined in "configdb.properties"!!
+In the step above we have created an PKCS#12 key store. This can be used instead of the JKS store, too:
+
+```
+ clientCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/client-keystore.p12
+clientCertificateKeyStorePassword: changeit
+clientCertificateKeyStoreType: PKCS12
+```
+
+Note: Properties for the `configdb` will be overwritten by the properties defined in `configdb.properties`!!
 
 Note: Based on the underlying JDK there might be problems with the available TLS versions. Newer JDK versions might only use TLSv1.1 or higher and the configured database might only accept TLSv1.
 
