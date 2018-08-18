@@ -109,7 +109,7 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
     private static final String LOGINATTR_OPTION = "com.openexchange.authentication.ucs.loginAttribute";
     private static final String LDAPPOOL_OPTION = "com.openexchange.authentication.ucs.useLdapPool";
 
-    private final class AuthenticatedImpl implements Authenticated {
+    private static final class AuthenticatedImpl implements Authenticated {
 
         private final String login;
         private final String contextIdOrName;
