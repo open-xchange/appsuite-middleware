@@ -796,8 +796,8 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
             if (jMail.hasAndNotNull(fromKey)) {
                 try {
                     String value = jMail.getString(fromKey);
-                    int endPos;
-                    if ('[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
+                    int endPos = value.lastIndexOf(']');
+                    if ('[' == value.charAt(0) && endPos+1 < value.length()) {
                         value = new StringBuilder(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
                     }
                     composedMail.addFrom(parseAddressList(value, true, true));
