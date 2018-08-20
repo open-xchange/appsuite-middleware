@@ -1,0 +1,14 @@
+Source: open-xchange-geoip-check
+Section: web
+Priority: optional
+Maintainer: Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-core (>= @OXVERSION@), open-xchange-geoip (>= @OXVERSION@)
+Standards-Version: 3.9.8
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-geoip-check
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@), open-xchange-geoip (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: The Open-Xchange GeoIP Check
+ This package provides the possibility to configure an IP check against country code plausibility
