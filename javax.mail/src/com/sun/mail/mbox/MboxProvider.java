@@ -1,4 +1,3 @@
-
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -39,16 +38,16 @@
  * holder.
  */
 
-package com.sun.mail.smtp;
+package com.sun.mail.mbox;
 
 import javax.mail.Provider;
 
 /**
- * The SMTP SSL protocol provider.
+ * The Mbox protocol provider.
  */
-public class SMTPSSLProvider extends Provider {
-    public SMTPSSLProvider() {
-    super(Provider.Type.TRANSPORT, "smtps",
-        SMTPSSLTransport.class.getName(), "Oracle", null);
+public class MboxProvider extends Provider {
+    public MboxProvider() {
+	super(Provider.Type.STORE, "mbox", MboxStore.class.getName(),
+	    "Oracle", null);
     }
 }

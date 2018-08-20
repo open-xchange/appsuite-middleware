@@ -75,6 +75,8 @@ import gnu.trove.list.array.TIntArrayList;
 
 public class Tools {
 
+    private static final String TOTAL = "total";
+
     public static Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
         return ContextStorage.getInstance().getSchemaAssociations();
     }
@@ -88,7 +90,7 @@ public class Tools {
     public static List<Integer> getAllContextIds() throws OXException {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
 
-        final List<Integer> retval = new ArrayList<Integer>();
+        final List<Integer> retval = new ArrayList<>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         Connection readConnection = null;
@@ -112,7 +114,7 @@ public class Tools {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         Connection readOnly = null;
 
-        final List<User> users = new ArrayList<User>();
+        final List<User> users = new ArrayList<>();
         try {
             readOnly = dbService.getReadOnly(contextId);
             int[] userIds = listAllUser(contextId, readOnly);
@@ -172,7 +174,7 @@ public class Tools {
             }
             result = stmt.executeQuery();
             if (result.next()) {
-                return result.getInt("total");
+                return result.getInt(TOTAL);
             }
         } catch (final SQLException e) {
             throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
@@ -200,7 +202,7 @@ public class Tools {
             result = stmt.executeQuery();
 
             if (result.next()) {
-                return result.getInt("total");
+                return result.getInt(TOTAL);
             }
         } catch (final SQLException e) {
             throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
@@ -228,7 +230,7 @@ public class Tools {
             result = stmt.executeQuery();
 
             if (result.next()) {
-                return result.getInt("total");
+                return result.getInt(TOTAL);
             }
         } catch (final SQLException e) {
             throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());

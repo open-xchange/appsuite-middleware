@@ -1,4 +1,3 @@
-
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -39,16 +38,16 @@
  * holder.
  */
 
-package com.sun.mail.smtp;
+package com.sun.mail.remote;
 
 import javax.mail.Provider;
 
 /**
- * The SMTP SSL protocol provider.
+ * The POP3 remote protocol provider.
  */
-public class SMTPSSLProvider extends Provider {
-    public SMTPSSLProvider() {
-    super(Provider.Type.TRANSPORT, "smtps",
-        SMTPSSLTransport.class.getName(), "Oracle", null);
+public class POP3RemoteProvider extends Provider {
+    public POP3RemoteProvider() {
+	super(Provider.Type.STORE, "pop3remote",
+	    POP3RemoteStore.class.getName(), "Oracle", null);
     }
 }

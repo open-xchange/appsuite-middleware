@@ -66,7 +66,7 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<
 
     private final BundleContext context;
 
-    private volatile ServiceRegistration<AuthenticationService> registration;
+    private ServiceRegistration<AuthenticationService> registration; // Guarded by synchronized
 
     /**
      * Initializes a new {@link AuthenticationRegisterer}.
@@ -79,7 +79,7 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<
     }
 
     @Override
-    public AuthenticationDriver addingService(ServiceReference<AuthenticationDriver> reference) {
+    public synchronized AuthenticationDriver addingService(ServiceReference<AuthenticationDriver> reference) {
         String driverId = (String) reference.getProperty(AuthenticationDriver.PROPERTY_ID);
         if (!"database".equals(driverId)) {
             return null;
@@ -97,7 +97,7 @@ public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<
     }
 
     @Override
-    public void removedService(ServiceReference<AuthenticationDriver> reference, AuthenticationDriver driver) {
+    public synchronized void removedService(ServiceReference<AuthenticationDriver> reference, AuthenticationDriver driver) {
         String driverId = (String) reference.getProperty(AuthenticationDriver.PROPERTY_ID);
         if (!"database".equals(driverId)) {
             context.ungetService(reference);
