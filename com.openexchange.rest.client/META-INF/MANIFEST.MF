@@ -71,5 +71,7 @@ Export-Package: com.openexchange.rest.client,
  com.openexchange.rest.client.exception,
  com.openexchange.rest.client.httpclient,
  com.openexchange.rest.client.session,
- com.openexchange.rest.client.session.pair
+ com.openexchange.rest.client.session.pair,
+ com.openexchange.rest.client.v2,
+ com.openexchange.rest.client.v2.parser
 Bundle-Activator: com.openexchange.rest.client.osgi.RestClientActivator
