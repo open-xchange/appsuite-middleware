@@ -257,7 +257,7 @@ properties:
       related: 
       file: hazelcast.properties
       packageName: open-xchange-core
-      tags: ["Hazelcast", "Encryption"]
+      tags: ["Hazelcast", "Encryption", "Credential"]
     - key: com.openexchange.hazelcast.network.symmetricEncryption.password
       description: |
         Specifies the pass phrase to use when generating the secret key for symmetric encryption.
@@ -268,7 +268,7 @@ properties:
       related: 
       file: hazelcast.properties
       packageName: open-xchange-core
-      tags: ["Hazelcast", "Encryption"]
+      tags: ["Hazelcast", "Encryption", "Credential"]
     - key: com.openexchange.hazelcast.network.symmetricEncryption.iterationCount
       description: |
         Configures the iteration count to use when generating the secret key for symmetric encryption. 
