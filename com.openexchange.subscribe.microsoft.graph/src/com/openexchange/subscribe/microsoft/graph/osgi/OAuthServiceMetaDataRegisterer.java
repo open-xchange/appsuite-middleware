@@ -55,7 +55,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.context.ContextService;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -63,6 +62,7 @@ import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.microsoft.graph.MicrosoftContactsSubscribeService;
+import com.openexchange.subscribe.microsoft.graph.groupware.MicrosoftSubscriptionsOAuthAccountDeleteListener;
 
 /**
  * {@link OAuthServiceMetaDataRegisterer}
@@ -103,16 +103,15 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
 
         Logger logger = LoggerFactory.getLogger(OAuthServiceMetaDataRegisterer.class);
         logger.info("Registering Microsoft Graph subscription services.");
-        MicrosoftContactsSubscribeService msliveSubService = new MicrosoftContactsSubscribeService(oAuthServiceMetaData, services);
-        contactsRegistration = context.registerService(SubscribeService.class, msliveSubService, null);
+        MicrosoftContactsSubscribeService msContactsSubService = new MicrosoftContactsSubscribeService(oAuthServiceMetaData, services);
+        contactsRegistration = context.registerService(SubscribeService.class, msContactsSubService, null);
 
         try {
             if (deleteListenerRegistration == null) {
-                ContextService contextService = services.getService(ContextService.class);
-                //deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, new MSLiveSubscriptionsOAuthAccountDeleteListener(msliveSubService, contextService), null);
+                deleteListenerRegistration = context.registerService(OAuthAccountDeleteListener.class, new MicrosoftSubscriptionsOAuthAccountDeleteListener(msContactsSubService, services), null);
             }
             if (associationProviderRegistration == null) {
-                //associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new MSLiveContactsOAuthAccountAssociationProvider(services), null);
+                //associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new MicrosoftContactsOAuthAccountAssociationProvider(services), null);
             }
         } catch (Throwable t) {
             logger.error("", t);
