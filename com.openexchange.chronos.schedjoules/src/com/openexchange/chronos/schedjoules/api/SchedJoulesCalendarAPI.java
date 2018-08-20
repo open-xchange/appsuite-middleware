@@ -55,8 +55,8 @@ import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCalendar;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.rest.client.RESTMethod;
-import com.openexchange.rest.client.RESTResponse;
+import com.openexchange.rest.client.v2.RESTMethod;
+import com.openexchange.rest.client.v2.RESTResponse;
 
 /**
  * {@link SchedJoulesCalendarAPI}

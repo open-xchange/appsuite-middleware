@@ -57,9 +57,9 @@ import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTBindPoint;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.client.RESTMethod;
-import com.openexchange.rest.client.RESTResponse;
-import com.openexchange.rest.client.ResponseUtil;
+import com.openexchange.rest.client.v2.RESTMethod;
+import com.openexchange.rest.client.v2.RESTResponse;
+import com.openexchange.rest.client.v2.RESTResponseUtil;
 
 /**
  * {@link SchedJoulesLanguagesAPI}
@@ -85,7 +85,7 @@ public class SchedJoulesLanguagesAPI extends AbstractSchedJoulesAPI {
         SchedJoulesRequest request = new SchedJoulesRequest(SchedJoulesRESTBindPoint.languages);
 
         RESTResponse response = client.executeRequest(request);
-        return new SchedJoulesPageBuilder().itemData((JSONArray) response.getResponseBody()).etag(response.getHeader(HttpHeaders.ETAG)).lastModified(ResponseUtil.getLastModified(response)).build();
+        return new SchedJoulesPageBuilder().itemData((JSONArray) response.getResponseBody()).etag(response.getHeader(HttpHeaders.ETAG)).lastModified(RESTResponseUtil.getLastModified(response)).build();
     }
 
     /**

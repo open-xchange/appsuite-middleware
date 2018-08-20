@@ -47,70 +47,14 @@
  *
  */
 
-package com.openexchange.rest.client;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Set;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
-import com.openexchange.rest.client.exception.RESTExceptionCodes;
+package com.openexchange.rest.client.v2;
 
 /**
- * {@link JsonRESTResponseBodyParser}
+ * {@link RESTMethod}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class JsonRESTResponseBodyParser implements RESTResponseBodyParser {
-
-    private static final String CHARSET = "UTF-8";
-    private final Set<String> contentTypes;
-
-    /**
-     * Initialises a new {@link JsonRESTResponseBodyParser}.
-     */
-    public JsonRESTResponseBodyParser() {
-        super();
-        contentTypes = Collections.singleton("application/json");
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
-     */
-    @Override
-    public Object parse(RESTResponse response) throws OXException {
-        try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
-            String string = Streams.stream2string(inputStream, CHARSET);
-            char c = string.charAt(0);
-            switch (c) {
-                case '{':
-                    return new JSONObject(string);
-                case '[':
-                    return new JSONArray(string);
-                default:
-                    throw RESTExceptionCodes.JSON_ERROR.create("Unexpected start token detected '" + c + "'");
-            }
-        } catch (IOException e) {
-            throw RESTExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (JSONException e) {
-            throw RESTExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.rest.client.RESTResponseBodyParser#getContentTypes()
-     */
-    @Override
-    public Set<String> getContentTypes() {
-        return contentTypes;
-    }
+public enum RESTMethod {
+    PUT, GET, POST, DELETE, OPTIONS, PATCH, HEAD;
 }

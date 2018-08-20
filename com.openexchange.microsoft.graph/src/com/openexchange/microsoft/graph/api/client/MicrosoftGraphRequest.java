@@ -49,7 +49,7 @@
 
 package com.openexchange.microsoft.graph.api.client;
 
-import com.openexchange.rest.client.RESTMethod;
+import com.openexchange.rest.client.v2.RESTMethod;
 
 /**
  * {@link MicrosoftGraphRequest}

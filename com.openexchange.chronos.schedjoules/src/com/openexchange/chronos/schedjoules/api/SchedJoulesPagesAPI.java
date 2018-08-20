@@ -62,9 +62,9 @@ import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRESTClient;
 import com.openexchange.chronos.schedjoules.api.client.SchedJoulesRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.rest.client.RESTMethod;
-import com.openexchange.rest.client.RESTResponse;
-import com.openexchange.rest.client.ResponseUtil;
+import com.openexchange.rest.client.v2.RESTMethod;
+import com.openexchange.rest.client.v2.RESTResponse;
+import com.openexchange.rest.client.v2.RESTResponseUtil;
 
 /**
  * {@link SchedJoulesPagesAPI}
@@ -199,6 +199,6 @@ public class SchedJoulesPagesAPI extends AbstractSchedJoulesAPI {
      */
     private SchedJoulesPage executeRequest(SchedJoulesRequest request) throws OXException {
         RESTResponse response = client.executeRequest(request);
-        return new SchedJoulesPageBuilder().itemData((JSONObject) response.getResponseBody()).etag(response.getHeader(HttpHeaders.ETAG)).lastModified(ResponseUtil.getLastModified(response)).build();
+        return new SchedJoulesPageBuilder().itemData((JSONObject) response.getResponseBody()).etag(response.getHeader(HttpHeaders.ETAG)).lastModified(RESTResponseUtil.getLastModified(response)).build();
     }
 }

@@ -49,7 +49,7 @@
 
 package com.openexchange.microsoft.graph.api.client;
 
-import com.openexchange.rest.client.RESTEndPoint;
+import com.openexchange.rest.client.v2.RESTEndPoint;
 
 /**
  * {@link MicrosoftGraphRESTEndPoint}

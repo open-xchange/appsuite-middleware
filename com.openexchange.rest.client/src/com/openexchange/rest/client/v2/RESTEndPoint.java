@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.rest.client;
+package com.openexchange.rest.client.v2;
 
 /**
  * {@link RESTEndPoint}

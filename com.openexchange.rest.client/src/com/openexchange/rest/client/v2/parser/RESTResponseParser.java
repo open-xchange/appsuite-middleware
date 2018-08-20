@@ -47,14 +47,26 @@
  *
  */
 
-package com.openexchange.rest.client;
+package com.openexchange.rest.client.v2.parser;
+
+import java.io.IOException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.rest.client.v2.RESTResponse;
 
 /**
- * {@link RESTMethod}
+ * {@link RESTResponseParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public enum RESTMethod {
-    PUT, GET, POST, DELETE, OPTIONS, PATCH, HEAD;
+public interface RESTResponseParser {
+
+    /**
+     * Parses the specified {@link CloseableHttpResponse}
+     * 
+     * @param response The response to parse
+     * @return The parsed {@link RESTResponse}.
+     */
+    RESTResponse parse(CloseableHttpResponse response) throws OXException, IOException;
 }

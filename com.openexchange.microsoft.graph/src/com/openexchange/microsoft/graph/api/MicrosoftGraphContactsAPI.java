@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTEndPoint;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
-import com.openexchange.rest.client.RESTMethod;
+import com.openexchange.rest.client.v2.RESTMethod;
 
 /**
  * {@link MicrosoftGraphContactsAPI}

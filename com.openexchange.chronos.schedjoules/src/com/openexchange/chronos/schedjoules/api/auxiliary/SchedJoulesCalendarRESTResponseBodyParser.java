@@ -61,9 +61,9 @@ import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCod
 import com.openexchange.chronos.schedjoules.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.rest.client.RESTResponse;
-import com.openexchange.rest.client.RESTResponseBodyParser;
-import com.openexchange.rest.client.ResponseUtil;
+import com.openexchange.rest.client.v2.RESTResponse;
+import com.openexchange.rest.client.v2.RESTResponseUtil;
+import com.openexchange.rest.client.v2.parser.RESTResponseBodyParser;
 
 /**
  * {@link SchedJoulesCalendarRESTResponseBodyParser}
@@ -94,7 +94,7 @@ public class SchedJoulesCalendarRESTResponseBodyParser implements RESTResponseBo
 
         try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
             Calendar calendar = iCalService.importICal(inputStream, parameters);
-            return new SchedJoulesCalendar(calendar.getName(), calendar.getEvents(), response.getHeader(HttpHeaders.ETAG), ResponseUtil.getLastModified(response));
+            return new SchedJoulesCalendar(calendar.getName(), calendar.getEvents(), response.getHeader(HttpHeaders.ETAG), RESTResponseUtil.getLastModified(response));
         } catch (IOException e) {
             throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }

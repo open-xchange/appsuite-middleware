@@ -50,8 +50,8 @@
 package com.openexchange.chronos.schedjoules.api.client;
 
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCalendarRESTResponseBodyParser;
-import com.openexchange.rest.client.AbstractRESTResponseParser;
-import com.openexchange.rest.client.RESTMimeType;
+import com.openexchange.rest.client.v2.RESTMimeType;
+import com.openexchange.rest.client.v2.parser.AbstractRESTResponseParser;
 
 /**
  * {@link SchedJoulesRESTResponseParser}

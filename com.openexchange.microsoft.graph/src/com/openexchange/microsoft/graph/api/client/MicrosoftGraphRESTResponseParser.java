@@ -49,8 +49,9 @@
 
 package com.openexchange.microsoft.graph.api.client;
 
-import com.openexchange.rest.client.AbstractRESTResponseParser;
-import com.openexchange.rest.client.RESTMimeType;
+import com.openexchange.rest.client.v2.RESTMimeType;
+import com.openexchange.rest.client.v2.parser.AbstractRESTResponseParser;
+import com.openexchange.rest.client.v2.parser.ImageRESTResponseBodyParser;
 
 /**
  * {@link MicrosoftGraphRESTResponseParser}
@@ -67,7 +68,7 @@ public class MicrosoftGraphRESTResponseParser extends AbstractRESTResponseParser
      */
     public MicrosoftGraphRESTResponseParser() {
         super();
-        responseBodyParsers.put(RESTMimeType.IMAGE, new MicrosoftGraphImageRESTResponseBodyParser());
+        responseBodyParsers.put(RESTMimeType.IMAGE, new ImageRESTResponseBodyParser());
     }
 
     /*

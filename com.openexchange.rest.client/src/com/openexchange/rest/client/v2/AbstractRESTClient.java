@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.rest.client;
+package com.openexchange.rest.client.v2;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
+import com.openexchange.rest.client.v2.parser.RESTResponseParser;
 
 /**
  * {@link AbstractRESTClient}

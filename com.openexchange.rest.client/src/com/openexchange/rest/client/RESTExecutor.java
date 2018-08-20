@@ -89,6 +89,8 @@ import com.openexchange.rest.client.exception.HTTPResponseCodes;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.session.Session;
 import com.openexchange.rest.client.session.Session.ProxyInfo;
+import com.openexchange.rest.client.v2.AbstractRESTClient;
+import com.openexchange.rest.client.v2.RESTResponse;
 
 /**
  * {@link RESTExecutor}. Used to create, execute and parse the responses of REST requests to any REST API.

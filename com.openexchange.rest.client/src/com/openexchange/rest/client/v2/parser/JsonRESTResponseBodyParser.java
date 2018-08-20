@@ -47,34 +47,71 @@
  *
  */
 
-package com.openexchange.rest.client;
+package com.openexchange.rest.client.v2.parser;
 
-import org.apache.http.HttpHeaders;
-import com.openexchange.java.Strings;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.rest.client.exception.RESTExceptionCodes;
+import com.openexchange.rest.client.v2.RESTResponse;
 
 /**
- * {@link ResponseUtil}
+ * {@link JsonRESTResponseBodyParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public final class ResponseUtil {
+public class JsonRESTResponseBodyParser implements RESTResponseBodyParser {
+
+    private static final String CHARSET = "UTF-8";
+    private final Set<String> contentTypes;
 
     /**
-     * Returns the Last-Modified value from the specified {@link RESTResponse}
-     * if present
-     * 
-     * @param response The {@link RESTResponse}
-     * @return The Last-Modified value or <code>0</code> if the header is absent or if
-     *         the header's value is indeed <code>0</code>.
+     * Initialises a new {@link JsonRESTResponseBodyParser}.
      */
-    public static long getLastModified(RESTResponse response) {
-        String value = response.getHeader(HttpHeaders.LAST_MODIFIED);
-        try {
-            return Strings.isEmpty(value) ? 0 : Long.parseLong(value);
-        } catch (NumberFormatException e) {
-            return 0;
+    public JsonRESTResponseBodyParser() {
+        super();
+        contentTypes = Collections.singleton("application/json");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
+     */
+    @Override
+    public Object parse(RESTResponse response) throws OXException {
+        try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
+            String string = Streams.stream2string(inputStream, CHARSET);
+            char c = string.charAt(0);
+            switch (c) {
+                case '{':
+                    return new JSONObject(string);
+                case '[':
+                    return new JSONArray(string);
+                default:
+                    throw RESTExceptionCodes.JSON_ERROR.create("Unexpected start token detected '" + c + "'");
+            }
+        } catch (IOException e) {
+            throw RESTExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (JSONException e) {
+            throw RESTExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.RESTResponseBodyParser#getContentTypes()
+     */
+    @Override
+    public Set<String> getContentTypes() {
+        return contentTypes;
+    }
 }

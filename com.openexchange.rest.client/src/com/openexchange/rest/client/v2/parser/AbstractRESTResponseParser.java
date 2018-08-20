@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.rest.client;
+package com.openexchange.rest.client.v2.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,6 +66,8 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
+import com.openexchange.rest.client.v2.RESTMimeType;
+import com.openexchange.rest.client.v2.RESTResponse;
 
 /**
  * {@link AbstractRESTResponseParser}

@@ -52,7 +52,7 @@ package com.openexchange.chronos.schedjoules.api.client;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.rest.client.RESTMethod;
+import com.openexchange.rest.client.v2.RESTMethod;
 
 /**
  * {@link SchedJoulesRequest}

@@ -54,9 +54,9 @@ import java.net.URISyntaxException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpRequestBase;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.client.AbstractRESTClient;
-import com.openexchange.rest.client.RESTResponse;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
+import com.openexchange.rest.client.v2.AbstractRESTClient;
+import com.openexchange.rest.client.v2.RESTResponse;
 
 /**
  * {@link MicrosoftGraphRESTClient}
