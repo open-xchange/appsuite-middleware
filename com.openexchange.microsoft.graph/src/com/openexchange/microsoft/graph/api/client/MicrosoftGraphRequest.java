@@ -49,6 +49,9 @@
 
 package com.openexchange.microsoft.graph.api.client;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.rest.client.v2.RESTMethod;
 
 /**
@@ -62,6 +65,7 @@ public class MicrosoftGraphRequest {
     private final String endPoint;
     private final RESTMethod method;
     private String accessToken;
+    private final Map<String, String> queryParams;
 
     /**
      * Initialises a new {@link MicrosoftGraphRequest}.
@@ -89,6 +93,7 @@ public class MicrosoftGraphRequest {
         super();
         this.method = method;
         this.endPoint = endPoint;
+        queryParams = new HashMap<>(4);
     }
 
     /**
@@ -125,5 +130,24 @@ public class MicrosoftGraphRequest {
      */
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    /**
+     * With the specified query parameter
+     * 
+     * @param name The name of the query parameter
+     * @param value the value of the query parameter
+     */
+    public void withQueryParameter(String name, String value) {
+        queryParams.put(name, value);
+    }
+
+    /**
+     * Returns an unmodifiable {@link Map} with the query parameters of the request
+     * 
+     * @return an unmodifiable {@link Map} with the query parameters of the request
+     */
+    Map<String, String> getQueryParameters() {
+        return Collections.unmodifiableMap(queryParams);
     }
 }

@@ -82,14 +82,38 @@ public class MicrosoftGraphContactsAPI extends AbstractMicrosoftGraphAPI {
      * <li>Contacts.Read</li>
      * </ul>
      * 
-     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/user_list_contacts">List Contacts</a>
      * @param accessToken The OAuth access token previously acquired by the OAuthService
      * @return a {@link JSONObject} with all the user's contacts
      * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/user_list_contacts">List Contacts</a>
      */
     public JSONObject getContacts(String accessToken) throws OXException {
+        return getContacts(accessToken, 0, 0);
+    }
+
+    /**
+     * Retrieves the contacts of the current user starting from the specified offset and skipping to the specified offset
+     * 
+     * Required OAuth scopes:
+     * <ul>
+     * <li>Contacts.Read</li>
+     * </ul>
+     * 
+     * @param accessToken The OAuth access token previously acquired by the OAuthService
+     * @return a {@link JSONObject} with all the user's contacts
+     * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/paging">Paging</a>
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/user_list_contacts">List Contacts</a>
+     */
+    public JSONObject getContacts(String accessToken, int startOffset, int skip) throws OXException {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath());
         request.setAccessToken(accessToken);
+        if (startOffset > 0) {
+            request.withQueryParameter("$top", Integer.toString(startOffset));
+        }
+        if (skip > 0) {
+            request.withQueryParameter("$skip", Integer.toString(skip));
+        }
         return ((JSONValue) client.execute(request).getResponseBody()).toObject();
     }
 

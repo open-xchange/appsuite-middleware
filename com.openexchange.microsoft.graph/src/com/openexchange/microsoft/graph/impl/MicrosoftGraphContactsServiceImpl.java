@@ -65,6 +65,7 @@ import com.openexchange.microsoft.graph.parser.ContactParser;
 public class MicrosoftGraphContactsServiceImpl implements MicrosoftGraphContactsService {
 
     private final MicrosoftGraphContactsAPI api;
+    private static final int CHUNK_SIZE = 25;
 
     /**
      * Initialises a new {@link MicrosoftGraphContactsServiceImpl}.

@@ -51,6 +51,8 @@ package com.openexchange.microsoft.graph.api.client;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpRequestBase;
 import com.openexchange.exception.OXException;
@@ -93,12 +95,26 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     private HttpRequestBase prepareRequest(MicrosoftGraphRequest request) throws OXException {
         HttpRequestBase httpRequest = createRequest(request.getMethod());
         try {
-            httpRequest.setURI(new URI(SCHEME, API_URL, "/" + API_VERSION + request.getEndPoint(), null, null));
+            httpRequest.setURI(new URI(SCHEME, API_URL, "/" + API_VERSION + request.getEndPoint(), prepareQueryParameters(request.getQueryParameters()), null));
             httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + request.getAccessToken());
             httpRequest.addHeader(HttpHeaders.ACCEPT, "application/json");
             return httpRequest;
         } catch (URISyntaxException e) {
             throw RESTExceptionCodes.INVALID_URI_PATH.create(e, API_VERSION + request.getEndPoint());
         }
+    }
+
+    /**
+     * 
+     * @param queryParams
+     * @return
+     */
+    private String prepareQueryParameters(Map<String, String> queryParams) {
+        StringBuilder queryParamBuilder = new StringBuilder(32);
+        for (Entry<String, String> queryParameter : queryParams.entrySet()) {
+            queryParamBuilder.append(queryParameter.getKey()).append('=').append(queryParameter.getValue()).append('&');
+        }
+        queryParamBuilder.setLength(queryParamBuilder.length() - 1);
+        return queryParamBuilder.toString();
     }
 }
