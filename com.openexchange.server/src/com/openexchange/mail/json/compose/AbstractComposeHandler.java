@@ -52,7 +52,6 @@ package com.openexchange.mail.json.compose;
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.isCustomOrReplyHeader;
-import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -792,20 +791,13 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
             /*
              * From Only mandatory if non-draft message
              */
-            String fromKey = MailJSONField.FROM.getKey();
-            if (jMail.hasAndNotNull(fromKey)) {
-                try {
-                    String value = jMail.getString(fromKey);
-                    int endPos = value.lastIndexOf(']');
-                    if ('[' == value.charAt(0) && endPos+1 < value.length()) {
-                        value = new StringBuilder(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
-                    }
-                    composedMail.addFrom(parseAddressList(value, true, true));
-                } catch (AddressException e) {
-                    composedMail.addFrom(parseAddressKey(fromKey, jMail, forTransport));
+            {
+                InternetAddress[] fromAddresses = parseAddressKey(MailJSONField.FROM.getKey(), jMail, forTransport);
+                if (null != fromAddresses && fromAddresses.length > 0) {
+                    composedMail.addFrom(fromAddresses);
+                } else if (forTransport) {
+                    throw MailExceptionCode.MISSING_FIELD.create(MailJSONField.FROM.getKey());
                 }
-            } else if (forTransport) {
-                throw MailExceptionCode.MISSING_FIELD.create(fromKey);
             }
             /*
              * To Only mandatory if non-draft message
