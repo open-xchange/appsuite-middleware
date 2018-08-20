@@ -114,7 +114,9 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
         for (Entry<String, String> queryParameter : queryParams.entrySet()) {
             queryParamBuilder.append(queryParameter.getKey()).append('=').append(queryParameter.getValue()).append('&');
         }
-        queryParamBuilder.setLength(queryParamBuilder.length() - 1);
+        if (queryParamBuilder.length() > 0) {
+            queryParamBuilder.setLength(queryParamBuilder.length() - 1);
+        }
         return queryParamBuilder.toString();
     }
 }

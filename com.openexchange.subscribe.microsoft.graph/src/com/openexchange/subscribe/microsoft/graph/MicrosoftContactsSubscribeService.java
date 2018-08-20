@@ -50,8 +50,15 @@
 package com.openexchange.subscribe.microsoft.graph;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
@@ -60,6 +67,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 
 /**
  * {@link MicrosoftContactsSubscribeService}
@@ -69,7 +79,9 @@ import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
  */
 public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MicrosoftContactsSubscribeService.class);
     private static final String SOURCE_ID = KnownApi.MICROSOFT_GRAPH.getServiceId() + ".contact";
+    private static final int CHUNK_SIZE = 25;
 
     /**
      * Initialises a new {@link MicrosoftContactsSubscribeService}.
@@ -97,7 +109,59 @@ public class MicrosoftContactsSubscribeService extends AbstractOAuthSubscribeSer
     public Collection<?> getContent(Subscription subscription) throws OXException {
         Session session = subscription.getSession();
         OAuthAccount oauthAccount = getOAuthAccount(session, subscription);
+
+        FolderUpdaterRegistry folderUpdaterRegistry = getServices().getOptionalService(FolderUpdaterRegistry.class);
+        ThreadPoolService threadPool = getServices().getOptionalService(ThreadPoolService.class);
+        FolderUpdaterService<Contact> folderUpdater = null == folderUpdaterRegistry ? null : folderUpdaterRegistry.<Contact> getFolderUpdater(subscription);
+
+        if (threadPool == null || folderUpdater == null) {
+            return fetchInForeground(oauthAccount);
+        }
+        scheduleInBackground(threadPool, folderUpdater, oauthAccount, subscription);
+        return Collections.emptyList();
+    }
+
+    /**
+     * Fetches all contacts in the foreground (blocking thread)
+     * 
+     * @param account The {@link OAuthAccount}
+     * @return A {@link List} with all fetched contacts
+     * @throws OXException
+     */
+    private List<Contact> fetchInForeground(OAuthAccount account) throws OXException {
         MicrosoftGraphContactsService contactsService = getServices().getService(MicrosoftGraphContactsService.class);
-        return contactsService.getContacts(oauthAccount.getToken());
+        return contactsService.getContacts(account.getToken());
+    }
+
+    /**
+     * Schedules a task to fetch all contacts and executes it in the background
+     * 
+     * @param threadPool the {@link ThreadPoolService}
+     * @param folderUpdater The {@link FolderUpdaterService}
+     * @param account The {@link OAuthAccount}
+     * @param subscription The {@link Subscription}
+     */
+    private void scheduleInBackground(ThreadPoolService threadPool, FolderUpdaterService<Contact> folderUpdater, OAuthAccount account, Subscription subscription) {
+        threadPool.submit(new AbstractTask<Void>() {
+
+            @Override
+            public Void call() throws Exception {
+                try {
+                    MicrosoftGraphContactsService contactsService = getServices().getService(MicrosoftGraphContactsService.class);
+                    boolean hasMore = false;
+                    int offset = 0;
+                    do {
+                        List<Contact> contacts = contactsService.getContacts(account.getToken(), CHUNK_SIZE, offset);
+                        folderUpdater.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
+                        offset += contacts.size();
+                        hasMore = !contacts.isEmpty();
+                    } while (hasMore);
+                } catch (Exception e) {
+                    LOG.error("", e);
+                    throw e;
+                }
+                return null;
+            }
+        });
     }
 }

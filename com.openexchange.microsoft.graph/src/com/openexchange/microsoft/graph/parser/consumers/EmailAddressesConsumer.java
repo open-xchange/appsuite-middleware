@@ -65,8 +65,6 @@ import com.openexchange.groupware.container.Contact;
  */
 public class EmailAddressesConsumer implements BiConsumer<JSONObject, Contact> {
 
-    private static final int MAXIMUM_SUPPORTED_EMAIL_ADDRESSES = 3;
-
     /**
      * Initialises a new {@link EmailAddressesConsumer}.
      */
@@ -86,7 +84,7 @@ public class EmailAddressesConsumer implements BiConsumer<JSONObject, Contact> {
         }
         JSONArray addresses = t.optJSONArray("emailAddresses");
         int count = 0;
-        for (int index = 0; index < MAXIMUM_SUPPORTED_EMAIL_ADDRESSES; index++) {
+        for (int index = 0; index < addresses.length(); index++) {
             JSONObject email = addresses.optJSONObject(index);
             String address = email.optString("address");
             switch (count++) {

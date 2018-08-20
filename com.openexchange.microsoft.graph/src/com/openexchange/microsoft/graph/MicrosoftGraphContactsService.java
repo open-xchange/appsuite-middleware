@@ -69,4 +69,13 @@ public interface MicrosoftGraphContactsService {
      */
     List<Contact> getContacts(String accessToken) throws OXException;
 
+    /**
+     * Fetches a {@link List} with the user's contacts that fall within the specified index range
+     * 
+     * @param accessToken The OAuth access token
+     * @param startOffset The start offset
+     * @param skip The skip offset
+     * @return a {@link List} with the user's contacts that fall within the specified index range
+     */
+    List<Contact> getContacts(String accessToken, int startOffset, int skip) throws OXException;
 }
