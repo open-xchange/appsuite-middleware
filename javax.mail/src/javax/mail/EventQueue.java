@@ -42,11 +42,11 @@ package javax.mail;
 
 import java.util.EventListener;
 import java.util.Vector;
-import java.util.Queue;
 import java.util.WeakHashMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import javax.mail.event.MailEvent;
 
 /**
@@ -158,8 +158,14 @@ class EventQueue implements Runnable {
 	try {
 	    loop:
 	    for (;;) {
-		// block until an item is available
-		QueueElement qe = bq.take();
+		// poll until an item is available or queue gets null'ed
+		QueueElement qe = bq.poll(1, TimeUnit.SECONDS);
+	    if (null == qe) {
+	        bq = q;
+	        if (bq == null)
+	            return;
+	        continue loop;
+        }
 		MailEvent e = qe.event;
 		Vector<? extends EventListener> v = qe.vector;
 
