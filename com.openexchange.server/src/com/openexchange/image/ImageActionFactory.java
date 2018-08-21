@@ -55,9 +55,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ImageActionFactory}
@@ -87,6 +90,24 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
     public static void addMapping(final String registrationName, final String alias) {
         regName2Alias.put(registrationName, alias);
         alias2regName.put(alias, registrationName);
+    }
+
+    /**
+     * Gets the image data source by given registration name
+     *
+     * @param registrationName The registration name to look-up by
+     * @return The image data source or <code>null</code>
+     */
+    public static ImageDataSource getImageDataSourceByRegistrationName(String registrationName) {
+        if (Strings.isEmpty(registrationName)) {
+            return null;
+        }
+
+        ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class);
+        if (null == conversionService) {
+            return null;
+        }
+        return (ImageDataSource) conversionService.getDataSource(registrationName);
     }
 
     /**

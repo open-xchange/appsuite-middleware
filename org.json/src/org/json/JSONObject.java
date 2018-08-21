@@ -167,16 +167,74 @@ public class JSONObject extends AbstractJSONValue {
     }
 
     /**
-     * The hash map where the JSONObject's properties are kept.
-     */
-    private final Map<String, Object> myHashMap;
-
-    /**
      * It is sometimes more convenient and less ambiguous to have a <code>NULL</code> object than to use Java's <code>null</code> value.
      * <code>JSONObject.NULL.equals(null)</code> returns <code>true</code>. <code>JSONObject.NULL.toString()</code> returns
      * <code>"null"</code>.
      */
     public static final Object NULL = new Null();
+
+    /**
+     * Checks if specified object is null.
+     * <p>
+     * The object is considered as null when
+     * <ul>
+     * <li>It is a Java <code>null</code> reference or</li>
+     * <li>It is equal to {@link JSONObject#NULL JSON NULL}</li>
+     * </ul>
+     *
+     * @param obj The object to check
+     * @return <code>true</code> if object is null; otherwise <code>false</code>
+     */
+    public static boolean isNull(Object obj) {
+        return null == obj || JSONObject.NULL.equals(obj);
+    }
+
+    /**
+     * Checks if specified object is not null.
+     * <p>
+     * The object is considered as not null when
+     * <ul>
+     * <li>It is not a Java <code>null</code> reference and</li>
+     * <li>It is not equal to {@link JSONObject#NULL JSON NULL}</li>
+     * </ul>
+     *
+     * @param obj The object to check
+     * @return <code>true</code> if object is not null; otherwise <code>false</code>
+     */
+    public static boolean isNotNull(Object obj) {
+        return false == isNull(obj);
+    }
+
+    /**
+     * Gets the boolean value for specified object.
+     *
+     * @param obj The object to get the boolean value for
+     * @return The boolean value or <code>null</code> if no boolean value can be returned for specified object
+     */
+    public static Boolean booleanFor(Object obj) {
+        if (isNull(obj)) {
+            return null;
+        }
+
+        if (obj instanceof Boolean) {
+            return (Boolean) obj;
+        } else if (obj instanceof String) {
+            String str = (String) obj;
+            if (STR_FALSE.equalsIgnoreCase(str)) {
+                return Boolean.FALSE;
+            } else if (STR_TRUE.equalsIgnoreCase(str)) {
+                return Boolean.TRUE;
+            }
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The hash map where the JSONObject's properties are kept.
+     */
+    private final Map<String, Object> myHashMap;
 
     /**
      * Construct an empty JSONObject with the default initial capacity (16).
@@ -583,16 +641,11 @@ public class JSONObject extends AbstractJSONValue {
      */
     public boolean getBoolean(final String key) throws JSONException {
         final Object o = get(key);
-        if (o.equals(Boolean.FALSE)) {
-            return false;
-        } else if (o.equals(Boolean.TRUE)) {
-            return true;
-        } else if (o instanceof String && ((String) o).equalsIgnoreCase(STR_FALSE)) {
-            return false;
-        } else if (o instanceof String && ((String) o).equalsIgnoreCase(STR_TRUE)) {
-            return true;
+        Boolean bool = booleanFor(o);
+        if (null == bool) {
+            throw new JSONException("JSONObject[" + quote(key) + "] is not a Boolean.");
         }
-        throw new JSONException("JSONObject[" + quote(key) + "] is not a Boolean.");
+        return bool.booleanValue();
     }
 
     /**
@@ -896,11 +949,12 @@ public class JSONObject extends AbstractJSONValue {
      * @return The truth.
      */
     public boolean optBoolean(final String key, final boolean defaultValue) {
-        try {
-            return getBoolean(key);
-        } catch (final Exception e) {
+        if (key == null) {
             return defaultValue;
         }
+        Object o = this.myHashMap.get(key);
+        Boolean bool = booleanFor(o);
+        return null == bool ? defaultValue : bool.booleanValue();
     }
 
     /**

@@ -51,6 +51,7 @@ package com.openexchange.mail.usersetting;
 
 import java.io.Serializable;
 import javax.mail.internet.idn.IDNA;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 
@@ -93,7 +94,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
                 /*
                  * Cannot occur since we are cloneable
                  */
-                LOG.error("", e);
+                LoggerHolder.LOG.error("", e);
                 final InternalError error = new InternalError(e.getMessage());
                 error.initCause(e);
                 throw error;
@@ -115,7 +116,10 @@ public final class UserSettingMail implements Cloneable, Serializable {
      */
     private static final long serialVersionUID = -5787223065275414178L;
 
-    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserSettingMail.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UserSettingMail.class);
+    }
 
     /*-
      * Integer constants for on/off options
@@ -358,7 +362,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
             }
             return clone;
         } catch (final CloneNotSupportedException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             final InternalError error = new InternalError(e.getMessage());
             error.initCause(e);
             throw error;
@@ -751,7 +755,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
             try {
                 spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(userId, cid));
             } catch (OXException e) {
-                LOG.error("", e);
+                LoggerHolder.LOG.error("", e);
             }
         }
         return ((null != spamHandlerFound && spamHandlerFound.booleanValue()) && spamEnabled);

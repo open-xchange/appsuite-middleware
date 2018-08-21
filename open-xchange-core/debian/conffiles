@@ -19,6 +19,7 @@ opt/open-xchange/etc/folder-reserved-names
 opt/open-xchange/etc/globaldb.yml
 opt/open-xchange/etc/globaleventhandlers.list
 opt/open-xchange/etc/hazelcast/credentials.properties
+opt/open-xchange/etc/hazelcast/cskeys.properties
 opt/open-xchange/etc/hazelcast.properties
 opt/open-xchange/etc/hazelcast/serverTokenHz.properties
 opt/open-xchange/etc/hazelcast/sessionId2tokenHz.properties

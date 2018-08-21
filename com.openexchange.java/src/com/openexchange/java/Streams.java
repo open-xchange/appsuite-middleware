@@ -633,7 +633,7 @@ public class Streams {
     }
 
     /**
-     * Checks if specified are ASCII-only.
+     * Checks if specified bytes are ASCII-only.
      *
      * @param bytes The bytes to check
      * @return <code>true</code> if ASCII-only; otherwise <code>false</code>

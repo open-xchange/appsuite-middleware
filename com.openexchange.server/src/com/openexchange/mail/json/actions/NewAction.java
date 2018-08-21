@@ -89,8 +89,8 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.MailMessageCache;
-import com.openexchange.mail.compose.CompositionSpace;
-import com.openexchange.mail.compose.CompositionSpaces;
+import com.openexchange.mail.compose.old.OldCompositionSpace;
+import com.openexchange.mail.compose.old.OldCompositionSpaces;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -329,14 +329,14 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
 
                 if (null != csid) {
                     if (null != msgref && ComposeType.DRAFT_EDIT.equals(sendType)) {
-                        CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                        OldCompositionSpace space = OldCompositionSpace.getCompositionSpace(csid, session);
                         if (!space.isMarkedAsReplyOrForward(msgref)) {
                             space.addCleanUp(msgref);
                         }
                     }
 
-                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), false);
-                    CompositionSpaces.destroy(csid, session);
+                    OldCompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), false);
+                    OldCompositionSpaces.destroy(csid, session);
                 }
 
                 warnings.addAll(mailInterface.getWarnings());
@@ -370,7 +370,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                     for (ComposedMailMessage composedMail : composedMails) {
                         MailPath msgref = composedMail.getMsgref();
                         if (null != msgref) {
-                            CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                            OldCompositionSpace space = OldCompositionSpace.getCompositionSpace(csid, session);
                             if (space.isMarkedAsReply(msgref)) {
                                 sendType = ComposeType.REPLY;
                             } else if (space.isMarkedAsForward(msgref)) {
@@ -391,8 +391,8 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                 MailServletInterface mailInterface = getMailInterface(req);
                 mailInterface.openFor(folder);
                 if (null != csid) {
-                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), false);
-                    CompositionSpaces.destroy(csid, session);
+                    OldCompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), false);
+                    OldCompositionSpaces.destroy(csid, session);
                 }
 
                 // Append messages
@@ -508,8 +508,8 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
 
             // Apply composition space state(s)
             if (null != csid) {
-                CompositionSpaces.applyCompositionSpace(csid, session, null, true);
-                CompositionSpaces.destroy(csid, session);
+                OldCompositionSpaces.applyCompositionSpace(csid, session, null, true);
+                OldCompositionSpaces.destroy(csid, session);
             }
 
             warnings.addAll(mailInterface.getWarnings());

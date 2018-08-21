@@ -491,7 +491,15 @@ public final class ImageUtility {
         return null;
     }
 
-    static String getDispatcherPrefix() {
+    /**
+     * Gets the prefix for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
+     * <p>
+     * All requests starting with this prefix are directed to dispatcher framework.
+     *
+     * @return The prefix containing leading and trailing slashes
+     * @throws IllegalStateException If <code>DispatcherPrefixService</code> is absent
+     */
+    public static String getDispatcherPrefix() {
         DispatcherPrefixService dispatcherPrefixService = DPS_REF.get();
         if (dispatcherPrefixService == null) {
             throw new IllegalStateException(ImageUtility.class.getName() + " has not been initialized. DispatcherPrefixService is not set!");

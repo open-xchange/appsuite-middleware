@@ -49,86 +49,59 @@
 
 package com.openexchange.mail.compose;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.session.Session;
-
-
 /**
- * {@link CompositionSpaceRegistry}
+ * {@link VCardAndFileName} - A pair of vCard and name for the ".vcf" file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.2
  */
-class CompositionSpaceRegistry {
+public class VCardAndFileName {
 
-    private final Map<String, CompositionSpace> spaces;
+    private final byte[] vcard;
+    private final String fileName;
 
     /**
-     * Initializes a new {@link CompositionSpaceRegistry}.
+     * Initializes a new {@link VCardAndFileName}.
+     *
+     * @param vcard The vCard bytes
+     * @param fileName The file name
      */
-    CompositionSpaceRegistry() {
+    public VCardAndFileName(byte[] vcard, String fileName) {
         super();
-        spaces = new HashMap<String, CompositionSpace>(8);
+        this.vcard = vcard;
+        this.fileName = fileName;
     }
 
     /**
-     * Removes all composition spaces.
+     * Gets the vcard bytes
      *
-     * @return The removed composition spaces
+     * @return The vcard bytes
      */
-    synchronized List<CompositionSpace> removeAllCompositionSpaces() {
-        List<CompositionSpace> l = new LinkedList<CompositionSpace>(spaces.values());
-        for (CompositionSpace space : l) {
-            space.markInactive();
+    public byte[] getVcard() {
+        return vcard;
+    }
+
+    /**
+     * Gets the file name
+     *
+     * @return The file name
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[");
+        if (vcard != null) {
+            builder.append("vcard=<not-null>").append(", ");
         }
-        spaces.clear();
-        return l;
-    }
-
-    /**
-     * Gets the composition space associated with given identifier.
-     * <p>
-     * A new composition space is created if absent.
-     *
-     * @param csid The composition space identifier
-     * @param session The associated session
-     * @return The associated composition space
-     */
-    synchronized CompositionSpace getCompositionSpace(String csid, Session session) {
-        CompositionSpace space = spaces.get(csid);
-        if (null == space) {
-            CompositionSpace newSpace = new CompositionSpace(csid, session);
-            spaces.put(csid, newSpace);
-            space = newSpace;
-            space.markActive();
+        if (fileName != null) {
+            builder.append("fileName=").append(fileName);
         }
-        return space;
-    }
-
-    /**
-     * Optionally gets the composition space associated with given identifier.
-     *
-     * @param csid The composition space identifier
-     * @return The associated composition space or <code>null</code>
-     */
-    synchronized CompositionSpace optCompositionSpace(String csid) {
-        return spaces.get(csid);
-    }
-
-    /**
-     * Removes the composition space associated with given identifier.
-     *
-     * @param csid The composition space identifier
-     * @return The removed composition space or <code>null</code> if no such composition space was available
-     */
-    synchronized CompositionSpace removeCompositionSpace(String csid) {
-        CompositionSpace space = spaces.remove(csid);
-        if (null != space) {
-            space.markInactive();
-        }
-        return space;
+        builder.append("]");
+        return builder.toString();
     }
 
 }

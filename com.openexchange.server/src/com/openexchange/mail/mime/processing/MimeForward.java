@@ -360,7 +360,7 @@ public final class MimeForward extends AbstractMimeProcessing {
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
-    private static String replaceMetaEquiv(final String html, final ContentType contentType) {
+    static String replaceMetaEquiv(final String html, final ContentType contentType) {
         final Matcher m = PAT_META_CT.matcher(html);
         final MatcherReplacer mr = new MatcherReplacer(m, html);
         final StringBuilder replaceBuffer = new StringBuilder(html.length());
@@ -624,7 +624,7 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @throws MessagingException
      * @throws IOException
      */
-    private static String getFirstSeenText(final MailPart multipartPart, final ContentType retvalContentType, final UserSettingMail usm, final MailMessage origMail, final Session session, final boolean alt) throws OXException, MessagingException, IOException {
+    public static String getFirstSeenText(final MailPart multipartPart, final ContentType retvalContentType, final UserSettingMail usm, final MailMessage origMail, final Session session, final boolean alt) throws OXException, MessagingException, IOException {
         final ContentType contentType = multipartPart.getContentType();
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
@@ -745,7 +745,7 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @param session The user's session
      * @return The forward text
      */
-    private static String generateForwardText(String firstSeenText, LocaleAndTimeZone ltz, MailMessage msg, boolean html, Session session) {
+    static String generateForwardText(String firstSeenText, LocaleAndTimeZone ltz, MailMessage msg, boolean html, Session session) {
         String forwardPrefix = generatePrefixText(MailStrings.FORWARD_PREFIX, ltz, msg);
         if (html) {
             forwardPrefix = HtmlProcessing.htmlFormat(forwardPrefix);

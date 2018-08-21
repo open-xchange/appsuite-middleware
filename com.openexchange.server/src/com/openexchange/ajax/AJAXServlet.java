@@ -534,6 +534,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     private static final String METHOD_PATCH = "PATCH";
+    private static final String METHOD_DELETE = "DELETE";
 
     /**
      * Receives standard HTTP requests from the public <code>service</code> method and dispatches them to the <code>do</code><i>XXX</i>
@@ -560,7 +561,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
             // Optionally enable rate limit on request instance
             HttpServletRequest requestToPass = checkRateLimit ? enableRateLimitCheckFor(req) : req;
-            if (req.getMethod().equals(METHOD_PATCH)) {
+            String method = req.getMethod();
+            if (method.equals(METHOD_PATCH)) {
+                doPut(requestToPass, resp);
+            } else if (method.equals(METHOD_DELETE)) {
                 doPut(requestToPass, resp);
             } else {
                 super.service(requestToPass, resp);

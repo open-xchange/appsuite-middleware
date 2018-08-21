@@ -60,20 +60,28 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -82,6 +90,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -226,7 +235,7 @@ public final class MimeProcessingUtility {
      * @return The possible <code>From</code> address or <code>null</code>
      * @throws OXException If an Open-Xchange error occurs
      */
-    static InternetAddress determinePossibleFrom(boolean isForward, MailMessage origMsg, int accountId, Session session, Context ctx) throws OXException {
+    public static InternetAddress determinePossibleFrom(boolean isForward, MailMessage origMsg, int accountId, Session session, Context ctx) throws OXException {
         Set<InternetAddress> fromCandidates;
         InternetAddress likely = null;
         if (accountId == MailAccount.DEFAULT_ID) {
@@ -359,7 +368,7 @@ public final class MimeProcessingUtility {
      * @param ctx The associated context
      * @throws OXException If operation fails
      */
-    static void addUserAliases(Set<InternetAddress> set, Session session, Context ctx) throws OXException {
+    public static void addUserAliases(Set<InternetAddress> set, Session session, Context ctx) throws OXException {
         /*
          * Add user's aliases to set
          */
@@ -382,7 +391,7 @@ public final class MimeProcessingUtility {
      * @param session The session
      * @return The owner or <code>null</code>
      */
-    static final String getFolderOwnerIfShared(final String fullName, final int accountId, final Session session) {
+    public static final String getFolderOwnerIfShared(final String fullName, final int accountId, final Session session) {
         if (null == fullName) {
             return null;
         }
@@ -692,4 +701,199 @@ public final class MimeProcessingUtility {
     static String preparePersonal(final String personal) {
         return MimeMessageUtility.quotePhrase(personal, false);
     }
+
+    /**
+     * Gets the context associated with specified session
+     *
+     * @param session The session
+     * @return The context
+     * @throws OXException If context cannot be returned
+     */
+    static Context getContextFrom(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getContext();
+        }
+
+        return ContextStorage.getInstance().getContext(session.getContextId());
+    }
+
+    /**
+     * Gets the user associated with specified session
+     *
+     * @param session The session
+     * @return The user
+     * @throws OXException If user cannot be returned
+     */
+    static User getUserFrom(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+
+        return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets the user mail setting associated with specified session
+     *
+     * @param session The session
+     * @return The user mail setting
+     * @throws OXException If user mail setting cannot be returned
+     */
+    static UserSettingMail getUserSettingMailFrom(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUserSettingMail();
+        }
+
+        return UserSettingMailStorage.getInstance().getUserSettingMail(session);
+    }
+
+    /**
+     * Gets the text from specified original mail for composing a reply.
+     *
+     * @param originalMail The original mail being replied to
+     * @param allowHtmlContent Whether HTMl content is allowed
+     * @param generateReplyPrefix Whether the {@link MailStrings#REPLY_PREFIX reply prefix} is supposed to be prepended
+     * @param session The session providing user information
+     * @return The text and its associated content-type
+     * @throws OXException OIf reply text cannot be generated
+     */
+    public static TextAndContentType getTextForReply(MailMessage originalMail, boolean allowHtmlContent, boolean generateReplyPrefix, Session session) throws OXException {
+        try {
+            List<String> list = new LinkedList<String>();
+            User user = getUserFrom(session);
+            Locale locale = user.getLocale();
+            LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
+
+            UserSettingMail usm = getUserSettingMailFrom(session).clone();
+            usm.setDisplayHtmlInlineContent(allowHtmlContent);
+            usm.setDropReplyForwardPrefix(false == generateReplyPrefix);
+
+            ContentType contentType = new ContentType();
+            MimeReply.generateReplyText(originalMail, contentType, StringHelper.valueOf(locale), ltz, usm, session, originalMail.getAccountId(), list);
+
+            StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
+            int size = list.size();
+            if (size > 0) {
+                for (int i = size; i-- > 0;) {
+                    replyTextBuilder.append(list.get(i));
+                }
+            }
+            if (replyTextBuilder.length() <= 0) {
+                /*
+                 * No reply text found at all
+                 */
+                return null;
+            }
+
+            if (contentType.getPrimaryType() == null) {
+                contentType.setContentType(MimeTypes.MIME_TEXT_PLAIN);
+            }
+
+            String replyText = replyTextBuilder.toString();
+            boolean isHtml = contentType.startsWithAny(CT_TEXT_HTM, "text/xhtm");
+            if (isHtml) {
+                contentType.setCharsetParameter("UTF-8");
+                replyText = MimeForward.replaceMetaEquiv(replyText, contentType);
+            } else {
+                String cs = contentType.getCharsetParameter();
+                if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
+                    // Select default charset
+                    contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
+                }
+            }
+            return new TextAndContentType(replyText, contentType, isHtml);
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the text from specified original mail for composing a forward.
+     *
+     * @param originalMail The original mail being forwarded
+     * @param allowHtmlContent Whether HTMl content is allowed
+     * @param generateForwardPrefix Whether the {@link MailStrings#FORWARD_PREFIX forward prefix} is supposed to be prepended
+     * @param contentIds An optional list for returning detected identifiers of inline images
+     * @param session The session providing user information
+     * @return The text and its associated content-type
+     * @throws OXException If reply text cannot be generated
+     */
+    public static TextAndContentType getTextForForward(MailMessage originalMail, boolean allowHtmlContent, boolean generateForwardPrefix, List<String> contentIds, Session session) throws OXException {
+        try {
+            UserSettingMail usm = getUserSettingMailFrom(session).clone();
+            usm.setDisplayHtmlInlineContent(allowHtmlContent);
+            usm.setDropReplyForwardPrefix(false == generateForwardPrefix);
+
+            ContentType originalContentType = originalMail.getContentType();
+
+            ContentType contentType;
+            String firstSeenText;
+            if (originalContentType.startsWith("multipart/")) {
+                contentType = new ContentType();
+                firstSeenText = MimeForward.getFirstSeenText(originalMail, contentType, usm, originalMail, session, false);
+            } else if (originalContentType.startsWith(TEXT) && !MimeProcessingUtility.isSpecial(originalContentType.getBaseType())) {
+                // Original mail is a simple text mail: Add message body prefixed with forward text
+                {
+                    String cs = originalContentType.getCharsetParameter();
+                    if (null == cs) {
+                        originalContentType.setCharsetParameter(MessageUtility.checkCharset(originalMail, originalContentType));
+                    }
+                }
+                contentType = originalContentType;
+                firstSeenText = MimeProcessingUtility.readContent(originalMail, originalContentType.getCharsetParameter());
+            } else {
+                // Mail only consists of one non-textual part
+                contentType = new ContentType().setPrimaryType("text").setSubType("plain").setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
+                firstSeenText = "";
+            }
+
+            {
+                String cs = contentType.getCharsetParameter();
+                if (cs == null || "US-ASCII".equalsIgnoreCase(cs)) {
+                    contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
+                }
+            }
+            /*
+             * Prepare the text to insert
+             */
+            boolean isHtml = contentType.startsWithAny(CT_TEXT_HTM, "text/xhtm");
+            if (null == firstSeenText) {
+                /*
+                 * No reply text found at all
+                 */
+                return null;
+            } else if (isHtml) {
+                if (null != contentIds) {
+                    contentIds.addAll(MimeMessageUtility.getContentIDs(firstSeenText));
+                }
+                contentType.setCharsetParameter("UTF-8");
+                firstSeenText = MimeForward.replaceMetaEquiv(firstSeenText, contentType);
+            }
+            /*
+             * Add appropriate text part prefixed with forward text
+             */
+            String txt = usm.isDropReplyForwardPrefix() ? firstSeenText : MimeForward.generateForwardText(firstSeenText, new LocaleAndTimeZone(getUserFrom(session)), originalMail, isHtml, session);
+            {
+                String cs = contentType.getCharsetParameter();
+                if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
+                    // Select default charset
+                    contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
+                }
+            }
+            return new TextAndContentType(txt, contentType, isHtml);
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
 }

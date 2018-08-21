@@ -587,7 +587,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                 final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
                 final Locale locale = user.getLocale();
                 final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
-                generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, session, accountId, list);
+                generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, session, accountId, list);
 
                 final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
@@ -758,13 +758,13 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @throws MessagingException
      * @throws IOException
      */
-    static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final javax.mail.Session mailSession, final Session session, final int accountId, final List<String> replyTexts) throws OXException, MessagingException, IOException {
+    static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final Session session, final int accountId, final List<String> replyTexts) throws OXException, MessagingException, IOException {
         final StringBuilder textBuilder = new StringBuilder(8192);
         final ContentType contentType = msg.getContentType();
         boolean found = false;
         if (contentType.startsWith(MULTIPART)) {
             final ParameterContainer pc =
-                new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, mailSession, session, msg, ltz, replyTexts);
+                new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, session, msg, ltz, replyTexts);
             found |= gatherAllTextContents(msg, contentType, accountId, pc);
         } else if (contentType.startsWith(TEXT) && !MimeProcessingUtility.isSpecial(contentType.getBaseType())) {
             if (retvalContentType.getPrimaryType() == null) {
@@ -915,7 +915,6 @@ public final class MimeReply extends AbstractMimeProcessing {
                         pc.strHelper,
                         pc.ltz,
                         pc.usm,
-                        pc.mailSession,
                         pc.session,
                         accountId,
                         pc.replyTexts);
@@ -932,7 +931,6 @@ public final class MimeReply extends AbstractMimeProcessing {
                             pc.strHelper,
                             pc.ltz,
                             pc.usm,
-                            pc.mailSession,
                             pc.session,
                             accountId,
                             pc.replyTexts);
@@ -1148,13 +1146,12 @@ public final class MimeReply extends AbstractMimeProcessing {
         final StringBuilder textBuilder;
         final StringHelper strHelper;
         final UserSettingMail usm;
-        final javax.mail.Session mailSession;
         final Session session;
         final MailMessage origMail;
         final LocaleAndTimeZone ltz;
         final List<String> replyTexts;
 
-        ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession, final Session session, final MailMessage origMail, final LocaleAndTimeZone ltz, final List<String> replyTexts) {
+        ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final Session session, final MailMessage origMail, final LocaleAndTimeZone ltz, final List<String> replyTexts) {
             super();
             this.origMail = origMail;
             this.session = session;
@@ -1162,7 +1159,6 @@ public final class MimeReply extends AbstractMimeProcessing {
             this.textBuilder = textBuilder;
             this.strHelper = strHelper;
             this.usm = usm;
-            this.mailSession = mailSession;
             this.ltz = ltz;
             this.replyTexts = replyTexts;
         }

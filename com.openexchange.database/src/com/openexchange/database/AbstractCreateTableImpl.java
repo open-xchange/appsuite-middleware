@@ -164,9 +164,9 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
     }
 
     /**
-     * Gets the CREATE-TABLE statements.
+     * Gets the <code>CREATE TABLE</code> statements for the {@link #tablesToCreate() tables}.
      *
-     * @return The CREATE-TABLE statements
+     * @return The <code>CREATE TABLE</code> statements
      */
     protected abstract String[] getCreateStatements();
 

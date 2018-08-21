@@ -107,7 +107,7 @@ import com.openexchange.mail.authenticity.CustomPropertyJsonHandler;
 import com.openexchange.mail.authenticity.GenericCustomPropertyJsonHandler;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.internal.MailCategoriesPreferenceItem;
-import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.old.OldCompositionSpace;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.config.MaliciousFolders;
@@ -230,7 +230,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                 }
 
                 private void handleSession(Session session) {
-                    CompositionSpace.dropCompositionSpaces(session);
+                    OldCompositionSpace.dropCompositionSpaces(session);
                 }
             };
 

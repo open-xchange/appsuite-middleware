@@ -58,18 +58,14 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.vcard.VCardExport;
-import com.openexchange.contact.vcard.VCardUtil;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
-import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.mail.compose.CompositonSpaces;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -83,7 +79,6 @@ import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -243,26 +238,12 @@ public final class SessionCompositionParameters implements CompositionParameters
 
     @Override
     public String getUserVCardFileName() throws OXException {
-        final String displayName;
-        if (session instanceof ServerSession) {
-            displayName = ((ServerSession) session).getUser().getDisplayName();
-        } else {
-            displayName = UserStorage.getInstance().getUser(session.getUserId(), ctx).getDisplayName();
-        }
-        final String saneDisplayName = Strings.replaceWhitespacesWith(displayName, "");
-        return saneDisplayName + ".vcf";
+        return CompositonSpaces.getUserVCardFileName(session);
     }
 
     @Override
     public byte[] getUserVCard() throws OXException {
-        Contact contact = ServerServiceRegistry.getInstance().getService(ContactService.class).getUser(session, session.getUserId());
-        VCardExport vCardExport = null;
-        try {
-            vCardExport = VCardUtil.exportContact(contact, session);
-            return vCardExport.toByteArray();
-        } finally {
-            Streams.close(vCardExport);
-        }
+        return CompositonSpaces.getUserVCardBytes(session);
     }
 
     @Override

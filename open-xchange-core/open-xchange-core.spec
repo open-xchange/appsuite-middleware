@@ -665,6 +665,7 @@ exit 0
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
 %dir /opt/open-xchange/etc/hazelcast
+%config(noreplace) /opt/open-xchange/etc/hazelcast/*
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
 %dir /var/spool/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads

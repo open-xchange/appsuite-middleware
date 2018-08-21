@@ -50,13 +50,18 @@
 package com.openexchange.mail.json.compose;
 
 import java.util.List;
+import java.util.Map;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -68,25 +73,90 @@ import com.openexchange.tools.session.ServerSession;
 public class ComposeRequest {
 
     private final int accountId;
-    private final JSONObject jMail;
-    private final ComposeType sendType;
-    private final UploadEvent uploadEvent;
     private final AJAXRequestData request;
     private final List<OXException> warnings;
 
+    private final JSONObject jMail;
+    private final ComposeType sendType;
+    private final UploadEvent uploadEvent;
+
+    private final ComposedMailMessage sourceMessage;
+    private final TextBodyMailPart textPart;
+    private final List<MailPart> parts;
+    private final Map<String, Object> parameters;
+
     /**
      * Initializes a new {@link ComposeRequest}.
-     *
-     * @throws OXException If initialization fails
      */
-    public ComposeRequest(int accountId, JSONObject jMail, ComposeType sendType, UploadEvent uploadEvent, AJAXRequestData request, List<OXException> warnings) throws OXException {
+    public ComposeRequest(int accountId, JSONObject jMail, ComposeType sendType, UploadEvent uploadEvent, AJAXRequestData request, List<OXException> warnings) {
         super();
         this.accountId = accountId;
+        this.request = request;
+        this.warnings = warnings;
+
         this.jMail = jMail;
         this.sendType = sendType;
         this.uploadEvent = uploadEvent;
+
+        this.sourceMessage = null;
+        this.textPart = null;
+        this.parts = null;
+        this.parameters = null;
+    }
+
+    /**
+     * Initializes a new {@link ComposeRequest}.
+     */
+    public ComposeRequest(int accountId, ComposedMailMessage sourceMessage, TextBodyMailPart textPart, List<MailPart> parts, Map<String, Object> parameters, AJAXRequestData request, List<OXException> warnings) {
+        super();
+        this.accountId = accountId;
         this.request = request;
         this.warnings = warnings;
+
+        this.jMail = null;
+        this.sendType = null;
+        this.uploadEvent = null;
+
+        this.sourceMessage = sourceMessage;
+        this.textPart = textPart;
+        this.parts = ImmutableList.copyOf(parts);
+        this.parameters = parameters;
+    }
+
+    /**
+     * Gets the parameters
+     *
+     * @return The parameters
+     */
+    public Map<String, Object> getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Gets the optional source message
+     *
+     * @return The source message or <code>null</code>
+     */
+    public ComposedMailMessage getSourceMessage() {
+        return sourceMessage;
+    }
+
+    /**
+     * Gets the parts
+     *
+     * @return The parts
+     */
+    public List<MailPart> getParts() {
+        return parts;
+    }
+
+    /**
+     * Gets the text part
+     *
+     * @return The text part
+     */
+    public TextBodyMailPart getTextPart() {
+        return textPart;
     }
 
     /**

@@ -1843,6 +1843,43 @@ public final class MimeMessageUtility {
         return MimeUtility.fold(used, foldMe);
     }
 
+    /**
+     * Folds a string at linear whitespace so that each line is no longer than 76 characters, if that string contains a whitespace.
+     * Otherwise a forced folding is performed.
+     *
+     * @param used The characters used in line so far; typically the length of the header name plus 2 (for <code>": "</code> part)
+     * @param foldMe The string to fold
+     * @return The folded string
+     * @see #fold(int, String)
+     */
+    public static String forceFold(int used, String foldMe) {
+        int usedInLine = used < 0 ? 0 : used;
+        int length = foldMe.length();
+        if (usedInLine + length <= 76) {
+            return foldMe;
+        }
+
+        if (foldMe.indexOf(' ') > 0) {
+            // Contains a whitespace
+            return MimeUtility.fold(usedInLine, foldMe);
+        }
+
+        StringBuilder sb = new StringBuilder(length + 16);
+        int start = 0;
+        while (start < length) {
+            int end = Math.min(start + 76 - usedInLine, length);
+            if (start == 0) {
+                usedInLine = 1;
+            }
+            if (sb.length() > 0) {
+                sb.append("\r\n ");
+            }
+            sb.append(foldMe.substring(start, end));
+            start = end;
+        }
+        return sb.toString();
+    }
+
     private static final Pattern PATTERN_UNFOLD = Pattern.compile("(\\?=)(\\s*)(=\\?)");
 
     /**

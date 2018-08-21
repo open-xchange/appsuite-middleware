@@ -64,7 +64,6 @@ import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.tools.session.ServerSession;
@@ -91,7 +90,7 @@ public abstract class AbstractComposeContext implements ComposeContext {
     private TextBodyMailPart textPart;
     private List<ReferencedMailPart> referencedParts;
     private List<DataMailPart> dataParts;
-    private List<UploadFileMailPart> uploadedParts;
+    private List<MailPart> uploadedParts;
     private List<InfostoreDocumentMailPart> driveParts;
 
     /**
@@ -242,21 +241,21 @@ public abstract class AbstractComposeContext implements ComposeContext {
     }
 
     @Override
-    public void addUploadPart(UploadFileMailPart uploadPart) throws OXException {
-        if (null != uploadPart) {
-            List<UploadFileMailPart> uploadedParts = this.uploadedParts;
+    public void addUploadPart(MailPart uploadPart) throws OXException {
+        if (uploadPart instanceof ComposedMailPart) {
+            List<MailPart> uploadedParts = this.uploadedParts;
             if (null == uploadedParts) {
                 uploadedParts = new ArrayList<>(4);
                 this.uploadedParts = uploadedParts;
             }
-            onPartAdd(uploadPart, uploadPart);
+            onPartAdd(uploadPart, (ComposedMailPart) uploadPart);
             uploadedParts.add(uploadPart);
         }
     }
 
     @Override
-    public List<UploadFileMailPart> getUploadParts() {
-        return null == uploadedParts ? Collections.<UploadFileMailPart> emptyList() : uploadedParts;
+    public List<MailPart> getUploadParts() {
+        return null == uploadedParts ? Collections.<MailPart> emptyList() : uploadedParts;
     }
 
     @Override

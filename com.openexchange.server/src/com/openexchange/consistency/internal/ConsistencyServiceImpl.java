@@ -49,6 +49,7 @@
 
 package com.openexchange.consistency.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -82,6 +83,7 @@ import com.openexchange.consistency.internal.solver.ProblemSolver;
 import com.openexchange.consistency.internal.solver.RecordSolver;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -100,6 +102,7 @@ import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.report.internal.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -127,11 +130,6 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#checkOrRepairConfigDB(boolean)
-     */
     @Override
     public List<String> checkOrRepairConfigDB(boolean repair) throws OXException {
         LOG.info("{} inconsistent configdb", repair ? "Repair" : "List");
@@ -235,142 +233,82 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#listMissingFilesInContext(int)
-     */
     @Override
     public List<String> listMissingFilesInContext(int contextId) throws OXException {
-        LOG.info("Listing missing files in context {}", contextId);
+        LOG.info("Listing missing files in context {}", I(contextId));
         DoNothingSolver doNothing = new DoNothingSolver();
         RecordSolver recorder = new RecordSolver();
         Context ctx = getContext(contextId);
-        checkOneEntity(new EntityImpl(ctx), recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
+        checkOneEntity(new EntityImpl(ctx), recorder, recorder, recorder, recorder, doNothing, recorder, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
         return recorder.getProblems();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#listMissingFilesInFilestore(int)
-     */
     @Override
     public Map<Entity, List<String>> listMissingFilesInFilestore(int filestoreId) throws OXException {
-        LOG.info("Listing missing files in filestore {}", filestoreId);
+        LOG.info("Listing missing files in filestore {}", I(filestoreId));
         return listMissing(getEntitiesForFilestore(filestoreId));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#listMissingFilesInDatabase(int)
-     */
     @Override
     public Map<Entity, List<String>> listMissingFilesInDatabase(int databaseId) throws OXException {
-        LOG.info("List missing files in database {}", databaseId);
+        LOG.info("List missing files in database {}", I(databaseId));
         return listMissing(toEntities(getContextsForDatabase(databaseId)));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#listAllMissingFiles()
-     */
     @Override
     public Map<Entity, List<String>> listAllMissingFiles() throws OXException {
         LOG.info("List all missing files");
         return listMissing(toEntities(getAllContexts()));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#listUnassignedFilesInContext(int)
-     */
     @Override
     public List<String> listUnassignedFilesInContext(int contextId) throws OXException {
-        LOG.info("List all unassigned files in context {}", contextId);
+        LOG.info("List all unassigned files in context {}", I(contextId));
         DoNothingSolver doNothing = new DoNothingSolver();
         RecordSolver recorder = new RecordSolver();
         Context ctx = getContext(contextId);
-        checkOneEntity(new EntityImpl(ctx), doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
+        checkOneEntity(new EntityImpl(ctx), doNothing, doNothing, doNothing, doNothing, recorder, doNothing, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
         return recorder.getProblems();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#listUnassignedFilesInFilestore(int)
-     */
     @Override
     public Map<Entity, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws OXException {
-        LOG.info("List all unassigned files in filestore {}", filestoreId);
+        LOG.info("List all unassigned files in filestore {}", I(filestoreId));
         return listUnassigned(getEntitiesForFilestore(filestoreId));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#listUnassignedFilesInDatabase(int)
-     */
     @Override
     public Map<Entity, List<String>> listUnassignedFilesInDatabase(int databaseId) throws OXException {
-        LOG.info("List all unassigned files in database {}", databaseId);
+        LOG.info("List all unassigned files in database {}", I(databaseId));
         return listUnassigned(toEntities(getContextsForDatabase(databaseId)));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#listAllUnassignedFiles()
-     */
     @Override
     public Map<Entity, List<String>> listAllUnassignedFiles() throws OXException {
         LOG.info("List all unassigned files");
         return listUnassigned(toEntities(getAllContexts()));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#repairFilesInContext(int, com.openexchange.consistency.RepairPolicy, com.openexchange.consistency.RepairAction)
-     */
     @Override
     public void repairFilesInContext(int contextId, RepairPolicy repairPolicy, RepairAction repairAction) throws OXException {
-        LOG.info("Repair all files in context {} with repair policy {} and repair action {}", contextId, repairPolicy, repairAction);
+        LOG.info("Repair all files in context {} with repair policy {} and repair action {}", I(contextId), repairPolicy, repairAction);
         List<Context> repairMe = new ArrayList<Context>();
         repairMe.add(getContext(contextId));
         repair(toEntities(repairMe), repairPolicy, repairAction);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#repairFilesInFilestore(int, com.openexchange.consistency.RepairPolicy, com.openexchange.consistency.RepairAction)
-     */
     @Override
     public void repairFilesInFilestore(int filestoreId, RepairPolicy repairPolicy, RepairAction repairAction) throws OXException {
-        LOG.info("Repair all files in filestore {} with repair policy {} and repair action {}", filestoreId, repairPolicy, repairAction);
+        LOG.info("Repair all files in filestore {} with repair policy {} and repair action {}", I(filestoreId), repairPolicy, repairAction);
         repair(getEntitiesForFilestore(filestoreId), repairPolicy, repairAction);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#repairFilesInDatabase(int, com.openexchange.consistency.RepairPolicy, com.openexchange.consistency.RepairAction)
-     */
     @Override
     public void repairFilesInDatabase(int databaseId, RepairPolicy repairPolicy, RepairAction repairAction) throws OXException {
-        LOG.info("Repair all files in database {} with repair policy {} and repair action {}", databaseId, repairPolicy, repairAction);
+        LOG.info("Repair all files in database {} with repair policy {} and repair action {}", I(databaseId), repairPolicy, repairAction);
         repair(toEntities(getContextsForDatabase(databaseId)), repairPolicy, repairAction);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.consistency.ConsistencyService#repairAllFiles(com.openexchange.consistency.RepairPolicy, com.openexchange.consistency.RepairAction)
-     */
     @Override
     public void repairAllFiles(RepairPolicy repairPolicy, RepairAction repairAction) throws OXException {
         LOG.info("Repair all files with repair policy {} and repair action {}", repairPolicy, repairAction);
@@ -474,7 +412,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                 stmt.setInt(1, filestoreId);
                 rs = stmt.executeQuery();
                 if (false == rs.next()) {
-                    throw FileStorageCodes.NO_SUCH_FILE_STORAGE.create(filestoreId);
+                    throw FileStorageCodes.NO_SUCH_FILE_STORAGE.create(I(filestoreId));
                 }
             } catch (SQLException e) {
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -519,7 +457,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         }
         return contexts;
     }
-    
+
     /**
      * Gets a {@link List} with {@link Entity} objects that are using the {@link FileStorage} with the specified filestore identifier
      *
@@ -631,7 +569,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                 stmt.setInt(1, databaseId);
                 rs = stmt.executeQuery();
                 if (false == rs.next()) {
-                    throw DBPoolingExceptionCodes.NO_DBPOOL.create(databaseId);
+                    throw DBPoolingExceptionCodes.NO_DBPOOL.create(I(databaseId));
                 }
             } catch (SQLException e) {
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -805,6 +743,106 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         return new TreeSet<String>(refIds);
     }
 
+    /**
+     * Gets a {@link SortedSet} with all composition space referenced file store locations for the specified {@link Context}
+     *
+     * @param ctx the {@link Context}
+     * @param user the {@link User}
+     * @return a {@link SortedSet} with all composition space referenced file store locations
+     * @throws OXException if the composition space referenced file store locations cannot be returned
+     */
+    private SortedSet<String> getCompostionSpaceReferencedFileStoreLocationsPerContext(Context ctx) throws OXException {
+        final SortedSet<String> retval = new TreeSet<String>();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        DatabaseService databaseService = ConsistencyServiceLookup.getService(DatabaseService.class, true);
+        try {
+            con = databaseService.getReadOnly(ctx);
+
+            if (DBUtils.tableExists(con, "compositionSpaceAttachmentMeta")) {
+                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND refType=1");
+                stmt.setInt(1, ctx.getContextId());
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    retval.add(rs.getString(1));
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+            }
+
+            if (DBUtils.tableExists(con, "compositionSpaceKeyStorage")) {
+                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=?");
+                stmt.setInt(1, ctx.getContextId());
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    retval.add(rs.getString(1));
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+            }
+        } catch (final SQLException e) {
+            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, getStatement(stmt));
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                databaseService.backReadOnly(ctx, con);
+            }
+        }
+        return retval;
+    }
+
+    /**
+     * Gets a {@link SortedSet} with all composition space referenced file store locations for the specified {@link Context} and {@link User}
+     *
+     * @param ctx the {@link Context}
+     * @param user the {@link User}
+     * @return a {@link SortedSet} with all composition space referenced file store locations
+     * @throws OXException if the composition space referenced file store locations cannot be returned
+     */
+    private SortedSet<String> getCompostionSpaceReferencedFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+        final SortedSet<String> retval = new TreeSet<String>();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        DatabaseService databaseService = ConsistencyServiceLookup.getService(DatabaseService.class, true);
+        try {
+            con = databaseService.getReadOnly(ctx);
+
+            if (DBUtils.tableExists(con, "compositionSpaceAttachmentMeta")) {
+                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND user=? AND refType=1");
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, user.getId());
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    retval.add(rs.getString(1));
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+            }
+
+            if (DBUtils.tableExists(con, "compositionSpaceKeyStorage")) {
+                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=? AND user=?");
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, user.getId());
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    retval.add(rs.getString(1));
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+            }
+        } catch (final SQLException e) {
+            throw CompositionSpaceErrorCode.SQL_ERROR.create(e, getStatement(stmt));
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                databaseService.backReadOnly(ctx, con);
+            }
+        }
+        return retval;
+    }
+
     ///////////////////////////////////////////////////
 
     /**
@@ -829,7 +867,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
 
     /**
      * Deletes the specified context from the configuration database
-     * 
+     *
      * @param configCon The {@link Connection} to the configuration database
      * @param contextId The context identifier to delete
      * @throws SQLException if an SQL error is occurred
@@ -837,7 +875,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
     private void deleteContextFromConfigDB(Connection configCon, int contextId) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            LOG.debug("Deleting context_server2db_pool mapping for context {}", contextId);
+            LOG.debug("Deleting context_server2db_pool mapping for context {}", I(contextId));
             // delete context from context_server2db_pool
             stmt = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
             stmt.setInt(1, contextId);
@@ -850,12 +888,12 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                 LOG.error("", e);
             }
 
-            LOG.debug("Deleting login2context entries for context {}", contextId);
+            LOG.debug("Deleting login2context entries for context {}", I(contextId));
             stmt = configCon.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
-            LOG.debug("Deleting context entry for context {}", contextId);
+            LOG.debug("Deleting context entry for context {}", I(contextId));
             stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
@@ -876,13 +914,14 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @param snippetSolver The snippet solver
      * @param previewSolver The preview cache solver
      * @param fileSolver The file solver
-     * @param vCardSolver The vcard solver
+     * @param vCardSolver The vCard solver
+     * @param compositionSpaceReferencesSolver The composition space references solver
      * @param database The database to use
      * @param attach The attachment base
      * @param fileStorage The file storage for that entity
      * @throws OXException if an error is occurred
      */
-    private void checkOneEntity(Entity entity, ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver previewSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver, DatabaseImpl database, AttachmentBase attach, FileStorage fileStorage) throws OXException {
+    private void checkOneEntity(Entity entity, ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver previewSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver, ProblemSolver compositionSpaceReferencesSolver, DatabaseImpl database, AttachmentBase attach, FileStorage fileStorage) throws OXException {
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
         LOG.info("Checking entity {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {}", entity, dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description());
@@ -904,7 +943,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         LOG.info("Listing all files in filestores");
         SortedSet<String> filestoreset = new TreeSet<String>();
         filestoreset = fileStorage.getFileList();
-        LOG.info("Found {} files in the filestore for this entity {}", filestoreset.size(), entity);
+        LOG.info("Found {} files in the filestore for this entity {}", I(filestoreset.size()), entity);
 
         try {
             LOG.info("Loading all infostore filestore locations");
@@ -914,6 +953,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             SortedSet<String> snippetset;
             SortedSet<String> previewset;
             SortedSet<String> vcardset;
+            SortedSet<String> compositionspacereferencesset;
             switch (entity.getType()) {
                 case Context:
                     dbfileset = database.getDocumentFileStoreLocationsPerContext(entity.getContext());
@@ -922,6 +962,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                     snippetset = getSnippetFileStoreLocationsPerContext(entity.getContext());
                     previewset = getPreviewCacheFileStoreLocationsPerContext(entity.getContext());
                     vcardset = getVCardFileStoreLocationsPerContext(entity.getContext());
+                    compositionspacereferencesset = getCompostionSpaceReferencedFileStoreLocationsPerContext(entity.getContext());
                     break;
                 case User:
                     dbfileset = database.getDocumentFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
@@ -930,25 +971,28 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                     snippetset = getSnippetFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
                     previewset = getPreviewCacheFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
                     vcardset = getVCardFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
+                    compositionspacereferencesset = getCompostionSpaceReferencedFileStoreLocationsPerUser(entity.getContext(), entity.getUser());
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown entity type '" + entity.getType() + "'");
 
             }
-            LOG.info("Found {} infostore filepaths", dbfileset.size());
+            LOG.info("Found {} infostore filepaths", I(dbfileset.size()));
 
-            LOG.info("Found {} attachments", attachmentset.size());
-            LOG.info("Found {} snippets", snippetset.size());
-            LOG.info("Found {} previews", previewset.size());
-            LOG.info("Found {} vCards", vcardset.size());
+            LOG.info("Found {} attachments", I(attachmentset.size()));
+            LOG.info("Found {} snippets", I(snippetset.size()));
+            LOG.info("Found {} previews", I(previewset.size()));
+            LOG.info("Found {} vCards", I(vcardset.size()));
+            LOG.info("Found {} composition space references", I(compositionspacereferencesset.size()));
 
             SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
             joineddbfileset.addAll(attachmentset);
             joineddbfileset.addAll(snippetset);
             joineddbfileset.addAll(previewset);
             joineddbfileset.addAll(vcardset);
+            joineddbfileset.addAll(compositionspacereferencesset);
 
-            LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", joineddbfileset.size(), filestoreset.size(), Math.abs(joineddbfileset.size() - filestoreset.size()));
+            LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", I(joineddbfileset.size()), I(filestoreset.size()), I(Math.abs(joineddbfileset.size() - filestoreset.size())));
 
             // Build the difference set of the database set, so that the final
             // dbfileset contains all the members that aren't in the filestoreset
@@ -981,6 +1025,10 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                 vCardSolver.solve(entity, vcardset);
             }
 
+            if (ConsistencyUtil.diffSet(compositionspacereferencesset, filestoreset, "database list of composition space referenced files", "filestore list")) {
+                compositionSpaceReferencesSolver.solve(entity, compositionspacereferencesset);
+            }
+
             // Build the difference set of the filestore set, so that the final
             // filestoreset contains all the members that aren't in the dbfileset or
             // the dbdelfileset
@@ -1007,7 +1055,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             FileStorage storage = getFileStorage(entity);
 
             PolicyResolver resolvers = PolicyResolver.build(repairPolicy, repairAction, database, attachments, storage, getAdmin(entity.getContext()));
-            checkOneEntity(entity, resolvers.getDbSolver(), resolvers.getAttachmentSolver(), resolvers.getSnippetSolver(), new DeleteBrokenPreviewReferencesSolver(), resolvers.getFileSolver(), resolvers.getvCardSolver(), database, attachments, storage);
+            checkOneEntity(entity, resolvers.getDbSolver(), resolvers.getAttachmentSolver(), resolvers.getSnippetSolver(), new DeleteBrokenPreviewReferencesSolver(), resolvers.getFileSolver(), resolvers.getvCardSolver(), resolvers.getCompositionSpaceReferencesSolver(), database, attachments, storage);
 
             /*
              * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
@@ -1073,7 +1121,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         DoNothingSolver doNothing = new DoNothingSolver();
         for (Entity entity : entities) {
             RecordSolver recorder = new RecordSolver();
-            checkOneEntity(entity, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(entity));
+            checkOneEntity(entity, recorder, recorder, recorder, recorder, doNothing, recorder, recorder, getDatabase(), getAttachments(), getFileStorage(entity));
             retval.put(entity, recorder.getProblems());
         }
         return retval;
@@ -1091,7 +1139,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         DoNothingSolver doNothing = new DoNothingSolver();
         for (Entity entity : entities) {
             RecordSolver recorder = new RecordSolver();
-            checkOneEntity(entity, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(entity));
+            checkOneEntity(entity, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, doNothing, getDatabase(), getAttachments(), getFileStorage(entity));
             retval.put(entity, recorder.getProblems());
         }
         return retval;

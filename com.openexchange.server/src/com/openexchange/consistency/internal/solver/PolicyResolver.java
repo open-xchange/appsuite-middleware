@@ -71,22 +71,25 @@ public class PolicyResolver {
     private final ProblemSolver snippetSolver;
     private final ProblemSolver fileSolver;
     private final ProblemSolver vCardSolver;
+    private final ProblemSolver csReferencesSolver;
 
     /**
-     * Initialises a new {@link PolicyResolver}.
-     * 
+     * Initializes a new {@link PolicyResolver}.
+     *
      * @param dbSolver The db {@link ProblemSolver}
      * @param attachmentSolver The attachment {@link ProblemSolver}
      * @param snippetSolver The snippet {@link ProblemSolver}
      * @param fileSolver The file {@link ProblemSolver}
      * @param vCardSolver The VCard {@link ProblemSolver}
+     * @param csAttachmentSolver The composition space references {@link ProblemSolver}
      */
-    private PolicyResolver(ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver) {
+    private PolicyResolver(ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver, ProblemSolver csAttachmentSolver) {
         this.dbSolver = dbSolver;
         this.attachmentSolver = attachmentSolver;
         this.snippetSolver = snippetSolver;
         this.fileSolver = fileSolver;
         this.vCardSolver = vCardSolver;
+        this.csReferencesSolver = csAttachmentSolver;
     }
 
     /**
@@ -135,8 +138,17 @@ public class PolicyResolver {
     }
 
     /**
+     * Gets the composition space references solver
+     *
+     * @return The composition space references solver
+     */
+    public ProblemSolver getCompositionSpaceReferencesSolver() {
+        return csReferencesSolver;
+    }
+
+    /**
      * Builds a {@link PolicyResolver} with the specified repair policy and action
-     * 
+     *
      * @param policy The repair policy
      * @param action The repair action
      * @param database The database implementation
@@ -152,6 +164,7 @@ public class PolicyResolver {
         ProblemSolver snippetsolver = new DoNothingSolver();
         ProblemSolver filesolver = new DoNothingSolver();
         ProblemSolver vCardSolver = new DoNothingSolver();
+        ProblemSolver csReferencesSolver = new DoNothingSolver();
 
         switch (policy) {
             case MISSING_ENTRY_FOR_FILE:
@@ -169,9 +182,12 @@ public class PolicyResolver {
             case MISSING_FILE_FOR_VCARD:
                 vCardSolver = SolverFactory.createVCardSolver(action);
                 break;
+            case MISSING_ATTACHMENT_FILE_FOR_MAIL_COMPOSE:
+                csReferencesSolver = SolverFactory.createCompositionSpaceAttachmentSolver(action, storage);
+                break;
             default:
                 throw ConsistencyExceptionCodes.UNKNOWN_POLICY.create(policy);
         }
-        return new PolicyResolver(dbsolver, attachmentsolver, snippetsolver, filesolver, vCardSolver);
+        return new PolicyResolver(dbsolver, attachmentsolver, snippetsolver, filesolver, vCardSolver, csReferencesSolver);
     }
 }

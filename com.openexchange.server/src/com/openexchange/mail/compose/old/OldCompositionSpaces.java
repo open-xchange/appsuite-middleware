@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.compose;
+package com.openexchange.mail.compose.old;
 
 import java.util.Map;
 import java.util.Queue;
@@ -64,19 +64,19 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link CompositionSpaces} - Utility class for composition spaces.
+ * {@link OldCompositionSpaces} - Utility class for composition spaces.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CompositionSpaces {
+public final class OldCompositionSpaces {
 
     /** The logger constant */
-    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CompositionSpaces.class);
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OldCompositionSpaces.class);
 
     /**
-     * Initializes a new {@link CompositionSpaces}.
+     * Initializes a new {@link OldCompositionSpaces}.
      */
-    private CompositionSpaces() {
+    private OldCompositionSpaces() {
         super();
     }
 
@@ -87,8 +87,8 @@ public final class CompositionSpaces {
      * @param session The session
      * @return The composition space or <code>null</code>
      */
-    public static CompositionSpace get(String csid, Session session) {
-        CompositionSpaceRegistry registry = CompositionSpace.getRegistry(session);
+    public static OldCompositionSpace get(String csid, Session session) {
+        OldCompositionSpaceRegistry registry = OldCompositionSpace.getRegistry(session);
         return registry.optCompositionSpace(csid);
     }
 
@@ -103,8 +103,8 @@ public final class CompositionSpaces {
      * @param session The session
      */
     public static void destroy(String csid, Session session) {
-        CompositionSpaceRegistry registry = CompositionSpace.getRegistry(session);
-        CompositionSpace space = registry.removeCompositionSpace(csid);
+        OldCompositionSpaceRegistry registry = OldCompositionSpace.getRegistry(session);
+        OldCompositionSpace space = registry.removeCompositionSpace(csid);
         if (null != space) {
             Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
             try {
@@ -153,7 +153,7 @@ public final class CompositionSpaces {
     public static void destroyFor(Session session) {
         Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
         try {
-            for (CompositionSpace space : CompositionSpace.getRegistry(session).removeAllCompositionSpaces()) {
+            for (OldCompositionSpace space : OldCompositionSpace.getRegistry(session).removeAllCompositionSpaces()) {
 
                 // Delete clean-ups
                 Queue<MailPath> cleanUps = space.getCleanUps();
@@ -197,10 +197,10 @@ public final class CompositionSpaces {
      * @param registry The composition space registry
      * @param session The associated session
      */
-    static void destroy(CompositionSpaceRegistry registry, Session session) {
+    static void destroy(OldCompositionSpaceRegistry registry, Session session) {
         Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
         try {
-            for (CompositionSpace space : registry.removeAllCompositionSpaces()) {
+            for (OldCompositionSpace space : registry.removeAllCompositionSpaces()) {
 
                 // Delete clean-ups
                 Queue<MailPath> cleanUps = space.getCleanUps();
@@ -255,7 +255,7 @@ public final class CompositionSpaces {
      * @throws OXException If operation fails
      */
     public static void applyCompositionSpace(String csid, Session session, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> optMailAccess, boolean updateMailFlags) throws OXException {
-        CompositionSpace space = CompositionSpace.optCompositionSpace(csid, session);
+        OldCompositionSpace space = OldCompositionSpace.optCompositionSpace(csid, session);
         if (null == space) {
             return;
         }

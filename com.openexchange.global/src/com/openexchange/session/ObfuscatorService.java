@@ -49,12 +49,15 @@
 
 package com.openexchange.session;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
  * {@link ObfuscatorService} - The obfuscator service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
+@SingletonService
 public interface ObfuscatorService {
 
     /**

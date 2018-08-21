@@ -171,6 +171,7 @@ import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationL
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
@@ -442,6 +443,7 @@ public final class ServerActivator extends HousekeepingActivator {
         // Full-name builder
         track(ServerConfigService.class, new RegistryCustomizer<ServerConfigService>(context, ServerConfigService.class));
         track(FullNameBuilderService.class, new RegistryCustomizer<FullNameBuilderService>(context, FullNameBuilderService.class));
+        track(TranslatorFactory.class, new RegistryCustomizer<TranslatorFactory>(context, TranslatorFactory.class));
 
         // Mail account delete listener
         track(MailAccountDeleteListener.class, new DeleteListenerServiceTracker(context));

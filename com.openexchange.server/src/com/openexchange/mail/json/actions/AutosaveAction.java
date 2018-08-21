@@ -59,7 +59,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.old.OldCompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
@@ -136,7 +136,7 @@ public final class AutosaveAction extends AbstractMailAction {
                 msgIdentifier = mailInterface.saveDraft(composedMail, true, accountId);
 
                 if (null != csid) {
-                    CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                    OldCompositionSpace space = OldCompositionSpace.getCompositionSpace(csid, session);
                     space.addDraftEditFor(msgIdentifier);
                 }
             }

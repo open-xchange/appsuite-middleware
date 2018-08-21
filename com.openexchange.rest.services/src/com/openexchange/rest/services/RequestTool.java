@@ -56,6 +56,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -153,10 +154,11 @@ public class RequestTool {
     public static AJAXRequestData getAJAXRequestData(HttpHeaders httpHeaders, UriInfo uriInfo, HttpServletRequest servletRequest, HttpServletResponse servletResponse) throws OXException {
         AJAXRequestData requestData;
         try {
+            boolean multipartFormData = MediaType.MULTIPART_FORM_DATA_TYPE.isCompatible(httpHeaders.getMediaType());
             requestData = AJAXRequestDataTools.getInstance().parseRequest(
                 servletRequest,
-                false,
-                false,
+                multipartFormData,
+                multipartFormData,
                 null,
                 uriInfo.getPathSegments().get(0).toString(),
                 servletResponse);

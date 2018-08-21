@@ -54,6 +54,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderPar
 import java.io.Serializable;
 import java.util.Comparator;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.utils.MailFolderUtility;
 
 /**
@@ -131,6 +132,17 @@ public final class MailPath implements Cloneable, Serializable {
             retval[i] = new MailPath(mailPaths[i]);
         }
         return retval;
+    }
+
+    /**
+     * Returns the mail path for given mail path's string representation.
+     *
+     * @param mailPath The mail path's string representation
+     * @return The mail path or <code>null</code> (if given string is <code>null</code> or empty)
+     * @throws OXException If mail path's string representation cannot be parsed
+     */
+    public static MailPath getMailPathFor(String mailPath) throws OXException {
+        return Strings.isEmpty(mailPath) ? null : new MailPath(mailPath);
     }
 
     /**

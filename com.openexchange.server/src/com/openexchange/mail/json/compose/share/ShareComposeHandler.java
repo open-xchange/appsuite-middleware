@@ -173,7 +173,17 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
      * @return The share options or <code>null</code>
      */
     private JSONObject optShareAttachmentOptions(ComposeRequest composeRequest) {
-        return composeRequest.getJsonMail().optJSONObject("share_attachments");
+        JSONObject jsonMail = composeRequest.getJsonMail();
+        if (jsonMail != null) {
+            return jsonMail.optJSONObject("share_attachments");
+        }
+
+        Map<String, Object> parameters = composeRequest.getParameters();
+        if (null != parameters) {
+            return (JSONObject) parameters.get("share_attachments");
+        }
+
+        return null;
     }
 
     /**
@@ -316,8 +326,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         // Collect recipients
         Set<Recipient> recipients;
         {
-            Set<InternetAddress> addresses = new HashSet<>();
-            addresses.addAll(Arrays.asList(source.getTo()));
+            Set<InternetAddress> addresses = new HashSet<>(Arrays.asList(source.getTo()));
             addresses.addAll(Arrays.asList(source.getCc()));
             addresses.addAll(Arrays.asList(source.getBcc()));
 
@@ -358,11 +367,12 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
         // Some state variables
         StoredAttachmentsControl attachmentsControl = null;
-        boolean rollback = true;
+        boolean rollback = false;
         Map<String, ThresholdFileHolder> previewImages = null;
         try {
             // Store attachments associated with compose context
             attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, autoDelete, context);
+            rollback = true;
 
             // The share target for an anonymous user
             ShareTarget folderTarget = attachmentsControl.getFolderTarget();

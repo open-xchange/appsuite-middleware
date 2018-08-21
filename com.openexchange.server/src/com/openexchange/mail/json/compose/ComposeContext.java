@@ -60,7 +60,6 @@ import com.openexchange.mail.dataobjects.compose.DataMailPart;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.tools.session.ServerSession;
 
@@ -178,14 +177,14 @@ public interface ComposeContext {
      * @param uploadPart The upload part
      * @throws OXException If part cannot be added
      */
-    void addUploadPart(UploadFileMailPart uploadPart) throws OXException;
+    void addUploadPart(MailPart uploadPart) throws OXException;
 
     /**
      * Gets the upload parts
      *
      * @return The upload parts or an empty list
      */
-    List<UploadFileMailPart> getUploadParts();
+    List<MailPart> getUploadParts();
 
     /**
      * Adds specified drive part

@@ -67,7 +67,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.FromAddressProvider;
-import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.old.OldCompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -153,8 +153,8 @@ public final class GetForwardAction extends AbstractMailAction {
             }
 
             if (null != csid) {
-                CompositionSpace compositionSpace = CompositionSpace.getCompositionSpace(csid, session);
-                compositionSpace.addForwardFor(new MailPath(folderPath, uid));
+                OldCompositionSpace oldCompositionSpace = OldCompositionSpace.getCompositionSpace(csid, session);
+                oldCompositionSpace.addForwardFor(new MailPath(folderPath, uid));
 
 
                 AJAXRequestResult result = new AJAXRequestResult(mailMessage, "mail");
@@ -212,9 +212,9 @@ public final class GetForwardAction extends AbstractMailAction {
             }
 
             if (null != csid) {
-                CompositionSpace compositionSpace = CompositionSpace.getCompositionSpace(csid, session);
+                OldCompositionSpace oldCompositionSpace = OldCompositionSpace.getCompositionSpace(csid, session);
                 for (MailPath forwardFor : forwardFors) {
-                    compositionSpace.addForwardFor(forwardFor);
+                    oldCompositionSpace.addForwardFor(forwardFor);
                 }
 
 

@@ -102,8 +102,8 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
-import com.openexchange.mail.compose.CompositionSpace;
-import com.openexchange.mail.compose.CompositionSpaces;
+import com.openexchange.mail.compose.old.OldCompositionSpace;
+import com.openexchange.mail.compose.old.OldCompositionSpaces;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -160,7 +160,23 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
     public ComposeDraftResult createDraftResult(ComposeRequest request) throws OXException {
         D context = createDraftComposeContext(request);
         try {
-            prepare(request, context);
+            ComposedMailMessage sourceMessage = request.getSourceMessage();
+            if (null == sourceMessage) {
+                prepare(request, context);
+            } else {
+                // Apply to context
+                context.setSourceMessage(sourceMessage);
+
+                // Add text part to compose context
+                context.setTextPart(request.getTextPart());
+
+                // Add parts
+                List<MailPart> parts = request.getParts();
+                for (MailPart mailPart : parts) {
+                    context.addUploadPart(mailPart);
+                }
+            }
+
             return doCreateDraftResult(request, context);
         } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -173,7 +189,23 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
     public ComposeTransportResult createTransportResult(ComposeRequest request) throws OXException {
         T context = createTransportComposeContext(request);
         try {
-            prepare(request, context);
+            ComposedMailMessage sourceMessage = request.getSourceMessage();
+            if (null == sourceMessage) {
+                prepare(request, context);
+            } else {
+                // Apply to context
+                context.setSourceMessage(sourceMessage);
+
+                // Add text part to compose context
+                context.setTextPart(request.getTextPart());
+
+                // Add parts
+                List<MailPart> parts = request.getParts();
+                for (MailPart mailPart : parts) {
+                    context.addUploadPart(mailPart);
+                }
+            }
+
             return doCreateTransportResult(request, context);
         } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -298,18 +330,18 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
                 Set<String> contentIds = extractContentIds(sContent);
 
                 // Check composition space
-                CompositionSpace compositionSpace = null;
+                OldCompositionSpace oldCompositionSpace = null;
                 {
                     String csid = request.getRequest().getParameter(AJAXServlet.PARAMETER_CSID);
                     if (null == csid) {
                         csid = request.getJsonMail().optString("csid", null);
                     }
                     if (null != csid) {
-                        compositionSpace = CompositionSpaces.get(csid, request.getSession());
+                        oldCompositionSpace = OldCompositionSpaces.get(csid, request.getSession());
                     }
                 }
 
-                parseAttachments(sourceMessage, attachmentArray, contentIds, context, compositionSpace,
+                parseAttachments(sourceMessage, attachmentArray, contentIds, context, oldCompositionSpace,
                     // If forwarding a previously encrypted message, needs attachments decrypted with authentication
                     (sourceMessage.getSecuritySettings() == null ? null : sourceMessage.getSecuritySettings().getAuthentication()));
             }
@@ -336,13 +368,15 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
         }
 
         // Parse data sources
-        if (request.getJsonMail().hasAndNotNull(DATASOURCES)) {
-            parseDataSources(request.getJsonMail().getJSONArray(DATASOURCES), context);
+        JSONArray jDataSources = request.getJsonMail().optJSONArray(DATASOURCES);
+        if (null != jDataSources) {
+            parseDataSources(jDataSources, context);
         }
 
         // Attach Drive documents
-        if (request.getJsonMail().hasAndNotNull(INFOSTORE_IDS)) {
-            parseDriveParts(request.getJsonMail().getJSONArray(INFOSTORE_IDS), context);
+        JSONArray jInfostoreIds = request.getJsonMail().optJSONArray(INFOSTORE_IDS);
+        if (null != jInfostoreIds) {
+            parseDriveParts(jInfostoreIds, context);
         }
     }
 
@@ -470,22 +504,22 @@ public abstract class AbstractComposeHandler<T extends ComposeContext, D extends
      * @param jAttachments The attachments to parse
      * @param contentIds The extracted content identifiers of inline images
      * @param context The compose context
-     * @param compositionSpace The optional composition space
+     * @param oldCompositionSpace The optional composition space
      * @throws OXException If parsing fails
      * @throws JSONException If a JSON error occurred
      */
-    protected void parseAttachments(ComposedMailMessage composeMessage, JSONArray jAttachments, Set<String> contentIds, ComposeContext context, CompositionSpace compositionSpace, String cryptoAuth) throws OXException, JSONException {
+    protected void parseAttachments(ComposedMailMessage composeMessage, JSONArray jAttachments, Set<String> contentIds, ComposeContext context, OldCompositionSpace oldCompositionSpace, String cryptoAuth) throws OXException, JSONException {
         // Get the identifier of the referenced message
         MailPath parentMsgRef = composeMessage.getMsgref();
         MailPath originalMsgRef = null;
-        if (null != parentMsgRef && null != compositionSpace) {
-            originalMsgRef = compositionSpace.getReplyFor();
+        if (null != parentMsgRef && null != oldCompositionSpace) {
+            originalMsgRef = oldCompositionSpace.getReplyFor();
             if (null == originalMsgRef) {
-                Queue<MailPath> queue = compositionSpace.getForwardsFor();
+                Queue<MailPath> queue = oldCompositionSpace.getForwardsFor();
                 originalMsgRef = queue.size() == 1 ? queue.peek() : null;
             }
             if (null == originalMsgRef) {
-                Queue<MailPath> queue = compositionSpace.getDraftEditsFor();
+                Queue<MailPath> queue = oldCompositionSpace.getDraftEditsFor();
                 originalMsgRef = queue.size() == 1 ? queue.peek() : null;
             }
             if (null != originalMsgRef && (originalMsgRef.equals(parentMsgRef) || parentMsgRef.getAccountId() != originalMsgRef.getAccountId())) {
