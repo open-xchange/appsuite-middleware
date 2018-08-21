@@ -51,6 +51,7 @@ package com.openexchange.drive.events.apn2.internal;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options;
@@ -218,11 +219,8 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
         }
 
         return new ApnsHttp2Notification.Builder(subscription.getToken(), options.getTopic())
-            .withCustomAlertLocKey("TRIGGER_SYNC")
-            .withCustomAlertActionLocKey("OK")
             .withCustomField("container-identifier", "NSFileProviderRootContainerItemIdentifier")
-            .withCustomField("root", subscription.getRootFolderID())
-            .withCustomField("action", "sync")
+            .withExpiration(TimeUnit.HOURS.toMillis(1L))
         .build();
     }
 
