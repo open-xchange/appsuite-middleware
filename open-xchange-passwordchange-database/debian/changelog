@@ -1,3 +1,9 @@
+open-xchange-passwordchange-database (7.10.0-13) stable; urgency=medium
+
+  * Build for patch 2018-08-20 (4863)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 15 Aug 2018 15:35:18 +0200
+
 open-xchange-passwordchange-database (7.10.0-12) stable; urgency=medium
 
   * Build for patch 2018-08-13 (4853)
