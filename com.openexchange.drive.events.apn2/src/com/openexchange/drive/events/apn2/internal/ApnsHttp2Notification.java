@@ -117,7 +117,7 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
             root = new HashMap<>();
             aps = new HashMap<>();
             alert = new HashMap<>();
-            priority = DeliveryPriority.IMMEDIATE;
+            priority = null;
             expiration = DEFAULT_EXPIRATION_PERIOD_MILLIS;
         }
 
