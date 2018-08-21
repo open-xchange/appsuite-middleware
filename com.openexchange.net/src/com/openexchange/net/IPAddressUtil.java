@@ -200,7 +200,7 @@ public final class IPAddressUtil {
         val = 0;
         while (i < srcb_length) {
             ch = src.charAt(i++);
-            final int chval = Character.digit(ch, 16);
+            final int chval = digit(ch, 16);
             if (chval != -1) {
                 val <<= 4;
                 val |= chval;
@@ -365,6 +365,179 @@ public final class IPAddressUtil {
             return true;
         }
         return false;
+    }
+
+    private static long parseUnsignedLong(final String s) {
+        if (s == null || s.length() <= 0 || s.charAt(0) == '-') {
+            return -1L;
+        }
+
+        if (s.equals("0")) {
+            return 0;
+        }
+
+        if (s.startsWith("0x")) {
+            // Assume hexadecimal
+            return parseUnsignedLong(s.substring(2), 16);
+        }
+        if (s.startsWith("0")) {
+            // Assume octal
+            return parseUnsignedLong(s.substring(1), 8);
+        }
+        return parseUnsignedLong(s, 10);
+    }
+
+    /**
+     * Parses the string argument as a signed decimal <code>long</code>. The characters in the string must all be decimal digits.
+     * <p>
+     * Note that neither the character <code>L</code> (<code>'&#92;u004C'</code>) nor <code>l</code> (<code>'&#92;u006C'</code>) is
+     * permitted to appear at the end of the string as a type indicator, as would be permitted in Java programming language source code.
+     *
+     * @param s A <code>String</code> containing the <code>long</code> representation to be parsed
+     * @return The <code>long</code> represented by the argument in decimal or <code>-1</code> if the string does not contain a parsable
+     *         <code>long</code>.
+     */
+    private static long parseUnsignedLong(final String s, int radix) {
+        final int max = s.length();
+        if (max <= 0) {
+            return -1;
+        }
+        long result = 0;
+        int i = 0;
+
+        final long limit = -Long.MAX_VALUE;
+        final long multmin = limit / radix;
+        int digit;
+
+        if (i < max) {
+            digit = digit(s.charAt(i++), radix);
+            if (digit < 0) {
+                return -1L;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            /*
+             * Accumulating negatively avoids surprises near MAX_VALUE
+             */
+            digit = digit(s.charAt(i++), radix);
+            if (digit < 0) {
+                return -1L;
+            }
+            if (result < multmin) {
+                return -1L;
+            }
+            result *= radix;
+            if (result < limit + digit) {
+                return -1L;
+            }
+            result -= digit;
+        }
+        return -result;
+    }
+
+    private static long parseUnsignedInteger(final String s) {
+        if (s == null || s.length() <= 0 || s.charAt(0) == '-') {
+            return -1L;
+        }
+
+        if (s.equals("0")) {
+            return 0;
+        }
+
+        if (s.startsWith("0x")) {
+            // Assume hexadecimal
+            return parseUnsignedInteger(s.substring(2), 16);
+        }
+        if (s.startsWith("0")) {
+            // Assume octal
+            return parseUnsignedInteger(s.substring(1), 8);
+        }
+        return parseUnsignedInteger(s, 10);
+    }
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    private static final int parseUnsignedInteger(final String s, int radix) {
+        final int max = s.length();
+        if (max <= 0) {
+            return -1;
+        }
+        int result = 0;
+        int i = 0;
+
+        final int limit = -Integer.MAX_VALUE;
+        final int multmin = limit / radix;
+        int digit;
+
+        if (i < max) {
+            digit = digit(s.charAt(i++), radix);
+            if (digit < 0) {
+                return -1;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            /*
+             * Accumulating negatively avoids surprises near MAX_VALUE
+             */
+            digit = digit(s.charAt(i++), radix);
+            if (digit < 0) {
+                return -1;
+            }
+            if (result < multmin) {
+                return -1;
+            }
+            result *= radix;
+            if (result < limit + digit) {
+                return -1;
+            }
+            result -= digit;
+        }
+        return -result;
+    }
+
+    private static int digit(char c, int radix) {
+        switch (c) {
+        case '0':
+            return 0;
+        case '1':
+            return 1;
+        case '2':
+            return 2;
+        case '3':
+            return 3;
+        case '4':
+            return 4;
+        case '5':
+            return 5;
+        case '6':
+            return 6;
+        case '7':
+            return 7;
+        case '8':
+            return radix < 10 ? -1 : 8;
+        case '9':
+            return radix < 10 ? -1 : 9;
+        case 'a':
+            return radix < 16 ? -1 : 10;
+        case 'b':
+            return radix < 16 ? -1 : 11;
+        case 'c':
+            return radix < 16 ? -1 : 12;
+        case 'd':
+            return radix < 16 ? -1 : 13;
+        case 'e':
+            return radix < 16 ? -1 : 14;
+        case 'f':
+            return radix < 16 ? -1 : 15;
+        default:
+            return -1;
+        }
     }
 
 }
