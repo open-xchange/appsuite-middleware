@@ -1,0 +1,7 @@
+type: object
+properties:
+  files:
+    type: array
+    description: An array of files
+    items:
+      $ref: "#/definitions/FolderCheckLimitsFiles"

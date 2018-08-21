@@ -47,64 +47,40 @@
  *
  */
 
-package com.openexchange.filestore;
+package com.openexchange.filestore.limit.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.Quota;
+import com.openexchange.filestore.limit.LimitService;
+import com.openexchange.filestore.limit.type.TypeLimitService;
+import com.openexchange.filestore.limit.type.TypeLimitServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
- * {@link FileQuotaCheckService}
+ * 
+ * {@link DefaultLimitService}
  *
- * @author <a href="mailto:jan-oliver.huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public interface FileQuotaCheckService {
+public class DefaultLimitService implements LimitService {
 
-    /**
-     * Performs a full check for all quotas
-     *
-     * @param userId The userId.
-     * @param contextId The contextId.
-     * @param quotaFiles The uploaded files to check.
-     * @param fileQuota The file quota.
-     * @param storageQuota The storage quota.
-     * @param accumulatedFileQuota The overall used file quota of the file upload.
-     * @param accumulatedStorageQuota The overall used storage quota of the file upload.
-     * @throws OXException If the quota check fails.
-     */
-    boolean completeQuotaCheck(int userId, int contextId, List<File> quotaFiles, Quota fileQuota, Quota storageQuota, long accumulatedFileQuota, long accumulatedStorageQuota) throws OXException;
+    private final TypeLimitServiceRegistry typeLimitServiceRegistry;
 
-    /**
-     * Checks, if the upload violates the current storage or file quota
-     *
-     * @param limit The current limit of the storage or file quota.
-     * @param usage The current usage of the storage or file quota.
-     * @param accumulatedStorageQuota The overall used storage quota of the file upload.
-     * @return boolean true, if the quota check was successful.
-     * @throws OXException If the quota check fails.
-     */
-    boolean checkQuota(long limit, long usage, long accumulatedStorageQuota) throws OXException;
+    public DefaultLimitService(TypeLimitServiceRegistry registry) {
+        this.typeLimitServiceRegistry = registry;
+    }
 
-    /**
-     * Checks, if the upload violates the max upload size
-     *
-     * @param accumulatedStorageQuota The overall used file quota of the file upload.
-     * @return boolean true, if the quota check was successful.
-     * @throws OXException If the quota check fails.
-     */
-    boolean checkFileMaxUploadSize(long accumulatedStorageQuota) throws OXException;
+    @Override
+    public List<OXException> checkLimits(Session session, String folderId, List<File> files, String type) throws OXException {
+        List<OXException> exceptions = new ArrayList<>();
 
-    /**
-     * Checks, if the upload violates the current storage quota of the specific user
-     *
-     * @param userId The userId.
-     * @param contextId The  contextId.
-     * @param accumulatedStorageQuota The overall used file quota of the file upload.
-     * @return boolean true, if the quota check was successful.
-     * @throws OXException If the quota check fails.
-     */
-    boolean checkStorageQuotaPerUser(int userId, int contextId, long accumulatedStorageQuota) throws OXException;
-
+        List<TypeLimitService> typeLimitServices = this.typeLimitServiceRegistry.get(type);
+        for (TypeLimitService typeLimitService : typeLimitServices) {
+            exceptions.addAll(typeLimitService.check(session, folderId, files));
+        }
+        return exceptions;
+    }
 }

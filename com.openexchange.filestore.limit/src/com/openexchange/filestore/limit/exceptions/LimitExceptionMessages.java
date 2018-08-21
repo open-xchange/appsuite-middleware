@@ -47,38 +47,27 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.files;
+package com.openexchange.filestore.limit.exceptions;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.composition.IDBasedFolderAccess;
-import com.openexchange.file.storage.json.services.Services;
-import com.openexchange.filestore.FileQuotaCheckService;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link QuotaCheckAction}
+ * 
+ * {@link LimitExceptionMessages}
  *
- * @author <a href="mailto:jan-oliver.huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public class QuotaCheckAction extends AbstractWriteAction {
+public class LimitExceptionMessages implements LocalizableStrings {
 
-    @Override
-    protected AJAXRequestResult handle(InfostoreRequest request) throws OXException {
-        String folderId = request.getQuotaCheckFolder();
+    public static final String STORAGE_QUOTA_EXCEEDED_MSG = "The total upload size (%1$s) exceeds the available free space of %2$s.";
 
-        IDBasedFolderAccess folderAccess = request.getFolderAccess();
-        AJAXRequestResult result = new AJAXRequestResult();
+    public static final String TOO_MANY_FILES_MSG = "The total number of files exceeds the maximum of %1$s.";
 
-        FileQuotaCheckService fileQuotaCheckService = Services.getFileQuotaCheckService();
-        try {
-            fileQuotaCheckService.completeQuotaCheck(request.getSession().getUserId(), request.getSession().getContextId(),
-                request.getQuotaCheckFiles(), folderAccess.getFileQuota(folderId),
-                folderAccess.getStorageQuota(folderId), request.getAccumulatedFileQuota(), request.getAccumulatedStorageQuota());
-        } catch (OXException e) {
-            result.setException(e);
-        }
-        return result;
+    public static final String FILE_QUOTA_PER_REQUEST_EXCEEDED_MSG = "'%1$s' (%2$s) exceeds the allowed size of %3$s per file.";
+
+    private LimitExceptionMessages() {
+        super();
     }
 
 }

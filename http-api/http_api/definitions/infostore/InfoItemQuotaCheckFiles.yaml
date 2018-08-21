@@ -1,9 +1,0 @@
-type: object
-properties:
-  file_size:
-    type: integer
-    format: int64
-    description: The file size of the file to check  in bytes.
-  filename:
-    type: string
-    description: The file name of the file to check.

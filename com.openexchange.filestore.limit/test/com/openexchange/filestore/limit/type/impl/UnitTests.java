@@ -47,44 +47,23 @@
  *
  */
 
-package com.openexchange.filestore.impl.osgi;
+package com.openexchange.filestore.limit.type.impl;
 
-import org.slf4j.Logger;
-import com.openexchange.filestore.FileQuotaCheckService;
-import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.filestore.impl.FileQuotaCheckServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * {@link FileQuotaCheckActivator}
+ * 
+ * {@link UnitTests}
  *
- * @author <a href="mailto:jan-oliver.huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public class FileQuotaCheckActivator extends HousekeepingActivator{
-
-    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FileQuotaCheckActivator.class);
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { QuotaFileStorageService.class } ;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(FileQuotaCheckService.class, new FileQuotaCheckServiceImpl(), null);
-        LOGGER.info("Successfully started FileQuotaCheckService");
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        LOGGER.info("Successfully stopped FileQuotaCheckService");
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    AbstractCombinedTypeLimitServiceTest.class,
+})
+public class UnitTests {
 
 }

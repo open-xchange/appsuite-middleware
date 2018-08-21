@@ -1,5 +1,5 @@
 type: object
 properties:
   data:
-    $ref: "#/definitions/InfoItemQuotaCheckResponseData"
+    $ref: "#/definitions/FolderCheckLimitsResponseData"
   $ref: ../common/CommonResponseData.yaml

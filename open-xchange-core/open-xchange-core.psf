@@ -90,6 +90,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.filestore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.filestore.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.filestore.limit"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.filestore.utils"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.find"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.find.basic"/>

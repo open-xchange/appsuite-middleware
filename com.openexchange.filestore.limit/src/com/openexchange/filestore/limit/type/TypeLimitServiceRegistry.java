@@ -47,28 +47,51 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.filestore.limit.type;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.limit.exceptions.LimitExceptionCodes;
 
 /**
- * {@link FileQuotaCheckExceptionMessages}
+ * {@link TypeLimitServiceRegistry}
  *
- * @author <a href="mailto:jan-oliver.huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public class FileQuotaCheckExceptionMessages implements LocalizableStrings {
+public class TypeLimitServiceRegistry {
 
-    public static final String QUOTA_CHECK_MSG = "There is not enough free space for your upload.";
+    private final ConcurrentMap<String, List<TypeLimitService>> typeLimitServices = new ConcurrentHashMap<>();
 
-    public static final String MAX_UPLOAD_CHECK_MSG = "The upload exceeds the maximum upload size.";
-    
+    private static final TypeLimitServiceRegistry SINGLETON = new TypeLimitServiceRegistry();
 
-    /**
-     * Initializes a new {@link FileQuotaCheckExceptionMessages}.
-     */
-    private FileQuotaCheckExceptionMessages() {
-        super();
+    private TypeLimitServiceRegistry() {
+        // prevent instantiation
     }
 
+    public static TypeLimitServiceRegistry getInstance() {
+        return SINGLETON;
+    }
+
+    public void register(TypeLimitService... lTypeLimitServices) {
+        for (TypeLimitService typeLimitService : lTypeLimitServices) {
+            List<TypeLimitService> list = this.typeLimitServices.get(typeLimitService.getType().toLowerCase());
+            if (list == null) {
+                list = new ArrayList<>();
+                typeLimitServices.put(typeLimitService.getType().toLowerCase(), list);
+            }
+            list.add(typeLimitService);
+        }
+    }
+
+    public List<TypeLimitService> get(String type) throws OXException {
+        List<TypeLimitService> list = typeLimitServices.get(type.toLowerCase());
+        if (list != null && !list.isEmpty()) {
+            return list;
+        }
+        throw LimitExceptionCodes.TYPE_NOT_AVAILABLE.create(type);
+    }
 }

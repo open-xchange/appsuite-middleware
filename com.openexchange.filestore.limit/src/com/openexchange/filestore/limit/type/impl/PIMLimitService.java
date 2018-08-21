@@ -47,30 +47,38 @@
  *
  */
 
-package com.openexchange.filestore.impl.osgi;
+package com.openexchange.filestore.limit.type.impl;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.osgi.CompositeBundleActivator;
-
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.groupware.attach.AttachmentConfig;
+import com.openexchange.session.Session;
 
 /**
- * {@link FileStorageCompositeActivator}
+ * {@link PIMLimitService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.1
  */
-public final class FileStorageCompositeActivator extends CompositeBundleActivator {
+public class PIMLimitService extends AbstractCombinedTypeLimitService {
 
-    /**
-     * Initializes a new {@link FileStorageCompositeActivator}.
-     */
-    public FileStorageCompositeActivator() {
-        super();
+    @Override
+    public String getType() {
+        return "pim";
     }
 
     @Override
-    protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new DefaultFileStorageActivator(), new DBQuotaFileStorageActivator() };
+    public List<OXException> check(Session session, String folderId, List<File> files) {
+        List<OXException> exceededLimits = new ArrayList<>();
+
+        checkMaxUploadSizePerFile(files, exceededLimits);
+        return exceededLimits;
     }
 
+    @Override
+    protected long getMaxUploadSizePerModule() {
+        return AttachmentConfig.getMaxUploadSize();
+    }
 }

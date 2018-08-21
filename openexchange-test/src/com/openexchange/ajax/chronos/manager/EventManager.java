@@ -790,8 +790,6 @@ public class EventManager extends AbstractManager {
 
     /**
      * Removes the specified {@link EventId} for the specified user from the cache
-     * 0
-     * 
      * @param eventId The {@link EventId}
      */
     protected void forgetEventId(EventId eventId) {

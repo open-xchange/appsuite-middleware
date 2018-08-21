@@ -47,30 +47,48 @@
  *
  */
 
-package com.openexchange.filestore.impl.osgi;
+package com.openexchange.filestore.limit.osgi;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.osgi.CompositeBundleActivator;
-
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
+import com.openexchange.filestore.limit.LimitService;
+import com.openexchange.filestore.limit.impl.DefaultLimitService;
+import com.openexchange.filestore.limit.type.TypeLimitServiceRegistry;
+import com.openexchange.filestore.limit.type.impl.InfostoreLimitService;
+import com.openexchange.filestore.limit.type.impl.PIMLimitService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link FileStorageCompositeActivator}
+ * 
+ * {@link LimitActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.1
  */
-public final class FileStorageCompositeActivator extends CompositeBundleActivator {
+public class LimitActivator extends HousekeepingActivator {
+    
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LimitActivator.class);
 
-    /**
-     * Initializes a new {@link FileStorageCompositeActivator}.
-     */
-    public FileStorageCompositeActivator() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { IDBasedFolderAccessFactory.class };
     }
 
     @Override
-    protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new DefaultFileStorageActivator(), new DBQuotaFileStorageActivator() };
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle: {}", this.context.getBundle().getSymbolicName());
+
+        Services.setServiceLookup(this);
+
+        TypeLimitServiceRegistry registry = TypeLimitServiceRegistry.getInstance();
+        registry.register(new InfostoreLimitService(), new PIMLimitService());
+        registerService(LimitService.class, new DefaultLimitService(registry));
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("Stopping bundle: {}", this.context.getBundle().getSymbolicName());
+
+        Services.setServiceLookup(null);
+        super.stopBundle();
+    }
 }

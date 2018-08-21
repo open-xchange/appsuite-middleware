@@ -47,30 +47,37 @@
  *
  */
 
-package com.openexchange.filestore.impl.osgi;
+package com.openexchange.filestore.limit.type;
 
-import org.osgi.framework.BundleActivator;
-import com.openexchange.osgi.CompositeBundleActivator;
-
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.session.Session;
 
 /**
- * {@link FileStorageCompositeActivator}
+ * {@link TypeLimitService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.1
  */
-public final class FileStorageCompositeActivator extends CompositeBundleActivator {
+public interface TypeLimitService {
 
     /**
-     * Initializes a new {@link FileStorageCompositeActivator}.
+     * Returns the type the implementation will check the limits for.
+     * 
+     * @return {@link String} defining the type the implementation will check the limits for.
      */
-    public FileStorageCompositeActivator() {
-        super();
-    }
+    String getType();
 
-    @Override
-    protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new DefaultFileStorageActivator(), new DBQuotaFileStorageActivator() };
-    }
+    /**
+     * Returns a {@link List} of {@link OXException}s containing the limits that will be exceeded (for the handled type) if the list of provided files will be uploaded for the given folder.
+     * 
+     * @param session The current session
+     * @param folderId The id of the folder to check the limits for
+     * @param files The files that should be uploaded.
+     * @return A {@link List} of {@link OXException}s containing exceeded limits for the given folder/list of files combination
+     * @throws OXException In case an error occurred while checking the limits
+     */
+    List<OXException> check(Session session, String folderId, List<File> files) throws OXException;
 
 }

@@ -58,7 +58,6 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
 import com.openexchange.file.storage.json.FileFieldCollector;
 import com.openexchange.file.storage.json.osgi.OSGiFileFieldCollector;
-import com.openexchange.filestore.FileQuotaCheckService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.preview.PreviewService;
@@ -169,10 +168,4 @@ public class Services {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(ThreadControlService.class);
     }
-
-    public static FileQuotaCheckService getFileQuotaCheckService() {
-        final ServiceLookup lookup = LOOKUP_REF.get();
-        return null == lookup ? null : lookup.getService(FileQuotaCheckService.class);
-    }
-
 }

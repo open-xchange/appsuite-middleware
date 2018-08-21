@@ -68,7 +68,6 @@ import com.openexchange.file.storage.json.actions.services.ServiceActionFactory;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.filestore.FileQuotaCheckService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.i18n.I18nService;
@@ -89,7 +88,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class,
             AttachmentBase.class, FolderService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class,
-            ThreadControlService.class, FileQuotaCheckService.class };
+            ThreadControlService.class};
     }
 
     @Override

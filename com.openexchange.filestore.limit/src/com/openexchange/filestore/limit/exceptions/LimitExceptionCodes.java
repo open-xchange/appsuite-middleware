@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.filestore.limit.exceptions;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -56,27 +56,24 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link FileQuotaCheckExceptionCodes}
+ * 
+ * {@link LimitExceptionCodes}
  *
- * @author <a href="mailto:jan-oliver.huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public enum FileQuotaCheckExceptionCodes implements DisplayableOXExceptionCode {
+public enum LimitExceptionCodes implements DisplayableOXExceptionCode {
 
-    /**
-     * The allowed quota is exceeded
-     */
-    QUOTA_CHECK_MSG("The allowed quota is exceeded", Category.CATEGORY_USER_INPUT, 1, FileQuotaCheckExceptionMessages.QUOTA_CHECK_MSG),
-    /**
-     * The allowed maximum upload size is exceeded
-     */
-    MAX_UPLOAD_CHECK_MSG("The allowed maximum upload size is exceeded", Category.CATEGORY_USER_INPUT, 2, FileQuotaCheckExceptionMessages.MAX_UPLOAD_CHECK_MSG)
+    TYPE_NOT_AVAILABLE("Cannot check limit for type %1$s. No service available", Category.CATEGORY_USER_INPUT, null, 4001),
+
+    TOO_MANY_FILES("The total number of files exceeds the maximum of %1$s.", Category.CATEGORY_USER_INPUT, LimitExceptionMessages.TOO_MANY_FILES_MSG, 4002),
+
+    STORAGE_QUOTA_EXCEEDED("The total upload size (%1$s) exceeds the available space of %2$s.", Category.CATEGORY_USER_INPUT, LimitExceptionMessages.STORAGE_QUOTA_EXCEEDED_MSG, 4003),
+
+    FILE_QUOTA_PER_REQUEST_EXCEEDED("The file '%1$s' with size %2$s exceeds the allowed size limit of %3$s.", Category.CATEGORY_USER_INPUT, LimitExceptionMessages.FILE_QUOTA_PER_REQUEST_EXCEEDED_MSG, 4004),
     ;
 
-    /**
-     * The prefix constant.
-     */
-    public static final String PREFIX = "FILE_QUOTA_CHECK";
+    public static final String PREFIX = "UPL-LIM";
 
     private final Category category;
 
@@ -86,11 +83,11 @@ public enum FileQuotaCheckExceptionCodes implements DisplayableOXExceptionCode {
 
     private final String displayMessage;
 
-    private FileQuotaCheckExceptionCodes(final String message, final Category category, final int detailNumber) {
-        this(message, category, detailNumber, null);
+    private LimitExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, null, detailNumber);
     }
 
-    private FileQuotaCheckExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
+    private LimitExceptionCodes(final String message, final Category category, final String displayMessage, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
