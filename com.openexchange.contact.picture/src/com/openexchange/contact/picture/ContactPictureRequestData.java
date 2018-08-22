@@ -50,7 +50,9 @@
 package com.openexchange.contact.picture;
 
 import static com.openexchange.java.Autoboxing.I;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
 
 /**
  * {@link ContactPictureRequestData} - Object holding data to get a contact picture
@@ -65,8 +67,6 @@ public class ContactPictureRequestData {
      */
     public final static ContactPictureRequestData EMPTY = new ContactPictureRequestData(null, null, null, null, null);
 
-    private final Integer contextId;
-
     private final Integer userId;
 
     private final Integer folderId;
@@ -75,19 +75,20 @@ public class ContactPictureRequestData {
 
     private final String email;
 
+    private final Session session;
+
     /**
      * Initializes a new {@link ContactPictureRequestData}.
-     * 
-     * @param contextId The context identifier
+     *
+     * @param session The current session
      * @param userId The user identifier
      * @param folderId The folder identifier
      * @param contactId The contact identifier
      * @param email The email address
-     * 
+     *
      */
-    public ContactPictureRequestData(Integer contextId, Integer userId, Integer folderId, Integer contactId, String email) {
-        super();
-        this.contextId = contextId;
+    public ContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, String email) {
+        this.session = session;
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
@@ -95,27 +96,21 @@ public class ContactPictureRequestData {
     }
 
     /**
-     * Get the context identifier
-     * 
+     * Get the context identifier of the current session
+     *
      * @return The identifier or <code>null</code>
      */
     public final Integer getContextId() {
-        return contextId;
+        return session.getContextId();
     }
 
-    /**
-     * A value indicating if the context identifier is set
-     * 
-     * @return <code>true</code> if the context identifier is set,
-     *         <code>false</code> otherwise
-     */
-    public boolean hasContext() {
-        return null != contextId;
+    public final Session getSession() {
+        return session;
     }
 
     /**
      * Get the user identifier
-     * 
+     *
      * @return The identifier or <code>null</code>
      */
     public final Integer getUserId() {
@@ -124,7 +119,7 @@ public class ContactPictureRequestData {
 
     /**
      * A value indicating if the user identifier is set
-     * 
+     *
      * @return <code>true</code> if the user identifier is set,
      *         <code>false</code> otherwise
      */
@@ -134,7 +129,7 @@ public class ContactPictureRequestData {
 
     /**
      * Get the folder identifier
-     * 
+     *
      * @return The identifier or <code>null</code>
      */
     public final Integer getFolderId() {
@@ -143,7 +138,7 @@ public class ContactPictureRequestData {
 
     /**
      * A value indicating if the folder identifier is set
-     * 
+     *
      * @return <code>true</code> if the folder identifier is set,
      *         <code>false</code> otherwise
      */
@@ -153,7 +148,7 @@ public class ContactPictureRequestData {
 
     /**
      * Get the contact identifier
-     * 
+     *
      * @return The identifier or <code>null</code>
      */
     public final Integer getContactId() {
@@ -162,7 +157,7 @@ public class ContactPictureRequestData {
 
     /**
      * A value indicating if the contact identifier is set
-     * 
+     *
      * @return <code>true</code> if the contact identifier is set,
      *         <code>false</code> otherwise
      */
@@ -172,7 +167,7 @@ public class ContactPictureRequestData {
 
     /**
      * Get the mail address
-     * 
+     *
      * @return The email or <code>null</code>
      */
     public final String getEmail() {
@@ -181,7 +176,7 @@ public class ContactPictureRequestData {
 
     /**
      * A value indicating if the mail address is set
-     * 
+     *
      * @return <code>true</code> if the mail address is set,
      *         <code>false</code> otherwise
      */
@@ -191,11 +186,11 @@ public class ContactPictureRequestData {
 
     /**
      * Initializes a new {@link ContactPictureDataBuilder}.
-     * 
+     *
      */
     public class ContactPictureDataBuilder {
 
-        private Integer contextId;
+        private Session session;
 
         private Integer userId;
 
@@ -205,8 +200,8 @@ public class ContactPictureRequestData {
 
         private String email;
 
-        public ContactPictureDataBuilder setContext(Integer contextId) {
-            this.contextId = contextId;
+        public ContactPictureDataBuilder setSession(Session session) {
+            this.session = session;
             return this;
         }
 
@@ -246,15 +241,18 @@ public class ContactPictureRequestData {
             return this;
         }
 
-        public ContactPictureRequestData build() {
+        public ContactPictureRequestData build() throws OXException {
+            if(session == null) {
+                throw ContactPictureExceptionCodes.MISSING_SESSION.create();
+            }
             if (isEmpty()) {
                 return EMPTY;
             }
-            return new ContactPictureRequestData(contextId, userId, folderId, contactId, email);
+            return new ContactPictureRequestData(session, userId, folderId, contactId, email);
         }
 
         private boolean isEmpty() {
-            return null == contextId && null == userId && null == folderId && null == contactId && null == email;
+            return null == userId && null == folderId && null == contactId && null == email;
         }
     }
 
