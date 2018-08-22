@@ -49,38 +49,85 @@
 
 package com.openexchange.contact.picture.finder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.java.Rankable;
+import com.openexchange.contact.picture.ContactPictureRequestData.ContactPictureDataBuilder;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ContactPictureFinder}
- * 
- * 
- * Priority order is natural order ascending. Known types and priorities are:
- * <li></li>
- *
+ * {@link FinderResult}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public interface ContactPictureFinder extends Rankable {
+public class FinderResult {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(FinderResult.class);
+
+    final ContactPictureRequestData original;
+
+    ContactPictureDataBuilder modified;
+
+    ContactPicture picture;
 
     /**
-     * Get the contact picture for the provided {@link ContactPictureRequestData}
+     * Initializes a new {@link FinderResult}.
      * 
-     * @param contactPictureRequestData The {@link ContactPictureRequestData} to get the picture for
-     * @return The {@link FinderResult}
+     * @param original The original and unmodifiable {@link ContactPictureRequestData}
      */
-    FinderResult getPicture(ContactPictureRequestData contactPictureRequestData);
+    public FinderResult(ContactPictureRequestData original) {
+        super();
+        this.original = original;
+        this.modified = new ContactPictureDataBuilder() // @formatter:off
+            .setContactId(original.getContactId())
+            .setEmail(original.getEmail())
+            .setETag(original.onlyETag())
+            .setFolder(original.getFolderId())
+            .setSession(original.getSession())
+            .setUser(original.getUserId()); // @formatter:on
+    }
 
     /**
-     * Get a value indicating if the {@link ContactPictureFinder} has enough information
-     * about the contact to try getting the contact picture
+     * Get the {@link ContactPictureDataBuilder} to modify values on
      * 
-     * @param contactPictureRequestData The {@link ContactPictureRequestData} to base the answer on
-     * @return <code>true</code> if the {@link ContactPictureFinder} can search for a contact picture,
-     *         <code>false</code> if calling {@link #getPicture(com.openexchange.contact.picture.ContactPictureRequestData)} is superfluous
+     * @return The modifiable {@link ContactPictureDataBuilder}
      */
-    boolean isRunnable(ContactPictureRequestData contactPictureRequestData);
+    public ContactPictureDataBuilder modify() {
+        return modified;
+    }
+
+    /**
+     * Get the modified {@link ContactPictureRequestData}
+     * 
+     * @return The {@link ContactPictureRequestData}
+     */
+    public ContactPictureRequestData getModifications() {
+        try {
+            return modified.build();
+        } catch (OXException e) {
+            LOGGER.debug("Session not found in modified data. Using original data", e);
+            return original;
+        }
+    }
+
+    /**
+     * Get the {@link ContactPicture}
+     * 
+     * @return The picture or <code>null</code>
+     */
+    public ContactPicture getContactPicture() {
+        return picture;
+    }
+
+    /**
+     * Set a picture to this result
+     * 
+     * @param picture A {@link ContactPicture}
+     */
+    public void setPicture(ContactPicture picture) {
+        this.picture = picture;
+    }
 
 }

@@ -49,38 +49,14 @@
 
 package com.openexchange.contact.picture.finder;
 
-import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.java.Rankable;
-
 /**
- * {@link ContactPictureFinder}
- * 
- * 
- * Priority order is natural order ascending. Known types and priorities are:
- * <li></li>
- *
+ * {@link Modifiable} - Signals that the class accepts input data taht has been modified by other classes
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public interface ContactPictureFinder extends Rankable {
+public interface Modifiable {
 
-    /**
-     * Get the contact picture for the provided {@link ContactPictureRequestData}
-     * 
-     * @param contactPictureRequestData The {@link ContactPictureRequestData} to get the picture for
-     * @return The {@link FinderResult}
-     */
-    FinderResult getPicture(ContactPictureRequestData contactPictureRequestData);
-
-    /**
-     * Get a value indicating if the {@link ContactPictureFinder} has enough information
-     * about the contact to try getting the contact picture
-     * 
-     * @param contactPictureRequestData The {@link ContactPictureRequestData} to base the answer on
-     * @return <code>true</code> if the {@link ContactPictureFinder} can search for a contact picture,
-     *         <code>false</code> if calling {@link #getPicture(com.openexchange.contact.picture.ContactPictureRequestData)} is superfluous
-     */
-    boolean isRunnable(ContactPictureRequestData contactPictureRequestData);
+    // Marker interface
 
 }
