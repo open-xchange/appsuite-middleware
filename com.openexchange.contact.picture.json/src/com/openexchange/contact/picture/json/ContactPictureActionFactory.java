@@ -47,36 +47,35 @@
  *
  */
 
-package com.openexchange.contact.picture.json.osgi;
+package com.openexchange.contact.picture.json;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.contact.picture.json.ContactPictureActionFactory;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
+import com.openexchange.server.ServiceLookup;
 
 /**
- *
- * {@link ContactPictureJSONActivator}
+ * {@link ContactPictureActionFactory}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public final class ContactPictureJSONActivator extends AJAXModuleActivator {
+@OAuthModule
+public class ContactPictureActionFactory implements AJAXActionServiceFactory {
 
-    /**
-     * Initializes a new {@link ContactPictureJSONActivator}.
-     *
-     */
-    public ContactPictureJSONActivator() {
-        super();
+    private final Map<String, AJAXActionService> actions;
+
+    public ContactPictureActionFactory(ServiceLookup services) {
+        ImmutableMap.Builder<String, AJAXActionService> builder = ImmutableMap.builder();
+        builder.put("get", new GetAction(services));
+        actions = builder.build();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new ContactPictureActionFactory(this), "contact/picture");
-    }
-
 }
