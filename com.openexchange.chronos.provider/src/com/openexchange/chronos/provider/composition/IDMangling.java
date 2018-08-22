@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.composition;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -57,6 +58,7 @@ import java.util.Set;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.id.IDMangler;
 
@@ -124,6 +126,50 @@ public class IDMangling {
     }
 
     /**
+     * Gets the fully qualified composite representations of a list of specific relative folder identifiers.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} as well as identifiers starting with {@link IDMangling#SHARED_PREFIX} are passed as-is implicitly.
+     *
+     * @param accountId The identifier of the account the folders originate in
+     * @param relativeFolderIds The relative folder identifiers
+     * @return The unique folder identifiers
+     */
+    public static List<String> getUniqueFolderIds(int accountId, List<String> relativeFolderIds) {
+        if (null == relativeFolderIds) {
+            return null;
+        }
+        List<String> uniqueFolderIds = new ArrayList<String>(relativeFolderIds.size());
+        for (String relativeFolderId : relativeFolderIds) {
+            uniqueFolderIds.add(getUniqueFolderId(accountId, relativeFolderId));
+        }
+        return uniqueFolderIds;
+    }
+
+    /**
+     * Gets the relative representation of a specific unique full event identifier consisting of composite parts.
+     *
+     * @param uniqueId The unique full event identifier
+     * @return The relative full event identifier
+     */
+    public static EventID getRelativeId(EventID uniqueEventID) throws OXException {
+        if (null == uniqueEventID) {
+            return uniqueEventID;
+        }
+        return new EventID(getRelativeFolderId(uniqueEventID.getFolderID()), uniqueEventID.getObjectID(), uniqueEventID.getRecurrenceID());
+    }
+
+    /**
+     * Gets the fully qualified composite representation of a specific relative event identifier.
+     *
+     * @param accountId The identifier of the account the event originates in
+     * @param relativeID The relative full event identifier
+     * @return The unique full event identifier
+     */
+    public static EventID getUniqueId(int accountId, EventID relativeID) {
+        return new EventID(getUniqueFolderId(accountId, relativeID.getFolderID()), relativeID.getObjectID(), relativeID.getRecurrenceID());
+    }
+
+    /**
      * <i>Mangles</i> the supplied relative folder identifier, together with its corresponding account information.
      *
      * @param accountId The identifier of the account the folder originates in
@@ -151,6 +197,5 @@ public class IDMangling {
         }
         return unmangled;
     }
-
 
 }

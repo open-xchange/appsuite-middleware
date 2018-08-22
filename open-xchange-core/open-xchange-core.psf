@@ -37,6 +37,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.composition.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.provider.internal"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.recurrence"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.chronos.storage.rdb"/>

@@ -415,30 +415,6 @@ public class IDMangling extends com.openexchange.chronos.provider.composition.ID
     }
 
     /**
-     * Gets the relative representation of a specific unique full event identifier consisting of composite parts.
-     *
-     * @param uniqueId The unique full event identifier
-     * @return The relative full event identifier
-     */
-    public static EventID getRelativeId(EventID uniqueEventID) throws OXException {
-        if (null == uniqueEventID) {
-            return uniqueEventID;
-        }
-        return new EventID(getRelativeFolderId(uniqueEventID.getFolderID()), uniqueEventID.getObjectID(), uniqueEventID.getRecurrenceID());
-    }
-
-    /**
-     * Gets the fully qualified composite representation of a specific relative event identifier.
-     *
-     * @param accountId The identifier of the account the event originates in
-     * @param relativeID The relative full event identifier
-     * @return The unique full event identifier
-     */
-    public static EventID getUniqueId(int accountId, EventID relativeID) {
-        return new EventID(getUniqueFolderId(accountId, relativeID.getFolderID()), relativeID.getObjectID(), relativeID.getRecurrenceID());
-    }
-
-    /**
      * Gets a conflict exception with adjusted problematic attributes so that any contained events details will indicate the unique
      * composite identifiers from a specific calendar account.
      *
