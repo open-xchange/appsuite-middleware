@@ -85,7 +85,7 @@ public final class ContactPictureActivator extends HousekeepingActivator {
         /*
          * Add tracker for Finder
          */
-        ContactPictureServiceImpl contactPictureServiceImpl = new ContactPictureServiceImpl(context, getServiceSafe(ThreadPoolService.class));
+        ContactPictureServiceImpl contactPictureServiceImpl = new ContactPictureServiceImpl(context);
         track(ContactPictureFinder.class, contactPictureServiceImpl);
         openTrackers();
 
@@ -96,13 +96,13 @@ public final class ContactPictureActivator extends HousekeepingActivator {
 
         /*
          * Register Finder. Rankings:
-         * 1 : UserPictureFinder
          * TODO
-         * 5 : ...
-         * 10 : ...
+         * 1 : UserPictureFinder
+         * 10 : ContactFinder
          * 20 : ...
          * 
          */
+
         registerService(ContactPictureFinder.class, new UserPictureFinder(getServiceSafe(UserService.class)));
 
     }

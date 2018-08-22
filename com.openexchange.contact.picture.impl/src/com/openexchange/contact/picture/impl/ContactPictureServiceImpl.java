@@ -50,22 +50,15 @@
 package com.openexchange.contact.picture.impl;
 
 import static com.openexchange.contact.picture.ContactPicture.FALLBACK_PICTURE;
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
+import com.openexchange.contact.picture.finder.FinderResult;
+import com.openexchange.contact.picture.finder.Modifiable;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
-import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link ContactPictureServiceImpl}
@@ -75,99 +68,39 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTracker<ContactPictureFinder> implements ContactPictureService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ContactPictureServiceImpl.class);
-
-    private final ThreadPoolService threadPoolService;
-
-    private final boolean async;
-
     /**
      * Initializes a new {@link ContactPictureServiceImpl}.
      * 
      * @param context The {@link BundleContext}
-     * @param threadPoolService The {@link ThreadPoolService}
      */
-    public ContactPictureServiceImpl(BundleContext context, ThreadPoolService threadPoolService) {
+    public ContactPictureServiceImpl(BundleContext context) {
         super(context, ContactPictureFinder.class);
-        this.threadPoolService = threadPoolService;
-        this.async = false;
-    }
-
-    /**
-     * Initializes a new {@link ContactPictureServiceImpl}.
-     * 
-     * @param context The {@link BundleContext}
-     * @param threadPoolService The {@link ThreadPoolService}
-     */
-    public ContactPictureServiceImpl(BundleContext context, ThreadPoolService threadPoolService, boolean aysnc) {
-        super(context, ContactPictureFinder.class);
-        this.threadPoolService = threadPoolService;
-        this.async = aysnc;
     }
 
     @Override
     public ContactPicture getPicture(ContactPictureRequestData contactData) {
-        if (async) {
-            return getPictureAync(contactData);
-        }
         // Ask each finder if it contains the picture
+        FinderResult result = null;
+        ContactPictureRequestData data;
         for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
             ContactPictureFinder next = iterator.next();
-            if (next.isRunnable(contactData)) {
-                ContactPicture contactPicture = next.getPicture(contactData);
-                if (null != contactPicture && contactPicture.containsContactPicture()) {
-                    return contactPicture;
+
+            // Check which data to use
+            if (null != result && Modifiable.class.isInstance(next.getClass())) {
+                data = result.getModifications();
+            } else {
+                data = contactData;
+            }
+
+            // Try to get contact picture
+            if (next.isRunnable(data)) {
+                result = next.getPicture(data);
+                if (null != result.getContactPicture()) {
+                    return result.getContactPicture();
                 }
             }
         }
 
         return FALLBACK_PICTURE;
     }
-
-    public ContactPicture getPictureAync(ContactPictureRequestData contactData) {
-        // XXX For development. Unused at the moment. Remove if not used in final version
-        ThreadPoolCompletionService<ContactPicture> threadPool = new ThreadPoolCompletionService<>(threadPoolService);
-        List<Integer> rankings = new LinkedList<>();
-
-        // Start each finder in an independent thread.
-        for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
-            ContactPictureFinder next = iterator.next();
-            if (next.isRunnable(contactData)) {
-                threadPool.submit(() -> {
-                    return next.getPicture(contactData);
-                });
-                rankings.add(I(next.getRanking()));
-            }
-        }
-
-        ContactPicture retval = FALLBACK_PICTURE;
-        try {
-            for (int i = 0; i < threadPool.getNumberOfSubmits(); i++) {
-                // Services ensured completed tasks
-                ContactPicture picture = threadPool.take().get();
-
-                // Check ranking
-                if (null != picture) {
-                    if (retval.containsContactPicture() && -1 == retval.compareTo(picture)) {
-                        retval = picture;
-                    } else {
-                        rankings.remove(I(picture.getRanking()));
-                    }
-                    if (i(rankings.get(0)) >= picture.getRanking()) {
-                        // Found 'best' picture
-                        break;
-                    }
-                }
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            // ExecutionException should not happen. ThreadPoolCompletionService ensure completed tasks. Nevertheless handle;
-            LOGGER.debug("Unable to finish task. Contact picture could not be obtained.", e);
-        } finally {
-            // Cancel all running tasks
-            threadPool.cancel(true);
-        }
-
-        return retval;
-    }
-
 }
