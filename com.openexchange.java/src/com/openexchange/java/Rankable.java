@@ -55,7 +55,7 @@ package com.openexchange.java;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface Rankable {
+public interface Rankable extends Comparable<Rankable> {
 
     /**
      * Gets this ranking.
@@ -65,6 +65,13 @@ public interface Rankable {
      *
      * @return The ranking
      */
-    int getRanking();
+    default int getRanking() {
+        return 0;
+    }
+
+    @Override
+    default int compareTo(Rankable o) {
+        return this.getRanking() == o.getRanking() ? 0 : this.getRanking() < o.getRanking() ? 1 : -1;
+    }
 
 }
