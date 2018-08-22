@@ -126,6 +126,7 @@ public class GetAction implements ETagAwareAJAXActionService {
     }
 
     private ContactPictureRequestData getData(AJAXRequestData requestData, Session session, boolean etagOnly) throws OXException {
+        //TODO use etagOnly param
         Integer contactId = requestData.getIntParameter(CONTACT_PARAM);
         String email = requestData.getParameter(MAIL_PARAM);
         Integer userId = requestData.getIntParameter(USER_PARAM);

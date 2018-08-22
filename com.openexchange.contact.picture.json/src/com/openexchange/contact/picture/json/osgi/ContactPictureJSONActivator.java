@@ -76,7 +76,7 @@ public final class ContactPictureJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new ContactPictureActionFactory(this), "contact/picture");
+        registerModule(new ContactPictureActionFactory(this), "contacts/picture");
     }
 
 }
