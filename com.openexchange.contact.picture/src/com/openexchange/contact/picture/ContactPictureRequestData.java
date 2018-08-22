@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.picture;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -64,7 +65,7 @@ public class ContactPictureRequestData {
     /**
      * 'Null' reference for {@link ContactPictureRequestData}
      */
-    public final static ContactPictureRequestData EMPTY = new ContactPictureRequestData(null, null, null, null, null);
+    public final static ContactPictureRequestData EMPTY = new ContactPictureRequestData(null, null, null, null, null, true);
 
     private final Integer userId;
 
@@ -76,6 +77,8 @@ public class ContactPictureRequestData {
 
     private final Session session;
 
+    private final boolean etag;
+
     /**
      * Initializes a new {@link ContactPictureRequestData}.
      *
@@ -84,14 +87,16 @@ public class ContactPictureRequestData {
      * @param folderId The folder identifier
      * @param contactId The contact identifier
      * @param email The email address
+     * @param etag If only eTag should be generated
      *
      */
-    public ContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, String email) {
+    public ContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, String email, boolean etag) {
         this.session = session;
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
         this.email = email;
+        this.etag = etag;
     }
 
     /**
@@ -100,11 +105,26 @@ public class ContactPictureRequestData {
      * @return The identifier or <code>null</code>
      */
     public final Integer getContextId() {
-        return session.getContextId();
+        return I(session.getContextId());
     }
 
+    /**
+     * Get the the current {@link Session}
+     *
+     * @return The {@link Session} or <code>null</code>
+     */
     public final Session getSession() {
         return session;
+    }
+
+    /**
+     * A value indicating if the session is set
+     *
+     * @return <code>true</code> if the session is set,
+     *         <code>false</code> otherwise
+     */
+    public boolean hasSession() {
+        return null != session;
     }
 
     /**
@@ -184,6 +204,18 @@ public class ContactPictureRequestData {
     }
 
     /**
+     * A value indicating if <b>only</b> the eTag shall be generated.
+     * If the value is set to <code>false</code> the eTag still can be set, but
+     * additionally services will try to set the pictures data.
+     *
+     * @return <code>true</code> if the mail address is set,
+     *         <code>false</code> otherwise
+     */
+    public boolean onlyETag() {
+        return etag;
+    }
+
+    /**
      * Initializes a new {@link ContactPictureDataBuilder}.
      *
      */
@@ -198,6 +230,8 @@ public class ContactPictureRequestData {
         private Integer contactId;
 
         private String email;
+
+        private boolean etag = true;
 
         public ContactPictureDataBuilder setSession(Session session) {
             this.session = session;
@@ -224,14 +258,25 @@ public class ContactPictureRequestData {
             return this;
         }
 
+        public ContactPictureDataBuilder setETag(boolean etag) {
+            this.etag = etag;
+            return this;
+        }
+
+        /**
+         * Get the {@link ContactPictureRequestData}
+         * 
+         * @return unmodifiable {@link ContactPictureRequestData}
+         * @throws OXException In case the {@link Session} is missing
+         */
         public ContactPictureRequestData build() throws OXException {
-            if(session == null) {
+            if (session == null) {
                 throw ContactPictureExceptionCodes.MISSING_SESSION.create();
             }
             if (isEmpty()) {
                 return EMPTY;
             }
-            return new ContactPictureRequestData(session, userId, folderId, contactId, email);
+            return new ContactPictureRequestData(session, userId, folderId, contactId, email, etag);
         }
 
         private boolean isEmpty() {
