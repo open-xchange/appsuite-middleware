@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.picture;
 
-import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -188,7 +187,7 @@ public class ContactPictureRequestData {
      * Initializes a new {@link ContactPictureDataBuilder}.
      *
      */
-    public class ContactPictureDataBuilder {
+    public static class ContactPictureDataBuilder {
 
         private Session session;
 
@@ -205,17 +204,9 @@ public class ContactPictureRequestData {
             return this;
         }
 
-        public ContactPictureDataBuilder setContext(int contextId) {
-            return setContext(I(contextId));
-        }
-
         public ContactPictureDataBuilder setUser(Integer userId) {
             this.userId = userId;
             return this;
-        }
-
-        public ContactPictureDataBuilder setUser(int userId) {
-            return setUser(I(userId));
         }
 
         public ContactPictureDataBuilder setFolder(Integer folderId) {
@@ -223,17 +214,9 @@ public class ContactPictureRequestData {
             return this;
         }
 
-        public ContactPictureDataBuilder setFolder(int folderId) {
-            return setFolder(I(folderId));
-        }
-
         public ContactPictureDataBuilder setContactId(Integer contactId) {
             this.contactId = contactId;
             return this;
-        }
-
-        public ContactPictureDataBuilder setContactId(int contactId) {
-            return setContactId(I(contactId));
         }
 
         public ContactPictureDataBuilder setEmail(String email) {
