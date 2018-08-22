@@ -230,7 +230,7 @@ public final class UserImageDataSource implements ImageDataSource {
         return ImageUtility.parseImageLocationFrom(requestData);
     }
 
-    private static Contact optUser(Session session, ImageLocation imageLocation, ContactField...fields) throws OXException {
+    private static Contact optUser(Session session, ImageLocation imageLocation, ContactField...fields) {
         return optUser(session, Tools.getUnsignedInteger(imageLocation.getId()), fields);
     }
 
