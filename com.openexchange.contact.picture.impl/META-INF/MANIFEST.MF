@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The bundle implementing avatar services
+Bundle-SymbolicName: com.openexchange.contact.picture.impl
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.contact,
+ com.openexchange.contact.picture,
+ com.openexchange.contact.picture.finder,
+ com.openexchange.exception,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.ldap,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.server,
+ com.openexchange.threadpool,
+ com.openexchange.user,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
