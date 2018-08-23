@@ -26,6 +26,12 @@
           The contact identifier.
         required: false
       - in: query
+        name: folderId
+        type: string
+        description: |
+          The folder id the contact id belongs to.
+        required: false
+      - in: query
         name: mail
         type: string
         description: |

@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -81,6 +82,7 @@ public class GetAction implements ETagAwareAJAXActionService {
     private static final String MAIL_PARAM = "mail";
     private static final String USER_PARAM = "userId";
     private static final String CONTACT_PARAM = "contactId";
+    private static final String CONTACT_FOLDER_PARAM = "folderId";
 
     static final byte[] TRANSPARENT_GIF = { 71, 73, 70, 56, 57, 97, 1, 0, 1, 0, -128, 0, 0, 0, 0, 0, -1, -1, -1, 33, -7, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 1, 68, 0, 59 };
 
@@ -126,12 +128,17 @@ public class GetAction implements ETagAwareAJAXActionService {
     }
 
     private ContactPictureRequestData getData(AJAXRequestData requestData, Session session, boolean etagOnly) throws OXException {
-        Integer contactId = requestData.getIntParameter(CONTACT_PARAM);
+        Integer contactId = requestData.getParameter(CONTACT_PARAM, Integer.class, true);
+        Integer folderId = requestData.getParameter(CONTACT_FOLDER_PARAM, Integer.class, true);
+        if(folderId == null && contactId != null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(CONTACT_FOLDER_PARAM);
+        }
         String email = requestData.getParameter(MAIL_PARAM);
-        Integer userId = requestData.getIntParameter(USER_PARAM);
+        Integer userId = requestData.getParameter(USER_PARAM, Integer.class, true);
         return new ContactPictureRequestData.ContactPictureDataBuilder()
                                              .setSession(session)
                                              .setContactId(contactId)
+                                             .setFolder(folderId)
                                              .setEmails(email)
                                              .setUser(userId)
                                              .setETag(etagOnly).build();
