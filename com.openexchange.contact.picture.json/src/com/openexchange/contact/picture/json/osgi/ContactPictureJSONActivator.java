@@ -50,6 +50,7 @@
 package com.openexchange.contact.picture.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.json.ContactPictureActionFactory;
 
 /**
@@ -71,7 +72,7 @@ public final class ContactPictureJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return new Class<?>[] {ContactPictureService.class};
     }
 
     @Override
