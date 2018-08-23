@@ -63,7 +63,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UserPictureFinder} - Checks if user exists and delegates the request to the contact module
+ * {@link UserPictureFinder} - Checks if user exists and set the contact identifier
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
@@ -93,7 +93,6 @@ public class UserPictureFinder implements ContactPictureFinder {
                 result.modify().setContactId(I(user.getContactId()));
                 if (null == contactPictureRequestData.getFolderId()) {
                     result.modify().setFolder(I(FolderObject.SYSTEM_LDAP_FOLDER_ID));
-
                 }
             }
         } catch (OXException e) {
