@@ -5,9 +5,10 @@ Bundle-SymbolicName: com.openexchange.contact.picture.impl
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-Activator: com.openexchange.contact.picture.osgi.ContactPictureActivator
+Bundle-Activator: com.openexchange.contact.picture.impl.osgi.ContactPictureActivator
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.helper,
+ com.openexchange.ajax.fileholder,
  com.openexchange.contact,
  com.openexchange.contact.picture,
  com.openexchange.contact.picture.finder,

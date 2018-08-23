@@ -47,51 +47,75 @@
  *
  */
 
-package com.openexchange.contact.picture.finder.impl;
+package com.openexchange.contact.picture.impl.osgi;
 
-import java.util.function.BiConsumer;
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.functions.OXFunction;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.contact.picture.ContactPictureService;
+import com.openexchange.contact.picture.finder.ContactPictureFinder;
+import com.openexchange.contact.picture.impl.ContactPictureCachingService;
+import com.openexchange.contact.picture.impl.ContactPictureServiceImpl;
+import com.openexchange.contact.picture.impl.finder.ContactIDFinder;
+import com.openexchange.contact.picture.impl.finder.ContactMailFinder;
+import com.openexchange.contact.picture.impl.finder.ContactUserFinder;
+import com.openexchange.contact.picture.impl.finder.UserPictureFinder;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
- * {@link ContactUserFinder} - Finds picture based on user identifier
+ * {@link ContactPictureActivator}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class ContactUserFinder extends AbstractContactFinder {
+public final class ContactPictureActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link ContactUserFinder}.
+     * Initializes a new {@link ContactPictureActivator}.
      * 
-     * @param userPermissionService The {@link UserPermissionService}
-     * @param contactService The {@link ContactService}
      */
-    public ContactUserFinder(UserPermissionService userPermissionService, ContactService contactService) {
-        super(userPermissionService, contactService);
+    public ContactPictureActivator() {
+        super();
     }
 
     @Override
-    public boolean isRunnable(ContactPictureRequestData cprd) {
-        return super.isRunnable(cprd) && cprd.hasUser();
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { UserService.class, ContactService.class, UserPermissionService.class };
     }
 
     @Override
-    OXFunction<ContactPictureRequestData, Contact> getContact() {
-        return (ContactPictureRequestData cprd) -> {
-            return contactService.getUser(cprd.getSession(), cprd.getUserId().intValue(), IMAGE_FIELD);
-        };
-    }
+    protected void startBundle() throws Exception {
+        /*
+         * Add tracker for Finder
+         */
+        ContactPictureServiceImpl contactPictureServiceImpl = new ContactPictureServiceImpl(context);
+        track(ContactPictureFinder.class, contactPictureServiceImpl);
+        openTrackers();
 
-    @Override
-    BiConsumer<ContactPictureRequestData, OXException> handleException() {
-        return (ContactPictureRequestData cprd, OXException e) -> {
-            LOGGER.debug("Unable to get contact for user {},", cprd.getUserId(), e);
-        };
+        /*
+         * Register service
+         */
+        registerService(ContactPictureService.class, new ContactPictureCachingService(contactPictureServiceImpl));
+
+        /*
+         * Needed services for ContactPictureFinder
+         */
+        UserService userService = getServiceSafe(UserService.class);
+        UserPermissionService userPermissionService = getServiceSafe(UserPermissionService.class);
+        ContactService contactService = getServiceSafe(ContactService.class);
+
+        /*
+         * Register Finder. Rankings:
+         * 1 : UserPictureFinder
+         * 20 : ContactFinders (Children will register with 20 + continuous number)
+         * 50 : ...
+         * 
+         */
+        registerService(ContactPictureFinder.class, new UserPictureFinder(userService));
+        registerService(ContactPictureFinder.class, new ContactUserFinder(userPermissionService, contactService));
+        registerService(ContactPictureFinder.class, new ContactIDFinder(userPermissionService, contactService));
+        registerService(ContactPictureFinder.class, new ContactMailFinder(userPermissionService, contactService));
+
     }
 
 }

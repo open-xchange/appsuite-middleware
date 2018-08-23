@@ -47,51 +47,69 @@
  *
  */
 
-package com.openexchange.contact.picture.finder.impl;
+package com.openexchange.contact.picture.impl.finder;
 
-import java.util.function.BiConsumer;
-import com.openexchange.contact.ContactService;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.finder.ContactPictureFinder;
+import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.functions.OXFunction;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.UserService;
 
 /**
- * {@link ContactIDFinder} - Finds picture based on contact identifier
+ * {@link UserPictureFinder} - Checks if user exists and set the contact identifier
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class ContactIDFinder extends AbstractContactFinder {
+public class UserPictureFinder implements ContactPictureFinder {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(UserPictureFinder.class);
+
+    private final UserService userService;
 
     /**
-     * Initializes a new {@link ContactUserFinder}.
+     * Initializes a new {@link UserPictureFinder}.
      * 
-     * @param userPermissionService The {@link UserPermissionService}
-     * @param contactService The {@link ContactService}
+     * @param userService The {@link UserService}
      */
-    public ContactIDFinder(UserPermissionService userPermissionService, ContactService contactService) {
-        super(userPermissionService, contactService);
+    public UserPictureFinder(UserService userService) {
+        super();
+        this.userService = userService;
+    }
+
+    @Override
+    public FinderResult getPicture(ContactPictureRequestData contactPictureRequestData) {
+        FinderResult result = new FinderResult(contactPictureRequestData);
+        try {
+            User user = userService.getUser(i(contactPictureRequestData.getUserId()), i(contactPictureRequestData.getContextId()));
+            if (null != user) {
+                result.modify().setContactId(I(user.getContactId()));
+                if (null == contactPictureRequestData.getFolderId()) {
+                    result.modify().setFolder(I(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+                }
+            }
+        } catch (OXException e) {
+            LOGGER.debug("Unable to get contact picture for user {} in context {}", contactPictureRequestData.getUserId(), contactPictureRequestData.getContextId(), e);
+        }
+
+        return result;
+    }
+
+    @Override
+    public int getRanking() {
+        return ContactPicture.HIGHEST_RANKING;
     }
 
     @Override
     public boolean isRunnable(ContactPictureRequestData cprd) {
-        return super.isRunnable(cprd) && cprd.hasFolder();
-    }
-
-    @Override
-    OXFunction<ContactPictureRequestData, Contact> getContact() {
-        return (ContactPictureRequestData cprd) -> {
-            return contactService.getContact(cprd.getSession(), String.valueOf(cprd.getFolderId()), String.valueOf(cprd.getContactId()), IMAGE_FIELD);
-        };
-    }
-
-    @Override
-    BiConsumer<ContactPictureRequestData, OXException> handleException() {
-        return (ContactPictureRequestData cprd, OXException e) -> {
-            LOGGER.debug("Unable to get contact for ID {} in folder {},", cprd.getContactId(), cprd.getFolderId(), e);
-        };
+        return cprd.hasUser() && false == (cprd.hasContact() && cprd.hasFolder());
     }
 
 }

@@ -47,11 +47,14 @@
  *
  */
 
-package com.openexchange.contact.picture;
+package com.openexchange.contact.picture.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.contact.picture.ContactPicture;
+import com.openexchange.contact.picture.ContactPictureExceptionCodes;
+import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 

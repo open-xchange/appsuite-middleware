@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.picture.finder.impl;
+package com.openexchange.contact.picture.impl.finder;
 
 import java.util.ArrayList;
 import java.util.Collections;

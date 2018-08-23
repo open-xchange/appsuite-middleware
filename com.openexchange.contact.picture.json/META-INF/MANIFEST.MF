@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The contact picture bundle
-Bundle-SymbolicName: com.openxchange.contact.picture.json
+Bundle-SymbolicName: com.openexchange.contact.picture.json
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

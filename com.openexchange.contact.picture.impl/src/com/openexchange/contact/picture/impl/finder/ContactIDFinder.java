@@ -47,75 +47,51 @@
  *
  */
 
-package com.openexchange.contact.picture.osgi;
+package com.openexchange.contact.picture.impl.finder;
 
+import java.util.function.BiConsumer;
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.picture.ContactPictureService;
-import com.openexchange.contact.picture.finder.ContactPictureFinder;
-import com.openexchange.contact.picture.finder.impl.ContactIDFinder;
-import com.openexchange.contact.picture.finder.impl.ContactMailFinder;
-import com.openexchange.contact.picture.finder.impl.ContactUserFinder;
-import com.openexchange.contact.picture.finder.impl.UserPictureFinder;
-import com.openexchange.contact.picture.impl.ContactPictureCachingService;
-import com.openexchange.contact.picture.impl.ContactPictureServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.functions.OXFunction;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
- * {@link ContactPictureActivator}
+ * {@link ContactIDFinder} - Finds picture based on contact identifier
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public final class ContactPictureActivator extends HousekeepingActivator {
+public class ContactIDFinder extends AbstractContactFinder {
 
     /**
-     * Initializes a new {@link ContactPictureActivator}.
+     * Initializes a new {@link ContactUserFinder}.
      * 
+     * @param userPermissionService The {@link UserPermissionService}
+     * @param contactService The {@link ContactService}
      */
-    public ContactPictureActivator() {
-        super();
+    public ContactIDFinder(UserPermissionService userPermissionService, ContactService contactService) {
+        super(userPermissionService, contactService);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContactService.class, UserPermissionService.class };
+    public boolean isRunnable(ContactPictureRequestData cprd) {
+        return super.isRunnable(cprd) && cprd.hasFolder();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        /*
-         * Add tracker for Finder
-         */
-        ContactPictureServiceImpl contactPictureServiceImpl = new ContactPictureServiceImpl(context);
-        track(ContactPictureFinder.class, contactPictureServiceImpl);
-        openTrackers();
+    OXFunction<ContactPictureRequestData, Contact> getContact() {
+        return (ContactPictureRequestData cprd) -> {
+            return contactService.getContact(cprd.getSession(), String.valueOf(cprd.getFolderId()), String.valueOf(cprd.getContactId()), IMAGE_FIELD);
+        };
+    }
 
-        /*
-         * Register service
-         */
-        registerService(ContactPictureService.class, new ContactPictureCachingService(contactPictureServiceImpl));
-
-        /*
-         * Needed services for ContactPictureFinder
-         */
-        UserService userService = getServiceSafe(UserService.class);
-        UserPermissionService userPermissionService = getServiceSafe(UserPermissionService.class);
-        ContactService contactService = getServiceSafe(ContactService.class);
-
-        /*
-         * Register Finder. Rankings:
-         * 1 : UserPictureFinder
-         * 20 : ContactFinders (Children will register with 20 + continuous number)
-         * 50 : ...
-         * 
-         */
-        registerService(ContactPictureFinder.class, new UserPictureFinder(userService));
-        registerService(ContactPictureFinder.class, new ContactUserFinder(userPermissionService, contactService));
-        registerService(ContactPictureFinder.class, new ContactIDFinder(userPermissionService, contactService));
-        registerService(ContactPictureFinder.class, new ContactMailFinder(userPermissionService, contactService));
-
+    @Override
+    BiConsumer<ContactPictureRequestData, OXException> handleException() {
+        return (ContactPictureRequestData cprd, OXException e) -> {
+            LOGGER.debug("Unable to get contact for ID {} in folder {},", cprd.getContactId(), cprd.getFolderId(), e);
+        };
     }
 
 }

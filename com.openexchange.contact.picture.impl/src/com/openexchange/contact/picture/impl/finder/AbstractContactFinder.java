@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.picture.finder.impl;
+package com.openexchange.contact.picture.impl.finder;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
@@ -55,10 +55,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.ContactPictureUtil;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.contact.picture.finder.Modifiable;
+import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.functions.OXFunction;
 import com.openexchange.groupware.contact.helpers.ContactField;
