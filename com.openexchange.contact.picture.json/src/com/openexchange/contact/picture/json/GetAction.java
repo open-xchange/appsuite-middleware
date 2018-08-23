@@ -132,7 +132,7 @@ public class GetAction implements ETagAwareAJAXActionService {
         return new ContactPictureRequestData.ContactPictureDataBuilder()
                                              .setSession(session)
                                              .setContactId(contactId)
-                                             .setEmail(email)
+                                             .setEmails(email)
                                              .setUser(userId)
                                              .setETag(etagOnly).build();
     }

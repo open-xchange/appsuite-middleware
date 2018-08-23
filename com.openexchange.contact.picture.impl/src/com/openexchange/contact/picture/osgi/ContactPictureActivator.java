@@ -52,11 +52,12 @@ package com.openexchange.contact.picture.osgi;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
+import com.openexchange.contact.picture.finder.impl.ContactIDFinder;
+import com.openexchange.contact.picture.finder.impl.ContactUserFinder;
 import com.openexchange.contact.picture.finder.impl.UserPictureFinder;
 import com.openexchange.contact.picture.impl.ContactPictureCachingService;
 import com.openexchange.contact.picture.impl.ContactPictureServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 
 /**
@@ -77,7 +78,7 @@ public final class ContactPictureActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContactService.class, ThreadPoolService.class };
+        return new Class<?>[] { UserService.class, ContactService.class };
     }
 
     @Override
@@ -95,15 +96,21 @@ public final class ContactPictureActivator extends HousekeepingActivator {
         registerService(ContactPictureService.class, new ContactPictureCachingService(contactPictureServiceImpl));
 
         /*
+         * Needed services for ContactPictureFinder
+         */
+        UserService userService = getServiceSafe(UserService.class);
+        ContactService contactService = getServiceSafe(ContactService.class);
+
+        /*
          * Register Finder. Rankings:
-         * TODO
          * 1 : UserPictureFinder
-         * 10 : ContactFinder
-         * 20 : ...
+         * 20 : ContactFinders (Children will register with 20 + continuous number)
+         * 50 : ...
          * 
          */
-
-        registerService(ContactPictureFinder.class, new UserPictureFinder(getServiceSafe(UserService.class)));
+        registerService(ContactPictureFinder.class, new UserPictureFinder(userService));
+        registerService(ContactPictureFinder.class, new ContactUserFinder(contactService));
+        registerService(ContactPictureFinder.class, new ContactIDFinder(contactService));
 
     }
 

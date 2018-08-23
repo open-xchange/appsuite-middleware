@@ -47,66 +47,49 @@
  *
  */
 
-package com.openexchange.contact.picture;
+package com.openexchange.contact.picture.finder.impl;
 
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import java.util.function.BiConsumer;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.functions.OXFunction;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link ContactPictureUtil}
+ * {@link ContactIDFinder} - Finds picture based on contact identifier
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class ContactPictureUtil {
+public class ContactIDFinder extends AbstractContactFinder {
 
     /**
-     * Generates a {@link ContactPicture} based on the given bytes
+     * Initializes a new {@link ContactUserFinder}.
      * 
-     * @param contact The {@link Contact}
-     * @return A {@link ContactPicture}
+     * @param contactService The {@link ContactService}
      */
-    public static ContactPicture fromContact(Contact contact) {
-        return fromContact(contact, false);
+    public ContactIDFinder(ContactService contactService) {
+        super(contactService, childCount.incrementAndGet());
     }
 
-    /**
-     * Generates a {@link ContactPicture} based on the given bytes
-     * 
-     * @param contact The {@link Contact}
-     * @param eTag <code>true</code> if eTag should be set
-     * @return A {@link ContactPicture}
-     */
-    public static ContactPicture fromContact(Contact contact, boolean eTag) {
-        return new ContactPicture(eTag ? genereateETag(contact) : null, transformToFileHolder(contact));
+    @Override
+    public boolean isRunnable(ContactPictureRequestData cprd) {
+        return super.isRunnable(cprd) && cprd.hasFolder();
     }
 
-    /**
-     * Generates the ETag
-     * 
-     * @param contact The {@link Contact}
-     * @return The ETag
-     */
-    private static String genereateETag(Contact contact) {
-        return null == contact ? null : new StringBuilder(512) // @formatter:off
-            .append(contact.getParentFolderID())
-            .append('/')
-            .append(contact.getObjectID())
-            .append('/')
-            .append(contact.getLastModified().getTime()).toString(); // @formatter:on
+    @Override
+    OXFunction<ContactPictureRequestData, Contact> getContact() {
+        return (ContactPictureRequestData cprd) -> {
+            return contactService.getContact(cprd.getSession(), String.valueOf(cprd.getFolderId()), String.valueOf(cprd.getContactId()), IMAGE_FIELD);
+        };
     }
 
-    /**
-     * Transforms a byte array into a {@link ByteArrayFileHolder}
-     * 
-     * @param contact The {@link Contact}
-     * @return The IFileHolder
-     */
-    private static ByteArrayFileHolder transformToFileHolder(Contact contact) {
-        ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(contact.getImage1());
-        fileHolder.setContentType(contact.getImageContentType());
-        // TODO       fileHolder.setName();
-        return fileHolder;
+    @Override
+    BiConsumer<ContactPictureRequestData, OXException> handleException() {
+        return (ContactPictureRequestData cprd, OXException e) -> {
+            LOGGER.debug("Unable to get contact for ID {} in folder {},", cprd.getContactId(), cprd.getFolderId(), e);
+        };
     }
 
 }

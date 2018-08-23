@@ -49,10 +49,8 @@
 
 package com.openexchange.contact.picture.finder.impl;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.ContactService;
@@ -66,90 +64,68 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link ContactFinder}
+ * {@link AbstractContactFinder} - Abstract class for all {@link ContactService} related searches for contact pictures.
+ * <p>
+ * <b>CAUTION</b>: This class uses a continuous integer to keep track of its children. Classes that wan't to inherit from this class should use {@link #childCount}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class ContactFinder implements ContactPictureFinder {
+public abstract class AbstractContactFinder implements ContactPictureFinder {
 
-    // Statics
+    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractContactFinder.class);
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ContactFinder.class);
-
-    private final static ContactField[] IMAGE_FIELD = new ContactField[] { ContactField.OBJECT_ID, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE1_URL,
+    protected final static ContactField[] IMAGE_FIELD = new ContactField[] { ContactField.OBJECT_ID, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE1_URL,
         ContactField.IMAGE_LAST_MODIFIED };
 
-    private final static Consumer<OXException> consumer = (OXException e) -> {
-        LOGGER.debug("Could not get contact", e);
-    };
+    protected final ContactService contactService;
 
-    // Members
+    protected static AtomicInteger childCount = new AtomicInteger(0);
 
-    private final List<OXFunction<ContactPictureRequestData, Contact>> methodes;
-
-    private final ContactService contactService;
+    private final int child;
 
     /**
-     * Initializes a new {@link ContactFinder}.
+     * Initializes a new {@link AbstractContactFinder}.
      * 
      * @param contactService The {@link ContactService}
+     * @param child The ranking of the children
      * 
      */
-    public ContactFinder(ContactService contactService) {
+    public AbstractContactFinder(ContactService contactService, int child) {
         super();
         this.contactService = contactService;
-        this.methodes = new LinkedList<>();
-        initializeMethodes();
-    }
-
-    private void initializeMethodes() {
-        // Search for user ID
-        methodes.add((ContactPictureRequestData cprd) -> {
-            if (cprd.hasUser()) {
-                return contactService.getUser(cprd.getSession(), cprd.getUserId().intValue(), IMAGE_FIELD);
-            }
-            return null;
-        });
-        // Search for contact ID in specific folder
-        methodes.add((ContactPictureRequestData cprd) -> {
-            if (cprd.hasFolder()) {
-                return contactService.getContact(cprd.getSession(), String.valueOf(cprd.getFolderId()), String.valueOf(cprd.getContactId()), IMAGE_FIELD);
-            }
-            return null;
-        });
-    }
-
-    /**
-     * Get a value indicating if the picture was found
-     * 
-     * @param f The function to execute
-     * @param cprd The data
-     * @return A {@link Contact} or <code>null</code>
-     */
-    private Contact getContact(OXFunction<ContactPictureRequestData, Contact> f, ContactPictureRequestData cprd) {
-        Contact contact = f.handle(cprd, consumer);
-        if (null != contact && null != contact.getImage1()) {
-            return contact;
-        }
-        return null;
+        this.child = child;
     }
 
     @Override
     public FinderResult getPicture(ContactPictureRequestData cprd) {
         FinderResult result = new FinderResult(cprd);
-
-        for (Iterator<OXFunction<ContactPictureRequestData, Contact>> iterator = methodes.iterator(); iterator.hasNext();) {
-            OXFunction<ContactPictureRequestData, Contact> f = iterator.next();
-            Contact c = getContact(f, cprd);
-            if (null != c) {
-                // Found!
-                result.setPicture(ContactPictureUtil.fromContact(c));
-                break;
+        try {
+            Contact contact = getContact().apply(cprd);
+            if (null != contact.getImage1()) {
+                result.setPicture(ContactPictureUtil.fromContact(contact, cprd.onlyETag()));
+            } else {
+                result.modify().setEmails(contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
             }
+        } catch (OXException e) {
+            handleException().accept(cprd, e);
         }
         return result;
     }
+
+    /**
+     * Get the function to provide the Contact in this context
+     * 
+     * @return The {@link OXFunction}
+     */
+    abstract OXFunction<ContactPictureRequestData, Contact> getContact();
+
+    /**
+     * Get the function to handle {@link OXException} when applying {@link #getContact()}
+     * 
+     * @return The {@link BiConsumer} to handle {@link OXException}
+     */
+    abstract BiConsumer<ContactPictureRequestData, OXException> handleException();
 
     @Override
     public boolean isRunnable(ContactPictureRequestData cprd) {
@@ -158,6 +134,6 @@ public class ContactFinder implements ContactPictureFinder {
 
     @Override
     public int getRanking() {
-        return 20;
+        return 20 + child;
     }
 }
