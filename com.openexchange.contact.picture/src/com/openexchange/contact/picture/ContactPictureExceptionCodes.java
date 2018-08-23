@@ -65,7 +65,12 @@ public enum ContactPictureExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Missing session parameter in ContactPictureRequestData.
      */
-    MISSING_SESSION("Missing session parameter in ContactPictureRequestData.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 1);
+    MISSING_SESSION("Missing session parameter in ContactPictureRequestData.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 1),
+
+    /**
+     * Found a picture for contact {} but it is possible harmful.
+     */
+    HARMFULL_PICTURE("Found a picture for contact {} but it is possible harmful.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 2);
 
     /**
      * The error code prefix for anonymize module.

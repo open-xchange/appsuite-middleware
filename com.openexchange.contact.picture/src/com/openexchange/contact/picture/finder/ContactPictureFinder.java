@@ -50,6 +50,7 @@
 package com.openexchange.contact.picture.finder;
 
 import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Rankable;
 
 /**
@@ -70,8 +71,9 @@ public interface ContactPictureFinder extends Rankable {
      * 
      * @param contactPictureRequestData The {@link ContactPictureRequestData} to get the picture for
      * @return The {@link FinderResult}
+     * @throws OXException In case picture was found, but it is harmful
      */
-    FinderResult getPicture(ContactPictureRequestData contactPictureRequestData);
+    FinderResult getPicture(ContactPictureRequestData contactPictureRequestData) throws OXException;
 
     /**
      * Get a value indicating if the {@link ContactPictureFinder} has enough information

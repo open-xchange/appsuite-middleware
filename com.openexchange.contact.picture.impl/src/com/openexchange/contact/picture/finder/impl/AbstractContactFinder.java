@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.functions.OXFunction;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link AbstractContactFinder} - Abstract class for all {@link ContactService} related searches for contact pictures.
@@ -77,7 +78,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder, Mod
     protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractContactFinder.class);
 
     protected final static ContactField[] IMAGE_FIELD = new ContactField[] { ContactField.OBJECT_ID, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE1_URL,
-        ContactField.IMAGE_LAST_MODIFIED };
+        ContactField.IMAGE_LAST_MODIFIED, ContactField.LAST_MODIFIED };
 
     protected final ContactService contactService;
 
@@ -85,31 +86,19 @@ public abstract class AbstractContactFinder implements ContactPictureFinder, Mod
 
     private final int child;
 
+    private UserPermissionService userPermissionService;
+
     /**
      * Initializes a new {@link AbstractContactFinder}.
      * 
+     * @param userPermissionService The {@link UserPermissionService}
      * @param contactService The {@link ContactService}
      */
-    public AbstractContactFinder(ContactService contactService) {
+    public AbstractContactFinder(UserPermissionService userPermissionService, ContactService contactService) {
         super();
+        this.userPermissionService = userPermissionService;
         this.contactService = contactService;
         this.child = childCount.incrementAndGet();
-    }
-
-    @Override
-    public FinderResult getPicture(ContactPictureRequestData cprd) {
-        FinderResult result = new FinderResult(cprd);
-        try {
-            Contact contact = getContact().apply(cprd);
-            if (null != contact.getImage1()) {
-                result.setPicture(ContactPictureUtil.fromContact(contact, cprd.onlyETag()));
-            } else {
-                result.modify().setEmails(contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
-            }
-        } catch (OXException e) {
-            handleException().accept(cprd, e);
-        }
-        return result;
     }
 
     /**
@@ -127,8 +116,31 @@ public abstract class AbstractContactFinder implements ContactPictureFinder, Mod
     abstract BiConsumer<ContactPictureRequestData, OXException> handleException();
 
     @Override
+    public FinderResult getPicture(ContactPictureRequestData cprd) throws OXException {
+        FinderResult result = new FinderResult(cprd);
+        try {
+            Contact contact = getContact().apply(cprd);
+            if (null != contact.getImage1() && ContactPictureUtil.checkImage(contact.getImage1(), cprd)) {
+                result.setPicture(ContactPictureUtil.fromContact(contact, cprd.onlyETag()));
+            } else {
+                result.modify().setEmails(contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
+            }
+        } catch (OXException e) {
+            handleException().accept(cprd, e);
+        }
+        return result;
+    }
+
+    @Override
     public boolean isRunnable(ContactPictureRequestData cprd) {
-        return null != contactService;
+        if (null != userPermissionService && null != contactService) {
+            try {
+                return userPermissionService.getUserPermissionBits(cprd.getSession().getUserId(), cprd.getContextId().intValue()).hasContact();
+            } catch (OXException e) {
+                LOGGER.warn("Unable to get user permissions. Therefore can't allow to access contacts.", e);
+            }
+        }
+        return false;
     }
 
     @Override

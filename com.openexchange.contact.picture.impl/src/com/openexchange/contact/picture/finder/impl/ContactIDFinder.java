@@ -55,6 +55,7 @@ import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.functions.OXFunction;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link ContactIDFinder} - Finds picture based on contact identifier
@@ -67,10 +68,11 @@ public class ContactIDFinder extends AbstractContactFinder {
     /**
      * Initializes a new {@link ContactUserFinder}.
      * 
+     * @param userPermissionService The {@link UserPermissionService}
      * @param contactService The {@link ContactService}
      */
-    public ContactIDFinder(ContactService contactService) {
-        super(contactService);
+    public ContactIDFinder(UserPermissionService userPermissionService, ContactService contactService) {
+        super(userPermissionService, contactService);
     }
 
     @Override

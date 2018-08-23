@@ -52,12 +52,15 @@ package com.openexchange.contact.picture.impl;
 import static com.openexchange.contact.picture.ContactPicture.FALLBACK_PICTURE;
 import java.util.Iterator;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.contact.picture.finder.Modifiable;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
@@ -67,6 +70,8 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
  * @since v7.10.1
  */
 public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTracker<ContactPictureFinder> implements ContactPictureService {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ContactPictureServiceImpl.class);
 
     /**
      * Initializes a new {@link ContactPictureServiceImpl}.
@@ -80,27 +85,30 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
     @Override
     public ContactPicture getPicture(ContactPictureRequestData contactData) {
         // Ask each finder if it contains the picture
-        FinderResult result = null;
-        ContactPictureRequestData data;
-        for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
-            ContactPictureFinder next = iterator.next();
+        try {
+            FinderResult result = null;
+            ContactPictureRequestData data;
+            for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
+                ContactPictureFinder next = iterator.next();
 
-            // Check which data to use
-            if (null != result && Modifiable.class.isInstance(next.getClass())) {
-                data = result.getModifications();
-            } else {
-                data = contactData;
-            }
+                // Check which data to use
+                if (null != result && Modifiable.class.isInstance(next.getClass())) {
+                    data = result.getModifications();
+                } else {
+                    data = contactData;
+                }
 
-            // Try to get contact picture
-            if (next.isRunnable(data)) {
-                result = next.getPicture(data);
-                if (null != result.getContactPicture()) {
-                    return result.getContactPicture();
+                // Try to get contact picture
+                if (next.isRunnable(data)) {
+                    result = next.getPicture(data);
+                    if (null != result.getContactPicture()) {
+                        return result.getContactPicture();
+                    }
                 }
             }
+        } catch (OXException e) {
+            LOGGER.warn("Unable to get contact picture. Using fallback instead.", e);
         }
-
         return FALLBACK_PICTURE;
     }
 }
