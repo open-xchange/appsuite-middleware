@@ -68,6 +68,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.internal.BucketNameUtils;
 import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
@@ -352,7 +353,11 @@ public class S3FileStorage implements FileStorage {
              */
             try {
                 String tempKey = addPrefix(tempName);
-                amazonS3.copyObject(bucketName, tempKey, bucketName, key);
+                CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, tempKey, bucketName, key);
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata = prepareMetadataForSSE(metadata);
+                copyObjectRequest.setNewObjectMetadata(metadata);
+                amazonS3.copyObject(copyObjectRequest);
                 amazonS3.deleteObject(bucketName, tempKey);
                 return getMetadata(key).getContentLength();
             } catch (AmazonClientException e) {
@@ -375,12 +380,17 @@ public class S3FileStorage implements FileStorage {
         String key = addPrefix(name);
         String tempKey = generateKey(true);
         try {
-            amazonS3.copyObject(bucketName, key, bucketName, tempKey);
+            CopyObjectRequest copyObjectRequest = new CopyObjectRequest(bucketName, key, bucketName, tempKey);
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata = prepareMetadataForSSE(metadata);
+            copyObjectRequest.setNewObjectMetadata(metadata);
+            amazonS3.copyObject(copyObjectRequest);
             /*
              * upload $length bytes from previous file to new current file
              */
-            ObjectMetadata metadata = new ObjectMetadata();
+            metadata = new ObjectMetadata();
             metadata.setContentLength(length);
+            metadata = prepareMetadataForSSE(metadata);
             InputStream inputStream = null;
             try {
                 inputStream = getFile(tempKey, 0, length);
