@@ -70,7 +70,7 @@ public class ContactIDFinder extends AbstractContactFinder {
      * @param contactService The {@link ContactService}
      */
     public ContactIDFinder(ContactService contactService) {
-        super(contactService, childCount.incrementAndGet());
+        super(contactService);
     }
 
     @Override

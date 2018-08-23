@@ -50,7 +50,7 @@
 package com.openexchange.contact.picture.finder;
 
 /**
- * {@link Modifiable} - Signals that the class accepts input data taht has been modified by other classes
+ * {@link Modifiable} - Signals that the class accepts input data that has been modified by other classes
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1

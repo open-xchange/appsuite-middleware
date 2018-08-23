@@ -58,6 +58,7 @@ import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.ContactPictureUtil;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.finder.FinderResult;
+import com.openexchange.contact.picture.finder.Modifiable;
 import com.openexchange.exception.OXException;
 import com.openexchange.functions.OXFunction;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -66,12 +67,12 @@ import com.openexchange.groupware.container.Contact;
 /**
  * {@link AbstractContactFinder} - Abstract class for all {@link ContactService} related searches for contact pictures.
  * <p>
- * <b>CAUTION</b>: This class uses a continuous integer to keep track of its children. Classes that wan't to inherit from this class should use {@link #childCount}
+ * <b>CAUTION</b>: This class uses a continuous integer to keep track of its children.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public abstract class AbstractContactFinder implements ContactPictureFinder {
+public abstract class AbstractContactFinder implements ContactPictureFinder, Modifiable {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractContactFinder.class);
 
@@ -80,7 +81,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     protected final ContactService contactService;
 
-    protected static AtomicInteger childCount = new AtomicInteger(0);
+    private final static AtomicInteger childCount = new AtomicInteger(0);
 
     private final int child;
 
@@ -88,13 +89,11 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
      * Initializes a new {@link AbstractContactFinder}.
      * 
      * @param contactService The {@link ContactService}
-     * @param child The ranking of the children
-     * 
      */
-    public AbstractContactFinder(ContactService contactService, int child) {
+    public AbstractContactFinder(ContactService contactService) {
         super();
         this.contactService = contactService;
-        this.child = child;
+        this.child = childCount.incrementAndGet();
     }
 
     @Override
