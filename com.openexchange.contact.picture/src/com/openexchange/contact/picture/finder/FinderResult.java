@@ -82,7 +82,7 @@ public class FinderResult {
         this.original = original;
         this.modified = new ContactPictureDataBuilder() // @formatter:off
             .setContactId(original.getContactId())
-            .setEmail(original.getEmail())
+            .setEmails(original.getEmails().toArray(new String[original.getEmails().size()]))
             .setETag(original.onlyETag())
             .setFolder(original.getFolderId())
             .setSession(original.getSession())

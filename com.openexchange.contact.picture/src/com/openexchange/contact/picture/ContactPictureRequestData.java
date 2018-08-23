@@ -50,6 +50,8 @@
 package com.openexchange.contact.picture;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -73,7 +75,7 @@ public class ContactPictureRequestData {
 
     private final Integer contactId;
 
-    private final String email;
+    private final Set<String> emails;
 
     private final Session session;
 
@@ -86,16 +88,16 @@ public class ContactPictureRequestData {
      * @param userId The user identifier
      * @param folderId The folder identifier
      * @param contactId The contact identifier
-     * @param email The email address
+     * @param emails The email addresses
      * @param etag If only eTag should be generated
      *
      */
-    public ContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, String email, boolean etag) {
+    public ContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, Set<String> emails, boolean etag) {
         this.session = session;
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
-        this.email = email;
+        this.emails = emails;
         this.etag = etag;
     }
 
@@ -175,12 +177,12 @@ public class ContactPictureRequestData {
     }
 
     /**
-     * Get the mail address
+     * Get the mail addresses
      *
      * @return The email or <code>null</code>
      */
-    public final String getEmail() {
-        return email;
+    public final Set<String> getEmails() {
+        return emails;
     }
 
     /**
@@ -190,7 +192,7 @@ public class ContactPictureRequestData {
      *         <code>false</code> otherwise
      */
     public boolean hasEmail() {
-        return Strings.isNotEmpty(email);
+        return false == emails.isEmpty();
     }
 
     /**
@@ -219,7 +221,7 @@ public class ContactPictureRequestData {
 
         private Integer contactId;
 
-        private String email;
+        private Set<String> emails = new HashSet<>(5);
 
         private boolean etag = true;
 
@@ -243,8 +245,12 @@ public class ContactPictureRequestData {
             return this;
         }
 
-        public ContactPictureDataBuilder setEmail(String email) {
-            this.email = email;
+        public ContactPictureDataBuilder setEmails(String... emails) {
+            for (String mail : emails) {
+                if (Strings.isNotEmpty(mail)) {
+                    this.emails.add(mail);
+                }
+            }
             return this;
         }
 
@@ -266,11 +272,11 @@ public class ContactPictureRequestData {
             if (isEmpty()) {
                 return EMPTY;
             }
-            return new ContactPictureRequestData(session, userId, folderId, contactId, email, etag);
+            return new ContactPictureRequestData(session, userId, folderId, contactId, emails, etag);
         }
 
         private boolean isEmpty() {
-            return null == userId && null == folderId && null == contactId && null == email;
+            return null == userId && null == folderId && null == contactId && null == emails;
         }
     }
 
