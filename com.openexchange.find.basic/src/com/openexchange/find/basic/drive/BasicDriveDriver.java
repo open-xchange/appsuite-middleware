@@ -163,7 +163,10 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
     @Override
     public SearchConfiguration getSearchConfiguration(ServerSession session) throws OXException {
         SearchConfiguration config = new SearchConfiguration();
-        config.setRequiresAccount();
+        List<FileStorageAccount> accounts = getFileStorageAccounts(session);
+        if (accounts.size() > 1) {
+            config.setRequiresAccount();
+        }
         return config;
     }
 
