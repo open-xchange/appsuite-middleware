@@ -118,16 +118,6 @@ public class ContactPictureRequestData {
     }
 
     /**
-     * A value indicating if the session is set
-     *
-     * @return <code>true</code> if the session is set,
-     *         <code>false</code> otherwise
-     */
-    public boolean hasSession() {
-        return null != session;
-    }
-
-    /**
      * Get the user identifier
      *
      * @return The identifier or <code>null</code>
