@@ -86,8 +86,8 @@ public class ContactMailFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isRunnable(ContactPictureRequestData data) {
-        return super.isRunnable(data) && data.hasEmail();
+    public boolean isApplicable(ContactPictureRequestData data) {
+        return super.isApplicable(data) && data.hasEmail();
     }
 
     @Override

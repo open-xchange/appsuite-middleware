@@ -108,7 +108,7 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isRunnable(ContactPictureRequestData data) {
+    public boolean isApplicable(ContactPictureRequestData data) {
         return data.hasUser() && false == (data.hasContact() && data.hasFolder());
     }
 

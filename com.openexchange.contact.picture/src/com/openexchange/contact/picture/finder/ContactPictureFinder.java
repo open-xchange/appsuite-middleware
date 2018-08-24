@@ -83,6 +83,6 @@ public interface ContactPictureFinder extends Rankable {
      * @return <code>true</code> if the {@link ContactPictureFinder} can search for a contact picture,
      *         <code>false</code> if calling {@link #getPicture(FinderResult)} is superfluous
      */
-    boolean isRunnable(ContactPictureRequestData contactPictureRequestData);
+    boolean isApplicable(ContactPictureRequestData contactPictureRequestData);
 
 }

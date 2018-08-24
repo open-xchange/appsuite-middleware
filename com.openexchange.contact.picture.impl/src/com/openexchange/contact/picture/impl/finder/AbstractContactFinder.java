@@ -140,7 +140,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isRunnable(ContactPictureRequestData cprd) {
+    public boolean isApplicable(ContactPictureRequestData cprd) {
         if (null != userPermissionService && null != contactService) {
             try {
                 return userPermissionService.getUserPermissionBits(cprd.getSession().getUserId(), cprd.getContextId().intValue()).hasContact();

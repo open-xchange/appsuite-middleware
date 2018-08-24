@@ -75,8 +75,8 @@ public class ContactIDFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isRunnable(ContactPictureRequestData data) {
-        return super.isRunnable(data) && data.hasContact() && data.hasFolder();
+    public boolean isApplicable(ContactPictureRequestData data) {
+        return super.isApplicable(data) && data.hasContact() && data.hasFolder();
     }
 
     @Override
