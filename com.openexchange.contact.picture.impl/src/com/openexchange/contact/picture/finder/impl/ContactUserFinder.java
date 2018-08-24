@@ -47,96 +47,64 @@
  *
  */
 
-package com.openexchange.contact.picture.finder;
+package com.openexchange.contact.picture.finder.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.contact.picture.ContactPicture;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.function.BiConsumer;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.ContactPictureRequestData.ContactPictureDataBuilder;
+import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.functions.OXFunction;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
- * {@link FinderResult}
+ * {@link ContactUserFinder} - Finds picture based on user identifier
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class FinderResult {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(FinderResult.class);
-
-    final ContactPictureRequestData original;
-
-    ContactPictureDataBuilder modified;
-
-    ContactPicture picture;
+public class ContactUserFinder extends AbstractContactFinder {
 
     /**
-     * Initializes a new {@link FinderResult}.
+     * Initializes a new {@link ContactUserFinder}.
      * 
-     * @param original The original and unmodifiable {@link ContactPictureRequestData}
+     * @param userPermissionService The {@link UserPermissionService}
+     * @param contactService The {@link ContactService}
      */
-    public FinderResult(ContactPictureRequestData original) {
-        super();
-        this.original = original;
-        this.modified = new ContactPictureDataBuilder() // @formatter:off
-            .setContactId(original.getContactId())
-            .setEmails(original.getEmails().toArray(new String[original.getEmails().size()]))
-            .setETag(original.onlyETag())
-            .setFolder(original.getFolderId())
-            .setSession(original.getSession())
-            .setUser(original.getUserId()); // @formatter:on
+    public ContactUserFinder(UserPermissionService userPermissionService, ContactService contactService) {
+        super(userPermissionService, contactService);
     }
 
-    /**
-     * Get the {@link ContactPictureDataBuilder} to modify values on
-     * 
-     * @return The modifiable {@link ContactPictureDataBuilder}
-     */
-    public ContactPictureDataBuilder modify() {
-        return modified;
+    @Override
+    public boolean isRunnable(ContactPictureRequestData cprd) {
+        return super.isRunnable(cprd) && cprd.hasUser();
     }
 
-    /**
-     * Get the original {@link ContactPictureRequestData}
-     * 
-     * @return The original data
-     */
-    public ContactPictureRequestData getOriginal() {
-        return original;
+    @Override
+    OXFunction<ContactPictureRequestData, Contact> getContact() {
+        return (ContactPictureRequestData cprd) -> {
+            return contactService.getUser(cprd.getSession(), cprd.getUserId().intValue(), IMAGE_FIELD);
+        };
     }
 
-    /**
-     * Get the modified {@link ContactPictureRequestData}
-     * 
-     * @return The {@link ContactPictureRequestData}
-     */
-    public ContactPictureRequestData getModifications() {
-        try {
-            return modified.build();
-        } catch (OXException e) {
-            LOGGER.debug("Session not found in modified data. Using original data", e);
-            return original;
-        }
+    @Override
+    BiConsumer<FinderResult, Contact> modfiyResult() {
+        return (FinderResult result, Contact contact) -> {
+            result.modify().setContactId(I(contact.getObjectID()));
+            if (null == result.getOriginal().getFolderId()) {
+                result.modify().setFolder(I(FolderObject.CONTACT));
+            }
+        };
     }
 
-    /**
-     * Get the {@link ContactPicture}
-     * 
-     * @return The picture or <code>null</code>
-     */
-    public ContactPicture getContactPicture() {
-        return picture;
-    }
-
-    /**
-     * Set a picture to this result
-     * 
-     * @param picture A {@link ContactPicture}
-     */
-    public void setPicture(ContactPicture picture) {
-        this.picture = picture;
+    @Override
+    BiConsumer<ContactPictureRequestData, OXException> handleException() {
+        return (ContactPictureRequestData cprd, OXException e) -> {
+            LOGGER.debug("Unable to get contact for user {},", cprd.getUserId(), e);
+        };
     }
 
 }
