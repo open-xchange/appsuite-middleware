@@ -232,7 +232,6 @@ public class ContactPictureUtil {
      * @return The {@link Contact} or <code>null</code>
      * @throws OXException If the contact could not be found
      */
-    @SuppressWarnings("resource")
     public static Contact getContactFromMail(ContactService contactService, Set<String> emails, Session session, Integer folderId) throws OXException {
         for (Iterator<String> iterator = emails.iterator(); iterator.hasNext();) {
             String email = iterator.next();

@@ -57,8 +57,8 @@ import com.openexchange.java.Rankable;
 
 /**
  * {@link ContactPictureFinder}
- * 
- * 
+ *
+ *
  * Priority order is natural order ascending. Known types and priorities are:
  * <li></li>
  *
@@ -70,9 +70,9 @@ public interface ContactPictureFinder extends Rankable {
 
     /**
      * Get the contact picture for the provided {@link ContactPictureRequestData}
-     * 
+     *
      * @param original The unmodifiable {@link UnmodifiableContactPictureRequestData}
-     * @param modified The {@link ContactPictureRequestData}. Might be modified by the finderx
+     * @param modified An updated version of the {@link ContactPictureRequestData} which has been modified by previous {@link ContactPictureFinder}s.
      * @return The {@link ContactPicture}
      * @throws OXException In case picture was found, but it is harmful
      */
@@ -81,7 +81,7 @@ public interface ContactPictureFinder extends Rankable {
     /**
      * Get a value indicating if the {@link ContactPictureFinder} has enough information
      * about the contact to try getting the contact picture
-     * 
+     *
      * @param data The {@link ContactPictureRequestData} to base the answer on
      * @return <code>true</code> if the {@link ContactPictureFinder} can search for a contact picture,
      *         <code>false</code> if calling {@link #getPicture(FinderResult)} is superfluous
