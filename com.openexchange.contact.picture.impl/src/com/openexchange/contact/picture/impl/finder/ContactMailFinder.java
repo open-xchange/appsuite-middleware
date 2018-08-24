@@ -55,21 +55,21 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.functions.OXFunction;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link ContactMailFinder} - Finds picture based on user identifier
  *
- * @author<a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> Logic from 'ContactDataSource'
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> Logic from 'ContactDataSource'
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
@@ -86,96 +86,88 @@ public class ContactMailFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isRunnable(ContactPictureRequestData cprd) {
-        return super.isRunnable(cprd) && cprd.hasUser();
+    public boolean isRunnable(ContactPictureRequestData data) {
+        return super.isRunnable(data) && data.hasEmail();
     }
 
     @Override
-    BiConsumer<ContactPictureRequestData, OXException> handleException() {
-        return (ContactPictureRequestData cprd, OXException e) -> {
-            LOGGER.debug("Unable to get contact for mail addresses {}.", cprd.getEmails(), e);
-        };
+    void handleException(ContactPictureRequestData data, OXException e) {
+        LOGGER.debug("Unable to get contact for mail addresses {}.", data.getEmails(), e);
+    }
+
+    @Override
+    public void modfiyResult(FinderResult result, Contact contact) {
+        // Nothing to add
     }
 
     @SuppressWarnings("resource")
     @Override
-    OXFunction<ContactPictureRequestData, Contact> getContact() {
-        return (ContactPictureRequestData cprd) -> {
-            for (Iterator<String> iterator = cprd.getEmails().iterator(); iterator.hasNext();) {
-                String email = iterator.next();
+    public Contact getContact(ContactPictureRequestData data) throws OXException {
+        for (Iterator<String> iterator = data.getEmails().iterator(); iterator.hasNext();) {
+            String email = iterator.next();
 
-                ContactSearchObject cso = new ContactSearchObject();
-                cso.setEmail1(email);
-                cso.setEmail2(email);
-                cso.setEmail3(email);
-                cso.setOrSearch(true);
-                
-                SearchIterator<Contact> result = null;
-                try {
-                    result = contactService.searchContacts(cprd.getSession(), cso, IMAGE_FIELD);
-                    if (result == null) {
-                        continue;
-                    }
+            ContactSearchObject cso = new ContactSearchObject();
+            cso.setEmail1(email);
+            cso.setEmail2(email);
+            cso.setEmail3(email);
+            cso.setOrSearch(true);
 
-                    List<Contact> contacts = new ArrayList<Contact>();
-                    while (result.hasNext()) {
-                        Contact contact = result.next();
-                        if (null != contact.getImage1() && (checkEmail(contact, email))) {
-                            contacts.add(contact);
-                        }
-                    }
-
-                    if (contacts.size() != 1) {
-                        Collections.sort(contacts, new ImagePrecedence());
-                    }
-                    return contacts.get(0);
-                } finally {
-                    Streams.close(result);
+            SearchIterator<Contact> result = null;
+            try {
+                result = contactService.searchContacts(data.getSession(), cso, IMAGE_FIELD);
+                if (result == null) {
+                    continue;
                 }
 
+                List<Contact> contacts = new ArrayList<Contact>();
+                while (result.hasNext()) {
+                    Contact contact = result.next();
+                    if (null != contact.getImage1() && (checkEmails(contact, email))) {
+                        contacts.add(contact);
+                    }
+                }
+
+                if (contacts.size() != 1) {
+                    Collections.sort(contacts, imagePrecedence);
+                }
+                return contacts.get(0);
+            } finally {
+                Streams.close(result);
             }
-            return null;
-        };
+
+        }
+        return null;
+
     }
 
-    private boolean checkEmail(Contact c, String email) {
-        if (c.getEmail1() != null && c.getEmail1().equalsIgnoreCase(email)) {
-            return true;
-        }
-        if (c.getEmail2() != null && c.getEmail2().equalsIgnoreCase(email)) {
-            return true;
-        }
-        if (c.getEmail3() != null && c.getEmail3().equalsIgnoreCase(email)) {
+    private boolean checkEmails(Contact c, String email) {
+        return checkEmail(c.getEmail1(), email) || checkEmail(c.getEmail2(), email) || checkEmail(c.getEmail3(), email);
+    }
+
+    private boolean checkEmail(String contactMail, String email) {
+        if (Strings.isNotEmpty(contactMail) && contactMail.equalsIgnoreCase(email)) {
             return true;
         }
         return false;
     }
 
-    private static class ImagePrecedence implements Comparator<Contact> {
-
-        ImagePrecedence() {
-            super();
+    private final static Comparator<Contact> imagePrecedence = (Contact o1, Contact o2) -> {
+        if (o1.getParentFolderID() == 6 && o2.getParentFolderID() != 6) {
+            return -1;
         }
 
-        @Override
-        public int compare(Contact o1, Contact o2) {
-            if (o1.getParentFolderID() == 6 && o2.getParentFolderID() != 6) {
-                return -1;
-            }
-
-            if (o1.getParentFolderID() != 6 && o2.getParentFolderID() == 6) {
-                return 1;
-            }
-            Date lastModified1 = o1.getLastModified();
-            Date lastModified2 = o2.getLastModified();
-            if (lastModified1 == null) {
-                lastModified1 = new Date(Long.MIN_VALUE);
-            }
-            if (lastModified2 == null) {
-                lastModified2 = new Date(Long.MIN_VALUE);
-            }
-            return lastModified2.compareTo(lastModified1);
+        if (o1.getParentFolderID() != 6 && o2.getParentFolderID() == 6) {
+            return 1;
         }
-    }
+        Date lastModified1 = o1.getLastModified();
+        Date lastModified2 = o2.getLastModified();
+        if (lastModified1 == null) {
+            lastModified1 = new Date(Long.MIN_VALUE);
+        }
+        if (lastModified2 == null) {
+            lastModified2 = new Date(Long.MIN_VALUE);
+        }
+        return lastModified2.compareTo(lastModified1);
+    };
 
 }

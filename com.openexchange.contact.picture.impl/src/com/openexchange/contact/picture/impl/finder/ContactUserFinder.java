@@ -49,12 +49,13 @@
 
 package com.openexchange.contact.picture.impl.finder;
 
-import java.util.function.BiConsumer;
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.functions.OXFunction;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -76,22 +77,26 @@ public class ContactUserFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isRunnable(ContactPictureRequestData cprd) {
-        return super.isRunnable(cprd) && cprd.hasUser();
+    public boolean isRunnable(ContactPictureRequestData data) {
+        return super.isRunnable(data) && data.hasUser();
     }
 
     @Override
-    OXFunction<ContactPictureRequestData, Contact> getContact() {
-        return (ContactPictureRequestData cprd) -> {
-            return contactService.getUser(cprd.getSession(), cprd.getUserId().intValue(), IMAGE_FIELD);
-        };
+    public Contact getContact(ContactPictureRequestData data) throws OXException {
+        return contactService.getUser(data.getSession(), data.getUserId().intValue(), IMAGE_FIELD);
     }
 
     @Override
-    BiConsumer<ContactPictureRequestData, OXException> handleException() {
-        return (ContactPictureRequestData cprd, OXException e) -> {
-            LOGGER.debug("Unable to get contact for user {},", cprd.getUserId(), e);
-        };
+    public void modfiyResult(FinderResult result, Contact contact) {
+        result.getModified().setContactId(I(contact.getObjectID()));
+        if (null == result.getOriginal().getFolderId()) {
+            result.getModified().setFolder(I(FolderObject.CONTACT));
+        }
+    }
+
+    @Override
+    public void handleException(ContactPictureRequestData data, OXException e) {
+        LOGGER.debug("Unable to get contact for user {},", data.getUserId(), e);
     }
 
 }

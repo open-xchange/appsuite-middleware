@@ -85,18 +85,18 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public FinderResult getPicture(ContactPictureRequestData contactPictureRequestData) {
-        FinderResult result = new FinderResult(contactPictureRequestData);
+    public FinderResult getPicture(FinderResult result) {
+        ContactPictureRequestData data = result.getModified();
         try {
-            User user = userService.getUser(i(contactPictureRequestData.getUserId()), i(contactPictureRequestData.getContextId()));
+            User user = userService.getUser(i(data.getUserId()), i(data.getContextId()));
             if (null != user) {
-                result.modify().setContactId(I(user.getContactId()));
-                if (null == contactPictureRequestData.getFolderId()) {
-                    result.modify().setFolder(I(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+                result.getModified().setContactId(I(user.getContactId()));
+                if (null == data.getFolderId()) {
+                    result.getModified().setFolder(I(FolderObject.SYSTEM_LDAP_FOLDER_ID));
                 }
             }
         } catch (OXException e) {
-            LOGGER.debug("Unable to get contact picture for user {} in context {}", contactPictureRequestData.getUserId(), contactPictureRequestData.getContextId(), e);
+            LOGGER.debug("Unable to get contact picture for user {} in context {}", data.getUserId(), data.getContextId(), e);
         }
 
         return result;
@@ -108,8 +108,8 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isRunnable(ContactPictureRequestData cprd) {
-        return cprd.hasUser() && false == (cprd.hasContact() && cprd.hasFolder());
+    public boolean isRunnable(ContactPictureRequestData data) {
+        return data.hasUser() && false == (data.hasContact() && data.hasFolder());
     }
 
 }
