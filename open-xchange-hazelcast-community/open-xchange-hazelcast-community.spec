@@ -24,6 +24,7 @@ Summary:       Community implementation of open-xchange-hazelcast
 Autoreqprov:   no
 Provides:      open-xchange-hazelcast
 Conflicts:     open-xchange-hazelcast-enterprise
+Conflicts:     open-xchange-core < 7.10.1
 
 %description
 This package installs the community version of Hazelcast. The implementation uses the freely available version of Hazelcast with a
