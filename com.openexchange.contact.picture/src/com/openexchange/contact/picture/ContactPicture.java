@@ -104,7 +104,7 @@ public class ContactPicture {
      *
      * @return The eTag
      */
-    public String geteTag() {
+    public String getETag() {
         return eTag;
     }
 

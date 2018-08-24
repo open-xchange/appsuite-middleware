@@ -50,6 +50,8 @@
 package com.openexchange.contact.picture;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -69,9 +71,9 @@ public class ContactPictureRequestData {
 
     private Integer contactId;
 
-    private Set<String> emails;
+    private final Set<String> emails;
 
-    private Session session;
+    private final Session session;
 
     private boolean etag;
 
@@ -87,7 +89,7 @@ public class ContactPictureRequestData {
      * @throws OXException If session is missing
      *
      */
-    public ContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, Set<String> emails, boolean etag) throws OXException {
+    public ContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, Collection<String> emails, boolean etag) throws OXException {
         if (session == null) {
             throw ContactPictureExceptionCodes.MISSING_SESSION.create();
         }
@@ -96,7 +98,7 @@ public class ContactPictureRequestData {
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
-        this.emails = emails;
+        this.emails = new HashSet<>(emails);
         this.etag = etag;
     }
 
@@ -208,7 +210,7 @@ public class ContactPictureRequestData {
 
     /**
      * Set the user identifier
-     * 
+     *
      * @param userId The identifier
      */
     public void setUser(Integer userId) {
@@ -217,7 +219,7 @@ public class ContactPictureRequestData {
 
     /**
      * Set the folder identifier
-     * 
+     *
      * @param folderId The folder identifier
      */
     public void setFolder(Integer folderId) {
@@ -226,7 +228,7 @@ public class ContactPictureRequestData {
 
     /**
      * Set the contact identifier
-     * 
+     *
      * @param contactId the contact identifier
      */
     public void setContactId(Integer contactId) {
@@ -235,10 +237,11 @@ public class ContactPictureRequestData {
 
     /**
      * Set the contacts E-Mails
-     * 
+     *
      * @param emails The E-Mails
      */
     public void setEmails(String... emails) {
+        this.emails.clear();
         for (String mail : emails) {
             if (Strings.isNotEmpty(mail)) {
                 this.emails.add(mail);
@@ -248,7 +251,7 @@ public class ContactPictureRequestData {
 
     /**
      * Set the eTag for the contact picture
-     * 
+     *
      * @param etag The eTag
      */
     public void setETag(boolean etag) {
@@ -257,7 +260,7 @@ public class ContactPictureRequestData {
 
     /**
      * Get a value indicating if this instances does not hold any usable data
-     * 
+     *
      * @return <code>true</code> if this instance doesn't hold any usable data
      */
     public boolean isEmpty() {

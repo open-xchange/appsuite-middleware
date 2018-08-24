@@ -52,6 +52,7 @@ package com.openexchange.contact.picture.json;
 import java.rmi.server.UID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -123,7 +124,7 @@ public class GetAction implements ETagAwareAJAXActionService {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         ContactPicture picture = getPicture(getData(requestData, session, false));
         AJAXRequestResult result = new AJAXRequestResult(picture.containsContactPicture() ? picture.getFileHolder() : FALLBACK_PICTURE.getFileHolder(), "file");
-        setETag(picture.getEtag(), Tools.getDefaultImageExpiry(), result);
+        setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
         return result;
     }
 
@@ -135,19 +136,14 @@ public class GetAction implements ETagAwareAJAXActionService {
         }
         String email = requestData.getParameter(MAIL_PARAM);
         Integer userId = requestData.getParameter(USER_PARAM, Integer.class, true);
-        return new ContactPictureRequestData.ContactPictureDataBuilder()
-                                             .setSession(session)
-                                             .setContactId(contactId)
-                                             .setFolder(folderId)
-                                             .setEmails(email)
-                                             .setUser(userId)
-                                             .setETag(etagOnly).build();
+
+        return new ContactPictureRequestData(session, userId, folderId, contactId, Collections.singleton(email), etagOnly);
     }
 
     @Override
     public boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException {
         ContactPicture contactPicture = getPicture(getData(request, session, true));
-        String etag = contactPicture.getEtag();
+        String etag = contactPicture.getETag();
         if (etag == null) {
             return false;
         }
