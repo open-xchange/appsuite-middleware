@@ -94,7 +94,7 @@ import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.RootFolderPermissionsAware;
-import com.openexchange.file.storage.UserCreatedAccountAwareFileStorageFolderAccess;
+import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
@@ -322,7 +322,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FolderID folderID = new FolderID(folderId);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
-        if (folderAccess instanceof UserCreatedAccountAwareFileStorageFolderAccess) {
+        if (folderAccess instanceof UserCreatedFileStorageFolderAccess) {
             String rootId = folderAccess.getRootFolder().getId();
             if (rootId.equals(folderID.getFolderId())) {
                 // rename of root folder -> rename account
@@ -364,7 +364,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
         FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
 
-        if (folderAccess instanceof UserCreatedAccountAwareFileStorageFolderAccess) {
+        if (folderAccess instanceof UserCreatedFileStorageFolderAccess) {
             String rootId = folderAccess.getRootFolder().getId();
             if (rootId.equals(folderID.getFolderId())) {
                 // delete of root folder -> delete account
@@ -380,7 +380,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
                 updatedAccount.setId(folderID.getAccountId());
                 accountManager.deleteAccount(updatedAccount, session);
                 FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), rootId);
-                fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
+                fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
                 return newFolderID.toUniqueID();
             }
         }

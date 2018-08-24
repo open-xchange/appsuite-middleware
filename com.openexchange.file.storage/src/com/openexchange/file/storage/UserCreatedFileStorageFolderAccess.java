@@ -51,11 +51,11 @@ package com.openexchange.file.storage;
 
 
 /**
- * {@link UserCreatedAccountAwareFileStorageFolderAccess} is a marker interface which indicates {@link FileStorageFolderAccess} implementation whose accounts are user created.
+ * {@link UserCreatedFileStorageFolderAccess} is a marker interface which indicates {@link FileStorageFolderAccess} implementation whose accounts are user created.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public interface UserCreatedAccountAwareFileStorageFolderAccess extends FileStorageFolderAccess {
+public interface UserCreatedFileStorageFolderAccess extends FileStorageFolderAccess {
     // empty marker interface
 }
