@@ -1969,6 +1969,11 @@ final class ListLsubCollection implements Serializable {
         }
 
         @Override
+        public String optOriginalFullName() {
+            return null;
+        }
+
+        @Override
         public Set<String> getAttributes() {
             return Collections.emptySet();
         }

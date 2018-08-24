@@ -107,9 +107,7 @@ public interface ListLsubEntry {
      *
      * @return The original full name or <code>null</code>
      */
-    default String optOriginalFullName() {
-        return null;
-    }
+    String optOriginalFullName();
 
     /**
      * Gets the attributes
