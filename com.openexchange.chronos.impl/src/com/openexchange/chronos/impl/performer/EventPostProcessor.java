@@ -121,7 +121,8 @@ public class EventPostProcessor {
     /**
      * Post-processes a list of events prior returning it to the client. This includes
      * <ul>
-     * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
      * <li>applying the folder identifier from the passed folder</li>
      * <li>generate and apply event flags</li>
      * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
@@ -145,7 +146,8 @@ public class EventPostProcessor {
     /**
      * Post-processes an event prior returning it to the client. This includes
      * <ul>
-     * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
      * <li>applying the folder identifier from the passed folder</li>
      * <li>generate and apply event flags</li>
      * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
@@ -167,7 +169,8 @@ public class EventPostProcessor {
     /**
      * Post-processes a list of events prior returning it to the client. This includes
      * <ul>
-     * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
      * <li>generate and apply event flags</li>
      * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
@@ -205,6 +208,16 @@ public class EventPostProcessor {
      */
     public List<Event> getEvents() throws OXException {
         return sortEvents(events, new SearchOptions(session).getSortOrders(), Utils.getTimeZone(session));
+    }
+
+    /**
+     * Gets the first event of all previously processed events.
+     *
+     * @return The first processed event, or <code>null</code> if there is none
+     */
+    public Event getFirstEvent() throws OXException {
+        List<Event> events = getEvents();
+        return 0 < events.size() ? events.get(0) : null;
     }
 
     /**
@@ -288,4 +301,3 @@ public class EventPostProcessor {
     }
 
 }
-

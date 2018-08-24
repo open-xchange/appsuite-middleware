@@ -51,11 +51,8 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
-import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
-import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import com.openexchange.chronos.Event;
@@ -96,7 +93,7 @@ public class GetPerformer extends AbstractQueryPerformer {
      */
     public Event perform(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         /*
-         * load event data & check permissions
+         * load event data, check permissions & userize event
          */
         CalendarFolder folder = getFolder(session, folderId, false);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
@@ -106,10 +103,10 @@ public class GetPerformer extends AbstractQueryPerformer {
         }
         event = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), event, fields);
         event = Check.eventIsVisible(folder, event);
-        event.setFolderId(Check.eventIsInFolder(event, folder));
-        event.setFlags(getFlags(event, getCalendarUserId(folder), session.getUserId()));
-        if (isSeriesMaster(event)) {
-            event = applyExceptionDates(storage, event, getCalendarUserId(folder));
+        Check.eventIsInFolder(event, folder);
+        event = new EventPostProcessor(session, storage).process(event, folder).getFirstEvent();
+        if (null == event) {
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
         /*
          * retrieve targeted event occurrence if specified (either existing change exception or resolved occurrence)
@@ -120,8 +117,8 @@ public class GetPerformer extends AbstractQueryPerformer {
                     Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
                     if (null != exceptionEvent) {
                         exceptionEvent = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), exceptionEvent, fields);
-                        exceptionEvent.setFolderId(Check.eventIsInFolder(exceptionEvent, folder));
-                        event = exceptionEvent;
+                        exceptionEvent = Check.eventIsVisible(folder, exceptionEvent);
+                        event = new EventPostProcessor(session, storage).process(exceptionEvent, folder).getFirstEvent();
                     }
                 } else {
                     event = getOccurrence(session.getRecurrenceService(), event, recurrenceId);
@@ -132,9 +129,9 @@ public class GetPerformer extends AbstractQueryPerformer {
             }
         }
         /*
-         * return event, anonymized as needed
+         * return event
          */
-        return anonymizeIfNeeded(session, event);
+        return event;
     }
 
 }
