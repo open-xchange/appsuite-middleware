@@ -47,16 +47,69 @@
  *
  */
 
-package com.openexchange.contact.picture.finder;
+package com.openexchange.contact.picture.finder.impl;
+
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.contact.picture.ContactPicture;
+import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.finder.ContactPictureFinder;
+import com.openexchange.contact.picture.finder.FinderResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.UserService;
 
 /**
- * {@link Modifiable} - Signals that the class accepts input data that has been modified by other classes
+ * {@link UserPictureFinder} - Checks if user exists and set the contact identifier
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public interface Modifiable {
+public class UserPictureFinder implements ContactPictureFinder {
 
-    // Marker interface
+    private final static Logger LOGGER = LoggerFactory.getLogger(UserPictureFinder.class);
+
+    private final UserService userService;
+
+    /**
+     * Initializes a new {@link UserPictureFinder}.
+     * 
+     * @param userService The {@link UserService}
+     */
+    public UserPictureFinder(UserService userService) {
+        super();
+        this.userService = userService;
+    }
+
+    @Override
+    public FinderResult getPicture(FinderResult result) {
+        ContactPictureRequestData data = result.getModified();
+        try {
+            User user = userService.getUser(i(data.getUserId()), i(data.getContextId()));
+            if (null != user) {
+                result.getModified().setContactId(I(user.getContactId()));
+                if (null == data.getFolderId()) {
+                    result.getModified().setFolder(I(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+                }
+            }
+        } catch (OXException e) {
+            LOGGER.debug("Unable to get contact picture for user {} in context {}", data.getUserId(), data.getContextId(), e);
+        }
+
+        return result;
+    }
+
+    @Override
+    public int getRanking() {
+        return ContactPicture.HIGHEST_RANKING;
+    }
+
+    @Override
+    public boolean isRunnable(ContactPictureRequestData data) {
+        return data.hasUser() && false == (data.hasContact() && data.hasFolder());
+    }
 
 }

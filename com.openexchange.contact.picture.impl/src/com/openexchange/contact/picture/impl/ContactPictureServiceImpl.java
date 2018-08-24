@@ -57,9 +57,9 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.ContactPictureService;
+import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.finder.FinderResult;
-import com.openexchange.contact.picture.finder.Modifiable;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
@@ -86,21 +86,15 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
     public ContactPicture getPicture(ContactPictureRequestData contactData) {
         // Ask each finder if it contains the picture
         try {
-            FinderResult result = null;
-            ContactPictureRequestData data;
+            UnmodifiableContactPictureRequestData original = new UnmodifiableContactPictureRequestData(contactData);
+            ContactPictureRequestData modified = contactData;
+            FinderResult result = new FinderResult(original, modified);
             for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
                 ContactPictureFinder next = iterator.next();
 
-                // Check which data to use
-                if (null != result && Modifiable.class.isInstance(next.getClass())) {
-                    data = result.getModifications();
-                } else {
-                    data = contactData;
-                }
-
                 // Try to get contact picture
-                if (next.isRunnable(data)) {
-                    result = next.getPicture(data);
+                if (next.isRunnable(original)) {
+                    result = next.getPicture(result);
                     if (null != result.getContactPicture()) {
                         return result.getContactPicture();
                     }

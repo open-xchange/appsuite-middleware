@@ -75,37 +75,37 @@ public class ContactPicture {
         FALLBACK_PICTURE = new ContactPicture(null, fileHolder);
     }
 
-    private final String etag;
+    private final String eTag;
 
     private final IFileHolder fileHolder;
 
     /**
      * Initializes a new {@link ContactPicture}.
      *
-     * @param etag The associated ETag
+     * @param eTag The associated eTag
      */
-    public ContactPicture(String etag) {
-        this(etag, null);
+    public ContactPicture(String eTag) {
+        this(eTag, null);
     }
 
     /**
      * Initializes a new {@link ContactPicture}.
      *
-     * @param etag The associated ETag
+     * @param eTag The associated eTag
      * @param fileHolder The file holder
      */
-    public ContactPicture(String etag, IFileHolder fileHolder) {
-        this.etag = etag;
+    public ContactPicture(String eTag, IFileHolder fileHolder) {
+        this.eTag = eTag;
         this.fileHolder = fileHolder;
     }
 
     /**
-     * Gets the etag
+     * Gets the eTag
      *
-     * @return The etag
+     * @return The eTag
      */
-    public String getEtag() {
-        return etag;
+    public String geteTag() {
+        return eTag;
     }
 
     /**
@@ -124,7 +124,7 @@ public class ContactPicture {
      *         <code>false</code> otherwise
      */
     public boolean containsContactPicture() {
-        return Strings.isNotEmpty(etag) || null != fileHolder;
+        return Strings.isNotEmpty(eTag) || null != fileHolder;
     }
 
 }

@@ -50,7 +50,6 @@
 package com.openexchange.contact.picture;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -64,22 +63,17 @@ import com.openexchange.session.Session;
  */
 public class ContactPictureRequestData {
 
-    /**
-     * 'Null' reference for {@link ContactPictureRequestData}
-     */
-    public final static ContactPictureRequestData EMPTY = new ContactPictureRequestData(null, null, null, null, null, true);
+    private Integer userId;
 
-    private final Integer userId;
+    private Integer folderId;
 
-    private final Integer folderId;
+    private Integer contactId;
 
-    private final Integer contactId;
+    private Set<String> emails;
 
-    private final Set<String> emails;
+    private Session session;
 
-    private final Session session;
-
-    private final boolean etag;
+    private boolean etag;
 
     /**
      * Initializes a new {@link ContactPictureRequestData}.
@@ -90,9 +84,14 @@ public class ContactPictureRequestData {
      * @param contactId The contact identifier
      * @param emails The email addresses
      * @param etag If only eTag should be generated
+     * @throws OXException If session is missing
      *
      */
-    public ContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, Set<String> emails, boolean etag) {
+    public ContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, Set<String> emails, boolean etag) throws OXException {
+        if (session == null) {
+            throw ContactPictureExceptionCodes.MISSING_SESSION.create();
+        }
+
         this.session = session;
         this.userId = userId;
         this.folderId = folderId;
@@ -208,76 +207,61 @@ public class ContactPictureRequestData {
     }
 
     /**
-     * Initializes a new {@link ContactPictureDataBuilder}.
-     *
+     * Set the user identifier
+     * 
+     * @param userId The identifier
      */
-    public static class ContactPictureDataBuilder {
+    public void setUser(Integer userId) {
+        this.userId = userId;
+    }
 
-        private Session session;
+    /**
+     * Set the folder identifier
+     * 
+     * @param folderId The folder identifier
+     */
+    public void setFolder(Integer folderId) {
+        this.folderId = folderId;
+    }
 
-        private Integer userId;
+    /**
+     * Set the contact identifier
+     * 
+     * @param contactId the contact identifier
+     */
+    public void setContactId(Integer contactId) {
+        this.contactId = contactId;
+    }
 
-        private Integer folderId;
-
-        private Integer contactId;
-
-        private Set<String> emails = new HashSet<>(5);
-
-        private boolean etag = true;
-
-        public ContactPictureDataBuilder setSession(Session session) {
-            this.session = session;
-            return this;
-        }
-
-        public ContactPictureDataBuilder setUser(Integer userId) {
-            this.userId = userId;
-            return this;
-        }
-
-        public ContactPictureDataBuilder setFolder(Integer folderId) {
-            this.folderId = folderId;
-            return this;
-        }
-
-        public ContactPictureDataBuilder setContactId(Integer contactId) {
-            this.contactId = contactId;
-            return this;
-        }
-
-        public ContactPictureDataBuilder setEmails(String... emails) {
-            for (String mail : emails) {
-                if (Strings.isNotEmpty(mail)) {
-                    this.emails.add(mail);
-                }
+    /**
+     * Set the contacts E-Mails
+     * 
+     * @param emails The E-Mails
+     */
+    public void setEmails(String... emails) {
+        for (String mail : emails) {
+            if (Strings.isNotEmpty(mail)) {
+                this.emails.add(mail);
             }
-            return this;
         }
+    }
 
-        public ContactPictureDataBuilder setETag(boolean etag) {
-            this.etag = etag;
-            return this;
-        }
+    /**
+     * Set the eTag for the contact picture
+     * 
+     * @param etag The eTag
+     */
+    public void setETag(boolean etag) {
+        this.etag = etag;
+    }
 
-        /**
-         * Get the {@link ContactPictureRequestData}
-         * 
-         * @return unmodifiable {@link ContactPictureRequestData}
-         * @throws OXException In case the {@link Session} is missing
-         */
-        public ContactPictureRequestData build() throws OXException {
-            if (session == null) {
-                throw ContactPictureExceptionCodes.MISSING_SESSION.create();
-            }
-            if (isEmpty()) {
-                return EMPTY;
-            }
-            return new ContactPictureRequestData(session, userId, folderId, contactId, emails, etag);
-        }
-
-        private boolean isEmpty() {
-            return null == userId && null == folderId && null == contactId && null == emails;
-        }
+    /**
+     * Get a value indicating if this instances does not hold any usable data
+     * 
+     * @return <code>true</code> if this instance doesn't hold any usable data
+     */
+    public boolean isEmpty() {
+        return null == userId && null == folderId && null == contactId && null == emails;
     }
 
 }

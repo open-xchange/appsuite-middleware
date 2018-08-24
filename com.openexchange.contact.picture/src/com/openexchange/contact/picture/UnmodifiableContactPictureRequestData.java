@@ -47,74 +47,51 @@
  *
  */
 
-package com.openexchange.contact.picture.finder;
+package com.openexchange.contact.picture;
 
-import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
+import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link FinderResult}
+ * {@link UnmodifiableContactPictureRequestData}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class FinderResult {
+public class UnmodifiableContactPictureRequestData extends ContactPictureRequestData {
 
-    final UnmodifiableContactPictureRequestData original;
-
-    final ContactPictureRequestData modified;
-
-    ContactPicture picture;
-
-    /**
-     * Initializes a new {@link FinderResult}.
-     * 
-     * @param original The original and unmodifiable {@link ContactPictureRequestData}
-     * @param modified The modified {@link ContactPictureRequestData}
-     * @throws OXException If session is missing
-     */
-    public FinderResult(UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
-        super();
-        this.original = original;
-        this.modified = modified;
+    public UnmodifiableContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, Set<String> emails, boolean etag) throws OXException {
+        super(session, userId, folderId, contactId, emails, etag);
     }
 
-    /**
-     * Get the {@link ContactPictureRequestData} to modify values on
-     * 
-     * @return The modifiable {@link ContactPictureRequestData}
-     */
-    public ContactPictureRequestData getModified() {
-        return modified;
+    public UnmodifiableContactPictureRequestData(ContactPictureRequestData data) throws OXException {
+        super(data.getSession(), data.getUserId(), data.getFolderId(), data.getContactId(), data.getEmails(), data.onlyETag());
     }
 
-    /**
-     * Get the original {@link ContactPictureRequestData}
-     * 
-     * @return The original data
-     */
-    public ContactPictureRequestData getOriginal() {
-        return original;
+    @Override
+    public void setUser(Integer userId) {
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Get the {@link ContactPicture}
-     * 
-     * @return The picture or <code>null</code>
-     */
-    public ContactPicture getContactPicture() {
-        return picture;
+    @Override
+    public void setFolder(Integer folderId) {
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Set a picture to this result
-     * 
-     * @param picture A {@link ContactPicture}
-     */
-    public void setPicture(ContactPicture picture) {
-        this.picture = picture;
+    @Override
+    public void setContactId(Integer contactId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEmails(String... emails) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setETag(boolean etag) {
+        throw new UnsupportedOperationException();
     }
 
 }

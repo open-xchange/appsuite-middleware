@@ -50,7 +50,6 @@
 package com.openexchange.contact.picture.finder.impl;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.ContactService;
@@ -58,9 +57,7 @@ import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.ContactPictureUtil;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.finder.FinderResult;
-import com.openexchange.contact.picture.finder.Modifiable;
 import com.openexchange.exception.OXException;
-import com.openexchange.functions.OXFunction;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.userconf.UserPermissionService;
@@ -73,7 +70,7 @@ import com.openexchange.userconf.UserPermissionService;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public abstract class AbstractContactFinder implements ContactPictureFinder, Modifiable {
+public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractContactFinder.class);
 
@@ -102,38 +99,42 @@ public abstract class AbstractContactFinder implements ContactPictureFinder, Mod
     }
 
     /**
-     * Get the function to provide the Contact in this context
+     * Get the contact
      * 
-     * @return The {@link OXFunction}
+     * @param data The data to get the contact from
+     * @return The {@link Contact}
+     * @throws OXException If contact can't be found
      */
-    abstract OXFunction<ContactPictureRequestData, Contact> getContact();
+    abstract Contact getContact(ContactPictureRequestData data) throws OXException;
 
     /**
-     * Get the function to modify result on invalid contact picture
+     * Modifies the {@link ContactPictureRequestData} in the result
      * 
-     * @return The {@link BiConsumer} to modify the result
+     * @param result The {@link FinderResult}
+     * @param contact To get the data from
      */
-    abstract BiConsumer<FinderResult, Contact> modfiyResult();
+    abstract void modfiyResult(FinderResult result, Contact contact);
 
     /**
-     * Get the function to handle {@link OXException} when applying {@link #getContact()}
+     * Personalized error logging
      * 
-     * @return The {@link BiConsumer} to handle {@link OXException}
+     * @param data The data to log
+     * @param exception The original exception to log
      */
-    abstract BiConsumer<ContactPictureRequestData, OXException> handleException();
+    abstract void handleException(ContactPictureRequestData data, OXException exception);
 
     @Override
-    public FinderResult getPicture(ContactPictureRequestData cprd) throws OXException {
-        FinderResult result = new FinderResult(cprd);
+    public FinderResult getPicture(FinderResult result) throws OXException {
+        ContactPictureRequestData data = result.getModified();
         try {
-            Contact contact = getContact().apply(cprd);
-            if (null != contact.getImage1() && ContactPictureUtil.checkImage(contact.getImage1(), cprd)) {
-                result.setPicture(ContactPictureUtil.fromContact(contact, cprd.onlyETag()));
+            Contact contact = getContact(data);
+            if (null != contact.getImage1() && ContactPictureUtil.checkImage(contact.getImage1(), data)) {
+                result.setPicture(ContactPictureUtil.fromContact(contact, data.onlyETag()));
             } else {
-                modfiyResult().accept(result, contact);
+                modfiyResult(result, contact);
             }
         } catch (OXException e) {
-            handleException().accept(cprd, e);
+            handleException(data, e);
         }
         return result;
     }

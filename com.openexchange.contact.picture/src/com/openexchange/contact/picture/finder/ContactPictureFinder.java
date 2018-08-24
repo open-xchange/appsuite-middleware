@@ -69,11 +69,11 @@ public interface ContactPictureFinder extends Rankable {
     /**
      * Get the contact picture for the provided {@link ContactPictureRequestData}
      * 
-     * @param contactPictureRequestData The {@link ContactPictureRequestData} to get the picture for
+     * @param result The {@link FinderResult} to get data from
      * @return The {@link FinderResult}
      * @throws OXException In case picture was found, but it is harmful
      */
-    FinderResult getPicture(ContactPictureRequestData contactPictureRequestData) throws OXException;
+    FinderResult getPicture(FinderResult result) throws OXException;
 
     /**
      * Get a value indicating if the {@link ContactPictureFinder} has enough information
@@ -81,7 +81,7 @@ public interface ContactPictureFinder extends Rankable {
      * 
      * @param contactPictureRequestData The {@link ContactPictureRequestData} to base the answer on
      * @return <code>true</code> if the {@link ContactPictureFinder} can search for a contact picture,
-     *         <code>false</code> if calling {@link #getPicture(com.openexchange.contact.picture.ContactPictureRequestData)} is superfluous
+     *         <code>false</code> if calling {@link #getPicture(FinderResult)} is superfluous
      */
     boolean isRunnable(ContactPictureRequestData contactPictureRequestData);
 

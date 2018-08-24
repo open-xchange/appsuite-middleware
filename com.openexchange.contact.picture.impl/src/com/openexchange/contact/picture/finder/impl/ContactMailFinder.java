@@ -55,12 +55,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.functions.OXFunction;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.Streams;
@@ -88,61 +86,58 @@ public class ContactMailFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isRunnable(ContactPictureRequestData cprd) {
-        return super.isRunnable(cprd) && cprd.hasUser();
+    public boolean isRunnable(ContactPictureRequestData data) {
+        return super.isRunnable(data) && data.hasEmail();
     }
 
     @Override
-    BiConsumer<ContactPictureRequestData, OXException> handleException() {
-        return (ContactPictureRequestData cprd, OXException e) -> {
-            LOGGER.debug("Unable to get contact for mail addresses {}.", cprd.getEmails(), e);
-        };
+    void handleException(ContactPictureRequestData data, OXException e) {
+        LOGGER.debug("Unable to get contact for mail addresses {}.", data.getEmails(), e);
     }
 
     @Override
-    BiConsumer<FinderResult, Contact> modfiyResult() {
-        return (FinderResult result, Contact contact) -> { };
+    public void modfiyResult(FinderResult result, Contact contact) {
+        // Nothing to add
     }
 
     @SuppressWarnings("resource")
     @Override
-    OXFunction<ContactPictureRequestData, Contact> getContact() {
-        return (ContactPictureRequestData cprd) -> {
-            for (Iterator<String> iterator = cprd.getEmails().iterator(); iterator.hasNext();) {
-                String email = iterator.next();
+    public Contact getContact(ContactPictureRequestData data) throws OXException {
+        for (Iterator<String> iterator = data.getEmails().iterator(); iterator.hasNext();) {
+            String email = iterator.next();
 
-                ContactSearchObject cso = new ContactSearchObject();
-                cso.setEmail1(email);
-                cso.setEmail2(email);
-                cso.setEmail3(email);
-                cso.setOrSearch(true);
+            ContactSearchObject cso = new ContactSearchObject();
+            cso.setEmail1(email);
+            cso.setEmail2(email);
+            cso.setEmail3(email);
+            cso.setOrSearch(true);
 
-                SearchIterator<Contact> result = null;
-                try {
-                    result = contactService.searchContacts(cprd.getSession(), cso, IMAGE_FIELD);
-                    if (result == null) {
-                        continue;
-                    }
-
-                    List<Contact> contacts = new ArrayList<Contact>();
-                    while (result.hasNext()) {
-                        Contact contact = result.next();
-                        if (null != contact.getImage1() && (checkEmails(contact, email))) {
-                            contacts.add(contact);
-                        }
-                    }
-
-                    if (contacts.size() != 1) {
-                        Collections.sort(contacts, imagePrecedence);
-                    }
-                    return contacts.get(0);
-                } finally {
-                    Streams.close(result);
+            SearchIterator<Contact> result = null;
+            try {
+                result = contactService.searchContacts(data.getSession(), cso, IMAGE_FIELD);
+                if (result == null) {
+                    continue;
                 }
 
+                List<Contact> contacts = new ArrayList<Contact>();
+                while (result.hasNext()) {
+                    Contact contact = result.next();
+                    if (null != contact.getImage1() && (checkEmails(contact, email))) {
+                        contacts.add(contact);
+                    }
+                }
+
+                if (contacts.size() != 1) {
+                    Collections.sort(contacts, imagePrecedence);
+                }
+                return contacts.get(0);
+            } finally {
+                Streams.close(result);
             }
-            return null;
-        };
+
+        }
+        return null;
+
     }
 
     private boolean checkEmails(Contact c, String email) {

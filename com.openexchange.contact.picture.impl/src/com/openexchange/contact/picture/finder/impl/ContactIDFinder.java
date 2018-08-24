@@ -49,12 +49,10 @@
 
 package com.openexchange.contact.picture.finder.impl;
 
-import java.util.function.BiConsumer;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.functions.OXFunction;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -77,29 +75,23 @@ public class ContactIDFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isRunnable(ContactPictureRequestData cprd) {
-        return super.isRunnable(cprd) && cprd.hasFolder();
+    public boolean isRunnable(ContactPictureRequestData data) {
+        return super.isRunnable(data) && data.hasContact() && data.hasFolder();
     }
 
     @Override
-    OXFunction<ContactPictureRequestData, Contact> getContact() {
-        return (ContactPictureRequestData cprd) -> {
-            return contactService.getContact(cprd.getSession(), String.valueOf(cprd.getFolderId()), String.valueOf(cprd.getContactId()), IMAGE_FIELD);
-        };
+    public Contact getContact(ContactPictureRequestData data) throws OXException {
+        return contactService.getContact(data.getSession(), String.valueOf(data.getFolderId()), String.valueOf(data.getContactId()), IMAGE_FIELD);
     }
 
     @Override
-    BiConsumer<FinderResult, Contact> modfiyResult() {
-        return (FinderResult result, Contact contact) -> {
-            result.modify().setEmails(contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
-        };
+    public void modfiyResult(FinderResult result, Contact contact) {
+        result.getModified().setEmails(contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
     }
 
     @Override
-    BiConsumer<ContactPictureRequestData, OXException> handleException() {
-        return (ContactPictureRequestData cprd, OXException e) -> {
-            LOGGER.debug("Unable to get contact for ID {} in folder {},", cprd.getContactId(), cprd.getFolderId(), e);
-        };
+    public void handleException(ContactPictureRequestData data, OXException e) {
+        LOGGER.debug("Unable to get contact for ID {} in folder {},", data.getContactId(), data.getFolderId(), e);
     }
 
 }
