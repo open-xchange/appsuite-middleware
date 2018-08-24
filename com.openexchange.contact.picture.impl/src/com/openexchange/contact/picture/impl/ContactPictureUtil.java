@@ -228,11 +228,11 @@ public class ContactPictureUtil {
      * @param contactService The {@link ContactService}
      * @param emails The mail addresses
      * @param session The {@link Session}
-     * @param folderId The identifier of the folder to search in. Can be <code>null</code>
+     * @param useGAB <code>true</code> if a search in the global address book shall be performed, <code>false</code> if search shall be done in all other folders
      * @return The {@link Contact} or <code>null</code>
      * @throws OXException If the contact could not be found
      */
-    public static Contact getContactFromMail(ContactService contactService, Set<String> emails, Session session, Integer folderId) throws OXException {
+    public static Contact getContactFromMail(ContactService contactService, Set<String> emails, Session session, boolean useGAB) throws OXException {
         for (Iterator<String> iterator = emails.iterator(); iterator.hasNext();) {
             String email = iterator.next();
 
@@ -242,8 +242,11 @@ public class ContactPictureUtil {
             cso.setEmail3(email);
             cso.setOrSearch(true);
 
-            if (null != folderId) {
-                cso.addFolder(folderId.intValue());
+            // Search in GAB or exclude GAB
+            if (useGAB) {
+                cso.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            } else {
+                cso.setExcludeFolders(FolderObject.SYSTEM_LDAP_FOLDER_ID);
             }
 
             SearchIterator<Contact> result = null;

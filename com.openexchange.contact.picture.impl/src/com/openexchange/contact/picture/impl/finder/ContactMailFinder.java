@@ -92,6 +92,6 @@ public class ContactMailFinder extends AbstractContactFinder {
 
     @Override
     public Contact getContact(ContactPictureRequestData data) throws OXException {
-        return ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), data.getSession(), data.getFolderId());
+        return ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), data.getSession(), false);
     }
 }
