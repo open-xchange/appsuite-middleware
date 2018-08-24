@@ -51,7 +51,7 @@ package com.openexchange.contact.picture.impl.finder;
 
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.finder.FinderResult;
+import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.userconf.UserPermissionService;
@@ -81,12 +81,12 @@ public class ContactIDFinder extends AbstractContactFinder {
 
     @Override
     public Contact getContact(ContactPictureRequestData data) throws OXException {
-        return contactService.getContact(data.getSession(), String.valueOf(data.getFolderId()), String.valueOf(data.getContactId()), IMAGE_FIELD);
+        return contactService.getContact(data.getSession(), String.valueOf(data.getFolderId()), String.valueOf(data.getContactId()), ContactPictureUtil.IMAGE_FIELD);
     }
 
     @Override
-    public void modfiyResult(FinderResult result, Contact contact) {
-        result.getModified().addEmails(contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
+    public void modfiyResult(ContactPictureRequestData data, Contact contact) {
+        data.addEmails(contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
     }
 
     @Override

@@ -55,10 +55,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
-import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.user.UserService;
 
@@ -85,21 +84,17 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public FinderResult getPicture(FinderResult result) {
-        ContactPictureRequestData data = result.getModified();
+    public ContactPicture getPicture(UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
         try {
-            User user = userService.getUser(i(data.getUserId()), i(data.getContextId()));
+            User user = userService.getUser(i(modified.getUserId()), i(modified.getContextId()));
             if (null != user) {
-                result.getModified().setContactId(I(user.getContactId()));
-                if (null == data.getFolderId()) {
-                    result.getModified().setFolder(I(FolderObject.SYSTEM_LDAP_FOLDER_ID));
-                }
+                modified.setContactId(I(user.getContactId()));
             }
         } catch (OXException e) {
-            LOGGER.debug("Unable to get contact picture for user {} in context {}", data.getUserId(), data.getContextId(), e);
+            LOGGER.debug("Unable to get contact picture for user {} in context {}", modified.getUserId(), modified.getContextId(), e);
         }
 
-        return result;
+        return null;
     }
 
     @Override
@@ -109,7 +104,7 @@ public class UserPictureFinder implements ContactPictureFinder {
 
     @Override
     public boolean isApplicable(ContactPictureRequestData data) {
-        return data.hasUser() && false == (data.hasContact() && data.hasFolder());
+        return data.hasUser() && false == data.hasContact();
     }
 
 }

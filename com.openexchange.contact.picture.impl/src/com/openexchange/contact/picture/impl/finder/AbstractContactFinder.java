@@ -53,12 +53,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
-import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -73,9 +73,6 @@ import com.openexchange.userconf.UserPermissionService;
 public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractContactFinder.class);
-
-    protected final static ContactField[] IMAGE_FIELD = new ContactField[] { ContactField.OBJECT_ID, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE1_URL,
-        ContactField.IMAGE_LAST_MODIFIED, ContactField.LAST_MODIFIED };
 
     protected final ContactService contactService;
 
@@ -110,10 +107,10 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     /**
      * Modifies the {@link ContactPictureRequestData} in the result
      * 
-     * @param result The {@link FinderResult}
+     * @param data The {@link ContactPictureRequestData}
      * @param contact To get the data from
      */
-    abstract void modfiyResult(FinderResult result, Contact contact);
+    abstract void modfiyResult(ContactPictureRequestData data, Contact contact);
 
     /**
      * Personalized error logging
@@ -124,19 +121,18 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     abstract void handleException(ContactPictureRequestData data, OXException exception);
 
     @Override
-    public FinderResult getPicture(FinderResult result) throws OXException {
-        ContactPictureRequestData data = result.getModified();
+    public ContactPicture getPicture(UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
         try {
-            Contact contact = getContact(data);
-            if (null != contact.getImage1() && ContactPictureUtil.checkImage(contact.getImage1(), data)) {
-                result.setPicture(ContactPictureUtil.fromContact(contact, data.onlyETag()));
+            Contact contact = getContact(modified);
+            if (null != contact.getImage1() && ContactPictureUtil.checkImage(contact.getImage1(), modified)) {
+                return ContactPictureUtil.fromContact(contact, modified.onlyETag());
             } else {
-                modfiyResult(result, contact);
+                modfiyResult(modified, contact);
             }
         } catch (OXException e) {
-            handleException(data, e);
+            handleException(modified, e);
         }
-        return result;
+        return null;
     }
 
     @Override

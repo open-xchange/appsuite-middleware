@@ -52,7 +52,7 @@ package com.openexchange.contact.picture.impl.finder;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.finder.FinderResult;
+import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -83,14 +83,14 @@ public class ContactUserFinder extends AbstractContactFinder {
 
     @Override
     public Contact getContact(ContactPictureRequestData data) throws OXException {
-        return contactService.getUser(data.getSession(), data.getUserId().intValue(), IMAGE_FIELD);
+        return contactService.getUser(data.getSession(), data.getUserId().intValue(), ContactPictureUtil.IMAGE_FIELD);
     }
 
     @Override
-    public void modfiyResult(FinderResult result, Contact contact) {
-        result.getModified().setContactId(I(contact.getObjectID()));
-        if (null == result.getOriginal().getFolderId()) {
-            result.getModified().setFolder(I(FolderObject.CONTACT));
+    public void modfiyResult(ContactPictureRequestData data, Contact contact) {
+        data.setContactId(I(contact.getObjectID()));
+        if (null == data.getFolderId()) {
+            data.setFolder(I(FolderObject.SYSTEM_LDAP_FOLDER_ID));
         }
     }
 

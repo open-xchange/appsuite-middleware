@@ -121,7 +121,7 @@ public class ContactPictureRequestData {
     }
 
     /**
-     * Get the user identifier
+     * Get the identifier of the user to get the picture for
      *
      * @return The identifier or <code>null</code>
      */

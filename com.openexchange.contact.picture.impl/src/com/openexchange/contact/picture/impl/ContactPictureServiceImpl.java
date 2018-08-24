@@ -59,7 +59,6 @@ import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
-import com.openexchange.contact.picture.finder.FinderResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
@@ -88,15 +87,14 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
         try {
             UnmodifiableContactPictureRequestData original = new UnmodifiableContactPictureRequestData(contactData);
             ContactPictureRequestData modified = contactData;
-            FinderResult result = new FinderResult(original, modified);
             for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
                 ContactPictureFinder next = iterator.next();
 
                 // Try to get contact picture
                 if (next.isApplicable(original)) {
-                    result = next.getPicture(result);
-                    if (null != result.getContactPicture()) {
-                        return result.getContactPicture();
+                    ContactPicture result = next.getPicture(original, modified);
+                    if (null != result && result.containsContactPicture()) {
+                        return result;
                     }
                 }
             }

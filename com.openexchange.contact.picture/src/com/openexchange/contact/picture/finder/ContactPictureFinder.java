@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.picture.finder;
 
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Rankable;
 
@@ -69,20 +71,21 @@ public interface ContactPictureFinder extends Rankable {
     /**
      * Get the contact picture for the provided {@link ContactPictureRequestData}
      * 
-     * @param result The {@link FinderResult} to get data from
-     * @return The {@link FinderResult}
+     * @param original The unmodifiable {@link UnmodifiableContactPictureRequestData}
+     * @param modified The {@link ContactPictureRequestData}. Might be modified by the finderx
+     * @return The {@link ContactPicture}
      * @throws OXException In case picture was found, but it is harmful
      */
-    FinderResult getPicture(FinderResult result) throws OXException;
+    ContactPicture getPicture(UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException;
 
     /**
      * Get a value indicating if the {@link ContactPictureFinder} has enough information
      * about the contact to try getting the contact picture
      * 
-     * @param contactPictureRequestData The {@link ContactPictureRequestData} to base the answer on
+     * @param data The {@link ContactPictureRequestData} to base the answer on
      * @return <code>true</code> if the {@link ContactPictureFinder} can search for a contact picture,
      *         <code>false</code> if calling {@link #getPicture(FinderResult)} is superfluous
      */
-    boolean isApplicable(ContactPictureRequestData contactPictureRequestData);
+    boolean isApplicable(ContactPictureRequestData data);
 
 }

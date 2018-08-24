@@ -7,8 +7,8 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.contact.picture.impl.osgi.ContactPictureActivator
 Import-Package: com.openexchange.ajax.container,
- com.openexchange.ajax.helper,
  com.openexchange.ajax.fileholder,
+ com.openexchange.ajax.helper,
  com.openexchange.contact,
  com.openexchange.contact.picture,
  com.openexchange.contact.picture.finder,
@@ -27,6 +27,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.session,
  com.openexchange.threadpool,
  com.openexchange.tools.iterator,
+ com.openexchange.tools.oxfolder,
  com.openexchange.user,
  com.openexchange.userconf,
  org.osgi.framework,

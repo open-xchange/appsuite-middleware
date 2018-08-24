@@ -57,6 +57,7 @@ import com.openexchange.contact.picture.impl.ContactPictureServiceImpl;
 import com.openexchange.contact.picture.impl.finder.ContactIDFinder;
 import com.openexchange.contact.picture.impl.finder.ContactMailFinder;
 import com.openexchange.contact.picture.impl.finder.ContactUserFinder;
+import com.openexchange.contact.picture.impl.finder.GABPictureFinder;
 import com.openexchange.contact.picture.impl.finder.UserPictureFinder;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -80,7 +81,7 @@ public final class ContactPictureActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContactService.class, UserPermissionService.class };
+        return new Class<?>[] { ContactService.class, UserPermissionService.class, UserService.class };
     }
 
     @Override
@@ -100,21 +101,22 @@ public final class ContactPictureActivator extends HousekeepingActivator {
         /*
          * Needed services for ContactPictureFinder
          */
-        UserService userService = getServiceSafe(UserService.class);
-        UserPermissionService userPermissionService = getServiceSafe(UserPermissionService.class);
         ContactService contactService = getServiceSafe(ContactService.class);
+        UserPermissionService userPermissionService = getServiceSafe(UserPermissionService.class);
+        UserService userService = getServiceSafe(UserService.class);
 
         /*
          * Register Finder. Rankings:
          * 1 : UserPictureFinder
          * 20 : ContactFinders (Children will register with 20 + continuous number)
-         * 50 : ...
-         * 
+         * 50 : GAB
+         * 100 : ...
          */
         registerService(ContactPictureFinder.class, new UserPictureFinder(userService));
         registerService(ContactPictureFinder.class, new ContactUserFinder(userPermissionService, contactService));
         registerService(ContactPictureFinder.class, new ContactIDFinder(userPermissionService, contactService));
         registerService(ContactPictureFinder.class, new ContactMailFinder(userPermissionService, contactService));
+        registerService(ContactPictureFinder.class, new GABPictureFinder(userPermissionService, contactService));
 
     }
 
