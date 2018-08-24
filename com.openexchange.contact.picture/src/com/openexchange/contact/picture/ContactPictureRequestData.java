@@ -242,6 +242,15 @@ public class ContactPictureRequestData {
      */
     public void setEmails(String... emails) {
         this.emails.clear();
+        addEmails(emails);
+    }
+
+    /**
+     * Add contacts E-Mails
+     *
+     * @param emails The E-Mails
+     */
+    public void addEmails(String... emails) {
         for (String mail : emails) {
             if (Strings.isNotEmpty(mail)) {
                 this.emails.add(mail);

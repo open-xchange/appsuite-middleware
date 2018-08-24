@@ -86,7 +86,7 @@ public class ContactIDFinder extends AbstractContactFinder {
 
     @Override
     public void modfiyResult(FinderResult result, Contact contact) {
-        result.getModified().setEmails(contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
+        result.getModified().addEmails(contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
     }
 
     @Override
