@@ -57,16 +57,13 @@ import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.DistributionListFields;
-import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.image.ImageDataSource;
-import com.openexchange.image.ImageLocation;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import gnu.trove.map.TIntObjectMap;
@@ -148,16 +145,9 @@ public class ContactWriter extends CommonWriter {
             final byte[] imageData = contact.getImage1();
             if (imageData != null && null != session && contact.getObjectID() > 0) {
                 try {
-                    ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class, true);
-                    ImageDataSource imgSource = (ImageDataSource) conversionService.getDataSource(CONTACT_IMAGE_REGISTRATION_NAME);
-                    if(imgSource != null) {
-                        final ImageLocation imageLocation =
-                            new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(
-                                Integer.toString(contact.getObjectID())).build();
-                        final String imageURL = imgSource.generateUrl(imageLocation, session);
-                        writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
-                    } else {
-                        org.slf4j.LoggerFactory.getLogger(ContactWriter.class).warn("Contact image URL could not be generated.");
+                    String url = ContactUtil.generateImageUrl(session, contact);
+                    if (url != null) {
+                        writeParameter(ContactFields.IMAGE1_URL, url, json);
                     }
                 } catch (final OXException e) {
                     org.slf4j.LoggerFactory.getLogger(ContactWriter.class).warn("Contact image URL could not be generated.", e);
@@ -682,26 +672,16 @@ public class ContactWriter extends CommonWriter {
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 if (contactObject.containsContextId()) {
-                    final byte[] imageData2 = contactObject.getImage1();
-                    if (imageData2 == null) {
-                        writeValueNull(jsonArray);
-                    } else {
-                        try {
-                            ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class, true);
-                            ImageDataSource imgSource = (ImageDataSource) conversionService.getDataSource(CONTACT_IMAGE_REGISTRATION_NAME);
-                            if (imgSource != null) {
-                                final ImageLocation imageLocation = new ImageLocation.Builder().folder(Integer.toString(contactObject.getParentFolderID())).id(Integer.toString(contactObject.getObjectID())).build();
-                                final String imageURL = imgSource.generateUrl(imageLocation, session);
-                                writeValue(imageURL, jsonArray);
-                            } else {
-                                org.slf4j.LoggerFactory.getLogger(ContactWriter.class).warn("Contact image URL could not be generated.");
-                                writeValueNull(jsonArray);
-                            }
-
-                        } catch (final OXException e) {
-                            org.slf4j.LoggerFactory.getLogger(ContactWriter.class).warn("Contact image URL could not be generated.", e);
+                    try {
+                        String url = ContactUtil.generateImageUrl(session, contactObject);
+                        if (url != null) {
+                            writeValue(url, jsonArray);
+                        } else {
                             writeValueNull(jsonArray);
                         }
+                    } catch (final OXException e) {
+                        org.slf4j.LoggerFactory.getLogger(ContactWriter.class).warn("Contact image URL could not be generated.", e);
+                        writeValueNull(jsonArray);
                     }
                 } else {
                     writeValueNull(jsonArray);

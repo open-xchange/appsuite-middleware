@@ -222,12 +222,7 @@ public class PermissionResolver {
         Contact userContact = getUserContact(userID);
         if (null != userContact && 0 < userContact.getNumberOfImages()) {
             try {
-                String url = ContactUtil.generateImageUrl(session, userContact);
-                if (null != url) {
-                    return url;
-                } else {
-                    return null;
-                }
+                return ContactUtil.generateImageUrl(session, userContact);
             } catch (OXException e) {
                 LOGGER.error("Error generating image URL for user {}", I(userID), e);
             }
