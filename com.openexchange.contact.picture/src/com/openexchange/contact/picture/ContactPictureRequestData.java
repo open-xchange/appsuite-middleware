@@ -49,13 +49,10 @@
 
 package com.openexchange.contact.picture;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.session.Session;
 
 /**
  * {@link ContactPictureRequestData} - Object holding data to get a contact picture
@@ -65,6 +62,8 @@ import com.openexchange.session.Session;
  */
 public class ContactPictureRequestData {
 
+    private Integer contextId;
+
     private Integer userId;
 
     private Integer folderId;
@@ -73,28 +72,21 @@ public class ContactPictureRequestData {
 
     private final Set<String> emails;
 
-    private final Session session;
-
     private boolean etag;
 
     /**
      * Initializes a new {@link ContactPictureRequestData}.
-     *
-     * @param session The current session
+     * 
+     * @param contextId The context identifier
      * @param userId The user identifier
      * @param folderId The folder identifier
      * @param contactId The contact identifier
      * @param emails The email addresses
      * @param etag If only eTag should be generated
-     * @throws OXException If session is missing
      *
      */
-    public ContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, Collection<String> emails, boolean etag) throws OXException {
-        if (session == null) {
-            throw ContactPictureExceptionCodes.MISSING_SESSION.create();
-        }
-
-        this.session = session;
+    public ContactPictureRequestData(Integer contextId, Integer userId, Integer folderId, Integer contactId, Collection<String> emails, boolean etag) {
+        this.contextId = contextId;
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
@@ -108,16 +100,7 @@ public class ContactPictureRequestData {
      * @return The identifier or <code>null</code>
      */
     public final Integer getContextId() {
-        return I(session.getContextId());
-    }
-
-    /**
-     * Get the the current {@link Session}
-     *
-     * @return The {@link Session} or <code>null</code>
-     */
-    public final Session getSession() {
-        return session;
+        return contextId;
     }
 
     /**

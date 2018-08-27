@@ -55,12 +55,14 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.picture.ContactPicture;
+import com.openexchange.contact.picture.ContactPictureExceptionCodes;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.session.Session;
 
 /**
  * {@link ContactPictureServiceImpl}
@@ -82,17 +84,22 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
     }
 
     @Override
-    public ContactPicture getPicture(ContactPictureRequestData contactData) {
+    public ContactPicture getPicture(Session session, ContactPictureRequestData contactData) {
         // Ask each finder if it contains the picture
         try {
+            // Check session
+            if (null == session) {
+                throw ContactPictureExceptionCodes.MISSING_SESSION.create();
+            }
+
             UnmodifiableContactPictureRequestData original = new UnmodifiableContactPictureRequestData(contactData);
             ContactPictureRequestData modified = contactData;
             for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
                 ContactPictureFinder next = iterator.next();
 
                 // Try to get contact picture
-                if (next.isApplicable(original)) {
-                    ContactPicture result = next.getPicture(original, modified);
+                if (next.isApplicable(session, original)) {
+                    ContactPicture result = next.getPicture(session, original, modified);
                     if (null != result && result.containsContactPicture()) {
                         return result;
                     }

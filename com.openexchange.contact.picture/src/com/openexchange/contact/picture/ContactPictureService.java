@@ -50,6 +50,7 @@
 package com.openexchange.contact.picture;
 
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
  * {@link ContactPictureService} - Service to get the contact picture
@@ -63,9 +64,10 @@ public interface ContactPictureService {
     /**
      * Get the contact picture for the provided {@link ContactPictureRequestData}
      * 
+     * @param session The session
      * @param contactPictureRequestData The {@link ContactPictureRequestData} to get the picture for
      * @return The {@link ContactPicture} and never <code>null</code>. If no picture is found {@link ContactPicture#FALLBACK_PICTURE} is used
      */
-    ContactPicture getPicture(ContactPictureRequestData contactPictureRequestData);
+    ContactPicture getPicture(Session session, ContactPictureRequestData contactPictureRequestData);
 
 }

@@ -54,12 +54,12 @@ import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link ContactMailFinder} - Finds picture based on user identifier
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> Logic from 'ContactDataSource'
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
@@ -76,13 +76,13 @@ public class ContactMailFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isApplicable(ContactPictureRequestData data) {
-        return super.isApplicable(data) && data.hasEmail() && data.hasFolder();
+    public Contact getContact(Session session, ContactPictureRequestData data) throws OXException {
+        return ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), session, false);
     }
 
     @Override
-    void handleException(ContactPictureRequestData data, OXException e) {
-        LOGGER.debug("Unable to get contact for mail addresses {}.", data.getEmails(), e);
+    public boolean isApplicable(Session session, ContactPictureRequestData data) {
+        return super.isApplicable(session, data) && data.hasEmail() && data.hasFolder();
     }
 
     @Override
@@ -91,7 +91,8 @@ public class ContactMailFinder extends AbstractContactFinder {
     }
 
     @Override
-    public Contact getContact(ContactPictureRequestData data) throws OXException {
-        return ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), data.getSession(), false);
+    void handleException(ContactPictureRequestData data, OXException e) {
+        LOGGER.debug("Unable to get contact for mail addresses {}.", data.getEmails(), e);
     }
+
 }

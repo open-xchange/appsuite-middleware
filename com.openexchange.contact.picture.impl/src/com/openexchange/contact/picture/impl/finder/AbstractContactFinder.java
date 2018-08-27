@@ -60,6 +60,7 @@ import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -98,11 +99,12 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     /**
      * Get the contact
      * 
+     * @param session The {@link Session}
      * @param data The data to get the contact from
      * @return The {@link Contact}
      * @throws OXException If contact can't be found
      */
-    abstract Contact getContact(ContactPictureRequestData data) throws OXException;
+    abstract Contact getContact(Session session, ContactPictureRequestData data) throws OXException;
 
     /**
      * Modifies the {@link ContactPictureRequestData} in the result
@@ -121,9 +123,9 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     abstract void handleException(ContactPictureRequestData data, OXException exception);
 
     @Override
-    public ContactPicture getPicture(UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
+    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
         try {
-            Contact contact = getContact(modified);
+            Contact contact = getContact(session, modified);
             if (ContactPictureUtil.hasValidImage(contact, modified)) {
                 return ContactPictureUtil.fromContact(contact, modified.onlyETag());
             } else {
@@ -138,10 +140,10 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isApplicable(ContactPictureRequestData cprd) {
+    public boolean isApplicable(Session session, ContactPictureRequestData cprd) {
         if (null != userPermissionService && null != contactService) {
             try {
-                return userPermissionService.getUserPermissionBits(cprd.getSession().getUserId(), cprd.getContextId().intValue()).hasContact();
+                return userPermissionService.getUserPermissionBits(session.getUserId(), cprd.getContextId().intValue()).hasContact();
             } catch (OXException e) {
                 LOGGER.warn("Unable to get user permissions. Therefore can't allow to access contacts.", e);
             }

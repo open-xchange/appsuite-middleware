@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.picture.json;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -98,7 +99,7 @@ public class GetAction implements ETagAwareAJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        ContactPicture picture = getPicture(getData(requestData, session, false));
+        ContactPicture picture = getPicture(session, getData(requestData, session, false));
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
         setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
         return result;
@@ -107,18 +108,18 @@ public class GetAction implements ETagAwareAJAXActionService {
     private ContactPictureRequestData getData(AJAXRequestData requestData, Session session, boolean etagOnly) throws OXException {
         Integer contactId = requestData.getParameter(CONTACT_PARAM, Integer.class, true);
         Integer folderId = requestData.getParameter(CONTACT_FOLDER_PARAM, Integer.class, true);
-        if(folderId == null && contactId != null) {
+        if (folderId == null && contactId != null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(CONTACT_FOLDER_PARAM);
         }
         String email = requestData.getParameter(MAIL_PARAM);
         Integer userId = requestData.getParameter(USER_PARAM, Integer.class, true);
 
-        return new ContactPictureRequestData(session, userId, folderId, contactId, Collections.singleton(email), etagOnly);
+        return new ContactPictureRequestData(I(session.getContextId()), userId, folderId, contactId, Collections.singleton(email), etagOnly);
     }
 
     @Override
     public boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException {
-        ContactPicture contactPicture = getPicture(getData(request, session, true));
+        ContactPicture contactPicture = getPicture(session, getData(request, session, true));
         String etag = contactPicture.getETag();
         if (etag == null) {
             return false;
@@ -137,7 +138,7 @@ public class GetAction implements ETagAwareAJAXActionService {
         }
     }
 
-    private ContactPicture getPicture(ContactPictureRequestData data) throws OXException {
-        return services.getServiceSafe(ContactPictureService.class).getPicture(data);
+    private ContactPicture getPicture(Session session, ContactPictureRequestData data) throws OXException {
+        return services.getServiceSafe(ContactPictureService.class).getPicture(session, data);
     }
 }

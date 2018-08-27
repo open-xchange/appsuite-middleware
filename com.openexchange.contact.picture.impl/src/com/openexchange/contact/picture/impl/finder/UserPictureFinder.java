@@ -59,6 +59,7 @@ import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 /**
@@ -84,7 +85,7 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public ContactPicture getPicture(UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
+    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
         try {
             User user = userService.getUser(i(modified.getUserId()), i(modified.getContextId()));
             if (null != user) {
@@ -103,7 +104,7 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isApplicable(ContactPictureRequestData data) {
+    public boolean isApplicable(Session session, ContactPictureRequestData data) {
         return data.hasUser() && false == data.hasContact();
     }
 

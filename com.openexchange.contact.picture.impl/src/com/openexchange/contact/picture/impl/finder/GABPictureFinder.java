@@ -59,6 +59,7 @@ import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -88,8 +89,8 @@ public class GABPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public ContactPicture getPicture(UnmodifiableContactPictureRequestData data, ContactPictureRequestData modified) throws OXException {
-        Contact contact = ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), data.getSession(), true);
+    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData data, ContactPictureRequestData modified) throws OXException {
+        Contact contact = ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), session, true);
         if (ContactPictureUtil.hasValidImage(contact, data)) {
             return ContactPictureUtil.fromContact(contact, data.onlyETag());
         }
@@ -97,10 +98,10 @@ public class GABPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isApplicable(ContactPictureRequestData data) {
+    public boolean isApplicable(Session session, ContactPictureRequestData data) {
         try {
             // Use ID of the user requesting the picture
-            return data.hasUser() && data.hasContact() && userPermissionService.getUserPermissionBits(data.getSession().getUserId(), data.getContextId().intValue()).isGlobalAddressBookEnabled();
+            return data.hasUser() && data.hasContact() && userPermissionService.getUserPermissionBits(session.getUserId(), data.getContextId().intValue()).isGlobalAddressBookEnabled();
         } catch (OXException e) {
             LOGGER.warn("Unable to check if Global AddressBook is enabled.", e);
         }

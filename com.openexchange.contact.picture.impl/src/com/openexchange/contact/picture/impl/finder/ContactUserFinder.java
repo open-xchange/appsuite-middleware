@@ -56,6 +56,7 @@ import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.session.Session;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
@@ -77,13 +78,13 @@ public class ContactUserFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isApplicable(ContactPictureRequestData data) {
-        return super.isApplicable(data) && data.hasUser();
+    public boolean isApplicable(Session session, ContactPictureRequestData data) {
+        return super.isApplicable(session, data) && data.hasUser();
     }
 
     @Override
-    public Contact getContact(ContactPictureRequestData data) throws OXException {
-        return contactService.getUser(data.getSession(), data.getUserId().intValue(), ContactPictureUtil.IMAGE_FIELD);
+    public Contact getContact(Session session, ContactPictureRequestData data) throws OXException {
+        return contactService.getUser(session, data.getUserId().intValue(), ContactPictureUtil.IMAGE_FIELD);
     }
 
     @Override

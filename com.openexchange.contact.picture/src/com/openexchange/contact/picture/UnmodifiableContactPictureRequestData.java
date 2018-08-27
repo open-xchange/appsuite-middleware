@@ -50,8 +50,6 @@
 package com.openexchange.contact.picture;
 
 import java.util.Set;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link UnmodifiableContactPictureRequestData}
@@ -61,12 +59,12 @@ import com.openexchange.session.Session;
  */
 public class UnmodifiableContactPictureRequestData extends ContactPictureRequestData {
 
-    public UnmodifiableContactPictureRequestData(Session session, Integer userId, Integer folderId, Integer contactId, Set<String> emails, boolean etag) throws OXException {
-        super(session, userId, folderId, contactId, emails, etag);
+    public UnmodifiableContactPictureRequestData(Integer contextId, Integer userId, Integer folderId, Integer contactId, Set<String> emails, boolean etag) {
+        super(contextId, userId, folderId, contactId, emails, etag);
     }
 
-    public UnmodifiableContactPictureRequestData(ContactPictureRequestData data) throws OXException {
-        super(data.getSession(), data.getUserId(), data.getFolderId(), data.getContactId(), data.getEmails(), data.onlyETag());
+    public UnmodifiableContactPictureRequestData(ContactPictureRequestData data) {
+        super(data.getContextId(), data.getUserId(), data.getFolderId(), data.getContactId(), data.getEmails(), data.onlyETag());
     }
 
     @Override
