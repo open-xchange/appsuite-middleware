@@ -47,28 +47,24 @@
  *
  */
 
-package com.openexchange.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.contacts.parser.consumers;
 
 import java.util.function.BiConsumer;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link EmailAddressesConsumer} - Parses the contact's e-mail addresses. Note that Microsoft
- * can store an unlimited mount of e-mail addresses for a contact due to their different
- * data model (probably EAV). Our contacts API however can only store three, therefore
- * we only fetch the first three we encounter.
+ * {@link OccupationConsumer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class EmailAddressesConsumer implements BiConsumer<JSONObject, Contact> {
+public class OccupationConsumer implements BiConsumer<JSONObject, Contact> {
 
     /**
-     * Initialises a new {@link EmailAddressesConsumer}.
+     * Initialises a new {@link OccupationConsumer}.
      */
-    public EmailAddressesConsumer() {
+    public OccupationConsumer() {
         super();
     }
 
@@ -79,27 +75,26 @@ public class EmailAddressesConsumer implements BiConsumer<JSONObject, Contact> {
      */
     @Override
     public void accept(JSONObject t, Contact u) {
-        if (!t.hasAndNotNull("emailAddresses")) {
-            return;
+        if (t.hasAndNotNull("jobTitle")) {
+            u.setPosition(t.optString("jobTitle"));
         }
-        JSONArray addresses = t.optJSONArray("emailAddresses");
-        int count = 0;
-        for (int index = 0; index < addresses.length(); index++) {
-            JSONObject email = addresses.optJSONObject(index);
-            String address = email.optString("address");
-            switch (count++) {
-                case 0:
-                    u.setEmail1(address);
-                    break;
-                case 1:
-                    u.setEmail2(address);
-                    break;
-                case 2:
-                    u.setEmail3(address);
-                    break;
-                default:
-                    return;
-            }
+        if (t.hasAndNotNull("profession")) {
+            u.setProfession(t.optString("profession"));
+        }
+        if (t.hasAndNotNull("department")) {
+            u.setDepartment(t.optString("department"));
+        }
+        if (t.hasAndNotNull("companyName")) {
+            u.setCompany(t.optString("companyName"));
+        }
+        if (t.hasAndNotNull("yomiCompanyName")) {
+            u.setYomiCompany(t.optString("yomiCompanyName"));
+        }
+        if (t.hasAndNotNull("assistantName")) {
+            u.setAssistantName(t.optString("assistantName"));
+        }
+        if (t.hasAndNotNull("manager")) {
+            u.setManagerName(t.optString("manager"));
         }
     }
 }

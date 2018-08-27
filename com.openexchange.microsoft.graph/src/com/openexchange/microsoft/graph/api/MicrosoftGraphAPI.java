@@ -61,6 +61,7 @@ public class MicrosoftGraphAPI {
 
     private final MicrosoftGraphRESTClient client;
     private final MicrosoftGraphContactsAPI contactsAPI;
+    private final MicrosoftGraphOneDriveAPI oneDriveAPI;
 
     /**
      * Initialises a new {@link MicrosoftGraphAPI}.
@@ -69,6 +70,7 @@ public class MicrosoftGraphAPI {
         super();
         client = new MicrosoftGraphRESTClient();
         contactsAPI = new MicrosoftGraphContactsAPI(client);
+        oneDriveAPI = new MicrosoftGraphOneDriveAPI(client);
     }
 
     /**
@@ -78,5 +80,14 @@ public class MicrosoftGraphAPI {
      */
     public MicrosoftGraphContactsAPI contacts() {
         return contactsAPI;
+    }
+
+    /**
+     * Gets the oneDriveAPI
+     *
+     * @return The oneDriveAPI
+     */
+    public MicrosoftGraphOneDriveAPI getOneDriveAPI() {
+        return oneDriveAPI;
     }
 }

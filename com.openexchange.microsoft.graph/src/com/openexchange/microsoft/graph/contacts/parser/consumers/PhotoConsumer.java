@@ -47,29 +47,36 @@
  *
  */
 
-package com.openexchange.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.contacts.parser.consumers;
 
 import java.util.function.BiConsumer;
-import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.microsoft.graph.api.MicrosoftGraphContactsAPI;
 
 /**
- * {@link PhoneNumbersConsumer} - Parses the contact's phone numbers. Note that Microsoft
- * can store an unlimited mount of phone numbers for a contact due to their different
- * data model (probably EAV). Our contacts API however can only store a handful, therefore
- * we only fetch the first seven we encounter.
+ * {@link PhotoConsumer} - Parses the birthday of the contact
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class PhoneNumbersConsumer implements BiConsumer<JSONObject, Contact> {
+public class PhotoConsumer implements BiConsumer<JSONObject, Contact> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PhotoConsumer.class);
+
+    private final MicrosoftGraphContactsAPI api;
+    private String accessToken;
 
     /**
-     * Initialises a new {@link PhoneNumbersConsumer}.
+     * Initialises a new {@link PhotoConsumer}.
      */
-    public PhoneNumbersConsumer() {
+    public PhotoConsumer(MicrosoftGraphContactsAPI api, String accessToken) {
         super();
+        this.api = api;
+        this.accessToken = accessToken;
     }
 
     /*
@@ -79,58 +86,12 @@ public class PhoneNumbersConsumer implements BiConsumer<JSONObject, Contact> {
      */
     @Override
     public void accept(JSONObject t, Contact u) {
-        parseHomePhones(t, u);
-        parseBusinessPhones(t, u);
-        parseOtherPhones(t, u);
-    }
-
-    private void parseHomePhones(JSONObject t, Contact u) {
-        if (!t.hasAndNotNull("homePhones")) {
-            return;
-        }
-        JSONArray phonesArray = t.optJSONArray("homePhones");
-
-        int count = 0;
-        for (int index = 0; index < phonesArray.length(); index++) {
-            String phone = phonesArray.optString(index);
-            switch (count++) {
-                case 0:
-                    u.setTelephoneHome1(phone);
-                    break;
-                case 1:
-                    u.setTelephoneHome2(phone);
-                    break;
-                default:
-                    return;
-            }
-        }
-    }
-
-    private void parseBusinessPhones(JSONObject t, Contact u) {
-        if (!t.hasAndNotNull("businessPhones")) {
-            return;
-        }
-        JSONArray phonesArray = t.optJSONArray("businessPhones");
-
-        int count = 0;
-        for (int index = 0; index < phonesArray.length(); index++) {
-            String phone = phonesArray.optString(index);
-            switch (count++) {
-                case 0:
-                    u.setTelephoneBusiness1(phone);
-                    break;
-                case 1:
-                    u.setTelephoneBusiness2(phone);
-                    break;
-                default:
-                    return;
-            }
-        }
-    }
-
-    private void parseOtherPhones(JSONObject t, Contact u) {
-        if (t.hasAndNotNull("mobilePhone")) {
-            u.setCellularTelephone1(t.optString("mobilePhone"));
+        String id = t.optString("id");
+        try {
+            u.setImage1(api.getContactPhoto(id, accessToken));
+            u.setImageContentType(api.getContactPhotoMetadata(id, accessToken).optString("@odata.mediaContentType"));
+        } catch (OXException e) {
+            LOG.debug("Cannot get photo for contact with id '{}'", id);
         }
     }
 }

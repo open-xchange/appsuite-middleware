@@ -47,24 +47,28 @@
  *
  */
 
-package com.openexchange.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.contacts.parser.consumers;
 
 import java.util.function.BiConsumer;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link PostalAddressesConsumer}
+ * {@link ImAddressesConsumer} - Parses the instant messaging addresses. Note that Microsoft
+ * can store an unlimited mount of instant messaging addresses for a contact due to their
+ * different data model (probably EAV). Our contacts API however can only store two,
+ * therefore we only fetch the first two we encounter.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class PostalAddressesConsumer implements BiConsumer<JSONObject, Contact> {
+public class ImAddressesConsumer implements BiConsumer<JSONObject, Contact> {
 
     /**
-     * Initialises a new {@link PostalAddressesConsumer}.
+     * Initialises a new {@link ImAddressesConsumer}.
      */
-    public PostalAddressesConsumer() {
+    public ImAddressesConsumer() {
         super();
     }
 
@@ -75,60 +79,22 @@ public class PostalAddressesConsumer implements BiConsumer<JSONObject, Contact> 
      */
     @Override
     public void accept(JSONObject t, Contact u) {
-        if (t.hasAndNotNull("homeAddress")) {
-            JSONObject homeAddress = t.optJSONObject("homeAddress");
-            if (homeAddress.hasAndNotNull("street")) {
-                u.setStreetHome(homeAddress.optString("street"));
-            }
-            if (homeAddress.hasAndNotNull("city")) {
-                u.setCityHome(homeAddress.optString("city"));
-            }
-            if (homeAddress.hasAndNotNull("postalCode")) {
-                u.setPostalCodeHome(homeAddress.optString("postalCode"));
-            }
-            if (homeAddress.hasAndNotNull("country")) {
-                u.setCountryHome(homeAddress.optString("country"));
-            }
-            if (homeAddress.hasAndNotNull("state")) {
-                u.setStateHome(homeAddress.optString("state"));
-            }
+        if (!t.hasAndNotNull("imAddresses")) {
+            return;
         }
-
-        if (t.hasAndNotNull("businessAddress")) {
-            JSONObject businessAddress = t.optJSONObject("businessAddress");
-            if (businessAddress.hasAndNotNull("street")) {
-                u.setStreetBusiness(businessAddress.optString("street"));
-            }
-            if (businessAddress.hasAndNotNull("city")) {
-                u.setCityBusiness(businessAddress.optString("city"));
-            }
-            if (businessAddress.hasAndNotNull("postalCode")) {
-                u.setPostalCodeBusiness(businessAddress.optString("postalCode"));
-            }
-            if (businessAddress.hasAndNotNull("country")) {
-                u.setCountryBusiness(businessAddress.optString("country"));
-            }
-            if (businessAddress.hasAndNotNull("state")) {
-                u.setStateBusiness(businessAddress.optString("state"));
-            }
-        }
-
-        if (t.hasAndNotNull("otherAddress")) {
-            JSONObject otherAddress = t.optJSONObject("otherAddress");
-            if (otherAddress.hasAndNotNull("street")) {
-                u.setStreetOther(otherAddress.optString("street"));
-            }
-            if (otherAddress.hasAndNotNull("city")) {
-                u.setCityOther(otherAddress.optString("city"));
-            }
-            if (otherAddress.hasAndNotNull("postalCode")) {
-                u.setPostalCodeOther(otherAddress.optString("postalCode"));
-            }
-            if (otherAddress.hasAndNotNull("country")) {
-                u.setCountryOther(otherAddress.optString("country"));
-            }
-            if (otherAddress.hasAndNotNull("state")) {
-                u.setStateOther(otherAddress.optString("state"));
+        JSONArray addressesArray = t.optJSONArray("imAddresses");
+        int count = 0;
+        for (int index = 0; index < addressesArray.length(); index++) {
+            String address = addressesArray.optString(index);
+            switch (count++) {
+                case 0:
+                    u.setInstantMessenger1(address);
+                    break;
+                case 1:
+                    u.setInstantMessenger2(address);
+                    break;
+                default:
+                    return;
             }
         }
     }

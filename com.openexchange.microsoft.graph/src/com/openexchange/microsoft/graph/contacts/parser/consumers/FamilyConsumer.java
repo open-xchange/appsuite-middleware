@@ -47,25 +47,24 @@
  *
  */
 
-package com.openexchange.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.contacts.parser.consumers;
 
 import java.util.function.BiConsumer;
 import org.json.JSONObject;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link NameConsumer} - Parses the given name, family name and full name of the specified contact
- * along with their yomi representations if available.
+ * {@link FamilyConsumer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class NameConsumer implements BiConsumer<JSONObject, Contact> {
+public class FamilyConsumer implements BiConsumer<JSONObject, Contact> {
 
     /**
-     * Initialises a new {@link NameConsumer}.
+     * Initialises a new {@link FamilyConsumer}.
      */
-    public NameConsumer() {
+    public FamilyConsumer() {
         super();
     }
 
@@ -76,29 +75,8 @@ public class NameConsumer implements BiConsumer<JSONObject, Contact> {
      */
     @Override
     public void accept(JSONObject t, Contact u) {
-        if (t.hasAndNotNull("displayName")) {
-            u.setDisplayName(t.optString("displayName"));
-        }
-        if (t.hasAndNotNull("givenName")) {
-            u.setGivenName(t.optString("givenName"));
-        }
-        if (t.hasAndNotNull("middleName")) {
-            u.setMiddleName(t.optString("middleName"));
-        }
-        if (t.hasAndNotNull("nickName")) {
-            u.setNickname(t.optString("nickName"));
-        }
-        if (t.hasAndNotNull("surname")) {
-            u.setSurName(t.optString("surname"));
-        }
-        if (t.hasAndNotNull("title")) {
-            u.setTitle(t.optString("title"));
-        }
-        if (t.hasAndNotNull("yomiGivenName")) {
-            u.setYomiFirstName(t.optString("yomiGivenName"));
-        }
-        if (t.hasAndNotNull("yomiSurname")) {
-            u.setYomiLastName(t.optString("yomiSurname"));
+        if (t.hasAndNotNull("spouseName")) {
+            u.setSpouseName(t.optString("spouseName"));
         }
     }
 }

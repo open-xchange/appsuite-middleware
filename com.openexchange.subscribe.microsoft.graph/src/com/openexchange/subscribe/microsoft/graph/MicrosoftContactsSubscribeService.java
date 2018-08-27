@@ -59,7 +59,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
-import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
+import com.openexchange.microsoft.graph.contacts.MicrosoftGraphContactsService;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthServiceMetaData;

@@ -47,35 +47,23 @@
  *
  */
 
-package com.openexchange.microsoft.graph;
+package com.openexchange.microsoft.graph.onedrive;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.file.storage.DefaultFile;
 
 /**
- * {@link MicrosoftGraphContactsService}
+ * {@link OneDriveFile}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public interface MicrosoftGraphContactsService {
+public class OneDriveFile extends DefaultFile {
 
     /**
-     * Fetches a {@link List} with all user's contacts
-     * 
-     * @param accessToken The OAuth access token
-     * @return a {@link List} with all user's contacts
+     * Initialises a new {@link OneDriveFile}.
      */
-    List<Contact> getContacts(String accessToken) throws OXException;
+    public OneDriveFile() {
+        super();
+    }
 
-    /**
-     * Fetches a {@link List} with the user's contacts that fall within the specified index range
-     * 
-     * @param accessToken The OAuth access token
-     * @param startOffset The start offset
-     * @param skip The skip offset
-     * @return a {@link List} with the user's contacts that fall within the specified index range
-     */
-    List<Contact> getContacts(String accessToken, int startOffset, int skip) throws OXException;
 }

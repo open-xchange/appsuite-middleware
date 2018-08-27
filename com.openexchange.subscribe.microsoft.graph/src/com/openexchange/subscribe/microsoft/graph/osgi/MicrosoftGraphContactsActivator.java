@@ -54,7 +54,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
+import com.openexchange.microsoft.graph.contacts.MicrosoftGraphContactsService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;

@@ -49,9 +49,9 @@
 
 package com.openexchange.microsoft.graph.osgi;
 
-import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphAPI;
-import com.openexchange.microsoft.graph.impl.MicrosoftGraphContactsServiceImpl;
+import com.openexchange.microsoft.graph.contacts.MicrosoftGraphContactsService;
+import com.openexchange.microsoft.graph.contacts.impl.MicrosoftGraphContactsServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**

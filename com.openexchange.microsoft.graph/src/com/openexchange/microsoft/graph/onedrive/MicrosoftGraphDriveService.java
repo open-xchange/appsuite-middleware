@@ -47,51 +47,16 @@
  *
  */
 
-package com.openexchange.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.onedrive;
 
-import java.util.function.BiConsumer;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.microsoft.graph.api.MicrosoftGraphContactsAPI;
 
 /**
- * {@link PhotoConsumer} - Parses the birthday of the contact
+ * {@link MicrosoftGraphDriveService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class PhotoConsumer implements BiConsumer<JSONObject, Contact> {
+public interface MicrosoftGraphDriveService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PhotoConsumer.class);
-
-    private final MicrosoftGraphContactsAPI api;
-    private String accessToken;
-
-    /**
-     * Initialises a new {@link PhotoConsumer}.
-     */
-    public PhotoConsumer(MicrosoftGraphContactsAPI api, String accessToken) {
-        super();
-        this.api = api;
-        this.accessToken = accessToken;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
-     */
-    @Override
-    public void accept(JSONObject t, Contact u) {
-        String id = t.optString("id");
-        try {
-            u.setImage1(api.getContactPhoto(id, accessToken));
-            u.setImageContentType(api.getContactPhotoMetadata(id, accessToken).optString("@odata.mediaContentType"));
-        } catch (OXException e) {
-            LOG.debug("Cannot get photo for contact with id '{}'", id);
-        }
-    }
+    void getRootFolder(String accessToken);
 }

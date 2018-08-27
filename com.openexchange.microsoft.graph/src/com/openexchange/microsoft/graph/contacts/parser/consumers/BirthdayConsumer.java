@@ -47,24 +47,52 @@
  *
  */
 
-package com.openexchange.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.contacts.parser.consumers;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.function.BiConsumer;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.util.TimeZones;
 
 /**
- * {@link NoteConsumer}
+ * {@link BirthdayConsumer} - Parses the birthday of the contact
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class NoteConsumer implements BiConsumer<JSONObject, Contact> {
+public class BirthdayConsumer implements BiConsumer<JSONObject, Contact> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BirthdayConsumer.class);
 
     /**
-     * Initialises a new {@link NoteConsumer}.
+     * The birthday {@link Date} format
+     * 
+     * @see <a href="https://developers.google.com/contacts/v3/reference#gcBirthday">gContact:birthday</a>
      */
-    public NoteConsumer() {
+    private final static String dateFormatPattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
+    /**
+     * Thread local {@link SimpleDateFormat} using "yyyy-MM-ddTHH:mm:ssZ" as pattern.
+     */
+    private static final ThreadLocal<SimpleDateFormat> BIRTHDAY_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+
+        @Override
+        protected SimpleDateFormat initialValue() {
+            SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatPattern);
+            dateFormat.setTimeZone(TimeZones.UTC);
+            return dateFormat;
+        }
+    };
+
+    /**
+     * Initialises a new {@link BirthdayConsumer}.
+     */
+    public BirthdayConsumer() {
         super();
     }
 
@@ -75,8 +103,14 @@ public class NoteConsumer implements BiConsumer<JSONObject, Contact> {
      */
     @Override
     public void accept(JSONObject t, Contact u) {
-        if (t.hasAndNotNull("personalNotes")) {
-            u.setNote(t.optString("personalNotes"));
+        if (!t.hasAndNotNull("birthday")) {
+            return;
+        }
+        String birthday = t.optString("birthday");
+        try {
+            u.setBirthday(BIRTHDAY_FORMAT.get().parse(birthday));
+        } catch (ParseException e) {
+            LOG.warn("Unable to parse '{}' as a birthday.", birthday);
         }
     }
 }

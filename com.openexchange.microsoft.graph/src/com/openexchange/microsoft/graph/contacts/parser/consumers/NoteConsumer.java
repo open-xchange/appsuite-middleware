@@ -47,28 +47,24 @@
  *
  */
 
-package com.openexchange.microsoft.graph.parser.consumers;
+package com.openexchange.microsoft.graph.contacts.parser.consumers;
 
 import java.util.function.BiConsumer;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link ImAddressesConsumer} - Parses the instant messaging addresses. Note that Microsoft
- * can store an unlimited mount of instant messaging addresses for a contact due to their
- * different data model (probably EAV). Our contacts API however can only store two,
- * therefore we only fetch the first two we encounter.
+ * {@link NoteConsumer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class ImAddressesConsumer implements BiConsumer<JSONObject, Contact> {
+public class NoteConsumer implements BiConsumer<JSONObject, Contact> {
 
     /**
-     * Initialises a new {@link ImAddressesConsumer}.
+     * Initialises a new {@link NoteConsumer}.
      */
-    public ImAddressesConsumer() {
+    public NoteConsumer() {
         super();
     }
 
@@ -79,23 +75,8 @@ public class ImAddressesConsumer implements BiConsumer<JSONObject, Contact> {
      */
     @Override
     public void accept(JSONObject t, Contact u) {
-        if (!t.hasAndNotNull("imAddresses")) {
-            return;
-        }
-        JSONArray addressesArray = t.optJSONArray("imAddresses");
-        int count = 0;
-        for (int index = 0; index < addressesArray.length(); index++) {
-            String address = addressesArray.optString(index);
-            switch (count++) {
-                case 0:
-                    u.setInstantMessenger1(address);
-                    break;
-                case 1:
-                    u.setInstantMessenger2(address);
-                    break;
-                default:
-                    return;
-            }
+        if (t.hasAndNotNull("personalNotes")) {
+            u.setNote(t.optString("personalNotes"));
         }
     }
 }

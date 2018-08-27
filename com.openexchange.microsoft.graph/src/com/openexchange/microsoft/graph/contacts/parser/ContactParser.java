@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.microsoft.graph.parser;
+package com.openexchange.microsoft.graph.contacts.parser;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -57,16 +57,16 @@ import org.json.JSONObject;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphContactsAPI;
-import com.openexchange.microsoft.graph.parser.consumers.BirthdayConsumer;
-import com.openexchange.microsoft.graph.parser.consumers.EmailAddressesConsumer;
-import com.openexchange.microsoft.graph.parser.consumers.FamilyConsumer;
-import com.openexchange.microsoft.graph.parser.consumers.ImAddressesConsumer;
-import com.openexchange.microsoft.graph.parser.consumers.NameConsumer;
-import com.openexchange.microsoft.graph.parser.consumers.NoteConsumer;
-import com.openexchange.microsoft.graph.parser.consumers.OccupationConsumer;
-import com.openexchange.microsoft.graph.parser.consumers.PhoneNumbersConsumer;
-import com.openexchange.microsoft.graph.parser.consumers.PhotoConsumer;
-import com.openexchange.microsoft.graph.parser.consumers.PostalAddressesConsumer;
+import com.openexchange.microsoft.graph.contacts.parser.consumers.BirthdayConsumer;
+import com.openexchange.microsoft.graph.contacts.parser.consumers.EmailAddressesConsumer;
+import com.openexchange.microsoft.graph.contacts.parser.consumers.FamilyConsumer;
+import com.openexchange.microsoft.graph.contacts.parser.consumers.ImAddressesConsumer;
+import com.openexchange.microsoft.graph.contacts.parser.consumers.NameConsumer;
+import com.openexchange.microsoft.graph.contacts.parser.consumers.NoteConsumer;
+import com.openexchange.microsoft.graph.contacts.parser.consumers.OccupationConsumer;
+import com.openexchange.microsoft.graph.contacts.parser.consumers.PhoneNumbersConsumer;
+import com.openexchange.microsoft.graph.contacts.parser.consumers.PhotoConsumer;
+import com.openexchange.microsoft.graph.contacts.parser.consumers.PostalAddressesConsumer;
 
 /**
  * {@link ContactParser}

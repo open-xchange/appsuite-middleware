@@ -47,34 +47,58 @@
  *
  */
 
-package com.openexchange.microsoft.graph.api.client;
+package com.openexchange.microsoft.graph.contacts.parser.consumers;
 
-import com.openexchange.rest.client.v2.RESTEndPoint;
+import java.util.function.BiConsumer;
+import org.json.JSONObject;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link MicrosoftGraphRESTEndPoint}
+ * {@link NameConsumer} - Parses the given name, family name and full name of the specified contact
+ * along with their yomi representations if available.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public enum MicrosoftGraphRESTEndPoint implements RESTEndPoint {
+public class NameConsumer implements BiConsumer<JSONObject, Contact> {
 
     /**
-     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/contact">Contact Resource</a>
+     * Initialises a new {@link NameConsumer}.
      */
-    contacts,
-    /**
-     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/onedrive">OneDrive Resource</a>
-     */
-    drive;
+    public NameConsumer() {
+        super();
+    }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.rest.client.RESTEndPoint#getEndPoint()
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
      */
     @Override
-    public String getEndPoint() {
-        return name();
+    public void accept(JSONObject t, Contact u) {
+        if (t.hasAndNotNull("displayName")) {
+            u.setDisplayName(t.optString("displayName"));
+        }
+        if (t.hasAndNotNull("givenName")) {
+            u.setGivenName(t.optString("givenName"));
+        }
+        if (t.hasAndNotNull("middleName")) {
+            u.setMiddleName(t.optString("middleName"));
+        }
+        if (t.hasAndNotNull("nickName")) {
+            u.setNickname(t.optString("nickName"));
+        }
+        if (t.hasAndNotNull("surname")) {
+            u.setSurName(t.optString("surname"));
+        }
+        if (t.hasAndNotNull("title")) {
+            u.setTitle(t.optString("title"));
+        }
+        if (t.hasAndNotNull("yomiGivenName")) {
+            u.setYomiFirstName(t.optString("yomiGivenName"));
+        }
+        if (t.hasAndNotNull("yomiSurname")) {
+            u.setYomiLastName(t.optString("yomiSurname"));
+        }
     }
 }

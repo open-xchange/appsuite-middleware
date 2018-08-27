@@ -47,50 +47,90 @@
  *
  */
 
-package com.openexchange.microsoft.graph.impl;
+package com.openexchange.microsoft.graph.contacts.parser.consumers;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
+import java.util.function.BiConsumer;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.microsoft.graph.MicrosoftGraphContactsService;
-import com.openexchange.microsoft.graph.api.MicrosoftGraphContactsAPI;
-import com.openexchange.microsoft.graph.parser.ContactParser;
 
 /**
- * {@link MicrosoftGraphContactsServiceImpl}
+ * {@link PhoneNumbersConsumer} - Parses the contact's phone numbers. Note that Microsoft
+ * can store an unlimited mount of phone numbers for a contact due to their different
+ * data model (probably EAV). Our contacts API however can only store a handful, therefore
+ * we only fetch the first seven we encounter.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MicrosoftGraphContactsServiceImpl implements MicrosoftGraphContactsService {
-
-    private final MicrosoftGraphContactsAPI api;
+public class PhoneNumbersConsumer implements BiConsumer<JSONObject, Contact> {
 
     /**
-     * Initialises a new {@link MicrosoftGraphContactsServiceImpl}.
+     * Initialises a new {@link PhoneNumbersConsumer}.
      */
-    public MicrosoftGraphContactsServiceImpl(MicrosoftGraphContactsAPI api) {
+    public PhoneNumbersConsumer() {
         super();
-        this.api = api;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.microsoft.graph.MicrosoftGraphContactsService#getContacts(java.lang.String)
+     * @see java.util.function.BiConsumer#accept(java.lang.Object, java.lang.Object)
      */
     @Override
-    public List<Contact> getContacts(String accessToken) throws OXException {
-        return new ContactParser(api, accessToken).parseFeed(api.getContacts(accessToken));
+    public void accept(JSONObject t, Contact u) {
+        parseHomePhones(t, u);
+        parseBusinessPhones(t, u);
+        parseOtherPhones(t, u);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.microsoft.graph.MicrosoftGraphContactsService#getContacts(java.lang.String, int, int)
-     */
-    @Override
-    public List<Contact> getContacts(String accessToken, int startOffset, int skip) throws OXException {
-        return new ContactParser(api, accessToken).parseFeed(api.getContacts(accessToken, startOffset, skip));
+    private void parseHomePhones(JSONObject t, Contact u) {
+        if (!t.hasAndNotNull("homePhones")) {
+            return;
+        }
+        JSONArray phonesArray = t.optJSONArray("homePhones");
+
+        int count = 0;
+        for (int index = 0; index < phonesArray.length(); index++) {
+            String phone = phonesArray.optString(index);
+            switch (count++) {
+                case 0:
+                    u.setTelephoneHome1(phone);
+                    break;
+                case 1:
+                    u.setTelephoneHome2(phone);
+                    break;
+                default:
+                    return;
+            }
+        }
+    }
+
+    private void parseBusinessPhones(JSONObject t, Contact u) {
+        if (!t.hasAndNotNull("businessPhones")) {
+            return;
+        }
+        JSONArray phonesArray = t.optJSONArray("businessPhones");
+
+        int count = 0;
+        for (int index = 0; index < phonesArray.length(); index++) {
+            String phone = phonesArray.optString(index);
+            switch (count++) {
+                case 0:
+                    u.setTelephoneBusiness1(phone);
+                    break;
+                case 1:
+                    u.setTelephoneBusiness2(phone);
+                    break;
+                default:
+                    return;
+            }
+        }
+    }
+
+    private void parseOtherPhones(JSONObject t, Contact u) {
+        if (t.hasAndNotNull("mobilePhone")) {
+            u.setCellularTelephone1(t.optString("mobilePhone"));
+        }
     }
 }
