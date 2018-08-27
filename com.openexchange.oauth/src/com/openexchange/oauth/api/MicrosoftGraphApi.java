@@ -200,5 +200,23 @@ public class MicrosoftGraphApi extends DefaultApi20 {
             request.addHeader("Authorization", "Bearer " + accessToken.getToken());
             request.addHeader("Accept", "application/json");
         }
+
+        /**
+         * Checks possible expiration for specified access token.
+         *
+         * @param accessToken The access token to validate
+         * @return <code>true</code> if expired; otherwise <code>false</code> if valid
+         */
+        public boolean isExpired(String accessToken) {
+            OAuthRequest request = new OAuthRequest(Verb.GET, "https://graph.microsoft.com/v1.0/me");
+            signRequest(new Token(accessToken, ""), request);
+
+            Response response = request.send();
+            if (response.getCode() == 401 || response.getCode() == 400) {
+                return true;
+            }
+
+            return false;
+        }
     }
 }
