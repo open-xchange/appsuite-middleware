@@ -90,7 +90,7 @@ public class GABPictureFinder implements ContactPictureFinder {
     @Override
     public ContactPicture getPicture(UnmodifiableContactPictureRequestData data, ContactPictureRequestData modified) throws OXException {
         Contact contact = ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), data.getSession(), true);
-        if (null != contact.getImage1() && ContactPictureUtil.checkImage(contact.getImage1(), data)) {
+        if (ContactPictureUtil.hasValidImage(contact, data)) {
             return ContactPictureUtil.fromContact(contact, data.onlyETag());
         }
         return null;

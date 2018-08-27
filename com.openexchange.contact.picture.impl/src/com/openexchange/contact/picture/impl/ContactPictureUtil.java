@@ -88,16 +88,6 @@ public class ContactPictureUtil {
      * Generates a {@link ContactPicture} based on the given bytes
      * 
      * @param contact The {@link Contact}
-     * @return A {@link ContactPicture}
-     */
-    public static ContactPicture fromContact(Contact contact) {
-        return fromContact(contact, false);
-    }
-
-    /**
-     * Generates a {@link ContactPicture} based on the given bytes
-     * 
-     * @param contact The {@link Contact}
      * @param onlyETag <code>true</code> if only eTag should be set
      * @return A {@link ContactPicture}
      */
@@ -120,18 +110,6 @@ public class ContactPictureUtil {
             .append(contact.getLastModified().getTime()).toString(); // @formatter:on
     }
 
-    //    private static String generateETagForLocation(Contact contact, Session session) {
-    //        final ImageLocation imageLocation = new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(Integer.toString(contact.getObjectID())).build();
-    //
-    //        final StringBuilder sb = new StringBuilder(64);
-    //        ImageUtility.startImageUrl(imageLocation, session, null, true, sb);
-    //        if (null == imageLocation.getTimestamp()) {
-    //            sb.append('&').append("timestamp=").append(contact.getLastModified().getTime());
-    //        }
-    //        return sb.toString();
-    //
-    //    }
-
     /**
      * Transforms a byte array into a {@link ByteArrayFileHolder}
      * 
@@ -141,8 +119,20 @@ public class ContactPictureUtil {
     private static ByteArrayFileHolder transformToFileHolder(Contact contact) {
         ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(contact.getImage1());
         fileHolder.setContentType(contact.getImageContentType());
-        // TODO       fileHolder.setName();
+        fileHolder.setName(new StringBuilder("contact-image-").append(contact.getObjectID()).toString());
         return fileHolder;
+    }
+
+    /**
+     * Checks if the contact does contain a valid image to use
+     * 
+     * @param contact The {@link Contact}
+     * @param data Information to log
+     * @return <code>true</code> if the image is valid and can be used, <code>false</code> otherwise
+     * @throws OXException In case picture contains harmful content
+     */
+    public static boolean hasValidImage(Contact contact, ContactPictureRequestData data) throws OXException {
+        return null != contact && null != contact.getImage1() && ContactPictureUtil.checkImage(contact.getImage1(), data);
     }
 
     /**

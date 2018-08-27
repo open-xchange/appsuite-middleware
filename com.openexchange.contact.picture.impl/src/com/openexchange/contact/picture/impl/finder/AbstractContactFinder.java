@@ -124,10 +124,12 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     public ContactPicture getPicture(UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
         try {
             Contact contact = getContact(modified);
-            if (null != contact.getImage1() && ContactPictureUtil.checkImage(contact.getImage1(), modified)) {
+            if (ContactPictureUtil.hasValidImage(contact, modified)) {
                 return ContactPictureUtil.fromContact(contact, modified.onlyETag());
             } else {
-                modfiyResult(modified, contact);
+                if (null != contact) {
+                    modfiyResult(modified, contact);
+                }
             }
         } catch (OXException e) {
             handleException(modified, e);

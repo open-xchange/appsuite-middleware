@@ -64,7 +64,7 @@ public interface ContactPictureService {
      * Get the contact picture for the provided {@link ContactPictureRequestData}
      * 
      * @param contactPictureRequestData The {@link ContactPictureRequestData} to get the picture for
-     * @return The {@link ContactPicture} or <code>null</code>
+     * @return The {@link ContactPicture} and never <code>null</code>. If no picture is found {@link ContactPicture#FALLBACK_PICTURE} is used
      */
     ContactPicture getPicture(ContactPictureRequestData contactPictureRequestData);
 

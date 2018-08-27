@@ -72,7 +72,11 @@ public class ContactPicture {
         ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(new byte[] { 71, 73, 70, 56, 57, 97, 1, 0, 1, 0, -128, 0, 0, 0, 0, 0, -1, -1, -1, 33, -7, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 1, 68, 0, 59 });
         fileHolder.setContentType("image/gif");
         fileHolder.setName("image.gif");
-        FALLBACK_PICTURE = new ContactPicture(null, fileHolder);
+        /*
+         * If default changes, increment ETag for a quick invalidation.
+         * (char-by-char comparison, see https://tools.ietf.org/html/rfc7232#section-2.3.2)
+         */
+        FALLBACK_PICTURE = new ContactPicture("1-fallback-image", fileHolder);
     }
 
     private final String eTag;
