@@ -8,9 +8,11 @@ Automatic-Module-Name: com.openexchange.contact.datasource
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.groupware.contact.datasource.osgi.ContactDatasourceActivator
 Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.fileholder,
  com.openexchange.ajax.helper,
  com.openexchange.ajax.requesthandler,
  com.openexchange.contact,
+ com.openexchange.contact.picture,
  com.openexchange.contact.vcard,
  com.openexchange.conversion,
  com.openexchange.exception,
@@ -26,5 +28,5 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.tools.stream,
  javax.servlet,
  org.json,
- org.slf4j;version="1.7.25",
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j;version="1.7.25"

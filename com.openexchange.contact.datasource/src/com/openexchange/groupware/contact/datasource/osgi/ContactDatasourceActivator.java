@@ -52,6 +52,7 @@ package com.openexchange.groupware.contact.datasource.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
@@ -72,7 +73,7 @@ public class ContactDatasourceActivator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ContactService.class };
+        return new Class[] { ContactService.class, ContactPictureService.class };
     }
 
     @Override

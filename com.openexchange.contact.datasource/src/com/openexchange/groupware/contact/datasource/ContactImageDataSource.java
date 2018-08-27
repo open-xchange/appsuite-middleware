@@ -52,8 +52,12 @@ package com.openexchange.groupware.contact.datasource;
 import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.picture.ContactPicture;
+import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -131,22 +135,13 @@ public final class ContactImageDataSource implements ImageDataSource {
 
     @Override
     public String getETag(final ImageLocation imageLocation, final Session session) throws OXException {
-        final char delim = '#';
-        final StringBuilder builder = new StringBuilder(128);
-        builder.append(delim).append(imageLocation.getFolder());
-        // builder.append(delim).append(imageLocation.getId());
-        // builder.append(delim).append(session.getUserId());
-        // builder.append(delim).append(session.getContextId());
-        if (null == imageLocation.getTimestamp()) {
-            final Contact contact = optContact(session, imageLocation, ContactField.LAST_MODIFIED);
-            if (null != contact) {
-                builder.append(delim).append(contact.getLastModified().getTime());
-            }
-        } else {
-            builder.append(delim).append(imageLocation.getTimestamp());
-        }
-        builder.append(delim);
-        return ImageUtility.getMD5(builder.toString(), "hex");
+        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(session,
+                                                                                            null,
+                                                                                            Tools.getUnsignedInteger(imageLocation.getFolder()),
+                                                                                            Tools.getUnsignedInteger(imageLocation.getId()),
+                                                                                            null,
+                                                                                            true);
+        return services.getServiceSafe(ContactPictureService.class).getPicture(contactPictureRequestData).getETag();
     }
 
     @SuppressWarnings("unchecked")
@@ -170,61 +165,43 @@ public final class ContactImageDataSource implements ImageDataSource {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[0], val);
             }
         }
-        final int objectId;
+        final int contactId;
         {
             final String val = dataArguments.get(ARGS[1]);
             if (val == null) {
                 throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[1]);
             }
             try {
-                objectId = Integer.parseInt(val);
+                contactId = Integer.parseInt(val);
             } catch (final NumberFormatException e) {
                 throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ARGS[1], val);
             }
         }
-        /*
-         * Get contact
-         */
-        final Contact contact = optContact(session, objectId, folder, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE);
-        if (null == contact) {
-            throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(Integer.valueOf(objectId), Integer.valueOf(session.getContextId()));
-        }
+
+        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(session, null, folder, contactId, null, false);
+        ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(contactPictureRequestData);
+
+        IFileHolder fileHolder = picture.getFileHolder();
+
         /*
          * Return contact image
          */
-        final byte[] imageBytes = contact.getImage1();
         final DataProperties properties = new DataProperties(8);
         properties.put(DataProperties.PROPERTY_FOLDER_ID, Integer.toString(folder));
-        properties.put(DataProperties.PROPERTY_ID, Integer.toString(objectId));
+        properties.put(DataProperties.PROPERTY_ID, Integer.toString(contactId));
 
-        if (imageBytes == null) {
-            LOG.warn("Requested a non-existing image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", objectId, folder, session.getContextId(), session.getUserId());
+        if (fileHolder == null) {
+            LOG.warn("Requested a non-existing image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", contactId, folder, session.getContextId(), session.getUserId());
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
             properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
         }
 
-        if (false == com.openexchange.ajax.helper.ImageUtils.isValidImage(imageBytes)) {
-            LOG.warn("Detected non-image data in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", objectId, folder, session.getContextId(), session.getUserId());
-            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
-            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
-            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
-            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
-        }
-
-        if (com.openexchange.ajax.helper.ImageUtils.isSvg(imageBytes)) {
-            LOG.warn("Detected a possibly harmful SVG image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", objectId, folder, session.getContextId(), session.getUserId());
-            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
-            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
-            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
-            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
-        }
-
-        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contact.getImageContentType());
-        properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
-        properties.put(DataProperties.PROPERTY_NAME, contact.getImageContentType().replace('/', '.'));
-        return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
+        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
+        properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+        properties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+        return new SimpleData<D>((D) (fileHolder.getStream()), properties);
     }
 
     /**

@@ -98,7 +98,7 @@ public class ContactPictureRequestData {
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
-        this.emails = new HashSet<>(emails);
+        this.emails = emails == null ? new HashSet<>() : new HashSet<>(emails);
         this.etag = etag;
     }
 
