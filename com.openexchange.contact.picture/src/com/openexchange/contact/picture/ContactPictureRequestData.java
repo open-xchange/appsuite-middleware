@@ -52,6 +52,7 @@ package com.openexchange.contact.picture;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 import com.openexchange.java.Strings;
 
 /**
@@ -257,6 +258,77 @@ public class ContactPictureRequestData {
      */
     public boolean isEmpty() {
         return null == userId && null == folderId && null == contactId && null == emails;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((contactId == null) ? 0 : contactId.hashCode());
+        result = prime * result + ((contextId == null) ? 0 : contextId.hashCode());
+        result = prime * result + ((emails == null) ? 0 : emails.hashCode());
+        result = prime * result + (etag ? 1231 : 1237);
+        result = prime * result + ((folderId == null) ? 0 : folderId.hashCode());
+        result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ContactPictureRequestData other = (ContactPictureRequestData) obj;
+        if (contactId == null) {
+            if (other.contactId != null) {
+                return false;
+            }
+        } else if (!contactId.equals(other.contactId)) {
+            return false;
+        }
+        if (contextId == null) {
+            if (other.contextId != null) {
+                return false;
+            }
+        } else if (!contextId.equals(other.contextId)) {
+            return false;
+        }
+        if (emails == null) {
+            if (other.emails != null) {
+                return false;
+            }
+        } else if (!emails.equals(other.emails)) {
+            return false;
+        }
+        if (etag != other.etag) {
+            return false;
+        }
+        if (folderId == null) {
+            if (other.folderId != null) {
+                return false;
+            }
+        } else if (!folderId.equals(other.folderId)) {
+            return false;
+        }
+        if (userId == null) {
+            if (other.userId != null) {
+                return false;
+            }
+        } else if (!userId.equals(other.userId)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "ContactPictureRequestData [contextId=" + contextId + ", userId=" + userId + ", folderId=" + folderId + ", contactId=" + contactId + ", emails=" + emails.stream().map(String::valueOf).collect(Collectors.joining(",")) + ", etag=" + etag + "]";
     }
 
 }

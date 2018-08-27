@@ -49,9 +49,30 @@
 
 package com.openexchange.contact.picture.impl;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Properties;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.ContactPictureService;
+import com.openexchange.event.CommonEvent;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 
 /**
  * {@link ContactPictureCachingService}
@@ -59,29 +80,111 @@ import com.openexchange.contact.picture.ContactPictureService;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class ContactPictureCachingService implements ContactPictureService {
+public class ContactPictureCachingService implements ContactPictureService, EventHandler, Reloadable {
 
-    /*
-     * TODO
-     * Hook to clear cache when picture is switched
-     */
+    private final static Logger LOGGER = LoggerFactory.getLogger(ContactPictureCachingService.class);
+
+    private final static String TOPIC = "com/openexchange/groupware/contact/update";
+
+    private final static AtomicReference<Cache<ContactPictureRequestData, ContactPicture>> REF = new AtomicReference<Cache<ContactPictureRequestData, ContactPicture>>();
+
+    private final LeanConfigurationService leanService;
 
     private final ContactPictureService delegate;
 
     /**
      * Initializes a new {@link ContactPictureCachingService}.
      * 
+     * @param delegate The service to delegate the actual request to
+     * @param leanService The {@link LeanConfigurationService}
+     * 
      */
-    public ContactPictureCachingService(ContactPictureService delegate) {
+    public ContactPictureCachingService(ContactPictureService delegate, LeanConfigurationService leanService) {
         super();
         this.delegate = delegate;
-
+        this.leanService = leanService;
+        loadCache(leanService);
     }
 
     @Override
-    public ContactPicture getPicture(ContactPictureRequestData avatarData) {
-        // TODO Caching
-        return delegate.getPicture(avatarData);
+    public ContactPicture getPicture(Session session, ContactPictureRequestData data) {
+        try {
+            Cache<ContactPictureRequestData, ContactPicture> cache = REF.get();
+            if (null == cache) {
+                return delegate.getPicture(session, data);
+            }
+            return cache.get(data, () -> {
+                return delegate.getPicture(session, data);
+            });
+        } catch (Exception e) {
+            LOGGER.warn("Exception while receiving contact picture", e);
+        }
+        return ContactPicture.FALLBACK_PICTURE;
     }
 
+    @Override
+    public void handleEvent(Event event) {
+        // --- Check basic conditions
+        Cache<ContactPictureRequestData, ContactPicture> cache = REF.get();
+        if (null == cache || null == event || false == TOPIC.equals(event.getTopic())) {
+            return;
+        }
+        Object property = event.getProperty(CommonEvent.EVENT_KEY);
+        if (null == property || false == CommonEvent.class.isAssignableFrom(property.getClass())) {
+            return;
+        }
+        CommonEvent commonEvent = (CommonEvent) property;
+
+        Object actionObj = commonEvent.getActionObj();
+        Object oldObj = commonEvent.getOldObj();
+        if (null == actionObj || false == Contact.class.isAssignableFrom(actionObj.getClass()) || null == oldObj || false == Contact.class.isAssignableFrom(oldObj.getClass())) {
+            return;
+        }
+
+        Contact updated = (Contact) actionObj;
+        Contact original = (Contact) oldObj;
+        if (false == isAboutPictureChange(original, updated)) {
+            return;
+        }
+        // ---
+
+        // Invalidate cache
+        Map<Integer, Set<Integer>> affectedUsersWithFolder = commonEvent.getAffectedUsersWithFolder();
+        for (Iterator<ContactPictureRequestData> iterator = cache.asMap().keySet().iterator(); iterator.hasNext();) {
+            ContactPictureRequestData next = iterator.next();
+            if (next.hasUser() && affectedUsersWithFolder.containsKey(next.getUserId())) {
+                cache.invalidate(next);
+            }
+        }
+    }
+
+    private boolean isAboutPictureChange(Contact original, Contact updated) {
+        if (null == original.getImage1() && null == updated.getImage1()) {
+            // Nothing changed
+            return false;
+        }
+        // Check bytes
+        return Arrays.equals(original.getImage1(), updated.getImage1());
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        loadCache(leanService);
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(Properties.getPropertyNames(ContactPictureProperties.values()));
+    }
+
+    private void loadCache(LeanConfigurationService leanService) {
+        Cache<ContactPictureRequestData, ContactPicture> toSet;
+        long cacheDuration = leanService.getLongProperty(ContactPictureProperties.CACHE_DURATION);
+        if (cacheDuration > 0) {
+            toSet = CacheBuilder.newBuilder().expireAfterWrite(cacheDuration, TimeUnit.SECONDS).maximumSize(leanService.getIntProperty(ContactPictureProperties.CACHE_SIZE)).build();
+        } else {
+            toSet = null;
+        }
+        REF.set(toSet);
+    }
 }
