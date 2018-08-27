@@ -49,11 +49,7 @@
 
 package com.openexchange.contact.picture.json;
 
-import java.rmi.server.UID;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -85,33 +81,13 @@ public class GetAction implements ETagAwareAJAXActionService {
     private static final String CONTACT_PARAM = "contactId";
     private static final String CONTACT_FOLDER_PARAM = "folderId";
 
-    static final byte[] TRANSPARENT_GIF = { 71, 73, 70, 56, 57, 97, 1, 0, 1, 0, -128, 0, 0, 0, 0, 0, -1, -1, -1, 33, -7, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 1, 68, 0, 59 };
-
-    static final ContactPicture FALLBACK_PICTURE;
-
-    static {
-        ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(TRANSPARENT_GIF);
-        fileHolder.setContentType("image/gif");
-        fileHolder.setName("image.gif");
-        MessageDigest digest;
-        String etag;
-        try {
-            digest = MessageDigest.getInstance("MD5");
-            etag = digest.digest(TRANSPARENT_GIF).toString();
-        } catch (NoSuchAlgorithmException e) {
-            // should not occur
-            etag = new UID().toString();
-        }
-
-        FALLBACK_PICTURE = new ContactPicture(etag.toString(), fileHolder);
-    }
 
     // -----------------------------------------------------------------------------------------------------------------------------
 
     final ServiceLookup services;
 
     /**
-     * Initializes a new {@link GetPictureAction}.
+     * Initializes a new {@link GetAction}.
      *
      * @param services The OSGi service look-up
      */
@@ -123,7 +99,7 @@ public class GetAction implements ETagAwareAJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         ContactPicture picture = getPicture(getData(requestData, session, false));
-        AJAXRequestResult result = new AJAXRequestResult(picture.containsContactPicture() ? picture.getFileHolder() : FALLBACK_PICTURE.getFileHolder(), "file");
+        AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
         setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
         return result;
     }
