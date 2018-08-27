@@ -57,7 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.internal.VCardUtil;
+import com.openexchange.contact.vcard.VCardUtil;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -66,7 +66,7 @@ import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -80,12 +80,13 @@ public final class ContactDataSource implements DataSource {
 
     private static final Class<?>[] TYPES = { InputStream.class, byte[].class };
     private static final String[] ARGS = { "com.openexchange.groupware.contact.pairs" };
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link ContactDataSource}
      */
-    public ContactDataSource() {
-        super();
+    public ContactDataSource(ServiceLookup services) {
+        this.services = services;
     }
 
     @Override
@@ -123,7 +124,7 @@ public final class ContactDataSource implements DataSource {
          */
         final Contact[] contacts = new Contact[len];
         {
-        	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+            final ContactService contactService = services.getServiceSafe(ContactService.class);
             for (int i = 0; i < len; i++) {
             	contacts[i] = contactService.getContact(session, Integer.toString(folderIds[i]), Integer.toString(objectIds[i]));
             }

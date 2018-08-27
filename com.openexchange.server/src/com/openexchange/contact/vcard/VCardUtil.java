@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.internal;
+package com.openexchange.contact.vcard;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,9 +55,6 @@ import java.io.OutputStream;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.vcard.VCardExport;
-import com.openexchange.contact.vcard.VCardImport;
-import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.conversion.DataExceptionCodes;

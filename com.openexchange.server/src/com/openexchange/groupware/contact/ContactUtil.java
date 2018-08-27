@@ -52,14 +52,15 @@ package com.openexchange.groupware.contact;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
-import com.openexchange.groupware.contact.datasource.UserImageDataSource;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.java.util.Pair;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * First start of a utility class for contacts. This class should contain methods that are useful for the complete backend and not only the
@@ -194,6 +195,9 @@ public class ContactUtil {
         return set;
     }
 
+    private static final String USER_IMAGE_REGISTRATION_NAME = "com.openexchange.user.image";
+    private static final String CONTACT_IMAGE_REGISTRATION_NAME = "com.openexchange.contact.image";
+
     /**
      * Prepares an {@link ImageDataSource} and an {@link ImageLocation} for a given contact. Both
      * can be used to e.g. generate an URL to the contacts image.
@@ -211,14 +215,28 @@ public class ContactUtil {
                  */
                 ImageLocation imageLocation = new ImageLocation.Builder().id(
                     String.valueOf(contact.getInternalUserId())).timestamp(timestamp).build();
-                return new Pair<ImageDataSource, ImageLocation>(UserImageDataSource.getInstance(), imageLocation);
+                ConversionService conversionService;
+                try {
+                    conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class, true);
+                } catch (OXException e) {
+                    return null;
+                }
+                ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(USER_IMAGE_REGISTRATION_NAME);
+                return new Pair<ImageDataSource, ImageLocation>(dataSource, imageLocation);
             } else {
                 /*
                  * use default contact image data source
                  */
                 ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID())).id(
                     String.valueOf(contact.getObjectID())).timestamp(timestamp).build();
-                return new Pair<ImageDataSource, ImageLocation>(ContactImageDataSource.getInstance(), imageLocation);
+                ConversionService conversionService;
+                try {
+                    conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class, true);
+                } catch (OXException e) {
+                    return null;
+                }
+                ImageDataSource dataSource = (ImageDataSource) conversionService.getDataSource(CONTACT_IMAGE_REGISTRATION_NAME);
+                return new Pair<ImageDataSource, ImageLocation>(dataSource, imageLocation);
             }
         }
 

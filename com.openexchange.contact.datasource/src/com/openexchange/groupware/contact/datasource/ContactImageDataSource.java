@@ -50,6 +50,8 @@
 package com.openexchange.groupware.contact.datasource;
 
 import java.io.InputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.Data;
@@ -65,7 +67,7 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.util.Tools;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
@@ -73,30 +75,22 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  * {@link ContactImageDataSource} - A data source to obtains a contact's image data
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Use the new ContactPictureService instead
  */
+@Deprecated
 public final class ContactImageDataSource implements ImageDataSource {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(ContactImageDataSource.class);
-
-    private static final ContactImageDataSource INSTANCE = new ContactImageDataSource();
-
-    /**
-     * Gets the instance
-     *
-     * @return The instance
-     */
-    public static ContactImageDataSource getInstance() {
-        return INSTANCE;
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(ContactImageDataSource.class);
 
     private static final String[] ARGS = { "com.openexchange.groupware.contact.folder", "com.openexchange.groupware.contact.id" };
+
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link ContactImageDataSource}
      */
-    private ContactImageDataSource() {
-        super();
+    public ContactImageDataSource(ServiceLookup services) {
+        this.services = services;
     }
 
     @Override
@@ -241,7 +235,7 @@ public final class ContactImageDataSource implements ImageDataSource {
      * @return The contact, or <code>null</code> if it can't be found or loaded.
      * @throws OXException
      */
-    private static Contact optContact(Session session, ImageLocation imageLocation, ContactField...fields) throws OXException {
+    private Contact optContact(Session session, ImageLocation imageLocation, ContactField... fields) throws OXException {
         return optContact(session, Tools.getUnsignedInteger(imageLocation.getId()),
             Tools.getUnsignedInteger(imageLocation.getFolder()), fields);
     }
@@ -256,8 +250,8 @@ public final class ContactImageDataSource implements ImageDataSource {
      * @return The contact, or <code>null</code> if it can't be found or loaded.
      * @throws OXException
      */
-    private static Contact optContact(Session session, int objectID, int folderID, ContactField...fields) throws OXException {
-        ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, false);
+    private Contact optContact(Session session, int objectID, int folderID, ContactField... fields) throws OXException {
+        ContactService contactService = services.getServiceSafe(ContactService.class);
         try {
             return contactService.getContact(session, Integer.toString(folderID),Integer.toString(objectID), fields);
         } catch (OXException e) {

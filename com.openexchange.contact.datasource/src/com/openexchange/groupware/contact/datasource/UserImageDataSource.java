@@ -66,7 +66,7 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.util.Tools;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
@@ -74,7 +74,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  * {@link UserImageDataSource} - A data source to obtains a user's image data
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @deprecated Use the new ContactPictureService instead
  */
+@Deprecated
 public final class UserImageDataSource implements ImageDataSource {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserImageDataSource.class);
@@ -82,22 +84,13 @@ public final class UserImageDataSource implements ImageDataSource {
     private static final String ALIAS = "/user/picture";
     private static final String ID_ARGUMENT = "com.openexchange.groupware.user.id";
 
-    private static final UserImageDataSource INSTANCE = new UserImageDataSource();
-
-    /**
-     * Gets the instance
-     *
-     * @return The instance
-     */
-    public static UserImageDataSource getInstance() {
-        return INSTANCE;
-    }
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link UserImageDataSource}.
      */
-    private UserImageDataSource() {
-        super();
+    public UserImageDataSource(ServiceLookup services) {
+        this.services = services;
     }
 
     @Override
@@ -230,12 +223,12 @@ public final class UserImageDataSource implements ImageDataSource {
         return ImageUtility.parseImageLocationFrom(requestData);
     }
 
-    private static Contact optUser(Session session, ImageLocation imageLocation, ContactField...fields) {
+    private Contact optUser(Session session, ImageLocation imageLocation, ContactField... fields) throws OXException {
         return optUser(session, Tools.getUnsignedInteger(imageLocation.getId()), fields);
     }
 
-    private static Contact optUser(Session session, int userID, ContactField...fields) {
-        ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+    private Contact optUser(Session session, int userID, ContactField... fields) throws OXException {
+        ContactService contactService = services.getServiceSafe(ContactService.class);
         if (null != contactService) {
             try {
                 return contactService.getUser(session, userID, fields);
