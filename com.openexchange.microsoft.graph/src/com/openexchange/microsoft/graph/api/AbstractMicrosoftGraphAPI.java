@@ -49,7 +49,15 @@
 
 package com.openexchange.microsoft.graph.api;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import com.openexchange.exception.OXException;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
+import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
+import com.openexchange.rest.client.v2.RESTMethod;
 
 /**
  * {@link AbstractMicrosoftGraphAPI}
@@ -67,5 +75,50 @@ abstract class AbstractMicrosoftGraphAPI {
     public AbstractMicrosoftGraphAPI(MicrosoftGraphRESTClient client) {
         super();
         this.client = client;
+    }
+
+    /**
+     * Gets the REST resource from the specified path
+     * 
+     * @param accessToken The oauth access token
+     * @param path The resource's path
+     * @return A {@link JSONObject} with the resource
+     * @throws OXException if an error is occurred
+     */
+    JSONObject getResource(String accessToken, String path) throws OXException {
+        return getResource(accessToken, path, Collections.emptyMap());
+    }
+
+    /**
+     * Gets the binary resource from the specified path
+     * 
+     * @param accessToken The oauth access token
+     * @param path The resource's path
+     * @return The byte array with the resource's contents
+     * @throws OXException if an error is occurred
+     */
+    byte[] getBinaryResource(String accessToken, String path) throws OXException {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, path);
+        request.setAccessToken(accessToken);
+        return (byte[]) client.execute(request).getResponseBody();
+    }
+
+    /**
+     * Gets the REST resource from the specified path and the specified query
+     * parameters
+     * 
+     * @param accessToken The oauth access token
+     * @param path The resource's path
+     * @param queryParams the request's query parameters
+     * @return A {@link JSONObject} with the resource
+     * @throws OXException if an error is occurred
+     */
+    JSONObject getResource(String accessToken, String path, Map<String, String> queryParams) throws OXException {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, path);
+        request.setAccessToken(accessToken);
+        for (Entry<String, String> queryParam : queryParams.entrySet()) {
+            request.withQueryParameter(queryParam.getKey(), queryParam.getValue());
+        }
+        return ((JSONValue) client.execute(request).getResponseBody()).toObject();
     }
 }

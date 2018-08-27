@@ -49,13 +49,12 @@
 
 package com.openexchange.microsoft.graph.api;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTEndPoint;
-import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
-import com.openexchange.rest.client.v2.RESTMethod;
 
 /**
  * {@link MicrosoftGraphContactsAPI}
@@ -106,15 +105,15 @@ public class MicrosoftGraphContactsAPI extends AbstractMicrosoftGraphAPI {
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/user_list_contacts">List Contacts</a>
      */
     public JSONObject getContacts(String accessToken, int startOffset, int skip) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath());
-        request.setAccessToken(accessToken);
+        String path = "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath();
+        Map<String, String> queryParams = new HashMap<>(2);
         if (startOffset > 0) {
-            request.withQueryParameter("$top", Integer.toString(startOffset));
+            queryParams.put("$top", Integer.toString(startOffset));
         }
         if (skip > 0) {
-            request.withQueryParameter("$skip", Integer.toString(skip));
+            queryParams.put("$skip", Integer.toString(skip));
         }
-        return ((JSONValue) client.execute(request).getResponseBody()).toObject();
+        return getResource(accessToken, path, queryParams);
     }
 
     /**
@@ -126,9 +125,7 @@ public class MicrosoftGraphContactsAPI extends AbstractMicrosoftGraphAPI {
      * @throws OXException if an error is occurred
      */
     public byte[] getContactPhoto(String contactId, String accessToken) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath() + "/" + contactId + "/photo/$value");
-        request.setAccessToken(accessToken);
-        return (byte[]) client.execute(request).getResponseBody();
+        return getBinaryResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath() + "/" + contactId + "/photo/$value");
     }
 
     /**
@@ -140,8 +137,6 @@ public class MicrosoftGraphContactsAPI extends AbstractMicrosoftGraphAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getContactPhotoMetadata(String contactId, String accessToken) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath() + "/" + contactId + "/photo");
-        request.setAccessToken(accessToken);
-        return ((JSONValue) client.execute(request).getResponseBody()).toObject();
+        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath() + "/" + contactId + "/photo");
     }
 }
