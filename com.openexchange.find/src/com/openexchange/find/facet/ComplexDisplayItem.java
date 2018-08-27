@@ -49,8 +49,10 @@
 
 package com.openexchange.find.facet;
 
-import com.openexchange.image.ImageDataSource;
-import com.openexchange.image.ImageLocation;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactUtil;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 
 /**
  * {@link ComplexDisplayItem}
@@ -61,12 +63,8 @@ import com.openexchange.image.ImageLocation;
 public class ComplexDisplayItem implements DisplayItem {
 
     private final String displayName;
-
     private final String detail;
-
-    private ImageLocation imageLocation;
-
-    private ImageDataSource imageDataSource;
+    private Contact contact;
 
     /**
      * Initializes a new {@link ComplexDisplayItem}.
@@ -91,23 +89,23 @@ public class ComplexDisplayItem implements DisplayItem {
         return detail;
     }
 
-    public ImageLocation getImageLocation() {
-        return imageLocation;
-    }
-
-    public ImageDataSource getImageDataSource() {
-        return imageDataSource;
+    public String getImageUrl(Session session) {
+        if (contact == null) {
+            return null;
+        }
+        try {
+            return ContactUtil.generateImageUrl(session, contact);
+        } catch (OXException e) {
+            return null;
+        }
     }
 
     public boolean hasImageData() {
-        return imageDataSource != null && imageLocation != null;
+        return contact != null;
     }
 
-    public void setImageData(ImageDataSource imageDataSource, ImageLocation imageLocation) {
-        if (imageDataSource != null && imageLocation != null) {
-            this.imageDataSource = imageDataSource;
-            this.imageLocation = imageLocation;
-        }
+    public void setContactForImageData(Contact con) {
+        this.contact = con;
     }
 
     @Override

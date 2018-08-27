@@ -89,6 +89,7 @@ public final class ContactDataSource implements DataSource {
         this.services = services;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         if (!InputStream.class.equals(type) && !byte[].class.equals(type)) {

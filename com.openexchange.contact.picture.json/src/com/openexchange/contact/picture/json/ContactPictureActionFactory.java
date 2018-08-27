@@ -68,6 +68,11 @@ public class ContactPictureActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
 
+    /**
+     * The module definition of this action factory: contacts/picture
+     */
+    public static final String Module = "contacts/picture";
+
     public ContactPictureActionFactory(ServiceLookup services) {
         ImmutableMap.Builder<String, AJAXActionService> builder = ImmutableMap.builder();
         builder.put("get", new GetAction(services));

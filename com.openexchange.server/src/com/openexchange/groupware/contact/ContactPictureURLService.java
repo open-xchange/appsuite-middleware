@@ -47,41 +47,39 @@
  *
  */
 
-package com.openexchange.contact.picture.json.osgi;
+package com.openexchange.groupware.contact;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.contact.picture.ContactPictureService;
-import com.openexchange.contact.picture.json.ContactPictureActionFactory;
-import com.openexchange.contact.picture.json.util.ContactPictureURLServiceImpl;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.groupware.contact.ContactPictureURLService;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- *
- * {@link ContactPictureJSONActivator}
+ * {@link ContactPictureURLService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public final class ContactPictureJSONActivator extends AJAXModuleActivator {
+public interface ContactPictureURLService {
 
     /**
-     * Initializes a new {@link ContactPictureJSONActivator}.
+     * Provides a url to the picture of a contact.
      *
+     * @param contactId The contact id.
+     * @param folderId The folder of the contact id. Must not be null in case the contact id is set.
+     * @param session The users session
+     * @param preferRelativeUrl Whether a relative url is preferred or not.
+     * @return The url to the picture.
+     * @throws OXException
      */
-    public ContactPictureJSONActivator() {
-        super();
-    }
+    public String getContactPictureUrl(Integer contactId, Integer folderId, final Session session, final boolean preferRelativeUrl) throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactPictureService.class, DispatcherPrefixService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new ContactPictureActionFactory(this), ContactPictureActionFactory.Module);
-        registerService(ContactPictureURLService.class, new ContactPictureURLServiceImpl(this));
-    }
-
+    /**
+     * Provides a url to the picture of an internal user.
+     *
+     * @param userId The user id.
+     * @param session The session
+     * @param preferRelativeUrl Whether a relative url is preferred or not.
+     * @return The url to the picture.
+     * @throws OXException
+     */
+    public String getUserPictureUrl(Integer userId, final Session session, final boolean preferRelativeUrl) throws OXException;
 }

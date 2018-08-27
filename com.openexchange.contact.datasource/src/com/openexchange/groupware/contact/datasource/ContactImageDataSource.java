@@ -149,6 +149,7 @@ public final class ContactImageDataSource implements ImageDataSource {
         return ImageUtility.getMD5(builder.toString(), "hex");
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <D> Data<D> getData(final Class<? extends D> type, final DataArguments dataArguments, final Session session) throws OXException {
         if (!InputStream.class.equals(type)) {

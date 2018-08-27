@@ -65,6 +65,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
+@SuppressWarnings("deprecation")
 public class ContactDatasourceActivator extends HousekeepingActivator{
 
     private static final String STR_IDENTIFIER = "identifier";

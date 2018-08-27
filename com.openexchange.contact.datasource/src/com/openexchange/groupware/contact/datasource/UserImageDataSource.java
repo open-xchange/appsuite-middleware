@@ -93,6 +93,7 @@ public final class UserImageDataSource implements ImageDataSource {
         this.services = services;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <D> Data<D> getData(Class<? extends D> type, DataArguments dataArguments, Session session) throws OXException {
         if (false == InputStream.class.equals(type)) {

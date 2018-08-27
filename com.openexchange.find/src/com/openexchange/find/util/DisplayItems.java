@@ -52,14 +52,10 @@ package com.openexchange.find.util;
 import java.util.Locale;
 import com.openexchange.find.facet.ComplexDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.contact.helpers.ContactDisplayNameHelper;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.i18n.I18nServiceRegistry;
-import com.openexchange.image.ImageDataSource;
-import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
 
 /**
  * A helper class to create {@link DisplayItem}s for common cases.
@@ -86,11 +82,9 @@ public class DisplayItems {
         }
 
         ComplexDisplayItem item = new ComplexDisplayItem(displayName, primaryAddress);
-        Pair<ImageDataSource, ImageLocation> imageData = ContactUtil.prepareImageData(contact);
-        if (imageData != null) {
-            item.setImageData(imageData.getFirst(), imageData.getSecond());
+        if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
+            item.setContactForImageData(contact);
         }
-
         return item;
     }
 

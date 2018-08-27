@@ -76,9 +76,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
-import com.openexchange.image.ImageDataSource;
-import com.openexchange.image.ImageLocation;
-import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.GuestInfo;
@@ -224,13 +221,15 @@ public class PermissionResolver {
     public String getImageURL(int userID) {
         Contact userContact = getUserContact(userID);
         if (null != userContact && 0 < userContact.getNumberOfImages()) {
-            Pair<ImageDataSource, ImageLocation> imageData = ContactUtil.prepareImageData(userContact);
-            if (null != imageData) {
-                try {
-                    return imageData.getFirst().generateUrl(imageData.getSecond(), session);
-                } catch (OXException e) {
-                    LOGGER.error("Error generating image URL for user {}", I(userID), e);
+            try {
+                String url = ContactUtil.generateImageUrl(session, userContact);
+                if (null != url) {
+                    return url;
+                } else {
+                    return null;
                 }
+            } catch (OXException e) {
+                LOGGER.error("Error generating image URL for user {}", I(userID), e);
             }
         }
         return null;
