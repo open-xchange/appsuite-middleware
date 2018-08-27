@@ -51,14 +51,16 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
+import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
+import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.sortEvents;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFrom;
+import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.getUntil;
-import static com.openexchange.chronos.impl.Utils.isExcluded;
 import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,6 +68,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -118,7 +121,8 @@ public class EventPostProcessor {
     /**
      * Post-processes a list of events prior returning it to the client. This includes
      * <ul>
-     * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
      * <li>applying the folder identifier from the passed folder</li>
      * <li>generate and apply event flags</li>
      * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
@@ -142,7 +146,8 @@ public class EventPostProcessor {
     /**
      * Post-processes an event prior returning it to the client. This includes
      * <ul>
-     * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
      * <li>applying the folder identifier from the passed folder</li>
      * <li>generate and apply event flags</li>
      * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
@@ -164,7 +169,8 @@ public class EventPostProcessor {
     /**
      * Post-processes a list of events prior returning it to the client. This includes
      * <ul>
-     * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
+     * <li>excluding or anonymizing events that are classified for the current user</li>
+     * <li>excluding events that are not within the requested range</li>
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
      * <li>generate and apply event flags</li>
      * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
@@ -205,6 +211,16 @@ public class EventPostProcessor {
     }
 
     /**
+     * Gets the first event of all previously processed events.
+     *
+     * @return The first processed event, or <code>null</code> if there is none
+     */
+    public Event getFirstEvent() throws OXException {
+        List<Event> events = getEvents();
+        return 0 < events.size() ? events.get(0) : null;
+    }
+
+    /**
      * Gets the maximum timestamp of the processed events.
      *
      * @return The maximum timestamp, or <code>0</code> if none were processed
@@ -214,7 +230,10 @@ public class EventPostProcessor {
     }
 
     private boolean process(Event event, String folderId, int calendarUserId) throws OXException {
-        if (isExcluded(event, session)) {
+        if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
+            /*
+             * excluded if classified as private for the session user
+             */
             return false;
         }
         event.setFolderId(folderId);
@@ -229,14 +248,26 @@ public class EventPostProcessor {
                  * add resolved occurrences; no need to apply individual exception dates here, as a removed attendee can only occur in exceptions
                  */
                 return events.addAll(resolveOccurrences(event));
+            } else if (false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
+                /*
+                 * exclude series master event if there are no occurrences in requested range
+                 */
+                return false;
             }
             /*
-             * apply 'userized' exception dates as requested
+             * apply 'userized' exception dates to series master as requested
              */
             if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) || 
                 Arrays.contains(requestedFields, EventField.DELETE_EXCEPTION_DATES)) {
-                event = applyExceptionDates(storage, event, calendarUserId);
+                return events.add(applyExceptionDates(storage, event, calendarUserId));
             }
+            return events.add(event);
+        }
+        if (false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
+            /*
+             * excluded if not in requested range
+             */
+            return false;
         }
         return events.add(event);
     }
@@ -256,8 +287,8 @@ public class EventPostProcessor {
     private List<Event> resolveOccurrences(Event master) throws OXException {
         Date from = getFrom(session);
         Date until = getUntil(session);
-        TimeZone timeZone = session.getEntityResolver().getTimeZone(session.getUserId());
-        Iterator<Event> itrerator = Utils.resolveOccurrences(session, master);
+        TimeZone timeZone = getTimeZone(session);
+        Iterator<Event> itrerator = session.getRecurrenceService().iterateEventOccurrences(master, from, until);
         List<Event> list = new ArrayList<Event>();
         while (itrerator.hasNext()) {
             Event event = itrerator.next();
@@ -270,4 +301,3 @@ public class EventPostProcessor {
     }
 
 }
-

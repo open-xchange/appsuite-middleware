@@ -117,7 +117,7 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
             root = new HashMap<>();
             aps = new HashMap<>();
             alert = new HashMap<>();
-            priority = DeliveryPriority.IMMEDIATE;
+            priority = null;
             expiration = DEFAULT_EXPIRATION_PERIOD_MILLIS;
         }
 
@@ -224,8 +224,12 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
          * @return The notification
          */
         public ApnsHttp2Notification build() {
-            root.put("aps", aps);
-            aps.put("alert", alert);
+            if (false == alert.isEmpty()) {
+                aps.put("alert", alert);
+            }
+            if (false == aps.isEmpty()) {
+                root.put("aps", aps);
+            }
             return new ApnsHttp2Notification(token, topic, root, expiration < 0 ? null : new Date(System.currentTimeMillis() + expiration), priority, collapseId, uuid);
         }
     }

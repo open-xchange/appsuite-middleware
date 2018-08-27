@@ -210,7 +210,13 @@ public class TransformImageClientAction extends TransformImageAction {
                 try {
                     final IImageClient imageClient = this.m_imageClient.get();
                     final String requestFormatString = getRequestFormatString(xformParams, "auto");
-                    final InputStream resultImageStm = imageClient.cacheAndGetImage(cacheKey, requestFormatString, srcImageStm, getContextIdString(session));
+                    InputStream resultImageStm;
+					try {
+						resultImageStm = imageClient.cacheAndGetImage(cacheKey, requestFormatString, srcImageStm, getContextIdString(session));
+					} catch (ImageConverterException e) {
+						throw OXException.general("Communication with Image Converter failed", e);
+					}
+					
                     if (null != resultImageStm) {
                         try {
                             ThresholdFileHolder imageData = new ThresholdFileHolder();

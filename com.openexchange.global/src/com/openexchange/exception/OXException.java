@@ -279,7 +279,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param cloneMe The <code>OXException</code> instance to clone
      */
     public OXException(OXException cloneMe) {
-        super();
+        super(cloneMe.getCause());
         interceptable = true;
         setStackTrace(cloneMe.getStackTrace());
         this.generic = cloneMe.generic;
