@@ -47,49 +47,83 @@
  *
  */
 
-package com.openexchange.microsoft.graph.osgi;
+package com.openexchange.microsoft.graph.onedrive.impl;
 
-import com.openexchange.microsoft.graph.api.MicrosoftGraphAPI;
-import com.openexchange.microsoft.graph.contacts.MicrosoftGraphContactsService;
-import com.openexchange.microsoft.graph.contacts.impl.MicrosoftGraphContactsServiceImpl;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.microsoft.graph.api.MicrosoftGraphOneDriveAPI;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
-import com.openexchange.microsoft.graph.onedrive.impl.MicrosoftGraphDriveServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
+import com.openexchange.microsoft.graph.onedrive.exceptions.ErrorCode;
+import com.openexchange.microsoft.graph.onedrive.parser.OneDriveFolderParser;
+import com.openexchange.rest.client.exception.RESTExceptionCodes;
 
 /**
- * {@link MicrosoftGraphAPIActivator}
+ * {@link MicrosoftGraphDriveServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MicrosoftGraphAPIActivator extends HousekeepingActivator {
+public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveService {
+
+    private final MicrosoftGraphOneDriveAPI api;
+    private final OneDriveFolderParser folderEntityParser;
 
     /**
-     * Initialises a new {@link MicrosoftGraphAPIActivator}.
+     * Initialises a new {@link MicrosoftGraphDriveServiceImpl}.
      */
-    public MicrosoftGraphAPIActivator() {
+    public MicrosoftGraphDriveServiceImpl(MicrosoftGraphOneDriveAPI api) {
         super();
+        this.api = api;
+        this.folderEntityParser = new OneDriveFolderParser();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#existsFolder(java.lang.String, java.lang.String)
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public boolean existsFolder(String accessToken, String folderPath) throws OXException {
+        try {
+            JSONObject response = api.getFolder(accessToken, folderPath);
+            return !containsError(response, ErrorCode.itemNotFound);
+        } catch (OXException e) {
+            if (RESTExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
+                return false;
+            }
+            throw e;
+        }
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getRootFolder(java.lang.String)
      */
     @Override
-    protected void startBundle() throws Exception {
-        MicrosoftGraphAPI microsoftGraphAPI = new MicrosoftGraphAPI();
-        registerService(MicrosoftGraphContactsService.class, new MicrosoftGraphContactsServiceImpl(microsoftGraphAPI.contacts()));
-        registerService(MicrosoftGraphDriveService.class, new MicrosoftGraphDriveServiceImpl(microsoftGraphAPI.getOneDriveAPI()));
+    public OneDriveFolder getRootFolder(String accessToken) throws OXException {
+        return folderEntityParser.parseEntity(api.getRoot(accessToken));
+    }
+
+    //////////////////////////////////////// HELPERS /////////////////////////////////////
+
+    /**
+     * Checks the specified response whether it contains the specified error code
+     * 
+     * @param response The response
+     * @param errorCode The error code
+     * @return <code>true</code> if the specified error code is contained</code>;
+     *         <code>false</code> if the response is null or empty, or if the error code is not contained.
+     */
+    private boolean containsError(JSONObject response, ErrorCode errorCode) {
+        if (response == null || response.isEmpty()) {
+            return true;
+        }
+        if (!response.hasAndNotNull("error")) {
+            return false;
+        }
+        JSONObject error = response.optJSONObject("error");
+        return errorCode.name().equals(error.optString("code"));
     }
 }

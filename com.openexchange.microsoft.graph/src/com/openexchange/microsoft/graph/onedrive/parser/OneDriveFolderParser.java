@@ -47,34 +47,67 @@
  *
  */
 
-package com.openexchange.microsoft.graph.onedrive;
+package com.openexchange.microsoft.graph.onedrive.parser;
 
-import com.openexchange.exception.OXException;
+import java.text.ParseException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
 
 /**
- * {@link MicrosoftGraphDriveService}
+ * {@link OneDriveFolderParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public interface MicrosoftGraphDriveService {
+public class OneDriveFolderParser {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OneDriveFolderParser.class);
+    
+    
+    /**
+     * Initialises a new {@link OneDriveFolderParser}.
+     */
+    public OneDriveFolderParser() {
+        super();
+    }
 
     /**
-     * Checks whether the folder with the specified path exists.
      * 
-     * @param accessToken The oauth access token
-     * @param folderPath The absolute folder path
-     * @return <code>true</code> if the folder exists; <code>false</code> otherwise.
-     * @throws OXException If an error is occurred
+     * @param entity
+     * @return
      */
-    boolean existsFolder(String accessToken, String folderPath) throws OXException;
+    public OneDriveFolder parseEntity(JSONObject entity) {
+        OneDriveFolder folder = new OneDriveFolder();
+        if (entity == null || entity.isEmpty()) {
+            return folder;
+        }
+        folder.setId(entity.optString("id"));
+        folder.setName(entity.optString("name"));
+        folder.setRootFolder(folder.getName().equals("root") /* && ??? */); //FIXME: find another anchor point to check for root folder
 
-    /**
-     * Returns the root folder of the user's default drive account
-     * 
-     * @param accessToken The oauth access token
-     * @return The root folder
-     * @throws OXException If an error is occurred
-     */
-    OneDriveFolder getRootFolder(String accessToken) throws OXException;
+        if (folder.isRootFolder()) {
+            folder.setParentId(null);
+            //TODO: set parentId if not root folder
+        }
+
+        JSONObject fileSystemInfo = entity.optJSONObject("fileSystemInfo");
+        if (fileSystemInfo != null && !fileSystemInfo.isEmpty()) {
+            String createdAt = fileSystemInfo.optString("createdDateTime");
+            try {
+                folder.setCreationDate(ISO8601DateParser.parse(createdAt));
+            } catch (ParseException e) {
+                LOG.warn("Could not parse date from: {}", createdAt, e);
+            }
+            String modifiedAt = fileSystemInfo.optString("lastModifiedDateTime");
+            try {
+                folder.setLastModifiedDate(ISO8601DateParser.parse(createdAt));
+            } catch (ParseException e) {
+                LOG.warn("Could not parse date from: {}", modifiedAt, e);
+            }
+            // TODO: check whether it has subfolders
+        }
+        return folder;
+    }
+
 }

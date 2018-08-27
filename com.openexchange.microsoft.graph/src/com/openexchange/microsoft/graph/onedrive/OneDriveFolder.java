@@ -49,32 +49,55 @@
 
 package com.openexchange.microsoft.graph.onedrive;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStorageFolder;
+import com.openexchange.file.storage.FileStorageFolderType;
+import com.openexchange.file.storage.TypeAware;
 
 /**
- * {@link MicrosoftGraphDriveService}
+ * {@link OneDriveFolder}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public interface MicrosoftGraphDriveService {
+public class OneDriveFolder extends DefaultFileStorageFolder implements TypeAware {
+
+    private FileStorageFolderType type;
 
     /**
-     * Checks whether the folder with the specified path exists.
-     * 
-     * @param accessToken The oauth access token
-     * @param folderPath The absolute folder path
-     * @return <code>true</code> if the folder exists; <code>false</code> otherwise.
-     * @throws OXException If an error is occurred
+     * Initialises a new {@link OneDriveFolder}.
      */
-    boolean existsFolder(String accessToken, String folderPath) throws OXException;
+    public OneDriveFolder() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.TypeAware#getType()
+     */
+    @Override
+    public FileStorageFolderType getType() {
+        return type;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return id == null ? super.toString() : id;
+    }
 
     /**
-     * Returns the root folder of the user's default drive account
-     * 
-     * @param accessToken The oauth access token
-     * @return The root folder
-     * @throws OXException If an error is occurred
+     * Sets the type.
+     *
+     * @param type The type to set
+     * @return This folder with type applied
      */
-    OneDriveFolder getRootFolder(String accessToken) throws OXException;
+    public OneDriveFolder setType(FileStorageFolderType type) {
+        this.type = type;
+        return this;
+    }
 }

@@ -47,34 +47,15 @@
  *
  */
 
-package com.openexchange.microsoft.graph.onedrive;
+package com.openexchange.microsoft.graph.onedrive.exceptions;
 
-import com.openexchange.exception.OXException;
 
 /**
- * {@link MicrosoftGraphDriveService}
+ * {@link ErrorCode}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public interface MicrosoftGraphDriveService {
-
-    /**
-     * Checks whether the folder with the specified path exists.
-     * 
-     * @param accessToken The oauth access token
-     * @param folderPath The absolute folder path
-     * @return <code>true</code> if the folder exists; <code>false</code> otherwise.
-     * @throws OXException If an error is occurred
-     */
-    boolean existsFolder(String accessToken, String folderPath) throws OXException;
-
-    /**
-     * Returns the root folder of the user's default drive account
-     * 
-     * @param accessToken The oauth access token
-     * @return The root folder
-     * @throws OXException If an error is occurred
-     */
-    OneDriveFolder getRootFolder(String accessToken) throws OXException;
+public enum ErrorCode {
+    itemNotFound;
 }

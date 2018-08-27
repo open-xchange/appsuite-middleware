@@ -47,34 +47,26 @@
  *
  */
 
-package com.openexchange.microsoft.graph.onedrive;
+package com.openexchange.microsoft.graph.onedrive.parser;
 
-import com.openexchange.exception.OXException;
+import org.json.JSONObject;
+import com.openexchange.microsoft.graph.onedrive.OneDriveFile;
 
 /**
- * {@link MicrosoftGraphDriveService}
+ * {@link OneDriveFileParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public interface MicrosoftGraphDriveService {
+public class OneDriveFileParser {
 
     /**
-     * Checks whether the folder with the specified path exists.
      * 
-     * @param accessToken The oauth access token
-     * @param folderPath The absolute folder path
-     * @return <code>true</code> if the folder exists; <code>false</code> otherwise.
-     * @throws OXException If an error is occurred
+     * @param entity
+     * @return
      */
-    boolean existsFolder(String accessToken, String folderPath) throws OXException;
+    public OneDriveFile parseEntity(JSONObject entity) {
+        return null;
+    }
 
-    /**
-     * Returns the root folder of the user's default drive account
-     * 
-     * @param accessToken The oauth access token
-     * @return The root folder
-     * @throws OXException If an error is occurred
-     */
-    OneDriveFolder getRootFolder(String accessToken) throws OXException;
 }
