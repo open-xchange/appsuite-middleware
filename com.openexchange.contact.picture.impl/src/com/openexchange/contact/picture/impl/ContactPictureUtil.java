@@ -56,20 +56,16 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureExceptionCodes;
-import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.finder.FinderUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -80,9 +76,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class ContactPictureUtil {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(ContactPictureUtil.class);
+public class ContactPictureUtil extends FinderUtil{
 
     /**
      * Generates a {@link ContactPicture} based on the given bytes
@@ -121,63 +115,6 @@ public class ContactPictureUtil {
         fileHolder.setContentType(contact.getImageContentType());
         fileHolder.setName(new StringBuilder("contact-image-").append(contact.getObjectID()).toString());
         return fileHolder;
-    }
-
-    /**
-     * Checks if the contact does contain a valid image to use
-     * 
-     * @param contact The {@link Contact}
-     * @param data Information to log
-     * @return <code>true</code> if the image is valid and can be used, <code>false</code> otherwise
-     * @throws OXException In case picture contains harmful content
-     */
-    public static boolean hasValidImage(Contact contact, ContactPictureRequestData data) throws OXException {
-        return null != contact && null != contact.getImage1() && ContactPictureUtil.checkImage(contact.getImage1(), data);
-    }
-
-    /**
-     * Checks the image and logs errors
-     * 
-     * @param imageBytes The image to check
-     * @param cprd Information to log
-     * @return <code>true</code> If all checks passed, <code>false</code> otherwise
-     * @throws OXException In case picture contains harmful content
-     */
-    public static boolean checkImage(byte[] imageBytes, ContactPictureRequestData cprd) throws OXException {
-        if (false == com.openexchange.ajax.helper.ImageUtils.isValidImage(imageBytes)) {
-            LOGGER.warn("Detected non-image data in contact: object-id={} folder={} context={} session-user={}. Try to obtain valid image.", cprd.getContactId(), cprd.getFolderId(), cprd.getContextId(), cprd.getUserId());
-            return false;
-        }
-        if (com.openexchange.ajax.helper.ImageUtils.isSvg(imageBytes)) {
-            LOGGER.debug("Detected a possibly harmful SVG image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", cprd.getContactId(), cprd.getFolderId(), cprd.getContextId(), cprd.getUserId());
-            throw ContactPictureExceptionCodes.HARMFULL_PICTURE.create(cprd.getContactId());
-        }
-        return true;
-    }
-
-    /**
-     * Checks if the given email belongs to the given contact
-     * 
-     * @param c The {@link Contact}
-     * @param email The mail to match
-     * @return <code>true</code> if the mail belongs to the contact, <code>false</code> otherwise
-     */
-    public static boolean checkEmails(Contact c, String email) {
-        return checkEmail(c.getEmail1(), email) || checkEmail(c.getEmail2(), email) || checkEmail(c.getEmail3(), email);
-    }
-
-    /**
-     * Checks if two mail addresses can be considered equal
-     * 
-     * @param contactMail The actual mail from a contact
-     * @param email The mail to match
-     * @return <code>true</code> if the mail addresses can be considered equal, <code>false</code> otherwise
-     */
-    public static boolean checkEmail(String contactMail, String email) {
-        if (Strings.isNotEmpty(contactMail) && contactMail.equalsIgnoreCase(email)) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -249,7 +186,7 @@ public class ContactPictureUtil {
                 List<Contact> contacts = new ArrayList<Contact>();
                 while (result.hasNext()) {
                     Contact contact = result.next();
-                    if (null != contact.getImage1() && (ContactPictureUtil.checkEmails(contact, email))) {
+                    if (null != contact.getImage1() && (checkEmails(contact, email))) {
                         contacts.add(contact);
                     }
                 }
