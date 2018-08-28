@@ -52,6 +52,7 @@ package com.openexchange.microsoft.graph.api;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.apache.http.HttpHeaders;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.exception.OXException;
@@ -119,6 +120,21 @@ abstract class AbstractMicrosoftGraphAPI {
         for (Entry<String, String> queryParam : queryParams.entrySet()) {
             request.withQueryParameter(queryParam.getKey(), queryParam.getValue());
         }
+        return ((JSONValue) client.execute(request).getResponseBody()).toObject();
+    }
+
+    /**
+     * 
+     * @param accessToken
+     * @param path
+     * @return
+     * @throws OXException
+     */
+    JSONObject postResource(String accessToken, String path, JSONObject body) throws OXException {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, path);
+        request.setAccessToken(accessToken);
+        request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        request.withBody(body);
         return ((JSONValue) client.execute(request).getResponseBody()).toObject();
     }
 }

@@ -51,11 +51,13 @@ package com.openexchange.microsoft.graph.api;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTEndPoint;
+import com.openexchange.rest.client.exception.RESTExceptionCodes;
 
 /**
  * {@link MicrosoftGraphOneDriveAPI}
@@ -119,6 +121,9 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getFolder(String accessToken, String folderId) throws OXException {
+        if (Strings.isEmpty(folderId)) {
+            return getRoot(accessToken);
+        }
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + folderId);
     }
 
@@ -161,6 +166,30 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      */
     public JSONObject getItem(String accessToken, String itemId) throws OXException {
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId);
+    }
+
+    /**
+     * 
+     * @param accessToken
+     * @param parentItemId
+     * @param autorename
+     * @return
+     * @throws OXException
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_post_children">Create a new folder in a drive</a>
+     */
+    public JSONObject createFolder(String accessToken, String folderName, String parentItemId, boolean autorename) throws OXException {
+        try {
+            JSONObject body = new JSONObject(3);
+            body.put("name", folderName);
+            body.put("folder", new JSONObject(0)); // indicate that this is a folder
+            if (autorename) {
+                body.put("@microsoft.graph.conflictBehavior", "rename");
+            }
+            String path = Strings.isEmpty(parentItemId) ? "/root" : "/items/" + parentItemId;
+            return postResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + path + "/children", body);
+        } catch (JSONException e) {
+            throw RESTExceptionCodes.JSON_ERROR.create(e);
+        }
     }
 
     ///////////////////// HELPERS //////////////////////

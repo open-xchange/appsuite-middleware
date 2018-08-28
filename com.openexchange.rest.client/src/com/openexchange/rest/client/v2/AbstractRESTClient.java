@@ -57,6 +57,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -149,6 +151,12 @@ public abstract class AbstractRESTClient implements Closeable {
                 break;
             case HEAD:
                 httpRequest = new HttpHead();
+                break;
+            case POST:
+                httpRequest = new HttpPost();
+                break;
+            case PUT:
+                httpRequest = new HttpPut();
                 break;
             default:
                 throw RESTExceptionCodes.UNSUPPORTED_METHOD.create(httpMethod);

@@ -81,7 +81,6 @@ import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
 import com.openexchange.file.storage.onedrive.osgi.Services;
-import com.openexchange.file.storage.onedrive.rest.folder.RestFolder;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -90,6 +89,7 @@ import com.openexchange.session.Session;
  * {@link OneDriveFolderAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
 
@@ -124,40 +124,40 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.onedrive.useOptimisticSubfolderDetection", true, view);
     }
 
-    private boolean hasSubfolders(String oneDriveFolderId, HttpClient httpClient) throws OXException, JSONException, IOException {
-        if (useOptimisticSubfolderDetection) {
-            return true;
-        }
-        HttpRequestBase request = null;
-        try {
-            List<NameValuePair> qparams = initiateQueryString();
-            //qparams.add(new BasicNameValuePair(QUERY_PARAM_FILTER, FILTER_FOLDERS));
-            HttpGet method = new HttpGet(buildUri(oneDriveFolderId + "/files", qparams));
-            request = method;
+    //    private boolean hasSubfolders(String oneDriveFolderId, HttpClient httpClient) throws OXException, JSONException, IOException {
+    //        if (useOptimisticSubfolderDetection) {
+    //            return true;
+    //        }
+    //        HttpRequestBase request = null;
+    //        try {
+    //            List<NameValuePair> qparams = initiateQueryString();
+    //            //qparams.add(new BasicNameValuePair(QUERY_PARAM_FILTER, FILTER_FOLDERS));
+    //            HttpGet method = new HttpGet(buildUri(oneDriveFolderId + "/files", qparams));
+    //            request = method;
+    //
+    //            JSONArray jData = handleHttpResponse(execute(method, httpClient), JSONObject.class).getJSONArray("data");
+    //            int length = jData.length();
+    //            if (length > 0) {
+    //                for (int i = 0; i < length; i++) {
+    //                    JSONObject jItem = jData.getJSONObject(i);
+    //                    if (isFolder(jItem)) {
+    //                        return true;
+    //                    }
+    //                }
+    //            }
+    //            return false;
+    //        } finally {
+    //            reset(request);
+    //        }
+    //    }
 
-            JSONArray jData = handleHttpResponse(execute(method, httpClient), JSONObject.class).getJSONArray("data");
-            int length = jData.length();
-            if (length > 0) {
-                for (int i = 0; i < length; i++) {
-                    JSONObject jItem = jData.getJSONObject(i);
-                    if (isFolder(jItem)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        } finally {
-            reset(request);
-        }
-    }
-
-    protected OneDriveFolder parseFolder(String oneDriveFolderId, RestFolder restFolder, HttpClient httpClient) throws OXException, JSONException, IOException {
-        return new OneDriveFolder(userId).parseDirEntry(restFolder, getRootFolderId(), accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
-    }
-
-    protected OneDriveFolder parseFolder(String oneDriveFolderId, JSONObject jFolder, HttpClient httpClient) throws OXException, JSONException, IOException {
-        return new OneDriveFolder(userId).parseDirEntry(jFolder, getRootFolderId(), accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
-    }
+    //    protected OneDriveFolder parseFolder(String oneDriveFolderId, RestFolder restFolder, HttpClient httpClient) throws OXException, JSONException, IOException {
+    //        return new OneDriveFolder(userId).parseDirEntry(restFolder, getRootFolderId(), accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
+    //    }
+    //
+    //    protected OneDriveFolder parseFolder(String oneDriveFolderId, JSONObject jFolder, HttpClient httpClient) throws OXException, JSONException, IOException {
+    //        return new OneDriveFolder(userId).parseDirEntry(jFolder, getRootFolderId(), accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
+    //    }
 
     @Override
     public boolean exists(final String folderId) throws OXException {
@@ -283,14 +283,15 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        OneDriveFolder rootFolder = new OneDriveFolder(userId);
-        rootFolder.setRootFolder(true);
-        rootFolder.setId(FileStorageFolder.ROOT_FULLNAME);
-        rootFolder.setParentId(null);
-        rootFolder.setName(accountDisplayName);
-        rootFolder.setSubfolders(true);
-        rootFolder.setSubscribedSubfolders(true);
-        return rootFolder;
+        return driveService.getRootFolder(userId, getAccessToken());
+        //        OneDriveFolder rootFolder = new OneDriveFolder(userId);
+        //        rootFolder.setRootFolder(true);
+        //        rootFolder.setId(FileStorageFolder.ROOT_FULLNAME);
+        //        rootFolder.setParentId(null);
+        //        rootFolder.setName(accountDisplayName);
+        //        rootFolder.setSubfolders(true);
+        //        rootFolder.setSubscribedSubfolders(true);
+        //        return rootFolder;
     }
 
     @Override
@@ -300,71 +301,72 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public String createFolder(final FileStorageFolder toCreate, final boolean autoRename) throws OXException {
-        if (false == autoRename) {
-            return perform(new OneDriveClosure<String>() {
-
-                @Override
-                protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                    String parentId = toCreate.getParentId();
-                    HttpPost request = null;
-                    try {
-                        request = new HttpPost(buildUri(toOneDriveFolderId(parentId), initiateQueryString()));
-                        request.setHeader("Content-Type", "application/json");
-                        request.setEntity(asHttpEntity(new JSONObject(1).put("name", toCreate.getName())));
-                        try {
-                            JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                            return jResponse.getString("id");
-                        } catch (DuplicateResourceException e) {
-                            FileStorageFolder parent = getFolder(parentId);
-                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), parent.getName());
-                        }
-                    } catch (HttpResponseException e) {
-                        throw handleHttpResponseError(parentId, account.getId(), e);
-                    } finally {
-                        reset(request);
-                    }
-                }
-            });
-        }
-
-        // With auto-rename
-        final String parentId = toCreate.getParentId();
-
-        String baseName = toCreate.getName();
-        final NameBuilder name = new NameBuilder(baseName);
-        while (true) {
-            try {
-                return perform(new OneDriveClosure<String>() {
-
-                    @Override
-                    protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                        HttpPost request = null;
-                        try {
-                            request = new HttpPost(buildUri(toOneDriveFolderId(parentId), initiateQueryString()));
-                            request.setHeader("Content-Type", "application/json");
-                            request.setEntity(asHttpEntity(new JSONObject(1).put("name", name.toString())));
-                            try {
-                                JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                                return jResponse.getString("id");
-                            } catch (DuplicateResourceException e) {
-                                FileStorageFolder parent = getFolder(parentId);
-                                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, name.toString(), parent.getName());
-                            }
-                        } catch (HttpResponseException e) {
-                            throw handleHttpResponseError(parentId, account.getId(), e);
-                        } finally {
-                            reset(request);
-                        }
-                    }
-                });
-            } catch (OXException e) {
-                if (false == FileStorageExceptionCodes.DUPLICATE_FOLDER.equals(e)) {
-                    throw e;
-                }
-
-                name.advance();
-            }
-        }
+        return driveService.createFolder(userId, getAccessToken(), toCreate.getName(), toCreate.getParentId(), autoRename).getId();
+        //        if (false == autoRename) {
+        //            return perform(new OneDriveClosure<String>() {
+        //
+        //                @Override
+        //                protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                    String parentId = toCreate.getParentId();
+        //                    HttpPost request = null;
+        //                    try {
+        //                        request = new HttpPost(buildUri(toOneDriveFolderId(parentId), initiateQueryString()));
+        //                        request.setHeader("Content-Type", "application/json");
+        //                        request.setEntity(asHttpEntity(new JSONObject(1).put("name", toCreate.getName())));
+        //                        try {
+        //                            JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+        //                            return jResponse.getString("id");
+        //                        } catch (DuplicateResourceException e) {
+        //                            FileStorageFolder parent = getFolder(parentId);
+        //                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), parent.getName());
+        //                        }
+        //                    } catch (HttpResponseException e) {
+        //                        throw handleHttpResponseError(parentId, account.getId(), e);
+        //                    } finally {
+        //                        reset(request);
+        //                    }
+        //                }
+        //            });
+        //        }
+        //
+        //        // With auto-rename
+        //        final String parentId = toCreate.getParentId();
+        //
+        //        String baseName = toCreate.getName();
+        //        final NameBuilder name = new NameBuilder(baseName);
+        //        while (true) {
+        //            try {
+        //                return perform(new OneDriveClosure<String>() {
+        //
+        //                    @Override
+        //                    protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                        HttpPost request = null;
+        //                        try {
+        //                            request = new HttpPost(buildUri(toOneDriveFolderId(parentId), initiateQueryString()));
+        //                            request.setHeader("Content-Type", "application/json");
+        //                            request.setEntity(asHttpEntity(new JSONObject(1).put("name", name.toString())));
+        //                            try {
+        //                                JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+        //                                return jResponse.getString("id");
+        //                            } catch (DuplicateResourceException e) {
+        //                                FileStorageFolder parent = getFolder(parentId);
+        //                                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, name.toString(), parent.getName());
+        //                            }
+        //                        } catch (HttpResponseException e) {
+        //                            throw handleHttpResponseError(parentId, account.getId(), e);
+        //                        } finally {
+        //                            reset(request);
+        //                        }
+        //                    }
+        //                });
+        //            } catch (OXException e) {
+        //                if (false == FileStorageExceptionCodes.DUPLICATE_FOLDER.equals(e)) {
+        //                    throw e;
+        //                }
+        //
+        //                name.advance();
+        //            }
+        //        }
     }
 
     @Override

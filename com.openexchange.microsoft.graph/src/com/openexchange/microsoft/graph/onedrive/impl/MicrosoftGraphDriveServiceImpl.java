@@ -49,7 +49,6 @@
 
 package com.openexchange.microsoft.graph.onedrive.impl;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONObject;
@@ -144,6 +143,16 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             list.addAll(folderEntityParser.parseEntities(userId, response.optJSONArray("value")));
         } while (Strings.isNotEmpty(skipToken));
         return list;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#createFolder(int, java.lang.String, java.lang.String, java.lang.String, boolean)
+     */
+    @Override
+    public OneDriveFolder createFolder(int userId, String accessToken, String folderName, String parentId, boolean autorename) throws OXException {
+        return folderEntityParser.parseEntity(userId, api.createFolder(accessToken, folderName, parentId, autorename));
     }
 
     /*

@@ -52,6 +52,7 @@ package com.openexchange.microsoft.graph.api.client;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONObject;
 import com.openexchange.rest.client.v2.RESTMethod;
 
 /**
@@ -66,6 +67,8 @@ public class MicrosoftGraphRequest {
     private final RESTMethod method;
     private String accessToken;
     private final Map<String, String> queryParams;
+    private final Map<String, String> headers;
+    private JSONObject body;
 
     /**
      * Initialises a new {@link MicrosoftGraphRequest}.
@@ -94,6 +97,7 @@ public class MicrosoftGraphRequest {
         this.method = method;
         this.endPoint = endPoint;
         queryParams = new HashMap<>(4);
+        headers = new HashMap<>(4);
     }
 
     /**
@@ -149,5 +153,24 @@ public class MicrosoftGraphRequest {
      */
     Map<String, String> getQueryParameters() {
         return Collections.unmodifiableMap(queryParams);
+    }
+
+    public void withHeader(String name, String value) {
+        headers.put(name, value);
+    }
+
+    Map<String, String> getHeaders() {
+        return Collections.unmodifiableMap(headers);
+    }
+
+    /**
+     * 
+     */
+    public void withBody(JSONObject body) {
+        this.body = body;
+    }
+    
+    public JSONObject getBody() {
+        return body;
     }
 }

@@ -103,6 +103,18 @@ public interface MicrosoftGraphDriveService {
     List<OneDriveFolder> getSubFolders(int userId, String accessToken, String folderId) throws OXException;
 
     /**
+     * 
+     * @param userId
+     * @param accessToken
+     * @param folderName
+     * @param parentId
+     * @param autorename
+     * @return
+     * @throws OXException
+     */
+    OneDriveFolder createFolder(int userId, String accessToken, String folderName, String parentId, boolean autorename) throws OXException;
+
+    /**
      * Returns all files with in the specified folder
      * 
      * @param userId The user identifier

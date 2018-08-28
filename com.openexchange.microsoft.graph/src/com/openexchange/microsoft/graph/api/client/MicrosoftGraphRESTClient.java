@@ -49,12 +49,16 @@
 
 package com.openexchange.microsoft.graph.api.client;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.v2.AbstractRESTClient;
@@ -98,9 +102,38 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
             httpRequest.setURI(new URI(SCHEME, API_URL, "/" + API_VERSION + request.getEndPoint(), prepareQueryParameters(request.getQueryParameters()), null));
             httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + request.getAccessToken());
             httpRequest.addHeader(HttpHeaders.ACCEPT, "application/json");
+            addAdditionalHeaders(httpRequest, request.getHeaders());
+            addOptionalBody(httpRequest, request.getBody());
             return httpRequest;
         } catch (URISyntaxException e) {
             throw RESTExceptionCodes.INVALID_URI_PATH.create(e, API_VERSION + request.getEndPoint());
+        }
+    }
+
+    /**
+     * @param httpRequest
+     * @param body
+     */
+    private void addOptionalBody(HttpRequestBase httpRequest, JSONObject body) {
+        if (httpRequest instanceof HttpPost && body != null) {
+            try {
+                ((HttpPost) httpRequest).setEntity(new StringEntity(body.toString()));
+            } catch (UnsupportedEncodingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Add any additional headers to the request
+     * 
+     * @param request The request to add the headers to
+     * @param headers the headers to add
+     */
+    private void addAdditionalHeaders(HttpRequestBase httpRequest, Map<String, String> headers) {
+        for (Entry<String, String> header : headers.entrySet()) {
+            httpRequest.addHeader(header.getKey(), header.getValue());
         }
     }
 
