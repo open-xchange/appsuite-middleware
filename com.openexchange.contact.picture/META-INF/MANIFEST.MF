@@ -5,9 +5,13 @@ Bundle-SymbolicName: com.openexchange.contact.picture
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.ajax.container,
+Import-Package: com.google.common.cache,
+ com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.helper,
+ com.openexchange.caching,
+ com.openexchange.config.lean,
+ com.openexchange.event,
  com.openexchange.exception,
  com.openexchange.groupware.container,
  com.openexchange.java,
@@ -16,6 +20,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.session,
+ org.osgi.service.event,
  org.slf4j
 Export-Package: com.openexchange.contact.picture,
  com.openexchange.contact.picture.finder

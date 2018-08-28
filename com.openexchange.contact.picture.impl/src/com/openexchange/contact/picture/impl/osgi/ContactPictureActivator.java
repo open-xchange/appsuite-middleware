@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.picture.impl.osgi;
 
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
@@ -81,7 +80,7 @@ public final class ContactPictureActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContactService.class, LeanConfigurationService.class, UserPermissionService.class, UserService.class };
+        return new Class<?>[] { ContactService.class, UserPermissionService.class, UserService.class };
     }
 
     @Override

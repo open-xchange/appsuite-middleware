@@ -105,6 +105,17 @@ public class FinderUtil {
     }
 
     /**
+     * Checks if two contacts are equal in Terms of mail addresses
+     * 
+     * @param c1 The one {@link Contact}
+     * @param c2 The other {@link Contact}
+     * @return <code>true</code> if the mail belongs to the contact, <code>false</code> otherwise
+     */
+    public static boolean checkEmails(Contact c1, Contact c2) {
+        return checkEmail(c1.getEmail1(), c2.getEmail1()) && checkEmail(c1.getEmail2(), c2.getEmail2()) && checkEmail(c1.getEmail3(), c2.getEmail3());
+    }
+
+    /**
      * Checks if the given email belongs to the given contact
      * 
      * @param c The {@link Contact}

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.picture.impl;
+package com.openexchange.contact.picture.finder;
 
 import com.openexchange.config.lean.Property;
 
@@ -57,9 +57,9 @@ import com.openexchange.config.lean.Property;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public enum ContactPictureProperties implements Property {
+enum ContactPictureProperties implements Property {
 
-    CACHE_DURATION("com.openexchange.contacts.picture.cache.duration", Long.valueOf(20)),
+    CACHE_DURATION("com.openexchange.contacts.picture.cache.duration", Long.valueOf(5)),
 
     CACHE_SIZE("com.openexchange.contacts.picture.cache.size", Integer.valueOf(1000)),
 
