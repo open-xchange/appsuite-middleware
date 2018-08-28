@@ -49,8 +49,11 @@
 
 package com.openexchange.microsoft.graph.api;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTEndPoint;
 
@@ -103,7 +106,19 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getRootChildren(String accessToken) throws OXException {
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root/children");
+        return getRootChildren(accessToken, 0, null);
+    }
+
+    /**
+     * Returns the metadata of all children (files and folders) of the specified folder.
+     * 
+     * @param accessToken The oauth access token
+     * @param folderPath The folder's absolute path, e.g. <code>/path/to/folder</code>
+     * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
+     * @throws OXException if an error is occurred
+     */
+    public JSONObject getRootChildren(String accessToken, int offset, String skipToken) throws OXException {
+        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root/children", compileRangeParams(offset, skipToken));
     }
 
     /**
@@ -129,5 +144,67 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      */
     public JSONObject getChildren(String accessToken, String folderPath) throws OXException {
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root:/" + folderPath + ":/children");
+    }
+
+    /**
+     * Returns the metadata of the folder with the specified identifier for a user's default Drive
+     * 
+     * @param accessToken The oauth access token
+     * @param folderPath The folder's unique identifier
+     * @return A {@link JSONObject} with the metadata of the user's specified folder
+     *         of the default Drive
+     * @throws OXException if an error is occurred
+     */
+    public JSONObject getFolderById(String accessToken, String folderId) throws OXException {
+        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + folderId);
+    }
+
+    /**
+     * Returns the metadata of all children (files and folders) of the specified folder.
+     * 
+     * @param accessToken The oauth access token
+     * @param folderPath The folder's unique identifier
+     * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
+     * @throws OXException if an error is occurred
+     */
+    public JSONObject getChildrenById(String accessToken, String folderId) throws OXException {
+        return getChildrenById(accessToken, folderId, 0, null);
+    }
+
+    /**
+     * Returns the metadata of all children (files and folders) of the specified folder.
+     * 
+     * @param accessToken The oauth access token
+     * @param folderPath The folder's unique identifier
+     * @param offset The offset for the request
+     * @param skipToken The skip token for the next page (provided by the API's response)
+     * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
+     * @throws OXException if an error is occurred
+     */
+    public JSONObject getChildrenById(String accessToken, String folderId, int offset, String skipToken) throws OXException {
+        if (Strings.isEmpty(folderId)) {
+            return getRootChildren(accessToken, offset, skipToken);
+        }
+        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + folderId + "/children", compileRangeParams(offset, skipToken));
+    }
+
+    ///////////////////// HELPERS //////////////////////
+    
+    /**
+     * Compiles a map with the range query parameters
+     * 
+     * @param offset the start offset (i.e. the '$top' parameter)
+     * @param skipToken the skip token provided by the API's response
+     * @return A {@link Map} with the range query parameters
+     */
+    private Map<String, String> compileRangeParams(int offset, String skipToken) {
+        Map<String, String> queryParams = new HashMap<>(2);
+        if (offset > 0) {
+            queryParams.put("$top", Integer.toString(offset));
+        }
+        if (Strings.isNotEmpty(skipToken)) {
+            queryParams.put("$skipToken", skipToken);
+        }
+        return queryParams;
     }
 }

@@ -98,6 +98,7 @@ import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpCopy;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
+import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.file.storage.onedrive.rest.Image;
 import com.openexchange.file.storage.onedrive.rest.file.RestFile;
 import com.openexchange.file.storage.onedrive.rest.file.RestFileResponse;
@@ -108,6 +109,7 @@ import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -122,6 +124,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     private final OneDriveAccountAccess accountAccess;
     private final OneDriveFolderAccess folderAccess;
     final int userId;
+    private final MicrosoftGraphDriveService driveService;
 
     /**
      * Initializes a new {@link OneDriveFileAccess}.
@@ -136,6 +139,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         this.accountAccess = accountAccess;
         this.folderAccess = folderAccess;
         this.userId = session.getUserId();
+        this.driveService = Services.getService(MicrosoftGraphDriveService.class);
     }
 
     @Override
@@ -644,52 +648,53 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public TimedResult<File> getDocuments(final String folderId, List<Field> fields, final Field sort, final SortDirection order) throws OXException {
-        return perform(new OneDriveClosure<TimedResult<File>>() {
-
-            @Override
-            protected TimedResult<File> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    String fid = toOneDriveFolderId(folderId);
-                    List<File> files = new LinkedList<>();
-
-                    int limit = 100;
-                    int offset = 0;
-                    int resultsFound;
-
-                    do {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
-                        request = method;
-
-                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
-                        int length = jData.length();
-                        resultsFound = length;
-                        for (int i = 0; i < length; i++) {
-                            JSONObject jItem = jData.getJSONObject(i);
-                            if (isFile(jItem)) {
-                                files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem));
-                            }
-                        }
-
-                        reset(request);
-                        request = null;
-
-                        offset += limit;
-                    } while (resultsFound == limit);
-
-                    // Sort collection if needed
-                    sort(files, sort, order);
-
-                    return new FileTimedResult(files);
-                } finally {
-                    reset(request);
-                }
-            }
-        });
+        return new FileTimedResult(driveService.getFiles(userId, oneDriveAccess.getOAuthAccount().getToken(), folderId));
+//        return perform(new OneDriveClosure<TimedResult<File>>() {
+//
+//            @Override
+//            protected TimedResult<File> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+//                HttpRequestBase request = null;
+//                try {
+//                    String fid = toOneDriveFolderId(folderId);
+//                    List<File> files = new LinkedList<>();
+//
+//                    int limit = 100;
+//                    int offset = 0;
+//                    int resultsFound;
+//
+//                    do {
+//                        List<NameValuePair> qparams = initiateQueryString();
+//                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
+//                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
+//                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
+//                        request = method;
+//
+//                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
+//                        JSONArray jData = jResponse.getJSONArray("data");
+//                        int length = jData.length();
+//                        resultsFound = length;
+//                        for (int i = 0; i < length; i++) {
+//                            JSONObject jItem = jData.getJSONObject(i);
+//                            if (isFile(jItem)) {
+//                                files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem));
+//                            }
+//                        }
+//
+//                        reset(request);
+//                        request = null;
+//
+//                        offset += limit;
+//                    } while (resultsFound == limit);
+//
+//                    // Sort collection if needed
+//                    sort(files, sort, order);
+//
+//                    return new FileTimedResult(files);
+//                } finally {
+//                    reset(request);
+//                }
+//            }
+//        });
     }
 
     @Override

@@ -49,12 +49,18 @@
 
 package com.openexchange.microsoft.graph.onedrive.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphOneDriveAPI;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
+import com.openexchange.microsoft.graph.onedrive.OneDriveFile;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
 import com.openexchange.microsoft.graph.onedrive.exceptions.ErrorCode;
+import com.openexchange.microsoft.graph.onedrive.parser.OneDriveFileParser;
 import com.openexchange.microsoft.graph.onedrive.parser.OneDriveFolderParser;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 
@@ -68,6 +74,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     private final MicrosoftGraphOneDriveAPI api;
     private final OneDriveFolderParser folderEntityParser;
+    private final OneDriveFileParser fileEntityParser;
 
     /**
      * Initialises a new {@link MicrosoftGraphDriveServiceImpl}.
@@ -76,6 +83,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         super();
         this.api = api;
         this.folderEntityParser = new OneDriveFolderParser();
+        this.fileEntityParser = new OneDriveFileParser();
     }
 
     /*
@@ -102,11 +110,80 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getRootFolder(java.lang.String)
      */
     @Override
-    public OneDriveFolder getRootFolder(String accessToken) throws OXException {
-        return folderEntityParser.parseEntity(api.getRoot(accessToken));
+    public OneDriveFolder getRootFolder(int userId, String accessToken) throws OXException {
+        return folderEntityParser.parseEntity(userId, api.getRoot(accessToken));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFolder(int, java.lang.String, java.lang.String)
+     */
+    @Override
+    public OneDriveFolder getFolder(int userId, String accessToken, String folderId) throws OXException {
+        return folderEntityParser.parseEntity(userId, api.getFolderById(accessToken, folderId));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getSubFolders(java.lang.String, java.lang.String)
+     */
+    @Override
+    public List<OneDriveFolder> getSubFolders(int userId, String accessToken, String folderId) throws OXException {
+        int offset = 100;
+        String skipToken = null;
+        List<OneDriveFolder> list = new ArrayList<>();
+        do {
+            JSONObject response = api.getChildrenById(accessToken, folderId, offset, skipToken);
+            skipToken = extractSkipToken(response);
+            list.addAll(folderEntityParser.parseEntities(userId, response.optJSONArray("value")));
+        } while (Strings.isNotEmpty(skipToken));
+        return list;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFiles(int, java.lang.String, java.lang.String)
+     */
+    @Override
+    public List<File> getFiles(int userId, String accessToken, String folderId) throws OXException {
+        int offset = 100;
+        String skipToken = null;
+        List<File> list = new ArrayList<>();
+        do {
+            JSONObject response = api.getChildrenById(accessToken, folderId, offset, skipToken);
+            skipToken = extractSkipToken(response);
+            list.addAll(fileEntityParser.parseEntities(userId, response.optJSONArray("value")));
+        } while (Strings.isNotEmpty(skipToken));
+        return list;
     }
 
     //////////////////////////////////////// HELPERS /////////////////////////////////////
+
+    /**
+     * Checks and extracts a 'skipToken' if available.
+     * 
+     * @param response The {@link JSONObject} response body
+     * @return the skipToken or <code>null</code> if none available.
+     */
+    private String extractSkipToken(JSONObject response) {
+        String nextLink = response.optString("@odata.nextLink");
+        if (Strings.isEmpty(nextLink)) {
+            return null;
+        }
+        int indexOfKey = nextLink.indexOf("skiptoken");
+        if (indexOfKey < 0) {
+            return null;
+        }
+        int indexOfValue = nextLink.indexOf("=", indexOfKey);
+        if (indexOfValue < 0) {
+            return null;
+        }
+        int indexOfLast = nextLink.indexOf("=", indexOfValue);
+        return ((indexOfLast < 0)) ? nextLink.substring(indexOfValue) : nextLink.substring(indexOfValue, indexOfLast);
+    }
 
     /**
      * Checks the specified response whether it contains the specified error code

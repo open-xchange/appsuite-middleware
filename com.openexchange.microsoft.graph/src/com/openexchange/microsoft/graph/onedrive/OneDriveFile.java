@@ -50,6 +50,7 @@
 package com.openexchange.microsoft.graph.onedrive;
 
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.FileStorageFileAccess;
 
 /**
  * {@link OneDriveFile}
@@ -62,8 +63,23 @@ public class OneDriveFile extends DefaultFile {
     /**
      * Initialises a new {@link OneDriveFile}.
      */
-    public OneDriveFile() {
+    public OneDriveFile(int userId) {
         super();
+        setCreatedBy(userId);
+        setModifiedBy(userId);
+        setVersion(FileStorageFileAccess.CURRENT_VERSION);
+        setIsCurrentVersion(true);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.AbstractFile#toString()
+     */
+    @Override
+    public String toString() {
+        final String url = getURL();
+        return url == null ? super.toString() : url;
     }
 
 }

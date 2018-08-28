@@ -56,6 +56,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator;
+import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthService;
@@ -78,10 +79,14 @@ public final class OneDriveActivator extends AbstractCloudStorageActivator {
         super();
     }
 
+    //@formatter:off
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, ClusterLockService.class, OAuthService.class, OAuthAccessRegistryService.class, ConfigViewFactory.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, 
+            MimeTypeMap.class, TimerService.class, ClusterLockService.class, OAuthService.class, OAuthAccessRegistryService.class,
+            ConfigViewFactory.class, MicrosoftGraphDriveService.class };
     }
+    //@formatter:on
 
     @Override
     protected void startBundle() throws Exception {
@@ -112,6 +117,6 @@ public final class OneDriveActivator extends AbstractCloudStorageActivator {
      */
     @Override
     protected KnownApi getAPI() {
-        return KnownApi.MS_LIVE_CONNECT;
+        return KnownApi.MICROSOFT_GRAPH;
     }
 }

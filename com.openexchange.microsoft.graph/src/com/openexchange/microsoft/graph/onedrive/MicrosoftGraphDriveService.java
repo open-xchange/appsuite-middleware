@@ -49,7 +49,9 @@
 
 package com.openexchange.microsoft.graph.onedrive;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
 
 /**
  * {@link MicrosoftGraphDriveService}
@@ -72,9 +74,43 @@ public interface MicrosoftGraphDriveService {
     /**
      * Returns the root folder of the user's default drive account
      * 
+     * @param userId The user identifier
      * @param accessToken The oauth access token
      * @return The root folder
      * @throws OXException If an error is occurred
      */
-    OneDriveFolder getRootFolder(String accessToken) throws OXException;
+    OneDriveFolder getRootFolder(int userId, String accessToken) throws OXException;
+
+    /**
+     * Retrieves the folder with the specified identifier for the specified user
+     * 
+     * @param userId The user identifier
+     * @param accessToken The oauth access token
+     * @param folderId the folder identifier
+     * @return The folder
+     * @throws OXException if an error is occurred
+     */
+    OneDriveFolder getFolder(int userId, String accessToken, String folderId) throws OXException;
+
+    /**
+     * Returns all sub-folders of the specified folder
+     * 
+     * @param userId The user identifier
+     * @param accessToken The oauth access token
+     * @param folderId The folder identifier for which to retrieve all sub-folders
+     * @return A {@link List} with all sub-folders
+     * @throws OXException If an error is occurred
+     */
+    List<OneDriveFolder> getSubFolders(int userId, String accessToken, String folderId) throws OXException;
+
+    /**
+     * Returns all files with in the specified folder
+     * 
+     * @param userId The user identifier
+     * @param accessToken The oauth access token
+     * @param folderId The folder identifier for which to retrieve all sub-folders
+     * @return A {@link List} with all files in the specified folder
+     * @throws OXException If an error is occurred
+     */
+    List<File> getFiles(int userId, String accessToken, String folderId) throws OXException;
 }

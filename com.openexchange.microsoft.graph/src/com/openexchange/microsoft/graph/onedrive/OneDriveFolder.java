@@ -49,8 +49,11 @@
 
 package com.openexchange.microsoft.graph.onedrive;
 
+import java.util.Collections;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
+import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageFolderType;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
 
 /**
@@ -66,8 +69,21 @@ public class OneDriveFolder extends DefaultFileStorageFolder implements TypeAwar
     /**
      * Initialises a new {@link OneDriveFolder}.
      */
-    public OneDriveFolder() {
+    public OneDriveFolder(int userId) {
         super();
+        type = FileStorageFolderType.NONE;
+        setCreatedBy(userId);
+        setModifiedBy(userId);
+
+        setHoldsFiles(true);
+        setHoldsFolders(true);
+        setExists(true);
+        setSubscribed(true);
+
+        DefaultFileStoragePermission permission = DefaultFileStoragePermission.newInstance();
+        permission.setEntity(userId);
+        setPermissions(Collections.<FileStoragePermission> singletonList(permission));
+        setOwnPermission(permission);
     }
 
     /*

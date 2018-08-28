@@ -71,7 +71,7 @@ public final class OneDriveFileStorageService extends AbstractOAuthFileStorageSe
      * Initializes a new {@link BoxFileStorageService}.
      */
     public OneDriveFileStorageService(ServiceLookup services) {
-        super(services, KnownApi.MS_LIVE_CONNECT, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID);
+        super(services, KnownApi.MICROSOFT_GRAPH, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID);
     }
 
     /**
@@ -81,7 +81,7 @@ public final class OneDriveFileStorageService extends AbstractOAuthFileStorageSe
      * @param compositeFileStorageAccountManagerProvider
      */
     public OneDriveFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, KnownApi.MS_LIVE_CONNECT, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID, compositeFileStorageAccountManagerProvider);
+        super(services, KnownApi.MICROSOFT_GRAPH, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
     @Override

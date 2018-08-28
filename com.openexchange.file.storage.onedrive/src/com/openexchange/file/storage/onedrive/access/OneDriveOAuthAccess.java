@@ -62,7 +62,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.MsLiveConnectApi;
 import org.scribe.model.Token;
 import org.slf4j.Logger;
 import com.openexchange.cluster.lock.ClusterLockService;
@@ -84,6 +83,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.oauth.api.MicrosoftGraphApi;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
 import com.openexchange.rest.client.httpclient.HttpClients;
@@ -136,7 +136,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             verifyAccount(liveconnectOAuthAccount, oAuthService, OXScope.drive);
             setOAuthClient(new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"), getOAuthAccount().getToken()));
         }
-        
+
     }
 
     @Override
@@ -207,9 +207,9 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     private boolean isExpired(OAuthAccount liveconnectOAuthAccount, Session session) throws OXException {
         // Create Scribe Microsoft OneDrive OAuth service
-        ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
+        ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MicrosoftGraphApi.class);
         serviceBuilder.apiKey(liveconnectOAuthAccount.getMetaData().getAPIKey(session)).apiSecret(liveconnectOAuthAccount.getMetaData().getAPISecret(session));
-        MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
+        MicrosoftGraphApi.MicrosoftGraphService scribeOAuthService = (MicrosoftGraphApi.MicrosoftGraphService) serviceBuilder.build();
         return scribeOAuthService.isExpired(liveconnectOAuthAccount.getToken());
     }
 
@@ -238,9 +238,9 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
                 throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cachedAccount.getDisplayName(), cachedAccount.getId(), session.getUserId(), session.getContextId());
             }
 
-            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
+            ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MicrosoftGraphApi.class);
             serviceBuilder.apiKey(cachedAccount.getMetaData().getAPIKey(session)).apiSecret(cachedAccount.getMetaData().getAPISecret(session));
-            MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
+            MicrosoftGraphApi.MicrosoftGraphService scribeOAuthService = (MicrosoftGraphApi.MicrosoftGraphService) serviceBuilder.build();
 
             try {
                 Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), refreshToken), null);
@@ -258,7 +258,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
             List<Object> displayArgs = new ArrayList<>(2);
             displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
-            displayArgs.add("apis.live.net");
+            displayArgs.add("graph.microsoft.com");
             return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
         }
 

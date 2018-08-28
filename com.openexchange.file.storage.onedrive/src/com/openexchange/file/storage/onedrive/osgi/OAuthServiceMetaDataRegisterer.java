@@ -70,7 +70,7 @@ public class OAuthServiceMetaDataRegisterer extends AbstractCloudStorageOAuthSer
      * @param context The bundle context
      */
     public OAuthServiceMetaDataRegisterer(BundleContext context, ServiceLookup services) {
-        super(context, services, KnownApi.MS_LIVE_CONNECT.getServiceId());
+        super(context, services, KnownApi.MICROSOFT_GRAPH.getServiceId());
     }
 
     /*

@@ -50,8 +50,13 @@
 package com.openexchange.microsoft.graph.onedrive.parser;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
 
 /**
@@ -63,8 +68,7 @@ import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
 public class OneDriveFolderParser {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OneDriveFolderParser.class);
-    
-    
+
     /**
      * Initialises a new {@link OneDriveFolderParser}.
      */
@@ -73,22 +77,24 @@ public class OneDriveFolderParser {
     }
 
     /**
+     * Parses the specified {@link JSONObject} entity to an {@link OneDriveFolder}
      * 
-     * @param entity
-     * @return
+     * @param userId The user identifier
+     * @param entity The {@link JSONObject}
+     * @return The {@link OneDriveFolder}
      */
-    public OneDriveFolder parseEntity(JSONObject entity) {
-        OneDriveFolder folder = new OneDriveFolder();
+    public OneDriveFolder parseEntity(int userId, JSONObject entity) {
+        OneDriveFolder folder = new OneDriveFolder(userId);
         if (entity == null || entity.isEmpty()) {
             return folder;
         }
         folder.setId(entity.optString("id"));
         folder.setName(entity.optString("name"));
-        folder.setRootFolder(folder.getName().equals("root") /* && ??? */); //FIXME: find another anchor point to check for root folder
 
-        if (folder.isRootFolder()) {
-            folder.setParentId(null);
-            //TODO: set parentId if not root folder
+        JSONObject parentRef = entity.optJSONObject("parentReference");
+        if (parentRef != null && !parentRef.isEmpty()) {
+            folder.setParentId(parentRef.optString("id"));
+            folder.setRootFolder(Strings.isEmpty(folder.getParentId()));
         }
 
         JSONObject fileSystemInfo = entity.optJSONObject("fileSystemInfo");
@@ -105,9 +111,35 @@ public class OneDriveFolderParser {
             } catch (ParseException e) {
                 LOG.warn("Could not parse date from: {}", modifiedAt, e);
             }
-            // TODO: check whether it has subfolders
+            JSONObject folderMetaData = entity.optJSONObject("folder");
+            if (folderMetaData != null && !folderMetaData.isEmpty()) {
+                int childCount = folderMetaData.optInt("childCount");
+                folder.setSubfolders(childCount > 0);
+                folder.setSubscribedSubfolders(folder.hasSubfolders());
+            }
         }
         return folder;
     }
 
+    /**
+     * Parses the specified {@link JSONArray} of entities in to a {@link List}
+     * of {@link OneDriveFolder}s
+     * 
+     * @param userId the user identifier
+     * @param entities The {@link JSONArray} with the entities
+     * @return A {@link List} with the {@link OneDriveFolder}s
+     */
+    public List<OneDriveFolder> parseEntities(int userId, JSONArray entities) {
+        if (entities == null || entities.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<OneDriveFolder> folders = new ArrayList<>();
+        for (int index = 0; index < entities.length(); index++) {
+            JSONObject entity = entities.optJSONObject(index);
+            if (entity.hasAndNotNull("folder")) {
+                folders.add(parseEntity(userId, entity));
+            }
+        }
+        return folders;
+    }
 }

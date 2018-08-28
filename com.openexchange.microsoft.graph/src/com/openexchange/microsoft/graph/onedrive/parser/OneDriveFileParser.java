@@ -49,7 +49,14 @@
 
 package com.openexchange.microsoft.graph.onedrive.parser;
 
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFile;
 
 /**
@@ -60,13 +67,80 @@ import com.openexchange.microsoft.graph.onedrive.OneDriveFile;
  */
 public class OneDriveFileParser {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OneDriveFileParser.class);
+
+    /**
+     * Initialises a new {@link OneDriveFileParser}.
+     */
+    public OneDriveFileParser() {
+        super();
+    }
+
     /**
      * 
      * @param entity
      * @return
      */
-    public OneDriveFile parseEntity(JSONObject entity) {
-        return null;
+    public OneDriveFile parseEntity(int userId, JSONObject entity) {
+        OneDriveFile file = new OneDriveFile(userId);
+        String name = entity.optString("name");
+        file.setId(entity.optString("id"));
+        file.setFileName(name);
+        file.setTitle(name);
+        file.setFileSize(entity.optLong("size"));
+        file.setURL(entity.optString("webUrl")); // FIXME: Use 'webUrl' or '@microsoft.graph.downloadUrl'
+        file.setDescription(entity.optString("description"));
+
+        file.setColorLabel(0);
+        file.setCategories(null);
+        file.setVersionComment(null);
+
+        JSONObject parentRef = entity.optJSONObject("parentReference");
+        if (parentRef != null && !parentRef.isEmpty()) {
+            file.setFolderId(parentRef.optString("id"));
+        }
+        
+        JSONObject fileJson = entity.optJSONObject("file");
+        if (fileJson != null && !fileJson.isEmpty()) {
+            file.setFileMIMEType(fileJson.optString("mimeType"));
+        }
+
+        JSONObject fileSystemInfo = entity.optJSONObject("fileSystemInfo");
+        if (fileSystemInfo != null && !fileSystemInfo.isEmpty()) {
+            String createdAt = fileSystemInfo.optString("createdDateTime");
+            try {
+                file.setCreated(ISO8601DateParser.parse(createdAt));
+            } catch (ParseException e) {
+                LOG.warn("Could not parse date from: {}", createdAt, e);
+            }
+            String modifiedAt = fileSystemInfo.optString("lastModifiedDateTime");
+            try {
+                file.setLastModified(ISO8601DateParser.parse(createdAt));
+            } catch (ParseException e) {
+                LOG.warn("Could not parse date from: {}", modifiedAt, e);
+            }
+        }
+
+        return file;
+    }
+
+    /**
+     * 
+     * @param entities
+     * @return
+     */
+    public List<OneDriveFile> parseEntities(int userId, JSONArray entities) {
+        if (entities == null || entities.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<OneDriveFile> folders = new ArrayList<>();
+        for (int index = 0; index < entities.length(); index++) {
+            JSONObject entity = entities.optJSONObject(index);
+            if (entity.hasAndNotNull("file")) {
+                folders.add(parseEntity(userId, entity));
+            }
+        }
+        return folders;
     }
 
 }
