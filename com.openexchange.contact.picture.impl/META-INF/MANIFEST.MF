@@ -6,8 +6,7 @@ Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.contact.picture.impl.osgi.ContactPictureActivator
-Import-Package: com.google.common.cache,
- com.openexchange.ajax.container,
+Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.helper,
  com.openexchange.ajax.requesthandler.cache,
