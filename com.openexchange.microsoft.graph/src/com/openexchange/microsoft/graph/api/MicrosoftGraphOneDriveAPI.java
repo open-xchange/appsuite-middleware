@@ -151,8 +151,20 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + folderId + "/children", compileRangeParams(offset, skipToken));
     }
 
+    /**
+     * Returns the item (being either a file or folder) with the specified identifier
+     * 
+     * @param accessToken The oauth access token
+     * @param itemId The item's identifier
+     * @return The item as a {@link JSONObject}
+     * @throws OXException if an error is occurred
+     */
+    public JSONObject getItem(String accessToken, String itemId) throws OXException {
+        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId);
+    }
+
     ///////////////////// HELPERS //////////////////////
-    
+
     /**
      * Compiles a map with the range query parameters
      * 

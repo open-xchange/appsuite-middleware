@@ -51,7 +51,6 @@ package com.openexchange.microsoft.graph.onedrive;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
 
 /**
  * {@link MicrosoftGraphDriveService}
@@ -112,5 +111,25 @@ public interface MicrosoftGraphDriveService {
      * @return A {@link List} with all files in the specified folder
      * @throws OXException If an error is occurred
      */
-    List<File> getFiles(int userId, String accessToken, String folderId) throws OXException;
+    List<OneDriveFile> getFiles(int userId, String accessToken, String folderId) throws OXException;
+
+    /**
+     * 
+     * @param userId
+     * @param accessToken
+     * @param itemId
+     * @return
+     * @throws OXException
+     */
+    OneDriveFile getFile(int userId, String accessToken, String itemId) throws OXException;
+
+    /**
+     * 
+     * @param userId
+     * @param accessToken
+     * @param itemIds
+     * @return
+     * @throws OXException
+     */
+    List<OneDriveFile> getFiles(int userId, String accessToken, List<String> itemIds) throws OXException;
 }

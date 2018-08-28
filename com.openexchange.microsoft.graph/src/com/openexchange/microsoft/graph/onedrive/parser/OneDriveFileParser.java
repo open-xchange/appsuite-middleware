@@ -50,13 +50,12 @@
 package com.openexchange.microsoft.graph.onedrive.parser;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFile;
 
 /**
@@ -82,6 +81,9 @@ public class OneDriveFileParser {
      * @return
      */
     public OneDriveFile parseEntity(int userId, JSONObject entity) {
+        if (!entity.hasAndNotNull("file")) {
+            return null;
+        }
         OneDriveFile file = new OneDriveFile(userId);
         String name = entity.optString("name");
         file.setId(entity.optString("id"));
@@ -99,7 +101,7 @@ public class OneDriveFileParser {
         if (parentRef != null && !parentRef.isEmpty()) {
             file.setFolderId(parentRef.optString("id"));
         }
-        
+
         JSONObject fileJson = entity.optJSONObject("file");
         if (fileJson != null && !fileJson.isEmpty()) {
             file.setFileMIMEType(fileJson.optString("mimeType"));
@@ -133,14 +135,14 @@ public class OneDriveFileParser {
         if (entities == null || entities.isEmpty()) {
             return Collections.emptyList();
         }
-        List<OneDriveFile> folders = new ArrayList<>();
+        List<OneDriveFile> folders = new LinkedList<>();
         for (int index = 0; index < entities.length(); index++) {
             JSONObject entity = entities.optJSONObject(index);
-            if (entity.hasAndNotNull("file")) {
-                folders.add(parseEntity(userId, entity));
+            OneDriveFile file = parseEntity(userId, entity);
+            if (file != null) {
+                folders.add(file);
             }
         }
         return folders;
     }
-
 }

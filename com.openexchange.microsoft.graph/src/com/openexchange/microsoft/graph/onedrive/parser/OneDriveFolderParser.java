@@ -50,8 +50,8 @@
 package com.openexchange.microsoft.graph.onedrive.parser;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -81,9 +81,12 @@ public class OneDriveFolderParser {
      * 
      * @param userId The user identifier
      * @param entity The {@link JSONObject}
-     * @return The {@link OneDriveFolder}
+     * @return The {@link OneDriveFolder} or <code>null</code> if the entity is not a folder
      */
     public OneDriveFolder parseEntity(int userId, JSONObject entity) {
+        if (!entity.hasAndNotNull("folder")) {
+            return null;
+        }
         OneDriveFolder folder = new OneDriveFolder(userId);
         if (entity == null || entity.isEmpty()) {
             return folder;
@@ -133,11 +136,12 @@ public class OneDriveFolderParser {
         if (entities == null || entities.isEmpty()) {
             return Collections.emptyList();
         }
-        List<OneDriveFolder> folders = new ArrayList<>();
+        List<OneDriveFolder> folders = new LinkedList<>();
         for (int index = 0; index < entities.length(); index++) {
             JSONObject entity = entities.optJSONObject(index);
-            if (entity.hasAndNotNull("folder")) {
-                folders.add(parseEntity(userId, entity));
+            OneDriveFolder folder = parseEntity(userId, entity);
+            if (folder != null) {
+                folders.add(folder);
             }
         }
         return folders;

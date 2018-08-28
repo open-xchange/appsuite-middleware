@@ -50,10 +50,12 @@
 package com.openexchange.microsoft.graph.onedrive.impl;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphOneDriveAPI;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
@@ -71,6 +73,8 @@ import com.openexchange.rest.client.exception.RESTExceptionCodes;
  * @since v7.10.1
  */
 public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MicrosoftGraphDriveServiceImpl.class);
 
     private final MicrosoftGraphOneDriveAPI api;
     private final OneDriveFolderParser folderEntityParser;
@@ -133,7 +137,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     public List<OneDriveFolder> getSubFolders(int userId, String accessToken, String folderId) throws OXException {
         int offset = 100;
         String skipToken = null;
-        List<OneDriveFolder> list = new ArrayList<>();
+        List<OneDriveFolder> list = new LinkedList<>();
         do {
             JSONObject response = api.getChildren(accessToken, folderId, offset, skipToken);
             skipToken = extractSkipToken(response);
@@ -148,16 +152,48 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFiles(int, java.lang.String, java.lang.String)
      */
     @Override
-    public List<File> getFiles(int userId, String accessToken, String folderId) throws OXException {
+    public List<OneDriveFile> getFiles(int userId, String accessToken, String folderId) throws OXException {
         int offset = 100;
         String skipToken = null;
-        List<File> list = new ArrayList<>();
+        List<OneDriveFile> list = new LinkedList<>();
         do {
             JSONObject response = api.getChildren(accessToken, folderId, offset, skipToken);
             skipToken = extractSkipToken(response);
             list.addAll(fileEntityParser.parseEntities(userId, response.optJSONArray("value")));
         } while (Strings.isNotEmpty(skipToken));
         return list;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFile(int, java.lang.String, java.lang.String)
+     */
+    @Override
+    public OneDriveFile getFile(int userId, String accessToken, String itemId) throws OXException {
+        return fileEntityParser.parseEntity(userId, api.getItem(accessToken, itemId));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFiles(int, java.lang.String, java.util.List)
+     */
+    @Override
+    public List<OneDriveFile> getFiles(int userId, String accessToken, List<String> itemIds) throws OXException {
+        List<OneDriveFile> files = new LinkedList<>();
+        for (String itemId : itemIds) {
+            try {
+                files.add(fileEntityParser.parseEntity(userId, api.getItem(accessToken, itemId)));
+            } catch (OXException e) {
+                if (RESTExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
+                    LOG.debug("Item with id '{}' for user with id '{}' was not found in OneDrive", itemId, userId);
+                    continue;
+                }
+                throw e;
+            }
+        }
+        return files;
     }
 
     //////////////////////////////////////// HELPERS /////////////////////////////////////

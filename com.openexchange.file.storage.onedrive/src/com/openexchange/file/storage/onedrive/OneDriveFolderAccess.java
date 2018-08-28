@@ -184,31 +184,31 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         //            }
         //
         //        }).booleanValue();
-        return driveService.existsFolder(oneDriveAccess.getOAuthAccount().getToken(), folderId);
+        return driveService.existsFolder(getAccessToken(), folderId);
     }
 
     @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
-        return driveService.getFolder(userId, oneDriveAccess.getOAuthAccount().getToken(), folderId);
-//        return perform(new OneDriveClosure<FileStorageFolder>() {
-//
-//            @Override
-//            protected FileStorageFolder doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-//                HttpRequestBase request = null;
-//                try {
-//                    String fid = toOneDriveFolderId(folderId);
-//                    HttpGet method = new HttpGet(buildUri(fid, initiateQueryString()));
-//                    request = method;
-//
-//                    RestFolder restFolder = handleHttpResponse(execute(method, httpClient), RestFolder.class);
-//                    return parseFolder(fid, restFolder, httpClient);
-//                } finally {
-//                    if (null != request) {
-//                        request.releaseConnection();
-//                    }
-//                }
-//            }
-//        });
+        return driveService.getFolder(userId, getAccessToken(), folderId);
+        //        return perform(new OneDriveClosure<FileStorageFolder>() {
+        //
+        //            @Override
+        //            protected FileStorageFolder doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpRequestBase request = null;
+        //                try {
+        //                    String fid = toOneDriveFolderId(folderId);
+        //                    HttpGet method = new HttpGet(buildUri(fid, initiateQueryString()));
+        //                    request = method;
+        //
+        //                    RestFolder restFolder = handleHttpResponse(execute(method, httpClient), RestFolder.class);
+        //                    return parseFolder(fid, restFolder, httpClient);
+        //                } finally {
+        //                    if (null != request) {
+        //                        request.releaseConnection();
+        //                    }
+        //                }
+        //            }
+        //        });
     }
 
     @Override
@@ -233,7 +233,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
-        return driveService.getSubFolders(userId, oneDriveAccess.getOAuthAccount().getToken(), parentIdentifier).toArray(new FileStorageFolder[0]);
+        return driveService.getSubFolders(userId, getAccessToken(), parentIdentifier).toArray(new FileStorageFolder[0]);
         //        return perform(new OneDriveClosure<FileStorageFolder[]>() {
         //
         //            @Override

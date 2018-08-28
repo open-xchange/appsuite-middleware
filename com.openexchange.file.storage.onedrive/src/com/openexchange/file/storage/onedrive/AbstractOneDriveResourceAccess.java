@@ -534,5 +534,13 @@ public abstract class AbstractOneDriveResourceAccess {
     protected String toFileStorageFolderId(String oneDriveId) throws OXException {
         return getRootFolderId().equals(oneDriveId) ? FileStorageFolder.ROOT_FULLNAME : oneDriveId;
     }
+    
+    /**
+     * 
+     * @return
+     */
+    protected String getAccessToken() {
+        return oneDriveAccess.getOAuthAccount().getToken();
+    }
 
 }
