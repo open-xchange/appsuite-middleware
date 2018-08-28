@@ -135,13 +135,13 @@ public final class ContactImageDataSource implements ImageDataSource {
 
     @Override
     public String getETag(final ImageLocation imageLocation, final Session session) throws OXException {
-        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(session,
+        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(session.getContextId(),
                                                                                             null,
                                                                                             Tools.getUnsignedInteger(imageLocation.getFolder()),
                                                                                             Tools.getUnsignedInteger(imageLocation.getId()),
                                                                                             null,
                                                                                             true);
-        return services.getServiceSafe(ContactPictureService.class).getPicture(contactPictureRequestData).getETag();
+        return services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData).getETag();
     }
 
     @SuppressWarnings("unchecked")
@@ -178,8 +178,8 @@ public final class ContactImageDataSource implements ImageDataSource {
             }
         }
 
-        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(session, null, folder, contactId, null, false);
-        ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(contactPictureRequestData);
+        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(session.getContextId(), null, folder, contactId, null, false);
+        ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData);
 
         IFileHolder fileHolder = picture.getFileHolder();
 
