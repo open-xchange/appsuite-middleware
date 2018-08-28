@@ -49,14 +49,17 @@
 
 package com.openexchange.halo.xing;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.picture.ContactPicture;
+import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
@@ -64,13 +67,12 @@ import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.Picture;
+import com.openexchange.halo.xing.picture.XingContactPictureFinder;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.Contacts;
 import com.openexchange.xing.Path;
-import com.openexchange.xing.PhotoUrls;
 import com.openexchange.xing.UserField;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.access.XingExceptionCodes;
@@ -80,7 +82,6 @@ import com.openexchange.xing.exception.XingApiException;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.session.WebAuthSession;
-
 
 /**
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
@@ -92,9 +93,12 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
 
     private final XingOAuthAccessProvider provider;
 
+    private final XingContactPictureFinder finder;
+
     public XingUserDataSource(final XingOAuthAccessProvider provider) {
         super();
         this.provider = provider;
+        this.finder = new XingContactPictureFinder(provider);
     }
 
     @Override
@@ -106,7 +110,7 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
     public boolean isAvailable(ServerSession session) throws OXException {
         try {
             provider.getXingOAuthAccount(session);
-        } catch(OXException e) {
+        } catch (OXException e) {
             if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
                 return false;
             }
@@ -165,71 +169,30 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
 
     @Override
     public String getPictureETag(HaloContactQuery query, ServerSession session) throws OXException {
-        XingAPI<WebAuthSession> api = getAPI(session);
-        com.openexchange.xing.User userInfo = loadXingUser(api, query, session);
-        if (userInfo == null) {
-            return null;
-        }
-
-        PhotoUrls photoUrls = userInfo.getPhotoUrls();
-        if (photoUrls == null) {
-            return null;
-        }
-
-        String url = photoUrls.getMaxiThumbUrl();
-        if (url == null) {
-            url = photoUrls.getLargestAvailableUrl();
-        }
-
-        if (url != null) {
-            return Base64.encode(url);
-        }
-
-        return null;
+        ContactPicture find = find(query, session, true);
+        return null != find ? find.getETag() : null;
     }
+
 
     @Override
     public Picture getPicture(HaloContactQuery query, ServerSession session) throws OXException {
-        XingAPI<WebAuthSession> api = getAPI(session);
-        com.openexchange.xing.User userInfo = loadXingUser(api, query, session);
-        if (userInfo == null) {
-            return null;
+        ContactPicture find = find(query, session, true);
+        return null != find ? new Picture(find.getETag(), find.getFileHolder()) : null;
+    }
+
+    private ContactPicture find(HaloContactQuery query, ServerSession session, boolean onlyETag) throws OXException {
+        ContactPictureRequestData data = new ContactPictureRequestData(I(session.getContextId()), I(session.getUserId()), null, null, prepareMailAddresses(query), onlyETag);
+        UnmodifiableContactPictureRequestData unmodifiableData = new UnmodifiableContactPictureRequestData(data);
+
+        if (finder.isApplicable(session, unmodifiableData, data)) {
+            return finder.getPicture(session, unmodifiableData, data);
         }
-
-        PhotoUrls photoUrls = userInfo.getPhotoUrls();
-        if (photoUrls == null) {
-            return null;
-        }
-
-        String url = photoUrls.getMaxiThumbUrl();
-        if (url == null) {
-            url = photoUrls.getLargestAvailableUrl();
-        }
-
-        if (url != null) {
-            try {
-                IFileHolder photo = api.getPhoto(url);
-                if (photo == null) {
-                    return null;
-                }
-
-                return new Picture(Base64.encode(url), photo);
-            } catch (XingException e) {
-                LOG.error("Could not load photo '{}' from XING. Returning 'null' instead.", url, e);
-            }
-        }
-
         return null;
     }
 
     private XingAPI<WebAuthSession> getAPI(ServerSession session) throws OXException {
-        XingOAuthAccessProvider provider = getAccessProvider();
         XingOAuthAccess access = provider.accessFor(provider.getXingOAuthAccount(session), session);
         return access.getXingAPI();
-    }
-
-    private XingOAuthAccessProvider getAccessProvider() {
-        return provider;
     }
 
     private static com.openexchange.xing.User loadXingUser(XingAPI<WebAuthSession> api, HaloContactQuery query, ServerSession session) throws OXException {

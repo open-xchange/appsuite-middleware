@@ -46,15 +46,18 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.halo.xing.osgi;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.xing.XingInvestigationResultConverter;
 import com.openexchange.halo.xing.XingUserDataSource;
+import com.openexchange.halo.xing.picture.XingContactPictureFinder;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
@@ -69,6 +72,8 @@ public class XingHaloActivator extends HousekeepingActivator {
 
     private volatile ServiceRegistration<HaloContactImageSource> imageRegistration = null;
 
+    private volatile ServiceRegistration<ContactPictureFinder> finderRegistration = null;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[0];
@@ -78,41 +83,53 @@ public class XingHaloActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         registerService(ResultConverter.class, new XingInvestigationResultConverter());
         track(XingOAuthAccessProvider.class, new SimpleRegistryListener<XingOAuthAccessProvider>() {
+
             @Override
             public void added(ServiceReference<XingOAuthAccessProvider> ref, XingOAuthAccessProvider service) {
                 XingUserDataSource xingDataSource = new XingUserDataSource(service);
                 contactRegistration = context.registerService(HaloContactDataSource.class, xingDataSource, null);
                 imageRegistration = context.registerService(HaloContactImageSource.class, xingDataSource, null);
+                finderRegistration = context.registerService(ContactPictureFinder.class, new XingContactPictureFinder(service), null);
             }
 
             @Override
             public void removed(ServiceReference<XingOAuthAccessProvider> ref, XingOAuthAccessProvider service) {
-                if (contactRegistration != null) {
-                    contactRegistration.unregister();
-                    contactRegistration = null;
-                }
-
-                if (imageRegistration != null) {
-                    imageRegistration.unregister();
-                    imageRegistration = null;
-                }
+                unregisterContact();
+                unregisterImage();
+                unregisterFinder();
             }
+
         });
         openTrackers();
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        unregisterContact();
+        unregisterImage();
+        unregisterFinder();
+        super.stopBundle();
+    }
+
+    protected void unregisterContact() {
         if (contactRegistration != null) {
             contactRegistration.unregister();
             contactRegistration = null;
         }
+    }
 
+    protected void unregisterImage() {
         if (imageRegistration != null) {
             imageRegistration.unregister();
             imageRegistration = null;
         }
-        super.stopBundle();
+    }
+
+    protected void unregisterFinder() {
+        if (finderRegistration != null) {
+            finderRegistration.unregister();
+            finderRegistration = null;
+        }
     }
 
 }
