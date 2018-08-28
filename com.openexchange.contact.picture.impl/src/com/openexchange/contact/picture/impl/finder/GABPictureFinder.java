@@ -98,10 +98,10 @@ public class GABPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isApplicable(Session session, ContactPictureRequestData data) {
+    public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
         try {
             // Use ID of the user requesting the picture
-            return data.hasUser() && data.hasContact() && userPermissionService.getUserPermissionBits(session.getUserId(), data.getContextId().intValue()).isGlobalAddressBookEnabled();
+            return modified.hasUser() && modified.hasContact() && userPermissionService.getUserPermissionBits(session.getUserId(), original.getContextId().intValue()).isGlobalAddressBookEnabled();
         } catch (OXException e) {
             LOGGER.warn("Unable to check if Global AddressBook is enabled.", e);
         }

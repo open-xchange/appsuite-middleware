@@ -98,7 +98,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
                 ContactPictureFinder next = iterator.next();
 
                 // Try to get contact picture
-                if (next.isApplicable(session, original)) {
+                if (next.isApplicable(session, original, modified)) {
                     ContactPicture result = next.getPicture(session, original, modified);
                     if (null != result && result.containsContactPicture()) {
                         return result;

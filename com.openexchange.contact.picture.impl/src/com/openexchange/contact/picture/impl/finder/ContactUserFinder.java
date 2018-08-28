@@ -78,8 +78,8 @@ public class ContactUserFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isApplicable(Session session, ContactPictureRequestData data) {
-        return super.isApplicable(session, data) && data.hasUser();
+    public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
+        return super.isApplicable(session, original, modified) && original.hasUser();
     }
 
     @Override

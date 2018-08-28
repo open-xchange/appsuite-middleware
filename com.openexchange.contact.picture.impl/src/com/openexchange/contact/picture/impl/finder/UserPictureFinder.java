@@ -104,8 +104,8 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isApplicable(Session session, ContactPictureRequestData data) {
-        return data.hasUser() && false == data.hasContact();
+    public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
+        return original.hasUser() && false == original.hasContact();
     }
 
 }

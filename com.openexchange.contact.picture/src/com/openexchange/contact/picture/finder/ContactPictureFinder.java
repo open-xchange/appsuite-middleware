@@ -85,10 +85,11 @@ public interface ContactPictureFinder extends Rankable {
      * about the contact to try getting the contact picture
      * 
      * @param session The {@link Session}
-     * @param data The {@link ContactPictureRequestData} to base the answer on
+     * @param original The original {@link ContactPictureRequestData}
+     * @param modified The modified {@link ContactPictureRequestData}
      * @return <code>true</code> if the {@link ContactPictureFinder} can search for a contact picture,
-     *         <code>false</code> if calling {@link #getPicture(FinderResult)} is superfluous
+     *         <code>false</code> if calling {@link #getPicture(Session, UnmodifiableContactPictureRequestData, ContactPictureRequestData)} is superfluous
      */
-    boolean isApplicable(Session session, ContactPictureRequestData data);
+    boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified);
 
 }

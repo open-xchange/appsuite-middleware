@@ -140,10 +140,10 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isApplicable(Session session, ContactPictureRequestData cprd) {
+    public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
         if (null != userPermissionService && null != contactService) {
             try {
-                return userPermissionService.getUserPermissionBits(session.getUserId(), cprd.getContextId().intValue()).hasContact();
+                return userPermissionService.getUserPermissionBits(session.getUserId(), original.getContextId().intValue()).hasContact();
             } catch (OXException e) {
                 LOGGER.warn("Unable to get user permissions. Therefore can't allow to access contacts.", e);
             }
