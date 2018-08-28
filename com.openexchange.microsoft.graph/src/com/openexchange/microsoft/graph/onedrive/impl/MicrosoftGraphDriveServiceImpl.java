@@ -121,7 +121,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public OneDriveFolder getFolder(int userId, String accessToken, String folderId) throws OXException {
-        return folderEntityParser.parseEntity(userId, api.getFolderById(accessToken, folderId));
+        return folderEntityParser.parseEntity(userId, api.getFolder(accessToken, folderId));
     }
 
     /*
@@ -135,7 +135,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         String skipToken = null;
         List<OneDriveFolder> list = new ArrayList<>();
         do {
-            JSONObject response = api.getChildrenById(accessToken, folderId, offset, skipToken);
+            JSONObject response = api.getChildren(accessToken, folderId, offset, skipToken);
             skipToken = extractSkipToken(response);
             list.addAll(folderEntityParser.parseEntities(userId, response.optJSONArray("value")));
         } while (Strings.isNotEmpty(skipToken));
@@ -153,7 +153,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         String skipToken = null;
         List<File> list = new ArrayList<>();
         do {
-            JSONObject response = api.getChildrenById(accessToken, folderId, offset, skipToken);
+            JSONObject response = api.getChildren(accessToken, folderId, offset, skipToken);
             skipToken = extractSkipToken(response);
             list.addAll(fileEntityParser.parseEntities(userId, response.optJSONArray("value")));
         } while (Strings.isNotEmpty(skipToken));

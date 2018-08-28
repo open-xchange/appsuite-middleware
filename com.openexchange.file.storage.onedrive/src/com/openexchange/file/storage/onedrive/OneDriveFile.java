@@ -69,6 +69,7 @@ import com.openexchange.mime.MimeTypeMap;
  * {@link OneDriveFile}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Use {@link com.openexchange.microsoft.graph.onedrive.OneDriveFile} instead
  */
 public final class OneDriveFile extends DefaultFile {
 

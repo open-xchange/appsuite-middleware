@@ -68,6 +68,7 @@ import com.openexchange.file.storage.onedrive.utils.ISO8601DateParser;
  * {@link OneDriveFolder}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated Use {@link com.openexchange.microsoft.graph.onedrive.OneDriveFolder} instead
  */
 public final class OneDriveFolder extends DefaultFileStorageFolder implements TypeAware {
 

@@ -105,45 +105,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
      * @throws OXException if an error is occurred
      */
-    public JSONObject getRootChildren(String accessToken) throws OXException {
-        return getRootChildren(accessToken, 0, null);
-    }
-
-    /**
-     * Returns the metadata of all children (files and folders) of the specified folder.
-     * 
-     * @param accessToken The oauth access token
-     * @param folderPath The folder's absolute path, e.g. <code>/path/to/folder</code>
-     * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
-     * @throws OXException if an error is occurred
-     */
     public JSONObject getRootChildren(String accessToken, int offset, String skipToken) throws OXException {
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root/children", compileRangeParams(offset, skipToken));
-    }
-
-    /**
-     * Returns the metadata of the specified folder for a user's default Drive
-     * 
-     * @param accessToken The oauth access token
-     * @param folderPath The folder's absolute path, e.g. <code>/path/to/folder</code>
-     * @return A {@link JSONObject} with the metadata of the user's specified folder
-     *         of the default Drive
-     * @throws OXException if an error is occurred
-     */
-    public JSONObject getFolder(String accessToken, String folderPath) throws OXException {
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root:/" + folderPath);
-    }
-
-    /**
-     * Returns the metadata of all children (files and folders) of the specified folder.
-     * 
-     * @param accessToken The oauth access token
-     * @param folderPath The folder's absolute path, e.g. <code>/path/to/folder</code>
-     * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
-     * @throws OXException if an error is occurred
-     */
-    public JSONObject getChildren(String accessToken, String folderPath) throws OXException {
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root:/" + folderPath + ":/children");
     }
 
     /**
@@ -155,7 +118,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      *         of the default Drive
      * @throws OXException if an error is occurred
      */
-    public JSONObject getFolderById(String accessToken, String folderId) throws OXException {
+    public JSONObject getFolder(String accessToken, String folderId) throws OXException {
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + folderId);
     }
 
@@ -167,8 +130,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
      * @throws OXException if an error is occurred
      */
-    public JSONObject getChildrenById(String accessToken, String folderId) throws OXException {
-        return getChildrenById(accessToken, folderId, 0, null);
+    public JSONObject getChildren(String accessToken, String folderId) throws OXException {
+        return getChildren(accessToken, folderId, 0, null);
     }
 
     /**
@@ -181,7 +144,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
      * @throws OXException if an error is occurred
      */
-    public JSONObject getChildrenById(String accessToken, String folderId, int offset, String skipToken) throws OXException {
+    public JSONObject getChildren(String accessToken, String folderId, int offset, String skipToken) throws OXException {
         if (Strings.isEmpty(folderId)) {
             return getRootChildren(accessToken, offset, skipToken);
         }
