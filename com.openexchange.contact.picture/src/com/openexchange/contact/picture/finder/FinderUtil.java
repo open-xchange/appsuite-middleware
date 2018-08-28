@@ -73,30 +73,32 @@ public class FinderUtil {
     /**
      * Checks if the contact does contain a valid image to use
      * 
+     * @param contextId The context identifier
      * @param contact The {@link Contact}
      * @param data Information to log
      * @return <code>true</code> if the image is valid and can be used, <code>false</code> otherwise
      * @throws OXException In case picture contains harmful content
      */
-    public static boolean hasValidImage(Contact contact, ContactPictureRequestData data) throws OXException {
-        return null != contact && null != contact.getImage1() && checkImage(contact.getImage1(), data);
+    public static boolean hasValidImage(Integer contextId, Contact contact, ContactPictureRequestData data) throws OXException {
+        return null != contact && null != contact.getImage1() && checkImage(contact.getImage1(), contextId, data);
     }
 
     /**
      * Checks the image and logs errors
      * 
      * @param imageBytes The image to check
+     * @param contextId The context identifier
      * @param data Information to log
      * @return <code>true</code> If all checks passed, <code>false</code> otherwise
      * @throws OXException In case picture contains harmful content
      */
-    public static boolean checkImage(byte[] imageBytes, ContactPictureRequestData data) throws OXException {
+    public static boolean checkImage(byte[] imageBytes, Integer contextId, ContactPictureRequestData data) throws OXException {
         if (false == com.openexchange.ajax.helper.ImageUtils.isValidImage(imageBytes)) {
-            LOGGER.warn("Detected non-image data in contact: object-id={} folder={} context={} session-user={}. Try to obtain valid image.", data.getContactId(), data.getFolderId(), data.getContextId(), data.getUserId());
+            LOGGER.warn("Detected non-image data in contact: object-id={} folder={} context={} session-user={}. Try to obtain valid image.", data.getContactId(), data.getFolderId(), contextId, data.getUserId());
             return false;
         }
         if (com.openexchange.ajax.helper.ImageUtils.isSvg(imageBytes)) {
-            LOGGER.debug("Detected a possibly harmful SVG image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", data.getContactId(), data.getFolderId(), data.getContextId(), data.getUserId());
+            LOGGER.debug("Detected a possibly harmful SVG image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", data.getContactId(), data.getFolderId(), contextId, data.getUserId());
             throw ContactPictureExceptionCodes.HARMFULL_PICTURE.create(data.getContactId());
         }
         return true;
@@ -131,12 +133,13 @@ public class FinderUtil {
      * Checks the image and logs errors
      * 
      * @param fileHolder The {@link IFileHolder} containing the data
+     * @param contextId The context identifier
      * @param data Information to log
      * @return <code>true</code> If all checks passed, <code>false</code> otherwise
      */
-    public static boolean checkImage(IFileHolder fileHolder, ContactPictureRequestData data) {
+    public static boolean checkImage(IFileHolder fileHolder, Integer contextId, ContactPictureRequestData data) {
         try {
-            return checkImage(Streams.stream2bytes(fileHolder.getStream()), data);
+            return checkImage(Streams.stream2bytes(fileHolder.getStream()), contextId, data);
         } catch (OXException | IOException e) {
             LOGGER.warn("Unable to convert input stream. Therefore can't check the image.", e);
         }

@@ -84,7 +84,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
     }
 
     @Override
-    public ContactPicture getPicture(Session session, ContactPictureRequestData contactData) {
+    public ContactPicture getPicture(Session session, ContactPictureRequestData contactData, boolean eTag) {
         // Ask each finder if it contains the picture
         try {
             // Check session
@@ -99,7 +99,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
 
                 // Try to get contact picture
                 if (next.isApplicable(session, original, modified)) {
-                    ContactPicture result = next.getPicture(session, original, modified);
+                    ContactPicture result = next.getPicture(session, original, modified, eTag);
                     if (null != result && result.containsContactPicture()) {
                         return result;
                     }

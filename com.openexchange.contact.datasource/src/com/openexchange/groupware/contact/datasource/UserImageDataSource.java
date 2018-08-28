@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact.datasource;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -116,8 +117,8 @@ public final class UserImageDataSource implements ImageDataSource {
             throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ID_ARGUMENT, argument);
         }
 
-        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(session.getContextId(), userID, null, null, null, false);
-        ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData);
+        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(I(userID), null, null, null);
+        ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData, false);
 
         IFileHolder fileHolder = picture.getFileHolder();
 
@@ -194,13 +195,8 @@ public final class UserImageDataSource implements ImageDataSource {
 
     @Override
     public String getETag(ImageLocation imageLocation, Session session) throws OXException {
-        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(session.getContextId(),
-            Tools.getUnsignedInteger(imageLocation.getId()),
-            null,
-            null,
-            null,
-            true);
-        return services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData).getETag();
+        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(I(Tools.getUnsignedInteger(imageLocation.getId())), null, null, null);
+        return services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData, true).getETag();
     }
 
     @Override

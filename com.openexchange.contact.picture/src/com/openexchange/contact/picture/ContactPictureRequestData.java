@@ -63,8 +63,6 @@ import com.openexchange.java.Strings;
  */
 public class ContactPictureRequestData {
 
-    private Integer contextId;
-
     private Integer userId;
 
     private Integer folderId;
@@ -73,35 +71,20 @@ public class ContactPictureRequestData {
 
     private final Set<String> emails;
 
-    private boolean etag;
-
     /**
      * Initializes a new {@link ContactPictureRequestData}.
      * 
-     * @param contextId The context identifier
      * @param userId The user identifier
      * @param folderId The folder identifier
      * @param contactId The contact identifier
      * @param emails The email addresses
-     * @param etag If only eTag should be generated
      *
      */
-    public ContactPictureRequestData(Integer contextId, Integer userId, Integer folderId, Integer contactId, Collection<String> emails, boolean etag) {
-        this.contextId = contextId;
+    public ContactPictureRequestData(Integer userId, Integer folderId, Integer contactId, Collection<String> emails) {
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
         this.emails = emails == null ? new HashSet<>() : new HashSet<>(emails);
-        this.etag = etag;
-    }
-
-    /**
-     * Get the context identifier of the current session
-     *
-     * @return The identifier or <code>null</code>
-     */
-    public final Integer getContextId() {
-        return contextId;
     }
 
     /**
@@ -181,18 +164,6 @@ public class ContactPictureRequestData {
     }
 
     /**
-     * A value indicating if <b>only</b> the eTag shall be generated.
-     * If the value is set to <code>false</code> the eTag still can be set, but
-     * additionally services will try to set the pictures data.
-     *
-     * @return <code>true</code> if the mail address is set,
-     *         <code>false</code> otherwise
-     */
-    public boolean onlyETag() {
-        return etag;
-    }
-
-    /**
      * Set the user identifier
      *
      * @param userId The identifier
@@ -243,15 +214,6 @@ public class ContactPictureRequestData {
     }
 
     /**
-     * Set the eTag for the contact picture
-     *
-     * @param etag The eTag
-     */
-    public void setETag(boolean etag) {
-        this.etag = etag;
-    }
-
-    /**
      * Get a value indicating if this instances does not hold any usable data
      *
      * @return <code>true</code> if this instance doesn't hold any usable data
@@ -265,9 +227,7 @@ public class ContactPictureRequestData {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((contactId == null) ? 0 : contactId.hashCode());
-        result = prime * result + ((contextId == null) ? 0 : contextId.hashCode());
         result = prime * result + ((emails == null) ? 0 : emails.hashCode());
-        result = prime * result + (etag ? 1231 : 1237);
         result = prime * result + ((folderId == null) ? 0 : folderId.hashCode());
         result = prime * result + ((userId == null) ? 0 : userId.hashCode());
         return result;
@@ -292,21 +252,11 @@ public class ContactPictureRequestData {
         } else if (!contactId.equals(other.contactId)) {
             return false;
         }
-        if (contextId == null) {
-            if (other.contextId != null) {
-                return false;
-            }
-        } else if (!contextId.equals(other.contextId)) {
-            return false;
-        }
         if (emails == null) {
             if (other.emails != null) {
                 return false;
             }
         } else if (!emails.equals(other.emails)) {
-            return false;
-        }
-        if (etag != other.etag) {
             return false;
         }
         if (folderId == null) {
@@ -328,7 +278,7 @@ public class ContactPictureRequestData {
 
     @Override
     public String toString() {
-        return "ContactPictureRequestData [contextId=" + contextId + ", userId=" + userId + ", folderId=" + folderId + ", contactId=" + contactId + ", emails=" + emails.stream().map(String::valueOf).collect(Collectors.joining(",")) + ", etag=" + etag + "]";
+        return "ContactPictureRequestData [userId=" + userId + ", folderId=" + folderId + ", contactId=" + contactId + ", emails=" + emails.stream().map(String::valueOf).collect(Collectors.joining(",")) + "]";
     }
 
 }

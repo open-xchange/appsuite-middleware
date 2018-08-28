@@ -75,10 +75,11 @@ public interface ContactPictureFinder extends Rankable {
      * @param session The {@link Session}
      * @param original The unmodifiable {@link UnmodifiableContactPictureRequestData}
      * @param modified An updated version of the {@link ContactPictureRequestData} which has been modified by previous {@link ContactPictureFinder}s.
+     * @param onlyETag <code>true</code> if only the eTag should be generated, <code>false</code> otherwise
      * @return The {@link ContactPicture}
      * @throws OXException In case picture was found, but it is harmful
      */
-    ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException;
+    ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException;
 
     /**
      * Get a value indicating if the {@link ContactPictureFinder} has enough information
@@ -88,7 +89,7 @@ public interface ContactPictureFinder extends Rankable {
      * @param original The original {@link ContactPictureRequestData}
      * @param modified The modified {@link ContactPictureRequestData}
      * @return <code>true</code> if the {@link ContactPictureFinder} can search for a contact picture,
-     *         <code>false</code> if calling {@link #getPicture(Session, UnmodifiableContactPictureRequestData, ContactPictureRequestData)} is superfluous
+     *         <code>false</code> if calling {@link #getPicture(Session, UnmodifiableContactPictureRequestData, ContactPictureRequestData, boolean)} is superfluous
      */
     boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified);
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.picture.impl.finder;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.ContactService;
@@ -89,10 +90,10 @@ public class GABPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData data, ContactPictureRequestData modified) throws OXException {
-        Contact contact = ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), session, true);
-        if (ContactPictureUtil.hasValidImage(contact, data)) {
-            return ContactPictureUtil.fromContact(contact, data.onlyETag());
+    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
+        Contact contact = ContactPictureUtil.getContactFromMail(contactService, original.getEmails(), session, true);
+        if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, original)) {
+            return ContactPictureUtil.fromContact(original, contact, onlyETag);
         }
         return null;
     }
@@ -101,7 +102,7 @@ public class GABPictureFinder implements ContactPictureFinder {
     public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
         try {
             // Use ID of the user requesting the picture
-            return modified.hasUser() && modified.hasContact() && userPermissionService.getUserPermissionBits(session.getUserId(), original.getContextId().intValue()).isGlobalAddressBookEnabled();
+            return modified.hasUser() && modified.hasContact() && userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).isGlobalAddressBookEnabled();
         } catch (OXException e) {
             LOGGER.warn("Unable to check if Global AddressBook is enabled.", e);
         }

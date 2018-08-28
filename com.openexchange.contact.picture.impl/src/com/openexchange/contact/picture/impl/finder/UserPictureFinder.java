@@ -85,14 +85,14 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
+    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
         try {
-            User user = userService.getUser(i(modified.getUserId()), i(modified.getContextId()));
+            User user = userService.getUser(i(modified.getUserId()), session.getContextId());
             if (null != user) {
                 modified.setContactId(I(user.getContactId()));
             }
         } catch (OXException e) {
-            LOGGER.debug("Unable to get contact picture for user {} in context {}", modified.getUserId(), modified.getContextId(), e);
+            LOGGER.debug("Unable to get contact picture for user {} in context {}", modified.getUserId(), I(session.getContextId()), e);
         }
 
         return null;

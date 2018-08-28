@@ -59,12 +59,12 @@ import java.util.Set;
  */
 public class UnmodifiableContactPictureRequestData extends ContactPictureRequestData {
 
-    public UnmodifiableContactPictureRequestData(Integer contextId, Integer userId, Integer folderId, Integer contactId, Set<String> emails, boolean etag) {
-        super(contextId, userId, folderId, contactId, emails, etag);
+    public UnmodifiableContactPictureRequestData(Integer userId, Integer folderId, Integer contactId, Set<String> emails) {
+        super(userId, folderId, contactId, emails);
     }
 
     public UnmodifiableContactPictureRequestData(ContactPictureRequestData data) {
-        super(data.getContextId(), data.getUserId(), data.getFolderId(), data.getContactId(), data.getEmails(), data.onlyETag());
+        super(data.getUserId(), data.getFolderId(), data.getContactId(), data.getEmails());
     }
 
     @Override
@@ -84,11 +84,6 @@ public class UnmodifiableContactPictureRequestData extends ContactPictureRequest
 
     @Override
     public void setEmails(String... emails) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setETag(boolean etag) {
         throw new UnsupportedOperationException();
     }
 

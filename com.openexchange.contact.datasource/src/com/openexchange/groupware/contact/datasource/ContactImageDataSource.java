@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact.datasource;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,13 +136,8 @@ public final class ContactImageDataSource implements ImageDataSource {
 
     @Override
     public String getETag(final ImageLocation imageLocation, final Session session) throws OXException {
-        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(session.getContextId(),
-                                                                                            null,
-                                                                                            Tools.getUnsignedInteger(imageLocation.getFolder()),
-                                                                                            Tools.getUnsignedInteger(imageLocation.getId()),
-                                                                                            null,
-                                                                                            true);
-        return services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData).getETag();
+        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(null, I(Tools.getUnsignedInteger(imageLocation.getFolder())), I(Tools.getUnsignedInteger(imageLocation.getId())), null);
+        return services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData, true).getETag();
     }
 
     @SuppressWarnings("unchecked")
@@ -178,8 +174,8 @@ public final class ContactImageDataSource implements ImageDataSource {
             }
         }
 
-        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(session.getContextId(), null, folder, contactId, null, false);
-        ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData);
+        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(null, I(folder), I(contactId), null);
+        ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData, false);
 
         IFileHolder fileHolder = picture.getFileHolder();
 
@@ -191,7 +187,7 @@ public final class ContactImageDataSource implements ImageDataSource {
         properties.put(DataProperties.PROPERTY_ID, Integer.toString(contactId));
 
         if (fileHolder == null) {
-            LOG.warn("Requested a non-existing image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", contactId, folder, session.getContextId(), session.getUserId());
+            LOG.warn("Requested a non-existing image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", I(contactId), I(folder), I(session.getContextId()), I(session.getUserId()));
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
             properties.put(DataProperties.PROPERTY_NAME, "image.jpg");

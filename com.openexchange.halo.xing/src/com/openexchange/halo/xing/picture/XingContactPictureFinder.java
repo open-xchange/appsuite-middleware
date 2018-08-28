@@ -49,6 +49,7 @@
 
 package com.openexchange.halo.xing.picture;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,7 +97,7 @@ public class XingContactPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
+    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
         XingOAuthAccess access = provider.accessFor(provider.getXingOAuthAccount(session), session);
         XingAPI<WebAuthSession> xingAPI = access.getXingAPI();
 
@@ -114,8 +115,8 @@ public class XingContactPictureFinder implements ContactPictureFinder {
                     for (Iterator<String> contactIterator = original.getEmails().iterator(); contactIterator.hasNext();) {
                         String contactMail = contactIterator.next();
                         if (FinderUtil.checkEmail(contactMail, user.getActiveMail())) {
-                            ContactPicture picture = getPictuerFromXing(xingAPI, user);
-                            if (null != picture && picture.containsContactPicture() && FinderUtil.checkImage(picture.getFileHolder(), modified)) {
+                            ContactPicture picture = getPictuerFromXing(xingAPI, user, onlyETag);
+                            if (null != picture && picture.containsContactPicture() && (onlyETag || FinderUtil.checkImage(picture.getFileHolder(), I(session.getContextId()), modified))) {
                                 return picture;
                             }
                             // The user was found but there was either no image or it was corrupted
@@ -134,7 +135,7 @@ public class XingContactPictureFinder implements ContactPictureFinder {
     }
 
     @SuppressWarnings("resource")
-    private ContactPicture getPictuerFromXing(XingAPI<WebAuthSession> xingAPI, User user) {
+    private ContactPicture getPictuerFromXing(XingAPI<WebAuthSession> xingAPI, User user, boolean onlyETag) {
         PhotoUrls photoUrls = user.getPhotoUrls();
         if (photoUrls == null) {
             return null;
@@ -146,16 +147,18 @@ public class XingContactPictureFinder implements ContactPictureFinder {
         }
 
         if (url != null) {
-            try {
-                IFileHolder photo = xingAPI.getPhoto(url);
-                if (photo == null) {
-                    return null;
+            IFileHolder photo = null;
+            if (false == onlyETag) {
+                try {
+                    photo = xingAPI.getPhoto(url);
+                    if (photo == null) {
+                        return null;
+                    }
+                } catch (XingException e) {
+                    LOGGER.error("Could not load photo '{}' from XING.", url, e);
                 }
-
-                return new ContactPicture(Base64.encode(url), photo);
-            } catch (XingException e) {
-                LOGGER.error("Could not load photo '{}' from XING.", url, e);
             }
+            return new ContactPicture(Base64.encode(url), photo);
         }
         return null;
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.picture.impl.finder;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,11 +124,11 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     abstract void handleException(ContactPictureRequestData data, OXException exception);
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) throws OXException {
+    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
         try {
             Contact contact = getContact(session, modified);
-            if (ContactPictureUtil.hasValidImage(contact, modified)) {
-                return ContactPictureUtil.fromContact(contact, modified.onlyETag());
+            if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, modified)) {
+                return ContactPictureUtil.fromContact(original, contact, onlyETag);
             } else {
                 if (null != contact) {
                     modfiyResult(modified, contact);
@@ -143,7 +144,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
         if (null != userPermissionService && null != contactService) {
             try {
-                return userPermissionService.getUserPermissionBits(session.getUserId(), original.getContextId().intValue()).hasContact();
+                return userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).hasContact();
             } catch (OXException e) {
                 LOGGER.warn("Unable to get user permissions. Therefore can't allow to access contacts.", e);
             }

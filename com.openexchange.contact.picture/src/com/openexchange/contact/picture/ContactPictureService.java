@@ -66,8 +66,9 @@ public interface ContactPictureService {
      * 
      * @param session The session
      * @param contactPictureRequestData The {@link ContactPictureRequestData} to get the picture for
+     * @param onlyETag <code>true</code> if only the eTag should be generated, <code>false</code> otherwise
      * @return The {@link ContactPicture} and never <code>null</code>. If no picture is found {@link ContactPicture#FALLBACK_PICTURE} is used
      */
-    ContactPicture getPicture(Session session, ContactPictureRequestData contactPictureRequestData);
+    ContactPicture getPicture(Session session, ContactPictureRequestData contactPictureRequestData, boolean onlyETag);
 
 }

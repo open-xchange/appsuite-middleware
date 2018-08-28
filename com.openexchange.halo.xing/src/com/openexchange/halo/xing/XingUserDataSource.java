@@ -181,11 +181,11 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
     }
 
     private ContactPicture find(HaloContactQuery query, ServerSession session, boolean onlyETag) throws OXException {
-        ContactPictureRequestData data = new ContactPictureRequestData(I(session.getContextId()), I(session.getUserId()), null, null, prepareMailAddresses(query), onlyETag);
+        ContactPictureRequestData data = new ContactPictureRequestData(I(session.getUserId()), null, null, prepareMailAddresses(query));
         UnmodifiableContactPictureRequestData unmodifiableData = new UnmodifiableContactPictureRequestData(data);
 
         if (finder.isApplicable(session, unmodifiableData, data)) {
-            return finder.getPicture(session, unmodifiableData, data);
+            return finder.getPicture(session, unmodifiableData, data, onlyETag);
         }
         return null;
     }

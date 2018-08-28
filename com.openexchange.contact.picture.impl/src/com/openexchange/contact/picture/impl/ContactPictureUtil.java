@@ -59,6 +59,7 @@ import java.util.Set;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPicture;
+import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.contact.picture.finder.FinderUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -81,22 +82,26 @@ public class ContactPictureUtil extends FinderUtil{
     /**
      * Generates a {@link ContactPicture} based on the given bytes
      * 
+     * @param unmodifiableData The {@link UnmodifiableContactPictureRequestData}
      * @param contact The {@link Contact}
      * @param onlyETag <code>true</code> if only eTag should be set
      * @return A {@link ContactPicture}
      */
-    public static ContactPicture fromContact(Contact contact, boolean onlyETag) {
-        return new ContactPicture(genereateETag(contact), onlyETag ? null : transformToFileHolder(contact));
+    public static ContactPicture fromContact(UnmodifiableContactPictureRequestData unmodifiableData, Contact contact, boolean onlyETag) {
+        return new ContactPicture(genereateETag(unmodifiableData, contact), onlyETag ? null : transformToFileHolder(contact));
     }
 
     /**
      * Generates the ETag
      * 
+     * @param unmodifiableData The {@link UnmodifiableContactPictureRequestData}
      * @param contact The {@link Contact}
      * @return The ETag
      */
-    private static String genereateETag(Contact contact) {
+    private static String genereateETag(UnmodifiableContactPictureRequestData unmodifiableData, Contact contact) {
         return null == contact ? null : new StringBuilder(512) // @formatter:off
+            .append(unmodifiableData.hashCode())
+            .append('/')
             .append(contact.getParentFolderID())
             .append('/')
             .append(contact.getObjectID())

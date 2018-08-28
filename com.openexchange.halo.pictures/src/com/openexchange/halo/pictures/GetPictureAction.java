@@ -49,6 +49,7 @@
 
 package com.openexchange.halo.pictures;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -143,14 +144,9 @@ public class GetPictureAction extends AbstractGetPictureAction {
             return (V) (eTagOnly ? null : fallbackPicture());
         }
 
-        ContactPictureRequestData data = new ContactPictureRequestData(contact.getContextId(),
-                                                                       contact.getInternalUserId(),
-                                                                       contact.getParentFolderID(),
-                                                                       contact.getObjectID(),
-                                                                       emails,
-                                                                       eTagOnly);
+        ContactPictureRequestData data = new ContactPictureRequestData(I(contact.getInternalUserId()), I(contact.getParentFolderID()), I(contact.getObjectID()), emails);
         try {
-            ContactPicture contactPicture = services.getServiceSafe(ContactPictureService.class).getPicture(session, data);
+            ContactPicture contactPicture = services.getServiceSafe(ContactPictureService.class).getPicture(session, data, eTagOnly);
             if (eTagOnly) {
                 return (V) contactPicture.getETag();
             }
