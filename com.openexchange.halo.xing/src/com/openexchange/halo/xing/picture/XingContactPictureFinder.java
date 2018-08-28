@@ -56,10 +56,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.caching.CacheKeyService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
-import com.openexchange.contact.picture.finder.ContactPictureFinder;
+import com.openexchange.contact.picture.finder.CacheAwareContactFinder;
 import com.openexchange.contact.picture.finder.FinderUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -80,7 +82,7 @@ import com.openexchange.xing.session.WebAuthSession;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> MW-926
  * @since v7.10.1
  */
-public class XingContactPictureFinder implements ContactPictureFinder {
+public class XingContactPictureFinder extends CacheAwareContactFinder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XingContactPictureFinder.class);
 
@@ -89,15 +91,23 @@ public class XingContactPictureFinder implements ContactPictureFinder {
     /**
      * Initializes a new {@link XingContactPictureFinder}.
      * 
+     * @param leanService The {@link LeanConfigurationService}
+     * @param cacheKeyService The {@link CacheKeyService}
      * @param provider The {@link XingOAuthAccessProvider}
      */
-    public XingContactPictureFinder(final XingOAuthAccessProvider provider) {
-        super();
+    public XingContactPictureFinder(LeanConfigurationService leanService, CacheKeyService cacheKeyService, final XingOAuthAccessProvider provider) {
+        super(leanService, cacheKeyService);
         this.provider = provider;
     }
 
     @Override
     public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
+        // Ask cache
+        ContactPicture p = super.getPicture(session, original, modified, onlyETag);
+        if (null != p) {
+            return p;
+        }
+
         XingOAuthAccess access = provider.accessFor(provider.getXingOAuthAccount(session), session);
         XingAPI<WebAuthSession> xingAPI = access.getXingAPI();
 
@@ -117,6 +127,7 @@ public class XingContactPictureFinder implements ContactPictureFinder {
                         if (FinderUtil.checkEmail(contactMail, user.getActiveMail())) {
                             ContactPicture picture = getPictuerFromXing(xingAPI, user, onlyETag);
                             if (null != picture && picture.containsContactPicture() && (onlyETag || FinderUtil.checkImage(picture.getFileHolder(), I(session.getContextId()), modified))) {
+                                put(session, user.getActiveMail(), picture.getETag());
                                 return picture;
                             }
                             // The user was found but there was either no image or it was corrupted
