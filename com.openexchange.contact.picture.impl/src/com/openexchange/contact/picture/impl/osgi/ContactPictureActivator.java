@@ -53,7 +53,6 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
-import com.openexchange.contact.picture.impl.ContactPictureCachingService;
 import com.openexchange.contact.picture.impl.ContactPictureServiceImpl;
 import com.openexchange.contact.picture.impl.finder.ContactIDFinder;
 import com.openexchange.contact.picture.impl.finder.ContactMailFinder;
@@ -97,8 +96,7 @@ public final class ContactPictureActivator extends HousekeepingActivator {
         /*
          * Register service
          */
-        LeanConfigurationService leanConfigurationService = getServiceSafe(LeanConfigurationService.class);
-        registerService(ContactPictureService.class, new ContactPictureCachingService(contactPictureServiceImpl, leanConfigurationService));
+        registerService(ContactPictureService.class, contactPictureServiceImpl);
 
         /*
          * Needed services for ContactPictureFinder
