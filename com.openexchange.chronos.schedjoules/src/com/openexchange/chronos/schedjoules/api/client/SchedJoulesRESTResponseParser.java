@@ -49,7 +49,11 @@
 
 package com.openexchange.chronos.schedjoules.api.client;
 
+import org.apache.http.HttpResponse;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCalendarRESTResponseBodyParser;
+import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
+import com.openexchange.chronos.schedjoules.impl.SchedJoulesProperty;
+import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.v2.RESTMimeType;
 import com.openexchange.rest.client.v2.parser.AbstractRESTResponseParser;
 
@@ -79,5 +83,37 @@ public class SchedJoulesRESTResponseParser extends AbstractRESTResponseParser {
     @Override
     protected String getRemoveServiceName() {
         return REMOTE_SERVICE_NAME;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.v2.parser.AbstractRESTResponseParser#assertStatusCode(org.apache.http.HttpResponse)
+     */
+    @Override
+    protected int assertStatusCode(HttpResponse httpResponse) throws OXException {
+        int statusCode = httpResponse.getStatusLine().getStatusCode();
+        // Assert the 4xx codes
+        switch (statusCode) {
+            case 401:
+                throw SchedJoulesAPIExceptionCodes.NOT_AUTHORIZED.create(httpResponse.getStatusLine().getReasonPhrase(), SchedJoulesProperty.apiKey.getFQPropertyName());
+            case 404:
+                throw SchedJoulesAPIExceptionCodes.PAGE_NOT_FOUND.create();
+        }
+        if (statusCode >= 400 && statusCode <= 499) {
+            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(httpResponse.getStatusLine());
+        }
+
+        // Assert the 5xx codes
+        switch (statusCode) {
+            case 500:
+                throw SchedJoulesAPIExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase());
+            case 503:
+                throw SchedJoulesAPIExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase());
+        }
+        if (statusCode >= 500 && statusCode <= 599) {
+            throw SchedJoulesAPIExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine());
+        }
+        return statusCode;
     }
 }

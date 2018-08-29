@@ -225,7 +225,7 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
      * @return The status code
      * @throws OXException if an HTTP error is occurred (4xx or 5xx)
      */
-    private int assertStatusCode(HttpResponse httpResponse) throws OXException {
+    protected int assertStatusCode(HttpResponse httpResponse) throws OXException {
         int statusCode = httpResponse.getStatusLine().getStatusCode();
         // Assert the 4xx codes
         switch (statusCode) {
