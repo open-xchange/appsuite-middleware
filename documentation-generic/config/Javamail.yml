@@ -1,8 +1,7 @@
 feature_name: Javamail
 feature_description: |
-  This file contains all known JavaMail properties structured by sections\:
-  JavaMail, JavaMail API System Properties, SMTP, IMAP, POP3 & Internet
-  All configurations done in this file will overwrite the ones set and used before, so modify it with care!
+  This feature contains all known JavaMail properties.
+  All configurations done in the javamail.properties file will overwrite the ones set and used before, so modify it with care!
 properties:
     - key: mail.debug
       description: |
@@ -1145,3 +1144,128 @@ properties:
       file: javamail.properties
       packageName: open-xchange-core
       tags: ["Mail", "IMAP", "POP3", "SMTP"]
+      
+    - key: mail.imap.proxy.host
+      description: |
+        The proxy host for the imap protocol.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: ["mail.imap.proxy.port","mail.imap.proxy.nonProxyHosts"]
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Proxy"]
+    - key: mail.imap.proxy.port
+      description: |
+        The proxy port for the imap protocol.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: ["mail.imap.proxy.host","mail.imap.proxy.nonProxyHosts"]
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Proxy", "Port"]
+      
+    - key: mail.imaps.proxy.host
+      description: |
+        The proxy host for the imaps protocol.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: ["mail.imaps.proxy.port","mail.imap.proxy.nonProxyHosts"]
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Proxy"]
+    - key: mail.imaps.proxy.port
+      description: |
+        The proxy port for the imaps protocol.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: ["mail.imaps.proxy.host","mail.imap.proxy.nonProxyHosts"]
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "IMAP", "Proxy", "Port"]
+      
+    - key: mail.smtp.proxy.host
+      description: |
+        The proxy host for the smtp protocol.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: ["mail.smtp.proxy.port","mail.smtp.proxy.nonProxyHosts"]
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Proxy"]
+    - key: mail.smtp.proxy.port
+      description: |
+        The proxy port for the smtp protocol.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: ["mail.smtp.proxy.host","mail.smtp.proxy.nonProxyHosts"]
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Proxy", "Port"]
+      
+    - key: mail.smtps.proxy.host
+      description: |
+        The proxy host for the smtps protocol.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: ["mail.smtps.proxy.port","mail.smtp.proxy.nonProxyHosts"]
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Proxy"]
+    - key: mail.smtps.proxy.port
+      description: |
+        The proxy port for the smtps protocol.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: ["mail.smtps.proxy.host","mail.smtp.proxy.nonProxyHosts"]
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Proxy", "Port"]
+      
+    - key: mail.imap.proxy.nonProxyHosts
+      description: |
+        The list of non proxy hosts for the imap and imaps protocols. 
+        
+        Note:  
+        This is an ox custom property which acts the same way as the http.nonProxyHosts property.
+        See https://docs.oracle.com/javase/7/docs/api/java/net/doc-files/net-properties.html for more informations. 
+        
+      defaultValue: 
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: ["mail.imap.proxy.host","mail.imaps.proxy.host","mail.imap.proxy.port","mail.imaps.proxy.port"]
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Proxy"]
+    - key: mail.smtp.proxy.nonProxyHosts
+      description: |
+        The list of non proxy hosts for the smtp and smtps protocols. 
+        
+        Note:  
+        This is an ox custom property which acts the same way as the http.nonProxyHosts property.
+        See https://docs.oracle.com/javase/7/docs/api/java/net/doc-files/net-properties.html for more informations. 
+        
+      defaultValue: 
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: ["mail.smtp.proxy.host","mail.smtps.proxy.host","mail.smtp.proxy.port","mail.smtps.proxy.port"]
+      file: javamail.properties
+      packageName: open-xchange-core
+      tags: ["Mail", "SMTP", "Proxy"]

@@ -80,7 +80,7 @@ public class MailProxyConfig {
             synchronized (this) {
                 if(imapHostList == null) {
                     String property = System.getProperty(IMAP_NON_PROXY_HOST);
-                    imapHostList = HostList.valueOf(property);
+                    imapHostList = HostList.valueOf(property.replace('|', ','));
                 }
             }
         }
@@ -92,7 +92,7 @@ public class MailProxyConfig {
             synchronized (this) {
                 if(smtpHostList == null) {
                     String property = System.getProperty(SMTP_NON_PROXY_HOST);
-                    smtpHostList = HostList.valueOf(property);
+                    smtpHostList = HostList.valueOf(property.replace('|', ','));
                 }
             }
         }
