@@ -82,7 +82,7 @@ public class ContactMailFinder extends AbstractContactFinder {
 
     @Override
     public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
-        return super.isApplicable(session, original, modified) && modified.hasEmail() && modified.hasFolder();
+        return super.isApplicable(session, original, modified) && modified.hasEmail();
     }
 
     @Override

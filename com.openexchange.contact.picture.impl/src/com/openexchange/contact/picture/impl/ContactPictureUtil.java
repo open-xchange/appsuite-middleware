@@ -201,7 +201,9 @@ public class ContactPictureUtil extends FinderUtil {
                     }
                 }
 
-                if (contacts.size() != 1) {
+                if (contacts.isEmpty()) {
+                    return null;
+                } else if (contacts.size() != 1) {
                     Collections.sort(contacts, ContactPictureUtil.getContactComperator());
                 }
                 return contacts.get(0);

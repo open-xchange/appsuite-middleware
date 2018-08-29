@@ -103,7 +103,7 @@ public class ContactPictureRequestData {
      *         <code>false</code> otherwise
      */
     public boolean hasUser() {
-        return null != userId;
+        return null != userId && userId.intValue() > 0;
     }
 
     /**
@@ -122,7 +122,7 @@ public class ContactPictureRequestData {
      *         <code>false</code> otherwise
      */
     public boolean hasFolder() {
-        return null != folderId;
+        return null != folderId && folderId.intValue() > 0;
     }
 
     /**
@@ -141,7 +141,7 @@ public class ContactPictureRequestData {
      *         <code>false</code> otherwise
      */
     public boolean hasContact() {
-        return null != contactId;
+        return null != contactId && contactId.intValue() > 0;
     }
 
     /**
