@@ -86,6 +86,23 @@ public class FinderUtil {
     /**
      * Checks the image and logs errors
      * 
+     * @param fileHolder The {@link IFileHolder} containing the data
+     * @param contextId The context identifier
+     * @param data Information to log
+     * @return <code>true</code> If all checks passed, <code>false</code> otherwise
+     */
+    public static boolean checkImage(IFileHolder fileHolder, Integer contextId, ContactPictureRequestData data) {
+        try {
+            return checkImage(Streams.stream2bytes(fileHolder.getStream()), contextId, data);
+        } catch (OXException | IOException e) {
+            LOGGER.warn("Unable to convert input stream. Therefore can't check the image.", e);
+        }
+        return false;
+    }
+
+    /**
+     * Checks the image and logs errors
+     * 
      * @param imageBytes The image to check
      * @param contextId The context identifier
      * @param data Information to log
@@ -136,23 +153,6 @@ public class FinderUtil {
     public static boolean checkEmail(String contactMail, String email) {
         if (Strings.isNotEmpty(contactMail) && contactMail.equalsIgnoreCase(email)) {
             return true;
-        }
-        return false;
-    }
-
-    /**
-     * Checks the image and logs errors
-     * 
-     * @param fileHolder The {@link IFileHolder} containing the data
-     * @param contextId The context identifier
-     * @param data Information to log
-     * @return <code>true</code> If all checks passed, <code>false</code> otherwise
-     */
-    public static boolean checkImage(IFileHolder fileHolder, Integer contextId, ContactPictureRequestData data) {
-        try {
-            return checkImage(Streams.stream2bytes(fileHolder.getStream()), contextId, data);
-        } catch (OXException | IOException e) {
-            LOGGER.warn("Unable to convert input stream. Therefore can't check the image.", e);
         }
         return false;
     }

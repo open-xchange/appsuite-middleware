@@ -77,7 +77,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class ContactPictureUtil extends FinderUtil{
+public class ContactPictureUtil extends FinderUtil {
 
     /**
      * Generates a {@link ContactPicture} based on the given bytes
@@ -99,7 +99,12 @@ public class ContactPictureUtil extends FinderUtil{
      * @return The ETag
      */
     private static String genereateETag(UnmodifiableContactPictureRequestData unmodifiableData, Contact contact) {
-        return null == contact ? null : new StringBuilder(512) // @formatter:off
+        return null == contact ? null : new StringBuilder(512) // @formatter:off#
+            /*
+             *  Use the request, so that changed request will lead in different eTags. 
+             *  This is important for requests containing resizing. If the picture shall be delivered in a 
+             *  different size the eTag must not be the same compared to the original size
+             */
             .append(unmodifiableData.hashCode())
             .append('/')
             .append(contact.getParentFolderID())
