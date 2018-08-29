@@ -266,7 +266,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @throws Exception if the default calendar folder cannot be found
      */
     private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
-        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(session, "event", "1,308", "0");
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, "event", "1,308", "0");
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
         } else {
@@ -287,7 +287,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @throws Exception if the folder cannot be found
      */
     private String findPrivateFolder(String session, String module, String folder) throws Exception {
-        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(session, module, "1,300,308", "1");
+        ArrayList<ArrayList<?>> privateList = getPrivateFolderList(null, session, module, "1,300,308", "1");
         for (ArrayList<?> folderName : privateList) {
             if (folderName.get(1).equals(folder)) {
                 return folderName.get(0).toString();
@@ -305,7 +305,10 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @throws Exception if the api call fails
      */
     @SuppressWarnings({ "unchecked" })
-    private ArrayList<ArrayList<?>> getPrivateFolderList(String session, String module, String columns, String tree) throws Exception {
+    private ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String session, String module, String columns, String tree) throws Exception {
+        if (null == foldersApi) {
+            foldersApi = this.foldersApi;
+        }
         FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
