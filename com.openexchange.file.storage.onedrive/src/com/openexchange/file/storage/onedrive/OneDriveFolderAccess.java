@@ -53,15 +53,10 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigView;
@@ -605,56 +600,57 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public void clearFolder(final String folderId, boolean hardDelete) throws OXException {
-        perform(new OneDriveClosure<Void>() {
-
-            @Override
-            protected Void doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    String fid = toOneDriveFolderId(folderId);
-                    List<String> list = new LinkedList<String>();
-
-                    int limit = 100;
-                    int offset = 0;
-                    int resultsFound;
-
-                    do {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
-                        request = method;
-
-                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
-                        int length = jData.length();
-                        resultsFound = length;
-                        for (int i = 0; i < length; i++) {
-                            JSONObject jItem = jData.getJSONObject(i);
-                            list.add(jItem.getString("id"));
-                        }
-
-                        reset(request);
-                        request = null;
-
-                        offset += limit;
-                    } while (resultsFound == limit);
-
-                    for (String id : list) {
-                        HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
-                        request = method;
-
-                        handleHttpResponse(execute(method, httpClient), Void.class);
-                        reset(request);
-                        request = null;
-                    }
-
-                    return null;
-                } finally {
-                    reset(request);
-                }
-            }
-        });
+        driveService.clearFolder(getAccessToken(), folderId);
+        //        perform(new OneDriveClosure<Void>() {
+        //
+        //            @Override
+        //            protected Void doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpRequestBase request = null;
+        //                try {
+        //                    String fid = toOneDriveFolderId(folderId);
+        //                    List<String> list = new LinkedList<String>();
+        //
+        //                    int limit = 100;
+        //                    int offset = 0;
+        //                    int resultsFound;
+        //
+        //                    do {
+        //                        List<NameValuePair> qparams = initiateQueryString();
+        //                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
+        //                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
+        //                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
+        //                        request = method;
+        //
+        //                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
+        //                        JSONArray jData = jResponse.getJSONArray("data");
+        //                        int length = jData.length();
+        //                        resultsFound = length;
+        //                        for (int i = 0; i < length; i++) {
+        //                            JSONObject jItem = jData.getJSONObject(i);
+        //                            list.add(jItem.getString("id"));
+        //                        }
+        //
+        //                        reset(request);
+        //                        request = null;
+        //
+        //                        offset += limit;
+        //                    } while (resultsFound == limit);
+        //
+        //                    for (String id : list) {
+        //                        HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
+        //                        request = method;
+        //
+        //                        handleHttpResponse(execute(method, httpClient), Void.class);
+        //                        reset(request);
+        //                        request = null;
+        //                    }
+        //
+        //                    return null;
+        //                } finally {
+        //                    reset(request);
+        //                }
+        //            }
+        //        });
     }
 
     @Override

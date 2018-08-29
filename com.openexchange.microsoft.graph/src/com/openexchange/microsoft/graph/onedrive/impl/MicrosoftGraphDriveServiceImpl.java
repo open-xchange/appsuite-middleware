@@ -163,13 +163,40 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     public OneDriveFolder createFolder(int userId, String accessToken, String folderName, String parentId, boolean autorename) throws OXException {
         return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#deleteFolder(java.lang.String, java.lang.String)
      */
     @Override
     public void deleteFolder(String accessToken, String folderId) throws OXException {
         api.deleteItem(accessToken, folderId);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#clearFolder(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void clearFolder(String accessToken, String folderId) throws OXException {
+        JSONObject ids = api.getChildren(accessToken, folderId, new Builder().withParameter(ParameterName.SELECT, "id").build());
+        JSONArray idsArray = ids.optJSONArray("value");
+        if (idsArray == null || idsArray.isEmpty()) {
+            return;
+        }
+        for (int index = 0; index < idsArray.length(); index++) {
+            JSONObject item = idsArray.optJSONObject(index);
+            if (item == null || item.isEmpty()) {
+                continue;
+            }
+            String id = item.optString("id");
+            if (Strings.isEmpty(id)) {
+                continue;
+            }
+            api.deleteItem(accessToken, id);
+        }
     }
 
     /*

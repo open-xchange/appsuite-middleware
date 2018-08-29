@@ -124,6 +124,15 @@ public interface MicrosoftGraphDriveService {
     void deleteFolder(String accessToken, String folderId) throws OXException;
 
     /**
+     * Empties and retains the folder
+     * 
+     * @param accessToken the oauth access token
+     * @param folderId the folder identifier
+     * @throws OXException if an error is occurred
+     */
+    void clearFolder(String accessToken, String folderId) throws OXException;
+
+    /**
      * Returns all files with in the specified folder
      * 
      * @param userId The user identifier
