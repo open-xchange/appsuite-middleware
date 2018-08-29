@@ -137,4 +137,10 @@ abstract class AbstractMicrosoftGraphAPI {
         request.withBody(body);
         return ((JSONValue) client.execute(request).getResponseBody()).toObject();
     }
+
+    void deleteResource(String accessToken, String path) throws OXException {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.DELETE, path);
+        request.setAccessToken(accessToken);
+        client.execute(request);
+    }
 }

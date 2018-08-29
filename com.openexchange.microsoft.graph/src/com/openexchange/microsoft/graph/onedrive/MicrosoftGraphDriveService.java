@@ -115,6 +115,15 @@ public interface MicrosoftGraphDriveService {
     OneDriveFolder createFolder(int userId, String accessToken, String folderName, String parentId, boolean autorename) throws OXException;
 
     /**
+     * Deletes the folder with the specified identifier
+     * 
+     * @param accessToken the oauth access token
+     * @param folderId the folder identifier
+     * @throws OXException if an error is occurred
+     */
+    void deleteFolder(String accessToken, String folderId) throws OXException;
+
+    /**
      * Returns all files with in the specified folder
      * 
      * @param userId The user identifier

@@ -163,6 +163,14 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     public OneDriveFolder createFolder(int userId, String accessToken, String folderName, String parentId, boolean autorename) throws OXException {
         return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
     }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#deleteFolder(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void deleteFolder(String accessToken, String folderId) throws OXException {
+        api.deleteItem(accessToken, folderId);
+    }
 
     /*
      * (non-Javadoc)

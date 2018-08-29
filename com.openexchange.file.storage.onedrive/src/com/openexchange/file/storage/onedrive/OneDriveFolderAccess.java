@@ -58,7 +58,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.message.BasicNameValuePair;
@@ -574,27 +573,29 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public String deleteFolder(final String folderId, boolean hardDelete) throws OXException {
-        return perform(new OneDriveClosure<String>() {
-
-            @Override
-            protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    HttpDelete method = new HttpDelete(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
-                    request = method;
-
-                    handleHttpResponse(execute(method, httpClient), Void.class);
-                    reset(request);
-                    request = null;
-
-                    return folderId;
-                } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(folderId, account.getId(), e);
-                } finally {
-                    reset(request);
-                }
-            }
-        });
+        driveService.deleteFolder(getAccessToken(), folderId);
+        return folderId;
+        //        return perform(new OneDriveClosure<String>() {
+        //
+        //            @Override
+        //            protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpRequestBase request = null;
+        //                try {
+        //                    HttpDelete method = new HttpDelete(buildUri(toOneDriveFolderId(folderId), initiateQueryString()));
+        //                    request = method;
+        //
+        //                    handleHttpResponse(execute(method, httpClient), Void.class);
+        //                    reset(request);
+        //                    request = null;
+        //
+        //                    return folderId;
+        //                } catch (HttpResponseException e) {
+        //                    throw handleHttpResponseError(folderId, account.getId(), e);
+        //                } finally {
+        //                    reset(request);
+        //                }
+        //            }
+        //        });
     }
 
     @Override
@@ -658,26 +659,39 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(final String folderId) throws OXException {
-        return perform(new OneDriveClosure<FileStorageFolder[]>() {
+        List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
 
-            @Override
-            protected FileStorageFolder[] doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        String fid = folderId;
+        FileStorageFolder f = getFolder(fid);
+        list.add(f);
 
-                List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
+        while (!FileStorageFolder.ROOT_FULLNAME.equals(fid)) {
+            fid = f.getParentId();
+            f = getFolder(fid);
+            list.add(f);
+        }
 
-                String fid = folderId;
-                FileStorageFolder f = getFolder(fid);
-                list.add(f);
-
-                while (!FileStorageFolder.ROOT_FULLNAME.equals(fid)) {
-                    fid = f.getParentId();
-                    f = getFolder(fid);
-                    list.add(f);
-                }
-
-                return list.toArray(new FileStorageFolder[list.size()]);
-            }
-        });
+        return list.toArray(new FileStorageFolder[list.size()]);
+        //        return perform(new OneDriveClosure<FileStorageFolder[]>() {
+        //
+        //            @Override
+        //            protected FileStorageFolder[] doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //
+        //                List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
+        //
+        //                String fid = folderId;
+        //                FileStorageFolder f = getFolder(fid);
+        //                list.add(f);
+        //
+        //                while (!FileStorageFolder.ROOT_FULLNAME.equals(fid)) {
+        //                    fid = f.getParentId();
+        //                    f = getFolder(fid);
+        //                    list.add(f);
+        //                }
+        //
+        //                return list.toArray(new FileStorageFolder[list.size()]);
+        //            }
+        //        });
     }
 
     @Override
