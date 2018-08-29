@@ -57,6 +57,8 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphOneDriveAPI;
+import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters;
+import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters.ParameterName;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFile;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
@@ -138,7 +140,10 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         String skipToken = null;
         List<OneDriveFolder> list = new LinkedList<>();
         do {
-            JSONObject response = api.getChildren(accessToken, folderId, offset, skipToken);
+            MicrosoftGraphQueryParameters.Builder paramBuilder = new MicrosoftGraphQueryParameters.Builder();
+            paramBuilder.withParameter(ParameterName.TOP, Integer.toString(offset)).withParameter(ParameterName.SKIPTOKEN, skipToken);
+
+            JSONObject response = api.getChildren(accessToken, folderId, paramBuilder.build());
             skipToken = extractSkipToken(response);
             list.addAll(folderEntityParser.parseEntities(userId, response.optJSONArray("value")));
         } while (Strings.isNotEmpty(skipToken));
@@ -166,7 +171,10 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         String skipToken = null;
         List<OneDriveFile> list = new LinkedList<>();
         do {
-            JSONObject response = api.getChildren(accessToken, folderId, offset, skipToken);
+            MicrosoftGraphQueryParameters.Builder paramBuilder = new MicrosoftGraphQueryParameters.Builder();
+            paramBuilder.withParameter(ParameterName.TOP, Integer.toString(offset)).withParameter(ParameterName.SKIPTOKEN, skipToken);
+
+            JSONObject response = api.getChildren(accessToken, folderId, paramBuilder.build());
             skipToken = extractSkipToken(response);
             list.addAll(fileEntityParser.parseEntities(userId, response.optJSONArray("value")));
         } while (Strings.isNotEmpty(skipToken));

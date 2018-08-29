@@ -49,6 +49,11 @@
 
 package com.openexchange.microsoft.graph.api;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.java.Strings;
+
 /**
  * {@link MicrosoftGraphQueryParameters}
  *
@@ -57,229 +62,7 @@ package com.openexchange.microsoft.graph.api;
  */
 public class MicrosoftGraphQueryParameters {
 
-    private boolean count;
-    private String expand;
-    private String filter;
-    private String format;
-    private String orderBy;
-    private String search;
-    private String select;
-    private int skip;
-    private String skipToken;
-    private int top;
-
-    /**
-     * Initialises a new {@link MicrosoftGraphQueryParameters}.
-     */
-    public MicrosoftGraphQueryParameters() {
-        super();
-    }
-
-    /**
-     * Gets the count
-     *
-     * @return The count
-     */
-    public boolean isCount() {
-        return count;
-    }
-
-    /**
-     * Gets the expand
-     *
-     * @return The expand
-     */
-    public String getExpand() {
-        return expand;
-    }
-
-    /**
-     * Gets the filter
-     *
-     * @return The filter
-     */
-    public String getFilter() {
-        return filter;
-    }
-
-    /**
-     * Gets the format
-     *
-     * @return The format
-     */
-    public String getFormat() {
-        return format;
-    }
-
-    /**
-     * Gets the orderBy
-     *
-     * @return The orderBy
-     */
-    public String getOrderBy() {
-        return orderBy;
-    }
-
-    /**
-     * Gets the search
-     *
-     * @return The search
-     */
-    public String getSearch() {
-        return search;
-    }
-
-    /**
-     * Gets the select
-     *
-     * @return The select
-     */
-    public String getSelect() {
-        return select;
-    }
-
-    /**
-     * Gets the skip
-     *
-     * @return The skip
-     */
-    public int getSkip() {
-        return skip;
-    }
-
-    /**
-     * Gets the skipToken
-     *
-     * @return The skipToken
-     */
-    public String getSkipToken() {
-        return skipToken;
-    }
-
-    /**
-     * Gets the top
-     *
-     * @return The top
-     */
-    public int getTop() {
-        return top;
-    }
-
-    /////////////// SETTERS ////////////////
-    /**
-     * Sets the count
-     *
-     * @param count The count to set
-     */
-    void setCount(boolean count) {
-        this.count = count;
-    }
-
-    /**
-     * Sets the expand
-     *
-     * @param expand The expand to set
-     */
-    void setExpand(String expand) {
-        this.expand = expand;
-    }
-
-    /**
-     * Sets the filter
-     *
-     * @param filter The filter to set
-     */
-    void setFilter(String filter) {
-        this.filter = filter;
-    }
-
-    /**
-     * Sets the format
-     *
-     * @param format The format to set
-     */
-    void setFormat(String format) {
-        this.format = format;
-    }
-
-    /**
-     * Sets the orderBy
-     *
-     * @param orderBy The orderBy to set
-     */
-    void setOrderBy(String orderBy) {
-        this.orderBy = orderBy;
-    }
-
-    /**
-     * Sets the search
-     *
-     * @param search The search to set
-     */
-    void setSearch(String search) {
-        this.search = search;
-    }
-
-    /**
-     * Sets the select
-     *
-     * @param select The select to set
-     */
-    void setSelect(String select) {
-        this.select = select;
-    }
-
-    /**
-     * Sets the skip
-     *
-     * @param skip The skip to set
-     */
-    void setSkip(int skip) {
-        this.skip = skip;
-    }
-
-    /**
-     * Sets the skipToken
-     *
-     * @param skipToken The skipToken to set
-     */
-    void setSkipToken(String skipToken) {
-        this.skipToken = skipToken;
-    }
-
-    /**
-     * Sets the top
-     *
-     * @param top The top to set
-     */
-    void setTop(int top) {
-        this.top = top;
-    }
-
-    //////////// BUILDER /////////////////
-
-    /**
-     * {@link Builder}
-     */
-    public static class Builder {
-
-        private boolean count;
-        private String expand;
-        private String filter;
-        private String format;
-        private String orderBy;
-        private String search;
-        private String select;
-        private int skip;
-        private String skipToken;
-        private int top;
-
-        /**
-         * Initialises a new {@link MicrosoftGraphQueryParameters.Builder}.
-         */
-        public Builder() {
-            super();
-        }
+    public enum ParameterName {
 
         /**
          * <p>
@@ -299,11 +82,7 @@ public class MicrosoftGraphQueryParameters {
          * @param count The count to use
          * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/query_parameters#count-parameter">count parameter</a>
          */
-        public Builder withCount(boolean count) {
-            this.count = count;
-            return this;
-        }
-
+        COUNT,
         /**
          * <p>
          * Many Microsoft Graph resources expose both declared properties of the resource
@@ -325,11 +104,7 @@ public class MicrosoftGraphQueryParameters {
          * @param expand The expand to use
          * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/query_parameters#expand-parameter">expand parameter</a>
          */
-        public Builder withExpand(String expand) {
-            this.expand = expand;
-            return this;
-        }
-
+        EXPAND,
         /**
          * <p>Use the $filter query parameter to retrieve just a subset of a collection.</p>
          * <p>
@@ -355,11 +130,7 @@ public class MicrosoftGraphQueryParameters {
          * @param filter The filter to use
          * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/query_parameters#filter-parameter">filter parameter</a>
          */
-        public Builder withFilter(String filter) {
-            this.filter = filter;
-            return this;
-        }
-
+        FILTER,
         /**
          * <p>
          * Use the $format query parameter to specify the media format of the items returned from Microsoft Graph.
@@ -371,11 +142,7 @@ public class MicrosoftGraphQueryParameters {
          * @param format The format to use
          * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/query_parameters#format-parameter">format parameter</a>
          */
-        public Builder withFormat(String format) {
-            this.format = format;
-            return this;
-        }
-
+        FORMAT,
         /**
          * <p>Use the $orderby query parameter to specify the sort order of the items returned from Microsoft Graph.</p>
          * <p>For example: <code>from/emailAddress/name desc,subject</code>
@@ -383,22 +150,14 @@ public class MicrosoftGraphQueryParameters {
          * @param orderBy The orderBy to use
          * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/query_parameters#orderby-parameter">orderby parameter</a>
          */
-        public Builder withOrderBy(String orderBy) {
-            this.orderBy = orderBy;
-            return this;
-        }
-
+        ORDERBY,
         /**
          * <p>Use the $search query parameter to restrict the results of a request to match a search criterion.</p>
          *
          * @param search The search to use
          * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/query_parameters#search-parameter">search parameter</a>
          */
-        public Builder withSearch(String search) {
-            this.search = search;
-            return this;
-        }
-
+        SEARCH,
         /**
          * <p>
          * Use the $select query parameter to return a set of properties
@@ -410,11 +169,7 @@ public class MicrosoftGraphQueryParameters {
          * @param select The select to use
          * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/query_parameters#select-parameter">select parameter</a>
          */
-        public Builder withSelect(String select) {
-            this.select = select;
-            return this;
-        }
-
+        SELECT,
         /**
          * <p>
          * Use the $skip query parameter to set the number of items to skip at the start of a collection.
@@ -423,11 +178,7 @@ public class MicrosoftGraphQueryParameters {
          * @param skip The skip to use
          * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/query_parameters#skip-parameter">skip parameter</a>
          */
-        public Builder withSkip(int skip) {
-            this.skip = skip;
-            return this;
-        }
-
+        SKIP,
         /**
          * <p>
          * Some requests return multiple pages of data either due to server-side paging or due to the
@@ -441,11 +192,7 @@ public class MicrosoftGraphQueryParameters {
          * @param skipToken The skipToken to use
          * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/query_parameters#skiptoken-parameter">skiptoken parameter</a>
          */
-        public Builder withSkipToken(String skipToken) {
-            this.skipToken = skipToken;
-            return this;
-        }
-
+        SKIPTOKEN,
         /**
          * <p>Use the $top query parameter to specify the page size of the result set.</p>
          * <p>
@@ -457,29 +204,167 @@ public class MicrosoftGraphQueryParameters {
          * @param top The top to use
          * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/query_parameters#top-parameter">top parameter</a>
          */
-        public Builder withTop(int top) {
-            this.top = top;
+        TOP;
+
+        /**
+         * Returns the parameter name
+         * 
+         * @return the parameter name
+         */
+        public String getName() {
+            return "$" + name().toLowerCase();
+        }
+    }
+
+    private Map<String, String> parametersMap;
+
+    /**
+     * Initialises a new {@link MicrosoftGraphQueryParameters}.
+     */
+    public MicrosoftGraphQueryParameters(Map<String, String> parameters) {
+        super();
+        parametersMap = parameters;
+    }
+
+    /**
+     * Gets the count
+     *
+     * @return The count
+     */
+    public Boolean getCount() {
+        String bool = parametersMap.get(ParameterName.COUNT.getName());
+        return bool == null ? null : Boolean.valueOf(bool);
+    }
+
+    /**
+     * Gets the expand
+     *
+     * @return The expand
+     */
+    public String getExpand() {
+        return parametersMap.get(ParameterName.EXPAND.getName());
+    }
+
+    /**
+     * Gets the filter
+     *
+     * @return The filter
+     */
+    public String getFilter() {
+        return parametersMap.get(ParameterName.FILTER.getName());
+    }
+
+    /**
+     * Gets the format
+     *
+     * @return The format
+     */
+    public String getFormat() {
+        return parametersMap.get(ParameterName.FORMAT.getName());
+    }
+
+    /**
+     * Gets the orderBy
+     *
+     * @return The orderBy
+     */
+    public String getOrderBy() {
+        return parametersMap.get(ParameterName.ORDERBY.getName());
+    }
+
+    /**
+     * Gets the search
+     *
+     * @return The search
+     */
+    public String getSearch() {
+        return parametersMap.get(ParameterName.SEARCH.getName());
+    }
+
+    /**
+     * Gets the select
+     *
+     * @return The select
+     */
+    public String getSelect() {
+        return parametersMap.get(ParameterName.SELECT.getName());
+    }
+
+    /**
+     * Gets the skip
+     *
+     * @return The skip
+     */
+    public Integer getSkip() {
+        String skip = parametersMap.get(ParameterName.SKIP.getName());
+        return skip == null ? null : Integer.valueOf(skip);
+    }
+
+    /**
+     * Gets the skipToken
+     *
+     * @return The skipToken
+     */
+    public String getSkipToken() {
+        return parametersMap.get(ParameterName.SKIPTOKEN.getName());
+    }
+
+    /**
+     * Gets the top
+     *
+     * @return The top
+     */
+    public Integer getTop() {
+        String top = parametersMap.get(ParameterName.TOP.getName());
+        return top == null ? null : Integer.valueOf(top);
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public Map<String, String> getQueryParametersMap() {
+        return Collections.unmodifiableMap(parametersMap);
+    }
+
+    //////////// BUILDER /////////////////
+
+    /**
+     * {@link Builder}
+     */
+    public static class Builder {
+
+        private Map<String, String> parameters;
+
+        /**
+         * Initialises a new {@link MicrosoftGraphQueryParameters.Builder}.
+         */
+        public Builder() {
+            super();
+            parameters = new HashMap<>(8);
+        }
+
+        /**
+         * Empty parameter values are ignored.
+         * 
+         * @param parameter The parameter's name
+         * @param value The parameter's value
+         * @return this instance for chained calls
+         */
+        public Builder withParameter(ParameterName parameter, String value) {
+            if (Strings.isNotEmpty(value)) {
+                parameters.put(parameter.getName(), value);
+            }
             return this;
         }
 
         /**
-         * Builds the params
+         * Builds the parameters
          * 
          * @return The {@link MicrosoftGraphQueryParameters}
          */
         public MicrosoftGraphQueryParameters build() {
-            MicrosoftGraphQueryParameters p = new MicrosoftGraphQueryParameters();
-            p.setCount(count);
-            p.setExpand(expand);
-            p.setFilter(filter);
-            p.setFormat(format);
-            p.setOrderBy(orderBy);
-            p.setSearch(search);
-            p.setSelect(select);
-            p.setSkip(skip);
-            p.setSkipToken(skipToken);
-            p.setTop(top);
-            return p;
+            return new MicrosoftGraphQueryParameters(Collections.unmodifiableMap(parameters));
         }
     }
 }

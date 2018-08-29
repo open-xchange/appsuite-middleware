@@ -107,8 +107,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
      * @throws OXException if an error is occurred
      */
-    public JSONObject getRootChildren(String accessToken, int offset, String skipToken) throws OXException {
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root/children", compileRangeParams(offset, skipToken));
+    public JSONObject getRootChildren(String accessToken, MicrosoftGraphQueryParameters queryParameters) throws OXException {
+        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root/children", queryParameters.getQueryParametersMap());
     }
 
     /**
@@ -136,7 +136,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @throws OXException if an error is occurred
      */
     public JSONObject getChildren(String accessToken, String folderId) throws OXException {
-        return getChildren(accessToken, folderId, 0, null);
+        return getChildren(accessToken, folderId, new MicrosoftGraphQueryParameters.Builder().build());
     }
 
     /**
@@ -149,11 +149,11 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
      * @throws OXException if an error is occurred
      */
-    public JSONObject getChildren(String accessToken, String folderId, int offset, String skipToken) throws OXException {
+    public JSONObject getChildren(String accessToken, String folderId, MicrosoftGraphQueryParameters queryParameters) throws OXException {
         if (Strings.isEmpty(folderId)) {
-            return getRootChildren(accessToken, offset, skipToken);
+            return getRootChildren(accessToken, new MicrosoftGraphQueryParameters.Builder().build());
         }
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + folderId + "/children", compileRangeParams(offset, skipToken));
+        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + folderId + "/children", queryParameters.getQueryParametersMap());
     }
 
     /**
@@ -190,25 +190,5 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         } catch (JSONException e) {
             throw RESTExceptionCodes.JSON_ERROR.create(e);
         }
-    }
-
-    ///////////////////// HELPERS //////////////////////
-
-    /**
-     * Compiles a map with the range query parameters
-     * 
-     * @param offset the start offset (i.e. the '$top' parameter)
-     * @param skipToken the skip token provided by the API's response
-     * @return A {@link Map} with the range query parameters
-     */
-    private Map<String, String> compileRangeParams(int offset, String skipToken) {
-        Map<String, String> queryParams = new HashMap<>(2);
-        if (offset > 0) {
-            queryParams.put("$top", Integer.toString(offset));
-        }
-        if (Strings.isNotEmpty(skipToken)) {
-            queryParams.put("$skipToken", skipToken);
-        }
-        return queryParams;
     }
 }
