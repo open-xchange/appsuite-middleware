@@ -113,7 +113,6 @@ public class XingContactPictureFinder extends CacheAwareContactFinder {
             try {
                 // XING only offers one mail address. This must not be a mail address we know about. So we use the first result, trusting XING to deliver best result first
                 User user = xingAPI.userInfo(userIds.get(0));
-                // Use original mails to avoid wrong pictures
                 ContactPicture picture = getPictuerFromXing(xingAPI, user, onlyETag);
                 if (null != picture && picture.containsContactPicture() && (onlyETag || FinderUtil.checkImage(picture.getFileHolder(), I(session.getContextId()), modified))) {
                     return picture;
