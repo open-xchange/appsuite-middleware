@@ -143,4 +143,12 @@ abstract class AbstractMicrosoftGraphAPI {
         request.setAccessToken(accessToken);
         client.execute(request);
     }
+
+    JSONObject patchResource(String accessToken, String path, JSONObject body) throws OXException {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.PATCH, path);
+        request.setAccessToken(accessToken);
+        request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        request.withBody(body);
+        return ((JSONValue) client.execute(request).getResponseBody()).toObject();
+    }
 }

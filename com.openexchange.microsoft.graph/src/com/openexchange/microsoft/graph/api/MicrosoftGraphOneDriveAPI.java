@@ -166,13 +166,41 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId);
     }
 
+    /**
+     * Deletes the item with the specified identifier
+     * 
+     * @param accessToken The oauth access token
+     * @param itemId The item's identifier
+     * @throws OXException if an error is occurred
+     */
     public void deleteItem(String accessToken, String itemId) throws OXException {
         deleteResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId);
     }
 
+    /**
+     * 
+     * @param accessToken
+     * @param query
+     * @param queryParams
+     * @return
+     * @throws OXException
+     */
     public JSONObject searchItems(String accessToken, String query, MicrosoftGraphQueryParameters queryParams) throws OXException {
         String path = "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root/search(q='" + query + "')";
         return getResource(accessToken, path, queryParams.getQueryParametersMap());
+    }
+
+    /**
+     * 
+     * @param accessToken
+     * @param itemId
+     * @param body
+     * @return
+     * @throws OXException
+     */
+    public JSONObject patchItem(String accessToken, String itemId, JSONObject body) throws OXException {
+        String path = "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId;
+        return patchResource(accessToken, path, body);
     }
 
     /**
