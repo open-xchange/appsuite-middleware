@@ -98,8 +98,7 @@ public class OneDriveFolderParser {
 
         JSONObject parentRef = entity.optJSONObject("parentReference");
         if (parentRef != null && !parentRef.isEmpty()) {
-            String parentId = parentRef.optString("path").equals("/drive/root:") ? FileStorageFolder.ROOT_FULLNAME : parentRef.optString("id");
-            folder.setParentId(parentId);
+            folder.setParentId(parentRef.optString("path").equals("/drive/root:") ? FileStorageFolder.ROOT_FULLNAME : parentRef.optString("id"));
         }
         
         if (folder.isRootFolder()) {
