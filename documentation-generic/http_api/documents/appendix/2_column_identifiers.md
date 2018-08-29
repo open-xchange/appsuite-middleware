@@ -102,11 +102,11 @@ specific field data of single or multiple objects.
 
 |Number|Type|
 |:-----|:---|
-|1|	private|
-|2|	public|
-|3|	shared|
-|5|	system folder|
-|7|	This type is no more in use (legacy type). Will be removed with a future update!|
+|1| private|
+|2| public|
+|3| shared|
+|5| system folder|
+|7| This type is no more in use (legacy type). Will be removed with a future update!|
 |16| trash|
 |20| pictures|
 |21| documents|
@@ -116,11 +116,11 @@ specific field data of single or multiple objects.
 
 ## Detailed task and appointment data
 
-|ID   | Name  |	Type  |	Value  |
+|ID   | Name  | Type  | Value  |
 |:----|:------|:------|:-------|
 |200 | title| String | Short description.|
 |201 | start_date| Date or Time | Inclusive start of the event as Date for tasks and whole day appointments and Time for normal appointments. For sequencies, this date must be part of the sequence, i. e. sequencies always start at this date. (deprecated for tasks since v7.6.1, replaced by start_time and full_time)|
-|202 | end_date| Date or Time |	Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time)|
+|202 | end_date| Date or Time | Exclusive end of the event as Date for tasks and whole day appointments and as Time for normal appointments. (deprecated for tasks since v7.6.1, replaced by end_time and full_time)|
 |203 | note| String | Long description.|
 |204 | alarm| Number or Time | Specifies when to notify the participants as the number of minutes before the start of the appointment (-1 for "no alarm"). For tasks, the Time value specifies the absolute time when the user should be notified.|
 |209 | recurrence_type| Number | Specifies the type of the recurrence for a task sequence. See [Task sequence type](#task-sequence-type)|
@@ -202,9 +202,9 @@ specific field data of single or multiple objects.
 
 ## Detailed task data
 
-|ID   | Name  |	Type  |	Value  |
+|ID   | Name  | Type  | Value  |
 |:----|:------|:------|:-------|
-|300 | status| Number |	Status of the task. See [Task status](#task-status)|
+|300 | status| Number | Status of the task. See [Task status](#task-status)|
 |301 | percent_completed| Number | How much of the task is completed. An integer number between 0 and 100.|
 |302 | actual_costs| Number | A monetary attribute to store actual costs of a task. Allowed values must be in the range -9999999999.99 and 9999999999.99.|
 |303 | actual_duration|||
@@ -212,13 +212,13 @@ specific field data of single or multiple objects.
 |305 | billing_information|||
 |307 | target_costs| Number| A monetary attribute to store target costs of a task. Allowed values must be in the range -9999999999.99 and 9999999999.99.|
 |308 | target_duration|||
-|309 | priority| Number |	1 = LOW, 2 = MEDIUM, 3 = HIGH|
+|309 | priority| Number | 1 = LOW, 2 = MEDIUM, 3 = HIGH|
 |312 | currency|||
 |313 | trip_meter|||
 |314 | companies|||
 |315 | date_completed|||
 |316 | start_time| Date or Time | Inclusive start as Date for whole day tasks and Time for normal tasks.|
-|317 | end_time| Date or Time |	Exclusive end as Date for whole day tasks and as Time for normal tasks.|
+|317 | end_time| Date or Time | Exclusive end as Date for whole day tasks and as Time for normal tasks.|
 
 ### Task status
 
@@ -238,39 +238,39 @@ specific field data of single or multiple objects.
 |500 |Display name | display_name | String ||
 |501 |Given name | first_name | String | First name.|
 |502 |Sur name | last_name | String | Last name.|
-|503 |Middle name |	second_name | String ||
-|504 |Suffix | suffix |	String ||
+|503 |Middle name | second_name | String ||
+|504 |Suffix | suffix | String ||
 |505 |Title | title | String ||
-|506 |Street home |	street_home | String ||
+|506 |Street home | street_home | String ||
 |507 |Postal code home | postal_code_home | String||
 |508 |City home | city_home | String||
 |509 |State home | state_home | String||
-|510 |Country home | country_home |	String||
-|511 |Birthday|	birthday | Date||
+|510 |Country home | country_home | String||
+|511 |Birthday| birthday | Date||
 |512 |Marital status| marital_status| String||
-|513 |Number of children | number_of_children |	String ||
-|514 |Profession | profession |	String ||
+|513 |Number of children | number_of_children | String ||
+|514 |Profession | profession | String ||
 |515 |Nickname | nickname | String ||
-|516 |Spouse name |	spouse_name | String ||
-|517 |Anniversary |	anniversary | Date ||
+|516 |Spouse name | spouse_name | String ||
+|517 |Anniversary | anniversary | Date ||
 |518 |Note | note | String ||
 |519 |Department | department | String ||
-|520 |Position|	position | String ||
+|520 |Position| position | String ||
 |521 |Employee type | employee_type | String ||
 |522 |Room number | room_number | String ||
-|523 |Street business |	street_business | String ||
+|523 |Street business | street_business | String ||
 |524 |Internal user id | user_id | Number ||
-|525 |Postal code business | postal_code_business |	String ||
+|525 |Postal code business | postal_code_business | String ||
 |526 |City business | city_business | String ||
-|527 |State business |	state_business | String ||
-|528 |Country business | country_business |	String ||
+|527 |State business | state_business | String ||
+|528 |Country business | country_business | String ||
 |529 |Number of employee | number_of_employees | String ||
-|530 |Sales volume | sales_volume |	String ||
-|531 |Tax id | tax_id |	String ||
-|532 |Commercial register |	commercial_register | String ||
-|533 |Branches | branches |	String ||
-|534 |Business category | business_category	| String ||
-|535 |Info | info |	String ||
+|530 |Sales volume | sales_volume | String ||
+|531 |Tax id | tax_id | String ||
+|532 |Commercial register | commercial_register | String ||
+|533 |Branches | branches | String ||
+|534 |Business category | business_category | String ||
+|535 |Info | info | String ||
 |536 |Manager's name | manager_name | String ||
 |537 |Assistant's name | assistant_name | String ||
 |538 |Street other | street_other | String ||
@@ -285,27 +285,27 @@ specific field data of single or multiple objects.
 |547 |Telephone company | telephone_company | String ||
 |548 |Telephone home 1 | telephone_home1 | String ||
 |549 |Telephone home 2 | telephone_home2 | String ||
-|550 |FAX home | fax_home |	String||
+|550 |FAX home | fax_home | String||
 |551 |Cellular telephone 1 | cellular_telephone1 | String ||
 |552 |Cellular telephone 2 | cellular_telephone2 | String ||
 |553 |Telephone other | telephone_other | String ||
 |554 |FAX other | fax_other | String ||
 |555 |Email 1 | email1 | String ||
-|556 |Email 2 |	email2 | String ||
-|557 |Email 3 |	email3 | String ||
+|556 |Email 2 | email2 | String ||
+|557 |Email 3 | email3 | String ||
 |558 |URL | url | String ||
-|559 |Telephone ISDN | telephone_isdn |	String ||
-|560 |Telephone pager |	telephone_pager | String ||
+|559 |Telephone ISDN | telephone_isdn | String ||
+|560 |Telephone pager | telephone_pager | String ||
 |561 |Telephone primary | telephone_primary | String ||
-|562 |Telephone radio |	telephone_radio | String ||
-|563 |Telephone telex |	telephone_telex | String ||
+|562 |Telephone radio | telephone_radio | String ||
+|563 |Telephone telex | telephone_telex | String ||
 |564 |Telephone TTY/TDD | telephone_ttytdd | String ||
-|565 |Instantmessenger 1 | instant_messenger1 |	String ||
-|566 |Instantmessenger 2 | instant_messenger2 |	String ||
-|567 |Telephone IP | telephone_ip |	String ||
-|568 |Telephone assistant |	telephone_assistant | String ||
+|565 |Instantmessenger 1 | instant_messenger1 | String ||
+|566 |Instantmessenger 2 | instant_messenger2 | String ||
+|567 |Telephone IP | telephone_ip | String ||
+|568 |Telephone assistant | telephone_assistant | String ||
 |569 |Company | company | String ||
-|570 ||	image1 | String ||
+|570 || image1 | String ||
 |571 |Dynamic Field 1 | userfield01 | String ||
 |572 |Dynamic Field 2 | userfield02 | String ||
 |573 |Dynamic Field 3 | userfield03 | String ||
@@ -330,19 +330,19 @@ specific field data of single or multiple objects.
 |594 | Number of distributionlists | number_of_distribution_list | Number ||
 |596 || number_of_images | Number ||
 |597 || image_last_modified | Timestamp ||
-|598 |State other |	state_other | String ||
-|599 ||	file_as | String ||
+|598 | State other | state_other | String ||
+|599 || file_as | String ||
 |601 || image1_content_type | String ||
 |602 || mark_as_distributionlist | Boolean ||
-|605 |Default address |	default_address | Number ||
-|606 ||	image1_url | String ||
-|608 ||	useCount | Number |	In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.|
-|616 ||	yomiFirstName | String | Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|
-|617 ||	yomiLastName | String |	Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|
-|618 ||	yomiCompany | String | Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|
-|619 ||	addressHome | String | Support for Outlook 'home' address field. (since 6.20.1)|
-|620 ||	addressBusiness | String | Support for Outlook 'business' address field. (since 6.20.1)|
-|621 ||	addressOther | String |	Support for Outlook 'other' address field. (since 6.20.1)|
+|605 |Default address | default_address | Number ||
+|606 || image1_url | String ||
+|608 || useCount | Number | In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.|
+|616 || yomiFirstName | String | Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|
+|617 || yomiLastName | String | Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|
+|618 || yomiCompany | String | Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|
+|619 || addressHome | String | Support for Outlook 'home' address field. (since 6.20.1)|
+|620 || addressBusiness | String | Support for Outlook 'business' address field. (since 6.20.1)|
+|621 || addressOther | String | Support for Outlook 'other' address field. (since 6.20.1)|
 
 
 
@@ -366,18 +366,18 @@ specific field data of single or multiple objects.
 
 ## Detailed appointment data
 
-|ID |	Name |	Type | Value |
+|ID | Name | Type | Value |
 |:--|:-------|:------|:------|
-|206 |	recurrence_id |	Number | Object ID of the entire appointment sequence. Present on series and change exception appointments. Equals to object identifier on series appointment and is different to object identifier on change exceptions. |
-|207 |	recurrence_position | Number | 1-based position of an individual appointment in a sequence. Present if and only if recurrence_type > 0. |
-|208 |	recurrence_date_position | Date | Date of an individual appointment in a sequence. Present if and only if recurrence_type > 0. |
-|210 |	change_exceptions |	Array | An array of Dates, representing all change exceptions of a sequence. |
-|211 |	delete_exceptions |	Array | An array of Dates, representing all delete exceptions of a sequence. |
-|400 |	location | String | Location |
-|402 |	shown_as | Number | Describes, how this appointment appears in availability queries. See [Appointment availability](#appointment-availability) |
-|408 |	timezone | String | Timezone |
-|410 |	recurrence_start |	Date | Start of a sequence without time |
-||ignore_conflicts | Boolean |	Ignore soft conflicts for the new or modified appointment. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client. |
+|206 | recurrence_id | Number | Object ID of the entire appointment sequence. Present on series and change exception appointments. Equals to object identifier on series appointment and is different to object identifier on change exceptions. |
+|207 | recurrence_position | Number | 1-based position of an individual appointment in a sequence. Present if and only if recurrence_type > 0. |
+|208 | recurrence_date_position | Date | Date of an individual appointment in a sequence. Present if and only if recurrence_type > 0. |
+|210 | change_exceptions | Array | An array of Dates, representing all change exceptions of a sequence. |
+|211 | delete_exceptions | Array | An array of Dates, representing all delete exceptions of a sequence. |
+|400 | location | String | Location |
+|402 | shown_as | Number | Describes, how this appointment appears in availability queries. See [Appointment availability](#appointment-availability) |
+|408 | timezone | String | Timezone |
+|410 | recurrence_start | Date | Start of a sequence without time |
+||ignore_conflicts | Boolean | Ignore soft conflicts for the new or modified appointment. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client. |
 
 ### Appointment availability
 
@@ -390,26 +390,26 @@ specific field data of single or multiple objects.
 
 ## Detailed mail data
 
-|ID   | Name  |	Type  |	Value  |
+|ID   | Name  | Type  | Value  |
 |:----|:------|:------|:-------|
 |102 | color_label | Number | Color number used by Outlook to label the object. The assignment of colors to numbers is arbitrary and specified by the client. The numbers are integer numbers between 0 and 10 (inclusive).|
 |600 | id | String | Object ID|
-|601 | folder_id | String |	Object ID of the parent folder|
+|601 | folder_id | String | Object ID of the parent folder|
 |602 | attachment | Boolean | Specifies whether this mail has attachments.|
 |603 | from | Array | Each element is a two-element array specifying one sender. The first element of each address is the personal name, the second element is the email address. Missing address parts are represented by null values.|
-|604 | to | Array |	Each element is a two-element array (see the from field) specifying one receiver.|
-|605 | cc | Array |	Each element is a two-element array (see the from field) specifying one carbon-copy receiver.|
+|604 | to | Array | Each element is a two-element array (see the from field) specifying one receiver.|
+|605 | cc | Array | Each element is a two-element array (see the from field) specifying one carbon-copy receiver.|
 |606 | bcc | Array | Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.|
 |607 | subject | String | Subject line.|
 |608 | size | Number | Size of the mail in bytes.|
 |609 | sent_date | Time | Date and time as specified in the mail by the sending client.|
 |610 | received_date | Time | Date and time as measured by the receiving server.|
-|611 | flags | Number |	Various system flags. A sum of zero or more of values described in [Mail system flags](#mail-system-flags). See javax.mail.Flags.Flag for details.|
-|612 | level | Number |	Zero-based nesting level in a thread.|
+|611 | flags | Number | Various system flags. A sum of zero or more of values described in [Mail system flags](#mail-system-flags). See javax.mail.Flags.Flag for details.|
+|612 | level | Number | Zero-based nesting level in a thread.|
 |613 | disp_notification_to | String | Content of message's header “Disposition-Notification-To”|
 |614 | priority | Number | Value of message's “X-Priority” header. See [X-Priority header](#x-priority-header).|
 |615 | msg_ref | String | Message reference on reply/forward.|
-|651 | flag_seen | String |	Special field to sort mails by seen status|
+|651 | flag_seen | String | Special field to sort mails by seen status|
 |652 | account_name | String | Message's account name.|
 |653 | account_id | int | Message's account identifier. Since v6.20.2|
 ||user | Array | An array with user-defined flags as strings.|
@@ -459,14 +459,14 @@ specific field data of single or multiple objects.
 
 ### Attachment
 
-|Name |	Type | Value |
+|Name | Type | Value |
 |:----|:-----|:------|
-|id |	String | Object ID (unique only inside the same message) |
-|content_type |	String | MIME type |
-|content |	String | Content as text. Present only if easily convertible to text. |
-|filename |	String | Displayed filename (mutually exclusive with content). |
-|size |	Number | Size of the attachment in bytes. |
-|disp |	String | Attachment's disposition: null, inline, attachment or alternative. |
+|id | String | Object ID (unique only inside the same message) |
+|content_type | String | MIME type |
+|content | String | Content as text. Present only if easily convertible to text. |
+|filename | String | Displayed filename (mutually exclusive with content). |
+|size | Number | Size of the attachment in bytes. |
+|disp | String | Attachment's disposition: null, inline, attachment or alternative. |
 
 
 ## Detailed infoitem data
@@ -496,7 +496,7 @@ specific field data of single or multiple objects.
 
 ### Object Permission object
 
-|Name |	Type | Value |
+|Name | Type | Value |
 |:----|:-----|:------|
 | bits | Number | A number as described in Object Permission flags.|
 | entity | Number | User ID of the user or group to which this permission applies.|
@@ -511,7 +511,7 @@ specific field data of single or multiple objects.
 
 ### Extended object permission object
 
-|Name |	Type | Value |
+|Name | Type | Value |
 |:----|:-----|:------|
 |entity | Number | Identifier of the permission entity (i.e. user-, group- or guest-ID). |
 |bits | Number | A number as described in Object Permission flags. |
@@ -588,7 +588,7 @@ specific field data of single or multiple objects.
 | 1037 | personal | String | The customizable personal part of email address |
 | 1038 | reply_to | String | The customizable reply-to email address |
 | 1039 | addresses | String | The comma-separated list of available E-Mail addresses including aliases. !! Only available for primary mail account !! |
-| 1040 | meta | JSON | data	Stores arbitrary JSON data as specified by client associated with the mail account |
+| 1040 | meta | JSON | data Stores arbitrary JSON data as specified by client associated with the mail account |
 | 1041 | archive | String | The name of the archive folder. Currently not functional! |
 | 1042 | archive_fullname | String | The full name of the archive folder. Currently not functional! |
 | 1043 | transport_auth | String | Available since v7.6.1 Specifies the source for mail transport (SMTP) credentials. See [Credential source](#credential-source).|
@@ -613,9 +613,9 @@ specific field data of single or multiple objects.
 |610 | Aliases | aliases | Array | The user's aliases |
 |611 | Time zone | timezone | String | The time zone ID. |
 |612 | Locale | locale | String | The name of user's entire locale, with the language, country and variant separated by underbars. E.g. "en", "de_DE" |
-|613 | Groups |	groups | Array | The IDs of user's groups |
-|614 | Contact ID |	contact_id | Number | The contact ID of the user |
-|615 | Login info |	login_info | String | The user's login information |
+|613 | Groups | groups | Array | The IDs of user's groups |
+|614 | Contact ID | contact_id | Number | The contact ID of the user |
+|615 | Login info | login_info | String | The user's login information |
 |616 | Guest Created By | guest_created_by | Number | The ID of the user who has created this guest in case this user represents a guest user; it is 0 for regular users (preliminary, available with v7.8.0) |
 
 ## Messaging message columns
