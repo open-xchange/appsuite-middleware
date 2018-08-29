@@ -55,7 +55,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.userfeedback.internal.FeedbackServiceImplTest;
 
 /**
- * 
+ *
  * {@link UnitTests}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -63,7 +63,8 @@ import com.openexchange.userfeedback.internal.FeedbackServiceImplTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    FeedbackServiceImplTest.class, 
+    FeedbackServiceImplTest.class,
 })
 public class UnitTests {
+    // empty
 }

@@ -173,7 +173,7 @@ public class OnboardingConfig {
                     LinkType linkType = LinkType.COMMON;
                     {
                         String sType = (String) linkValues.get("type");
-                        if (!Strings.isEmpty(sType)) {
+                        if (Strings.isNotEmpty(sType)) {
                             linkType = LinkType.typeFor(sType);
                             if (null == linkType) {
                                 throw OnboardingExceptionCodes.INVALID_LINK_TYPE_IN_SCENARIO_CONFIGURATION.create(sType, id);
@@ -182,7 +182,7 @@ public class OnboardingConfig {
                     }
                     String imageInfo = (String) linkValues.get("image");
                     String sUrl = (String) linkValues.get("url");
-                    if (!Strings.isEmpty(sUrl)) {
+                    if (Strings.isNotEmpty(sUrl)) {
                         try {
                             URI uri = new URI(sUrl);
                             if ("property".equalsIgnoreCase(uri.getScheme())) {
@@ -203,7 +203,7 @@ public class OnboardingConfig {
             List<String> capabilities = Collections.emptyList();
             if (OnboardingType.LINK == type) {
                 String sCapabilities = (String) values.get("capabilities");
-                if (!Strings.isEmpty(sCapabilities) && !"null".equalsIgnoreCase(sCapabilities)) {
+                if (Strings.isNotEmpty(sCapabilities) && !"null".equalsIgnoreCase(sCapabilities)) {
                     String[] saCpabilities = Strings.splitByComma(sCapabilities);
                     if (null != saCpabilities && saCpabilities.length > 0) {
                         capabilities = Arrays.asList(saCpabilities);

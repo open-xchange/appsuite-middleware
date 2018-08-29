@@ -457,7 +457,7 @@ public final class JerichoParser {
         }
 
         String closing = m.group(2);
-        boolean orderlyClosed = false == Strings.isEmpty(closing); // Ending '>' found?
+        boolean orderlyClosed = Strings.isNotEmpty(closing); // Ending '>' found?
 
         if (!force) {
             if (!orderlyClosed) {

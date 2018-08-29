@@ -372,7 +372,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                 throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname, userId, contextId));
             }
 
-            if (!Strings.isEmpty(socketHostname) && !socketHostname.equals(certificate.getHostName())) {
+            if (Strings.isNotEmpty(socketHostname) && !socketHostname.equals(certificate.getHostName())) {
                 cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.INVALID_COMMON_NAME);
                 throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname));
             }

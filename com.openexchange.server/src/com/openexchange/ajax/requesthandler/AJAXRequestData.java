@@ -84,6 +84,8 @@ import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.groupware.upload.StreamedUpload;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.groupware.upload.impl.UploadException;
+import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -1314,6 +1316,10 @@ public class AJAXRequestData {
     /**
      * Find out whether this request contains an uploaded file. Note that this is only possible via a servlet interface and not via the
      * multiple module.
+     * <p>
+     * <code>Note:</code> This invocation might throw {@link UploadCode#FAILED_STREAMED_UPLOAD} error code. In that case error's
+     * {@link OXException#getArgument(String) arguments} contains the legacy <code>com.openexchange.groupware.upload.impl.UploadEvent</code>
+     * referenced by name <code>"__uploadEvent"</code> as fall-back
      *
      * @param maxUploadFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
      * @param maxUploadSize The maximum allowed size of a complete request or <code>-1</code>
@@ -1322,12 +1328,24 @@ public class AJAXRequestData {
      * @throws OXException If upload files cannot be processed
      */
     public boolean hasUploads(long maxUploadFileSize, long maxUploadSize, boolean streamed) throws OXException {
+        if (!files.isEmpty()) {
+            // Already parsed
+            return true;
+        }
+
         if (streamed) {
             Boolean hasStreamedUpload = this.hasStreamedUpload;
             if (null == hasStreamedUpload) {
                 this.maxUploadFileSize = maxUploadFileSize > 0 ? maxUploadFileSize : -1L;
                 this.maxUploadSize = maxUploadSize > 0 ? maxUploadSize : -1L;
-                processUpload(maxUploadFileSize, maxUploadSize, true);
+                try {
+                    processUpload(maxUploadFileSize, maxUploadSize, true);
+                } catch (OXException e) {
+                    if (UploadException.UploadCode.FAILED_STREAMED_UPLOAD.equals(e)) {
+                        return (null != e.getArgument("__uploadEvent")) && !files.isEmpty();
+                    }
+                    throw e;
+                }
                 StreamedUpload streamedUpload = this.streamedUpload;
                 hasStreamedUpload = Boolean.valueOf(streamedUpload != null && streamedUpload.hasAny());
                 this.hasStreamedUpload = hasStreamedUpload;
@@ -1409,6 +1427,10 @@ public class AJAXRequestData {
 
     /**
      * Gets the streamed upload
+     * <p>
+     * <code>Note:</code> This invocation might throw {@link UploadCode#FAILED_STREAMED_UPLOAD} error code. In that case error's
+     * {@link OXException#getArgument(String) arguments} contains the legacy <code>com.openexchange.groupware.upload.impl.UploadEvent</code>
+     * referenced by name <code>"__uploadEvent"</code> as fall-back
      *
      * @return The streamed upload
      * @throws OXException If upload cannot be processed
@@ -1420,6 +1442,10 @@ public class AJAXRequestData {
 
     /**
      * Gets the streamed upload.
+     * <p>
+     * <code>Note:</code> This invocation might throw {@link UploadCode#FAILED_STREAMED_UPLOAD} error code. In that case error's
+     * {@link OXException#getArgument(String) arguments} contains the legacy <code>com.openexchange.groupware.upload.impl.UploadEvent</code>
+     * referenced by name <code>"__uploadEvent"</code> as fall-back
      *
      * @param maxUploadFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
      * @param maxUploadSize The maximum allowed size of a complete request or <code>-1</code>
@@ -1469,13 +1495,39 @@ public class AJAXRequestData {
             final List<UploadFile> thisFiles = this.files;
             synchronized (thisFiles) {
                 if (streamed) {
+                    UploadEvent existingUploadEvent = this.uploadEvent;
+                    if (null != existingUploadEvent) {
+                        // Spooling upload already triggered
+                        UploadException uploadException = UploadException.UploadCode.FAILED_STREAMED_UPLOAD.create();
+                        uploadException.setArgument("__uploadEvent", existingUploadEvent);
+                        throw uploadException;
+                    }
+
                     StreamedUpload streamedUpload = this.streamedUpload;
                     if (null == streamedUpload) {
-                        streamedUpload = UploadUtility.processStreamedUpload(localHttpServletRequest, maxFileSize, maxOverallSize, session);
-                        this.streamedUpload = streamedUpload;
-                        for (Iterator<String> names = streamedUpload.getFormFieldNames(); names.hasNext();) {
-                            String name = names.next();
-                            putParameter0(name, streamedUpload.getFormField(name), false);
+                        try {
+                            streamedUpload = UploadUtility.processStreamedUpload(true, localHttpServletRequest, maxFileSize, maxOverallSize, session);
+                            this.streamedUpload = streamedUpload;
+                            for (Iterator<String> names = streamedUpload.getFormFieldNames(); names.hasNext();) {
+                                String name = names.next();
+                                putParameter0(name, streamedUpload.getFormField(name), false);
+                            }
+                        } catch (OXException e) {
+                            if (UploadException.UploadCode.FAILED_STREAMED_UPLOAD.equals(e)) {
+                                UploadEvent uploadEvent = this.uploadEvent;
+                                if (null == uploadEvent) {
+                                    uploadEvent = (UploadEvent) e.getArgument("__uploadEvent");
+                                    this.uploadEvent = uploadEvent;
+                                    for (Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator(); iterator.hasNext();) {
+                                        thisFiles.add(iterator.next());
+                                    }
+                                    for (Iterator<String> names = uploadEvent.getFormFieldNames(); names.hasNext();) {
+                                        String name = names.next();
+                                        putParameter0(name, uploadEvent.getFormField(name), false);
+                                    }
+                                }
+                            }
+                            throw e;
                         }
                     }
                 } else {
@@ -1648,12 +1700,12 @@ public class AJAXRequestData {
 
     /**
      * Appends the port if necessary, either:
-     * 
+     *
      * a) if it is an SSL connection and the port is other
      * than the standard 443 port port, or
-     * 
+     *
      * b) if it's other than the default non-secure one.
-     * 
+     *
      * @param urlBuilder The URL {@link StringBuilder}
      */
     private void appendPort(StringBuilder urlBuilder) {

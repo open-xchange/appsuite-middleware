@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.alias;
 
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -76,13 +77,8 @@ public class AliasUserAttributeChangers extends AbstractAttributeChangers {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
-     */
     @Override
-    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException {
         UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
         Set<String> aliases = userData.getAliases();
         try {
@@ -96,7 +92,7 @@ public class AliasUserAttributeChangers extends AbstractAttributeChangers {
 
             Set<String> aliasesToSet = new LinkedHashSet<>(aliases.size());
             for (String alias : aliases) {
-                if (false == Strings.isEmpty(alias)) {
+                if (Strings.isNotEmpty(alias)) {
                     alias = alias.trim();
                     aliasesToSet.add(alias);
                 }

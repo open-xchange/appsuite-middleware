@@ -214,10 +214,10 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 if (null != rotatePolicy) {
                     switch (rotatePolicy) {
                         case DAILY:
-                            builder.rotatedDaily();
+                            builder.rotationPattern("yyyyMMdd");
                             break;
                         case HOURLY:
-                            builder.rotatedHourly();
+                            builder.rotationPattern("yyyyMMddhh");
                             break;
                         case NONE: /* fall-through */
                         default:

@@ -78,7 +78,7 @@ public class RedeemTest extends AbstractLoginTest {
         /*
          * RandomToken is disabled by default via US: 52869957 so only try to login if the randomToken is enabled on the server side
          */
-        if (!Strings.isEmpty(random)) {
+        if (Strings.isNotEmpty(random)) {
             String session = rawResponse.getString("session");
             createClient();
             raw("redeem", "random", random);

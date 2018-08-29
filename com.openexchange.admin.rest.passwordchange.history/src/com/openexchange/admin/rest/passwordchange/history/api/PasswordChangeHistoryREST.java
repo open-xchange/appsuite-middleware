@@ -192,7 +192,7 @@ public class PasswordChangeHistoryREST {
         String[] fields = Strings.splitByComma(sort);
         Map<SortField, SortOrder> retval = new LinkedHashMap<>(fields.length);
         for (String field : fields) {
-            if (false == Strings.isEmpty(field)) {
+            if (Strings.isNotEmpty(field)) {
                 boolean desc = false;
                 if (field.startsWith("-")) {
                     field = field.substring(1);

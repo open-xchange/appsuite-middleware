@@ -108,7 +108,7 @@ public class ApnsHttp2Options {
 
     private final AuthType authType;
 
-    private final File privateKey;
+    private final byte[] privateKey;
     private final String keyId;
     private final String teamId;
 
@@ -121,15 +121,7 @@ public class ApnsHttp2Options {
     /**
      * Initializes a new immutable {@link ApnsHttp2Options} instance using a provider certificate.
      *
-     * @param keystore A keystore containing the private key and the certificate signed by Apple.<br>
-     *                 The following formats can be used:
-     *                 <ul>
-     *                 <li><code>java.io.File</code></li>
-     *                 <li><code>java.io.InputStream</code></li>
-     *                 <li><code>byte[]</code></li>
-     *                 <li><code>java.security.KeyStore</code></li>
-     *                 <li><code>java.lang.String</code> for a file path</li>
-     *                 </ul>
+     * @param keystore A keystore containing the private key and the certificate signed by Apple
      * @param password The keystore's password.
      * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
      * @param topic The app's topic, which is typically the bundle ID of the app
@@ -155,7 +147,7 @@ public class ApnsHttp2Options {
      * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
      * @param topic The app's topic, which is typically the bundle ID of the app
      */
-    public ApnsHttp2Options(File privateKey, String keyId, String teamId, boolean production, String topic) {
+    public ApnsHttp2Options(byte[] privateKey, String keyId, String teamId, boolean production, String topic) {
         super();
         authType = AuthType.JWT;
         this.keystore = null;
@@ -226,7 +218,7 @@ public class ApnsHttp2Options {
      *
      * @return The APNS auth key file
      */
-    public File getPrivateKey() {
+    public byte[] getPrivateKey() {
         return privateKey;
     }
 

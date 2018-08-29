@@ -76,6 +76,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.java.Strings;
 import au.com.bytecode.opencsv.CSVReader;
 
 public abstract class UserAbstraction extends ObjectNamingAbstraction {
@@ -2734,9 +2735,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             try {
                 final String date = (String) parser.getOptionValue(anniversaryOption);
                 if (date != null) {
-                    final Date value = sdf.parse(date);
-                    if (null != value) {
-                        usr.setAnniversary(value);
+                    if (Strings.isEmpty(date)) {
+                        usr.setAnniversary(null);
+                    } else {
+                        usr.setAnniversary(sdf.parse(date));
                     }
                 }
             } catch (final ParseException e) {

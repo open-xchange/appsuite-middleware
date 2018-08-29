@@ -157,9 +157,9 @@ public class LoginCounterImpl implements LoginCounterService {
          * Get all logins of every schema
          */
         int sum = 0;
-        final Map<String, Integer> results = new HashMap<String, Integer>();
+        final Map<String, Integer> results = new HashMap<>();
         for (final Entry<String, Integer> schemaEntry : schemaMap.entrySet()) {
-            final Set<UserContextId> countedUsers = new HashSet<UserContextId>();
+            final Set<UserContextId> countedUsers = new HashSet<>();
             final int readPool = schemaEntry.getValue().intValue();
             final Connection connection = dbService.get(readPool, schemaEntry.getKey());
             PreparedStatement stmt = null;

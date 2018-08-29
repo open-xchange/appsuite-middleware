@@ -523,20 +523,13 @@ public final class MessageParser {
         /*
          * From Only mandatory if non-draft message
          */
-        String fromKey = MailJSONField.FROM.getKey();
-        if (jsonObj.hasAndNotNull(fromKey)) {
-            try {
-                String value = jsonObj.getString(fromKey);
-                int endPos;
-                if ('[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
-                    value = new StringBuilder(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
-                }
-                mail.addFrom(parseAddressList(value, true, true));
-            } catch (AddressException e) {
-                mail.addFrom(parseAddressKey(fromKey, jsonObj, prepare4Transport));
+        {
+            InternetAddress[] fromAddresses = parseAddressKey(MailJSONField.FROM.getKey(), jsonObj, prepare4Transport);
+            if (null != fromAddresses && fromAddresses.length > 0) {
+                mail.addFrom(fromAddresses);
+            } else if (prepare4Transport) {
+                throw MailExceptionCode.MISSING_FIELD.create(MailJSONField.FROM.getKey());
             }
-        } else if (prepare4Transport) {
-            throw MailExceptionCode.MISSING_FIELD.create(fromKey);
         }
         /*
          * To Only mandatory if non-draft message
@@ -698,7 +691,7 @@ public final class MessageParser {
                     properties.put(DataProperties.PROPERTY_CHARSET, charsetName);
                     {
                         String fileName = jAttachment.optString(ATTACHMENT_FILE_NAME, null);
-                        if (!Strings.isEmpty(fileName)) {
+                        if (Strings.isNotEmpty(fileName)) {
                             properties.put(DataProperties.PROPERTY_NAME, fileName);
                         }
                     }

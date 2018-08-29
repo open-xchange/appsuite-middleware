@@ -164,7 +164,7 @@ public class ContactJSONDataHandler implements DataHandler {
 
     private static int optIntProperty(DataProperties properties, String propertyName) {
         String value = properties.get(propertyName);
-        if (false == Strings.isEmpty(value)) {
+        if (Strings.isNotEmpty(value)) {
             try {
                 return Integer.parseInt(value);
             } catch (NumberFormatException e) {

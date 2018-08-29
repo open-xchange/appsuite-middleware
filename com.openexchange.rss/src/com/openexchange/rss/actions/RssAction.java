@@ -312,7 +312,7 @@ public class RssAction implements AJAXActionService {
                 Throwable t = parsingException.getCause();
                 if (t != null && t instanceof IOException) {
                     String exceptionMessage = t.getMessage();
-                    if (!Strings.isEmpty(exceptionMessage) && exceptionMessage.contains("exceeded")) {
+                    if (Strings.isNotEmpty(exceptionMessage) && exceptionMessage.contains("exceeded")) {
                         ConfigurationService configService = Services.getService(ConfigurationService.class);
                         int maximumAllowedSize = configService.getIntProperty("com.openexchange.messaging.rss.feed.size", 4194304);
                         OXException oxe = RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize);

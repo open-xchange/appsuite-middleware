@@ -158,8 +158,8 @@ public final class FolderUtility {
             f.open(IMAPFolder.READ_ONLY);
             return true;
         } catch (FolderNotFoundException e) {
-            // Rethrow...
-            throw e;
+            // Apparently no such folder exists, hence cannot be opened
+            return false;
         } catch (MessagingException e) {
             if ("folder cannot contain messages".equals(e.getMessage())) {
                 // Folder could not be opened because it cannot hold messages

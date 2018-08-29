@@ -249,7 +249,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
 
         String usr = user;
         String proxyDelim = ConfigViews.getDefinedStringPropertyFrom("com.openexchange.dovecot.doveadm.proxyDelimiter", null, view);
-        if (false == Strings.isEmpty(proxyDelim)) {
+        if (Strings.isNotEmpty(proxyDelim)) {
             int pos = usr.indexOf(proxyDelim);
             if (pos > 0) {
                 usr = usr.substring(0, pos);

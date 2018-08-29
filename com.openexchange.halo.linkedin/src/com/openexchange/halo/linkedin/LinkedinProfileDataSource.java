@@ -115,10 +115,10 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
         if (firstName == null || lastName == null) {
             List<String> eMail = getEMail(contact);
             for (String string : eMail) {
-                if (!Strings.isEmpty(string)) {
+                if (Strings.isNotEmpty(string)) {
                     try {
                         final String personal = new QuotedInternetAddress(string, false).getPersonal();
-                        if (!Strings.isEmpty(personal)) {
+                        if (Strings.isNotEmpty(personal)) {
                             String[] pSplit = personal.replace(",", " ").split("\\s+");
                             if (pSplit.length == 2) {
                                 firstName = pSplit[0];

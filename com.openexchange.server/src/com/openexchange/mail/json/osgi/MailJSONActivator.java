@@ -73,7 +73,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
@@ -257,10 +256,6 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                 MailProperties.invalidateCache();
             }
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
         });
 
         MailCategoriesPreferenceItem item = new MailCategoriesPreferenceItem(this);

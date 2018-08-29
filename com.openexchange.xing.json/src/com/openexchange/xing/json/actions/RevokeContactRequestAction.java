@@ -90,7 +90,7 @@ public class RevokeContactRequestAction extends AbstractXingAction {
 		String secret = req.getParameter("testSecret");
 		final XingOAuthAccess xingOAuthAccess;
 		{
-			if (!Strings.isEmpty(token) && !Strings.isEmpty(secret)) {
+			if (Strings.isNotEmpty(token) && Strings.isNotEmpty(secret)) {
 				xingOAuthAccess = getXingOAuthAccess(token, secret, req.getSession());
 			} else {
 				xingOAuthAccess = getXingOAuthAccess(req);

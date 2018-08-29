@@ -121,7 +121,7 @@ public class MailFilterBlacklistService {
     }
 
     private void addBlacklist(MailFilterBlacklistProperty key, String blacklist, Map<String, Set<String>> result) {
-        if (!Strings.isEmpty(blacklist)) {
+        if (Strings.isNotEmpty(blacklist)) {
             String[] blacklists = Strings.splitByComma(blacklist);
             if (key.getField() != null) {
                 result.put(Blacklist.key(key.getBase(), key.getSub(), key.getField()), validateBlacklist(key, blacklists));

@@ -59,9 +59,7 @@ import com.openexchange.appsuite.FileContribution;
 import com.openexchange.appsuite.FileContributor;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRampUpService;
@@ -199,10 +197,4 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
             }
         }
     }
-
-    @Override
-    public Interests getInterests() {
-        return Reloadables.getInterestsForAll();
-    }
-
 }

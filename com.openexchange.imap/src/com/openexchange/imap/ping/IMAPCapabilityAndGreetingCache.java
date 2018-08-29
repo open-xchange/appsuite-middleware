@@ -466,7 +466,7 @@ public final class IMAPCapabilityAndGreetingCache {
                 String[] caps = SPLIT.split(capability);
                 Map<String, String> capabilities = new LinkedHashMap<String, String>(caps.length);
                 for (String cap : caps) {
-                    if (!Strings.isEmpty(cap)) {
+                    if (Strings.isNotEmpty(cap)) {
                         capabilities.put(Strings.toUpperCase(cap), cap);
                     }
                 }

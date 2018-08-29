@@ -133,10 +133,6 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
                 WnsPushNotificationTransport.invalidateEnabledCache();
             }
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
         });
 
         registerService(Reloadable.class, this);

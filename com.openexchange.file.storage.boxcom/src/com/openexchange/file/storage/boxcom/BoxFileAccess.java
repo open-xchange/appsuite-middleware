@@ -569,7 +569,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(x, x.getMessage());
                     }
 
-                    if (!Strings.isEmpty(file.getDescription())) {
+                    if (Strings.isNotEmpty(file.getDescription())) {
                         fileInfo.setDescription(file.getDescription());
                         boxFile.updateInfo(fileInfo);
                     }

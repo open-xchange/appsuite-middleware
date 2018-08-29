@@ -84,7 +84,7 @@ public class OrganizationMapping extends AbstractMapping {
             }
             property.getValues().add(contact.getCompany());
             property.getValues().add(contact.getDepartment());
-            if (contact.containsBranches() && false == Strings.isEmpty(contact.getBranches())) {
+            if (contact.containsBranches() && Strings.isNotEmpty(contact.getBranches())) {
                 for (String branch : Strings.splitByComma(contact.getBranches())) {
                     property.getValues().add(branch);
                 }

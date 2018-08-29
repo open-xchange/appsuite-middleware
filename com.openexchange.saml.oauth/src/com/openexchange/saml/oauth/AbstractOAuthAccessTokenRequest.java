@@ -142,7 +142,7 @@ public abstract class AbstractOAuthAccessTokenRequest {
             // Build the url-encoded pairs for the POST request
             List<NameValuePair> nvps = new ArrayList<NameValuePair>();
             nvps.add(new BasicNameValuePair("grant_type", getGrantType()));
-            if(!Strings.isEmpty(scope)){
+            if(Strings.isNotEmpty(scope)){
                 nvps.add(new BasicNameValuePair(SCOPE, scope));
             }
             addAccessInfo(accessInfo, nvps);

@@ -434,7 +434,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
             protected String doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
-                if (!Strings.isEmpty(newName)) {
+                if (Strings.isNotEmpty(newName)) {
                     try {
                         boxFolder.rename(newName);
                     } catch (BoxAPIException e) {

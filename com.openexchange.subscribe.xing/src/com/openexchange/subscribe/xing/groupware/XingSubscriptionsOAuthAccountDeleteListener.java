@@ -64,7 +64,6 @@ import com.openexchange.subscribe.xing.XingSubscribeService;
 public class XingSubscriptionsOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
 
     private XingSubscribeService xingService;
-
     private ContextService contextService;
 
     /**
@@ -78,12 +77,11 @@ public class XingSubscriptionsOAuthAccountDeleteListener implements OAuthAccount
 
     @Override
     public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        xingService.deleteAllUsingOAuthAccount(contextService.getContext(cid), id);
+        xingService.deleteSubscription(contextService.getContext(cid), id);
     }
 
     @Override
     public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         // no op
     }
-
 }

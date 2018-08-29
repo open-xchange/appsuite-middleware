@@ -163,7 +163,7 @@ public class FolderBuffer {
          * check for client push token
          */
         String pushToken = (String)session.getParameter(DriveSession.PARAMETER_PUSH_TOKEN);
-        if (false == Strings.isEmpty(pushToken)) {
+        if (Strings.isNotEmpty(pushToken)) {
             if (null == this.pushToken) {
                 this.pushToken = pushToken; // use push token from event
             } else if (false == this.pushToken.equals(pushToken)) {

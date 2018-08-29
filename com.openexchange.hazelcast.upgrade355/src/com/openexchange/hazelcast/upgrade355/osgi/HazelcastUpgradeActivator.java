@@ -156,7 +156,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
             String[] members = Strings.splitByComma(configService.getProperty(property));
             if (null != members && 0 < members.length) {
                 for (String member : members) {
-                    if (false == Strings.isEmpty(member)) {
+                    if (Strings.isNotEmpty(member)) {
                         try {
                             config.getNetworkConfig().addAddress(InetAddress.getByName(member).getHostAddress());
                         } catch (UnknownHostException e) {
@@ -179,7 +179,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         }
         config.getGroupConfig().setName(groupName);
         String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
-        if (false == Strings.isEmpty(groupPassword)) {
+        if (Strings.isNotEmpty(groupPassword)) {
             config.getGroupConfig().setPassword(groupPassword);
         }
         /*

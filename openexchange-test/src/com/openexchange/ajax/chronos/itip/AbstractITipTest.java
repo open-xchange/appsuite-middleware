@@ -287,7 +287,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         EventId id = new EventId();
         id.setFolder(data.getFolder());
         id.setId(data.getId());
-        chronosApi.deleteEvent(session, now(), Collections.singletonList(id), null, null, Boolean.FALSE, Boolean.FALSE);
+        chronosApi.deleteEvent(session, now(), Collections.singletonList(id), null, null, Boolean.FALSE, Boolean.FALSE, null);
     }
 
     private Long now() {

@@ -96,6 +96,7 @@ public final class ConfigActivator extends HousekeepingActivator {
         try {
             ConfigProviderTracker configProviderServiceTracker = new ConfigProviderTracker(context);
             ConfigurationImpl configService = new ConfigurationImpl(configProviderServiceTracker.getReinitQueue());
+            ConfigurationImpl.setConfigReference(configService);
             registerService(ConfigurationService.class, configService, null);
 
             {
@@ -156,6 +157,7 @@ public final class ConfigActivator extends HousekeepingActivator {
 
             cleanUp();
             FileWatcher.dropTimer();
+            ConfigurationImpl.setConfigReference(null);
         } catch (Throwable t) {
             logger.error("", t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);

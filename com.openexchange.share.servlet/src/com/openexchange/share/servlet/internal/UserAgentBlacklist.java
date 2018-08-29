@@ -181,7 +181,7 @@ public class UserAgentBlacklist {
         List<Matcher> blacklistMatchers = new ArrayList<>(wps.length);
         List<Tokens> containees = new ArrayList<>(wps.length);
         for (String wildcardPattern : wps) {
-            if (!Strings.isEmpty(wildcardPattern)) {
+            if (Strings.isNotEmpty(wildcardPattern)) {
                 String expr = wildcardPattern.trim();
                 try {
                     String unquoted = removeQuotes(expr);
@@ -234,7 +234,7 @@ public class UserAgentBlacklist {
 
         List<String> list = new ArrayList<>(numTokens);
         for (String token : tokens) {
-            if (false == Strings.isEmpty(token)) {
+            if (Strings.isNotEmpty(token)) {
                 for (int i = token.length() - 1; i-- > 1;) {
                     char ch = token.charAt(i);
                     if (false == Strings.isAsciiLetter(ch) && ch != ' ' && ch != '-' && ch != '_') {

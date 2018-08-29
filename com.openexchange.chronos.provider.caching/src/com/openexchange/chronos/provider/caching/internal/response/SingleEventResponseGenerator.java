@@ -51,11 +51,8 @@ package com.openexchange.chronos.provider.caching.internal.response;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -90,10 +87,7 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
 
             @Override
             protected Event call(CalendarStorage storage) throws OXException {
-                EventField[] fields = getFields(cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
-                List<EventField> fieldList = new ArrayList<EventField>(Arrays.asList(fields));
-                fieldList.add(EventField.FOLDER_ID);
-                fields = fieldList.toArray(new EventField[fieldList.size()]);
+                EventField[] fields = getFields(cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.FOLDER_ID);
                 Event event = storage.getEventStorage().loadEvent(eventId, fields);
                 if (event == null) {
                     throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);

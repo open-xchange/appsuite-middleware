@@ -680,7 +680,7 @@ public final class CleaningJsoupHandler implements JsoupHandler {
                  * Handle style attribute
                  */
                 String css = attribute.getValue();
-                if (!Strings.isEmpty(css)) {
+                if (Strings.isNotEmpty(css)) {
                     checkCSS(cssBuffer.append(css), styleMap, true);
                     css = cssBuffer.toString();
                     cssBuffer.setLength(0);

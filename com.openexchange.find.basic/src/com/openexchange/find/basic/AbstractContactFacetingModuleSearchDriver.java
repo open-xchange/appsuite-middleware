@@ -206,17 +206,17 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
     protected static List<String> extractMailAddessesFrom(final Contact contact) {
         List<String> addrs = new ArrayList<String>(3);
         String mailAddress = contact.getEmail1();
-        if (!Strings.isEmpty(mailAddress)) {
+        if (Strings.isNotEmpty(mailAddress)) {
             addrs.add(mailAddress);
         }
 
         mailAddress = contact.getEmail2();
-        if (!Strings.isEmpty(mailAddress)) {
+        if (Strings.isNotEmpty(mailAddress)) {
             addrs.add(mailAddress);
         }
 
         mailAddress = contact.getEmail3();
-        if (!Strings.isEmpty(mailAddress)) {
+        if (Strings.isNotEmpty(mailAddress)) {
             addrs.add(mailAddress);
         }
 

@@ -123,7 +123,7 @@ public class UpdateRequest extends AbstractMailFilterRequest<UpdateResponse> {
         List<Parameter> parameters = new LinkedList<>();
         parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
         parameters.add(new Parameter(AJAXServlet.PARAMETER_ID, rule.getId()));
-        if (!Strings.isEmpty(forUser)) {
+        if (Strings.isNotEmpty(forUser)) {
             parameters.add(new Parameter("username", forUser));
         }
         return parameters.toArray(new Parameter[parameters.size()]);

@@ -337,7 +337,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
                             int contextId = ((Integer) event.getProperty("com.openexchange.passwordchange.contextId")).intValue();
                             int userId = ((Integer) event.getProperty("com.openexchange.passwordchange.userId")).intValue();
                             Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
-                            if (null != session && false == Strings.isEmpty(session.getSessionID())) {
+                            if (null != session && Strings.isNotEmpty(session.getSessionID())) {
                                 Collection<Session> sessions = serviceImpl.getSessions(userId, contextId);
                                 for (Session userSession : sessions) {
                                     if (false == session.getSessionID().equals(userSession.getSessionID())) {

@@ -102,7 +102,7 @@ public class Tools {
     public static Set<String> getEnhancedWildcards(Set<String> fileNames) {
         Set<String> possibleWildcards = new HashSet<String>(fileNames.size());
         for (String filename : fileNames) {
-            if (false == Strings.isEmpty(filename)) {
+            if (Strings.isNotEmpty(filename)) {
                 StringBuilder stringBuilder = new StringBuilder(filename);
                 Matcher matcher = IS_NUMBERED_WITH_EXTENSION.matcher(filename);
                 if (matcher.find()) {

@@ -53,9 +53,9 @@ package com.openexchange.authentication.ucs.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.naming.AuthenticationException;
 import javax.naming.Context;
 import javax.naming.InvalidNameException;
@@ -76,6 +76,7 @@ import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -108,17 +109,132 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
     private static final String LOGINATTR_OPTION = "com.openexchange.authentication.ucs.loginAttribute";
     private static final String LDAPPOOL_OPTION = "com.openexchange.authentication.ucs.useLdapPool";
 
-    private Hashtable<String, String> ldapConfig;
-    private URL passwordChangeURL;
-    private Properties props;
-    private String binddn;
-    private String bindpw;
-    private String contextIdAttr;
-    private String ldapUrl;
-    private String baseDn;
-    private String searchFilter;
-    private String mailAttr;
-    private String loginAttr;
+    private static final class AuthenticatedImpl implements Authenticated {
+
+        private final String login;
+        private final String contextIdOrName;
+
+        AuthenticatedImpl(String login, String contextIdOrName) {
+            super();
+            this.login = login;
+            this.contextIdOrName = contextIdOrName;
+        }
+
+        @Override
+        public String getContextInfo() {
+            return contextIdOrName;
+        }
+
+        @Override
+        public String getUserInfo() {
+            return login;
+        }
+    } // End of class AuthenticatedImpl
+
+    private static class Config {
+
+        private static class Builder {
+
+            private Hashtable<String, String> ldapConfigDefaults;
+            private URL passwordChangeURL;
+            private String binddn;
+            private String bindpw;
+            private String contextIdAttr;
+            private String ldapUrl;
+            private String baseDn;
+            private String searchFilter;
+            private String mailAttr;
+            private String loginAttr;
+
+            Builder() {
+                super();
+            }
+
+            Builder withLdapConfigDefaults(Hashtable<String, String> ldapConfigDefaults) {
+                this.ldapConfigDefaults = ldapConfigDefaults;
+                return this;
+            }
+
+            Builder withPasswordChangeURL(URL passwordChangeURL) {
+                this.passwordChangeURL = passwordChangeURL;
+                return this;
+            }
+
+            Builder withBinddn(String binddn) {
+                this.binddn = binddn;
+                return this;
+            }
+
+            Builder withBindpw(String bindpw) {
+                this.bindpw = bindpw;
+                return this;
+            }
+
+            Builder withContextIdAttr(String contextIdAttr) {
+                this.contextIdAttr = contextIdAttr;
+                return this;
+            }
+
+            Builder withLdapUrl(String ldapUrl) {
+                this.ldapUrl = ldapUrl;
+                return this;
+            }
+
+            Builder withBaseDn(String baseDn) {
+                this.baseDn = baseDn;
+                return this;
+            }
+
+            Builder withSearchFilter(String searchFilter) {
+                this.searchFilter = searchFilter;
+                return this;
+            }
+
+            Builder withMailAttr(String mailAttr) {
+                this.mailAttr = mailAttr;
+                return this;
+            }
+
+            Builder withLoginAttr(String loginAttr) {
+                this.loginAttr = loginAttr;
+                return this;
+            }
+
+            Config build() {
+                return new Config(ldapConfigDefaults, passwordChangeURL, binddn, bindpw, contextIdAttr, ldapUrl, baseDn, searchFilter, mailAttr, loginAttr);
+            }
+
+        }
+
+        final Hashtable<String, String> ldapConfigDefaults;
+        final URL passwordChangeURL;
+        final String binddn;
+        final String bindpw;
+        final String contextIdAttr;
+        final String ldapUrl;
+        final String baseDn;
+        final String searchFilter;
+        final String mailAttr;
+        final String loginAttr;
+
+        Config(Hashtable<String, String> ldapConfigDefaults, URL passwordChangeURL, String binddn, String bindpw, String contextIdAttr, String ldapUrl, String baseDn, String searchFilter, String mailAttr, String loginAttr) {
+            super();
+            this.ldapConfigDefaults = ldapConfigDefaults;
+            this.passwordChangeURL = passwordChangeURL;
+            this.binddn = binddn;
+            this.bindpw = bindpw;
+            this.contextIdAttr = contextIdAttr;
+            this.ldapUrl = ldapUrl;
+            this.baseDn = baseDn;
+            this.searchFilter = searchFilter;
+            this.mailAttr = mailAttr;
+            this.loginAttr = loginAttr;
+        }
+    } // End of class Config
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<Config> configReference;
 
     /**
      * Default constructor.
@@ -128,8 +244,7 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
      */
     public UCSAuthentication(Properties props) throws OXException {
         super();
-        this.props = props;
-        init();
+        configReference = new AtomicReference<Config>(parseConfigFrom(props));
     }
 
     /**
@@ -139,22 +254,21 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
         DirContext ctx = null;
         try {
-            if (loginInfo.getUsername()==null || loginInfo.getPassword()==null) {
-                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-            }
-
             final String loginString = loginInfo.getUsername();
             final String password = loginInfo.getPassword();
-            if ("".equals(loginString.trim()) || "".equals(password.trim())) {
+            if (Strings.isEmpty(loginString) || Strings.isEmpty(password)) {
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 
+            Config config = configReference.get();
+
             // Search LDAP server without any credentials to get the users dn to bind with
-            boolean doBind = null != binddn && binddn.trim().length() > 0 && null != bindpw && bindpw .trim().length() > 0;
-            if ( doBind ) {
+            Hashtable<String, String> ldapConfig = new Hashtable<String, String>(config.ldapConfigDefaults);
+            boolean doBind = null != config.binddn && config.binddn.trim().length() > 0 && null != config.bindpw && config.bindpw .trim().length() > 0;
+            if (doBind) {
                 ldapConfig.put(Context.SECURITY_AUTHENTICATION, "simple");
-                ldapConfig.put(Context.SECURITY_PRINCIPAL, binddn);
-                ldapConfig.put(Context.SECURITY_CREDENTIALS, bindpw);
+                ldapConfig.put(Context.SECURITY_PRINCIPAL, config.binddn);
+                ldapConfig.put(Context.SECURITY_CREDENTIALS, config.bindpw);
             } else {
                 LOG.debug("either {}, {} or both not set, doing anonymous bind", BINDDN_OPTION, BINDPW_OPTION);
                 ldapConfig.put(Context.SECURITY_AUTHENTICATION, "none");
@@ -163,16 +277,13 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
 
             String user_dn = null;
             {
-
                 SearchControls sc = new SearchControls();
                 sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
                 sc.setReturningAttributes(new String[]{"dn"});
 
-                final String search_pattern = searchFilter.replaceAll("%s", escapeString(loginString));
-
-                LOG.debug("Now searching on server {} for DN of User {} with BASE: {} and pattern {}", ldapUrl, loginString, baseDn, search_pattern);
-
-                NamingEnumeration<SearchResult> result = ctx.search(baseDn, search_pattern, sc);
+                String search_pattern = Strings.replaceSequenceWith(config.searchFilter, "%s", escapeString(loginString));
+                LOG.debug("Now searching on server {} for DN of User {} with BASE: {} and pattern {}", config.ldapUrl, loginString, config.baseDn, search_pattern);
+                NamingEnumeration<SearchResult> result = ctx.search(config.baseDn, search_pattern, sc);
                 try {
                     if ( !result.hasMoreElements() ) {
                         LOG.error("User {} not found in LDAP", loginString);
@@ -180,7 +291,7 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
                     }
                     final SearchResult sr = result.next();
                     LOG.debug("User found : {}", sr.getName());
-                    user_dn = sr.getName() + "," + baseDn;
+                    user_dn = new StringBuilder(sr.getName()).append(',').append(config.baseDn).toString();
 
                     if (result.hasMoreElements()) {
                         LOG.error("More than one user for login string {} found in LDAP", loginString);
@@ -195,100 +306,110 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
                 }
             }
 
-            {
-                try {
-                    // unbind old context
-                    ctx.close();
-                } catch (NamingException e) {
-                    LOG.error("", e);
-                }
-                ctx = null;
+            // unbind old context
+            try {
+                ctx.close();
+            } catch (NamingException e) {
+                LOG.error("", e);
             }
+            ctx = null;
 
             // after we found the users dn, auth with this dn and given password
-            if( ! doBind ) {
+            if (false == doBind) {
                 ldapConfig.put(Context.SECURITY_AUTHENTICATION, "simple");
             }
             ldapConfig.put(Context.SECURITY_PRINCIPAL, user_dn);
             ldapConfig.put(Context.SECURITY_CREDENTIALS, password);
 
-            final String[] attribs;
-            if ( null != contextIdAttr ) {
-                attribs = new String[]{contextIdAttr, mailAttr, loginAttr, "shadowLastChange","shadowMax"};
-                LOG.debug("Also fetching contextId attribute {}", contextIdAttr);
+            boolean hasContextIdAttr = null != config.contextIdAttr;
+
+            String[] attribs;
+            if (hasContextIdAttr) {
+                attribs = new String[] { config.contextIdAttr, config.mailAttr, config.loginAttr, "shadowLastChange", "shadowMax" };
+                LOG.debug("Also fetching contextId attribute {}", config.contextIdAttr);
             } else {
-                attribs = new String[]{mailAttr, loginAttr, "shadowLastChange","shadowMax"};
+                attribs = new String[] { config.mailAttr, config.loginAttr, "shadowLastChange", "shadowMax" };
             }
 
             LOG.debug("trying to bind with DN: {}", user_dn);
             ctx = new InitialDirContext(ldapConfig);
 
-            final Attributes users_attr = ctx.getAttributes(user_dn,attribs);
-            
-            final String ldapCtxId;
-            if ( null != contextIdAttr && null != users_attr.get(contextIdAttr)) {
-                ldapCtxId = (String) users_attr.get(contextIdAttr).get(0);
-            } else {
-                ldapCtxId = null;
+            Attributes users_attr = ctx.getAttributes(user_dn,attribs);
+
+            String ldapCtxId = null;
+            if (hasContextIdAttr) {
+                Attribute attr = users_attr.get(config.contextIdAttr);
+                if (null != attr) {
+                    ldapCtxId = (String) attr.get(0);
+                }
             }
 
-            final String login;
-            if ( null == users_attr.get(loginAttr)) {
-                LOG.error("unable to get ox login name from ldap attribute {}", loginAttr);
-                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+            String login;
+            {
+                Attribute attr = users_attr.get(config.loginAttr);
+                if (null == attr) {
+                    LOG.error("unable to get ox login name from ldap attribute {}", config.loginAttr);
+                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                }
+                login = (String) attr.get(0);
             }
-            login = (String) users_attr.get(loginAttr).get(0);
-            
+
             // ### Needed for password expired check against ldap ###
-            final Attribute shadowlastchange = users_attr.get("shadowLastChange");
-            final Attribute shadowmax = users_attr.get("shadowMax");
-            long shadowlastchange_days = 0;
-            long shadowmax_days = 0;
-            if (shadowlastchange != null && shadowmax != null) {
+            {
+                Attribute shadowlastchange = users_attr.get("shadowLastChange");
+                Attribute shadowmax = users_attr.get("shadowMax");
+                if (shadowlastchange != null && shadowmax != null) {
+                    try {
+                        long shadowlastchange_days = Long.parseLong(((String) shadowlastchange.get()));
+                        long shadowmax_days = Long.parseLong(((String) shadowmax.get()));
+                        LOG.debug("Found shadowlastchange ({}) and shadowmax({}) in ldap! NOW calculating!", shadowlastchange_days, shadowmax_days);
 
-                try {
-                    shadowlastchange_days = Long.parseLong(((String) shadowlastchange.get()));
-                    shadowmax_days = Long.parseLong(((String) shadowmax.get()));
-                    LOG.debug("Found shadowlastchange ({}) and shadowmax({}) in ldap! NOW calculating!", shadowlastchange_days, shadowmax_days);
-                } catch (final Exception exp) {
-                    LOG.error("LDAP Attributes shadowlastchange or/and shadowmax contain invalid values!", exp);
+                        /**
+                         * Bug #12593
+                         * Check if password is already expired.
+                         * This is done by calculating the sum of the both shadow attributes,
+                         * if the sum is lower than day count since 1.1.1970 then password is expired
+                         */
+                        long days_since_1970 = System.currentTimeMillis() / 86400000;
+                        long sum_up = shadowlastchange_days + shadowmax_days;
+                        if (sum_up < days_since_1970) {
+                            LOG.info("Password for account \"{}\" seems to be expired({}<{})!", login, sum_up, days_since_1970);
+                            throw LoginExceptionCodes.PASSWORD_EXPIRED.create(config.passwordChangeURL.toString());
+                        }
+                    } catch (Exception whatever) {
+                        LOG.error("LDAP Attributes shadowlastchange or/and shadowmax contain invalid values! Considering password for account \"{}\" as expired!", login, whatever);
+                        throw LoginExceptionCodes.PASSWORD_EXPIRED.create(config.passwordChangeURL.toString());
+                    }
+                } else {
+                    LOG.debug("LDAP Attributes shadowlastchange and shadowmax not found in LDAP, no password expiry calculation will be done!");
                 }
-
-                /**
-                 * Bug #12593
-                 * Check if password is already expired.
-                 * This is done by calculating the sum of the both shadow attributes,
-                 * if the sum is lower than day count since 1.1.1970 then password is expired
-                 */
-                final Calendar cal = Calendar.getInstance();
-                final long days_since_1970 = cal.getTimeInMillis() / 86400000;
-                final long sum_up = shadowlastchange_days + shadowmax_days;
-                if (sum_up < days_since_1970) {
-                    LOG.info("Password for account \"{}\" seems to be expired({}<{})!", login, sum_up, days_since_1970);
-                    throw LoginExceptionCodes.PASSWORD_EXPIRED.create(passwordChangeURL.toString());
-                }
-            } else {
-                LOG.debug("LDAP Attributes shadowlastchange and shadowmax not found in LDAP, no password expiry calculation will be done!");
             }
 
-            final String contextIdOrName;
+            String contextIdOrName;
             if (null != ldapCtxId) {
-                LOG.debug("Bind with DN successfull, using context id {} as found in ldap attribute {} as context", ldapCtxId, contextIdAttr);
+                LOG.debug("Bind with DN successfull, using context id {} as found in ldap attribute {} as context", ldapCtxId, config.contextIdAttr);
                 contextIdOrName = ldapCtxId;
             } else {
                 // Fetch the users mail attribute and parse the configured attribute to get the context name (domain part of email in this case)
-                LOG.debug("Bind with DN successfull, now parsing attribute " + mailAttr + " to resolve context");
-                final Attribute emailattrib = users_attr.get(mailAttr);
+                LOG.debug("Bind with DN successfull, now parsing attribute {} to resolve context", config.mailAttr);
+                final Attribute emailattrib = users_attr.get(config.mailAttr);
 
-                if (emailattrib.size() != 1) {
-                    // more than one mailAttr value found, cannot resolve correct context
-                    LOG.error("Fatal, more than one " + mailAttr + " value found, cannot resolv correct context");
+                int numOfEmailAttribs = emailattrib.size();
+                if (numOfEmailAttribs != 1) {
+                    if (numOfEmailAttribs == 0) {
+                        // No mailAttr value found, cannot resolve correct context
+                        LOG.error("Fatal, no {} value found, cannot resolve correct context", config.mailAttr);
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                    }
+
+                    // Otherwise more than one mailAttr value found, cannot resolve correct context
+                    LOG.error("Fatal, more than one {} value found, cannot resolv correct context", config.mailAttr);
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
 
-                String[] data = ((String) emailattrib.get()).split("@");
+                String[] data = Strings.splitBy((String) emailattrib.get(), '@', false);
                 if (data.length != 2) {
-                    LOG.error("Fatal, Email address {} could not be splitted correctly!!", emailattrib.get());
+                    LOG.error("Fatal, Email address {} could not be parsed!", emailattrib.get());
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
 
@@ -298,18 +419,7 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
             LOG.debug("Returning context={}, user={} to OX API!", contextIdOrName, login);
 
             // return username AND context-name to the OX API
-            return new Authenticated() {
-
-                @Override
-                public String getContextInfo() {
-                    return contextIdOrName;
-                }
-
-                @Override
-                public String getUserInfo() {
-                    return login;
-                }
-            };
+            return new AuthenticatedImpl(login, contextIdOrName);
         } catch (final InvalidNameException e) {
             LOG.error("Invalid name error", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
@@ -334,106 +444,151 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
     }
 
     /**
-     * Escape string to be used as ldap filter
-     * 
-     * @param input
-     * @return
+     * Escape string to be used as LDAP filter expression.
+     *
+     * @param input The input to escape
+     * @return The escaped input ready for being used as LDAP filter expression
      */
     private static final String escapeString(String input) {
-        StringBuffer sb = new StringBuffer();
+        StringBuffer sb = null;
         for (int i = 0; i < input.length(); i++) {
             char cur = input.charAt(i);
             switch (cur) {
             case '\\':
+                if (null == sb) {
+                    sb = initStringBuilder(input, i);
+                }
                 sb.append("\\5c");
                 break;
             case '*':
+                if (null == sb) {
+                    sb = initStringBuilder(input, i);
+                }
                 sb.append("\\2a");
                 break;
             case '(':
+                if (null == sb) {
+                    sb = initStringBuilder(input, i);
+                }
                 sb.append("\\28");
                 break;
             case ')':
+                if (null == sb) {
+                    sb = initStringBuilder(input, i);
+                }
                 sb.append("\\29");
                 break;
             case '\u0000':
+                if (null == sb) {
+                    sb = initStringBuilder(input, i);
+                }
                 sb.append("\\00");
                 break;
             default:
-                sb.append(cur);
+                if (null != sb) {
+                    sb.append(cur);
+                }
             }
         }
-        return sb.toString();
+        return null == sb ? input : sb.toString();
     }
-    
-    private void init() throws OXException {
-        ldapUrl = props.getProperty(LDAPURL_OPTION);
-        if( null == ldapUrl || ldapUrl.length() == 0) {
+
+    private static StringBuffer initStringBuilder(String input, int currentPos) {
+        StringBuffer sb = new StringBuffer(input.length() + 10);
+        if (currentPos > 0) {
+            sb.append(input, 0, currentPos);
+        }
+        return sb;
+    }
+
+    private Config parseConfigFrom(Properties props) throws OXException {
+        Config.Builder config = new Config.Builder();
+
+        String ldapUrl = props.getProperty(LDAPURL_OPTION);
+        if (null == ldapUrl || ldapUrl.length() == 0) {
             OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LDAPURL_OPTION);
             LOG.error("", e);
             throw e;
         }
+        config.withLdapUrl(ldapUrl);
 
-        baseDn = props.getProperty(LDAPBASE_OPTION);
-        if( null == baseDn || baseDn.length() == 0) {
-            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LDAPBASE_OPTION);
-            LOG.error("", e);
-            throw e;
+        {
+            String baseDn = props.getProperty(LDAPBASE_OPTION);
+            if (null == baseDn || baseDn.length() == 0) {
+                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LDAPBASE_OPTION);
+                LOG.error("", e);
+                throw e;
+            }
+            config.withBaseDn(baseDn);
         }
 
-        searchFilter = props.getProperty(SEARCHFILTER_OPTION);
-        if( null == searchFilter || searchFilter.length() == 0) {
-            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + SEARCHFILTER_OPTION);
-            LOG.error("", e);
-            throw e;
+        {
+            String searchFilter = props.getProperty(SEARCHFILTER_OPTION);
+            if (null == searchFilter || searchFilter.length() == 0) {
+                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + SEARCHFILTER_OPTION);
+                LOG.error("", e);
+                throw e;
+            }
+            config.withSearchFilter(searchFilter);
         }
 
-        mailAttr = props.getProperty(MAILATTR_OPTION);
-        if( null == mailAttr || mailAttr.length() == 0) {
-            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + MAILATTR_OPTION);
-            LOG.error("", e);
-            throw e;
+        {
+            String mailAttr = props.getProperty(MAILATTR_OPTION);
+            if (null == mailAttr || mailAttr.length() == 0) {
+                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + MAILATTR_OPTION);
+                LOG.error("", e);
+                throw e;
+            }
+            config.withMailAttr(mailAttr);
         }
 
-        loginAttr = props.getProperty(LOGINATTR_OPTION);
-        if( null == loginAttr || loginAttr.length() == 0) {
-            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LOGINATTR_OPTION);
-            LOG.error("", e);
-            throw e;
+        {
+            String loginAttr = props.getProperty(LOGINATTR_OPTION);
+            if (null == loginAttr || loginAttr.length() == 0) {
+                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + LOGINATTR_OPTION);
+                LOG.error("", e);
+                throw e;
+            }
+            config.withLoginAttr(loginAttr);
         }
 
-        String sURL = (String) props.get(PASSWORD_CHANGE_URL_OPTION);
-        if( null == sURL || sURL.length() == 0) {
-            OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + PASSWORD_CHANGE_URL_OPTION);
-            LOG.error("", e);
-            throw e;
-        }
-        try {
-            passwordChangeURL = new URL(sURL);
-        } catch (MalformedURLException e) {
-            throw LoginExceptionCodes.UNKNOWN.create("Invalid option " + PASSWORD_CHANGE_URL_OPTION + ": " + sURL);
-        }
-
-        ldapConfig = new Hashtable<String, String>();
-
-        String usepool = (String) props.get(LDAPPOOL_OPTION);
-        if ( null != usepool && usepool.trim().equalsIgnoreCase("true")) {
-            ldapConfig.put("com.sun.jndi.ldap.connect.pool", "true");
+        {
+            String sURL = (String) props.get(PASSWORD_CHANGE_URL_OPTION);
+            if (null == sURL || sURL.length() == 0) {
+                OXException e = LoginExceptionCodes.UNKNOWN.create("Missing option " + PASSWORD_CHANGE_URL_OPTION);
+                LOG.error("", e);
+                throw e;
+            }
+            try {
+                config.withPasswordChangeURL(new URL(sURL));
+            } catch (MalformedURLException e) {
+                throw LoginExceptionCodes.UNKNOWN.create(e, "Invalid option " + PASSWORD_CHANGE_URL_OPTION + ": " + sURL);
+            }
         }
 
-        ldapConfig.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+        {
+            Hashtable<String, String> ldapConfigDefaults = new Hashtable<String, String>(6);
+            String usepool = (String) props.get(LDAPPOOL_OPTION);
+            if (null != usepool && usepool.trim().equalsIgnoreCase("true")) {
+                ldapConfigDefaults.put("com.sun.jndi.ldap.connect.pool", "true");
+            }
 
-        ldapConfig.put(Context.PROVIDER_URL, ldapUrl);
-        if (ldapUrl.startsWith("ldaps")) {
-            ldapConfig.put("java.naming.ldap.factory.socket", TrustAllSSLSocketFactory.class.getName());
+            ldapConfigDefaults.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+
+            ldapConfigDefaults.put(Context.PROVIDER_URL, ldapUrl);
+            if (ldapUrl.startsWith("ldaps")) {
+                ldapConfigDefaults.put("java.naming.ldap.factory.socket", TrustAllSSLSocketFactory.class.getName());
+            }
+            config.withLdapConfigDefaults(ldapConfigDefaults);
         }
-        
-        binddn = props.getProperty(BINDDN_OPTION);
-        bindpw = props.getProperty(BINDPW_OPTION);
-        
-        contextIdAttr = props.getProperty(CONTEXTIDATTR_OPTION);
+
+        config.withBinddn(props.getProperty(BINDDN_OPTION));
+        config.withBindpw(props.getProperty(BINDPW_OPTION));
+
+        config.withContextIdAttr(props.getProperty(CONTEXTIDATTR_OPTION));
+        return config.build();
     }
-    
+
     @Override
     public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
         throw LoginExceptionCodes.NOT_SUPPORTED.create(UCSAuthentication.class.getName());
@@ -442,9 +597,8 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         Properties properties = configService.getFile(CONFIGFILE);
-        this.props = properties;
         try {
-            init();
+            configReference.set(parseConfigFrom(properties));
         } catch (OXException e) {
             LOG.error("Error reloading configuration for bundle com.openexchange.authentication.ucs: {}", e);
         }

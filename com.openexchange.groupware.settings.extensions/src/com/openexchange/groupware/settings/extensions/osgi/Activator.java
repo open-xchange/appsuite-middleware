@@ -385,7 +385,7 @@ public class Activator extends HousekeepingActivator {
                 }
                 for (int k = i+1; k < path.length; k++) {
                     String segment = path[k];
-                    if (!Strings.isEmpty(segment)) {
+                    if (Strings.isNotEmpty(segment)) {
                         sanitizedPath.add(segment);
                     }
                 }

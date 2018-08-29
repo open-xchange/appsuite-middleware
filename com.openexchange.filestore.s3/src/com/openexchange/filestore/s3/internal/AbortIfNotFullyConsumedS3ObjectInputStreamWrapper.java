@@ -63,6 +63,8 @@ public class AbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends InputStre
 
     private final S3ObjectInputStream objectContent;
 
+    private boolean closed = false;
+
     /**
      * Initializes a new {@link AbortIfNotFullyConsumedS3ObjectInputStreamWrapper}.
      *
@@ -100,11 +102,20 @@ public class AbortIfNotFullyConsumedS3ObjectInputStreamWrapper extends InputStre
 
     @Override
     public void close() throws IOException {
-        if (objectContent.read() >= 0) {
-            // Abort HTTP connection in case not all bytes were read from the S3ObjectInputStream
-            objectContent.abort();
+        if (!closed) {
+            closed = true;
+            try {
+                if (objectContent.read() >= 0) {
+                    // Abort HTTP connection in case not all bytes were read from the
+                    // S3ObjectInputStream
+                    objectContent.abort();
+                }
+            } catch (IOException e) {
+                //
+            } finally {
+                objectContent.close();
+            }
         }
-        objectContent.close();
     }
 
     @Override

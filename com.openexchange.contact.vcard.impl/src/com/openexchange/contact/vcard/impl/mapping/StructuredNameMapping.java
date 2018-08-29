@@ -84,17 +84,17 @@ public class StructuredNameMapping extends AbstractMapping {
             property.setGiven(contact.getGivenName());
             property.getAdditionalNames().clear();
             String middleName = contact.getMiddleName();
-            if (false == Strings.isEmpty(middleName)) {
+            if (Strings.isNotEmpty(middleName)) {
                 property.getAdditionalNames().add(middleName);
             }
             property.getPrefixes().clear();
             String title = contact.getTitle();
-            if (false == Strings.isEmpty(title)) {
+            if (Strings.isNotEmpty(title)) {
                 property.getPrefixes().add(title);
             }
             property.getSuffixes().clear();
             String suffix = contact.getSuffix();
-            if (false == Strings.isEmpty(suffix)) {
+            if (Strings.isNotEmpty(suffix)) {
                 property.getSuffixes().add(suffix);
             }
         } else if (null != property) {
