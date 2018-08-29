@@ -49,6 +49,8 @@
 
 package com.openexchange.microsoft.graph.api.client;
 
+import org.apache.http.HttpResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.v2.RESTMimeType;
 import com.openexchange.rest.client.v2.parser.AbstractRESTResponseParser;
 import com.openexchange.rest.client.v2.parser.ImageRESTResponseBodyParser;
@@ -81,4 +83,15 @@ public class MicrosoftGraphRESTResponseParser extends AbstractRESTResponseParser
         return REMOTE_SERVICE;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.v2.parser.AbstractRESTResponseParser#assertStatusCode(org.apache.http.HttpResponse)
+     */
+    @Override
+    protected int assertStatusCode(HttpResponse httpResponse) throws OXException {
+        // No assertion of the status code, we will check the response body later
+        // and throw an exception (if necessary) on a higher API level.
+        return httpResponse.getStatusLine().getStatusCode();
+    }
 }
