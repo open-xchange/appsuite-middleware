@@ -166,27 +166,8 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
         }
         // The Microsoft Graph API does not return an error when the 'autorename' behaviour is not present and the folder exists;
-        // hence we have to manually search for any folders with that name 
-        Builder b = new Builder();
-        b.withParameter(ParameterName.SELECT, "id,name,parentReference").withParameter(ParameterName.FILTER, "folder ne null");
-        JSONObject children = api.searchItems(accessToken, folderName, b.build());
-        JSONArray namesArray = children.optJSONArray("value");
-        if (namesArray == null || namesArray.isEmpty()) {
-            return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
-        }
-        for (int index = 0; index < namesArray.length(); index++) {
-            JSONObject candidate = namesArray.optJSONObject(index);
-            if (candidate == null || candidate.isEmpty()) {
-                continue;
-            }
-            JSONObject parentRef = candidate.optJSONObject("parentReference");
-            if (parentRef == null || parentRef.isEmpty()) {
-                continue;
-            }
-            if (parentId.equals(parentRef.optString("id"))) {
-                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(folderName, parentRef.optString("name"));
-            }
-        }
+        // hence we have to manually search for any folders with that name
+        checkFolderExistence(accessToken, folderName, parentId);
         return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
     }
 
@@ -280,6 +261,45 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     //////////////////////////////////////// HELPERS /////////////////////////////////////
 
+    /**
+     * Checks whether a folder with the specified name already exists as a sub-folder of the folder with the specified identifier
+     * 
+     * @param accessToken The oauth access token
+     * @param folderName The folder name to check
+     * @param parentId The parent folder's identifier
+     * @throws OXException if an error is occurred
+     */
+    private void checkFolderExistence(String accessToken, String folderName, String parentId) throws OXException {
+        Builder b = new Builder();
+        b.withParameter(ParameterName.SELECT, "id,name,parentReference").withParameter(ParameterName.FILTER, "folder ne null");
+        JSONObject children = api.searchItems(accessToken, folderName, b.build());
+        JSONArray namesArray = children.optJSONArray("value");
+        if (namesArray == null || namesArray.isEmpty()) {
+            return;
+        }
+        for (int index = 0; index < namesArray.length(); index++) {
+            JSONObject candidate = namesArray.optJSONObject(index);
+            if (candidate == null || candidate.isEmpty()) {
+                continue;
+            }
+            JSONObject parentRef = candidate.optJSONObject("parentReference");
+            if (parentRef == null || parentRef.isEmpty()) {
+                continue;
+            }
+            if (parentId.equals(parentRef.optString("id"))) {
+                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(folderName, parentRef.optString("name"));
+            }
+        }
+    }
+
+    /**
+     * Checks whether the folder with the specified identifier has any sub-folders
+     * 
+     * @param accessToken The oauth access token
+     * @param folderId The folder identifier
+     * @return <code>true</code> if the folder has at least one sub-folder;<code>false</code> otherwise
+     * @throws OXException if an error is occurred
+     */
     private boolean hasSubFolders(String accessToken, String folderId) throws OXException {
         MicrosoftGraphQueryParameters params = new Builder().withParameter(ParameterName.SELECT, "folder").build();
         JSONObject j = Strings.isEmpty(folderId) ? api.getRootChildren(accessToken, params) : api.getChildren(accessToken, folderId, params);
