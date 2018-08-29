@@ -57,6 +57,7 @@ import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -89,7 +90,10 @@ import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.arrays.Arrays;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -535,6 +539,24 @@ public class DefaultEntityResolver implements EntityResolver {
         }
     }
 
+    /**
+     * Gets all visible calendar folders for a specific user.
+     *
+     * @param userId The identifier of the user to get the visible folders for
+     * @param optConnection An optional connection to the database to use, or <code>null</code> to acquire one dynamically
+     * @return The folders, or an empty list if there are none
+     */
+    public List<FolderObject> getVisibleFolders(int userId, Connection optConnection) throws OXException {
+        List<FolderObject> folders = loadVisibleFolders(userId, optConnection);
+        if (null == folders) {
+            return Collections.emptyList();
+        }
+        for (FolderObject folder : folders) {
+            knownFolders.put(I(folder.getObjectID()), folder);
+        }
+        return folders;
+    }
+
     private Attendee applyEntityData(Attendee attendee, User user, AttendeeField... fields) throws OXException {
         if (null == fields || Arrays.contains(fields, AttendeeField.ENTITY)) {
             attendee.setEntity(user.getId());
@@ -781,6 +803,17 @@ public class DefaultEntityResolver implements EntityResolver {
                 throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(e, String.valueOf(id));
             }
             throw e;
+        }
+    }
+
+    private List<FolderObject> loadVisibleFolders(int userId, Connection optConnection) throws OXException {
+        SearchIterator<FolderObject> iterator = null;
+        try {
+            iterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                userId, getUser(userId).getGroups(), null, FolderObject.CALENDAR, context, optConnection);
+            return SearchIterators.asList(iterator);
+        } finally {
+            SearchIterators.close(iterator);
         }
     }
 

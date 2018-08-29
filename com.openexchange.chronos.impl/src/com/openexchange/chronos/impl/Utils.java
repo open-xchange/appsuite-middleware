@@ -68,6 +68,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,14 +117,7 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderResponse;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.folderstorage.FolderServiceDecorator;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -923,30 +917,23 @@ public class Utils {
      * @return The folders, or an empty list if there are none
      */
     public static List<CalendarFolder> getVisibleFolders(CalendarSession session) throws OXException {
-        return getVisibleFolders(session, PrivateType.getInstance(), SharedType.getInstance(), PublicType.getInstance());
-    }
-
-    /**
-     * Gets all calendar folders of certain types  accessible by the current sesssion's user.
-     *
-     * @param session The underlying calendar session
-     * @param types The folder types to include
-     * @return The folders, or an empty list if there are none
-     */
-    public static List<CalendarFolder> getVisibleFolders(CalendarSession session, Type... types) throws OXException {
-        List<CalendarFolder> visibleFolders = new ArrayList<CalendarFolder>();
-        FolderService folderService = Services.getService(FolderService.class);
-        for (Type type : types) {
-            FolderResponse<UserizedFolder[]> response = folderService.getVisibleFolders(
-                FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session.getSession(), initDecorator(session));
-            UserizedFolder[] folders = response.getResponse();
-            if (null != folders && 0 < folders.length) {
-                for (UserizedFolder folder : folders) {
-                    visibleFolders.add(new CalendarFolder(folder));
-                }
+        Connection connection = optConnection(session);
+        List<FolderObject> folders = getEntityResolver(session).getVisibleFolders(session.getUserId(), connection);
+        UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session.getSession()).getUserPermissionBits();
+        List<CalendarFolder> calendarFolders = new ArrayList<CalendarFolder>(folders.size());
+        for (FolderObject folder : folders) {
+            EffectivePermission permission;
+            try {
+                permission = folder.getEffectiveUserPermission(session.getUserId(), permissionBits, connection);
+            } catch (SQLException e) {
+                LOG.warn("Error getting effective user permission for folder {}; skipping.", I(folder.getObjectID()), e);
+                continue;
+            }
+            if (permission.isFolderVisible()) {
+                calendarFolders.add(new CalendarFolder(session.getSession(), folder, permission));
             }
         }
-        return visibleFolders;
+        return calendarFolders;
     }
 
     /**
@@ -1249,17 +1236,6 @@ public class Utils {
             organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         return organizer;
-    }
-
-    private static FolderServiceDecorator initDecorator(CalendarSession session) throws OXException {
-        FolderServiceDecorator decorator = new FolderServiceDecorator();
-        Connection connection = optConnection(session);
-        if (null != connection) {
-            decorator.put(Connection.class.getName(), connection);
-        }
-        decorator.setLocale(session.getEntityResolver().getLocale(session.getUserId()));
-        decorator.setTimeZone(Utils.getTimeZone(session));
-        return decorator;
     }
 
     /**
