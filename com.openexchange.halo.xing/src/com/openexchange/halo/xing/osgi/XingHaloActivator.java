@@ -53,6 +53,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.caching.CacheKeyService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.halo.HaloContactDataSource;
@@ -62,6 +63,8 @@ import com.openexchange.halo.xing.XingUserDataSource;
 import com.openexchange.halo.xing.picture.XingContactPictureFinder;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.user.UserService;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
 
 /**
@@ -78,23 +81,21 @@ public class XingHaloActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, CacheKeyService.class };
+        return new Class<?>[] { LeanConfigurationService.class, CacheKeyService.class, UserService.class, ConfigViewFactory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        LeanConfigurationService leanConfigurationService = getServiceSafe(LeanConfigurationService.class);
-        CacheKeyService cacheKeyService = getServiceSafe(CacheKeyService.class);
-
+        final ServiceLookup services = this;
         registerService(ResultConverter.class, new XingInvestigationResultConverter());
         track(XingOAuthAccessProvider.class, new SimpleRegistryListener<XingOAuthAccessProvider>() {
 
             @Override
             public void added(ServiceReference<XingOAuthAccessProvider> ref, XingOAuthAccessProvider service) {
-                XingUserDataSource xingDataSource = new XingUserDataSource(leanConfigurationService, cacheKeyService, service);
+                XingUserDataSource xingDataSource = new XingUserDataSource(services, service);
                 contactRegistration = context.registerService(HaloContactDataSource.class, xingDataSource, null);
                 imageRegistration = context.registerService(HaloContactImageSource.class, xingDataSource, null);
-                finderRegistration = context.registerService(ContactPictureFinder.class, new XingContactPictureFinder(leanConfigurationService, cacheKeyService, service), null);
+                finderRegistration = context.registerService(ContactPictureFinder.class, new XingContactPictureFinder(services, service), null);
             }
 
             @Override

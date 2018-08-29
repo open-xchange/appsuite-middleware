@@ -57,8 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.caching.CacheKeyService;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
@@ -72,6 +70,7 @@ import com.openexchange.halo.Picture;
 import com.openexchange.halo.xing.picture.XingContactPictureFinder;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.Contacts;
 import com.openexchange.xing.Path;
@@ -97,10 +96,10 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
 
     private final XingContactPictureFinder finder;
 
-    public XingUserDataSource(LeanConfigurationService leanConfigurationService, CacheKeyService cacheKeyService, final XingOAuthAccessProvider provider) {
+    public XingUserDataSource(ServiceLookup services, final XingOAuthAccessProvider provider) {
         super();
         this.provider = provider;
-        this.finder = new XingContactPictureFinder(leanConfigurationService, cacheKeyService, provider);
+        this.finder = new XingContactPictureFinder(services, provider);
     }
 
     @Override

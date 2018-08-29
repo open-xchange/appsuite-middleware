@@ -55,17 +55,22 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.caching.CacheKeyService;
-import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.contact.picture.finder.CacheAwareContactFinder;
 import com.openexchange.contact.picture.finder.FinderUtil;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Base64;
+import com.openexchange.user.UserService;
 import com.openexchange.xing.PhotoUrls;
 import com.openexchange.xing.User;
 import com.openexchange.xing.XingAPI;
@@ -87,16 +92,18 @@ public class XingContactPictureFinder extends CacheAwareContactFinder {
 
     private final XingOAuthAccessProvider provider;
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link XingContactPictureFinder}.
      * 
-     * @param leanService The {@link LeanConfigurationService}
-     * @param cacheKeyService The {@link CacheKeyService}
+     * @param services The {@link ServiceLookup}
      * @param provider The {@link XingOAuthAccessProvider}
      */
-    public XingContactPictureFinder(LeanConfigurationService leanService, CacheKeyService cacheKeyService, final XingOAuthAccessProvider provider) {
-        super(leanService, cacheKeyService);
+    public XingContactPictureFinder(ServiceLookup services, final XingOAuthAccessProvider provider) {
+        super(services);
         this.provider = provider;
+        this.services = services;
     }
 
     @Override
@@ -158,9 +165,10 @@ public class XingContactPictureFinder extends CacheAwareContactFinder {
 
     @Override
     public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
-        if (null == session || modified.isEmpty() || false == original.hasEmail()) {
+        if (null == session || modified.isEmpty() || false == original.hasEmail() || false == isEnabledForUser(session)) {
             return false;
         }
+        ;
         try {
             provider.getXingOAuthAccount(session);
         } catch (OXException e) {
@@ -172,6 +180,25 @@ public class XingContactPictureFinder extends CacheAwareContactFinder {
         }
 
         return true;
+    }
+
+    private boolean isEnabledForUser(Session session) {
+        try {
+            com.openexchange.groupware.ldap.User user = services.getServiceSafe(UserService.class).getUser(session.getUserId(), session.getContextId());
+            if (user.isGuest()) {
+                return false;
+            }
+            ConfigViewFactory viewFactory = services.getServiceSafe(ConfigViewFactory.class);
+            if (null == viewFactory) {
+                throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+            }
+
+            ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+            return ConfigViews.getDefinedBoolPropertyFrom(KnownApi.XING.getFullName(), true, view);
+        } catch (Exception e) {
+            LOGGER.warn("Unale to verify if XING is enabeld.", e);
+        }
+        return false;
     }
 
 }

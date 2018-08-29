@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.picture.finder;
 
+import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
@@ -60,6 +62,7 @@ import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -77,14 +80,21 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder {
     /**
      * Initializes a new {@link CacheAwareContactFinder}.
      * 
-     * @param leanService The {@link LeanConfigurationService}
-     * @param cacheKeyService The {@link CacheKeyService}
+     * @param services The {@link ServiceLookup}
+     * 
      */
-    public CacheAwareContactFinder(LeanConfigurationService leanService, CacheKeyService cacheKeyService) {
+    public CacheAwareContactFinder(ServiceLookup services) {
         super();
-        long duration = leanService.getLongProperty(ContactPictureProperties.CACHE_DURATION);
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(duration < 1 ? 1 : duration, TimeUnit.MINUTES).maximumSize(leanService.getIntProperty(ContactPictureProperties.CACHE_SIZE)).build();
-        this.cacheKeyService = cacheKeyService;
+        LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
+        long duration = l(ContactPictureProperties.CACHE_DURATION.getDefaultValue(Long.class));
+        int maximumSize = i(ContactPictureProperties.CACHE_SIZE.getDefaultValue(Integer.class));
+        if (null != leanConfigurationService) {
+            duration = leanConfigurationService.getLongProperty(ContactPictureProperties.CACHE_DURATION);
+            maximumSize = leanConfigurationService.getIntProperty(ContactPictureProperties.CACHE_SIZE);
+
+        }
+        this.cacheKeyService = services.getService(CacheKeyService.class);
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(duration < 1 ? 1 : duration, TimeUnit.MINUTES).maximumSize(maximumSize).build();
     }
 
     @Override
@@ -127,6 +137,9 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder {
     }
 
     protected CacheKey generateCacheKey(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) {
+        if (null == cacheKeyService) {
+            return null;
+        }
         return cacheKeyService.newCacheKey(session.getContextId(), String.valueOf(session.getUserId()), original.toString(), modified.toString());
     }
 
