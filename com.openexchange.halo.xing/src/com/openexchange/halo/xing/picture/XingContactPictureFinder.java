@@ -50,7 +50,6 @@
 package com.openexchange.halo.xing.picture;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -111,25 +110,16 @@ public class XingContactPictureFinder extends CacheAwareContactFinder {
                 return null;
             }
 
-            UserLoop: for (Iterator<String> idIterator = userIds.iterator(); idIterator.hasNext();) {
-                String userId = idIterator.next();
-                try {
-                    User user = xingAPI.userInfo(userId);
-                    // Use original mails to avoid wrong pictures
-                    for (Iterator<String> contactIterator = original.getEmails().iterator(); contactIterator.hasNext();) {
-                        String contactMail = contactIterator.next();
-                        if (FinderUtil.checkEmail(contactMail, user.getActiveMail())) {
-                            ContactPicture picture = getPictuerFromXing(xingAPI, user, onlyETag);
-                            if (null != picture && picture.containsContactPicture() && (onlyETag || FinderUtil.checkImage(picture.getFileHolder(), I(session.getContextId()), modified))) {
-                                return picture;
-                            }
-                            // The user was found but there was either no image or it was corrupted
-                            break UserLoop;
-                        }
-                    }
-                } catch (XingException e) {
-                    LOGGER.debug("Unable to find user for identifier {}.", userId, e);
+            try {
+                // XING only offers one mail address. This must not be a mail address we know about. So we use the first result, trusting XING to deliver best result first
+                User user = xingAPI.userInfo(userIds.get(0));
+                // Use original mails to avoid wrong pictures
+                ContactPicture picture = getPictuerFromXing(xingAPI, user, onlyETag);
+                if (null != picture && picture.containsContactPicture() && (onlyETag || FinderUtil.checkImage(picture.getFileHolder(), I(session.getContextId()), modified))) {
+                    return picture;
                 }
+            } catch (XingException e) {
+                LOGGER.debug("Unable to find user for identifier {}.", userIds.get(0), e);
             }
         } catch (XingException e) {
             LOGGER.debug("Unable to retrive contact picutre.", e);
