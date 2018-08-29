@@ -49,55 +49,19 @@
 
 package com.openexchange.oauth.impl.internal.groupware;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link CreateOAuthAccountTable}
+ * {@link OAuthAccountsTableUtf8Mb4UpdateTaskV2}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
-    
-    static final String TABLE_NAME = "oauthAccounts";
+public class OAuthAccountsTableUtf8Mb4UpdateTaskV2 extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
-    public static final String CREATE_TABLE_STATEMENT =
-        "CREATE TABLE oauthAccounts (" +
-        "cid INT4 UNSIGNED NOT NULL," +
-        "user INT4 UNSIGNED NOT NULL," +
-        "id INT4 UNSIGNED NOT NULL," +
-        "displayName VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
-        "accessToken TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
-        "accessSecret TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
-        "serviceId VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
-        "scope VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
-        "identity VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL," +
-        "PRIMARY KEY (cid, id)," +
-        "KEY `identity` (cid,identity(191))" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-
-    public CreateOAuthAccountTable() {
-        super();
+    /**
+     * Initialises a new {@link OAuthAccountsTableUtf8Mb4UpdateTaskV2}.
+     */
+    public OAuthAccountsTableUtf8Mb4UpdateTaskV2() {
+        super(OAuthAccountsTableUtf8Mb4UpdateTask.class, "oauthAccounts");
     }
-
-    @Override
-    public String[] getCreateStatements() {
-        return createStatements;
-    }
-
-    @Override
-    public String[] requiredTables() {
-        return requiredTables;
-    }
-
-    @Override
-    public String[] tablesToCreate() {
-        return createdTables;
-    }
-
-    private static final String[] requiredTables = { "user" };
-
-    private static final String[] createdTables = { TABLE_NAME };
-
-    private static final String[] createStatements = { CREATE_TABLE_STATEMENT };
-
 }
