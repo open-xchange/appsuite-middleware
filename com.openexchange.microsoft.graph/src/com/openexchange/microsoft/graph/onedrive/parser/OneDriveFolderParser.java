@@ -50,6 +50,7 @@
 package com.openexchange.microsoft.graph.onedrive.parser;
 
 import java.text.ParseException;
+import java.util.Collections;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -97,7 +98,9 @@ public class OneDriveFolderParser {
         }
 
         if (folder.isRootFolder()) {
-            // Override Microsoft's id with our default root id
+            // Override Microsoft's id with our default root id 
+            // and retain the original in the metadata for future reference.
+            folder.setMeta(Collections.singletonMap("id", folder.getId()));
             folder.setId(FileStorageFolder.ROOT_FULLNAME);
         }
 

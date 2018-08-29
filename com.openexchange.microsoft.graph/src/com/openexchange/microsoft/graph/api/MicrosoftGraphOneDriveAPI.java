@@ -170,6 +170,11 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         deleteResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId);
     }
 
+    public JSONObject searchItems(String accessToken, String query, MicrosoftGraphQueryParameters queryParams) throws OXException {
+        String path = "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root/search(q='" + query + "')";
+        return getResource(accessToken, path, queryParams.getQueryParametersMap());
+    }
+
     /**
      * 
      * @param accessToken

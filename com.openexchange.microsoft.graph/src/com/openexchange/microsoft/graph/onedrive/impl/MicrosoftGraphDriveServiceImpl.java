@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphOneDriveAPI;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters;
@@ -161,6 +162,31 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public OneDriveFolder createFolder(int userId, String accessToken, String folderName, String parentId, boolean autorename) throws OXException {
+        if (autorename) {
+            return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
+        }
+        // The Microsoft Graph API does not return an error when the 'autorename' behaviour is not present and the folder exists;
+        // hence we have to manually search for any folders with that name 
+        Builder b = new Builder();
+        b.withParameter(ParameterName.SELECT, "id,name,parentReference").withParameter(ParameterName.FILTER, "folder ne null");
+        JSONObject children = api.searchItems(accessToken, folderName, b.build());
+        JSONArray namesArray = children.optJSONArray("value");
+        if (namesArray == null || namesArray.isEmpty()) {
+            return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
+        }
+        for (int index = 0; index < namesArray.length(); index++) {
+            JSONObject candidate = namesArray.optJSONObject(index);
+            if (candidate == null || candidate.isEmpty()) {
+                continue;
+            }
+            JSONObject parentRef = candidate.optJSONObject("parentReference");
+            if (parentRef == null || parentRef.isEmpty()) {
+                continue;
+            }
+            if (parentId.equals(parentRef.optString("id"))) {
+                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(folderName, parentRef.optString("name"));
+            }
+        }
         return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
     }
 
