@@ -82,7 +82,7 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder {
      */
     public CacheAwareContactFinder(LeanConfigurationService leanService, CacheKeyService cacheKeyService) {
         super();
-        int duration = leanService.getIntProperty(ContactPictureProperties.CACHE_DURATION);
+        long duration = leanService.getLongProperty(ContactPictureProperties.CACHE_DURATION);
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(duration < 1 ? 1 : duration, TimeUnit.MINUTES).maximumSize(leanService.getIntProperty(ContactPictureProperties.CACHE_SIZE)).build();
         this.cacheKeyService = cacheKeyService;
     }

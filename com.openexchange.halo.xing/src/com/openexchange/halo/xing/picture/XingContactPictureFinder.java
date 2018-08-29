@@ -167,7 +167,7 @@ public class XingContactPictureFinder extends CacheAwareContactFinder {
             if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
                 LOGGER.error("Xing account does not exists.", e);
             }
-            LOGGER.warn("Unable verify that Xing accoutn exists.", e);
+            LOGGER.debug("Unable verify that XING accoutn exists.", e);
             return false;
         }
 
