@@ -128,7 +128,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -144,8 +143,6 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
@@ -669,27 +666,13 @@ public class Utils {
      * @return The folder
      */
     public static CalendarFolder getFolder(CalendarSession session, String folderId, boolean failIfNotVisible) throws OXException {
-        return getFolder(Services.getService(FolderService.class), folderId, session.getSession(), initDecorator(session), failIfNotVisible);
-    }
-
-    /**
-     * Gets multiple <i>userized</i> folders by their identifier.
-     *
-     * @param session The calendar session
-     * @param folderIds The identifiers of the folders to get
-     * @return The folders
-     */
-    public static List<CalendarFolder> getFolders(CalendarSession session, List<String> folderIds) throws OXException {
-        if (null == folderIds || 0 == folderIds.size()) {
-            return Collections.emptyList();
+        FolderObject folder = getEntityResolver(session).getFolder(asInt(folderId), optConnection(session));
+        UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session.getSession()).getUserPermissionBits();
+        EffectivePermission permission = folder.getEffectiveUserPermission(session.getUserId(), permissionBits);
+        if (failIfNotVisible && false == permission.isFolderVisible()) {
+            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(folderId);
         }
-        List<CalendarFolder> folders = new ArrayList<CalendarFolder>(folderIds.size());
-        FolderServiceDecorator decorator = initDecorator(session);
-        FolderService folderService = Services.getService(FolderService.class);
-        for (String folderId : folderIds) {
-            folders.add(getFolder(folderService, folderId, session.getSession(), decorator, true));
-        }
-        return folders;
+        return new CalendarFolder(session.getSession(), folder, permission);
     }
 
     /**
@@ -703,12 +686,13 @@ public class Utils {
         if (null == folderIds || 0 == folderIds.size()) {
             return Collections.emptyList();
         }
-        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
+        List<CalendarFolder> folders = new ArrayList<CalendarFolder>(folderIds.size());
         DefaultEntityResolver entityResolver = getEntityResolver(session);
         UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session.getSession()).getUserPermissionBits();
+        Connection connection = optConnection(session);
         for (String folderId : folderIds) {
             try {
-                FolderObject folder = entityResolver.getFolder(asInt(folderId));
+                FolderObject folder = entityResolver.getFolder(asInt(folderId), connection);
                 EffectivePermission permission = folder.getEffectiveUserPermission(session.getUserId(), permissionBits);
                 if (permission.isFolderVisible()) {
                     folders.add(new CalendarFolder(session.getSession(), folder, permission));
@@ -719,43 +703,6 @@ public class Utils {
             }
         }
         return folders;
-    }
-
-    /**
-     * Gets a <i>userized</i> folder by its identifier.
-     *
-     * @param folderService A reference to the folder service
-     * @param folderId The identifier of the folder to get
-     * @param session The session
-     * @param decorator The folder service decorator to use
-     * @param failIfNotVisible <code>true</code> to fail with an appropriate exception in case the folder is not visible for
-     *            the current session' user, <code>false</code>, otherwise
-     * @return The folder
-     */
-    private static CalendarFolder getFolder(FolderService folderService, String folderId, Session session, FolderServiceDecorator decorator, boolean failIfNotVisible) throws OXException {
-        try {
-            return new CalendarFolder(folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, session, decorator));
-        } catch (OXException e) {
-            if ("FLD-0003".equals(e.getErrorCode())) {
-                // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
-                if (false == failIfNotVisible) {
-                    FolderObject folderObject = optFolderObject(session, folderId, (Connection) decorator.getProperty(Connection.class.getName()));
-                    if (null != folderObject) {
-                        return new CalendarFolder(session, folderObject, Permission.NO_PERMISSIONS);
-                    }
-                }
-                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, folderId);
-            }
-            if ("FLD-1004".equals(e.getErrorCode())) {
-                // com.openexchange.folderstorage.FolderExceptionErrorMessage.NO_STORAGE_FOR_ID
-                throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderId, "");
-            }
-            if ("FLD-0008".equals(e.getErrorCode())) {
-                // com.openexchange.folderstorage.FolderExceptionErrorMessage.NOT_FOUND
-                throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(e, folderId);
-            }
-            throw e;
-        }
     }
 
     /**
@@ -1323,25 +1270,6 @@ public class Utils {
      */
     public static Connection optConnection(CalendarSession session) {
         return session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
-    }
-
-    /**
-     * Attempts to load a folder object from the storage.
-     *
-     * @param session The current session
-     * @param folderId The identifier of the folder to load
-     * @param optConnection An optional read connection to use, or <code>null</code> if not available
-     * @return The folder, or <code>null</code> if any error occurred
-     */
-    private static FolderObject optFolderObject(Session session, String folderId, Connection optConnection) {
-        try {
-            Context context = ServerSessionAdapter.valueOf(session).getContext();
-            OXFolderAccess folderAccess = new OXFolderAccess(optConnection, context);
-            return folderAccess.getFolderObject(Integer.parseInt(folderId));
-        } catch (NumberFormatException | OXException e) {
-            LOG.warn("Error getting folder object {}.", folderId, e);
-            return null;
-        }
     }
 
     private static DefaultEntityResolver getEntityResolver(CalendarSession session) throws OXException {

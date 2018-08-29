@@ -56,6 +56,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.i2I;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -489,6 +490,7 @@ public class DefaultEntityResolver implements EntityResolver {
         return resource;
     }
 
+
     /**
      * Gets a folder by its identifier.
      *
@@ -496,10 +498,21 @@ public class DefaultEntityResolver implements EntityResolver {
      * @return The folder
      */
     public FolderObject getFolder(int id) throws OXException {
+        return getFolder(id, null);
+    }
+
+    /**
+     * Gets a folder by its identifier.
+     *
+     * @param id The identifier of the folder to get
+     * @param optConnection An optional connection to the database to use, or <code>null</code> to acquire one dynamically
+     * @return The folder
+     */
+    public FolderObject getFolder(int id, Connection optConnection) throws OXException {
         Integer iD = I(id);
         FolderObject folder = knownFolders.get(iD);
         if (null == folder) {
-            folder = loadFolder(iD);
+            folder = loadFolder(iD, optConnection);
             knownFolders.put(iD, folder);
         }
         return folder;
@@ -760,9 +773,9 @@ public class DefaultEntityResolver implements EntityResolver {
         }
     }
 
-    private FolderObject loadFolder(int id) throws OXException {
+    private FolderObject loadFolder(int id, Connection optConnection) throws OXException {
         try {
-            return new OXFolderAccess(context).getFolderObject(id);
+            return new OXFolderAccess(optConnection, context).getFolderObject(id);
         } catch (OXException e) {
             if ("FLD-0008".equals(e.getErrorCode())) {
                 throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(e, String.valueOf(id));
