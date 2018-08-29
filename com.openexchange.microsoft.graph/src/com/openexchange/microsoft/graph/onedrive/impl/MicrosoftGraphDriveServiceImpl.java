@@ -49,8 +49,10 @@
 
 package com.openexchange.microsoft.graph.onedrive.impl;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphOneDriveAPI;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters;
+import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters.Builder;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters.ParameterName;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFile;
@@ -116,7 +119,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public OneDriveFolder getRootFolder(int userId, String accessToken) throws OXException {
-        return folderEntityParser.parseEntity(userId, api.getRoot(accessToken));
+        return folderEntityParser.parseEntity(userId, hasSubFolders(accessToken, null), api.getRoot(accessToken));
     }
 
     /*
@@ -126,7 +129,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public OneDriveFolder getFolder(int userId, String accessToken, String folderId) throws OXException {
-        return folderEntityParser.parseEntity(userId, api.getFolder(accessToken, folderId));
+        return folderEntityParser.parseEntity(userId, hasSubFolders(accessToken, folderId), api.getFolder(accessToken, folderId));
     }
 
     /*
@@ -140,12 +143,13 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         String skipToken = null;
         List<OneDriveFolder> list = new LinkedList<>();
         do {
-            MicrosoftGraphQueryParameters.Builder paramBuilder = new MicrosoftGraphQueryParameters.Builder();
+            Builder paramBuilder = new Builder();
             paramBuilder.withParameter(ParameterName.TOP, Integer.toString(offset)).withParameter(ParameterName.SKIPTOKEN, skipToken);
 
             JSONObject response = api.getChildren(accessToken, folderId, paramBuilder.build());
             skipToken = extractSkipToken(response);
-            list.addAll(folderEntityParser.parseEntities(userId, response.optJSONArray("value")));
+            list.addAll(parseEntities(userId, accessToken, response.optJSONArray("value")));
+
         } while (Strings.isNotEmpty(skipToken));
         return list;
     }
@@ -157,7 +161,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public OneDriveFolder createFolder(int userId, String accessToken, String folderName, String parentId, boolean autorename) throws OXException {
-        return folderEntityParser.parseEntity(userId, api.createFolder(accessToken, folderName, parentId, autorename));
+        return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
     }
 
     /*
@@ -214,6 +218,50 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     }
 
     //////////////////////////////////////// HELPERS /////////////////////////////////////
+
+    private boolean hasSubFolders(String accessToken, String folderId) throws OXException {
+        MicrosoftGraphQueryParameters params = new Builder().withParameter(ParameterName.SELECT, "folder").build();
+        JSONObject j = Strings.isEmpty(folderId) ? api.getRootChildren(accessToken, params) : api.getChildren(accessToken, folderId, params);
+        JSONArray entities = j.optJSONArray("value");
+        if (entities == null || entities.isEmpty()) {
+            return false;
+        }
+        for (int index = 0; index < entities.length(); index++) {
+            JSONObject entity = entities.optJSONObject(index);
+            if (entity == null || entity.isEmpty()) {
+                continue;
+            }
+            if (entity.hasAndNotNull("folder")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Parses the specified {@link JSONArray} of entities in to a {@link List}
+     * of {@link OneDriveFolder}s
+     * 
+     * @param userId the user identifier
+     * @param entities The {@link JSONArray} with the entities
+     * @return A {@link List} with the {@link OneDriveFolder}s
+     * @throws OXException
+     */
+    public List<OneDriveFolder> parseEntities(int userId, String accessToken, JSONArray entities) throws OXException {
+        if (entities == null || entities.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<OneDriveFolder> folders = new LinkedList<>();
+        for (int index = 0; index < entities.length(); index++) {
+            JSONObject entity = entities.optJSONObject(index);
+            String folderId = entity.optString("id");
+            OneDriveFolder folder = folderEntityParser.parseEntity(userId, hasSubFolders(accessToken, folderId), entity);
+            if (folder != null) {
+                folders.add(folder);
+            }
+        }
+        return folders;
+    }
 
     /**
      * Checks and extracts a 'skipToken' if available.

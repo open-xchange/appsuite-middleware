@@ -50,14 +50,9 @@
 package com.openexchange.microsoft.graph.onedrive.parser;
 
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
 
 /**
@@ -84,7 +79,7 @@ public class OneDriveFolderParser {
      * @param entity The {@link JSONObject}
      * @return The {@link OneDriveFolder} or <code>null</code> if the entity is not a folder
      */
-    public OneDriveFolder parseEntity(int userId, JSONObject entity) {
+    public OneDriveFolder parseEntity(int userId, boolean hasSubFolders, JSONObject entity) {
         if (!entity.hasAndNotNull("folder")) {
             return null;
         }
@@ -100,7 +95,7 @@ public class OneDriveFolderParser {
         if (parentRef != null && !parentRef.isEmpty()) {
             folder.setParentId(parentRef.optString("path").equals("/drive/root:") ? FileStorageFolder.ROOT_FULLNAME : parentRef.optString("id"));
         }
-        
+
         if (folder.isRootFolder()) {
             // Override Microsoft's id with our default root id
             folder.setId(FileStorageFolder.ROOT_FULLNAME);
@@ -120,36 +115,9 @@ public class OneDriveFolderParser {
             } catch (ParseException e) {
                 LOG.warn("Could not parse date from: {}", modifiedAt, e);
             }
-            JSONObject folderMetaData = entity.optJSONObject("folder");
-            if (folderMetaData != null && !folderMetaData.isEmpty()) {
-                int childCount = folderMetaData.optInt("childCount");
-                folder.setSubfolders(childCount > 0);
-                folder.setSubscribedSubfolders(folder.hasSubfolders());
-            }
+            folder.setSubfolders(hasSubFolders);
+            folder.setSubscribedSubfolders(hasSubFolders);
         }
         return folder;
-    }
-
-    /**
-     * Parses the specified {@link JSONArray} of entities in to a {@link List}
-     * of {@link OneDriveFolder}s
-     * 
-     * @param userId the user identifier
-     * @param entities The {@link JSONArray} with the entities
-     * @return A {@link List} with the {@link OneDriveFolder}s
-     */
-    public List<OneDriveFolder> parseEntities(int userId, JSONArray entities) {
-        if (entities == null || entities.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<OneDriveFolder> folders = new LinkedList<>();
-        for (int index = 0; index < entities.length(); index++) {
-            JSONObject entity = entities.optJSONObject(index);
-            OneDriveFolder folder = parseEntity(userId, entity);
-            if (folder != null) {
-                folders.add(folder);
-            }
-        }
-        return folders;
     }
 }
