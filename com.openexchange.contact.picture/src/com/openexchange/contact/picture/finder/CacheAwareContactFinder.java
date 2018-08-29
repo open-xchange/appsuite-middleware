@@ -49,12 +49,8 @@
 
 package com.openexchange.contact.picture.finder;
 
-import static com.openexchange.java.Strings.isNotEmpty;
-import java.util.Arrays;
-import java.util.Iterator;
+import static com.openexchange.java.Strings.isEmpty;
 import java.util.concurrent.TimeUnit;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.caching.CacheKey;
@@ -63,22 +59,18 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
-import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
 
 /**
- * {@link CacheAwareContactFinder} - Implements caching for a {@link ContactPictureFinder}. <b>ONLY</b> the email of a contact is cacheable
+ * {@link CacheAwareContactFinder} - Implements caching for a {@link ContactPictureFinder}. This class should be used for services where getting the picture can be considered expensive, e.g. external resources
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public abstract class CacheAwareContactFinder implements ContactPictureFinder, EventHandler {
+public abstract class CacheAwareContactFinder implements ContactPictureFinder {
 
-    private final static String TOPIC = "com/openexchange/groupware/contact/update";
-
-    private final Cache<CacheKey, String> cache;
+    private final Cache<CacheKey, FetchResult> cache;
 
     private final CacheKeyService cacheKeyService;
 
@@ -90,76 +82,88 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder, E
      */
     public CacheAwareContactFinder(LeanConfigurationService leanService, CacheKeyService cacheKeyService) {
         super();
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(leanService.getIntProperty(ContactPictureProperties.CACHE_DURATION), TimeUnit.MINUTES).maximumSize(leanService.getIntProperty(ContactPictureProperties.CACHE_SIZE)).build();
+        int duration = leanService.getIntProperty(ContactPictureProperties.CACHE_DURATION);
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(duration < 1 ? 1 : duration, TimeUnit.MINUTES).maximumSize(leanService.getIntProperty(ContactPictureProperties.CACHE_SIZE)).build();
         this.cacheKeyService = cacheKeyService;
     }
 
     @Override
     public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
-        if (onlyETag && original.hasEmail()) {
-            for (Iterator<String> iterator = original.getEmails().iterator(); iterator.hasNext();) {
-                String eTag = cache.getIfPresent(cacheKeyService.newCacheKey(session.getContextId(), String.valueOf(session.getUserId()), iterator.next()));
-                if (isNotEmpty(eTag)) {
-                    return new ContactPicture(eTag);
+        if (onlyETag) {
+            FetchResult result = cache.getIfPresent(generateCacheKey(session, original, modified));
+            if (null != result) {
+                // The request was already performed, now get the cached data
+                if (Status.MISS.equals(result.result)) {
+                    return null;
                 }
+                return new ContactPicture(result.eTag);
             }
         }
 
-        return null;
+        // Cache miss, get the picture
+        ContactPicture picture = fetchPicture(session, original, modified, onlyETag);
+        put(generateCacheKey(session, original, modified), null != picture && picture.containsContactPicture() ? picture.getETag() : null);
+
+        return picture;
     }
 
     /**
      * Puts an eTag in the cache.
      * 
-     * @param email The email of the contact
+     * @param key The {@link CacheKey}
      * @param eTag The eTag
      * @return <code>true</code> if the eTag was put into the cache, <code>false</code> otherwise
      */
-    protected boolean put(Session session, String email, String eTag) {
-        if (isNotEmpty(eTag) && isNotEmpty(email)) {
-            CacheKey cacheKey = cacheKeyService.newCacheKey(session.getContextId(), String.valueOf(session.getUserId()), email);
-            cache.put(cacheKey, eTag);
+    protected boolean put(CacheKey key, String eTag) {
+        if (null != key) {
+            if (isEmpty(eTag)) {
+                cache.put(key, new FetchResult(null, Status.MISS));
+            } else {
+                cache.put(key, new FetchResult(eTag, Status.FOUND));
+            }
             return true;
         }
         return false;
     }
 
-    @Override
-    public void handleEvent(Event event) {
-        // --- Check basic conditions
-        if (null == event || false == TOPIC.equals(event.getTopic())) {
-            return;
-        }
-        Object property = event.getProperty(CommonEvent.EVENT_KEY);
-        if (null == property || false == CommonEvent.class.isAssignableFrom(property.getClass())) {
-            return;
-        }
-        CommonEvent commonEvent = (CommonEvent) property;
+    protected CacheKey generateCacheKey(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) {
+        return cacheKeyService.newCacheKey(session.getContextId(), String.valueOf(session.getUserId()), original.toString(), modified.toString());
+    }
 
-        Object actionObj = commonEvent.getActionObj();
-        Object oldObj = commonEvent.getOldObj();
-        if (null == actionObj || false == Contact.class.isAssignableFrom(actionObj.getClass()) || null == oldObj || false == Contact.class.isAssignableFrom(oldObj.getClass())) {
-            return;
-        }
+    // -----------------------------------------------------------------------------------------------
 
-        Contact updated = (Contact) actionObj;
-        Contact original = (Contact) oldObj;
-        // ---
+    /**
+     * Fetches a picture from a resource
+     * 
+     * @param session The {@link Session}
+     * @param original The {@link UnmodifiableContactPictureRequestData}
+     * @param modified The {@link ContactPictureRequestData}
+     * @param onlyETag <code>true</code> If only the eTag should be generated
+     * @return The {@link ContactPicture} or <code>null</code>
+     * @throws OXException On error
+     */
+    public abstract ContactPicture fetchPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException;
 
-        if (isAboutPictureChange(original, updated) || false == FinderUtil.checkEmails(original, updated)) {
-            cache.invalidate(cacheKeyService.newCacheKey(commonEvent.getContextId(), String.valueOf(commonEvent.getUserId()), original.getEmail1()));
-            cache.invalidate(cacheKeyService.newCacheKey(commonEvent.getContextId(), String.valueOf(commonEvent.getUserId()), original.getEmail2()));
-            cache.invalidate(cacheKeyService.newCacheKey(commonEvent.getContextId(), String.valueOf(commonEvent.getUserId()), original.getEmail3()));
+    // -----------------------------------------------------------------------------------------------
+
+    private final class FetchResult {
+
+        final String eTag;
+
+        final Status result;
+
+        public FetchResult(String eTag, Status result) {
+            super();
+            this.eTag = eTag;
+            this.result = result;
         }
     }
 
-    private boolean isAboutPictureChange(Contact original, Contact updated) {
-        if (null == original.getImage1() && null == updated.getImage1()) {
-            // Nothing changed
-            return false;
-        }
-        // Check bytes
-        return Arrays.equals(original.getImage1(), updated.getImage1());
+    // -----------------------------------------------------------------------------------------------
+
+    private enum Status {
+        MISS,
+        FOUND;
     }
 
 }

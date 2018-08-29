@@ -101,18 +101,12 @@ public class XingContactPictureFinder extends CacheAwareContactFinder {
     }
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
-        // Ask cache
-        ContactPicture p = super.getPicture(session, original, modified, onlyETag);
-        if (null != p) {
-            return p;
-        }
-
+    public ContactPicture fetchPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
         XingOAuthAccess access = provider.accessFor(provider.getXingOAuthAccount(session), session);
         XingAPI<WebAuthSession> xingAPI = access.getXingAPI();
 
         try {
-            List<String> userIds = xingAPI.findByEmails(new LinkedList<>(modified.getEmails()));
+            List<String> userIds = xingAPI.findByEmails(new LinkedList<>(original.getEmails()));
             if (null == userIds || userIds.isEmpty()) {
                 return null;
             }
@@ -127,7 +121,6 @@ public class XingContactPictureFinder extends CacheAwareContactFinder {
                         if (FinderUtil.checkEmail(contactMail, user.getActiveMail())) {
                             ContactPicture picture = getPictuerFromXing(xingAPI, user, onlyETag);
                             if (null != picture && picture.containsContactPicture() && (onlyETag || FinderUtil.checkImage(picture.getFileHolder(), I(session.getContextId()), modified))) {
-                                put(session, user.getActiveMail(), picture.getETag());
                                 return picture;
                             }
                             // The user was found but there was either no image or it was corrupted

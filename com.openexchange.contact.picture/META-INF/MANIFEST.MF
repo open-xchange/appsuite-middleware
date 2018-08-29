@@ -20,7 +20,6 @@ Import-Package: com.google.common.cache,
  com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.session,
- org.osgi.service.event,
  org.slf4j
 Export-Package: com.openexchange.contact.picture,
  com.openexchange.contact.picture.finder
