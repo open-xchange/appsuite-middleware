@@ -134,9 +134,10 @@ public class HashingFileStorage extends DefaultFileStorage {
                 out.write(buf, 0, read);
             }
             out.flush();
-            success = true;
 
-            return new StringBuilder(filestorePath[0]).append('/').append(filestorePath[1]).toString();
+            String identifier = new StringBuilder(filestorePath[0]).append('/').append(filestorePath[1]).toString();
+            success = true;
+            return identifier;
         } catch (final IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
