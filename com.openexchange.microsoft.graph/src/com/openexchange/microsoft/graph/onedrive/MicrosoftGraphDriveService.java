@@ -61,14 +61,14 @@ import com.openexchange.exception.OXException;
 public interface MicrosoftGraphDriveService {
 
     /**
-     * Checks whether the folder with the specified path exists.
+     * Checks whether the folder with the specified identifier exists.
      * 
      * @param accessToken The oauth access token
-     * @param folderPath The absolute folder path
+     * @param folderId The folder identifier
      * @return <code>true</code> if the folder exists; <code>false</code> otherwise.
      * @throws OXException If an error is occurred
      */
-    boolean existsFolder(String accessToken, String folderPath) throws OXException;
+    boolean existsFolder(String accessToken, String folderId) throws OXException;
 
     /**
      * Returns the root folder of the user's default drive account

@@ -102,9 +102,9 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#existsFolder(java.lang.String, java.lang.String)
      */
     @Override
-    public boolean existsFolder(String accessToken, String folderPath) throws OXException {
+    public boolean existsFolder(String accessToken, String folderId) throws OXException {
         try {
-            JSONObject response = api.getFolder(accessToken, folderPath);
+            JSONObject response = api.getFolder(accessToken, folderId);
             return !containsError(response, ErrorCode.itemNotFound);
         } catch (OXException e) {
             if (RESTExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
