@@ -99,13 +99,12 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder {
 
     @Override
     public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
-        if (onlyETag) {
-            FetchResult result = cache.getIfPresent(generateCacheKey(session, original, modified));
-            if (null != result) {
-                // The request was already performed, now get the cached data
-                if (Status.MISS.equals(result.result)) {
-                    return null;
-                }
+        FetchResult result = cache.getIfPresent(generateCacheKey(session, original, modified));
+        if (null != result) {
+            // The request was already performed, now get the cached data
+            if (Status.MISS.equals(result.result)) {
+                return null;
+            } else if (onlyETag) {
                 return new ContactPicture(result.eTag);
             }
         }

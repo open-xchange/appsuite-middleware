@@ -49,7 +49,6 @@
 
 package com.openexchange.halo.xing;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,20 +56,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.halo.Picture;
-import com.openexchange.halo.xing.picture.XingContactPictureFinder;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.xing.Contacts;
 import com.openexchange.xing.Path;
@@ -88,18 +80,15 @@ import com.openexchange.xing.session.WebAuthSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class XingUserDataSource implements HaloContactDataSource, HaloContactImageSource {
+public class XingUserDataSource implements HaloContactDataSource {
 
     private static final Logger LOG = LoggerFactory.getLogger(XingUserDataSource.class);
 
     private final XingOAuthAccessProvider provider;
 
-    private final XingContactPictureFinder finder;
-
-    public XingUserDataSource(ServiceLookup services, final XingOAuthAccessProvider provider) {
+    public XingUserDataSource(final XingOAuthAccessProvider provider) {
         super();
         this.provider = provider;
-        this.finder = new XingContactPictureFinder(services, provider);
     }
 
     @Override
@@ -120,11 +109,6 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
         }
 
         return true;
-    }
-
-    @Override
-    public int getPriority() {
-        return 0;
     }
 
     @Override
@@ -166,28 +150,6 @@ public class XingUserDataSource implements HaloContactDataSource, HaloContactIma
         }
 
         return new AJAXRequestResult(result, XingInvestigationResult.class.getName());
-    }
-
-    @Override
-    public String getPictureETag(HaloContactQuery query, ServerSession session) throws OXException {
-        ContactPicture find = find(query, session, true);
-        return null != find ? find.getETag() : null;
-    }
-
-    @Override
-    public Picture getPicture(HaloContactQuery query, ServerSession session) throws OXException {
-        ContactPicture find = find(query, session, true);
-        return null != find ? new Picture(find.getETag(), find.getFileHolder()) : null;
-    }
-
-    private ContactPicture find(HaloContactQuery query, ServerSession session, boolean onlyETag) throws OXException {
-        ContactPictureRequestData data = new ContactPictureRequestData(I(session.getUserId()), null, null, prepareMailAddresses(query));
-        UnmodifiableContactPictureRequestData unmodifiableData = new UnmodifiableContactPictureRequestData(data);
-
-        if (finder.isApplicable(session, unmodifiableData, data)) {
-            return finder.getPicture(session, unmodifiableData, data, onlyETag);
-        }
-        return null;
     }
 
     private XingAPI<WebAuthSession> getAPI(ServerSession session) throws OXException {
