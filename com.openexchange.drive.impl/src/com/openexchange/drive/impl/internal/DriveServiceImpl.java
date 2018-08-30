@@ -384,7 +384,7 @@ public class DriveServiceImpl implements DriveService {
         IntermediateSyncResult<FileVersion> syncResult = new IntermediateSyncResult<FileVersion>();
         File createdFile = null;
         try {
-            createdFile = new UploadHelper(syncSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
+            createdFile = new UploadHelper(syncSession).perform(path, originalVersion, newVersion, uploadStream, DriveUtils.checkContentType(contentType), offset, totalLength, created, modified);
         } catch (OXException e) {
             if ("FLS-0022".equals(e.getErrorCode())) {
                 // The connected client closed the connection unexpectedly

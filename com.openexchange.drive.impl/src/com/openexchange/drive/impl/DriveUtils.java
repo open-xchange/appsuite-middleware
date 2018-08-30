@@ -49,7 +49,8 @@
 
 package com.openexchange.drive.impl;
 
-import static com.openexchange.drive.impl.DriveConstants.*;
+import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
+import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,6 +83,7 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.session.Session;
@@ -278,7 +280,7 @@ public class DriveUtils {
      */
     public static boolean indicatesFailedSave(OXException e) {
         return "IFO-0100".equals(e.getErrorCode()) || "IFO-2103".equals(e.getErrorCode()) ||
-            "FLD-0092".equals(e.getErrorCode()) || "FLD-0064".equals(e.getErrorCode()) || "FLD-1014".equals(e.getErrorCode());
+            "FLD-0092".equals(e.getErrorCode()) || "FLD-0064".equals(e.getErrorCode()) || "FLD-1014".equals(e.getErrorCode()) || FileStorageExceptionCodes.DENIED_MIME_TYPE.equals(e);
     }
 
     /**
@@ -518,6 +520,29 @@ public class DriveUtils {
             }
         }
         return 1 == result ? 0 : result;
+    }
+
+    /**
+     * Checks that a (client-supplied) content type is allowed, throwing an appropriate exception in case validation is not passed.
+     * 
+     * @param contentType The content type to check
+     * @return The checked content type string
+     * @throws OXException {@link FileStorageExceptionCodes#DENIED_MIME_TYPE} if content type validation fails
+     */
+    public static String checkContentType(String contentType) throws OXException {
+        if (Strings.isEmpty(contentType)) {
+            return null;
+        }
+        ContentType checkdContentType;
+        try {
+            checkdContentType = new ContentType(contentType, true);
+        } catch (Exception e) {
+            throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create(e); // MIME type could not be safely parsed
+        }
+        if (checkdContentType.contains("multipart/") || checkdContentType.containsBoundaryParameter()) {
+            throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create(); // deny weird MIME types
+        }
+        return checkdContentType.toString();
     }
 
     private DriveUtils() {
