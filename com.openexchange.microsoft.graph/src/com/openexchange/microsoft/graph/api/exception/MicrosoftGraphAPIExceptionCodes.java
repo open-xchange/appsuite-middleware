@@ -50,10 +50,14 @@
 package com.openexchange.microsoft.graph.api.exception;
 
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.java.Strings;
 
 /**
  * {@link MicrosoftGraphAPIExceptionCodes}
@@ -62,21 +66,24 @@ import com.openexchange.exception.OXExceptionFactory;
  * @since v7.10.1
  */
 public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCode {
-    /**
-     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
-     * <li>An I/O error occurred: %1$s</li>
-     */
-    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 1),
-    /**
-     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
-     * <li>A JSON error occurred: %1$s</li>
-     */
-    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 2),
-    /**
-     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
-     * <li>No stream parser found for the specified content type '%1$s'</li>
-     */
-    NO_STREAM_PARSER("No stream parser found for the specified content type '%1$s'", CATEGORY_ERROR, 3);
+
+    ACCESS_DENIED("%1$s", CATEGORY_ERROR, ErrorCode.accessDenied, 1),
+    ACTIVITY_LIMIT_REACHED("%1$s", CATEGORY_ERROR, ErrorCode.activityLimitReached, 2),
+    GENERAL_EXCEPTION("%1$s", CATEGORY_ERROR, ErrorCode.generalException, 3),
+    INVALID_RANGE("%1$s", CATEGORY_ERROR, ErrorCode.invalidRange, 4),
+    INVALID_REQUEST("%1$s", CATEGORY_ERROR, ErrorCode.invalidRequest, 5),
+    ITEM_NOT_FOUND("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 6),
+    MALWARE_DETECTED("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 7),
+    NAME_ALREADY_EXISTS("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 8),
+    NOT_ALLOWED("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 9),
+    NOT_SUPPORTED("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 10),
+    RESOURCE_MODIFIED("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 11),
+    RESYNC_REQUIRED("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 12),
+    SERVICE_NOT_AVAILABLE("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 13),
+    QUOTA_LIMIT_REACHED("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 14),
+    UNAUTHENTICATED("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 15),
+
+    ;
 
     public static final String PREFIX = "MICROSOFT-GRAPH-API";
 
@@ -84,17 +91,18 @@ public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCod
     private String displayMessage;
     private Category category;
     private int number;
+    private final ErrorCode errorCode;
 
     /**
-     * Initialises a new {@link MicrosoftGraphAPIExceptionCodes}.
-     * 
-     * @param message The exception message
-     * @param displayMessage The display message
-     * @param category The {@link Category}
-     * @param number The error number
+     * A reverse index to map the {@link ErrorCode}s with exceptions
      */
-    private MicrosoftGraphAPIExceptionCodes(String message, Category category, int number) {
-        this(message, null, category, number);
+    private static final Map<ErrorCode, MicrosoftGraphAPIExceptionCodes> reverseIndex;
+    static {
+        Map<ErrorCode, MicrosoftGraphAPIExceptionCodes> m = new HashMap<>(8);
+        for (MicrosoftGraphAPIExceptionCodes c : MicrosoftGraphAPIExceptionCodes.values()) {
+            m.put(c.getErrorCode(), c);
+        }
+        reverseIndex = Collections.unmodifiableMap(m);
     }
 
     /**
@@ -105,8 +113,21 @@ public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCod
      * @param category The {@link Category}
      * @param number The error number
      */
-    private MicrosoftGraphAPIExceptionCodes(String message, String displayMessage, Category category, int number) {
+    private MicrosoftGraphAPIExceptionCodes(String message, Category category, ErrorCode errorCode, int number) {
+        this(message, null, category, errorCode, number);
+    }
+
+    /**
+     * Initialises a new {@link MicrosoftGraphAPIExceptionCodes}.
+     * 
+     * @param message The exception message
+     * @param displayMessage The display message
+     * @param category The {@link Category}
+     * @param number The error number
+     */
+    private MicrosoftGraphAPIExceptionCodes(String message, String displayMessage, Category category, ErrorCode errorCode, int number) {
         this.message = message;
+        this.errorCode = errorCode;
         this.displayMessage = null != displayMessage ? displayMessage : MESSAGE;
         this.category = category;
         this.number = number;
@@ -143,6 +164,27 @@ public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCod
     }
 
     /**
+     * 
+     * @param error
+     * @return
+     */
+    public static MicrosoftGraphAPIExceptionCodes parse(String error) {
+        if (Strings.isEmpty(error)) {
+            return MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION;
+        }
+        try {
+            ErrorCode errorCode = ErrorCode.valueOf(error);
+            MicrosoftGraphAPIExceptionCodes ex = reverseIndex.get(errorCode);
+            if (ex == null) {
+                return MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION;
+            }
+            return ex;
+        } catch (IllegalArgumentException e) {
+            return MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION;
+        }
+    }
+
+    /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *
      * @return The newly created {@link OXException} instance
@@ -170,5 +212,14 @@ public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCod
      */
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /**
+     * Gets the errorCode
+     *
+     * @return The errorCode
+     */
+    public ErrorCode getErrorCode() {
+        return errorCode;
     }
 }

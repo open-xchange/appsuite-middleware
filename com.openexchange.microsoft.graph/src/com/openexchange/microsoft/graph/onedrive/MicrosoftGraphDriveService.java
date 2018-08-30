@@ -166,6 +166,7 @@ public interface MicrosoftGraphDriveService {
 
     /**
      * Retrieve the quota for the user's default OneDrive
+     * 
      * @param accessToken The oauth access token
      * @return The {@link Quota}
      * @throws OXException if an error is occurred

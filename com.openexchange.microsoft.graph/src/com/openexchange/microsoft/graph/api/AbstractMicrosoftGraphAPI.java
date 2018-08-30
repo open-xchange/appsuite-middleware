@@ -58,6 +58,7 @@ import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.rest.client.v2.RESTMethod;
 
 /**
@@ -120,7 +121,7 @@ abstract class AbstractMicrosoftGraphAPI {
         for (Entry<String, String> queryParam : queryParams.entrySet()) {
             request.withQueryParameter(queryParam.getKey(), queryParam.getValue());
         }
-        return ((JSONValue) client.execute(request).getResponseBody()).toObject();
+        return executeRequest(request);
     }
 
     /**
@@ -135,7 +136,7 @@ abstract class AbstractMicrosoftGraphAPI {
         request.setAccessToken(accessToken);
         request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         request.withBody(body);
-        return ((JSONValue) client.execute(request).getResponseBody()).toObject();
+        return executeRequest(request);
     }
 
     void deleteResource(String accessToken, String path) throws OXException {
@@ -149,6 +150,32 @@ abstract class AbstractMicrosoftGraphAPI {
         request.setAccessToken(accessToken);
         request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         request.withBody(body);
-        return ((JSONValue) client.execute(request).getResponseBody()).toObject();
+        return executeRequest(request);
     }
+
+    /**
+     * 
+     * @param request
+     * @return
+     * @throws OXException
+     */
+    private JSONObject executeRequest(MicrosoftGraphRequest request) throws OXException {
+        JSONObject response = ((JSONValue) client.execute(request).getResponseBody()).toObject();
+        if (response.hasAndNotNull("error")) {
+            handleErrorResponse(response);
+        }
+        return response;
+    }
+
+    /**
+     * @param response
+     * @throws OXException
+     */
+    private void handleErrorResponse(JSONObject response) throws OXException {
+        String message = response.optString("message");
+        String code = response.optString("code");
+        throw MicrosoftGraphAPIExceptionCodes.parse(code).create(message);
+    }
+    
+    
 }
