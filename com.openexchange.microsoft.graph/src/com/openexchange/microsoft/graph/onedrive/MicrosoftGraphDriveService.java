@@ -51,6 +51,7 @@ package com.openexchange.microsoft.graph.onedrive;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Quota;
 
 /**
  * {@link MicrosoftGraphDriveService}
@@ -162,4 +163,12 @@ public interface MicrosoftGraphDriveService {
      * @throws OXException
      */
     List<OneDriveFile> getFiles(int userId, String accessToken, List<String> itemIds) throws OXException;
+
+    /**
+     * Retrieve the quota for the user's default OneDrive
+     * @param accessToken The oauth access token
+     * @return The {@link Quota}
+     * @throws OXException if an error is occurred
+     */
+    Quota getQuota(String accessToken) throws OXException;
 }

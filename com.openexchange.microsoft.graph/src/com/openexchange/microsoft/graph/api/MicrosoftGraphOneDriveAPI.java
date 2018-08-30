@@ -84,6 +84,17 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     public JSONObject getDrive(String accessToken) throws OXException {
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath());
     }
+    
+    /**
+     * Gets the user's OneDrive
+     * 
+     * @param accessToken OAuth The access token
+     * @return A {@link JSONObject} with the user's one drive metadata
+     * @throws OXException if an error is occurred
+     */
+    public JSONObject getDrive(String accessToken, MicrosoftGraphQueryParameters queryParameters) throws OXException {
+        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath(), queryParameters.getQueryParametersMap());
+    }
 
     /**
      * Returns the metadata of the root folder for a user's default Drive

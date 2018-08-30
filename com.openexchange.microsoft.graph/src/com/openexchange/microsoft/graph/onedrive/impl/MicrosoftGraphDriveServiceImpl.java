@@ -53,12 +53,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.Quota;
+import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphOneDriveAPI;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters;
@@ -206,7 +207,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             api.deleteItem(accessToken, id);
         }
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -258,6 +259,22 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             }
         }
         return files;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getQuota(java.lang.String)
+     */
+    @Override
+    public Quota getQuota(String accessToken) throws OXException {
+        JSONObject drive = api.getDrive(accessToken, new Builder().withParameter(ParameterName.SELECT, "quota").build());
+        JSONObject quota = drive.optJSONObject("quota");
+        if (quota == null || quota.isEmpty()) {
+            // Should never happen, but just in case...
+            return new Quota(-1, -1, Type.STORAGE);
+        }
+        return new Quota(quota.optInt("total"), quota.optInt("used"), Type.STORAGE);
     }
 
     //////////////////////////////////////// HELPERS /////////////////////////////////////

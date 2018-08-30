@@ -692,22 +692,23 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public Quota getStorageQuota(String folderId) throws OXException {
-        return perform(new OneDriveClosure<Quota>() {
-
-            @Override
-            protected Quota doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpGet request = null;
-                try {
-                    request = new HttpGet(buildUri("me/skydrive/quota", initiateQueryString()));
-                    com.openexchange.file.storage.onedrive.rest.Quota quota = handleHttpResponse(execute(request, httpClient), com.openexchange.file.storage.onedrive.rest.Quota.class);
-                    return new Quota(quota.getQuota(), quota.getQuota() - quota.getAvailable(), Type.STORAGE);
-                } finally {
-                    if (null != request) {
-                        request.releaseConnection();
-                    }
-                }
-            }
-        });
+        return driveService.getQuota(getAccessToken());
+//        return perform(new OneDriveClosure<Quota>() {
+//
+//            @Override
+//            protected Quota doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+//                HttpGet request = null;
+//                try {
+//                    request = new HttpGet(buildUri("me/skydrive/quota", initiateQueryString()));
+//                    com.openexchange.file.storage.onedrive.rest.Quota quota = handleHttpResponse(execute(request, httpClient), com.openexchange.file.storage.onedrive.rest.Quota.class);
+//                    return new Quota(quota.getQuota(), quota.getQuota() - quota.getAvailable(), Type.STORAGE);
+//                } finally {
+//                    if (null != request) {
+//                        request.releaseConnection();
+//                    }
+//                }
+//            }
+//        });
     }
 
     @Override
