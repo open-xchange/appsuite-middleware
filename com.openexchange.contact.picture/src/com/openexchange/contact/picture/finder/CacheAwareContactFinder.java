@@ -62,11 +62,12 @@ import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
- * {@link CacheAwareContactFinder} - Implements caching for a {@link ContactPictureFinder}. This class should be used for services where getting the picture can be considered expensive, e.g. external resources
+ * {@link CacheAwareContactFinder} - Implements caching for a {@link ContactPictureFinder}.
+ * This class should be used for services where getting the picture can be considered expensive, e.g. external resources
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
@@ -79,21 +80,26 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder {
 
     /**
      * Initializes a new {@link CacheAwareContactFinder}.
-     * 
-     * @param services The {@link ServiceLookup}
-     * 
+     *
+     * @param leanConfigurationService The {@link LeanConfigurationService}
+     * @param cacheKeyService The {@link CacheKeyService}
+     * @throws OXException
+     *
      */
-    public CacheAwareContactFinder(ServiceLookup services) {
-        super();
-        LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
+    public CacheAwareContactFinder(LeanConfigurationService leanConfigurationService, CacheKeyService cacheKeyService) throws OXException {
+        if(leanConfigurationService == null) {
+            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
+        }
+
+        if(cacheKeyService == null) {
+            throw ServiceExceptionCode.absentService(CacheKeyService.class);
+        }
+
         long duration = l(ContactPictureProperties.CACHE_DURATION.getDefaultValue(Long.class));
         int maximumSize = i(ContactPictureProperties.CACHE_SIZE.getDefaultValue(Integer.class));
-        if (null != leanConfigurationService) {
-            duration = leanConfigurationService.getLongProperty(ContactPictureProperties.CACHE_DURATION);
-            maximumSize = leanConfigurationService.getIntProperty(ContactPictureProperties.CACHE_SIZE);
-
-        }
-        this.cacheKeyService = services.getService(CacheKeyService.class);
+        duration = leanConfigurationService.getLongProperty(ContactPictureProperties.CACHE_DURATION);
+        maximumSize = leanConfigurationService.getIntProperty(ContactPictureProperties.CACHE_SIZE);
+        this.cacheKeyService = cacheKeyService;
         this.cache = CacheBuilder.newBuilder().expireAfterWrite(duration < 1 ? 1 : duration, TimeUnit.MINUTES).maximumSize(maximumSize).build();
     }
 
@@ -118,27 +124,21 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder {
 
     /**
      * Puts an eTag in the cache.
-     * 
+     *
      * @param key The {@link CacheKey}
      * @param eTag The eTag
-     * @return <code>true</code> if the eTag was put into the cache, <code>false</code> otherwise
      */
-    protected boolean put(CacheKey key, String eTag) {
+    protected void put(CacheKey key, String eTag) {
         if (null != key) {
             if (isEmpty(eTag)) {
                 cache.put(key, new FetchResult(null, Status.MISS));
             } else {
                 cache.put(key, new FetchResult(eTag, Status.FOUND));
             }
-            return true;
         }
-        return false;
     }
 
     protected CacheKey generateCacheKey(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) {
-        if (null == cacheKeyService) {
-            return null;
-        }
         return cacheKeyService.newCacheKey(session.getContextId(), String.valueOf(session.getUserId()), original.toString(), modified.toString());
     }
 
@@ -146,7 +146,7 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder {
 
     /**
      * Fetches a picture from a resource
-     * 
+     *
      * @param session The {@link Session}
      * @param original The {@link UnmodifiableContactPictureRequestData}
      * @param modified The {@link ContactPictureRequestData}

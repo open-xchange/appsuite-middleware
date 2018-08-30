@@ -114,7 +114,7 @@ public class XingUserDataSource implements HaloContactDataSource {
     @Override
     public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
         XingAPI<WebAuthSession> api = getAPI(session);
-        com.openexchange.xing.User userInfo = loadXingUser(api, query, session);
+        com.openexchange.xing.User userInfo = loadXingUser(api, query);
         XingInvestigationResult result = new XingInvestigationResult(userInfo);
         if (userInfo != null) {
             try {
@@ -157,7 +157,7 @@ public class XingUserDataSource implements HaloContactDataSource {
         return access.getXingAPI();
     }
 
-    private static com.openexchange.xing.User loadXingUser(XingAPI<WebAuthSession> api, HaloContactQuery query, ServerSession session) throws OXException {
+    private static com.openexchange.xing.User loadXingUser(XingAPI<WebAuthSession> api, HaloContactQuery query) throws OXException {
         List<String> mailAddresses = prepareMailAddresses(query);
         if (mailAddresses.isEmpty()) {
             return null;

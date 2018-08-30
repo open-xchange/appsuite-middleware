@@ -49,6 +49,7 @@
 
 package com.openexchange.halo.xing.osgi;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -66,7 +67,7 @@ import com.openexchange.xing.access.XingOAuthAccessProvider;
  */
 public class XingHaloActivator extends HousekeepingActivator {
 
-    private volatile ServiceRegistration<HaloContactDataSource> contactRegistration = null;
+    volatile ServiceRegistration<HaloContactDataSource> contactRegistration = null;
 
     private volatile ServiceRegistration<ContactPictureFinder> finderRegistration = null;
 
@@ -78,12 +79,13 @@ public class XingHaloActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(ResultConverter.class, new XingInvestigationResultConverter());
+        final BundleContext xingBungleContext = context;
         track(XingOAuthAccessProvider.class, new SimpleRegistryListener<XingOAuthAccessProvider>() {
 
             @Override
             public void added(ServiceReference<XingOAuthAccessProvider> ref, XingOAuthAccessProvider service) {
                 XingUserDataSource xingDataSource = new XingUserDataSource(service);
-                contactRegistration = context.registerService(HaloContactDataSource.class, xingDataSource, null);
+                contactRegistration = xingBungleContext.registerService(HaloContactDataSource.class, xingDataSource, null);
             }
 
             @Override
