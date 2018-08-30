@@ -65,7 +65,7 @@ public class BirthdayCalendarExportTest extends AbstractImportExportTest {
     public void testBirthdayCalendarExport() throws Exception {
         String session = defaultUserApi.getSession();
         createContactWithBirthdayEvent(session);
-        String folderId = getBirthdayCalendarFolder(session);
+        String folderId = getBirthdayCalendarFolder();
         //export
         String ical = importExportManager.exportICalFile(session, folderId);
         assertNotNull(ical);
