@@ -49,9 +49,12 @@
 
 package com.openexchange.oauth.api;
 
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.scribe.builder.api.DefaultApi20;
+import org.scribe.exceptions.OAuthException;
 import org.scribe.extractors.AccessTokenExtractor;
-import org.scribe.extractors.JsonTokenExtractor;
 import org.scribe.model.OAuthConfig;
 import org.scribe.model.OAuthConstants;
 import org.scribe.model.OAuthRequest;
@@ -62,6 +65,7 @@ import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuth20ServiceImpl;
 import org.scribe.oauth.OAuthService;
 import org.scribe.utils.OAuthEncoder;
+import org.scribe.utils.Preconditions;
 
 /**
  * {@link MicrosoftGraphApi}
@@ -86,6 +90,15 @@ public class MicrosoftGraphApi extends DefaultApi20 {
 
     // Token end-point
     private static final String TOKEN_URL = LOGIN_URL + "/" + COMMON_TENANT + "/" + TOKEN_ENDPOINT;
+
+    /** The <code>"access_token": &lt;token&gt;</code> pattern */
+    static final Pattern PATTERN_ACCESS_TOKEN = Pattern.compile("\"access_token\" *: *\"([^&\"]+)\"");
+
+    /** The <code>"refresh_token": &lt;token&gt;</code> pattern */
+    static final Pattern PATTERN_REFRESH_TOKEN = Pattern.compile("\"refresh_token\" *: *\"([^&\"]+)\"");
+
+    /** The <code>"expires_in": &lt;number&gt;</code> pattern */
+    static final Pattern PATTERN_EXPIRES = Pattern.compile("\"expires_in\" *: *([0-9]+)");
 
     /*
      * (non-Javadoc)
@@ -124,7 +137,31 @@ public class MicrosoftGraphApi extends DefaultApi20 {
      */
     @Override
     public AccessTokenExtractor getAccessTokenExtractor() {
-        return new JsonTokenExtractor();
+        return new AccessTokenExtractor() {
+
+            @Override
+            public Token extract(String response) {
+                Preconditions.checkEmptyString(response, "Response body is incorrect. Can't extract a token from an empty string");
+
+                Matcher matcher = PATTERN_ACCESS_TOKEN.matcher(response);
+                if (!matcher.find()) {
+                    throw new OAuthException("Response body is incorrect. Can't extract a token from this: '" + response + "'", null);
+                }
+                String token = OAuthEncoder.decode(matcher.group(1));
+                String refreshToken = "";
+                Matcher refreshMatcher = PATTERN_REFRESH_TOKEN.matcher(response);
+                if (refreshMatcher.find()) {
+                    refreshToken = OAuthEncoder.decode(refreshMatcher.group(1));
+                }
+                Date expiry = null;
+                Matcher expiryMatcher = PATTERN_EXPIRES.matcher(response);
+                if (expiryMatcher.find()) {
+                    int lifeTime = Integer.parseInt(OAuthEncoder.decode(expiryMatcher.group(1)));
+                    expiry = new Date(System.currentTimeMillis() + lifeTime * 1000);
+                }
+                return new Token(token, refreshToken, expiry, response);
+            }
+        };
     }
 
     /*

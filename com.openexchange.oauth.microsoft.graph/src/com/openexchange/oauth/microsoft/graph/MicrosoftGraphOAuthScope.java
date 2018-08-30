@@ -65,13 +65,13 @@ public enum MicrosoftGraphOAuthScope implements OAuthScope {
      * 
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/permissions_reference#files-permissions">File Permissions</a>
      */
-    drive("User.Read Files.Read Files.Read.All Files.ReadWrite Files.ReadWrite.All Files.Read.Selected Files.ReadWrite.Selected", OXScope.drive),
+    drive("offline_access User.Read Files.Read Files.Read.All Files.ReadWrite Files.ReadWrite.All Files.Read.Selected Files.ReadWrite.Selected", OXScope.drive),
     /**
      * Defines the contacts' scopes
      * 
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/permissions_reference#contacts-permissions">Contacts Permissions</a>
      */
-    contacts_ro("User.Read Contacts.Read Contacts.Read.Shared", OXScope.contacts_ro);
+    contacts_ro("offline_access User.Read Contacts.Read Contacts.Read.Shared", OXScope.contacts_ro);
 
     private final String scopes;
     private final OXScope oxScope;
