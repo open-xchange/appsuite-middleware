@@ -60,6 +60,7 @@ import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
 import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.rest.client.v2.RESTMethod;
+import com.openexchange.rest.client.v2.RESTResponse;
 
 /**
  * {@link AbstractMicrosoftGraphAPI}
@@ -70,6 +71,7 @@ import com.openexchange.rest.client.v2.RESTMethod;
 abstract class AbstractMicrosoftGraphAPI {
 
     final MicrosoftGraphRESTClient client;
+    private static final String APPLICATION_JSON = "application/json";
 
     /**
      * Initialises a new {@link AbstractMicrosoftGraphAPI}.
@@ -102,6 +104,7 @@ abstract class AbstractMicrosoftGraphAPI {
     byte[] getBinaryResource(String accessToken, String path) throws OXException {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, path);
         request.setAccessToken(accessToken);
+        RESTResponse restResponse = client.execute(request);
         return (byte[]) client.execute(request).getResponseBody();
     }
 
@@ -160,7 +163,8 @@ abstract class AbstractMicrosoftGraphAPI {
      * @throws OXException
      */
     private JSONObject executeRequest(MicrosoftGraphRequest request) throws OXException {
-        JSONObject response = ((JSONValue) client.execute(request).getResponseBody()).toObject();
+        RESTResponse restResponse = client.execute(request);
+        JSONObject response = ((JSONValue) restResponse.getResponseBody()).toObject();
         checkForErrors(response);
         return response;
     }

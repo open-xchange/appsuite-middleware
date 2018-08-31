@@ -49,6 +49,7 @@
 
 package com.openexchange.microsoft.graph.onedrive.impl;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -311,6 +312,16 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         } catch (JSONException e) {
             throw new OXException(666, "JSON error", e);
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFile(java.lang.String, java.lang.String)
+     */
+    @Override
+    public InputStream getFile(String accessToken, String fileId) throws OXException {
+        return api.getContent(accessToken, fileId);
     }
 
     /*

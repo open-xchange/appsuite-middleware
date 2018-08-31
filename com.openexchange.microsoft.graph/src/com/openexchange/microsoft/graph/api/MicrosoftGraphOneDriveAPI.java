@@ -49,13 +49,23 @@
 
 package com.openexchange.microsoft.graph.api;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTEndPoint;
+import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
+import com.openexchange.rest.client.v2.RESTMethod;
+import com.openexchange.rest.client.v2.RESTResponse;
 
 /**
  * {@link MicrosoftGraphOneDriveAPI}
@@ -84,7 +94,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     public JSONObject getDrive(String accessToken) throws OXException {
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath());
     }
-    
+
     /**
      * Gets the user's OneDrive
      * 
@@ -175,6 +185,32 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      */
     public JSONObject getItem(String accessToken, String itemId) throws OXException {
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId);
+    }
+
+    public InputStream getContent(String accessToken, String itemId) throws OXException {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId + "/content");
+        request.setAccessToken(accessToken);
+        RESTResponse response = client.execute(request);
+        switch (response.getStatusCode()) {
+            case 200:
+                return new ByteArrayInputStream((byte[]) response.getResponseBody());
+            case 302:
+                // OK we follow the location
+                // see: https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_get_content
+                String location = response.getHeader(HttpHeaders.LOCATION);
+                if (Strings.isEmpty(location)) {
+                    throw new OXException(666, "No location found");
+                }
+                try {
+                    HttpRequestBase httpRequest = new HttpGet();
+                    httpRequest.setURI(new URI(location));
+                    return client.executeRequest(httpRequest).getStream();
+                } catch (URISyntaxException e) {
+                    throw RESTExceptionCodes.INVALID_URI_PATH.create(e, location);
+                }
+        }
+        throw new OXException(666, "Cannot get item " + itemId + ": code: " + response.getStatusCode() + ", response" + response.getResponseBody());
+
     }
 
     /**

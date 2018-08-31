@@ -49,11 +49,12 @@
 
 package com.openexchange.microsoft.graph.onedrive;
 
+import java.io.InputStream;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.Quota;
 
 /**
  * {@link MicrosoftGraphDriveService}
@@ -174,6 +175,15 @@ public interface MicrosoftGraphDriveService {
      * @throws OXException
      */
     List<OneDriveFile> getFiles(int userId, String accessToken, List<String> itemIds) throws OXException;
+
+    /**
+     * 
+     * @param accessToken
+     * @param fileId
+     * @return
+     * @throws OXException
+     */
+    InputStream getFile(String accessToken, String fileId) throws OXException;
 
     String moveFile(String accessToken, String fileId, String parentId) throws OXException;
 
