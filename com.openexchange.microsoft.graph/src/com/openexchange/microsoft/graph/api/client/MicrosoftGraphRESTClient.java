@@ -84,6 +84,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     }
 
     /**
+     * Executes the request
      * 
      * @param request
      * @return
@@ -93,6 +94,13 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
         return executeRequest(prepareRequest(request));
     }
 
+    /**
+     * Prepares the request
+     * 
+     * @param request
+     * @return
+     * @throws OXException
+     */
     private HttpRequestBase prepareRequest(MicrosoftGraphRequest request) throws OXException {
         HttpRequestBase httpRequest = createRequest(request.getMethod());
         try {
@@ -108,9 +116,11 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     }
 
     /**
-     * @param httpRequest
-     * @param body
-     * @throws OXException
+     * Adds an optional body to the specified HTTP request
+     * 
+     * @param httpRequest the request to add the body to
+     * @param body The body to add to the request
+     * @throws OXException if the default HTTP charset is not supported
      */
     private void addOptionalBody(HttpRequestBase httpRequest, MicrosoftGraphRequest request) throws OXException {
         switch (request.getMethod()) {
@@ -129,5 +139,4 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
                 break;
         }
     }
-
 }

@@ -276,7 +276,46 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             body.put("name", newName);
             api.patchItem(accessToken, folderId, body);
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new OXException(666, "JSON error", e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#moveFolder(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public String moveFolder(String accessToken, String folderId, String parentId, String newName) throws OXException {
+        try {
+            JSONObject parentRef = new JSONObject();
+            parentRef.put("id", parentId);
+            JSONObject body = new JSONObject();
+            body.put("name", newName);
+            body.put("parentReference", parentRef);
+            JSONObject patchItem = api.patchItem(accessToken, folderId, body);
+            return patchItem.optString("id");
+        } catch (JSONException e) {
+            throw new OXException(666, "JSON error", e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#moveFolder(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public String moveFolder(String accessToken, String folderId, String parentId) throws OXException {
+        try {
+            JSONObject parentRef = new JSONObject();
+            parentRef.put("id", parentId);
+            JSONObject body = new JSONObject();
+            body.put("parentReference", parentRef);
+            JSONObject patchItem = api.patchItem(accessToken, folderId, body);
+            return patchItem.optString("id");
+        } catch (JSONException e) {
+            throw new OXException(666, "JSON error", e);
         }
     }
 

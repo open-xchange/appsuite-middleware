@@ -173,6 +173,10 @@ public interface MicrosoftGraphDriveService {
      */
     void renameFolder(String accessToken, String folderId, String newName) throws OXException;
     
+    String moveFolder(String accessToken, String folderId, String parentId) throws OXException;
+    
+    String moveFolder(String accessToken, String folderId, String parentId, String newName) throws OXException;
+    
     /**
      * Retrieve the quota for the user's default OneDrive
      * 
