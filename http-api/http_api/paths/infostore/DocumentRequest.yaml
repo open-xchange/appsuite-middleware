@@ -9,6 +9,8 @@
     description: |
       It is possible to add a filename to the request's URI like `/infostore/{filename}?action=document`.
       The filename may be added to the customary infostore path to suggest a filename to a Save-As dialog.
+
+      If the file is an image file then it is possible to use the image transformation parameters.
     produces:
       - application/octet-stream
     parameters:
@@ -29,6 +31,15 @@
         type: string
         description: If present the response declares the given `content_type` in the Content-Type header.
         required: false
+      - $ref: "#/parameters/glbQueryParamsImageTransformationRotate"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationWidth"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationHeight"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationShrinkOnly"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationScaleType"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropWidth"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropHeight"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropX"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropY"       
     responses:
       200:
         description: The raw byte data of the document. The response type for the HTTP request is set accordingly to the defined mimetype for this infoitem or the content_type given.

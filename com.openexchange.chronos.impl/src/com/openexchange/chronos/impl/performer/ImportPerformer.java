@@ -74,7 +74,6 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UIDConflictStrategy;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link ImportPerformer}
@@ -93,7 +92,6 @@ public class ImportPerformer extends AbstractUpdatePerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
-     * @throws OXException See {@link AbstractUpdatePerformer#AbstractUpdatePerformer(CalendarStorage, CalendarSession, UserizedFolder)}
      */
     public ImportPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);

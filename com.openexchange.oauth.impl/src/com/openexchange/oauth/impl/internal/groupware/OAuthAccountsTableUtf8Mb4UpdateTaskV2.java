@@ -47,29 +47,21 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.oauth.impl.internal.groupware;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link BirthdayCalendarExportTest}
+ * {@link OAuthAccountsTableUtf8Mb4UpdateTaskV2}
  *
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BirthdayCalendarExportTest extends AbstractImportExportTest {
+public class OAuthAccountsTableUtf8Mb4UpdateTaskV2 extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
-    @Test
-    public void testBirthdayCalendarExport() throws Exception {
-        String session = defaultUserApi.getSession();
-        createContactWithBirthdayEvent(session);
-        String folderId = getBirthdayCalendarFolder();
-        //export
-        String ical = importExportManager.exportICalFile(session, folderId);
-        assertNotNull(ical);
-        assertTrue(ical.contains("Peter Paul Rubens"));
+    /**
+     * Initialises a new {@link OAuthAccountsTableUtf8Mb4UpdateTaskV2}.
+     */
+    public OAuthAccountsTableUtf8Mb4UpdateTaskV2() {
+        super(OAuthAccountsTableUtf8Mb4UpdateTask.class, "oauthAccounts");
     }
-
 }

@@ -88,7 +88,7 @@ public class UpdateMailFilterAction extends AbstractMailFilterAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        final Credentials credentials = new Credentials(session);
+        final Credentials credentials = getCredentials(session, request);
         final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         try {
             final JSONObject json = getJSONBody(request.getData());

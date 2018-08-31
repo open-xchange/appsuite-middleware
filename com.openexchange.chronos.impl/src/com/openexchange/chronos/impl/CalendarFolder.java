@@ -55,8 +55,6 @@ import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -79,25 +77,6 @@ public class CalendarFolder {
     private final Permission[] permissions;
     private final int createdBy;
     private final Session session;
-
-    /**
-     * Initializes a new {@link CalendarFolder} based on the supplied <i>userized</i> folder.
-     *
-     * @param folder The <i>userized</i> folder to use for initialization
-     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}
-     */
-    public CalendarFolder(UserizedFolder folder) throws OXException {
-        super();
-        if (false == CalendarContentType.getInstance().equals(folder.getContentType())) {
-            throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(folder.getID(), String.valueOf(folder.getContentType()));
-        }
-        this.id = folder.getID();
-        this.ownPermission = folder.getOwnPermission();
-        this.type = folder.getType();
-        this.permissions = folder.getPermissions();
-        this.createdBy = folder.getCreatedBy();
-        this.session = folder.getSession();
-    }
 
     /**
      * Initializes a new {@link CalendarFolder} for the session's user based on the supplied folder object, applying a specific set of
