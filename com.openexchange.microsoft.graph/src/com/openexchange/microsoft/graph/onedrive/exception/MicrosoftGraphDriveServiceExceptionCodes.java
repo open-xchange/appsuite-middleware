@@ -47,89 +47,57 @@
  *
  */
 
-package com.openexchange.microsoft.graph.api.exception;
+package com.openexchange.microsoft.graph.onedrive.exception;
 
-import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
-import com.openexchange.java.Strings;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link MicrosoftGraphAPIExceptionCodes}
+ * {@link MicrosoftGraphDriveServiceExceptionCodes}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCode {
-
-    ACCESS_DENIED("%1$s", CATEGORY_ERROR, ErrorCode.accessDenied, 1),
-    ACTIVITY_LIMIT_REACHED("%1$s", CATEGORY_ERROR, ErrorCode.activityLimitReached, 2),
-    GENERAL_EXCEPTION("%1$s", CATEGORY_ERROR, ErrorCode.generalException, 3),
-    INVALID_RANGE("%1$s", CATEGORY_ERROR, ErrorCode.invalidRange, 4),
-    INVALID_REQUEST("%1$s", CATEGORY_ERROR, ErrorCode.invalidRequest, 5),
-    ITEM_NOT_FOUND("%1$s", CATEGORY_ERROR, ErrorCode.itemNotFound, 6),
-    MALWARE_DETECTED("%1$s", CATEGORY_ERROR, ErrorCode.malwareDetected, 7),
-    NAME_ALREADY_EXISTS("%1$s", CATEGORY_ERROR, ErrorCode.nameAlreadyExists, 8),
-    NOT_ALLOWED("%1$s", CATEGORY_ERROR, ErrorCode.notAllowed, 9),
-    NOT_SUPPORTED("%1$s", CATEGORY_ERROR, ErrorCode.notSupported, 10),
-    RESOURCE_MODIFIED("%1$s", CATEGORY_ERROR, ErrorCode.resourceModified, 11),
-    RESYNC_REQUIRED("%1$s", CATEGORY_ERROR, ErrorCode.resyncRequired, 12),
-    SERVICE_NOT_AVAILABLE("%1$s", CATEGORY_ERROR, ErrorCode.serviceNotAvailable, 13),
-    QUOTA_LIMIT_REACHED("%1$s", CATEGORY_ERROR, ErrorCode.quotaLimitReached, 14),
-    UNAUTHENTICATED("%1$s", CATEGORY_ERROR, ErrorCode.unauthenticated, 15),
+public enum MicrosoftGraphDriveServiceExceptionCodes implements DisplayableOXExceptionCode {
     ;
 
-    public static final String PREFIX = "MICROSOFT-GRAPH-API";
-
-    private String message;
-    private String displayMessage;
-    private Category category;
-    private int number;
-    private final ErrorCode errorCode;
+    private final String message;
+    private final String displayMessage;
+    private final Category category;
+    private final int number;
 
     /**
-     * A reverse index to map the {@link ErrorCode}s with exceptions
+     * Initialises a new {@link MicrosoftGraphDriveServiceExceptionCodes}.
+     * 
+     * @param message
+     * @param category
+     * @param number
      */
-    private static final Map<ErrorCode, MicrosoftGraphAPIExceptionCodes> reverseIndex;
-    static {
-        Map<ErrorCode, MicrosoftGraphAPIExceptionCodes> m = new HashMap<>(8);
-        for (MicrosoftGraphAPIExceptionCodes c : MicrosoftGraphAPIExceptionCodes.values()) {
-            m.put(c.getErrorCode(), c);
-        }
-        reverseIndex = Collections.unmodifiableMap(m);
+    private MicrosoftGraphDriveServiceExceptionCodes(String message, Category category, int number) {
+        this(message, null, category, number);
     }
 
     /**
-     * Initialises a new {@link MicrosoftGraphAPIExceptionCodes}.
+     * Initialises a new {@link MicrosoftGraphDriveServiceExceptionCodes}.
      * 
-     * @param message The exception message
-     * @param displayMessage The display message
-     * @param category The {@link Category}
-     * @param number The error number
+     * @param message
+     * @param displayMessage
+     * @param category
+     * @param number
      */
-    private MicrosoftGraphAPIExceptionCodes(String message, Category category, ErrorCode errorCode, int number) {
-        this(message, null, category, errorCode, number);
-    }
-
-    /**
-     * Initialises a new {@link MicrosoftGraphAPIExceptionCodes}.
-     * 
-     * @param message The exception message
-     * @param displayMessage The display message
-     * @param category The {@link Category}
-     * @param number The error number
-     */
-    private MicrosoftGraphAPIExceptionCodes(String message, String displayMessage, Category category, ErrorCode errorCode, int number) {
+    private MicrosoftGraphDriveServiceExceptionCodes(String message, String displayMessage, Category category, int number) {
         this.message = message;
-        this.errorCode = errorCode;
-        this.displayMessage = null != displayMessage ? displayMessage : MESSAGE;
+        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;
         this.number = number;
+    }
+
+    @Override
+    public String getPrefix() {
+        return "GRD-ACCOUNT";
     }
 
     @Override
@@ -148,11 +116,6 @@ public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCod
     }
 
     @Override
-    public String getPrefix() {
-        return PREFIX;
-    }
-
-    @Override
     public Category getCategory() {
         return category;
     }
@@ -160,27 +123,6 @@ public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCod
     @Override
     public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
-    }
-
-    /**
-     * 
-     * @param error
-     * @return
-     */
-    public static MicrosoftGraphAPIExceptionCodes parse(String error) {
-        if (Strings.isEmpty(error)) {
-            return MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION;
-        }
-        try {
-            ErrorCode errorCode = ErrorCode.valueOf(error);
-            MicrosoftGraphAPIExceptionCodes ex = reverseIndex.get(errorCode);
-            if (ex == null) {
-                return MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION;
-            }
-            return ex;
-        } catch (IllegalArgumentException e) {
-            return MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION;
-        }
     }
 
     /**
@@ -198,7 +140,7 @@ public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCod
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Object... args) {
+    public OXException create(Object... args) {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
@@ -209,16 +151,8 @@ public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCod
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
-    public OXException create(final Throwable cause, final Object... args) {
+    public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
-    /**
-     * Gets the errorCode
-     *
-     * @return The errorCode
-     */
-    public ErrorCode getErrorCode() {
-        return errorCode;
-    }
 }
