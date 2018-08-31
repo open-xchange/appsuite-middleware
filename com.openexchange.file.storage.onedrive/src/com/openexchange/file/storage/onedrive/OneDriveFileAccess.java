@@ -153,41 +153,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     }
 
     @Override
-    public void startTransaction() throws OXException {
-        // Nope
-    }
-
-    @Override
-    public void commit() throws OXException {
-        // Nope
-    }
-
-    @Override
-    public void rollback() throws OXException {
-        // Nope
-    }
-
-    @Override
-    public void finish() throws OXException {
-        // Nope
-    }
-
-    @Override
-    public void setTransactional(final boolean transactional) {
-        // Nope
-    }
-
-    @Override
-    public void setRequestTransactional(final boolean transactional) {
-        // Nope
-    }
-
-    @Override
-    public void setCommitsTransaction(final boolean commits) {
-        // Nope
-    }
-
-    @Override
     public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
             return null != getFileMetadata(folderId, id, version);
@@ -205,24 +170,24 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(OneDriveConstants.ID);
         }
         return driveService.getFile(userId, getAccessToken(), id);
-//        return perform(new OneDriveClosure<File>() {
-//
-//            @Override
-//            protected File doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-//                HttpGet request = null;
-//                try {
-//                    request = new HttpGet(buildUri(id, initiateQueryString()));
-//                    RestFile restFile = handleHttpResponse(execute(request, httpClient), RestFile.class);
-//                    OneDriveFile file = new OneDriveFile(folderId, id, userId, getRootFolderId()).parseOneDriveFile(restFile);
-//                    if (false == file.getFolderId().equals(folderId)) {
-//                        throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
-//                    }
-//                    return file;
-//                } finally {
-//                    reset(request);
-//                }
-//            }
-//        });
+        //        return perform(new OneDriveClosure<File>() {
+        //
+        //            @Override
+        //            protected File doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpGet request = null;
+        //                try {
+        //                    request = new HttpGet(buildUri(id, initiateQueryString()));
+        //                    RestFile restFile = handleHttpResponse(execute(request, httpClient), RestFile.class);
+        //                    OneDriveFile file = new OneDriveFile(folderId, id, userId, getRootFolderId()).parseOneDriveFile(restFile);
+        //                    if (false == file.getFolderId().equals(folderId)) {
+        //                        throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
+        //                    }
+        //                    return file;
+        //                } finally {
+        //                    reset(request);
+        //                }
+        //            }
+        //        });
     }
 
     @Override
@@ -506,58 +471,59 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public void removeDocument(final String folderId, long sequenceNumber) throws OXException {
-        perform(new OneDriveClosure<Void>() {
-
-            @Override
-            protected Void doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    String fid = toOneDriveFolderId(folderId);
-                    List<String> ids = new LinkedList<>();
-
-                    int limit = 100;
-                    int offset = 0;
-                    int resultsFound;
-
-                    do {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
-                        request = method;
-
-                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
-                        int length = jData.length();
-                        resultsFound = length;
-                        for (int i = 0; i < length; i++) {
-                            JSONObject jItem = jData.getJSONObject(i);
-                            if (isFile(jItem)) {
-                                ids.add(jItem.getString("id"));
-                            }
-                        }
-                        reset(request);
-                        request = null;
-
-                        offset += limit;
-                    } while (resultsFound == limit);
-
-                    for (String id : ids) {
-                        HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
-                        request = method;
-
-                        handleHttpResponse(execute(method, httpClient), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
-
-                        reset(request);
-                        request = null;
-                    }
-
-                    return null;
-                } finally {
-                    reset(request);
-                }
-            }
-        });
+        driveService.clearFolder(getAccessToken(), folderId);
+        //        perform(new OneDriveClosure<Void>() {
+        //
+        //            @Override
+        //            protected Void doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpRequestBase request = null;
+        //                try {
+        //                    String fid = toOneDriveFolderId(folderId);
+        //                    List<String> ids = new LinkedList<>();
+        //
+        //                    int limit = 100;
+        //                    int offset = 0;
+        //                    int resultsFound;
+        //
+        //                    do {
+        //                        List<NameValuePair> qparams = initiateQueryString();
+        //                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
+        //                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
+        //                        HttpGet method = new HttpGet(buildUri(fid + "/files", qparams));
+        //                        request = method;
+        //
+        //                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
+        //                        JSONArray jData = jResponse.getJSONArray("data");
+        //                        int length = jData.length();
+        //                        resultsFound = length;
+        //                        for (int i = 0; i < length; i++) {
+        //                            JSONObject jItem = jData.getJSONObject(i);
+        //                            if (isFile(jItem)) {
+        //                                ids.add(jItem.getString("id"));
+        //                            }
+        //                        }
+        //                        reset(request);
+        //                        request = null;
+        //
+        //                        offset += limit;
+        //                    } while (resultsFound == limit);
+        //
+        //                    for (String id : ids) {
+        //                        HttpDelete method = new HttpDelete(buildUri(id, initiateQueryString()));
+        //                        request = method;
+        //
+        //                        handleHttpResponse(execute(method, httpClient), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
+        //
+        //                        reset(request);
+        //                        request = null;
+        //                    }
+        //
+        //                    return null;
+        //                } finally {
+        //                    reset(request);
+        //                }
+        //            }
+        //        });
     }
 
     @Override
@@ -567,28 +533,32 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, long sequenceNumber, final boolean hardDelete) throws OXException {
-        return perform(new OneDriveClosure<List<IDTuple>>() {
-
-            @Override
-            protected List<IDTuple> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    for (IDTuple idTuple : ids) {
-                        HttpDelete method = new HttpDelete(buildUri(idTuple.getId(), initiateQueryString()));
-                        request = method;
-
-                        handleHttpResponse(execute(method, httpClient), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
-
-                        reset(request);
-                        request = null;
-                    }
-
-                    return Collections.emptyList();
-                } finally {
-                    reset(request);
-                }
-            }
-        });
+        for (IDTuple id : ids) {
+            driveService.deleteFile(getAccessToken(), id.getId());
+        }
+        return Collections.emptyList();
+        //        return perform(new OneDriveClosure<List<IDTuple>>() {
+        //
+        //            @Override
+        //            protected List<IDTuple> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpRequestBase request = null;
+        //                try {
+        //                    for (IDTuple idTuple : ids) {
+        //                        HttpDelete method = new HttpDelete(buildUri(idTuple.getId(), initiateQueryString()));
+        //                        request = method;
+        //
+        //                        handleHttpResponse(execute(method, httpClient), STATUS_CODE_POLICY_IGNORE_NOT_FOUND, Void.class);
+        //
+        //                        reset(request);
+        //                        request = null;
+        //                    }
+        //
+        //                    return Collections.emptyList();
+        //                } finally {
+        //                    reset(request);
+        //                }
+        //            }
+        //        });
     }
 
     @Override
@@ -837,6 +807,64 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         });
     }
 
+    @Override
+    public FileStorageAccountAccess getAccountAccess() {
+        return accountAccess;
+    }
+
+    @Override
+    public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
+        if (null == folderIds || 0 == folderIds.size()) {
+            return Collections.emptyMap();
+        }
+        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
+        Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
+        for (String folderId : folderIds) {
+            Date lastModifiedDate = folderAccess.getFolder(folderId).getLastModifiedDate();
+            sequenceNumbers.put(folderId, null != lastModifiedDate ? Long.valueOf(lastModifiedDate.getTime()) : null);
+        }
+        return sequenceNumbers;
+    }
+
+    ////////////////////// NO-OPS ////////////////////////
+
+    @Override
+    public void startTransaction() throws OXException {
+        // Nope
+    }
+
+    @Override
+    public void commit() throws OXException {
+        // Nope
+    }
+
+    @Override
+    public void rollback() throws OXException {
+        // Nope
+    }
+
+    @Override
+    public void finish() throws OXException {
+        // Nope
+    }
+
+    @Override
+    public void setTransactional(final boolean transactional) {
+        // Nope
+    }
+
+    @Override
+    public void setRequestTransactional(final boolean transactional) {
+        // Nope
+    }
+
+    @Override
+    public void setCommitsTransaction(final boolean commits) {
+        // Nope
+    }
+
+    //////////////////////////// HELPERS ///////////////////////////
+
     /**
      * Gets a value indicating whether a folder is a subfolder (at any level) of a parent folder.
      *
@@ -860,25 +888,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             id = folder.getParentId();
         } while (false == id.equals(parentId) && false == id.equals(rootId));
         return id.equals(parentId);
-    }
-
-    @Override
-    public FileStorageAccountAccess getAccountAccess() {
-        return accountAccess;
-    }
-
-    @Override
-    public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
-        if (null == folderIds || 0 == folderIds.size()) {
-            return Collections.emptyMap();
-        }
-        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
-        Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
-        for (String folderId : folderIds) {
-            Date lastModifiedDate = folderAccess.getFolder(folderId).getLastModifiedDate();
-            sequenceNumbers.put(folderId, null != lastModifiedDate ? Long.valueOf(lastModifiedDate.getTime()) : null);
-        }
-        return sequenceNumbers;
     }
 
     /**

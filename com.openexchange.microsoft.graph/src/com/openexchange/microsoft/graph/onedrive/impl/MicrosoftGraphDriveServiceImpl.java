@@ -267,6 +267,16 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#deleteFile(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void deleteFile(String accessToken, String fileId) throws OXException {
+        api.deleteItem(accessToken, fileId);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#renameFolder(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override

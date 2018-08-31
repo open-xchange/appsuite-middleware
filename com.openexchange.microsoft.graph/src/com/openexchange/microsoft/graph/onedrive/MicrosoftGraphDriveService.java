@@ -134,6 +134,15 @@ public interface MicrosoftGraphDriveService {
     void clearFolder(String accessToken, String folderId) throws OXException;
 
     /**
+     * Deletes the file with the specified identifier
+     * 
+     * @param accessToken the oauth access token
+     * @param fileId the file identifier
+     * @throws OXException if an error is occurred
+     */
+    void deleteFile(String accessToken, String fileId) throws OXException;
+
+    /**
      * Returns all files with in the specified folder
      * 
      * @param userId The user identifier
@@ -163,7 +172,7 @@ public interface MicrosoftGraphDriveService {
      * @throws OXException
      */
     List<OneDriveFile> getFiles(int userId, String accessToken, List<String> itemIds) throws OXException;
-    
+
     /**
      * 
      * @param accessToken
@@ -172,11 +181,11 @@ public interface MicrosoftGraphDriveService {
      * @throws OXException
      */
     void renameFolder(String accessToken, String folderId, String newName) throws OXException;
-    
+
     String moveFolder(String accessToken, String folderId, String parentId) throws OXException;
-    
+
     String moveFolder(String accessToken, String folderId, String parentId, String newName) throws OXException;
-    
+
     /**
      * Retrieve the quota for the user's default OneDrive
      * 
