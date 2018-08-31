@@ -58,6 +58,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
@@ -277,6 +279,43 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#moveFile(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public String moveFile(String accessToken, String fileId, String parentId) throws OXException {
+        return moveItem(accessToken, fileId, parentId);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#updateFile(java.lang.String, com.openexchange.file.storage.File, java.lang.String)
+     */
+    @Override
+    public String updateFile(String accessToken, File file, List<Field> modifiedFields, String parentId) throws OXException {
+        try {
+            JSONObject body = new JSONObject();
+            if (modifiedFields == null || modifiedFields.contains(Field.FILENAME)) {
+                body.put("name", file.getFileName());
+            }
+            if (modifiedFields == null || modifiedFields.contains(Field.DESCRIPTION)) {
+                body.put("description", file.getDescription());
+            }
+            if (Strings.isNotEmpty(parentId)) {
+                JSONObject parentRef = new JSONObject();
+                parentRef.put("id", parentId);
+                body.put("parentReference", parentRef);
+            }
+            JSONObject response = api.patchItem(accessToken, file.getId(), body);
+            return response.optString("id");
+        } catch (JSONException e) {
+            throw new OXException(666, "JSON error", e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#renameFolder(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -317,16 +356,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String moveFolder(String accessToken, String folderId, String parentId) throws OXException {
-        try {
-            JSONObject parentRef = new JSONObject();
-            parentRef.put("id", parentId);
-            JSONObject body = new JSONObject();
-            body.put("parentReference", parentRef);
-            JSONObject patchItem = api.patchItem(accessToken, folderId, body);
-            return patchItem.optString("id");
-        } catch (JSONException e) {
-            throw new OXException(666, "JSON error", e);
-        }
+        return moveItem(accessToken, folderId, parentId);
     }
 
     /*
@@ -346,6 +376,29 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     }
 
     //////////////////////////////////////// HELPERS /////////////////////////////////////
+
+    /**
+     * 
+     * @param accessToken
+     * @param itemId
+     * @param parentId
+     * @return
+     * @throws OXException
+     */
+    private String moveItem(String accessToken, String itemId, String parentId) throws OXException {
+        try {
+            JSONObject parentRef = new JSONObject();
+            parentRef.put("id", parentId);
+
+            JSONObject body = new JSONObject();
+            body.put("parentReference", parentRef);
+
+            JSONObject patchItem = api.patchItem(accessToken, itemId, body);
+            return patchItem.optString("id");
+        } catch (JSONException e) {
+            throw new OXException(666, "JSON error", e);
+        }
+    }
 
     /**
      * Checks whether a folder with the specified name already exists as a sub-folder of the folder with the specified identifier

@@ -65,7 +65,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -98,7 +97,6 @@ import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpCopy;
-import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.file.storage.onedrive.rest.Image;
 import com.openexchange.file.storage.onedrive.rest.file.RestFile;
@@ -293,36 +291,36 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public IDTuple move(final IDTuple source, final String destFolder, long sequenceNumber, final File update, final List<File.Field> modifiedFields) throws OXException {
-        /*
-         * perform move operation
-         */
-        IDTuple result = perform(new OneDriveClosure<IDTuple>() {
-
-            @Override
-            protected IDTuple doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpMove request = null;
-                try {
-                    request = new HttpMove(buildUri(source.getId(), initiateQueryString()));
-                    request.setEntity(asHttpEntity(new JSONObject(1).put("destination", toOneDriveFolderId(destFolder))));
-                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                    return new IDTuple(destFolder, jResponse.getString("id"));
-                } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(source.getId(), account.getId(), e);
-                } finally {
-                    reset(request);
-                }
-            }
-        });
-        /*
-         * update additional metadata as needed
-         */
-        if (null != update) {
-            DefaultFile toUpdate = new DefaultFile(update);
-            toUpdate.setId(result.getId());
-            toUpdate.setFolderId(result.getFolder());
-            result = saveFileMetadata(update, UNDEFINED_SEQUENCE_NUMBER, modifiedFields);
+        // perform move operation
+        if (update == null) {
+            return new IDTuple(destFolder, driveService.moveFile(getAccessToken(), source.getId(), destFolder));
         }
-        return result;
+        //        IDTuple result = perform(new OneDriveClosure<IDTuple>() {
+        //
+        //            @Override
+        //            protected IDTuple doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpMove request = null;
+        //                try {
+        //                    request = new HttpMove(buildUri(source.getId(), initiateQueryString()));
+        //                    request.setEntity(asHttpEntity(new JSONObject(1).put("destination", toOneDriveFolderId(destFolder))));
+        //                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+        //                    return new IDTuple(destFolder, jResponse.getString("id"));
+        //                } catch (HttpResponseException e) {
+        //                    throw handleHttpResponseError(source.getId(), account.getId(), e);
+        //                } finally {
+        //                    reset(request);
+        //                }
+        //            }
+        //        });
+        // move and update additional metadata as needed
+        return new IDTuple(destFolder, driveService.updateFile(getAccessToken(), new DefaultFile(update), modifiedFields, destFolder));
+        //        if (null == update) {
+        //            return result;
+        //        }
+        //        DefaultFile toUpdate = new DefaultFile(update);
+        //        toUpdate.setId(result.getId());
+        //        toUpdate.setFolderId(result.getFolder());
+        //        return saveFileMetadata(update, UNDEFINED_SEQUENCE_NUMBER, modifiedFields);
     }
 
     @Override
