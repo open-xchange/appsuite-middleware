@@ -54,7 +54,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -181,30 +180,6 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
         HttpRequestBase httpRequest = createRequest(httpMethod);
         prepareRequest(httpRequest, url.getProtocol(), url.getHost(), url.getPath(), url.getQuery(), eTag, lastModified);
         return httpRequest;
-    }
-
-    /**
-     * Prepares the query string from the specified query parameters
-     *
-     * @param queryParameters The {@link Map} containing the query parameters
-     * @return The query string
-     */
-    private String prepareQuery(Map<String, String> queryParameters) {
-        if (queryParameters.isEmpty()) {
-            return "";
-        }
-
-        StringBuilder stringBuilder = new StringBuilder(64);
-        boolean first = true;
-        for (Map.Entry<String, String> queryParameter : queryParameters.entrySet()) {
-            if (first) {
-                first = false;
-            } else {
-                stringBuilder.append('&');
-            }
-            stringBuilder.append(queryParameter.getKey()).append('=').append(queryParameter.getValue());
-        }
-        return stringBuilder.toString();
     }
 
     /**

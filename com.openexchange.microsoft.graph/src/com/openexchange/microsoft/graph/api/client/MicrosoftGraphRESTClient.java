@@ -52,8 +52,6 @@ package com.openexchange.microsoft.graph.api.client;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -98,7 +96,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     private HttpRequestBase prepareRequest(MicrosoftGraphRequest request) throws OXException {
         HttpRequestBase httpRequest = createRequest(request.getMethod());
         try {
-            httpRequest.setURI(new URI(SCHEME, API_URL, "/" + API_VERSION + request.getEndPoint(), prepareQueryParameters(request.getQueryParameters()), null));
+            httpRequest.setURI(new URI(SCHEME, API_URL, "/" + API_VERSION + request.getEndPoint(), prepareQuery(request.getQueryParameters()), null));
             httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + request.getAccessToken());
             httpRequest.addHeader(HttpHeaders.ACCEPT, "application/json");
             addAdditionalHeaders(httpRequest, request.getHeaders());
@@ -112,48 +110,24 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     /**
      * @param httpRequest
      * @param body
+     * @throws OXException
      */
-    private void addOptionalBody(HttpRequestBase httpRequest, MicrosoftGraphRequest request) {
+    private void addOptionalBody(HttpRequestBase httpRequest, MicrosoftGraphRequest request) throws OXException {
         switch (request.getMethod()) {
             case PATCH:
             case POST:
             case PUT:
                 try {
+                    if (request.getBody() == null) {
+                        return;
+                    }
                     ((HttpEntityEnclosingRequestBase) httpRequest).setEntity(new StringEntity(request.getBody().toString()));
                 } catch (UnsupportedEncodingException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    throw RESTExceptionCodes.UNSUPPORTED_ENCODING.create(e);
                 }
             default:
                 break;
         }
     }
 
-    /**
-     * Add any additional headers to the request
-     * 
-     * @param request The request to add the headers to
-     * @param headers the headers to add
-     */
-    private void addAdditionalHeaders(HttpRequestBase httpRequest, Map<String, String> headers) {
-        for (Entry<String, String> header : headers.entrySet()) {
-            httpRequest.addHeader(header.getKey(), header.getValue());
-        }
-    }
-
-    /**
-     * 
-     * @param queryParams
-     * @return
-     */
-    private String prepareQueryParameters(Map<String, String> queryParams) {
-        StringBuilder queryParamBuilder = new StringBuilder(32);
-        for (Entry<String, String> queryParameter : queryParams.entrySet()) {
-            queryParamBuilder.append(queryParameter.getKey()).append('=').append(queryParameter.getValue()).append('&');
-        }
-        if (queryParamBuilder.length() > 0) {
-            queryParamBuilder.setLength(queryParamBuilder.length() - 1);
-        }
-        return queryParamBuilder.toString();
-    }
 }

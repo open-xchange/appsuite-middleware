@@ -51,6 +51,8 @@ package com.openexchange.rest.client.v2;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -170,6 +172,38 @@ public abstract class AbstractRESTClient implements Closeable {
                 throw RESTExceptionCodes.UNSUPPORTED_METHOD.create(httpMethod);
         }
         return httpRequest;
+    }
+
+    /**
+     * Add any additional headers to the request
+     * 
+     * @param request The request to add the headers to
+     * @param headers the headers to add
+     */
+    protected void addAdditionalHeaders(HttpRequestBase httpRequest, Map<String, String> headers) {
+        for (Entry<String, String> header : headers.entrySet()) {
+            httpRequest.addHeader(header.getKey(), header.getValue());
+        }
+    }
+
+    /**
+     * Prepares the query parameters and returns a query string
+     * 
+     * @param queryParams The {@link Map} with the query parameters to prepare
+     * @return the query string
+     */
+    protected String prepareQuery(Map<String, String> queryParams) {
+        if (queryParams == null || queryParams.isEmpty()) {
+            return "";
+        }
+        StringBuilder queryParamBuilder = new StringBuilder(32);
+        for (Entry<String, String> queryParameter : queryParams.entrySet()) {
+            queryParamBuilder.append(queryParameter.getKey()).append('=').append(queryParameter.getValue()).append('&');
+        }
+        if (queryParamBuilder.length() > 0) {
+            queryParamBuilder.setLength(queryParamBuilder.length() - 1);
+        }
+        return queryParamBuilder.toString();
     }
 
     /**
