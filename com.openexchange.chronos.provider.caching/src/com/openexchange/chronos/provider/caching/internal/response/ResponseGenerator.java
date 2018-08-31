@@ -76,8 +76,8 @@ public class ResponseGenerator {
         this.cachedCalendarAccess = cachedCalendarAccess;
     }
 
-    protected EventField[] getFields(EventField[] requestedFields) {
-        EventField[] fields = CalendarUtils.getFields(requestedFields);
+    protected EventField[] getFields(EventField[] requestedFields, EventField... requiredFields) {
+        EventField[] fields = CalendarUtils.getFields(requestedFields, requiredFields);
         fields = com.openexchange.tools.arrays.Arrays.remove(fields, IGNORED_FIELDS);
         return fields;
     }

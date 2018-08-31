@@ -53,9 +53,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -67,6 +71,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public abstract class AbstractMailFilterAction implements AJAXActionService{
 
     protected final ServiceLookup services;
+    private static final String UserNameParameter = "username";
 
     /**
      * Initializes a new {@link AbstractMailFilterAction}.
@@ -103,6 +108,19 @@ public abstract class AbstractMailFilterAction implements AJAXActionService{
             }
         }
         throw MailFilterExceptionCode.MISSING_PARAMETER.create("id");
+    }
+
+    protected Credentials getCredentials(Session session, AJAXRequestData request) {
+        Credentials credentials = new Credentials(session);
+        String userName = getUserName(request);
+        if(Strings.isNotEmpty(userName)) {
+            credentials.setUsername(userName);
+        }
+        return credentials;
+    }
+
+    private String getUserName(AJAXRequestData request) {
+        return request.getParameter(UserNameParameter);
     }
 
 }

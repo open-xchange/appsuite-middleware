@@ -53,6 +53,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Namespace;
 import com.openexchange.dav.reports.PrinicpalPropertySearchReport;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
@@ -135,7 +136,12 @@ public abstract class DAVProtocol extends Protocol {
      * @return The appropriate {@link WebdavProtocolException}
      */
     public static WebdavProtocolException protocolException(WebdavPath url, OXException e, int statusCode) {
-        switch (e.getCategory().getLogLevel()) {
+        LogLevel level = e.getCategory().getLogLevel();
+        if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory()) || Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
+            // override default log level for typical client errors 
+            level = LogLevel.DEBUG;
+        }
+        switch (level) {
             case TRACE:
                 LOG.trace("{}", url, e);
                 break;

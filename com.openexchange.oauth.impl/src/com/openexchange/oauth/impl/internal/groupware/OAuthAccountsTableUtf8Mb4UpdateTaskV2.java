@@ -47,44 +47,21 @@
  *
  */
 
-package com.openexchange.user.copy.internal;
+package com.openexchange.oauth.impl.internal.groupware;
 
-import com.openexchange.user.copy.internal.attachment.AttachmentCopyTest;
-import com.openexchange.user.copy.internal.calendar.CalendarCopyTest;
-import com.openexchange.user.copy.internal.contact.ContactCopyTest;
-import com.openexchange.user.copy.internal.folder.FolderCopyTest;
-import com.openexchange.user.copy.internal.infostore.InfostoreCopyTest;
-import com.openexchange.user.copy.internal.messaging.MessagingCopyTest;
-import com.openexchange.user.copy.internal.oauth.OAuthCopyTest;
-import com.openexchange.user.copy.internal.reminder.ReminderCopyTest;
-import com.openexchange.user.copy.internal.subscription.SubscriptionCopyTest;
-import com.openexchange.user.copy.internal.task.TaskCopyTest;
-import com.openexchange.user.copy.internal.user.UserCopyTest;
-import com.openexchange.user.copy.internal.uwa.UWACopyTest;
-
+import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
 /**
- * {@link UserCopyUnitTestSuite}
+ * {@link OAuthAccountsTableUtf8Mb4UpdateTaskV2}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    UserCopyTest.class,
-    CopyToolsTest.class,
-    InfostoreCopyTest.class,
-    ReminderCopyTest.class,
-    SubscriptionCopyTest.class,
-    FolderCopyTest.class,
-    CalendarCopyTest.class,
-    TaskCopyTest.class,
-    ContactCopyTest.class,        
-    AttachmentCopyTest.class,
-    UWACopyTest.class,
-    OAuthCopyTest.class,
-    MessagingCopyTest.class,
+public class OAuthAccountsTableUtf8Mb4UpdateTaskV2 extends SimpleConvertUtf8ToUtf8mb4UpdateTask {
 
-})
-public class UserCopyUnitTestSuite {
-    
+    /**
+     * Initialises a new {@link OAuthAccountsTableUtf8Mb4UpdateTaskV2}.
+     */
+    public OAuthAccountsTableUtf8Mb4UpdateTaskV2() {
+        super(OAuthAccountsTableUtf8Mb4UpdateTask.class, "oauthAccounts");
+    }
 }

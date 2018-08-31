@@ -49,15 +49,13 @@
 
 package com.openexchange.imageconverter.api;
 
-import com.openexchange.exception.OXException;
-
 /**
  * {@link ImageConverterException}
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
  * @since v7.10
  */
-public class ImageConverterException extends OXException {
+public class ImageConverterException extends Exception {
 
     /**
      * serialVersionUID
@@ -77,7 +75,7 @@ public class ImageConverterException extends OXException {
      * @param message
      */
     public ImageConverterException(String message) {
-        super(OXException.general(message));
+        super(message);
 
     }
 
@@ -87,7 +85,6 @@ public class ImageConverterException extends OXException {
      */
     public ImageConverterException(Throwable cause) {
         super(cause);
-
     }
 
     /**
@@ -96,7 +93,7 @@ public class ImageConverterException extends OXException {
      * @param cause
      */
     public ImageConverterException(String message, Throwable cause) {
-        super(OXException.general(message, cause));
+        super(message, cause);
     }
 
 }
