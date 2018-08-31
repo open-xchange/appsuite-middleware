@@ -303,6 +303,9 @@ public class Messages implements LocalizableStrings {
 	public static final String ORGANIZER_JUSTIFICATION = "You have received this E-Mail because you are the organizer of this appointment.";
 
 	public static final String RESOURCE_MANAGER_JUSTIFICATION = "You have received this E-Mail because this appointment contains the resource %1$s which is managed by you.";
+	
+    // You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
+	public static final String NO_PERMISSION = "You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.";
 
 }
 
