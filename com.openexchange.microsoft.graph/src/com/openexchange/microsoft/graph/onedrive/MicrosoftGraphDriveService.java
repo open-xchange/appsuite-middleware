@@ -163,7 +163,16 @@ public interface MicrosoftGraphDriveService {
      * @throws OXException
      */
     List<OneDriveFile> getFiles(int userId, String accessToken, List<String> itemIds) throws OXException;
-
+    
+    /**
+     * 
+     * @param accessToken
+     * @param folderId
+     * @param newName
+     * @throws OXException
+     */
+    void renameFolder(String accessToken, String folderId, String newName) throws OXException;
+    
     /**
      * Retrieve the quota for the user's default OneDrive
      * 

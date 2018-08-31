@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,6 +109,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             JSONObject response = api.getFolder(accessToken, folderId);
             return !containsError(response, ErrorCode.itemNotFound);
         } catch (OXException e) {
+            // FIXME: introduce own exception codes
             if (RESTExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
                 return false;
             }
@@ -251,6 +253,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             try {
                 files.add(fileEntityParser.parseEntity(userId, api.getItem(accessToken, itemId)));
             } catch (OXException e) {
+                // FIXME: introduce own exception codes
                 if (RESTExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
                     LOG.debug("Item with id '{}' for user with id '{}' was not found in OneDrive", itemId, userId);
                     continue;
@@ -259,6 +262,22 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             }
         }
         return files;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#renameFolder(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public void renameFolder(String accessToken, String folderId, String newName) throws OXException {
+        try {
+            JSONObject body = new JSONObject();
+            body.put("name", newName);
+            api.patchItem(accessToken, folderId, body);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -305,6 +324,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
                 continue;
             }
             if (parentId.equals(parentRef.optString("id"))) {
+                // FIXME: introduce own exception codes
                 throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(folderName, parentRef.optString("name"));
             }
         }

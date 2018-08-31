@@ -161,9 +161,7 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     private JSONObject executeRequest(MicrosoftGraphRequest request) throws OXException {
         JSONObject response = ((JSONValue) client.execute(request).getResponseBody()).toObject();
-        if (response.hasAndNotNull("error")) {
-            handleErrorResponse(response);
-        }
+        checkForErrors(response);
         return response;
     }
 
@@ -171,11 +169,16 @@ abstract class AbstractMicrosoftGraphAPI {
      * @param response
      * @throws OXException
      */
-    private void handleErrorResponse(JSONObject response) throws OXException {
-        String message = response.optString("message");
-        String code = response.optString("code");
+    private void checkForErrors(JSONObject response) throws OXException {
+        if (!response.hasAndNotNull("error")) {
+            return;
+        }
+        JSONObject error = response.optJSONObject("error");
+        if (error == null || error.isEmpty()) {
+            throw MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION.create("Unexpected error");
+        }
+        String message = error.optString("message");
+        String code = error.optString("code");
         throw MicrosoftGraphAPIExceptionCodes.parse(code).create(message);
     }
-    
-    
 }

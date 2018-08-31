@@ -55,10 +55,9 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.v2.AbstractRESTClient;
@@ -103,7 +102,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
             httpRequest.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + request.getAccessToken());
             httpRequest.addHeader(HttpHeaders.ACCEPT, "application/json");
             addAdditionalHeaders(httpRequest, request.getHeaders());
-            addOptionalBody(httpRequest, request.getBody());
+            addOptionalBody(httpRequest, request);
             return httpRequest;
         } catch (URISyntaxException e) {
             throw RESTExceptionCodes.INVALID_URI_PATH.create(e, API_VERSION + request.getEndPoint());
@@ -114,14 +113,19 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
      * @param httpRequest
      * @param body
      */
-    private void addOptionalBody(HttpRequestBase httpRequest, JSONObject body) {
-        if (httpRequest instanceof HttpPost && body != null) {
-            try {
-                ((HttpPost) httpRequest).setEntity(new StringEntity(body.toString()));
-            } catch (UnsupportedEncodingException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+    private void addOptionalBody(HttpRequestBase httpRequest, MicrosoftGraphRequest request) {
+        switch (request.getMethod()) {
+            case PATCH:
+            case POST:
+            case PUT:
+                try {
+                    ((HttpEntityEnclosingRequestBase) httpRequest).setEntity(new StringEntity(request.getBody().toString()));
+                } catch (UnsupportedEncodingException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            default:
+                break;
         }
     }
 

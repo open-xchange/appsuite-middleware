@@ -55,8 +55,6 @@ import java.util.List;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigView;
@@ -75,6 +73,7 @@ import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.http.client.methods.HttpMove;
 import com.openexchange.file.storage.onedrive.osgi.Services;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -523,42 +522,61 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     }
 
     private String renameFolder(final String folderId, final String oneDriveFolderId, final NameBuilder newName, final boolean autoRename) throws OXException {
-        return perform(new OneDriveClosure<String>() {
-
-            @Override
-            protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                NextTry: while (true) {
-                    HttpPut request = null;
-                    HttpResponse httpResponse = null;
-                    try {
-                        request = new HttpPut(buildUri(oneDriveFolderId, initiateQueryString()));
-                        request.setHeader("Content-Type", "application/json");
-                        request.setEntity(asHttpEntity(new JSONObject(1).put("name", newName.toString())));
-                        try {
-                            httpResponse = execute(request, httpClient);
-                            JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
-                            return jResponse.getString("id");
-                        } catch (DuplicateResourceException e) {
-                            if (autoRename) {
-                                newName.advance();
-                                close(request, httpResponse);
-                                httpResponse = null;
-                                request = null;
-                                continue NextTry;
-                            }
-
-                            FileStorageFolder folder = getFolder(folderId);
-                            FileStorageFolder parent = getFolder(folder.getParentId());
-                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName.toString(), parent.getName());
-                        }
-                    } catch (HttpResponseException e) {
-                        throw handleHttpResponseError(folderId, account.getId(), e);
-                    } finally {
-                        close(request, httpResponse);
+        while (true) {
+            try {
+                driveService.renameFolder(getAccessToken(), folderId, newName.toString());
+                return folderId;
+            } catch (OXException e) {
+                // FIXME: DO NOT use the API exception codes. Use the OneDrive service's codes once in place.
+                if (MicrosoftGraphAPIExceptionCodes.NAME_ALREADY_EXISTS.equals(e)) {
+                    if (autoRename) {
+                        newName.advance();
+                        continue;
                     }
+                } else {
+                    throw e;
                 }
+                FileStorageFolder folder = getFolder(folderId);
+                FileStorageFolder parent = getFolder(folder.getParentId());
+                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName.toString(), parent.getName());
             }
-        });
+        }
+        //        return perform(new OneDriveClosure<String>() {
+        //
+        //            @Override
+        //            protected String doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                NextTry: while (true) {
+        //                    HttpPut request = null;
+        //                    HttpResponse httpResponse = null;
+        //                    try {
+        //                        request = new HttpPut(buildUri(oneDriveFolderId, initiateQueryString()));
+        //                        request.setHeader("Content-Type", "application/json");
+        //                        request.setEntity(asHttpEntity(new JSONObject(1).put("name", newName.toString())));
+        //                        try {
+        //                            httpResponse = execute(request, httpClient);
+        //                            JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
+        //                            return jResponse.getString("id");
+        //                        } catch (DuplicateResourceException e) {
+        //                            if (autoRename) {
+        //                                newName.advance();
+        //                                close(request, httpResponse);
+        //                                httpResponse = null;
+        //                                request = null;
+        //                                continue NextTry;
+        //                            }
+        //
+        //                            FileStorageFolder folder = getFolder(folderId);
+        //                            FileStorageFolder parent = getFolder(folder.getParentId());
+        //                            throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, newName.toString(), parent.getName());
+        //                        }
+        //                    } catch (HttpResponseException e) {
+        //                        throw handleHttpResponseError(folderId, account.getId(), e);
+        //                    } finally {
+        //                        close(request, httpResponse);
+        //                    }
+        //                }
+        //            }
+        //        });
     }
 
     @Override
@@ -693,22 +711,22 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     @Override
     public Quota getStorageQuota(String folderId) throws OXException {
         return driveService.getQuota(getAccessToken());
-//        return perform(new OneDriveClosure<Quota>() {
-//
-//            @Override
-//            protected Quota doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-//                HttpGet request = null;
-//                try {
-//                    request = new HttpGet(buildUri("me/skydrive/quota", initiateQueryString()));
-//                    com.openexchange.file.storage.onedrive.rest.Quota quota = handleHttpResponse(execute(request, httpClient), com.openexchange.file.storage.onedrive.rest.Quota.class);
-//                    return new Quota(quota.getQuota(), quota.getQuota() - quota.getAvailable(), Type.STORAGE);
-//                } finally {
-//                    if (null != request) {
-//                        request.releaseConnection();
-//                    }
-//                }
-//            }
-//        });
+        //        return perform(new OneDriveClosure<Quota>() {
+        //
+        //            @Override
+        //            protected Quota doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpGet request = null;
+        //                try {
+        //                    request = new HttpGet(buildUri("me/skydrive/quota", initiateQueryString()));
+        //                    com.openexchange.file.storage.onedrive.rest.Quota quota = handleHttpResponse(execute(request, httpClient), com.openexchange.file.storage.onedrive.rest.Quota.class);
+        //                    return new Quota(quota.getQuota(), quota.getQuota() - quota.getAvailable(), Type.STORAGE);
+        //                } finally {
+        //                    if (null != request) {
+        //                        request.releaseConnection();
+        //                    }
+        //                }
+        //            }
+        //        });
     }
 
     @Override
