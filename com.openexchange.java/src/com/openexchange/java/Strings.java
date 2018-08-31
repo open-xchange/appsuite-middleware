@@ -1519,7 +1519,7 @@ public class Strings {
     public static String trimStart(String string, char... trimChars) {
         if (null != string && null != trimChars && 0 < trimChars.length) {
             while (0 < string.length() && contains(string.charAt(0), trimChars)) {
-                string = string.substring(1, string.length() - 1);
+                string = string.substring(1, string.length());
             }
         }
         return string;
