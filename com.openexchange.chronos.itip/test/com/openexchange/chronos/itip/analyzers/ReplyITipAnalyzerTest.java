@@ -51,13 +51,14 @@ package com.openexchange.chronos.itip.analyzers;
 
 import static org.hamcrest.Matchers.is;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -130,7 +131,7 @@ public class ReplyITipAnalyzerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        original = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        original = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         update = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
         wrapper = new HTMLWrapper();
 
@@ -151,8 +152,8 @@ public class ReplyITipAnalyzerTest {
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
 
         // Mock settings
-        PowerMockito.when(contextService.getContext(Matchers.anyInt())).thenReturn(context);
-        PowerMockito.when(userService.getUser(Matchers.anyInt(), Matchers.any())).thenReturn(user);
+        PowerMockito.when(contextService.getContext(ArgumentMatchers.anyInt())).thenReturn(context);
+        PowerMockito.when(userService.getUser(ArgumentMatchers.anyInt(), ArgumentMatchers.any())).thenReturn(user);
     }
 
     @Test(expected = OXException.class)
@@ -171,7 +172,7 @@ public class ReplyITipAnalyzerTest {
 
     @Test
     public void testAnalyze_PartyCrasherReply_AcceptPartyCrasher() throws Exception {
-        Attendee crasher = ChronosTestTools.createAttendee(CONTEXT_ID, null);
+        Attendee crasher = ChronosTestTools.createAttendee(CONTEXT_ID, (AttendeeField[]) null);
         update.setAttendees(Collections.singletonList(crasher));
         ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
         Assert.assertThat("Party crasher should have been found", analyze.getActions().toArray()[0], is(ITipAction.ACCEPT_PARTY_CRASHER));
@@ -209,7 +210,7 @@ public class ReplyITipAnalyzerTest {
      */
     @Test
     public void testAnalyze_UpperCaseMailto_NoPartyCrasherAdded() throws Exception {
-        Attendee externalAttendee = ChronosTestTools.createExternalAttendee(CONTEXT_ID % 13, null);
+        Attendee externalAttendee = ChronosTestTools.createExternalAttendee(CONTEXT_ID % 13, (AttendeeField[]) null);
         original.getAttendees().add(externalAttendee);
 
         Attendee copy = copy(externalAttendee);
@@ -226,6 +227,28 @@ public class ReplyITipAnalyzerTest {
         Event newEvent = analyze.getChanges().get(0).getNewEvent();
         Assert.assertTrue("REPLY attendee is missing.", newEvent.getAttendees().stream().filter(a -> copy.getEntity() == a.getEntity()).findAny().isPresent());
         Assert.assertThat("Status not changed", Integer.valueOf(newEvent.getAttendees().size()), is(Integer.valueOf(original.getAttendees().size())));
+    }
+
+    /**
+     * Test for bug 59647
+     * 
+     * @throws Exception If test fails
+     */
+    @Test
+    public void testAnalyze_ReplyForNonOrganizer_IgnoreAction() throws Exception {
+        Attendee copy = getAttendeeCopy();
+        copy.setPartStat(ParticipationStatus.DECLINED);
+        update.setAttendees(Collections.singletonList(copy));
+
+        // Create event unknown user, that 'accidentally' gets the mail
+        MockUser user = new MockUser(42);
+        user.setMail("notOrganizer@example.org");
+        user.setTimeZone("");
+        user.setLocale(Locale.US);
+
+        ITipAnalysis analyze = replyITipAnalyzer.analyze(message, null, wrapper, null, user, context, session);
+        Assert.assertThat("Should have been IGNORE action", analyze.getActions().toArray()[0], is(ITipAction.IGNORE));
+        Assert.assertTrue("There should be no diff displayed to the client!", analyze.getChanges().isEmpty());
     }
 
     private Attendee getAttendee() {
