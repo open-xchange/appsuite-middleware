@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.Databases;
@@ -148,11 +149,11 @@ public class RemoveParametersFromPoolConnectionUrlCustomTaskChange implements Cu
             rs = null;
         }
 
-        for (Integer db_pool_id : id2Url.keySet()) {
-            String url = id2Url.get(db_pool_id);
+        for (Entry<Integer, String> entry : id2Url.entrySet()) {
+            String url = id2Url.get(entry.getKey());
             int paramStart = url.indexOf('?');
             if (paramStart != -1) {
-                id2NewUrl.put(db_pool_id, url.substring(0, paramStart));
+                id2NewUrl.put(entry.getKey(), url.substring(0, paramStart));
             }
         }
 
