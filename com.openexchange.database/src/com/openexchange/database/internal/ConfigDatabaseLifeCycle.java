@@ -109,7 +109,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
         return poolId == Constants.CONFIGDB_WRITE_ID || poolId == Constants.CONFIGDB_READ_ID;
     }
 
-    private class ConfigPoolAdapter extends AbstractConfigurationListener<Configuration> implements ConfigDBListener {
+    private static class ConfigPoolAdapter extends AbstractConfigurationListener<Configuration> implements ConfigDBListener {
 
         ConfigPoolAdapter(int poolId, Configuration configuration, Function<Configuration, String> toUrl, Function<Configuration, Properties> toConnectionArguments, Function<Configuration, PoolConfig> toConf) {
             super(poolId, configuration, toUrl, toConnectionArguments, toConf);
