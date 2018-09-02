@@ -130,16 +130,21 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     }
 
     protected void setConfig(PoolConfig config) {
-        maxIdle = config.maxIdle;
-        maxIdleTime = config.maxIdleTime;
-        maxActive = config.maxActive;
-        maxWait = config.maxWait;
-        maxLifeTime = config.maxLifeTime;
-        exhaustedAction = config.exhaustedAction;
-        testOnActivate = config.testOnActivate;
-        testOnDeactivate = config.testOnDeactivate;
-        testOnIdle = config.testOnIdle;
-        testThreads = config.testThreads;
+        lock.lock();
+        try {
+            maxIdle = config.maxIdle;
+            maxIdleTime = config.maxIdleTime;
+            maxActive = config.maxActive;
+            maxWait = config.maxWait;
+            maxLifeTime = config.maxLifeTime;
+            exhaustedAction = config.exhaustedAction;
+            testOnActivate = config.testOnActivate;
+            testOnDeactivate = config.testOnDeactivate;
+            testOnIdle = config.testOnIdle;
+            testThreads = config.testThreads;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -171,7 +176,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             if (!poolable) {
                 numBroken++;
             }
-            poolable &= !metaData.isDeprecated(); 
+            poolable &= !metaData.isDeprecated();
             poolable &= (maxLifeTime <= 0 || metaData.getLiveTime() < maxLifeTime);
         } else {
             poolable = false;

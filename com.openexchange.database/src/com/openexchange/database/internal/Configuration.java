@@ -85,7 +85,7 @@ public final class Configuration {
 
     private final Properties configDbWriteProps = new Properties();
 
-    private final PoolConfig poolConfig = PoolConfig.DEFAULT_CONFIG.clone();
+    private final AtomicReference<PoolConfig> poolConfigReference = new AtomicReference<PoolConfig>(PoolConfig.DEFAULT_CONFIG);
 
     public Configuration() {
         super();
@@ -292,16 +292,20 @@ public final class Configuration {
      * Reads the pooling configuration from the configdb.properties file.
      */
     private void initPoolConfig() {
-        poolConfig.maxIdle = getInt(Property.MAX_IDLE, poolConfig.maxIdle);
-        poolConfig.maxIdleTime = getLong(Property.MAX_IDLE_TIME, poolConfig.maxIdleTime);
-        poolConfig.maxActive = getInt(Property.MAX_ACTIVE, poolConfig.maxActive);
-        poolConfig.maxWait = getLong(Property.MAX_WAIT, poolConfig.maxWait);
-        poolConfig.maxLifeTime = getLong(Property.MAX_LIFE_TIME, poolConfig.maxLifeTime);
-        poolConfig.exhaustedAction = ExhaustedActions.valueOf(getProperty(Property.EXHAUSTED_ACTION, poolConfig.exhaustedAction.name()));
-        poolConfig.testOnActivate = getBoolean(Property.TEST_ON_ACTIVATE, poolConfig.testOnActivate);
-        poolConfig.testOnDeactivate = getBoolean(Property.TEST_ON_DEACTIVATE, poolConfig.testOnDeactivate);
-        poolConfig.testOnIdle = getBoolean(Property.TEST_ON_IDLE, poolConfig.testOnIdle);
-        poolConfig.testThreads = getBoolean(Property.TEST_THREADS, poolConfig.testThreads);
+        PoolConfig poolConfig = poolConfigReference.get();
+        PoolConfig.Builder poolConfigBuilder = PoolConfig.builder();
+        poolConfigBuilder.withMaxIdle(getInt(Property.MAX_IDLE, poolConfig.maxIdle));
+        poolConfigBuilder.withMaxIdleTime(getLong(Property.MAX_IDLE_TIME, poolConfig.maxIdleTime));
+        poolConfigBuilder.withMaxActive(getInt(Property.MAX_ACTIVE, poolConfig.maxActive));
+        poolConfigBuilder.withMaxWait(getLong(Property.MAX_WAIT, poolConfig.maxWait));
+        poolConfigBuilder.withMaxLifeTime(getLong(Property.MAX_LIFE_TIME, poolConfig.maxLifeTime));
+        poolConfigBuilder.withExhaustedAction(ExhaustedActions.valueOf(getProperty(Property.EXHAUSTED_ACTION, poolConfig.exhaustedAction.name())));
+        poolConfigBuilder.withTestOnActivate(getBoolean(Property.TEST_ON_ACTIVATE, poolConfig.testOnActivate));
+        poolConfigBuilder.withTestOnDeactivate(getBoolean(Property.TEST_ON_DEACTIVATE, poolConfig.testOnDeactivate));
+        poolConfigBuilder.withTestOnIdle(getBoolean(Property.TEST_ON_IDLE, poolConfig.testOnIdle));
+        poolConfigBuilder.withTestThreads(getBoolean(Property.TEST_THREADS, poolConfig.testThreads));
+        poolConfig = poolConfigBuilder.build();
+        poolConfigReference.set(poolConfig);
 
         List<Object> logArgs = new ArrayList<>(24);
         logArgs.add(Strings.getLineSeparator());
@@ -343,7 +347,7 @@ public final class Configuration {
 
 
     PoolConfig getPoolConfig() {
-        return poolConfig;
+        return poolConfigReference.get();
     }
 
     @Override
@@ -352,6 +356,7 @@ public final class Configuration {
         int result = 1;
         Properties jdbcProps = jdbcPropsReference.get();
         result = prime * result + ((jdbcProps == null) ? 0 : jdbcProps.hashCode());
+        PoolConfig poolConfig = poolConfigReference.get();
         result = prime * result + ((poolConfig == null) ? 0 : poolConfig.hashCode());
         Properties props = propsReference.get();
         result = prime * result + ((props == null) ? 0 : props.hashCode());
@@ -381,11 +386,12 @@ public final class Configuration {
         } else if (!jdbcProps.equals(otherJdbcProps)) {
             return false;
         }
+        PoolConfig poolConfig = poolConfigReference.get();
         if (poolConfig == null) {
-            if (other.poolConfig != null) {
+            if (other.poolConfigReference.get() != null) {
                 return false;
             }
-        } else if (!poolConfig.equals(other.poolConfig)) {
+        } else if (!poolConfig.equals(other.poolConfigReference.get())) {
             return false;
         }
         Properties props = propsReference.get();
@@ -413,10 +419,10 @@ public final class Configuration {
         }
         return true;
     }
-    
+
     /**
      * Matches if two {@link Properties} can be considered equal
-     * 
+     *
      * @param p1 The first {@link Properties}
      * @param p2 The second {@link Properties}
      * @return <code>true</code> if both properties contain equal objects

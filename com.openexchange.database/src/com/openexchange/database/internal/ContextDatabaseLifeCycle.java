@@ -135,14 +135,14 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
     }
 
     private PoolConfig getConfig(final ConnectionData data) {
-        final PoolConfig retval = defaultPoolConfig.clone();
-        retval.maxActive = data.max;
+        final PoolConfig.Builder retval = PoolConfig.builder(defaultPoolConfig);
+        retval.withMaxActive(data.max);
         if (data.block) {
-            retval.exhaustedAction = ExhaustedActions.BLOCK;
+            retval.withExhaustedAction(ExhaustedActions.BLOCK);
         } else {
-            retval.exhaustedAction = ExhaustedActions.GROW;
+            retval.withExhaustedAction(ExhaustedActions.GROW);
         }
-        return retval;
+        return retval.build();
     }
 
     private void removeParameters(ConnectionData retval) {
