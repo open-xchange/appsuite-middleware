@@ -190,6 +190,28 @@ public interface MicrosoftGraphDriveService {
     String updateFile(String accessToken, File file, List<Field> modifiedFields, String parentId) throws OXException;
 
     /**
+     * Copy the file
+     * 
+     * @param accessToken
+     * @param itemId
+     * @param parentId
+     * @return
+     * @throws OXException
+     */
+    String copyFile(String accessToken, String itemId, String parentId) throws OXException;
+
+    /**
+     * Copy the file and update the metadata
+     * 
+     * @param accessToken
+     * @param file
+     * @param parentId
+     * @return
+     * @throws OXException
+     */
+    String copyFile(String accessToken, File file, String parentId) throws OXException;
+
+    /**
      * 
      * @param accessToken
      * @param folderId

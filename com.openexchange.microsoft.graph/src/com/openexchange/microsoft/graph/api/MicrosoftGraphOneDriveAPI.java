@@ -58,11 +58,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTEndPoint;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
+import com.openexchange.policy.retry.LinearRetryPolicy;
+import com.openexchange.policy.retry.RetryPolicy;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.v2.RESTMethod;
 import com.openexchange.rest.client.v2.RESTResponse;
@@ -232,7 +235,76 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                 }
         }
         throw new OXException(666, "Cannot get item " + itemId + ": code: " + response.getStatusCode() + ", response" + response.getResponseBody());
+    }
 
+    /**
+     * Asynchronously creates a copy of a driveItem (including any children), under a new parent item or with a new name.
+     * 
+     * @param accessToken The oauth access token
+     * @param itemId The item identifier
+     * @param body The body with the copy information such as new parent identifier or name conflict behaviour
+     * @return The value of the <code>Location</code> header which provides a URL for a service that will return
+     *         the current state of the copy operation.
+     * @throws OXException
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_copy">Copy a file or folder</a>
+     */
+    public String copyItemAsync(String accessToken, String itemId, JSONObject body) throws OXException {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itames/" + itemId + "/copy");
+        request.setAccessToken(accessToken);
+        request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        request.withBody(body);
+        RESTResponse restResponse = client.execute(request);
+        if (restResponse.getStatusCode() == 202) {
+            return restResponse.getHeader(HttpHeaders.LOCATION);
+        }
+        throw new OXException(666, "Copy failed: " + restResponse.getStatusCode());
+    }
+
+    /**
+     * Synchronously creates a copy of a drive item
+     * 
+     * @param accessToken The oauth access token
+     * @param itemId The item identifier
+     * @param body The body with the copy information such as new parent identifier or name conflict behaviour
+     * @return The new identifier of the item
+     * @throws OXException if an error is occurred
+     */
+    public String copyItem(String accessToken, String itemId, JSONObject body) throws OXException {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itames/" + itemId + "/copy");
+        request.setAccessToken(accessToken);
+        request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        request.withBody(body);
+        RESTResponse restResponse = client.execute(request);
+        if (restResponse.getStatusCode() != 202) {
+            throw new OXException(666, "Copy failed: " + restResponse.getStatusCode());
+        }
+        String location = restResponse.getHeader(HttpHeaders.LOCATION);
+        RetryPolicy retryPolicy = new LinearRetryPolicy();
+        do {
+            JSONObject monitor = monitorAsyncTask(accessToken, location);
+            double percentage = monitor.optDouble("percentageComplete");
+            if (percentage == 100) {
+                return monitor.optString("resourceId");
+            }
+        } while (retryPolicy.isRetryAllowed());
+        throw new OXException(666, "Gave up after " + retryPolicy.getMaxTries() + " tries");
+    }
+
+    /**
+     * 
+     * @param accessToken
+     * @param location
+     * @return
+     * @throws OXException
+     */
+    public JSONObject monitorAsyncTask(String accessToken, String location) throws OXException {
+        HttpRequestBase get = new HttpGet(location);
+        get.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
+        RESTResponse response = client.executeRequest(get);
+        if (APPLICATION_JSON.equals(response.getHeader(HttpHeaders.CONTENT_TYPE))) {
+            return ((JSONValue) response.getResponseBody()).toObject();
+        }
+        throw new OXException(666, "Monitor failed: " + response.getStatusCode());
     }
 
     /**

@@ -71,7 +71,7 @@ import com.openexchange.rest.client.v2.RESTResponse;
 abstract class AbstractMicrosoftGraphAPI {
 
     final MicrosoftGraphRESTClient client;
-    private static final String APPLICATION_JSON = "application/json";
+    static final String APPLICATION_JSON = "application/json";
 
     /**
      * Initialises a new {@link AbstractMicrosoftGraphAPI}.
@@ -105,6 +105,7 @@ abstract class AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, path);
         request.setAccessToken(accessToken);
         RESTResponse restResponse = client.execute(request);
+        // TODO: Check for errors
         return (byte[]) client.execute(request).getResponseBody();
     }
 
