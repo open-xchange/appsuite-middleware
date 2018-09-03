@@ -239,6 +239,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Asynchronously creates a copy of a driveItem (including any children), under a new parent item or with a new name.
+     * If another file with the same name already exists it will automatically be renamed by the API
      * 
      * @param accessToken The oauth access token
      * @param itemId The item identifier
@@ -261,7 +262,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     }
 
     /**
-     * Synchronously creates a copy of a drive item
+     * Synchronously creates a copy of a drive item.
+     * If another file with the same name already exists it will automatically be renamed by the API
      * 
      * @param accessToken The oauth access token
      * @param itemId The item identifier
@@ -270,7 +272,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @throws OXException if an error is occurred
      */
     public String copyItem(String accessToken, String itemId, JSONObject body) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itames/" + itemId + "/copy");
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/items/" + itemId + "/copy");
         request.setAccessToken(accessToken);
         request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         request.withBody(body);
@@ -281,7 +283,11 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         String location = restResponse.getHeader(HttpHeaders.LOCATION);
         RetryPolicy retryPolicy = new LinearRetryPolicy();
         do {
-            JSONObject monitor = monitorAsyncTask(accessToken, location);
+            JSONObject monitor = monitorAsyncTask(location);
+            String status = monitor.optString("status");
+            if ("failed".equals(status)) {
+                throw new OXException(666, "copy failed");
+            }
             double percentage = monitor.optDouble("percentageComplete");
             if (percentage == 100) {
                 return monitor.optString("resourceId");
@@ -297,9 +303,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @return
      * @throws OXException
      */
-    public JSONObject monitorAsyncTask(String accessToken, String location) throws OXException {
+    public JSONObject monitorAsyncTask(String location) throws OXException {
         HttpRequestBase get = new HttpGet(location);
-        get.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken);
         RESTResponse response = client.executeRequest(get);
         if (APPLICATION_JSON.equals(response.getHeader(HttpHeaders.CONTENT_TYPE))) {
             return ((JSONValue) response.getResponseBody()).toObject();

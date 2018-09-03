@@ -68,5 +68,9 @@ public enum RESTMimeType {
     /**
      * image/*
      */
-    IMAGE;
+    IMAGE,
+    /**
+     * text/*
+     */
+    TEXT;
 }

@@ -64,7 +64,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -96,7 +95,6 @@ import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
-import com.openexchange.file.storage.onedrive.http.client.methods.HttpCopy;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.file.storage.onedrive.rest.Image;
 import com.openexchange.file.storage.onedrive.rest.file.RestFile;
@@ -242,51 +240,55 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             // can only copy the current revision
             throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(OneDriveConstants.ID);
         }
-        if (destFolder.equals(source.getFolder()) && null != update && null != update.getFileName()) {
-            /*
-             * special handling to copy within the same folder
-             */
-            InputStream data = null;
-            try {
-                data = getDocument(source.getFolder(), source.getId(), CURRENT_VERSION);
-                DefaultFile toCreate = new DefaultFile(update);
-                toCreate.setId(NEW);
-                toCreate.setFolderId(destFolder);
-                return saveDocument(toCreate, data, UNDEFINED_SEQUENCE_NUMBER);
-            } finally {
-                Streams.close(data);
-            }
+        if (update == null) {
+            return new IDTuple(destFolder, driveService.copyFile(getAccessToken(), source.getId(), destFolder));
         }
+        //        IDTuple result = perform(new OneDriveClosure<IDTuple>() {
+        //
+        //            @Override
+        //            protected IDTuple doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpCopy request = null;
+        //                try {
+        //                    request = new HttpCopy(buildUri(source.getId(), initiateQueryString()));
+        //                    request.setEntity(asHttpEntity(new JSONObject(2).put("destination", toOneDriveFolderId(destFolder))));
+        //                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+        //                    return new IDTuple(destFolder, jResponse.getString("id"));
+        //                } catch (HttpResponseException e) {
+        //                    throw handleHttpResponseError(source.getId(), account.getId(), e);
+        //                } finally {
+        //                    reset(request);
+        //                }
+        //            }
+        //        });
+        //        /*
+        //         * update additional metadata as needed
+        //         */
+        //        if (null != update) {
+        //            DefaultFile toUpdate = new DefaultFile(update);
+        //            toUpdate.setId(result.getId());
+        //            toUpdate.setFolderId(result.getFolder());
+        //            result = saveFileMetadata(update, UNDEFINED_SEQUENCE_NUMBER, modifiedFields);
+        //        }
+        //        return result;
         /*
-         * perform copy operation
+         * if (destFolder.equals(source.getFolder()) && null != update && null != update.getFileName()) {
+         * return new IDTuple(destFolder, driveService.copyFile(getAccessToken(), source.getId(), update, modifiedFields, destFolder));
          */
-        IDTuple result = perform(new OneDriveClosure<IDTuple>() {
-
-            @Override
-            protected IDTuple doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpCopy request = null;
-                try {
-                    request = new HttpCopy(buildUri(source.getId(), initiateQueryString()));
-                    request.setEntity(asHttpEntity(new JSONObject(2).put("destination", toOneDriveFolderId(destFolder))));
-                    JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                    return new IDTuple(destFolder, jResponse.getString("id"));
-                } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(source.getId(), account.getId(), e);
-                } finally {
-                    reset(request);
-                }
-            }
-        });
-        /*
-         * update additional metadata as needed
-         */
-        if (null != update) {
-            DefaultFile toUpdate = new DefaultFile(update);
-            toUpdate.setId(result.getId());
-            toUpdate.setFolderId(result.getFolder());
-            result = saveFileMetadata(update, UNDEFINED_SEQUENCE_NUMBER, modifiedFields);
-        }
-        return result;
+        //            /*
+        //             * special handling to copy within the same folder
+        //             */
+        //            InputStream data = null;
+        //            try {
+        //                data = getDocument(source.getFolder(), source.getId(), CURRENT_VERSION);
+        //                DefaultFile toCreate = new DefaultFile(update);
+        //                toCreate.setId(NEW);
+        //                toCreate.setFolderId(destFolder);
+        //                return saveDocument(toCreate, data, UNDEFINED_SEQUENCE_NUMBER);
+        //            } finally {
+        //                Streams.close(data);
+        //            }
+        /* } */
+        return new IDTuple(destFolder, driveService.copyFile(getAccessToken(), source.getId(), update, modifiedFields, destFolder));
     }
 
     @Override

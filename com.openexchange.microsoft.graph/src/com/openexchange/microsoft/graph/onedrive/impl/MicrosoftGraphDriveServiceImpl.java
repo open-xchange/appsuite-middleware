@@ -343,18 +343,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     @Override
     public String updateFile(String accessToken, File file, List<Field> modifiedFields, String parentId) throws OXException {
         try {
-            JSONObject body = new JSONObject();
-            if (modifiedFields == null || modifiedFields.contains(Field.FILENAME)) {
-                body.put("name", file.getFileName());
-            }
-            if (modifiedFields == null || modifiedFields.contains(Field.DESCRIPTION)) {
-                body.put("description", file.getDescription());
-            }
-            if (Strings.isNotEmpty(parentId)) {
-                JSONObject parentRef = new JSONObject();
-                parentRef.put("id", parentId);
-                body.put("parentReference", parentRef);
-            }
+            JSONObject body = compileUpdateBody(file, modifiedFields, parentId);
             if (body.isEmpty()) {
                 return file.getId();
             }
@@ -371,9 +360,12 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#copyFile(java.lang.String, com.openexchange.file.storage.File, java.lang.String)
      */
     @Override
-    public String copyFile(String accessToken, File file, String parentId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+    public String copyFile(String accessToken, String itemId, File file, List<Field> modifiedFields, String parentId) throws OXException {
+        try {
+            return api.copyItem(accessToken, itemId, compileUpdateBody(file, modifiedFields, parentId));
+        } catch (JSONException e) {
+            throw new OXException(666, "JSON error", e);
+        }
     }
 
     /*
@@ -389,8 +381,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             //parentRef.put("driveId", getDriveId());
             JSONObject body = new JSONObject();
             body.put("parentReference", parentRef);
-            String location = api.copyItemAsync(accessToken, itemId, body);
-            return null;
+            return api.copyItem(accessToken, itemId, body);
         } catch (JSONException e) {
             throw new OXException(666, "JSON error", e);
         }
@@ -571,5 +562,29 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         }
         JSONObject error = response.optJSONObject("error");
         return errorCode.name().equals(error.optString("code"));
+    }
+
+    /**
+     * 
+     * @param file
+     * @param modifiedFields
+     * @param parentId
+     * @return
+     * @throws JSONException
+     */
+    private JSONObject compileUpdateBody(File file, List<Field> modifiedFields, String parentId) throws JSONException {
+        JSONObject body = new JSONObject();
+        if (modifiedFields == null || modifiedFields.contains(Field.FILENAME)) {
+            body.put("name", file.getFileName());
+        }
+        if (modifiedFields == null || modifiedFields.contains(Field.DESCRIPTION)) {
+            body.put("description", file.getDescription());
+        }
+        if (Strings.isNotEmpty(parentId)) {
+            JSONObject parentRef = new JSONObject();
+            parentRef.put("id", parentId);
+            body.put("parentReference", parentRef);
+        }
+        return body;
     }
 }

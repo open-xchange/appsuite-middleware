@@ -209,7 +209,7 @@ public interface MicrosoftGraphDriveService {
      * @return
      * @throws OXException
      */
-    String copyFile(String accessToken, File file, String parentId) throws OXException;
+    String copyFile(String accessToken, String itemId, File file, List<Field> modifiedFields, String parentId) throws OXException;
 
     /**
      * 
