@@ -47,7 +47,7 @@
  *
  */
 
-package com.hazelcast.core;
+package com.openexchange.hazelcast;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -63,6 +63,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import com.hazelcast.core.Cluster;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Member;
+import com.hazelcast.core.OperationTimeoutException;
 import com.hazelcast.nio.serialization.Portable;
 
 /**

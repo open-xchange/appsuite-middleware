@@ -205,7 +205,7 @@ public class UtilTest extends AbstractRMITest {
         client_db.setPoolHardLimit(20);
         client_db.setPoolInitial(2);
         client_db.setPoolMax(100);
-        client_db.setUrl("jdbc:mysql://" + hostname + "/?useUnicode=true&characterEncoding=UTF-8&" + "autoReconnect=true&useUnicode=true&useServerPrepStmts=false&useTimezone=true&" + "serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000");
+        client_db.setUrl("jdbc:mysql://" + hostname);
         client_db.setMasterId(0);
         return client_db;
     }

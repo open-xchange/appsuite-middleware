@@ -185,7 +185,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             this.diff = new ITipEventUpdate(original, updated, true, DEFAULT_SKIP);
         }
 
-        if (actor.hasRole(ITipRole.ORGANIZER) || actor.hasRole(ITipRole.PRINCIPAL)) {
+        if (actor.hasRole(ITipRole.ORGANIZER) || actor.hasRole(ITipRole.PRINCIPAL) || util.isActingOnBehalfOf(updated, session)) {
             state = new OrganizerState();
         } else {
             if (organizer.isExternal()) {

@@ -120,19 +120,46 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         }
     }
 
-    // ----------------------------------------------------------------------------------------------
+    private static class UrlAndConnectionArgs {
 
-    private final String url;
-    private final Properties info;
+        final String url;
+        final Properties connectionArguments;
+
+        UrlAndConnectionArgs(String url, Properties connectionArguments) {
+            super();
+            this.url = url;
+            this.connectionArguments = connectionArguments;
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------
 
     /**
      * Time between checks if a connection still works.
      */
-    private final long checkTime = ConnectionPool.DEFAULT_CHECK_TIME;
+    private static final long DEFAULT_CHECK_TIME = 120000;
 
-    public ConnectionLifecycle(final String url, final Properties info) {
-        this.url = url;
-        this.info = info;
+    private final AtomicReference<UrlAndConnectionArgs> urlAndConnectionReference;
+
+    /**
+     * Initializes a new {@link ConnectionLifecycle}.
+     *
+     * @param url A database URL of the form <code> jdbc:<em>subprotocol</em>:<em>subname</em></code>
+     * @param connectionArguments A list of arbitrary string tag/value pairs as connection arguments; normally at least a "user" and "password" property should be included
+     */
+    public ConnectionLifecycle(final String url, final Properties connectionArguments) {
+        super();
+        urlAndConnectionReference = new AtomicReference<>(new UrlAndConnectionArgs(url, connectionArguments));
+    }
+
+    /**
+     * Sets the JDBC URL and connection arguments to use.
+     *
+     * @param url A database URL of the form <code> jdbc:<em>subprotocol</em>:<em>subname</em></code>
+     * @param connectionArguments A list of arbitrary string tag/value pairs as connection arguments; normally at least a "user" and "password" property should be included
+     */
+    public void setUrlAndConnectionArgs(String url, Properties connectionArguments) {
+        urlAndConnectionReference.set(new UrlAndConnectionArgs(url, connectionArguments));
     }
 
     @Override
@@ -143,7 +170,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         ResultSet result = null;
         try {
             retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(con, true);
-            if (retval && data.getLastPacketDiffFallbackToTimeDiff() > checkTime) {
+            if (retval && data.getLastPacketDiffFallbackToTimeDiff() > DEFAULT_CHECK_TIME) {
                 stmt = con.createStatement();
                 result = stmt.executeQuery(TEST_SELECT);
                 if (result.next()) {
@@ -162,27 +189,28 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     @Override
     public Connection create() throws SQLException {
-        return DriverManager.getConnection(url, info);
+        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
+        return DriverManager.getConnection(urlAndConnectionArgs.url, urlAndConnectionArgs.connectionArguments);
     }
 
     public Connection createWithoutTimeout() throws SQLException {
-        final Properties withoutTimeout = new Properties();
-        withoutTimeout.putAll(info);
-        final Iterator<Object> iter = withoutTimeout.keySet().iterator();
-        while (iter.hasNext()) {
+        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
+        Properties withoutTimeout = new Properties();
+        withoutTimeout.putAll(urlAndConnectionArgs.connectionArguments);
+        for (Iterator<Object> iter = withoutTimeout.keySet().iterator(); iter.hasNext();) {
             final Object test = iter.next();
             if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
                 iter.remove();
             }
         }
-        return DriverManager.getConnection(url, withoutTimeout);
+        return DriverManager.getConnection(urlAndConnectionArgs.url, withoutTimeout);
     }
 
     @Override
     public boolean deactivate(final PooledData<Connection> data) {
         boolean retval = true;
         try {
-            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(data.getPooled(), true);;
+            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(data.getPooled(), true);
         } catch (final SQLException e) {
             retval = false;
         }
