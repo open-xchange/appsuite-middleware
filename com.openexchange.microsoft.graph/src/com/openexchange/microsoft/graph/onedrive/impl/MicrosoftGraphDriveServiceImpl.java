@@ -307,6 +307,9 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
                 parentRef.put("id", parentId);
                 body.put("parentReference", parentRef);
             }
+            if (body.isEmpty()) {
+                return file.getId();
+            }
             JSONObject response = api.patchItem(accessToken, file.getId(), body);
             return response.optString("id");
         } catch (JSONException e) {

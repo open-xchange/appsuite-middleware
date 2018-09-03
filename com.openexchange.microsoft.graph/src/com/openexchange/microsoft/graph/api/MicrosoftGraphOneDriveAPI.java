@@ -76,6 +76,11 @@ import com.openexchange.rest.client.v2.RESTResponse;
 public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
+     * The base API URL '/me/drive'
+     */
+    private static final String BASE_URL = "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath();
+
+    /**
      * Initialises a new {@link MicrosoftGraphOneDriveAPI}.
      * 
      * @param client The rest client
@@ -90,9 +95,10 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @param accessToken OAuth The access token
      * @return A {@link JSONObject} with the user's one drive metadata
      * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/drive_get">Get Drive</a>
      */
     public JSONObject getDrive(String accessToken) throws OXException {
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath());
+        return getResource(accessToken, BASE_URL);
     }
 
     /**
@@ -101,9 +107,10 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @param accessToken OAuth The access token
      * @return A {@link JSONObject} with the user's one drive metadata
      * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/drive_get">Get Drive</a>
      */
     public JSONObject getDrive(String accessToken, MicrosoftGraphQueryParameters queryParameters) throws OXException {
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath(), queryParameters.getQueryParametersMap());
+        return getResource(accessToken, BASE_URL, queryParameters.getQueryParametersMap());
     }
 
     /**
@@ -113,9 +120,10 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @return A {@link JSONObject} with the metadata of the user's root folder
      *         of the default Drive
      * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_get">Get a file or folder</a>
      */
     public JSONObject getRoot(String accessToken) throws OXException {
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root");
+        return getResource(accessToken, BASE_URL + "/root");
     }
 
     /**
@@ -125,9 +133,10 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @param folderPath The folder's absolute path, e.g. <code>/path/to/folder</code>
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
      * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_list_children">List the contents of a folder</a>
      */
     public JSONObject getRootChildren(String accessToken, MicrosoftGraphQueryParameters queryParameters) throws OXException {
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root/children", queryParameters.getQueryParametersMap());
+        return getResource(accessToken, BASE_URL + "/root/children", queryParameters.getQueryParametersMap());
     }
 
     /**
@@ -138,12 +147,13 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @return A {@link JSONObject} with the metadata of the user's specified folder
      *         of the default Drive
      * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_get">Get a file or folder</a>
      */
     public JSONObject getFolder(String accessToken, String folderId) throws OXException {
         if (Strings.isEmpty(folderId)) {
             return getRoot(accessToken);
         }
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + folderId);
+        return getResource(accessToken, BASE_URL + "/items/" + folderId);
     }
 
     /**
@@ -153,6 +163,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @param folderPath The folder's unique identifier
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
      * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_list_children">List the contents of a folder</a>
      */
     public JSONObject getChildren(String accessToken, String folderId) throws OXException {
         return getChildren(accessToken, folderId, new MicrosoftGraphQueryParameters.Builder().build());
@@ -167,12 +178,13 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @param skipToken The skip token for the next page (provided by the API's response)
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
      * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_list_children">List the contents of a folder</a>
      */
     public JSONObject getChildren(String accessToken, String folderId, MicrosoftGraphQueryParameters queryParameters) throws OXException {
         if (Strings.isEmpty(folderId)) {
             return getRootChildren(accessToken, new MicrosoftGraphQueryParameters.Builder().build());
         }
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + folderId + "/children", queryParameters.getQueryParametersMap());
+        return getResource(accessToken, BASE_URL + "/items/" + folderId + "/children", queryParameters.getQueryParametersMap());
     }
 
     /**
@@ -182,13 +194,23 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @param itemId The item's identifier
      * @return The item as a {@link JSONObject}
      * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_get">Get a file or folder</a>
      */
     public JSONObject getItem(String accessToken, String itemId) throws OXException {
-        return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId);
+        return getResource(accessToken, BASE_URL + "/items/" + itemId);
     }
 
+    /**
+     * Downloads the contents of a file
+     * 
+     * @param accessToken the oauth access token
+     * @param itemId The item's identifier
+     * @return The InputStream with the contents of the file
+     * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_get_content">Download the contents of a file</a>
+     */
     public InputStream getContent(String accessToken, String itemId) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId + "/content");
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, BASE_URL + "/items/" + itemId + "/content");
         request.setAccessToken(accessToken);
         RESTResponse response = client.execute(request);
         switch (response.getStatusCode()) {
@@ -219,44 +241,48 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @param accessToken The oauth access token
      * @param itemId The item's identifier
      * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_delete">Delete a file or folder</a>
      */
     public void deleteItem(String accessToken, String itemId) throws OXException {
-        deleteResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId);
+        deleteResource(accessToken, BASE_URL + "/items/" + itemId);
     }
 
     /**
+     * Performs a search and returns the results
      * 
-     * @param accessToken
-     * @param query
-     * @param queryParams
-     * @return
-     * @throws OXException
+     * @param accessToken The oauth access token
+     * @param query the search query
+     * @param queryParams The request query parameters
+     * @return The results of the search
+     * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_search">Search for files</a>
      */
     public JSONObject searchItems(String accessToken, String query, MicrosoftGraphQueryParameters queryParams) throws OXException {
-        String path = "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/root/search(q='" + query + "')";
-        return getResource(accessToken, path, queryParams.getQueryParametersMap());
+        return getResource(accessToken, BASE_URL + "/root/search(q='" + query + "')", queryParams.getQueryParametersMap());
     }
 
     /**
+     * Updates the metadata of the specified item
      * 
-     * @param accessToken
-     * @param itemId
-     * @param body
-     * @return
-     * @throws OXException
+     * @param accessToken the oauth access token
+     * @param itemId the item's identifier
+     * @param body The body with the metadata to update (delta)
+     * @return the updated item as a {@link JSONObject}
+     * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_update">Update a file or folder</a>
      */
     public JSONObject patchItem(String accessToken, String itemId, JSONObject body) throws OXException {
-        String path = "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + "/items/" + itemId;
-        return patchResource(accessToken, path, body);
+        return patchResource(accessToken, BASE_URL + "/items/" + itemId, body);
     }
 
     /**
+     * Creates a folder under the specified parent folder
      * 
-     * @param accessToken
-     * @param parentItemId
-     * @param autorename
-     * @return
-     * @throws OXException
+     * @param accessToken The oauth access token
+     * @param parentItemId The parent identifier (an empty or <code>null</code> parent identifier implies the root folder)
+     * @param autorename <code>true</code> if an autorename should happen in case of name conflicts
+     * @return The new item as a {@link JSONObject}
+     * @throws OXException if an error is occurred
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_post_children">Create a new folder in a drive</a>
      */
     public JSONObject createFolder(String accessToken, String folderName, String parentItemId, boolean autorename) throws OXException {
@@ -268,7 +294,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                 body.put("@microsoft.graph.conflictBehavior", "rename");
             }
             String path = Strings.isEmpty(parentItemId) ? "/root" : "/items/" + parentItemId;
-            return postResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath() + path + "/children", body);
+            return postResource(accessToken, BASE_URL + path + "/children", body);
         } catch (JSONException e) {
             throw RESTExceptionCodes.JSON_ERROR.create(e);
         }
