@@ -90,6 +90,16 @@ public class UserPictureFinder implements ContactPictureFinder {
             User user = userService.getUser(i(modified.getUserId()), session.getContextId());
             if (null != user) {
                 modified.setContactId(I(user.getContactId()));
+
+                /*
+                 * Add mail addresses from user.
+                 * Make sure internal, reliable mails get checked first
+                 */
+                modified.setEmails(user.getMail());
+                modified.addEmails(user.getAliases());
+                if (original.hasEmail()) {
+                    modified.addEmails(original.getEmails().toArray(new String[0]));
+                }
             }
         } catch (OXException e) {
             LOGGER.debug("Unable to get contact picture for user {} in context {}", modified.getUserId(), I(session.getContextId()), e);

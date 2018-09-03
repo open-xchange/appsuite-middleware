@@ -49,11 +49,11 @@
 
 package com.openexchange.contact.picture.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
@@ -193,7 +193,7 @@ public class ContactPictureUtil extends FinderUtil {
                     continue;
                 }
 
-                List<Contact> contacts = new ArrayList<Contact>();
+                List<Contact> contacts = new LinkedList<Contact>();
                 while (result.hasNext()) {
                     Contact contact = result.next();
                     if (null != contact.getImage1() && (checkEmails(contact, email))) {
@@ -201,12 +201,12 @@ public class ContactPictureUtil extends FinderUtil {
                     }
                 }
 
-                if (contacts.isEmpty()) {
-                    return null;
-                } else if (contacts.size() != 1) {
-                    Collections.sort(contacts, ContactPictureUtil.getContactComperator());
+                if (false == contacts.isEmpty()) {
+                    if (contacts.size() != 1) {
+                        Collections.sort(contacts, ContactPictureUtil.getContactComperator());
+                    }
+                    return contacts.get(0);
                 }
-                return contacts.get(0);
             } finally {
                 Streams.close(result);
             }
