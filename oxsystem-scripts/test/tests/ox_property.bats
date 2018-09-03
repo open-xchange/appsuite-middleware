@@ -11,6 +11,9 @@ setup() {
   cat <<EOF > $PROPFILE
 #some documentation
 some.existing.property=foo
+
+#some property doc with -> characters to confuse cli option parsing
+confuse.parser=true
 EOF
   touch -d "01 Jan 1970 00:00:00 -0000" $PROPFILE
 }
@@ -56,5 +59,13 @@ teardown() {
     return 1
   else
     return 0
+  fi
+}
+
+@test "not confused by dashes" {
+  if contains "-> characters" $PROPFILE; then
+    return 0
+  else
+    return 1
   fi
 }

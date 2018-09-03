@@ -51,6 +51,8 @@ package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.SearchStrings.lengthWithoutWildcards;
+import static com.openexchange.tools.arrays.Arrays.contains;
+import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -77,7 +79,6 @@ import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.Mapping;
-import com.openexchange.java.Strings;
 
 /**
  * {@link Check}
@@ -249,36 +250,49 @@ public class Check {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_ALARM}
      */
     public static Alarm alarmIsValid(Alarm alarm) throws OXException {
+        return alarmIsValid(alarm, null);
+    }
+
+    /**
+     * Checks that the supplied alarm is valid, i.e. it contains all mandatory properties.
+     *
+     * @param alarm The alarm to check
+     * @param fields The alarm fields to check, or <code>null</code> to check all fields
+     * @return The passed alarm, after it was checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_ALARM}
+     */
+    public static Alarm alarmIsValid(Alarm alarm, AlarmField[] fields) throws OXException {
         /*
          * action and trigger are both required for any type of alarm
          */
-        if (null == alarm.getAction()) {
+        if (null == alarm.getAction() && (null == fields || contains(fields, AlarmField.ACTION))) {
             throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ACTION.toString());
         }
-        if (null == alarm.getTrigger() || null == alarm.getTrigger().getDateTime() && null == alarm.getTrigger().getDuration()) {
+        if ((null == alarm.getTrigger() || null == alarm.getTrigger().getDateTime() && null == alarm.getTrigger().getDuration()) &&
+            (null == fields || contains(fields, AlarmField.TRIGGER))) {
             throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.TRIGGER.toString());
         }
         /*
          * check further properties based on alarm type
          */
         if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
-            if (!alarm.containsDescription()) {
+            if (null == alarm.getDescription() && (null == fields || contains(fields, AlarmField.DESCRIPTION))) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
             }
-            return alarm;
         } else if (AlarmAction.EMAIL.equals(alarm.getAction())) {
-            if ((!alarm.containsDescription()) || Strings.isEmpty(alarm.getDescription())) {
+            if (null == alarm.getDescription() && (null == fields || contains(fields, AlarmField.DESCRIPTION))) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
             }
-            if ((!alarm.containsSummary()) || Strings.isEmpty(alarm.getSummary())) {
+            if (null == alarm.getSummary() && (null == fields || contains(fields, AlarmField.SUMMARY))) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.SUMMARY.toString());
             }
-
-            if ((!alarm.containsAttendees()) || null ==  alarm.getAttendees() || alarm.getAttendees().isEmpty()) {
-                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
-            }
-            for (Attendee attendee : alarm.getAttendees()) {
-                requireValidEMail(attendee);
+            if (null == fields || contains(fields, AlarmField.ATTENDEES)) {
+                if (isNullOrEmpty(alarm.getAttendees())) {
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
+                }
+                for (Attendee attendee : alarm.getAttendees()) {
+                    requireValidEMail(attendee);
+                }
             }
         }
         return alarm;

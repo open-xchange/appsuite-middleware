@@ -54,7 +54,6 @@ import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
-import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -546,51 +545,6 @@ public class Utils {
         Event anonymizedEvent = EventMapper.getInstance().copy(event, new Event(), NON_CLASSIFIED_FIELDS);
         anonymizedEvent.setSummary(StringHelper.valueOf(session.getEntityResolver().getLocale(session.getUserId())).getString(CalendarStrings.SUMMARY_PRIVATE));
         return anonymizedEvent;
-    }
-
-    /**
-     * Gets a value indicating whether a specific event should be excluded from results based on the configured calendar parameters,
-     * e.g. because ...
-     * <ul>
-     * <li>it is classified as private or confidential for the accessing user and such events are configured to be excluded</li>
-     * <li>it's start-date is behind the range requested via parameters</li>
-     * <li>it's end-date is before the range requested via parameters</li>
-     * </ul>
-     *
-     * @param event The event to check
-     * @param session The calendar session
-     * @param skipClassified <code>true</code> to skip <i>confidential</i> events in shared folders, <code>false</code>, otherwise
-     * @return <code>true</code> if the event should be excluded, <code>false</code>, otherwise
-     */
-    public static boolean isExcluded(Event event, CalendarSession session, boolean skipClassified) throws OXException {
-        /*
-         * excluded if "classified" for user (and such events are requested to be excluded)
-         */
-        if (isClassifiedFor(event, session.getUserId())) {
-            if (skipClassified || false == Classification.CONFIDENTIAL.equals(event.getClassification())) {
-                // only include 'confidential' events if requested
-                return true;
-            }
-        }
-        Date from = getFrom(session);
-        Date until = getUntil(session);
-        if ((null != from || null != until) && null != event.getStartDate()) {
-            if (isSeriesMaster(event)) {
-                /*
-                 * excluded if there are no actual occurrences in range
-                 */
-                return false == session.getRecurrenceService().iterateEventOccurrences(event, from, until).hasNext();
-            } else {
-                /*
-                 * excluded if event period not in range
-                 */
-                TimeZone timeZone = getTimeZone(session);
-                if (false == isInRange(event, from, until, timeZone)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
