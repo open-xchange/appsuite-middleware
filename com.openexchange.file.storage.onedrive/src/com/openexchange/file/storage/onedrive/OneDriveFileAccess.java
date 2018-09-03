@@ -206,28 +206,29 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                          */
                         return saveDocument(file, Streams.EMPTY_INPUT_STREAM, sequenceNumber, modifiedFields);
                     } else {
+                        return new IDTuple(file.getFolderId(), driveService.updateFile(getAccessToken(), file, modifiedFields, null));
                         /*
                          * rename / description change
                          */
-                        if (null != modifiedFields && false == modifiedFields.contains(Field.FILENAME) && false == modifiedFields.contains(Field.DESCRIPTION)) {
-                            // no change
-                            return new IDTuple(file.getFolderId(), file.getId());
-                        }
-                        request = new HttpPut(buildUri(file.getId(), initiateQueryString()));
-                        JSONObject json = new JSONObject(2);
-                        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-                            json.put("name", file.getFileName());
-                        }
-                        if (null == modifiedFields || modifiedFields.contains(Field.DESCRIPTION)) {
-                            json.put("description", file.getDescription());
-                        }
-                        request.setEntity(asHttpEntity(json));
-                        JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                        file.setId(jResponse.getString("id"));
-                        return new IDTuple(file.getFolderId(), file.getId());
+                        //                        if (null != modifiedFields && false == modifiedFields.contains(Field.FILENAME) && false == modifiedFields.contains(Field.DESCRIPTION)) {
+                        //                            // no change
+                        //                            return new IDTuple(file.getFolderId(), file.getId());
+                        //                        }
+                        //                        request = new HttpPut(buildUri(file.getId(), initiateQueryString()));
+                        //                        JSONObject json = new JSONObject(2);
+                        //                        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+                        //                            json.put("name", file.getFileName());
+                        //                        }
+                        //                        if (null == modifiedFields || modifiedFields.contains(Field.DESCRIPTION)) {
+                        //                            json.put("description", file.getDescription());
+                        //                        }
+                        //                        request.setEntity(asHttpEntity(json));
+                        //                        JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+                        //                        file.setId(jResponse.getString("id"));
+                        //                        return new IDTuple(file.getFolderId(), file.getId());
                     }
-                } catch (HttpResponseException e) {
-                    throw handleHttpResponseError(file.getId(), account.getId(), e);
+                    //                } catch (HttpResponseException e) {
+                    //                    throw handleHttpResponseError(file.getId(), account.getId(), e);
                 } finally {
                     reset(request);
                 }
