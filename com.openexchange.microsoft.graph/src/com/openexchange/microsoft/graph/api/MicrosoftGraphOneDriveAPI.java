@@ -326,11 +326,11 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         }
         for (int index = 0; index < array.length(); index++) {
             JSONObject thumbnail = array.optJSONObject(index);
-            JSONObject mediumThumb = thumbnail.optJSONObject("small");
-            if (mediumThumb == null || mediumThumb.isEmpty()) {
+            JSONObject thumb = thumbnail.optJSONObject("large");
+            if (thumb == null || thumb.isEmpty()) {
                 continue;
             }
-            String location = mediumThumb.optString("url");
+            String location = thumb.optString("url");
             if (Strings.isEmpty(location)) {
                 continue;
             }
