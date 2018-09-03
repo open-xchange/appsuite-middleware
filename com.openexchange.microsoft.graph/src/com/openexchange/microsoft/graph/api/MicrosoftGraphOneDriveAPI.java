@@ -56,6 +56,7 @@ import java.net.URISyntaxException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -310,6 +311,35 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
             return ((JSONValue) response.getResponseBody()).toObject();
         }
         throw new OXException(666, "Monitor failed: " + response.getStatusCode());
+    }
+
+    public JSONObject getThumbnails(String accessToken, String itemId) throws OXException {
+        return getResource(accessToken, BASE_URL + "/items/" + itemId + "/thumbnails");
+    }
+
+    public InputStream getThumbnailContent(String accessToken, String itemId) throws OXException {
+        JSONObject thumbnails = getThumbnails(accessToken, itemId);
+        JSONArray array = thumbnails.optJSONArray("value");
+        if (array == null || array.isEmpty()) {
+            // No thumbnail available
+            return null;
+        }
+        for (int index = 0; index < array.length(); index++) {
+            JSONObject thumbnail = array.optJSONObject(index);
+            JSONObject mediumThumb = thumbnail.optJSONObject("small");
+            if (mediumThumb == null || mediumThumb.isEmpty()) {
+                continue;
+            }
+            String location = mediumThumb.optString("url");
+            if (Strings.isEmpty(location)) {
+                continue;
+            }
+            HttpRequestBase get = new HttpGet(location);
+            RESTResponse response = client.executeRequest(get);
+            return new ByteArrayInputStream((byte[]) response.getResponseBody()); // FIXME: asap!
+        }
+        // No thumbnail available
+        return null;
     }
 
     /**

@@ -137,6 +137,19 @@ public interface MicrosoftGraphDriveService {
     void clearFolder(String accessToken, String folderId) throws OXException;
 
     /**
+     * 
+     * @param accessToken
+     * @param folderId
+     * @param newName
+     * @throws OXException
+     */
+    void renameFolder(String accessToken, String folderId, String newName) throws OXException;
+
+    String moveFolder(String accessToken, String folderId, String parentId) throws OXException;
+
+    String moveFolder(String accessToken, String folderId, String parentId, String newName) throws OXException;
+    
+    /**
      * Deletes the file with the specified identifier
      * 
      * @param accessToken the oauth access token
@@ -210,19 +223,8 @@ public interface MicrosoftGraphDriveService {
      * @throws OXException
      */
     String copyFile(String accessToken, String itemId, File file, List<Field> modifiedFields, String parentId) throws OXException;
-
-    /**
-     * 
-     * @param accessToken
-     * @param folderId
-     * @param newName
-     * @throws OXException
-     */
-    void renameFolder(String accessToken, String folderId, String newName) throws OXException;
-
-    String moveFolder(String accessToken, String folderId, String parentId) throws OXException;
-
-    String moveFolder(String accessToken, String folderId, String parentId, String newName) throws OXException;
+    
+    InputStream getThumbnail(String accessToken, String itemId) throws OXException;
 
     /**
      * Retrieve the quota for the user's default OneDrive

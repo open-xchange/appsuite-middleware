@@ -400,6 +400,16 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getThumbnail(java.lang.String, java.lang.String)
+     */
+    @Override
+    public InputStream getThumbnail(String accessToken, String itemId) throws OXException {
+        return api.getThumbnailContent(accessToken, itemId);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getQuota(java.lang.String)
      */
     @Override

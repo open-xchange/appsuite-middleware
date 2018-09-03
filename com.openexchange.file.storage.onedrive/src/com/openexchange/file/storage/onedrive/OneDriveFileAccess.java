@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -96,8 +95,6 @@ import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.osgi.Services;
-import com.openexchange.file.storage.onedrive.rest.Image;
-import com.openexchange.file.storage.onedrive.rest.file.RestFile;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Charsets;
@@ -355,47 +352,48 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public InputStream getThumbnailStream(String folderId, final String id, String version) throws OXException {
-        return perform(new OneDriveClosure<InputStream>() {
-
-            @Override
-            protected InputStream doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpGet request = null;
-                boolean error = true;
-                try {
-                    /*
-                     * discover thumbnail image url
-                     */
-                    request = new HttpGet(buildUri(id, initiateQueryString()));
-                    RestFile restFile = handleHttpResponse(execute(request, httpClient), RestFile.class);
-                    reset(request);
-                    Image[] images = restFile.getImages();
-                    if (null != images && 0 < images.length) {
-                        for (String imageType : new String[] { "album", "thumbnail", "normal" }) {
-                            for (Image image : images) {
-                                if (imageType.equals(image.getType()) && null != image.getSource()) {
-                                    /*
-                                     * get & return this thumbnail stream
-                                     */
-                                    request = new HttpGet(image.getSource());
-                                    HttpResponse httpResponse = execute(request, httpClient);
-                                    InputStream content = httpResponse.getEntity().getContent();
-                                    error = false;
-                                    return content;
-                                }
-                            }
-                        }
-                    }
-                    /*
-                     * no thumbnail available
-                     */
-                    return null;
-                } finally {
-                    if (error) {
-                        reset(request);
-                    }
-                }
-            }
-        });
+        return driveService.getThumbnail(getAccessToken(), id);
+        //        return perform(new OneDriveClosure<InputStream>() {
+        //
+        //            @Override
+        //            protected InputStream doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpGet request = null;
+        //                boolean error = true;
+        //                try {
+        //                    /*
+        //                     * discover thumbnail image url
+        //                     */
+        //                    request = new HttpGet(buildUri(id, initiateQueryString()));
+        //                    RestFile restFile = handleHttpResponse(execute(request, httpClient), RestFile.class);
+        //                    reset(request);
+        //                    Image[] images = restFile.getImages();
+        //                    if (null != images && 0 < images.length) {
+        //                        for (String imageType : new String[] { "album", "thumbnail", "normal" }) {
+        //                            for (Image image : images) {
+        //                                if (imageType.equals(image.getType()) && null != image.getSource()) {
+        //                                    /*
+        //                                     * get & return this thumbnail stream
+        //                                     */
+        //                                    request = new HttpGet(image.getSource());
+        //                                    HttpResponse httpResponse = execute(request, httpClient);
+        //                                    InputStream content = httpResponse.getEntity().getContent();
+        //                                    error = false;
+        //                                    return content;
+        //                                }
+        //                            }
+        //                        }
+        //                    }
+        //                    /*
+        //                     * no thumbnail available
+        //                     */
+        //                    return null;
+        //                } finally {
+        //                    if (error) {
+        //                        reset(request);
+        //                    }
+        //                }
+        //            }
+        //        });
     }
 
     @Override
