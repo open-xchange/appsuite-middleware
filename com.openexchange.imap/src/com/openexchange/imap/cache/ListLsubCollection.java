@@ -846,13 +846,22 @@ final class ListLsubCollection implements Serializable {
                     mbox = Boolean.FALSE;
                 }
                 final String fullName = listLsubEntry.getFullName();
-
+                final String originalFullName = listLsubEntry.optOriginalFullName();
                 // (Re-)Set children
                 {
-                    final ListLsubEntryImpl oldEntry = map.get(fullName);
+                    ListLsubEntryImpl oldEntry = map.get(fullName);
+                    if (oldEntry == null && originalFullName != null) {
+                        // Re-lookup with original full name
+                        oldEntry = map.get(originalFullName);
+                    }
+
                     if (oldEntry == null) {
                         // Wasn't in map before
                         map.put(fullName, listLsubEntry);
+                        if (originalFullName != null) {
+                            map.put(originalFullName, listLsubEntry);
+                        }
+
                     } else {
                         // Already contained in map
                         oldEntry.clearChildren();
@@ -1960,6 +1969,11 @@ final class ListLsubCollection implements Serializable {
         }
 
         @Override
+        public String optOriginalFullName() {
+            return null;
+        }
+
+        @Override
         public Set<String> getAttributes() {
             return Collections.emptySet();
         }
@@ -2056,6 +2070,8 @@ final class ListLsubCollection implements Serializable {
 
         private final String fullName;
 
+        private final String originalFullName;
+
         private Set<String> attributes;
 
         private char separator;
@@ -2084,7 +2100,10 @@ final class ListLsubCollection implements Serializable {
 
         protected ListLsubEntryImpl(final String fullName, final Set<String> attributes, final char separator, final ChangeState changeState, final boolean hasInferiors, final boolean canOpen, final Boolean hasChildren, final ConcurrentMap<String, ListLsubEntryImpl> lsubMap) {
             super();
-            this.fullName = checkFullName(fullName, separator);
+            String checkedFullName = checkFullName(fullName, separator);
+            this.fullName = checkedFullName;
+            this.originalFullName = checkedFullName.length() == 0 /* root full-name is the empty string */ || fullName.equals(checkedFullName) ? null : fullName;
+
             this.attributes = attributes;
             this.separator = separator;
             this.changeState = changeState;
@@ -2106,6 +2125,7 @@ final class ListLsubCollection implements Serializable {
         protected ListLsubEntryImpl(final ListLsubEntryImpl newEntry, final boolean subscribed) {
             super();
             fullName = newEntry.fullName;
+            originalFullName = newEntry.originalFullName;
             attributes = newEntry.attributes;
             canOpen = newEntry.canOpen;
             changeState = newEntry.changeState;
@@ -2283,6 +2303,11 @@ final class ListLsubCollection implements Serializable {
         @Override
         public String getFullName() {
             return fullName;
+        }
+
+        @Override
+        public String optOriginalFullName() {
+            return originalFullName;
         }
 
         @Override
@@ -2525,7 +2550,7 @@ final class ListLsubCollection implements Serializable {
         if (null == fullName) {
             return fullName;
         }
-        if (String.valueOf(separator).equals(fullName)) {
+        if (fullName.length() == 1 && fullName.charAt(0) == separator) {
             return ROOT_FULL_NAME;
         }
         final String upperCase = Strings.toUpperCase(fullName);

@@ -230,8 +230,8 @@ specific field data of single or multiple objects.
 |:---|:---------------|:-----|:-----|:------------|
 |223 ||uid | String | Can only be written when the object is created. Internal and external globally unique identifier of the contact. Is used to recognize contacts within vCard files. If this attribute is not written it contains an automatic generated UUID.|
 |500 |Display name | display_name | String ||
-|501 |Given name | first_name |	String | First name.||
-|502 |Sur name | last_name |	String | Last name.||
+|501 |Given name | first_name | String | First name.|
+|502 |Sur name | last_name | String | Last name.|
 |503 |Middle name |	second_name | String ||
 |504 |Suffix | suffix |	String ||
 |505 |Title | title | String ||
@@ -330,13 +330,13 @@ specific field data of single or multiple objects.
 |602 || mark_as_distributionlist | Boolean ||
 |605 |Default address |	default_address | Number ||
 |606 ||	image1_url | String ||
-|608 ||	useCount | Number |	In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.||
-|616 ||	yomiFirstName | String | Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
-|617 ||	yomiLastName | String |	Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
-|618 ||	yomiCompany | String | Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)||
-|619 ||	addressHome | String | Support for Outlook 'home' address field. (since 6.20.1)||
-|620 ||	addressBusiness | String | Support for Outlook 'business' address field. (since 6.20.1)||
-|621 ||	addressOther | String |	Support for Outlook 'other' address field. (since 6.20.1)||
+|608 ||	useCount | Number |	In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.|
+|616 ||	yomiFirstName | String | Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|
+|617 ||	yomiLastName | String |	Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|
+|618 ||	yomiCompany | String | Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)|
+|619 ||	addressHome | String | Support for Outlook 'home' address field. (since 6.20.1)|
+|620 ||	addressBusiness | String | Support for Outlook 'business' address field. (since 6.20.1)|
+|621 ||	addressOther | String |	Support for Outlook 'other' address field. (since 6.20.1)|
 
 
 
