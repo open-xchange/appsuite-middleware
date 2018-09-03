@@ -86,9 +86,6 @@ public class UserPictureFinder implements ContactPictureFinder {
 
     @Override
     public ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException {
-        if(modified.hasUser() == false) {
-            return null;
-        }
         try {
             User user = userService.getUser(i(modified.getUserId()), session.getContextId());
             if (null != user) {
@@ -118,7 +115,7 @@ public class UserPictureFinder implements ContactPictureFinder {
 
     @Override
     public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
-        return original.hasUser();
+        return modified.hasUser();
     }
 
 }

@@ -70,8 +70,8 @@ public interface ContactPictureFinder extends Ranked{
      * @param original The unmodifiable {@link UnmodifiablePictureSearchData}
      * @param modified An updated version of the {@link PictureSearchData} which has been modified by previous {@link ContactPictureFinder}s.
      * @param onlyETag <code>true</code> if only the eTag should be generated, <code>false</code> otherwise
-     * @return The {@link ContactPicture} or null if none could be found.
-     * @throws OXException
+     * @return The {@link ContactPicture} or <code>null</code> if none could be found.
+     * @throws OXException If harmful picture was found
      */
     ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException;
 
