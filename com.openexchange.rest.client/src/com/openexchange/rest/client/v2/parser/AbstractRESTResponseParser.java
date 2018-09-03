@@ -133,9 +133,19 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
             response.addHeader(HttpHeaders.CONTENT_TYPE, indexOf < 0 ? value : value.substring(0, indexOf));
         });
 
+        // Location header parser
+        headerParsers.put(HttpHeaders.LOCATION, (response, httpResponse) -> {
+            String value = getHeaderValue(httpResponse, HttpHeaders.LOCATION);
+            if (Strings.isEmpty(value)) {
+                return;
+            }
+            response.addHeader(HttpHeaders.LOCATION, value);
+        });
+
         //////////////////// RESPONSE BODY PARSERS //////////////////////////
         responseBodyParsers = new HashMap<>(4);
         responseBodyParsers.put(RESTMimeType.JSON, new JsonRESTResponseBodyParser());
+        responseBodyParsers.put(RESTMimeType.TEXT, new TextRESTResponseBodyParser());
     }
 
     /*
