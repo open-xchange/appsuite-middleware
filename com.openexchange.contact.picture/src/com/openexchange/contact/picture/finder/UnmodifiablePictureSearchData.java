@@ -47,31 +47,45 @@
  *
  */
 
-package com.openexchange.java;
+package com.openexchange.contact.picture.finder;
+
+import java.util.Set;
+import com.openexchange.contact.picture.PictureSearchData;
 
 /**
- * {@link Rankable} - Adds {@link #getRanking()} to implementor.
+ * {@link UnmodifiablePictureSearchData}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.1
  */
-public interface Rankable extends Comparable<Rankable> {
+public class UnmodifiablePictureSearchData extends PictureSearchData {
 
-    /**
-     * Gets this ranking.
-     * <p>
-     * The default ranking is zero (<tt>0</tt>). An implementor with a ranking of {@code Integer.MAX_VALUE} is very likely to be returned ,
-     * whereas an implementor with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be returned.
-     *
-     * @return The ranking
-     */
-    default int getRanking() {
-        return 0;
+    public UnmodifiablePictureSearchData(Integer userId, Integer folderId, Integer contactId, Set<String> emails) {
+        super(userId, folderId, contactId, emails);
+    }
+
+    public UnmodifiablePictureSearchData(PictureSearchData data) {
+        super(data.getUserId(), data.getFolderId(), data.getContactId(), data.getEmails());
     }
 
     @Override
-    default int compareTo(Rankable o) {
-        return this.getRanking() == o.getRanking() ? 0 : this.getRanking() < o.getRanking() ? 1 : -1;
+    public void setUser(Integer userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setFolder(Integer folderId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setContactId(Integer contactId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEmails(String... emails) {
+        throw new UnsupportedOperationException();
     }
 
 }

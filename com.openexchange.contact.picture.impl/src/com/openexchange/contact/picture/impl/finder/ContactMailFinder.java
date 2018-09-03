@@ -50,7 +50,8 @@
 package com.openexchange.contact.picture.impl.finder;
 
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.PictureSearchData;
+import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -76,22 +77,22 @@ public class ContactMailFinder extends AbstractContactFinder {
     }
 
     @Override
-    public Contact getContact(Session session, ContactPictureRequestData data) throws OXException {
+    public Contact getContact(Session session, PictureSearchData data) throws OXException {
         return ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), session, false);
     }
 
     @Override
-    public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
+    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
         return super.isApplicable(session, original, modified) && modified.hasEmail();
     }
 
     @Override
-    public void modfiyResult(ContactPictureRequestData data, Contact contact) {
+    public void modfiyResult(PictureSearchData data, Contact contact) {
         // Nothing to add
     }
 
     @Override
-    void handleException(ContactPictureRequestData data, OXException e) {
+    void handleException(PictureSearchData data, OXException e) {
         LOGGER.debug("Unable to get contact for mail addresses {}.", data.getEmails(), e);
     }
 

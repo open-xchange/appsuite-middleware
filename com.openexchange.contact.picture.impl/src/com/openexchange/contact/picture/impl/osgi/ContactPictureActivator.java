@@ -109,7 +109,6 @@ public final class ContactPictureActivator extends HousekeepingActivator {
          * 1 : UserPictureFinder
          * 20 : ContactFinders (Children will register with 20 + continuous number)
          * 50 : GAB
-         * 100 : XingContactPictureFinder (Default value, registered in c.o.halo.xing package)
          */
         registerService(ContactPictureFinder.class, new UserPictureFinder(userService));
         registerService(ContactPictureFinder.class, new ContactUserFinder(userPermissionService, contactService));

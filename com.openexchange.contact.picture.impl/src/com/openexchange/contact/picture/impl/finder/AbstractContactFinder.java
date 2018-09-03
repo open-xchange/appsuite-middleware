@@ -55,9 +55,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
+import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -105,15 +105,15 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
      * @return The {@link Contact}
      * @throws OXException If contact can't be found
      */
-    abstract Contact getContact(Session session, ContactPictureRequestData data) throws OXException;
+    abstract Contact getContact(Session session, PictureSearchData data) throws OXException;
 
     /**
-     * Modifies the {@link ContactPictureRequestData} in the result
+     * Modifies the {@link PictureSearchData} in the result
      * 
-     * @param data The {@link ContactPictureRequestData}
+     * @param data The {@link PictureSearchData}
      * @param contact To get the data from
      */
-    abstract void modfiyResult(ContactPictureRequestData data, Contact contact);
+    abstract void modfiyResult(PictureSearchData data, Contact contact);
 
     /**
      * Personalized error logging
@@ -121,10 +121,10 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
      * @param data The data to log
      * @param exception The original exception to log
      */
-    abstract void handleException(ContactPictureRequestData data, OXException exception);
+    abstract void handleException(PictureSearchData data, OXException exception);
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
+    public ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException {
         try {
             Contact contact = getContact(session, modified);
             if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, modified)) {
@@ -141,7 +141,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
+    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
         if (null != userPermissionService && null != contactService) {
             try {
                 return userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).hasContact();

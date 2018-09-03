@@ -55,8 +55,8 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.ContactPictureService;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -92,6 +92,8 @@ public final class UserImageDataSource implements ImageDataSource {
 
     /**
      * Initializes a new {@link UserImageDataSource}.
+     * 
+     * @param services The {@link ServiceLookup} 
      */
     public UserImageDataSource(ServiceLookup services) {
         this.services = services;
@@ -117,7 +119,7 @@ public final class UserImageDataSource implements ImageDataSource {
             throw DataExceptionCodes.INVALID_ARGUMENT.create(e, ID_ARGUMENT, argument);
         }
 
-        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(I(userID), null, null, null);
+        PictureSearchData contactPictureRequestData = new PictureSearchData(I(userID), null, null, null);
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData, false);
 
         IFileHolder fileHolder = picture.getFileHolder();
@@ -130,7 +132,7 @@ public final class UserImageDataSource implements ImageDataSource {
         properties.put(DataProperties.PROPERTY_ID, String.valueOf(userID));
 
         if (fileHolder == null) {
-            LOG.warn("Requested a non-existing image in user contact: user-id={} context={} session-user={}. Returning an empty image as fallback.", userID, session.getContextId(), session.getUserId());
+            LOG.warn("Requested a non-existing image in user contact: user-id={} context={} session-user={}. Returning an empty image as fallback.", I(userID), I(session.getContextId()), I(session.getUserId()));
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
             properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
@@ -195,7 +197,7 @@ public final class UserImageDataSource implements ImageDataSource {
 
     @Override
     public String getETag(ImageLocation imageLocation, Session session) throws OXException {
-        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(I(Tools.getUnsignedInteger(imageLocation.getId())), null, null, null);
+        PictureSearchData contactPictureRequestData = new PictureSearchData(I(Tools.getUnsignedInteger(imageLocation.getId())), null, null, null);
         return services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData, true).getETag();
     }
 

@@ -51,7 +51,8 @@ package com.openexchange.contact.picture.impl.finder;
 
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.PictureSearchData;
+import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -78,25 +79,25 @@ public class ContactUserFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
+    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
         return super.isApplicable(session, original, modified) && original.hasUser();
     }
 
     @Override
-    public Contact getContact(Session session, ContactPictureRequestData data) throws OXException {
+    public Contact getContact(Session session, PictureSearchData data) throws OXException {
         return contactService.getUser(session, data.getUserId().intValue(), ContactPictureUtil.IMAGE_FIELD);
     }
 
     @Override
-    public void modfiyResult(ContactPictureRequestData data, Contact contact) {
+    public void modfiyResult(PictureSearchData data, Contact contact) {
         data.setContactId(I(contact.getObjectID()));
-        if (null == data.getFolderId()) {
+        if (false == data.hasFolder()) {
             data.setFolder(I(FolderObject.SYSTEM_LDAP_FOLDER_ID));
         }
     }
 
     @Override
-    public void handleException(ContactPictureRequestData data, OXException e) {
+    public void handleException(PictureSearchData data, OXException e) {
         LOGGER.debug("Unable to get contact for user {},", data.getUserId(), e);
     }
 

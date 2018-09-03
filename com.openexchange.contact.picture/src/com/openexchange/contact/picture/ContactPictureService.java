@@ -62,13 +62,13 @@ import com.openexchange.session.Session;
 public interface ContactPictureService {
 
     /**
-     * Get the contact picture for the provided {@link ContactPictureRequestData}
+     * Get the contact picture for the provided {@link PictureSearchData}
      * 
      * @param session The session
-     * @param contactPictureRequestData The {@link ContactPictureRequestData} to get the picture for
+     * @param contactPictureRequestData The {@link PictureSearchData} to get the picture for
      * @param onlyETag <code>true</code> if only the eTag should be generated, <code>false</code> otherwise
      * @return The {@link ContactPicture} and never <code>null</code>. If no picture is found {@link ContactPicture#FALLBACK_PICTURE} is used
      */
-    ContactPicture getPicture(Session session, ContactPictureRequestData contactPictureRequestData, boolean onlyETag);
+    ContactPicture getPicture(Session session, PictureSearchData contactPictureRequestData, boolean onlyETag);
 
 }

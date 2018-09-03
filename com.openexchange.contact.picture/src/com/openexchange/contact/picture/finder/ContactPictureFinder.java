@@ -50,47 +50,41 @@
 package com.openexchange.contact.picture.finder;
 
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Rankable;
+import com.openexchange.osgi.Ranked;
 import com.openexchange.session.Session;
 
 /**
- * {@link ContactPictureFinder}
- *
- *
- * Priority order is natural order ascending. Known types and priorities are:
- * <li></li>
- *
+ * {@link ContactPictureFinder} - Class that tries to lookup a contact picture in a specific service
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public interface ContactPictureFinder extends Rankable {
+public interface ContactPictureFinder extends Ranked{
 
     /**
-     * Get the contact picture for the provided {@link ContactPictureRequestData}
+     * Get the contact picture for the provided {@link PictureSearchData}
      *
      * @param session The {@link Session}
-     * @param original The unmodifiable {@link UnmodifiableContactPictureRequestData}
-     * @param modified An updated version of the {@link ContactPictureRequestData} which has been modified by previous {@link ContactPictureFinder}s.
+     * @param original The unmodifiable {@link UnmodifiablePictureSearchData}
+     * @param modified An updated version of the {@link PictureSearchData} which has been modified by previous {@link ContactPictureFinder}s.
      * @param onlyETag <code>true</code> if only the eTag should be generated, <code>false</code> otherwise
      * @return The {@link ContactPicture}
      * @throws OXException In case picture was found, but it is harmful
      */
-    ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException;
+    ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException;
 
     /**
      * Get a value indicating if the {@link ContactPictureFinder} has enough information
      * about the contact to try getting the contact picture
      * 
      * @param session The {@link Session}
-     * @param original The original {@link ContactPictureRequestData}
-     * @param modified The modified {@link ContactPictureRequestData}
+     * @param original The original {@link PictureSearchData}
+     * @param modified The modified {@link PictureSearchData}
      * @return <code>true</code> if the {@link ContactPictureFinder} can search for a contact picture,
-     *         <code>false</code> if calling {@link #getPicture(Session, UnmodifiableContactPictureRequestData, ContactPictureRequestData, boolean)} is superfluous
+     *         <code>false</code> if calling {@link #getPicture(Session, UnmodifiablePictureSearchData, PictureSearchData, boolean)} is superfluous
      */
-    boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified);
+    boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified);
 
 }

@@ -56,12 +56,12 @@ import java.util.stream.Collectors;
 import com.openexchange.java.Strings;
 
 /**
- * {@link ContactPictureRequestData} - Object holding data to get a contact picture
+ * {@link PictureSearchData} - The object containing information about the contact to find a picture for
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class ContactPictureRequestData {
+public class PictureSearchData {
 
     private Integer userId;
 
@@ -72,7 +72,7 @@ public class ContactPictureRequestData {
     private final Set<String> emails;
 
     /**
-     * Initializes a new {@link ContactPictureRequestData}.
+     * Initializes a new {@link PictureSearchData}.
      * 
      * @param userId The user identifier
      * @param folderId The folder identifier
@@ -80,7 +80,7 @@ public class ContactPictureRequestData {
      * @param emails The email addresses
      *
      */
-    public ContactPictureRequestData(Integer userId, Integer folderId, Integer contactId, Collection<String> emails) {
+    public PictureSearchData(Integer userId, Integer folderId, Integer contactId, Collection<String> emails) {
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
@@ -244,7 +244,7 @@ public class ContactPictureRequestData {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ContactPictureRequestData other = (ContactPictureRequestData) obj;
+        PictureSearchData other = (PictureSearchData) obj;
         if (contactId == null) {
             if (other.contactId != null) {
                 return false;

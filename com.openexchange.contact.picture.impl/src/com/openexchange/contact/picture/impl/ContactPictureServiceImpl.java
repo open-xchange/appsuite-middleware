@@ -56,10 +56,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureExceptionCodes;
-import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.ContactPictureService;
-import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
+import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.session.Session;
@@ -84,16 +84,17 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
     }
 
     @Override
-    public ContactPicture getPicture(Session session, ContactPictureRequestData contactData, boolean eTag) {
-        // Ask each finder if it contains the picture
+    public ContactPicture getPicture(Session session, PictureSearchData data, boolean eTag) {
         try {
             // Check session
             if (null == session) {
                 throw ContactPictureExceptionCodes.MISSING_SESSION.create();
             }
 
-            UnmodifiableContactPictureRequestData original = new UnmodifiableContactPictureRequestData(contactData);
-            ContactPictureRequestData modified = contactData;
+            UnmodifiablePictureSearchData original = new UnmodifiablePictureSearchData(data);
+            PictureSearchData modified = data;
+            
+            // Ask each finder if it contains the picture
             for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
                 ContactPictureFinder next = iterator.next();
 

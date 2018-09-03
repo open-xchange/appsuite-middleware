@@ -61,25 +61,25 @@ import com.openexchange.session.Session;
 public interface ContactPictureURLService {
 
     /**
-     * Provides a url to the picture of a contact.
+     * Provides a URL to the picture of a contact.
      *
      * @param contactId The contact id.
      * @param folderId The folder of the contact id. Must not be null in case the contact id is set.
      * @param session The users session
-     * @param preferRelativeUrl Whether a relative url is preferred or not.
-     * @return The url to the picture.
-     * @throws OXException
+     * @param preferRelativeUrl Whether a relative URL is preferred or not.
+     * @return The URL to the picture.
+     * @throws OXException If user or folder ID is missing or DispatcherPrefixService is absent
      */
     public String getContactPictureUrl(Integer contactId, Integer folderId, final Session session, final boolean preferRelativeUrl) throws OXException;
 
     /**
-     * Provides a url to the picture of an internal user.
+     * Provides a URL to the picture of an internal user.
      *
      * @param userId The user id.
      * @param session The session
-     * @param preferRelativeUrl Whether a relative url is preferred or not.
-     * @return The url to the picture.
-     * @throws OXException
+     * @param preferRelativeUrl Whether a relative URL is preferred or not.
+     * @return The URL to the picture.
+     * @throws OXException If user ID is missing or DispatcherPrefixService is absent
      */
     public String getUserPictureUrl(Integer userId, final Session session, final boolean preferRelativeUrl) throws OXException;
 }

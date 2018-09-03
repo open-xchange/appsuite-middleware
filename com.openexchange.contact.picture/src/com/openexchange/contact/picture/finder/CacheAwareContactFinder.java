@@ -49,8 +49,6 @@
 
 package com.openexchange.contact.picture.finder;
 
-import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.java.Autoboxing.l;
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
@@ -59,8 +57,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheKeyService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -83,28 +80,26 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder {
      *
      * @param leanConfigurationService The {@link LeanConfigurationService}
      * @param cacheKeyService The {@link CacheKeyService}
-     * @throws OXException
+     * @throws OXException If services are absent
      *
      */
     public CacheAwareContactFinder(LeanConfigurationService leanConfigurationService, CacheKeyService cacheKeyService) throws OXException {
-        if(leanConfigurationService == null) {
+        if (leanConfigurationService == null) {
             throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
         }
 
-        if(cacheKeyService == null) {
+        if (cacheKeyService == null) {
             throw ServiceExceptionCode.absentService(CacheKeyService.class);
         }
 
-        long duration = l(ContactPictureProperties.CACHE_DURATION.getDefaultValue(Long.class));
-        int maximumSize = i(ContactPictureProperties.CACHE_SIZE.getDefaultValue(Integer.class));
-        duration = leanConfigurationService.getLongProperty(ContactPictureProperties.CACHE_DURATION);
-        maximumSize = leanConfigurationService.getIntProperty(ContactPictureProperties.CACHE_SIZE);
+        long duration = leanConfigurationService.getLongProperty(ContactPictureProperties.CACHE_DURATION);
+        int maximumSize = leanConfigurationService.getIntProperty(ContactPictureProperties.CACHE_SIZE);
         this.cacheKeyService = cacheKeyService;
-        this.cache = CacheBuilder.newBuilder().expireAfterWrite(duration < 1 ? 1 : duration, TimeUnit.MINUTES).maximumSize(maximumSize).build();
+        this.cache = CacheBuilder.newBuilder().expireAfterWrite(duration < 1 ? 1 : duration, TimeUnit.MINUTES).maximumSize(maximumSize < 1 ? 1 : maximumSize).build();
     }
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
+    public ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException {
         FetchResult result = cache.getIfPresent(generateCacheKey(session, original, modified));
         if (null != result) {
             // The request was already performed, now get the cached data
@@ -138,7 +133,7 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder {
         }
     }
 
-    protected CacheKey generateCacheKey(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified) {
+    protected CacheKey generateCacheKey(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
         return cacheKeyService.newCacheKey(session.getContextId(), String.valueOf(session.getUserId()), original.toString(), modified.toString());
     }
 
@@ -148,13 +143,13 @@ public abstract class CacheAwareContactFinder implements ContactPictureFinder {
      * Fetches a picture from a resource
      *
      * @param session The {@link Session}
-     * @param original The {@link UnmodifiableContactPictureRequestData}
-     * @param modified The {@link ContactPictureRequestData}
+     * @param original The {@link UnmodifiablePictureSearchData}
+     * @param modified The {@link PictureSearchData}
      * @param onlyETag <code>true</code> If only the eTag should be generated
      * @return The {@link ContactPicture} or <code>null</code>
      * @throws OXException On error
      */
-    public abstract ContactPicture fetchPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException;
+    public abstract ContactPicture fetchPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException;
 
     // -----------------------------------------------------------------------------------------------
 

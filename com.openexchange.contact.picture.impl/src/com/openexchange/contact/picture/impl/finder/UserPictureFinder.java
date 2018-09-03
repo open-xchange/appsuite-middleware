@@ -54,9 +54,9 @@ import static com.openexchange.java.Autoboxing.i;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
+import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -85,7 +85,7 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
+    public ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException {
         try {
             User user = userService.getUser(i(modified.getUserId()), session.getContextId());
             if (null != user) {
@@ -93,7 +93,7 @@ public class UserPictureFinder implements ContactPictureFinder {
 
                 /*
                  * Add mail addresses from user.
-                 * Make sure internal, reliable mails get checked first
+                 * Make sure internal, reliable mails are stored first in modified object
                  */
                 modified.setEmails(user.getMail());
                 modified.addEmails(user.getAliases());
@@ -102,7 +102,7 @@ public class UserPictureFinder implements ContactPictureFinder {
                 }
             }
         } catch (OXException e) {
-            LOGGER.debug("Unable to get contact picture for user {} in context {}", modified.getUserId(), I(session.getContextId()), e);
+            LOGGER.debug("Unable to find user with identifier {} in context {}", modified.getUserId(), I(session.getContextId()), e);
         }
 
         return null;
@@ -114,7 +114,7 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
+    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
         return original.hasUser() && false == original.hasContact();
     }
 

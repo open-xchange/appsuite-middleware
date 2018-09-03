@@ -55,7 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
@@ -104,7 +104,7 @@ public class GetAction implements ETagAwareAJAXActionService {
         return result;
     }
 
-    private ContactPictureRequestData getData(AJAXRequestData requestData, Session session) throws OXException {
+    private PictureSearchData getData(AJAXRequestData requestData, Session session) throws OXException {
         Integer contactId = requestData.getParameter(CONTACT_PARAM, Integer.class, true);
         Integer folderId = requestData.getParameter(CONTACT_FOLDER_PARAM, Integer.class, true);
         if (folderId == null && contactId != null) {
@@ -113,7 +113,7 @@ public class GetAction implements ETagAwareAJAXActionService {
         String email = requestData.getParameter(MAIL_PARAM);
         Integer userId = requestData.getParameter(USER_PARAM, Integer.class, true);
 
-        return new ContactPictureRequestData(userId, folderId, contactId, Collections.singleton(email));
+        return new PictureSearchData(userId, folderId, contactId, Collections.singleton(email));
     }
 
     @Override
@@ -137,7 +137,7 @@ public class GetAction implements ETagAwareAJAXActionService {
         }
     }
 
-    private ContactPicture getPicture(Session session, ContactPictureRequestData data, boolean onlyETag) throws OXException {
+    private ContactPicture getPicture(Session session, PictureSearchData data, boolean onlyETag) throws OXException {
         return services.getServiceSafe(ContactPictureService.class).getPicture(session, data, onlyETag);
     }
 }

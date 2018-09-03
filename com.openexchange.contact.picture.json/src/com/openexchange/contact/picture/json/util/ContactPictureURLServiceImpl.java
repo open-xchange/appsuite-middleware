@@ -75,6 +75,8 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
 
     /**
      * Initializes a new {@link ContactPictureURLServiceImpl}.
+     * 
+     * @param serviceLookup The {@link ServiceLookup} 
      */
     public ContactPictureURLServiceImpl(ServiceLookup serviceLookup) {
         this.services = serviceLookup;
@@ -83,7 +85,7 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
     @Override
     public String getContactPictureUrl(Integer contactId, Integer folderId, Session session, boolean preferRelativeUrl) throws OXException {
         if (contactId == null || folderId == null) {
-            throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Tthe contactId and the folderId must not be null.");
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create("The contactId and the folderId must not be null!");
         }
         return getPictureUrl(contactId, folderId, null, session, preferRelativeUrl);
     }

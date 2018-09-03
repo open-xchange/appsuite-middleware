@@ -49,18 +49,18 @@
 
 package com.openexchange.contact.picture.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
 import com.openexchange.contact.picture.finder.FinderUtil;
+import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -82,29 +82,29 @@ public class ContactPictureUtil extends FinderUtil {
     /**
      * Generates a {@link ContactPicture} based on the given bytes
      * 
-     * @param unmodifiableData The {@link UnmodifiableContactPictureRequestData}
+     * @param unmodifiableData The {@link UnmodifiablePictureSearchData}
      * @param contact The {@link Contact}
      * @param onlyETag <code>true</code> if only eTag should be set
      * @return A {@link ContactPicture}
      */
-    public static ContactPicture fromContact(UnmodifiableContactPictureRequestData unmodifiableData, Contact contact, boolean onlyETag) {
+    public static ContactPicture fromContact(UnmodifiablePictureSearchData unmodifiableData, Contact contact, boolean onlyETag) {
         return new ContactPicture(genereateETag(unmodifiableData, contact), onlyETag ? null : transformToFileHolder(contact));
     }
 
     /**
      * Generates the ETag
      * 
-     * @param unmodifiableData The {@link UnmodifiableContactPictureRequestData}
+     * @param unmodifiableData The {@link UnmodifiablePictureSearchData}
      * @param contact The {@link Contact}
      * @return The ETag
      */
-    private static String genereateETag(UnmodifiableContactPictureRequestData unmodifiableData, Contact contact) {
+    private static String genereateETag(UnmodifiablePictureSearchData unmodifiableData, Contact contact) {
+        /*
+         *  Use the request, so that changed request will lead in different eTags. 
+         *  This is important for requests containing resizing. If the picture shall be delivered in a 
+         *  different size the eTag must not be the same compared to the original size
+         */
         return null == contact ? null : new StringBuilder(512) // @formatter:off#
-            /*
-             *  Use the request, so that changed request will lead in different eTags. 
-             *  This is important for requests containing resizing. If the picture shall be delivered in a 
-             *  different size the eTag must not be the same compared to the original size
-             */
             .append(unmodifiableData.hashCode())
             .append('/')
             .append(contact.getParentFolderID())
@@ -193,7 +193,7 @@ public class ContactPictureUtil extends FinderUtil {
                     continue;
                 }
 
-                List<Contact> contacts = new LinkedList<Contact>();
+                List<Contact> contacts = new ArrayList<Contact>();
                 while (result.hasNext()) {
                     Contact contact = result.next();
                     if (null != contact.getImage1() && (checkEmails(contact, email))) {

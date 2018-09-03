@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -193,20 +194,20 @@ public class ContactUtil {
     }
 
     /**
-     * Creates an url to the contact image of the given contact.
+     * Creates an URL to the contact image of the given contact.
      *
      * @param session The user session
      * @param con The contact
-     * @return The url or null
-     * @throws OXException
+     * @return The URL or <code>null</code>
+     * @throws OXException If services or parameter are missing
      */
     public static String generateImageUrl(Session session, Contact con) throws OXException {
         ContactPictureURLService service = ServerServiceRegistry.getInstance().getService(ContactPictureURLService.class, true);
         if (0 < con.getNumberOfImages() || con.containsImage1() && null != con.getImage1()) {
             if (FolderObject.SYSTEM_LDAP_FOLDER_ID == con.getParentFolderID() && con.containsInternalUserId()) {
-                return service.getUserPictureUrl(con.getInternalUserId(), session, true);
+                return service.getUserPictureUrl(I(con.getInternalUserId()), session, true);
             } else {
-                return service.getContactPictureUrl(con.getObjectID(), con.getParentFolderID(), session, true);
+                return service.getContactPictureUrl(I(con.getObjectID()), I(con.getParentFolderID()), session, true);
             }
         }
         return null;

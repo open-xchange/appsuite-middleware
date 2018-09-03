@@ -57,8 +57,8 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureRequestData;
 import com.openexchange.contact.picture.ContactPictureService;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -136,7 +136,7 @@ public final class ContactImageDataSource implements ImageDataSource {
 
     @Override
     public String getETag(final ImageLocation imageLocation, final Session session) throws OXException {
-        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(null, I(Tools.getUnsignedInteger(imageLocation.getFolder())), I(Tools.getUnsignedInteger(imageLocation.getId())), null);
+        PictureSearchData contactPictureRequestData = new PictureSearchData(null, I(Tools.getUnsignedInteger(imageLocation.getFolder())), I(Tools.getUnsignedInteger(imageLocation.getId())), null);
         return services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData, true).getETag();
     }
 
@@ -174,7 +174,7 @@ public final class ContactImageDataSource implements ImageDataSource {
             }
         }
 
-        ContactPictureRequestData contactPictureRequestData = new ContactPictureRequestData(null, I(folder), I(contactId), null);
+        PictureSearchData contactPictureRequestData = new PictureSearchData(null, I(folder), I(contactId), null);
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData, false);
 
         IFileHolder fileHolder = picture.getFileHolder();
@@ -207,7 +207,7 @@ public final class ContactImageDataSource implements ImageDataSource {
      * @param imageLocation The image location containing the contact information
      * @param fields The contact fields to retrieve
      * @return The contact, or <code>null</code> if it can't be found or loaded.
-     * @throws OXException
+     * @throws OXException If getting contact failed
      */
     private Contact optContact(Session session, ImageLocation imageLocation, ContactField... fields) throws OXException {
         return optContact(session, Tools.getUnsignedInteger(imageLocation.getId()),
@@ -217,12 +217,12 @@ public final class ContactImageDataSource implements ImageDataSource {
     /**
      * Gets a contact with specified fields.
      *
-     * @param objectId The object ID of the contact to get
-     * @param folder The parent folder ID of the contact to get
      * @param session The current session
+     * @param objectID The object ID of the contact to get
+     * @param folderID The parent folder ID of the contact to get
      * @param fields The contact fields to retrieve
      * @return The contact, or <code>null</code> if it can't be found or loaded.
-     * @throws OXException
+     * @throws OXException If getting contact failed
      */
     private Contact optContact(Session session, int objectID, int folderID, ContactField... fields) throws OXException {
         ContactService contactService = services.getServiceSafe(ContactService.class);

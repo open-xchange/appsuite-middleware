@@ -59,28 +59,26 @@ import com.openexchange.config.lean.Property;
  */
 enum ContactPictureProperties implements Property {
 
-    CACHE_DURATION("com.openexchange.contacts.picture.cache.duration", Long.valueOf(5)),
+    CACHE_DURATION("duration", Long.valueOf(5)),
 
-    CACHE_SIZE("com.openexchange.contacts.picture.cache.size", Integer.valueOf(1000)),
+    CACHE_SIZE("size", Integer.valueOf(1000)),
 
     ;
 
-    private final String fqn;
+    private final static String PREFIX = "com.openexchange.contacts.picture.cache";
+
+    private final String name;
 
     private final Object defaultValue;
 
-    /**
-     * Initializes a new {@link ContactPictureProperties}.
-     * 
-     */
-    private ContactPictureProperties(String fqn, Object defaultValue) {
-        this.fqn = fqn;
+    private ContactPictureProperties(String name, Object defaultValue) {
+        this.name = name;
         this.defaultValue = defaultValue;
     }
 
     @Override
     public String getFQPropertyName() {
-        return fqn;
+        return new StringBuilder(PREFIX).append('.').append(name).toString();
     }
 
     @Override

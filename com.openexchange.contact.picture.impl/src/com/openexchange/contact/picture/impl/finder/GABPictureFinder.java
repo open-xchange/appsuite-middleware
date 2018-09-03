@@ -54,9 +54,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.ContactPictureRequestData;
-import com.openexchange.contact.picture.UnmodifiableContactPictureRequestData;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
+import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -90,8 +90,9 @@ public class GABPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiableContactPictureRequestData original, ContactPictureRequestData modified, boolean onlyETag) throws OXException {
-        Contact contact = ContactPictureUtil.getContactFromMail(contactService, original.getEmails(), session, true);
+    public ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException {
+        // Use original data to avoid 
+        Contact contact = ContactPictureUtil.getContactFromMail(contactService, modified.getEmails(), session, true);
         if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, original)) {
             return ContactPictureUtil.fromContact(original, contact, onlyETag);
         }
@@ -99,12 +100,12 @@ public class GABPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public boolean isApplicable(Session session, ContactPictureRequestData original, ContactPictureRequestData modified) {
+    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
         try {
             // Use ID of the user requesting the picture
-            return modified.hasUser() && modified.hasContact() && userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).isGlobalAddressBookEnabled();
+            return modified.hasEmail() && userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).isGlobalAddressBookEnabled();
         } catch (OXException e) {
-            LOGGER.warn("Unable to check if Global AddressBook is enabled.", e);
+            LOGGER.warn("Unable to check if GlobalAddressBook is enabled.", e);
         }
         return false;
     }

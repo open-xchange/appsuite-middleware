@@ -54,7 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.contact.picture.ContactPictureExceptionCodes;
-import com.openexchange.contact.picture.ContactPictureRequestData;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
@@ -73,13 +73,13 @@ public class FinderUtil {
     /**
      * Checks if the contact does contain a valid image to use
      * 
-     * @param contextId The context identifier
+     * @param contextId The context identifier for logging
      * @param contact The {@link Contact}
      * @param data Information to log
      * @return <code>true</code> if the image is valid and can be used, <code>false</code> otherwise
      * @throws OXException In case picture contains harmful content
      */
-    public static boolean hasValidImage(Integer contextId, Contact contact, ContactPictureRequestData data) throws OXException {
+    public static boolean hasValidImage(Integer contextId, Contact contact, PictureSearchData data) throws OXException {
         return null != contact && null != contact.getImage1() && checkImage(contact.getImage1(), contextId, data);
     }
 
@@ -87,11 +87,11 @@ public class FinderUtil {
      * Checks the image and logs errors
      * 
      * @param fileHolder The {@link IFileHolder} containing the data
-     * @param contextId The context identifier
+     * @param contextId The context identifier for logging
      * @param data Information to log
      * @return <code>true</code> If all checks passed, <code>false</code> otherwise
      */
-    public static boolean checkImage(IFileHolder fileHolder, Integer contextId, ContactPictureRequestData data) {
+    public static boolean checkImage(IFileHolder fileHolder, Integer contextId, PictureSearchData data) {
         try {
             return checkImage(Streams.stream2bytes(fileHolder.getStream()), contextId, data);
         } catch (OXException | IOException e) {
@@ -104,12 +104,12 @@ public class FinderUtil {
      * Checks the image and logs errors
      * 
      * @param imageBytes The image to check
-     * @param contextId The context identifier
+     * @param contextId The context identifier for logging
      * @param data Information to log
      * @return <code>true</code> If all checks passed, <code>false</code> otherwise
      * @throws OXException In case picture contains harmful content
      */
-    public static boolean checkImage(byte[] imageBytes, Integer contextId, ContactPictureRequestData data) throws OXException {
+    public static boolean checkImage(byte[] imageBytes, Integer contextId, PictureSearchData data) throws OXException {
         if (false == com.openexchange.ajax.helper.ImageUtils.isValidImage(imageBytes)) {
             LOGGER.warn("Detected non-image data in contact: object-id={} folder={} context={} session-user={}. Try to obtain valid image.", data.getContactId(), data.getFolderId(), contextId, data.getUserId());
             return false;
@@ -122,7 +122,7 @@ public class FinderUtil {
     }
 
     /**
-     * Checks if two contacts are equal in Terms of mail addresses
+     * Checks if two contacts are equal in terms of mail addresses
      * 
      * @param c1 The one {@link Contact}
      * @param c2 The other {@link Contact}
