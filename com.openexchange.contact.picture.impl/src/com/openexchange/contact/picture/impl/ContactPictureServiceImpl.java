@@ -65,7 +65,7 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.session.Session;
 
 /**
- * {@link ContactPictureServiceImpl}
+ * {@link ContactPictureServiceImpl} is a service the retrieve a picture for a given user id, contact id or email address.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
@@ -76,7 +76,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
 
     /**
      * Initializes a new {@link ContactPictureServiceImpl}.
-     * 
+     *
      * @param context The {@link BundleContext}
      */
     public ContactPictureServiceImpl(BundleContext context) {
@@ -93,7 +93,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
 
             UnmodifiablePictureSearchData original = new UnmodifiablePictureSearchData(data);
             PictureSearchData modified = data;
-            
+
             // Ask each finder if it contains the picture
             for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
                 ContactPictureFinder next = iterator.next();
@@ -107,7 +107,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
                 }
             }
         } catch (OXException e) {
-            LOGGER.warn("Unable to get contact picture. Using fallback instead.", e);
+            LOGGER.debug("Unable to get contact picture. Using fallback instead.", e);
         }
         return FALLBACK_PICTURE;
     }

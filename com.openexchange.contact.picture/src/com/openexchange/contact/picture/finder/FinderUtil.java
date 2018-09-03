@@ -72,7 +72,7 @@ public class FinderUtil {
 
     /**
      * Checks if the contact does contain a valid image to use
-     * 
+     *
      * @param contextId The context identifier for logging
      * @param contact The {@link Contact}
      * @param data Information to log
@@ -85,7 +85,7 @@ public class FinderUtil {
 
     /**
      * Checks the image and logs errors
-     * 
+     *
      * @param fileHolder The {@link IFileHolder} containing the data
      * @param contextId The context identifier for logging
      * @param data Information to log
@@ -102,7 +102,7 @@ public class FinderUtil {
 
     /**
      * Checks the image and logs errors
-     * 
+     *
      * @param imageBytes The image to check
      * @param contextId The context identifier for logging
      * @param data Information to log
@@ -111,7 +111,7 @@ public class FinderUtil {
      */
     public static boolean checkImage(byte[] imageBytes, Integer contextId, PictureSearchData data) throws OXException {
         if (false == com.openexchange.ajax.helper.ImageUtils.isValidImage(imageBytes)) {
-            LOGGER.warn("Detected non-image data in contact: object-id={} folder={} context={} session-user={}. Try to obtain valid image.", data.getContactId(), data.getFolderId(), contextId, data.getUserId());
+            LOGGER.debug("Detected non-image data in contact: object-id={} folder={} context={} session-user={}. Try to obtain valid image.", data.getContactId(), data.getFolderId(), contextId, data.getUserId());
             return false;
         }
         if (com.openexchange.ajax.helper.ImageUtils.isSvg(imageBytes)) {
@@ -123,7 +123,7 @@ public class FinderUtil {
 
     /**
      * Checks if two contacts are equal in terms of mail addresses
-     * 
+     *
      * @param c1 The one {@link Contact}
      * @param c2 The other {@link Contact}
      * @return <code>true</code> if the mail belongs to the contact, <code>false</code> otherwise
@@ -134,7 +134,7 @@ public class FinderUtil {
 
     /**
      * Checks if the given email belongs to the given contact
-     * 
+     *
      * @param c The {@link Contact}
      * @param email The mail to match
      * @return <code>true</code> if the mail belongs to the contact, <code>false</code> otherwise
@@ -145,7 +145,7 @@ public class FinderUtil {
 
     /**
      * Checks if two mail addresses can be considered equal
-     * 
+     *
      * @param contactMail The actual mail from a contact
      * @param email The mail to match
      * @return <code>true</code> if the mail addresses can be considered equal, <code>false</code> otherwise

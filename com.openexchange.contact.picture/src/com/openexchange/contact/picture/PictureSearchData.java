@@ -50,13 +50,13 @@
 package com.openexchange.contact.picture;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.openexchange.java.Strings;
 
 /**
- * {@link PictureSearchData} - The object containing information about the contact to find a picture for
+ * {@link PictureSearchData} - The object containing information about the contact to find a picture for.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
@@ -73,7 +73,7 @@ public class PictureSearchData {
 
     /**
      * Initializes a new {@link PictureSearchData}.
-     * 
+     *
      * @param userId The user identifier
      * @param folderId The folder identifier
      * @param contactId The contact identifier
@@ -84,7 +84,7 @@ public class PictureSearchData {
         this.userId = userId;
         this.folderId = folderId;
         this.contactId = contactId;
-        this.emails = emails == null ? new HashSet<>() : new HashSet<>(emails);
+        this.emails = emails == null ? new LinkedHashSet<>() : new LinkedHashSet<>(emails);
     }
 
     /**
@@ -211,15 +211,6 @@ public class PictureSearchData {
                 this.emails.add(mail);
             }
         }
-    }
-
-    /**
-     * Get a value indicating if this instances does not hold any usable data
-     *
-     * @return <code>true</code> if this instance doesn't hold any usable data
-     */
-    public boolean isEmpty() {
-        return null == userId && null == folderId && null == contactId && null == emails;
     }
 
     @Override

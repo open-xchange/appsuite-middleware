@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
 import com.openexchange.userconf.UserPermissionService;
 
 /**
- * {@link GABPictureFinder}
+ * {@link GABPictureFinder} - implements a {@link ContactPictureFinder} for the global address book.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
@@ -79,7 +79,7 @@ public class GABPictureFinder implements ContactPictureFinder {
 
     /**
      * Initializes a new {@link GABPictureFinder}.
-     * 
+     *
      * @param userPermissionService The {@link UserPermissionService}
      * @param contactService The {@link ContactService}
      */
@@ -91,7 +91,7 @@ public class GABPictureFinder implements ContactPictureFinder {
 
     @Override
     public ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException {
-        // Use original data to avoid 
+        // Use original data to avoid
         Contact contact = ContactPictureUtil.getContactFromMail(contactService, modified.getEmails(), session, true);
         if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, original)) {
             return ContactPictureUtil.fromContact(original, contact, onlyETag);
@@ -105,7 +105,7 @@ public class GABPictureFinder implements ContactPictureFinder {
             // Use ID of the user requesting the picture
             return modified.hasEmail() && userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).isGlobalAddressBookEnabled();
         } catch (OXException e) {
-            LOGGER.warn("Unable to check if GlobalAddressBook is enabled.", e);
+            LOGGER.debug("Unable to check if GlobalAddressBook is enabled.", e);
         }
         return false;
     }

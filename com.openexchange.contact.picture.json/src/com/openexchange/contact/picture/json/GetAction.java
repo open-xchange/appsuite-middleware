@@ -98,13 +98,13 @@ public class GetAction implements ETagAwareAJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        ContactPicture picture = getPicture(session, getData(requestData, session), false);
+        ContactPicture picture = getPicture(session, getData(requestData), false);
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
         setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
         return result;
     }
 
-    private PictureSearchData getData(AJAXRequestData requestData, Session session) throws OXException {
+    private PictureSearchData getData(AJAXRequestData requestData) throws OXException {
         Integer contactId = requestData.getParameter(CONTACT_PARAM, Integer.class, true);
         Integer folderId = requestData.getParameter(CONTACT_FOLDER_PARAM, Integer.class, true);
         if (folderId == null && contactId != null) {
@@ -118,7 +118,7 @@ public class GetAction implements ETagAwareAJAXActionService {
 
     @Override
     public boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException {
-        ContactPicture contactPicture = getPicture(session, getData(request, session), true);
+        ContactPicture contactPicture = getPicture(session, getData(request), true);
         String etag = contactPicture.getETag();
         if (etag == null) {
             return false;

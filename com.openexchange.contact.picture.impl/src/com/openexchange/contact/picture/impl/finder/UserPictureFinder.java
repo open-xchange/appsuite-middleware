@@ -63,7 +63,7 @@ import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UserPictureFinder} - Checks if user exists and set the contact identifier
+ * {@link UserPictureFinder} - Checks if user exists and set the user information like contact id etc.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
@@ -76,7 +76,7 @@ public class UserPictureFinder implements ContactPictureFinder {
 
     /**
      * Initializes a new {@link UserPictureFinder}.
-     * 
+     *
      * @param userService The {@link UserService}
      */
     public UserPictureFinder(UserService userService) {
@@ -86,6 +86,9 @@ public class UserPictureFinder implements ContactPictureFinder {
 
     @Override
     public ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException {
+        if(modified.hasUser() == false) {
+            return null;
+        }
         try {
             User user = userService.getUser(i(modified.getUserId()), session.getContextId());
             if (null != user) {
@@ -98,7 +101,7 @@ public class UserPictureFinder implements ContactPictureFinder {
                 modified.setEmails(user.getMail());
                 modified.addEmails(user.getAliases());
                 if (original.hasEmail()) {
-                    modified.addEmails(original.getEmails().toArray(new String[0]));
+                    modified.addEmails(original.getEmails().toArray(new String[original.getEmails().size()]));
                 }
             }
         } catch (OXException e) {
@@ -115,7 +118,7 @@ public class UserPictureFinder implements ContactPictureFinder {
 
     @Override
     public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
-        return original.hasUser() && false == original.hasContact();
+        return original.hasUser();
     }
 
 }

@@ -70,20 +70,20 @@ public interface ContactPictureFinder extends Ranked{
      * @param original The unmodifiable {@link UnmodifiablePictureSearchData}
      * @param modified An updated version of the {@link PictureSearchData} which has been modified by previous {@link ContactPictureFinder}s.
      * @param onlyETag <code>true</code> if only the eTag should be generated, <code>false</code> otherwise
-     * @return The {@link ContactPicture}
-     * @throws OXException In case picture was found, but it is harmful
+     * @return The {@link ContactPicture} or null if none could be found.
+     * @throws OXException
      */
     ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException;
 
     /**
-     * Get a value indicating if the {@link ContactPictureFinder} has enough information
-     * about the contact to try getting the contact picture
-     * 
+     * Checks if the {@link ContactPictureFinder} is applicable for the given parameter.
+     *
+     * E.g. can check if the user is allowed to use this finder or if the original/modified data contains enough informations
+     *
      * @param session The {@link Session}
      * @param original The original {@link PictureSearchData}
      * @param modified The modified {@link PictureSearchData}
-     * @return <code>true</code> if the {@link ContactPictureFinder} can search for a contact picture,
-     *         <code>false</code> if calling {@link #getPicture(Session, UnmodifiablePictureSearchData, PictureSearchData, boolean)} is superfluous
+     * @return <code>true</code> if the {@link ContactPictureFinder} is applicable for the given parameters, <code>false</code> otherwise.
      */
     boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified);
 

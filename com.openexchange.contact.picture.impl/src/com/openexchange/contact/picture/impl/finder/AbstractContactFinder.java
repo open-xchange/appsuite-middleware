@@ -82,11 +82,11 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     private final int child;
 
-    private UserPermissionService userPermissionService;
+    private final UserPermissionService userPermissionService;
 
     /**
      * Initializes a new {@link AbstractContactFinder}.
-     * 
+     *
      * @param userPermissionService The {@link UserPermissionService}
      * @param contactService The {@link ContactService}
      */
@@ -99,7 +99,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     /**
      * Get the contact
-     * 
+     *
      * @param session The {@link Session}
      * @param data The data to get the contact from
      * @return The {@link Contact}
@@ -109,7 +109,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     /**
      * Modifies the {@link PictureSearchData} in the result
-     * 
+     *
      * @param data The {@link PictureSearchData}
      * @param contact To get the data from
      */
@@ -117,7 +117,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     /**
      * Personalized error logging
-     * 
+     *
      * @param data The data to log
      * @param exception The original exception to log
      */
@@ -146,7 +146,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
             try {
                 return userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).hasContact();
             } catch (OXException e) {
-                LOGGER.warn("Unable to get user permissions. Therefore can't allow to access contacts.", e);
+                LOGGER.trace("Unable to get user permissions. Therefore can't allow to access contacts.", e);
             }
         }
         return false;

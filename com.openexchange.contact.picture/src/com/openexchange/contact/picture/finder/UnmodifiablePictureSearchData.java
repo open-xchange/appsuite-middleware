@@ -53,7 +53,7 @@ import java.util.Set;
 import com.openexchange.contact.picture.PictureSearchData;
 
 /**
- * {@link UnmodifiablePictureSearchData}
+ * {@link UnmodifiablePictureSearchData} is a wrapper object for the {@link PictureSearchData} which renders it unmodifiable.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1

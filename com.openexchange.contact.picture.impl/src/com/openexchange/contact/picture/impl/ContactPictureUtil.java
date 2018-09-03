@@ -49,15 +49,11 @@
 
 package com.openexchange.contact.picture.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.finder.FinderUtil;
 import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
@@ -66,6 +62,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -73,7 +70,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 /**
  * {@link ContactPictureUtil}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> Logic from 'ContactDataSource'
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
@@ -81,7 +77,7 @@ public class ContactPictureUtil extends FinderUtil {
 
     /**
      * Generates a {@link ContactPicture} based on the given bytes
-     * 
+     *
      * @param unmodifiableData The {@link UnmodifiablePictureSearchData}
      * @param contact The {@link Contact}
      * @param onlyETag <code>true</code> if only eTag should be set
@@ -93,15 +89,15 @@ public class ContactPictureUtil extends FinderUtil {
 
     /**
      * Generates the ETag
-     * 
+     *
      * @param unmodifiableData The {@link UnmodifiablePictureSearchData}
      * @param contact The {@link Contact}
      * @return The ETag
      */
     private static String genereateETag(UnmodifiablePictureSearchData unmodifiableData, Contact contact) {
         /*
-         *  Use the request, so that changed request will lead in different eTags. 
-         *  This is important for requests containing resizing. If the picture shall be delivered in a 
+         *  Use the request, so that changed request will lead in different eTags.
+         *  This is important for requests containing resizing. If the picture shall be delivered in a
          *  different size the eTag must not be the same compared to the original size
          */
         return null == contact ? null : new StringBuilder(512) // @formatter:off#
@@ -116,7 +112,7 @@ public class ContactPictureUtil extends FinderUtil {
 
     /**
      * Transforms a byte array into a {@link ByteArrayFileHolder}
-     * 
+     *
      * @param contact The {@link Contact}
      * @return The IFileHolder
      */
@@ -127,41 +123,12 @@ public class ContactPictureUtil extends FinderUtil {
         return fileHolder;
     }
 
-    /**
-     * Get a {@link Comparator} for {@link Contact}s
-     * 
-     * @return A {@link Comparator}
-     */
-    public final static Comparator<Contact> getContactComperator() {
-        return (Contact o1, Contact o2) -> {
-            if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-                if (o2.getParentFolderID() != FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-                    return -1;
-                }
-            } else {
-                if (o2.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-                    return 1;
-                }
-            }
-
-            Date lastModified1 = o1.getLastModified();
-            Date lastModified2 = o2.getLastModified();
-            if (lastModified1 == null) {
-                lastModified1 = new Date(Long.MIN_VALUE);
-            }
-            if (lastModified2 == null) {
-                lastModified2 = new Date(Long.MIN_VALUE);
-            }
-            return lastModified2.compareTo(lastModified1);
-        };
-    }
-
     public final static ContactField[] IMAGE_FIELD = new ContactField[] { ContactField.OBJECT_ID, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE1_URL,
         ContactField.IMAGE_LAST_MODIFIED, ContactField.LAST_MODIFIED };
 
     /**
      * Searches for a contact via its mail address.
-     * 
+     *
      * @param contactService The {@link ContactService}
      * @param emails The mail addresses
      * @param session The {@link Session}
@@ -188,24 +155,16 @@ public class ContactPictureUtil extends FinderUtil {
 
             SearchIterator<Contact> result = null;
             try {
-                result = contactService.searchContacts(session, cso, IMAGE_FIELD);
+                result = contactService.searchContacts(session, cso, new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING));
                 if (result == null) {
                     continue;
                 }
 
-                List<Contact> contacts = new ArrayList<Contact>();
                 while (result.hasNext()) {
                     Contact contact = result.next();
                     if (null != contact.getImage1() && (checkEmails(contact, email))) {
-                        contacts.add(contact);
+                        return contact;
                     }
-                }
-
-                if (false == contacts.isEmpty()) {
-                    if (contacts.size() != 1) {
-                        Collections.sort(contacts, ContactPictureUtil.getContactComperator());
-                    }
-                    return contacts.get(0);
                 }
             } finally {
                 Streams.close(result);
