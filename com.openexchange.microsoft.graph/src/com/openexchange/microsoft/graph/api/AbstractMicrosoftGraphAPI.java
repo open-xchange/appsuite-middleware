@@ -49,6 +49,8 @@
 
 package com.openexchange.microsoft.graph.api;
 
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,6 +63,8 @@ import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
 import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.rest.client.v2.RESTMethod;
 import com.openexchange.rest.client.v2.RESTResponse;
+import com.openexchange.rest.client.v2.entity.InputStreamEntity;
+import com.openexchange.rest.client.v2.entity.JSONObjectEntity;
 
 /**
  * {@link AbstractMicrosoftGraphAPI}
@@ -139,7 +143,19 @@ abstract class AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, path);
         request.setAccessToken(accessToken);
         request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        request.withBody(body);
+        try {
+            request.withBodyEntity(new JSONObjectEntity(body));
+        } catch (UnsupportedEncodingException e) {
+            throw new OXException(666, "charset is not supported");
+        }
+        return executeRequest(request);
+    }
+
+    JSONObject putResource(String accessToken, String path, String contentType, InputStream body) throws OXException {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, path);
+        request.setAccessToken(accessToken);
+        request.withHeader(HttpHeaders.CONTENT_TYPE, contentType);
+        request.withBodyEntity(new InputStreamEntity(body));
         return executeRequest(request);
     }
 
@@ -153,7 +169,11 @@ abstract class AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.PATCH, path);
         request.setAccessToken(accessToken);
         request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        request.withBody(body);
+        try {
+            request.withBodyEntity(new JSONObjectEntity(body));
+        } catch (UnsupportedEncodingException e) {
+            throw new OXException(666, "charset is not supported");
+        }
         return executeRequest(request);
     }
 

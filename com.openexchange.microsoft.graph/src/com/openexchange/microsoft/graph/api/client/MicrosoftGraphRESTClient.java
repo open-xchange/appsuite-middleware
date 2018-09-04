@@ -49,13 +49,11 @@
 
 package com.openexchange.microsoft.graph.api.client;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.StringEntity;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.v2.AbstractRESTClient;
@@ -123,20 +121,18 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
      * @throws OXException if the default HTTP charset is not supported
      */
     private void addOptionalBody(HttpRequestBase httpRequest, MicrosoftGraphRequest request) throws OXException {
+        if (request.getBodyEntity() == null) {
+            return;
+        }
+
         switch (request.getMethod()) {
             case PATCH:
             case POST:
             case PUT:
-                try {
-                    if (request.getBody() == null) {
-                        return;
-                    }
-                    ((HttpEntityEnclosingRequestBase) httpRequest).setEntity(new StringEntity(request.getBody().toString()));
-                } catch (UnsupportedEncodingException e) {
-                    throw RESTExceptionCodes.UNSUPPORTED_ENCODING.create(e);
-                }
+                ((HttpEntityEnclosingRequestBase) httpRequest).setEntity(request.getBodyEntity().getBodyEntity());
+                return;
             default:
-                break;
+                return;
         }
     }
 }

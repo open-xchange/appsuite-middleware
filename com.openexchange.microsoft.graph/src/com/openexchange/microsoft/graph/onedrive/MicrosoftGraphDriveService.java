@@ -236,4 +236,6 @@ public interface MicrosoftGraphDriveService {
     Quota getQuota(String accessToken) throws OXException;
 
     List<OneDriveFile> searchFiles(int userId, String accessToken, String query, String folderId, boolean includeSubfolders) throws OXException;
+
+    String upload(String accessToken, File file, InputStream inputStream);
 }

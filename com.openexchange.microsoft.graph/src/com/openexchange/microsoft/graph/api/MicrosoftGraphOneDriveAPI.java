@@ -51,6 +51,7 @@ package com.openexchange.microsoft.graph.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.http.HttpHeaders;
@@ -70,6 +71,7 @@ import com.openexchange.policy.retry.RetryPolicy;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.v2.RESTMethod;
 import com.openexchange.rest.client.v2.RESTResponse;
+import com.openexchange.rest.client.v2.entity.JSONObjectEntity;
 
 /**
  * {@link MicrosoftGraphOneDriveAPI}
@@ -254,7 +256,11 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itames/" + itemId + "/copy");
         request.setAccessToken(accessToken);
         request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        request.withBody(body);
+        try {
+            request.withBodyEntity(new JSONObjectEntity(body));
+        } catch (UnsupportedEncodingException e) {
+            throw new OXException(666, "charset is not supported");
+        }
         RESTResponse restResponse = client.execute(request);
         if (restResponse.getStatusCode() == 202) {
             return restResponse.getHeader(HttpHeaders.LOCATION);
@@ -276,7 +282,11 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/items/" + itemId + "/copy");
         request.setAccessToken(accessToken);
         request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        request.withBody(body);
+        try {
+            request.withBodyEntity(new JSONObjectEntity(body));
+        } catch (UnsupportedEncodingException e) {
+            throw new OXException(666, "charset is not supported");
+        }
         RESTResponse restResponse = client.execute(request);
         if (restResponse.getStatusCode() != 202) {
             throw new OXException(666, "Copy failed: " + restResponse.getStatusCode());
@@ -405,5 +415,24 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         } catch (JSONException e) {
             throw RESTExceptionCodes.JSON_ERROR.create(e);
         }
+    }
+
+    /**
+     * Uploads a new file to the specified folder
+     * 
+     * @param accessToken The oauth access token
+     * @param folderId The folder identifier
+     * @param inputStream The binary content to upload
+     * @return The metadata of the new item
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_put_content">Upload a new File</a>
+     */
+    public JSONObject uploadNew(String accessToken, String folderId, String filename, String contentType, InputStream inputStream) throws OXException {
+        String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/content";
+
+        return null;
+    }
+
+    public JSONObject uploadReplace(String accessToken, String itemId) {
+        return null;
     }
 }

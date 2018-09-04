@@ -86,6 +86,12 @@ import com.openexchange.rest.client.exception.RESTExceptionCodes;
 public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MicrosoftGraphDriveServiceImpl.class);
+    /**
+     * API limit for simple uploads, a.k.a. one shot uploads
+     * 
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_put_content">Upload files</a>
+     */
+    private static final long ONE_SHOT_UPLOAD_LIMIT = 1024 * 1024 * 4;
 
     private final MicrosoftGraphOneDriveAPI api;
     private final OneDriveFolderParser folderEntityParser;
@@ -455,12 +461,26 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
                 }
 
                 JSONObject parentRef = item.optJSONObject("parentReference");
+                if (parentRef == null || parentRef.isEmpty()) {
+                    continue;
+                }
                 if (folderId == null || includeSubfolders || folderId.equals(parentRef.optString("id"))) {
                     list.add(fileEntityParser.parseEntity(userId, item));
                 }
             }
         } while (Strings.isNotEmpty(skipToken));
         return list;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#upload(java.lang.String, com.openexchange.file.storage.File, java.io.InputStream)
+     */
+    @Override
+    public String upload(String accessToken, File file, InputStream inputStream) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     //////////////////////////////////////// HELPERS /////////////////////////////////////

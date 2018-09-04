@@ -52,8 +52,9 @@ package com.openexchange.microsoft.graph.api.client;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONObject;
+import com.openexchange.rest.client.v2.RESTBodyEntity;
 import com.openexchange.rest.client.v2.RESTMethod;
+import com.openexchange.rest.client.v2.RESTRequest;
 
 /**
  * {@link MicrosoftGraphRequest}
@@ -61,14 +62,14 @@ import com.openexchange.rest.client.v2.RESTMethod;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MicrosoftGraphRequest {
+public class MicrosoftGraphRequest implements RESTRequest {
 
     private final String endPoint;
     private final RESTMethod method;
     private String accessToken;
     private final Map<String, String> queryParams;
     private final Map<String, String> headers;
-    private JSONObject body;
+    private RESTBodyEntity entity;
 
     /**
      * Initialises a new {@link MicrosoftGraphRequest}.
@@ -146,12 +147,13 @@ public class MicrosoftGraphRequest {
         queryParams.put(name, value);
     }
 
-    /**
-     * Returns an unmodifiable {@link Map} with the query parameters of the request
+    /*
+     * (non-Javadoc)
      * 
-     * @return an unmodifiable {@link Map} with the query parameters of the request
+     * @see com.openexchange.rest.client.v2.RESTRequest#getQueryParameters()
      */
-    Map<String, String> getQueryParameters() {
+    @Override
+    public Map<String, String> getQueryParameters() {
         return Collections.unmodifiableMap(queryParams);
     }
 
@@ -159,18 +161,30 @@ public class MicrosoftGraphRequest {
         headers.put(name, value);
     }
 
-    Map<String, String> getHeaders() {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.v2.RESTRequest#getHeaders()
+     */
+    @Override
+    public Map<String, String> getHeaders() {
         return Collections.unmodifiableMap(headers);
     }
 
     /**
      * 
      */
-    public void withBody(JSONObject body) {
-        this.body = body;
+    public void withBodyEntity(RESTBodyEntity entity) {
+        this.entity = entity;
     }
-    
-    public JSONObject getBody() {
-        return body;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.v2.RESTRequest#getBodyEntity()
+     */
+    @Override
+    public RESTBodyEntity getBodyEntity() {
+        return entity;
     }
 }
