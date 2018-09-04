@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.contact;
 
-import java.io.FileInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Arrays;
+import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
@@ -65,6 +68,10 @@ import com.openexchange.testing.httpclient.models.ContactData;
  */
 public class ContactPictureTest extends AbstractApiClientContactTest {
 
+    private final static String IMAGE_TYPE = "image/png";
+
+    private final static byte IMAGE[] = Photos.PNG_100x100;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -72,22 +79,51 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
     }
 
     @Test
-    public void testGetContactPicture() throws Exception {
-        FileInputStream input = null;
-        try {
-            final ContactData contactObj = createContactObject("testGetContactPicture");
-            final byte bigImage[] = Photos.PNG_100x100;
-            contactObj.setImage1(Base64.encodeBase64String(bigImage));
-            contactObj.setImage1ContentType("image/png");
-            final String contactId = createContact(contactObj);
-            byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
-            Assert.assertNotNull("Response should not be null.", contactPicture);
-            Assert.assertEquals(bigImage.length, contactPicture.length);
-        } finally {
-            if (input != null) {
-                input.close();
-            }
-        }
+    public void testFallbackContactPicture() throws Exception {
+        final ContactData contactObj = new ContactData();
+        
+        contactObj.setLastName("Fallback");
+        contactObj.setFirstName("Picture");
+        contactObj.setCountryBusiness("Deutschland");
+        contactObj.setEmail1(UUID.randomUUID() + "@open-xchange.com");
+        contactObj.setFolderId(contactFolderId);
+        contactObj.setMarkAsDistributionlist(false);
+        contactObj.setDistributionList(null);
+
+        final String contactId = createContact(contactObj);
+
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        
+        System.out.println(Arrays.toString(contactPicture));
+
+        Assert.assertNotNull("Response should not be null.", contactPicture);
+        Assert.assertEquals(Photos.FALLBACK_PICTURE.length, contactPicture.length);
+        Assert.assertTrue("Wrong image", Arrays.equals(contactPicture, Photos.FALLBACK_PICTURE));
     }
 
+    @Test
+    public void testGetContactPicture() throws Exception {
+        final ContactData contactObj = createContactObject("testGetContactPicture");
+        contactObj.setImage1(Base64.encodeBase64String(IMAGE));
+        contactObj.setImage1ContentType(IMAGE_TYPE);
+        final String contactId = createContact(contactObj);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        Assert.assertNotNull("Response should not be null.", contactPicture);
+        Assert.assertEquals(IMAGE.length, contactPicture.length);
+        Assert.assertArrayEquals(IMAGE, contactPicture);
+    }
+
+    @Test
+    public void testGetContactPictureByMail() throws Exception {
+        String mail = "picture@example.org";
+        final ContactData contactObj = createContactObject("testGetContactPictureByMail");
+        contactObj.setImage1(Base64.encodeBase64String(IMAGE));
+        contactObj.setImage1ContentType(IMAGE_TYPE);
+        contactObj.setEmail1(mail);
+        createContact(contactObj);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, contactFolderId, mail);
+        Assert.assertNotNull("Response should not be null.", contactPicture);
+        Assert.assertEquals(IMAGE.length, contactPicture.length);
+        Assert.assertArrayEquals(IMAGE, contactPicture);
+    }
 }
