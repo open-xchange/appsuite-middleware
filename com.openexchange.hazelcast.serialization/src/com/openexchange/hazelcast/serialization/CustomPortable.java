@@ -92,6 +92,16 @@ public interface CustomPortable extends Portable {
      * Unique id for PortableLogoutRequestInfo
      */
     public static final int PORTABLE_SAML_LOGOUT_REQUEST_INFO = 301;
+    
+    /**
+     * Unique id for OpenId authentication request
+     */
+    public static final int PORTABLE_OIDC_AUTHN_REQUEST_INFO = 310;
+
+    /**
+     * Unique id for OpenId logout request
+     */
+    public static final int PORTABLE_OIDC_LOGOUT_REQUEST_INFO = 311;
 
     /**
      * Gets the ID of the dynamic portable factory.<p/>
