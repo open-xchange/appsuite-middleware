@@ -47,53 +47,112 @@
  *
  */
 
-package com.openexchange.microsoft.graph.api.client;
+package com.openexchange.rest.client.v2;
 
-import com.openexchange.rest.client.v2.AbstractRESTRequest;
-import com.openexchange.rest.client.v2.RESTMethod;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * {@link MicrosoftGraphRequest}
+ * {@link AbstractRESTRequest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public class MicrosoftGraphRequest extends AbstractRESTRequest {
+public abstract class AbstractRESTRequest implements RESTRequest {
 
-    private String accessToken;
-
-    /**
-     * Initialises a new {@link MicrosoftGraphRequest}.
-     */
-    public MicrosoftGraphRequest(MicrosoftGraphRESTEndPoint endPoint) {
-        super(endPoint.getAbsolutePath());
-    }
+    private final String endPoint;
+    private final RESTMethod method;
+    private RESTBodyEntity entity;
+    private final Map<String, String> queryParameters;
+    private final Map<String, String> headers;
 
     /**
-     * Initialises a new {@link MicrosoftGraphRequest}.
+     * Initialises a new {@link AbstractRESTRequest}.
      * 
-     * @param method
      * @param path
      */
-    public MicrosoftGraphRequest(RESTMethod method, String path) {
-        super(method, path);
+    public AbstractRESTRequest(String path) {
+        this(RESTMethod.GET, path);
     }
 
     /**
-     * Gets the accessToken
-     *
-     * @return The accessToken
+     * Initialises a new {@link AbstractRESTRequest}.
      */
-    public String getAccessToken() {
-        return accessToken;
+    public AbstractRESTRequest(RESTMethod method, String path) {
+        super();
+        this.method = method;
+        this.endPoint = path;
+        queryParameters = new HashMap<>();
+        headers = new HashMap<>(4);
     }
 
     /**
-     * Sets the accessToken
+     * Gets the endPoint
      *
-     * @param accessToken The accessToken to set
+     * @return The endPoint
      */
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+    public String getEndPoint() {
+        return endPoint;
+    }
+
+    /**
+     * Gets the method
+     *
+     * @return The method
+     */
+    public RESTMethod getMethod() {
+        return method;
+    }
+
+    /**
+     * With the specified query parameter
+     * 
+     * @param name The name of the query parameter
+     * @param value the value of the query parameter
+     */
+    public void setQueryParameter(String name, String value) {
+        queryParameters.put(name, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.v2.RESTRequest#getQueryParameters()
+     */
+    @Override
+    public Map<String, String> getQueryParameters() {
+        return Collections.unmodifiableMap(queryParameters);
+    }
+
+    public void setHeader(String name, String value) {
+        headers.put(name, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.v2.RESTRequest#getHeaders()
+     */
+    @Override
+    public Map<String, String> getHeaders() {
+        return Collections.unmodifiableMap(headers);
+    }
+
+    /**
+     * 
+     */
+    public void sethBodyEntity(RESTBodyEntity entity) {
+        this.entity = entity;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.rest.client.v2.RESTRequest#getBodyEntity()
+     */
+    @Override
+    public RESTBodyEntity getBodyEntity() {
+        return entity;
     }
 }

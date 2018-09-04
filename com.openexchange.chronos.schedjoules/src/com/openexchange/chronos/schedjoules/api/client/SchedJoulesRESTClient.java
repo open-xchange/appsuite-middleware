@@ -161,7 +161,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
 
         // Prepare the request
         HttpRequestBase httpRequest = createRequest(request.getMethod());
-        prepareAuthorizedRequest(httpRequest, this.scheme, this.host, request.getPath(), query);
+        prepareAuthorizedRequest(httpRequest, this.scheme, this.host, request.getEndPoint(), query);
         return httpRequest;
     }
 
@@ -216,7 +216,7 @@ public class SchedJoulesRESTClient extends AbstractRESTClient {
      */
     public RESTResponse executeRequest(SchedJoulesRequest request, RESTMethod httpMethod, String eTag, long lastModified) throws OXException {
         HttpRequestBase httpRequest = createRequest(httpMethod);
-        prepareRequest(httpRequest, this.scheme, this.host, request.getPath(), prepareQuery(request.getQueryParameters()), eTag, lastModified);
+        prepareRequest(httpRequest, this.scheme, this.host, request.getEndPoint(), prepareQuery(request.getQueryParameters()), eTag, lastModified);
         httpRequest.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
         return executeRequest(httpRequest);
     }

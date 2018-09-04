@@ -127,7 +127,7 @@ abstract class AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, path);
         request.setAccessToken(accessToken);
         for (Entry<String, String> queryParam : queryParams.entrySet()) {
-            request.withQueryParameter(queryParam.getKey(), queryParam.getValue());
+            request.setQueryParameter(queryParam.getKey(), queryParam.getValue());
         }
         return executeRequest(request);
     }
@@ -142,9 +142,9 @@ abstract class AbstractMicrosoftGraphAPI {
     JSONObject postResource(String accessToken, String path, JSONObject body) throws OXException {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, path);
         request.setAccessToken(accessToken);
-        request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         try {
-            request.withBodyEntity(new JSONObjectEntity(body));
+            request.sethBodyEntity(new JSONObjectEntity(body));
         } catch (UnsupportedEncodingException e) {
             throw new OXException(666, "charset is not supported");
         }
@@ -154,8 +154,8 @@ abstract class AbstractMicrosoftGraphAPI {
     JSONObject putResource(String accessToken, String path, String contentType, long contentLength, InputStream body) throws OXException {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.PUT, path);
         request.setAccessToken(accessToken);
-        request.withHeader(HttpHeaders.CONTENT_TYPE, contentType);
-        request.withBodyEntity(new InputStreamEntity(body, contentLength, contentType));
+        request.setHeader(HttpHeaders.CONTENT_TYPE, contentType);
+        request.sethBodyEntity(new InputStreamEntity(body, contentLength, contentType));
         return executeRequest(request);
     }
 
@@ -168,9 +168,9 @@ abstract class AbstractMicrosoftGraphAPI {
     JSONObject patchResource(String accessToken, String path, JSONObject body) throws OXException {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.PATCH, path);
         request.setAccessToken(accessToken);
-        request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         try {
-            request.withBodyEntity(new JSONObjectEntity(body));
+            request.sethBodyEntity(new JSONObjectEntity(body));
         } catch (UnsupportedEncodingException e) {
             throw new OXException(666, "charset is not supported");
         }

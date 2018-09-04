@@ -259,9 +259,9 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     public String copyItemAsync(String accessToken, String itemId, JSONObject body) throws OXException {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itames/" + itemId + "/copy");
         request.setAccessToken(accessToken);
-        request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         try {
-            request.withBodyEntity(new JSONObjectEntity(body));
+            request.sethBodyEntity(new JSONObjectEntity(body));
         } catch (UnsupportedEncodingException e) {
             throw new OXException(666, "charset is not supported");
         }
@@ -285,9 +285,9 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     public String copyItem(String accessToken, String itemId, JSONObject body) throws OXException {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/items/" + itemId + "/copy");
         request.setAccessToken(accessToken);
-        request.withHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         try {
-            request.withBodyEntity(new JSONObjectEntity(body));
+            request.sethBodyEntity(new JSONObjectEntity(body));
         } catch (UnsupportedEncodingException e) {
             throw new OXException(666, "charset is not supported");
         }
