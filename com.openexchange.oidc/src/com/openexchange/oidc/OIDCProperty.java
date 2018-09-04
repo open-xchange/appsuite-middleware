@@ -92,10 +92,4 @@ public enum OIDCProperty implements Property {
         throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
 
     }
-
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
-
 }

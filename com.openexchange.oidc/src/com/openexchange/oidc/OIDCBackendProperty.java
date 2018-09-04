@@ -170,4 +170,16 @@ public enum OIDCBackendProperty implements Property {
         return this.defaultValue;
     }
 
+    @Override
+    public <T extends Object> T getDefaultValue(Class<T> clazz) throws IllegalArgumentException {
+        Object defaultValue = getDefaultValue();
+        if (null == defaultValue) {
+            return null;
+        }
+        if (clazz.isAssignableFrom(defaultValue.getClass())) {
+            return clazz.cast(defaultValue);
+        }
+        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
+    }
+
 }

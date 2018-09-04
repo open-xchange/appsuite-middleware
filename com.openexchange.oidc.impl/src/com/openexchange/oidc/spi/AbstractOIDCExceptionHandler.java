@@ -52,7 +52,6 @@ package com.openexchange.oidc.spi;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -77,9 +76,9 @@ public abstract class AbstractOIDCExceptionHandler implements OIDCExceptionHandl
             headTitle = "Authentication provider error";
             category += "oauth-error";
             String error = request.getParameter("error");
-            errorType += error != null ? StringEscapeUtils.escapeHtml4(error) : "";
+            errorType += error != null ? org.apache.commons.lang3.StringEscapeUtils.escapeHtml4(error) : "";
             String errorDesc = request.getParameter("error_description");
-            errorDescription += errorDesc != null ? StringEscapeUtils.escapeHtml4(errorDesc) : "";
+            errorDescription += errorDesc != null ? org.apache.commons.lang3.StringEscapeUtils.escapeHtml4(errorDesc) : "";
         } else {
             headTitle = "500 - Internal Server Error";
             category += "ox-error";
