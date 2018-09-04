@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
  * Manager of all client states, that try to login or logout with OpenID features.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since v7.10.0
+ * @since v7.8.4
  */
 public interface StateManagement {
 

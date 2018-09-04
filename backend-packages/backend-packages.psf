@@ -69,6 +69,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,open-xchange-mobile-config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,open-xchange-munin-scripts"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,open-xchange-oauth-provider"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,open-xchange-oidc"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,open-xchange-client-onboarding"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,open-xchange-drive-client-windows"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,open-xchange-parallels"/>

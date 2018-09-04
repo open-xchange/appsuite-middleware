@@ -56,7 +56,7 @@ import com.openexchange.config.lean.Property;
  * Backend specific properties. OP = OpenID Provider
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since v7.10.0
+ * @since v7.8.4
  */
 public enum OIDCBackendProperty implements Property {
     /**

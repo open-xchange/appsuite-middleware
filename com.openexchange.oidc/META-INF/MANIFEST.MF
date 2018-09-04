@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OpenID Connect
 Bundle-SymbolicName: com.openexchange.oidc
-Bundle-Version: 7.10.0
+Bundle-Version: 7.8.4
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .
 Export-Package: com.openexchange.oidc,
  com.openexchange.oidc.state

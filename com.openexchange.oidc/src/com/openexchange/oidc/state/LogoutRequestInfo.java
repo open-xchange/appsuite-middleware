@@ -55,7 +55,7 @@ package com.openexchange.oidc.state;
  * is intended to be logged out.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since v7.10.0
+ * @since v7.8.4
  */
 public interface LogoutRequestInfo {
     

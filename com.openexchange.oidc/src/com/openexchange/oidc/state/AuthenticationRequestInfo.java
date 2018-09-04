@@ -54,7 +54,7 @@ import java.util.Map;
  * Meta information about the client, that tries to authenticate on the server.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since v7.10.0
+ * @since v7.8.4
  */
 public interface AuthenticationRequestInfo {
 

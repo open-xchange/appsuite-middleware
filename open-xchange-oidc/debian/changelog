@@ -1,47 +1,5 @@
-open-xchange-oidc (7.10.0-7) stable; urgency=medium
+open-xchange-oidc (7.8.4-0) unstable; urgency=medium
 
-  * Fourth candidate for 7.10.0 release
+  * Backport to 7.8.4
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 29 Jun 2018 12:38:17 +0200
-
-open-xchange-oidc (7.10.0-6) stable; urgency=medium
-
-  * Third candidate for 7.10.0 release
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 27 Jun 2018 14:49:56 +0200
-
-open-xchange-oidc (7.10.0-5) stable; urgency=medium
-
-  * Second candidate for 7.10.0 release
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 25 Jun 2018 14:33:19 +0200
-
-open-xchange-oidc (7.10.0-4) stable; urgency=medium
-
-  * First candidate for 7.10.0 release
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 11 Jun 2018 07:00:46 +0200
-
-open-xchange-oidc (7.10.0-3) stable; urgency=medium
-
-  * Sixth preview of 7.10.0 release
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 18 May 2018 12:54:29 +0200
-
-open-xchange-oidc (7.10.0-2) stable; urgency=medium
-
-  * Fifth preview of 7.10.0 release
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 19 Apr 2018 15:17:30 +0200
-
-open-xchange-oidc (7.10.0-1) stable; urgency=medium
-
-  * Fourth preview of 7.10.0 release
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 03 Apr 2018 12:57:37 +0200
-
-open-xchange-oidc (7.10.0-0) unstable; urgency=medium
-
-  * Initial release
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 01 Feb 2018 17:04:32 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 04 Sep 2018 15:26:00 +0200

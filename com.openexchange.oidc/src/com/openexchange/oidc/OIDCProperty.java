@@ -55,7 +55,7 @@ import com.openexchange.config.lean.Property;
  * Contains all properties of the OpenID feature.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
- * @since v7.10.0
+ * @since v7.8.4
  */
 public enum OIDCProperty implements Property {
     /**

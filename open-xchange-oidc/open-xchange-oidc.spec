@@ -8,13 +8,17 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?suse_version}
-BuildRequires: java-1_8_0-openjdk-devel
+%if 0%{?rhel_version} && 0%{?rhel_version} == 600
+BuildRequires: java7-devel
 %else
-BuildRequires: java-1.8.0-openjdk-devel
+%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
+BuildRequires: java-1_7_0-openjdk-devel
+%else
+BuildRequires: java-devel >= 1.7.0
+%endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,19 +59,5 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/oidcLogoutInfos.properties
 
 %changelog
-* Fri Jun 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Fourth candidate for 7.10.0 release
-* Wed Jun 27 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Third candidate for 7.10.0 release
-* Mon Jun 25 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Second candidate for 7.10.0 release
-* Mon Jun 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
-First candidate for 7.10.0 release
-* Fri May 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Sixth preview of 7.10.0 release
-* Thu Apr 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Fifth preview of 7.10.0 release
-* Tue Apr 03 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Fourth preview of 7.10.0 release
-* Thu Feb 01 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Initial release
+* Tue Sep 04 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Backport to 7.8.4
