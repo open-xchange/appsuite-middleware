@@ -52,12 +52,16 @@ package com.openexchange.chronos.alarm.mail.impl;
 import static com.openexchange.osgi.Tools.requireService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.alarm.mail.MailAlarmNotificationService;
+import com.openexchange.chronos.alarm.message.AlarmNotificationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -67,13 +71,13 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public class MailAlarmNotificationServiceImpl implements MailAlarmNotificationService {
+public class MailAlarmNotificationServiceImpl implements AlarmNotificationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(MailAlarmNotificationServiceImpl.class.getName());
 
-    private MailAlarmMailHandler mailAlarmNotificationHandler;
+    private final MailAlarmMailHandler mailAlarmNotificationHandler;
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public MailAlarmNotificationServiceImpl(ServiceLookup services) {
         this.services = services;
@@ -81,7 +85,7 @@ public class MailAlarmNotificationServiceImpl implements MailAlarmNotificationSe
     }
 
     @Override
-    public void send(Event event, int contextId, int accountId, int userId, long trigger) throws OXException {
+    public void send(Event event, Alarm alarm, int contextId, int accountId, int userId, long trigger) throws OXException {
         if (event == null || contextId < 1 || userId < 1) {
             LOG.debug("Event is null or contextId/userId invalid. Cannot send alarm notification via mail.");
             return;
@@ -93,5 +97,16 @@ public class MailAlarmNotificationServiceImpl implements MailAlarmNotificationSe
         User targetUser = userService.getUser(userId, context);
 
         this.mailAlarmNotificationHandler.send(event, targetUser, contextId, accountId, trigger);
+    }
+
+    @Override
+    public AlarmAction getAction() {
+        return AlarmAction.EMAIL;
+    }
+
+    @Override
+    public int getShift() throws OXException {
+        LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, services);
+        return leanConfig.getIntProperty(MailAlarmConfig.MAIL_SHIFT);
     }
 }

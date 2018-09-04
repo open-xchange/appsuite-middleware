@@ -47,56 +47,49 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.message.impl;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link MailAlarmDeliveryWorkerUpdateTask}
+ * {@link MessageAlarmConfig}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class MailAlarmDeliveryWorkerUpdateTask extends UpdateTaskAdapter {
+public class MessageAlarmConfig {
+    private static final String PREFIX = "com.openexchange.calendar.alarm.message.backgroundWorker.";
 
-    private static final String TABLE = "calendar_alarm_trigger";
+    /**
+     * Defines the time in minutes between executions of the message delivery worker.
+     */
+    public static final Property PERIOD = DefaultProperty.valueOf(PREFIX + "period", 30);
 
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        boolean rollback = false;
-        try {
-            Databases.startTransaction(con);
-            rollback = true;
-            Column col = new Column("processed", "bigint(20) NOT NULL DEFAULT 0");
-            Tools.checkAndAddColumns(con, TABLE , col);
-            Tools.createIndex(con, TABLE, "action", new String[] {"action", "triggerDate"}, false);
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
-        }
+    /**
+     * Defines the initial delay in minutes after which the message delivery worker runs for the first time.
+     */
+    public static final Property INITIAL_DELAY = DefaultProperty.valueOf(PREFIX + "initialDelay", 10);
 
-    }
+    /**
+     * Defines the time in minutes the delivery worker looks ahead to pick up message alarms. Must not be smaller than {@link #PERIOD}.
+     */
+    public static final Property LOOK_AHEAD = DefaultProperty.valueOf(PREFIX + "lookAhead", 35);
 
-    @Override
-    public String[] getDependencies() {
-        return new String[] {"com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"};
-    }
+    /**
+     * Defines the time in minutes that is waited until an alarm that is already in process is picked up. E.g. because the node who originally was going to process the trigger has died.
+     */
+    public static final Property OVERDUE = DefaultProperty.valueOf(PREFIX + "overdueWaitTime", 5);
+
+    /**
+     * Enables or disables the message alarm delivery worker.
+     */
+    public static final Property ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", true);
+
+    /**
+     * Defines the amount of message delivery worker
+     */
+    public static final Property WORKER_COUNT = DefaultProperty.valueOf(PREFIX + "count", 1);
+
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.message.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -66,8 +66,10 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.alarm.message.AlarmNotificationService;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -84,12 +86,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.util.Pair;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * The {@link MailAlarmDeliveryWorker} checks if there are any mail alarm triggers which needed to be executed within the next timeframe ({@link #lookAhead}).
- * It then marks those triggers as processed and schedules a {@link SingleMailDeliveryTask} at the appropriate time (shifted forward by the {@link #mailShift} value)
+ * The {@link MessageAlarmDeliveryWorker} checks if there are any message alarm triggers (e.g. email and sms) which needed to be executed within the next timeframe ({@link #lookAhead}).
+ * It then marks those triggers as processed and schedules a {@link SingleMessageDeliveryTask} at the appropriate time (shifted forward by the {@link #shifts} value)
  * for each of them.
  *
  * It also picks up old triggers, which are already marked as processed by other threats, if they are overdue ({@link #overdueWaitTime}).
@@ -97,11 +100,11 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class MailAlarmDeliveryWorker implements Runnable {
+public class MessageAlarmDeliveryWorker implements Runnable {
 
     /**
      *
-     * {@link Builder} a builder for {@link MailAlarmDeliveryWorker}
+     * {@link Builder} a builder for {@link MessageAlarmDeliveryWorker}
      *
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.10.1
@@ -113,11 +116,10 @@ public class MailAlarmDeliveryWorker implements Runnable {
         private ContextService ctxService;
         private CalendarUtilities calUtil;
         private TimerService timerService;
-        private MailAlarmNotificationService mailAlarmNotificationService;
+        private AlarmNotificationServiceRegistry registry;
         private CalendarProviderRegistry calendarProviderRegistry;
         private AdministrativeCalendarAccountService administrativeCalendarAccountService;
         private int lookAhead;
-        private int mailShift;
         private int overdueWaitTime;
 
         public Builder setStorage(AdministrativeAlarmTriggerStorage storage) {
@@ -150,8 +152,8 @@ public class MailAlarmDeliveryWorker implements Runnable {
             return this;
         }
 
-        public Builder setMailAlarmNotificationService(MailAlarmNotificationService mailAlarmNotificationService) {
-            this.mailAlarmNotificationService = mailAlarmNotificationService;
+        public Builder setAlarmNotificationServiceRegistry(AlarmNotificationServiceRegistry registry) {
+            this.registry = registry;
             return this;
         }
 
@@ -170,33 +172,27 @@ public class MailAlarmDeliveryWorker implements Runnable {
             return this;
         }
 
-        public Builder setMailShift(int mailShift) {
-            this.mailShift = mailShift;
-            return this;
-        }
-
         public Builder setOverdueWaitTime(int overdueWaitTime) {
             this.overdueWaitTime = overdueWaitTime;
             return this;
         }
 
-        public MailAlarmDeliveryWorker build() throws OXException {
-            return new MailAlarmDeliveryWorker( storage,
+        public MessageAlarmDeliveryWorker build() throws OXException {
+            return new MessageAlarmDeliveryWorker( storage,
                                                 calendarStorageFactory,
                                                 dbService,
                                                 ctxService,
                                                 calUtil,
                                                 timerService,
-                                                mailAlarmNotificationService,
+                                                registry,
                                                 calendarProviderRegistry,
                                                 administrativeCalendarAccountService,
                                                 lookAhead,
-                                                mailShift,
                                                 overdueWaitTime);
         }
     }
 
-    protected static final Logger LOG = LoggerFactory.getLogger(MailAlarmDeliveryWorker.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(MessageAlarmDeliveryWorker.class);
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     private final AdministrativeAlarmTriggerStorage storage;
@@ -208,15 +204,14 @@ public class MailAlarmDeliveryWorker implements Runnable {
     private final CalendarStorageFactory factory;
     private final CalendarUtilities calUtil;
 
-    private final MailAlarmNotificationService mailService;
+    private final AlarmNotificationServiceRegistry registry;
     private final CalendarProviderRegistry calendarProviderRegistry;
     private final AdministrativeCalendarAccountService administrativeCalendarAccountService;
-    private final int mailShift;
     private final int lookAhead;
     private final int overdueWaitTime;
 
     /**
-     * Initializes a new {@link MailAlarmDeliveryWorker}.
+     * Initializes a new {@link MessageAlarmDeliveryWorker}.
      *
      * @param storage An {@link AdministrativeAlarmTriggerStorage}
      * @param factory A {@link CalendarStorageFactory} which provides the storage.
@@ -224,25 +219,23 @@ public class MailAlarmDeliveryWorker implements Runnable {
      * @param ctxService A {@link ContextService} to load the Context.
      * @param calUtil A {@link CalendarUtilities} to perform addition
      * @param timerService A {@link TimerService} to provide {@link EntityResolver} for each context
-     * @param mailService The {@link MailAlarmNotificationService} to send the mails with
+     * @param registry The {@link AlarmNotificationServiceRegistry} used to send the notification
      * @param calProviderRegistry The {@link CalendarProviderRegistry}
      * @param administrativeCalendarAccountService The {@link AdministrativeCalendarAccountService}
      * @param lookAhead The time value in minutes the worker is looking ahead.
-     * @param mailShift The time in milliseconds the mail send is shifter forward.
      * @param overdueWaitTime The time in minutes to wait until an old trigger is picked up.
      * @throws OXException If not administrative storage could be created.
      */
-    protected MailAlarmDeliveryWorker( AdministrativeAlarmTriggerStorage storage,
+    protected MessageAlarmDeliveryWorker( AdministrativeAlarmTriggerStorage storage,
                                     CalendarStorageFactory factory,
                                     DatabaseService dbservice,
                                     ContextService ctxService,
                                     CalendarUtilities calUtil,
                                     TimerService timerService,
-                                    MailAlarmNotificationService mailService,
+                                    AlarmNotificationServiceRegistry registry,
                                     CalendarProviderRegistry calProviderRegistry,
                                     AdministrativeCalendarAccountService administrativeCalendarAccountService,
                                     int lookAhead,
-                                    int mailShift,
                                     int overdueWaitTime) throws OXException {
         this.storage = storage;
         this.dbservice = dbservice;
@@ -250,9 +243,8 @@ public class MailAlarmDeliveryWorker implements Runnable {
         this.timerService = timerService;
         this.factory = factory;
         this.calUtil = calUtil;
-        this.mailService = mailService;
+        this.registry = registry;
         this.lookAhead = lookAhead;
-        this.mailShift = mailShift;
         this.overdueWaitTime = overdueWaitTime;
         this.calendarProviderRegistry = calProviderRegistry;
         this.administrativeCalendarAccountService = administrativeCalendarAccountService;
@@ -261,7 +253,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
 
     @Override
     public void run() {
-        LOG.info("Started mail alarm delivery worker...");
+        LOG.info("Started alarm delivery worker...");
         Calendar until = Calendar.getInstance(UTC);
         until.add(Calendar.MINUTE, lookAhead);
         try {
@@ -270,7 +262,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
             for (Integer ctxId : ctxIds) {
                 // Test if schema is ready
                 UpdateStatus status = Updater.getInstance().getStatus(ctxId);
-                if (!status.isExecutedSuccessfully(MailAlarmDeliveryWorkerUpdateTask.class.getName()) || status.backgroundUpdatesRunning() || status.blockingUpdatesRunning()) {
+                if (!status.isExecutedSuccessfully(MessageAlarmDeliveryWorkerUpdateTask.class.getName()) || status.backgroundUpdatesRunning() || status.blockingUpdatesRunning()) {
                     continue;
                 }
                 Connection readCon = null;
@@ -283,7 +275,8 @@ public class MailAlarmDeliveryWorker implements Runnable {
                     Calendar overdueTime = Calendar.getInstance(UTC);
                     overdueTime.add(Calendar.MINUTE, -Math.abs(overdueWaitTime));
                     readCon = dbservice.getReadOnly(ctxId);
-                    lockedTriggers = storage.getAndLockTriggers(readCon, until.getTime(), overdueTime.getTime(), false);
+
+                    lockedTriggers = storage.getAndLockTriggers(readCon, until.getTime(), overdueTime.getTime(), false, registry.getActions());
                     if (lockedTriggers.isEmpty()) {
                         successful = true;
                         continue;
@@ -337,7 +330,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
             // Nothing that can be done here. Just retry it with the next run
             LOG.error(e.getMessage(), e);
         }
-        LOG.info("Mail Alarm delivery worker run finished!");
+        LOG.info("Alarm delivery worker run finished!");
     }
 
     private void spawnDeliveryTaskForTriggers(Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers, Calendar currentUTCTime) throws OXException {
@@ -354,18 +347,25 @@ public class MailAlarmDeliveryWorker implements Runnable {
                         Calendar calTriggerTime = Calendar.getInstance(UTC);
                         calTriggerTime.setTimeInMillis(trigger.getTime());
                         Calendar now = Calendar.getInstance(UTC);
-                        long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - mailShift;
+                        AlarmNotificationService alarmNotificationService = registry.getService(alarm.getAction());
+                        if(alarmNotificationService == null) {
+                            LOG.error("Missing required AlarmNotificationService for alarm action \"{}\"", alarm.getAction().getValue());
+                            throw ServiceExceptionCode.absentService(AlarmNotificationService.class);
+                        }
+
+                        Integer shift = alarmNotificationService.getShift();
+                        long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - (shift == null ? 0 : shift);
                         if (delay < 0) {
                             delay = 0;
                         }
 
-                        SingleMailDeliveryTask task = createTask(cid, account, alarm, trigger, currentUTCTime.getTimeInMillis());
+                        SingleMessageDeliveryTask task = createTask(cid, account, alarm, trigger, currentUTCTime.getTimeInMillis(), alarmNotificationService);
                         ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
                         Key key = key(cid, account, trigger.getEventId(), alarm.getId());
                         scheduledTasks.put(key, timer);
-                        LOG.trace("Created a new mail alarm task for {}", key);
+                        LOG.trace("Created a new alarm task for {}", key);
                     } catch (UnsupportedOperationException e) {
-                        LOG.error("Can't handle mail alarms as long as the legacy storage is used.");
+                        LOG.error("Can't handle message alarms as long as the legacy storage is used.");
                         continue;
                     }
                 }
@@ -378,21 +378,22 @@ public class MailAlarmDeliveryWorker implements Runnable {
     }
 
     /**
-     * Creates a new {@link SingleMailDeliveryTask}
+     * Creates a new {@link SingleMessageDeliveryTask}
      *
      * @param cid The context id
      * @param account The account id
      * @param alarm The {@link Alarm}
      * @param trigger The {@link AlarmTrigger}
      * @param processed The processed value
+     * @param alarmNotificationService
      * @return The task
-     * @throws OXException If the context couldn't be loaded
+     * @throws OXException If the context couldn't be loaded or if no {@link AlarmNotificationService} is registered for the {@link AlarmAction} of the alarm
      */
-    private SingleMailDeliveryTask createTask(int cid, int account, Alarm alarm, AlarmTrigger trigger, long processed) throws OXException {
-        return new SingleMailDeliveryTask.Builder()
+    private SingleMessageDeliveryTask createTask(int cid, int account, Alarm alarm, AlarmTrigger trigger, long processed, AlarmNotificationService alarmNotificationService) throws OXException {
+        return new SingleMessageDeliveryTask.Builder()
                                          .setDbservice(dbservice)
                                          .setStorage(storage)
-                                         .setMailService(mailService)
+                                         .setAlarmNotificationService(alarmNotificationService)
                                          .setFactory(factory)
                                          .setCalUtil(calUtil)
                                          .setCalendarProviderRegistry(calendarProviderRegistry)
@@ -431,7 +432,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
             Entry<Key, ScheduledTimerTask> entry = iterator.next();
             Key key = entry.getKey();
             if (key.getCid() == cid && key.getAccount() == accountId && key.getEventId().equals(eventId)) {
-                LOG.trace("Canceled mail alarm task for {}", key);
+                LOG.trace("Canceled message alarm task for {}", key);
                 entry.getValue().cancel();
                 iterator.remove();
             }
@@ -452,7 +453,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
     }
 
     /**
-     * Checks if the given events contain alarm trigger which must be triggered before the next run of the {@link MailAlarmDeliveryWorker} and
+     * Checks if the given events contain alarm trigger which must be triggered before the next run of the {@link MessageAlarmDeliveryWorker} and
      * schedules a task for each trigger.
      *
      * @param events A list of updated and newly created events
@@ -486,7 +487,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
                     successful = true;
                 }
             } catch (SQLException e) {
-                LOG.error("Error while scheduling mail alarm task: {}", e.getMessage(), e);
+                LOG.error("Error while scheduling message alarm task: {}", e.getMessage(), e);
             } finally {
                 if (readCon != null) {
                     dbservice.backReadOnly(cid, readCon);
@@ -505,12 +506,12 @@ public class MailAlarmDeliveryWorker implements Runnable {
             }
         } catch (OXException e) {
             LOG.error("Error while trying to handle event: {}", e.getMessage(), e);
-            // Can be ignored. Triggers are picked up with the next run of the MailAlarmDeliveryWorker
+            // Can be ignored. Triggers are picked up with the next run of the MessageAlarmDeliveryWorker
         }
     }
 
     /**
-     * Checks the given events for mail alarms which need to be triggered soon
+     * Checks the given events for message alarms which need to be triggered soon
      *
      * @param con The connection to use
      * @param events The events to check
@@ -526,7 +527,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
 
         List<AlarmTrigger> result = null;
         for (Event event : events) {
-            Map<Pair<Integer, Integer>, List<AlarmTrigger>> triggerMap = storage.getMailAlarmTriggers(con, cid, account, event.getId(), isWriteCon);
+            Map<Pair<Integer, Integer>, List<AlarmTrigger>> triggerMap = storage.getMessageAlarmTriggers(con, cid, account, event.getId(), isWriteCon, registry.getActions());
             // Schedule a task for all triggers before the next usual interval
             for (Entry<Pair<Integer, Integer>, List<AlarmTrigger>> entry : triggerMap.entrySet()) {
                 for (AlarmTrigger trigger : entry.getValue()) {
@@ -550,15 +551,15 @@ public class MailAlarmDeliveryWorker implements Runnable {
             Alarm alarm = storage.getAlarmStorage().loadAlarm(trigger.getAlarm());
             scheduleTask(writeCon, key, alarm, trigger);
         } catch (UnsupportedOperationException e) {
-            LOG.error("Can't handle mail alarms as long as the legacy storage is used.");
+            LOG.error("Can't handle message alarms as long as the legacy storage is used.");
         }
     }
 
     /**
-     * Schedules a {@link SingleMailDeliveryTask} for the given {@link AlarmTriggerWrapper}
+     * Schedules a {@link SingleMessageDeliveryTask} for the given {@link AlarmTriggerWrapper}
      *
      * @param con The connection to use
-     * @param key The {@link Key} to the {@link SingleMailDeliveryTask}
+     * @param key The {@link Key} to the {@link SingleMessageDeliveryTask}
      * @param alarm The {@link Alarm} of the {@link AlarmTriggerWrapper}
      * @param trigger The {@link AlarmTriggerWrapper}
      */
@@ -572,14 +573,19 @@ public class MailAlarmDeliveryWorker implements Runnable {
 
             storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(key.getCid(), key.getAccount()), Collections.singletonList(trigger)), now.getTimeInMillis());
             processingSet = true;
-
-            long delay = calTriggerTime.getTimeInMillis() - now.getTimeInMillis();
+            AlarmNotificationService alarmNotificationService = registry.getService(alarm.getAction());
+            if(alarmNotificationService == null) {
+                LOG.error("Missing required AlarmNotificationService for alarm action \"{}\"", alarm.getAction().getValue());
+                throw ServiceExceptionCode.absentService(AlarmNotificationService.class);
+            }
+            Integer shift = alarmNotificationService.getShift();
+            long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - (shift == null ? 0 : shift);
             if (delay < 0) {
                 delay = 0;
             }
 
             LOG.trace("Created new task for {}", key);
-            SingleMailDeliveryTask task = createTask(key.getCid(), key.getAccount(), alarm, trigger, now.getTimeInMillis());
+            SingleMessageDeliveryTask task = createTask(key.getCid(), key.getAccount(), alarm, trigger, now.getTimeInMillis(), alarmNotificationService);
             ScheduledTimerTask timer = timerService.schedule(task, delay, TimeUnit.MILLISECONDS);
             scheduledTasks.put(key, timer);
         } catch (OXException e) {
@@ -603,7 +609,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
     private void cancelTask(Key key) {
         ScheduledTimerTask scheduledTimerTask = scheduledTasks.remove(key);
         if (scheduledTimerTask != null) {
-            LOG.trace("Canceled mail alarm task for {}", key);
+            LOG.trace("Canceled message alarm task for {}", key);
             scheduledTimerTask.cancel();
         }
     }
@@ -661,7 +667,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
                 entries.put(key.getCid(), list);
             }
             list.add(entry);
-            LOG.trace("Canceled mail alarm delivery task for {}", key);
+            LOG.trace("Canceled message alarm delivery task for {}", key);
         }
         return entries;
     }
@@ -682,7 +688,7 @@ public class MailAlarmDeliveryWorker implements Runnable {
     }
 
     /**
-     * Removes the {@link SingleMailDeliveryTask} defined by the given key from the local map.
+     * Removes the {@link SingleMessageDeliveryTask} defined by the given key from the local map.
      *
      * @param key The key to remove
      */

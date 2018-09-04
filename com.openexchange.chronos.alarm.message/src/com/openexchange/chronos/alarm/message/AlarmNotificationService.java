@@ -47,56 +47,50 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.message;
 
-import com.openexchange.config.lean.DefaultProperty;
-import com.openexchange.config.lean.Property;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmAction;
+import com.openexchange.chronos.Event;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link MailAlarmConfig}
+ * {@link AlarmNotificationService} is a service which delivers event messages for a specific type of {@link AlarmAction}s. E.g. transport via mail for {@link AlarmAction#EMAIL}.
  *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class MailAlarmConfig {
-    private static final String PREFIX = "com.openexchange.calendar.alarm.mail.backgroundWorker.";
+public interface AlarmNotificationService {
 
     /**
-     * Defines the time in minutes between executions of the mail delivery worker.
+     * Sends the given event
+     *
+     * @param event The event
+     * @param alarm The {@link Alarm}
+     * @param contextId The context id
+     * @param accountId The calendar account id
+     * @param userId The user id
+     * @param trigger The trigger id
+     * @throws OXException
      */
-    public static final Property PERIOD = DefaultProperty.valueOf(PREFIX + "period", 30);
+    public void send(Event event, Alarm alarm, int contextId, int accountId, int userId, long trigger) throws OXException;
 
     /**
-     * Defines the initial delay in minutes after which the mail delivery worker runs for the first time.
+     * Returns the type of {@link AlarmAction} this {@link AlarmNotificationService} is responsible for.
+     *
+     * @return the {@link AlarmAction}
      */
-    public static final Property INITIAL_DELAY = DefaultProperty.valueOf(PREFIX + "initialDelay", 10);
+    public AlarmAction getAction();
 
     /**
-     * Defines the time in minutes the delivery worker looks ahead to pick up mail alarms. Must not be smaller than {@link #PERIOD}.
+     * Returns the time in milliseconds a trigger for this {@link AlarmNotificationService} should be shifted forward to compensate the time needed to send the message.
+     *
+     * E.g. the average time a mail infrastructure needs to send out a mail.
+     *
+     * @return The time in milliseconds
+     * @throws OXException
      */
-    public static final Property LOOK_AHEAD = DefaultProperty.valueOf(PREFIX + "lookAhead", 35);
-
-    /**
-     * Defines the time in minutes that is waited until an alarm that is already in process is picked up. E.g. because the node who originally was going to process the trigger has died.
-     */
-    public static final Property OVERDUE = DefaultProperty.valueOf(PREFIX + "overdueWaitTime", 5);
-
-    /**
-     * Defines the time in milliseconds an alarm mail should be send out before the trigger time.
-     * With this property the admin can configure the average time needed by the mail system to send out the mail.
-     * This way the mail should usually be send out on time and not a few seconds late.
-     */
-    public static final Property MAIL_SHIFT = DefaultProperty.valueOf(PREFIX + "time.shift", 0);
-
-    /**
-     * Enables or disables the mail alarm delivery worker.
-     */
-    public static final Property ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", true);
-
-    /**
-     * Defines the amount of mail delivery worker
-     */
-    public static final Property WORKER_COUNT = DefaultProperty.valueOf(PREFIX + "count", 1);
-
+    int getShift() throws OXException;
 
 }

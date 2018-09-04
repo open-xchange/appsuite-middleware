@@ -47,50 +47,54 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail.osgi;
+package com.openexchange.chronos.alarm.message.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.alarm.mail.impl.MailAlarmNotificationServiceImpl;
-import com.openexchange.chronos.alarm.message.AlarmNotificationService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.html.HtmlService;
-import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.user.UserService;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarEvent;
+import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.UpdateResult;
 
 /**
- * {@link Activator}
+ * {@link MessageAlarmCalendarHandler}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class Activator extends HousekeepingActivator {
+public class MessageAlarmCalendarHandler implements CalendarHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private final MessageAlarmDeliveryWorker worker;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
-            TemplateService.class, ResourceService.class, UserService.class, ConfigurationService.class, HtmlService.class, LeanConfigurationService.class};
+    /**
+     * Initializes a new {@link MessageAlarmCalendarHandler}.
+     * @param worker
+     */
+    public MessageAlarmCalendarHandler(MessageAlarmDeliveryWorker worker) {
+        this.worker = worker;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(AlarmNotificationService.class, new MailAlarmNotificationServiceImpl(this));
-        LOG.info("Successfully started bundle "+this.context.getBundle().getSymbolicName());
-    }
+    public void handle(CalendarEvent event) {
+        // Check deleted events and remove the according tasks
+        HashSet<String> eventsToCancel = new HashSet<>();
+        for(DeleteResult deletion: event.getDeletions()) {
+            eventsToCancel.add(deletion.getEventID().getObjectID());
+        }
+        worker.cancelAll(event.getContextId(), event.getAccountId(), eventsToCancel);
+        // Check if an updated events has tasks and if so load and check the appropriate alarm data
+        List<Event> eventsToCheck = new ArrayList<>();
+        for(UpdateResult updateResult : event.getUpdates()) {
+            eventsToCheck.add(updateResult.getOriginal());
+        }
+        for(CreateResult createResult : event.getCreations()) {
+            eventsToCheck.add(createResult.getCreatedEvent());
+        }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        LOG.info("Successfully stopped bundle "+this.context.getBundle().getSymbolicName());
+        worker.checkAndScheduleTasksForEvents(eventsToCheck, event.getContextId(), event.getAccountId());
     }
 
 }

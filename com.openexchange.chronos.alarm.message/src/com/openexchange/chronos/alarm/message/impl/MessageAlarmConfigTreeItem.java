@@ -47,54 +47,72 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.message.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.CalendarEvent;
-import com.openexchange.chronos.service.CalendarHandler;
-import com.openexchange.chronos.service.CreateResult;
-import com.openexchange.chronos.service.DeleteResult;
-import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.chronos.AlarmAction;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.session.Session;
 
 /**
- * {@link MailAlarmCalendarHandler}
+ * {@link MessageAlarmConfigTreeItem}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class MailAlarmCalendarHandler implements CalendarHandler {
+public class MessageAlarmConfigTreeItem implements PreferencesItemService, ConfigTreeEquivalent {
 
-    private final MailAlarmDeliveryWorker worker;
+    final AlarmNotificationServiceRegistry registry;
 
     /**
-     * Initializes a new {@link MailAlarmCalendarHandler}.
-     * @param worker
+     * Initializes a new {@link MessageAlarmConfigTreeItem}.
      */
-    public MailAlarmCalendarHandler(MailAlarmDeliveryWorker worker) {
-        this.worker = worker;
+    public MessageAlarmConfigTreeItem(AlarmNotificationServiceRegistry registry) {
+        super();
+        this.registry = registry;
+
     }
 
     @Override
-    public void handle(CalendarEvent event) {
-        // Check deleted events and remove the according tasks
-        HashSet<String> eventsToCancel = new HashSet<>();
-        for(DeleteResult deletion: event.getDeletions()) {
-            eventsToCancel.add(deletion.getEventID().getObjectID());
-        }
-        worker.cancelAll(event.getContextId(), event.getAccountId(), eventsToCancel);
-        // Check if an updated events has tasks and if so load and check the appropriate alarm data
-        List<Event> eventsToCheck = new ArrayList<>();
-        for(UpdateResult updateResult : event.getUpdates()) {
-            eventsToCheck.add(updateResult.getOriginal());
-        }
-        for(CreateResult createResult : event.getCreations()) {
-            eventsToCheck.add(createResult.getCreatedEvent());
-        }
+    public String[] getPath() {
+        return new String[] { "modules", "calendar", "supportedAlarms" };
+    }
 
-        worker.checkAndScheduleTasksForEvents(eventsToCheck, event.getContextId(), event.getAccountId());
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return userConfig.hasCalendar();
+            }
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                setting.addMultiValue(AlarmAction.DISPLAY.getValue());
+                setting.addMultiValue(AlarmAction.AUDIO.getValue());
+                for(AlarmAction action: registry.getActions()) {
+                    setting.addMultiValue(action.getValue());
+                }
+            }
+        };
+    }
+
+    @Override
+    public String getConfigTreePath() {
+        return "modules/calendar/supportedAlarms";
+    }
+
+    @Override
+    public String getJslobPath() {
+        return "io.ox/calendar//supportedAlarms";
     }
 
 }

@@ -47,19 +47,85 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
-
-import com.openexchange.chronos.Event;
-import com.openexchange.exception.OXException;
+package com.openexchange.chronos.alarm.message.impl;
 
 /**
- * {@link MailAlarmNotificationService}
+ * {@link Key} is a identifying key for a {@link SingleMessageDeliveryTask}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public interface MailAlarmNotificationService {
+class Key {
 
-    void send(Event event, int contextId, int accountId, int userId, long trigger) throws OXException;
+    private final int cid, account, id;
+    private final String eventId;
 
+    /**
+     * Initializes a new {@link MessageAlarmDeliveryWorker.key}.
+     */
+    public Key(int cid, int account, String eventId, int id) {
+        this.cid = cid;
+        this.account = account;
+        this.id = id;
+        this.eventId = eventId;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = hash * 31 + cid;
+        hash = hash * 31 + account;
+        hash = hash * 31 + eventId.hashCode();
+        hash = hash * 31 + id;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Key) {
+            return obj.hashCode() == this.hashCode();
+        }
+        return false;
+    }
+
+    /**
+     * Gets the eventId
+     *
+     * @return The eventId
+     */
+    public String getEventId() {
+        return eventId;
+    }
+
+    /**
+     * Gets the cid
+     *
+     * @return The cid
+     */
+    public int getCid() {
+        return cid;
+    }
+
+    /**
+     * Gets the account
+     *
+     * @return The account
+     */
+    public int getAccount() {
+        return account;
+    }
+
+    @Override
+    public String toString() {
+        return "Key [cid=" + cid + "|account=" + account + "|eventId=" + eventId + "|alarmId=" + id + "]";
+    }
+
+    /**
+     * Gets the id
+     *
+     * @return The id
+     */
+    public int getId() {
+        return id;
+    }
 }

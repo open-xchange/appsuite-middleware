@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.message.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.alarm.message.AlarmNotificationService;
 import com.openexchange.chronos.provider.AdministrativeCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
@@ -80,12 +81,12 @@ import com.openexchange.java.util.Pair;
 
 /**
  *
- * {@link SingleMailDeliveryTask} executes the mail delivery for a calendar mail alarm.
+ * {@link SingleMessageDeliveryTask} executes the delivery for a calendar message alarm.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-class SingleMailDeliveryTask implements Runnable {
+class SingleMessageDeliveryTask implements Runnable {
 
     public static class Builder {
         Context ctx;
@@ -95,10 +96,10 @@ class SingleMailDeliveryTask implements Runnable {
         private CalendarUtilities calUtil;
         private long processed;
         private int account;
-        private MailAlarmDeliveryWorker callback;
+        private MessageAlarmDeliveryWorker callback;
         private DatabaseService dbservice;
         private AdministrativeAlarmTriggerStorage storage;
-        private MailAlarmNotificationService mailService;
+        private AlarmNotificationService alarmNotificationService;
         private CalendarProviderRegistry calendarProviderRegistry;
         private AdministrativeCalendarAccountService administrativeCalendarAccountService;
 
@@ -137,7 +138,7 @@ class SingleMailDeliveryTask implements Runnable {
             return this;
         }
 
-        public Builder setCallback(MailAlarmDeliveryWorker callback) {
+        public Builder setCallback(MessageAlarmDeliveryWorker callback) {
             this.callback = callback;
             return this;
         }
@@ -152,8 +153,8 @@ class SingleMailDeliveryTask implements Runnable {
             return this;
         }
 
-        public Builder setMailService(MailAlarmNotificationService mailService) {
-            this.mailService = mailService;
+        public Builder setAlarmNotificationService(AlarmNotificationService alarmNotificationService) {
+            this.alarmNotificationService = alarmNotificationService;
             return this;
         }
 
@@ -167,10 +168,10 @@ class SingleMailDeliveryTask implements Runnable {
             return this;
         }
 
-        public SingleMailDeliveryTask build() {
-            return new SingleMailDeliveryTask(  dbservice,
+        public SingleMessageDeliveryTask build() {
+            return new SingleMessageDeliveryTask(  dbservice,
                                                 storage,
-                                                mailService,
+                                                alarmNotificationService,
                                                 factory,
                                                 calUtil,
                                                 calendarProviderRegistry,
@@ -184,7 +185,7 @@ class SingleMailDeliveryTask implements Runnable {
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(SingleMailDeliveryTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SingleMessageDeliveryTask.class);
 
     Context ctx;
     private final Alarm alarm;
@@ -193,19 +194,19 @@ class SingleMailDeliveryTask implements Runnable {
     private final CalendarUtilities calUtil;
     private final long processed;
     private final int account;
-    private final MailAlarmDeliveryWorker callback;
+    private final MessageAlarmDeliveryWorker callback;
     private final DatabaseService dbservice;
     private final AdministrativeAlarmTriggerStorage storage;
-    private final MailAlarmNotificationService mailService;
+    private final AlarmNotificationService notificationService;
     private final CalendarProviderRegistry calendarProviderRegistry;
     private final AdministrativeCalendarAccountService administrativeCalendarAccountService;
 
     /**
-     * Initializes a new {@link SingleMailDeliveryTask}.
+     * Initializes a new {@link SingleMessageDeliveryTask}.
      *
      * @param dbservice The {@link DatabaseService}
      * @param storage The {@link AdministrativeAlarmTriggerStorage}
-     * @param mailService The {@link MailAlarmNotificationService}
+     * @param notificationService The {@link AlarmNotificationService}
      * @param factory The {@link CalendarStorageFactory}
      * @param calUtil The {@link CalendarUtilities}
      * @param calendarProviderRegistry The {@link CalendarProviderRegistry}
@@ -214,12 +215,12 @@ class SingleMailDeliveryTask implements Runnable {
      * @param account The account id
      * @param alarm The {@link Alarm}
      * @param trigger The {@link AlarmTrigger}
-     * @param callback The {@link MailAlarmDeliveryWorker} which started this task
+     * @param callback The {@link MessageAlarmDeliveryWorker} which started this task
      * @param processed The processed value
      */
-    protected SingleMailDeliveryTask(   DatabaseService dbservice,
+    protected SingleMessageDeliveryTask(   DatabaseService dbservice,
                                         AdministrativeAlarmTriggerStorage storage,
-                                        MailAlarmNotificationService mailService,
+                                        AlarmNotificationService notificationService,
                                         CalendarStorageFactory factory,
                                         CalendarUtilities calUtil,
                                         CalendarProviderRegistry calendarProviderRegistry,
@@ -229,7 +230,7 @@ class SingleMailDeliveryTask implements Runnable {
                                         Alarm alarm,
                                         AlarmTrigger trigger,
                                         long processed,
-                                        MailAlarmDeliveryWorker callback) {
+                                        MessageAlarmDeliveryWorker callback) {
         this.ctx = ctx;
         this.alarm = alarm;
         this.factory = factory;
@@ -240,7 +241,7 @@ class SingleMailDeliveryTask implements Runnable {
         this.callback = callback;
         this.dbservice = dbservice;
         this.storage = storage;
-        this.mailService = mailService;
+        this.notificationService = notificationService;
         this.calendarProviderRegistry = calendarProviderRegistry;
         this.administrativeCalendarAccountService = administrativeCalendarAccountService;
 
@@ -261,8 +262,8 @@ class SingleMailDeliveryTask implements Runnable {
             if (event != null) {
                 Databases.autocommit(writeCon);
                 dbservice.backWritable(ctx, writeCon);
-                // send the mail
-                sendMail(event);
+                // send the message
+                sendMessage(event);
                 // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
                 writeCon = dbservice.getWritable(ctx);
                 writeCon.setAutoCommit(false);
@@ -282,7 +283,7 @@ class SingleMailDeliveryTask implements Runnable {
                         writeCon.commit();
                         if (event != null) {
                             isReadOnly = false;
-                            sendMail(event);
+                            sendMessage(event);
                         }
                         processFinished = true;
                         // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
@@ -333,7 +334,7 @@ class SingleMailDeliveryTask implements Runnable {
         AlarmTrigger loadedTrigger = storage.getAlarmTriggerStorage().loadTrigger(trigger.getAlarm());
         if (loadedTrigger == null || loadedTrigger.getProcessed() != processed) {
             // Abort since the triggers is either gone or picked up by another node (e.g. because of an update)
-            LOG.trace("Skipped mail alarm task for {}. Its trigger is not up to date!", new Key(ctx.getContextId(), account, trigger.getEventId(), alarm.getId()));
+            LOG.trace("Skipped message alarm task for {}. Its trigger is not up to date!", new Key(ctx.getContextId(), account, trigger.getEventId(), alarm.getId()));
             return null;
         }
         Event event = null;
@@ -380,18 +381,18 @@ class SingleMailDeliveryTask implements Runnable {
     }
 
     /**
-     * Delivers the mail
+     * Delivers the message
      *
      * @param event The event of the alarm
      */
-    private void sendMail(Event event) {
-        Key key = new Key(ctx.getContextId(), account, event.getId(), alarm.getId());
-        try {
-            mailService.send(event, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
-            LOG.trace("Mail successfully send for {}", key);
-        } catch (OXException e) {
-            LOG.warn("Unable to send mail for calendar alarm ({}): {}", key, e.getMessage(), e);
-        }
+    private void sendMessage(Event event) {
+            Key key = new Key(ctx.getContextId(), account, event.getId(), alarm.getId());
+            try {
+                notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
+                LOG.trace("Message successfully send for {}", key);
+            } catch (OXException e) {
+                LOG.warn("Unable to send message for calendar alarm ({}): {}", key, e.getMessage(), e);
+            }
     }
 
     private boolean checkEvent(Connection writeCon, Event event) throws OXException {

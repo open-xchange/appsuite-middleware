@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.Pair;
@@ -73,10 +74,11 @@ public interface AdministrativeAlarmTriggerStorage {
      * @param until The upper limit for the trigger time
      * @param overdueTime The overdue date
      * @param lock Whether the selected triggers should be locked or not
+     * @param actions The list of actions to check for. Usually a list of available message {@link AlarmAction}.
      * @return A mapping of a cid/account {@link Pair} to a list of {@link AlarmTrigger}s
      * @throws OXException
      */
-    Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Date until, Date overdueTime, boolean lock) throws OXException;
+    Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Date until, Date overdueTime, boolean lock, AlarmAction... actions) throws OXException;
 
 
     /**
@@ -91,16 +93,17 @@ public interface AdministrativeAlarmTriggerStorage {
 
 
     /**
-     * Retrieves and locks mail alarm triggers for the given event which are not already taken by another worker.
+     * Retrieves and locks message alarm triggers for the given event which are not already taken by another worker.
      *
      * @param con The connection to use
      * @param cid The context id
      * @param account The account id
      * @param eventId The event id
-     * @param lock Whether the selected triggers should be locked or not
+     * @param lock Whether the selected triggers should be locked or not.
+     * @param actions The list of actions to check for. Usually a list of available message {@link AlarmAction}.
      * @return A mapping of a cid/account {@link Pair} to a list of {@link AlarmTrigger}s
      * @throws OXException
      */
-    Map<Pair<Integer, Integer>, List<AlarmTrigger>> getMailAlarmTriggers(Connection con, int cid, int account, String eventId, boolean lock) throws OXException;
+    Map<Pair<Integer, Integer>, List<AlarmTrigger>> getMessageAlarmTriggers(Connection con, int cid, int account, String eventId, boolean lock, AlarmAction... actions) throws OXException;
 
 }

@@ -47,50 +47,26 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail.osgi;
+package com.openexchange.chronos.alarm.mail.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.alarm.mail.impl.MailAlarmNotificationServiceImpl;
-import com.openexchange.chronos.alarm.message.AlarmNotificationService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.html.HtmlService;
-import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.user.UserService;
+import com.openexchange.config.lean.DefaultProperty;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link Activator}
+ * {@link MailAlarmConfig}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class Activator extends HousekeepingActivator {
+public class MailAlarmConfig {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
+    private static final String PREFIX = "com.openexchange.calendar.alarm.message.backgroundWorker.";
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
-            TemplateService.class, ResourceService.class, UserService.class, ConfigurationService.class, HtmlService.class, LeanConfigurationService.class};
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(AlarmNotificationService.class, new MailAlarmNotificationServiceImpl(this));
-        LOG.info("Successfully started bundle "+this.context.getBundle().getSymbolicName());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        LOG.info("Successfully stopped bundle "+this.context.getBundle().getSymbolicName());
-    }
+    /**
+     * Defines the time in milliseconds an alarm mail should be send out before the trigger time.
+     * With this property the admin can configure the average time needed by the mail system to send out the mail.
+     * This way the mail should usually be send out on time and not a few seconds late.
+     */
+    public static final Property MAIL_SHIFT = DefaultProperty.valueOf(PREFIX + "mail.time.shift", 0);
 
 }

@@ -47,85 +47,46 @@
  *
  */
 
-package com.openexchange.chronos.alarm.mail;
+package com.openexchange.chronos.alarm.message.impl;
+
+import java.util.concurrent.ConcurrentHashMap;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.chronos.AlarmAction;
+import com.openexchange.chronos.alarm.message.AlarmNotificationService;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * {@link Key} is a identifying key for a {@link SingleMailDeliveryTask}
+ * {@link AlarmNotificationServiceRegistry}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-class Key {
+public class AlarmNotificationServiceRegistry implements SimpleRegistryListener<AlarmNotificationService>{
 
-    private final int cid, account, id;
-    private final String eventId;
+    ConcurrentHashMap<AlarmAction, AlarmNotificationService> services = new ConcurrentHashMap<>(2);
 
-    /**
-     * Initializes a new {@link MailAlarmDeliveryWorker.key}.
-     */
-    public Key(int cid, int account, String eventId, int id) {
-        this.cid = cid;
-        this.account = account;
-        this.id = id;
-        this.eventId = eventId;
+    @Override
+    public void added(ServiceReference<AlarmNotificationService> ref, AlarmNotificationService service) {
+        services.put(service.getAction(), service);
     }
 
     @Override
-    public int hashCode() {
-        int hash = 17;
-        hash = hash * 31 + cid;
-        hash = hash * 31 + account;
-        hash = hash * 31 + eventId.hashCode();
-        hash = hash * 31 + id;
-        return hash;
+    public void removed(ServiceReference<AlarmNotificationService> ref, AlarmNotificationService service) {
+        services.remove(service.getAction());
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Key) {
-            return obj.hashCode() == this.hashCode();
-        }
-        return false;
+    public AlarmNotificationService getService(AlarmAction action){
+        return services.get(action);
     }
 
     /**
-     * Gets the eventId
+     * Returns the current registered {@link AlarmAction}s
      *
-     * @return The eventId
+     * @return The registered {@link AlarmAction}s
      */
-    public String getEventId() {
-        return eventId;
+    public AlarmAction[] getActions() {
+        return services.keySet().toArray(new AlarmAction[services.size()]);
     }
 
-    /**
-     * Gets the cid
-     *
-     * @return The cid
-     */
-    public int getCid() {
-        return cid;
-    }
 
-    /**
-     * Gets the account
-     *
-     * @return The account
-     */
-    public int getAccount() {
-        return account;
-    }
-
-    @Override
-    public String toString() {
-        return "Key [cid=" + cid + "|account=" + account + "|eventId=" + eventId + "|alarmId=" + id + "]";
-    }
-
-    /**
-     * Gets the id
-     *
-     * @return The id
-     */
-    public int getId() {
-        return id;
-    }
 }

@@ -90,7 +90,7 @@ import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 
 /**
- * 
+ *
  * {@link MailAlarmNotificationGenerator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -241,6 +241,13 @@ public class MailAlarmNotificationGenerator {
     }
 
     private class PassthroughWrapper implements TypeWrapper {
+
+        /**
+         * Initializes a new {@link PassthroughWrapper}.
+         */
+        public PassthroughWrapper() {
+            super();
+        }
 
         @Override
         public String none(final Object argument) {
