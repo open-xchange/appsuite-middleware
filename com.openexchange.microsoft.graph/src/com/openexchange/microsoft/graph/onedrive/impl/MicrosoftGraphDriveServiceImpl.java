@@ -147,12 +147,12 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public List<OneDriveFolder> getSubFolders(int userId, String accessToken, String folderId) throws OXException {
-        int offset = 100;
+        int top = 100;
         String skipToken = null;
         List<OneDriveFolder> list = new LinkedList<>();
         do {
             Builder paramBuilder = new Builder();
-            paramBuilder.withParameter(ParameterName.TOP, Integer.toString(offset)).withParameter(ParameterName.SKIPTOKEN, skipToken);
+            paramBuilder.withParameter(ParameterName.TOP, Integer.toString(top)).withParameter(ParameterName.SKIPTOKEN, skipToken);
 
             JSONObject response = api.getChildren(accessToken, folderId, paramBuilder.build());
             skipToken = extractSkipToken(response);
@@ -423,6 +423,46 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         return new Quota(quota.optInt("total"), quota.optInt("used"), Type.STORAGE);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#searchFiles(java.lang.String, java.lang.String, java.lang.String, boolean)
+     */
+    @Override
+    public List<OneDriveFile> searchFiles(int userId, String accessToken, String query, String folderId, boolean includeSubfolders) throws OXException {
+        int top = 100;
+        String skipToken = null;
+        List<OneDriveFile> list = new LinkedList<>();
+        do {
+            Builder b = new MicrosoftGraphQueryParameters.Builder();
+            b.withParameter(ParameterName.TOP, Integer.toString(top)).withParameter(ParameterName.SKIPTOKEN, skipToken);
+
+            JSONObject result = api.searchItems(accessToken, query, b.build());
+            skipToken = extractSkipToken(result);
+
+            JSONArray array = result.optJSONArray("value");
+            if (array == null || array.isEmpty()) {
+                return list;
+            }
+
+            for (int index = 0; index < array.length(); index++) {
+                JSONObject item = array.optJSONObject(index);
+                if (item == null || item.isEmpty()) {
+                    continue;
+                }
+                if (!item.hasAndNotNull("file")) {
+                    continue;
+                }
+
+                JSONObject parentRef = item.optJSONObject("parentReference");
+                if (folderId == null || includeSubfolders || folderId.equals(parentRef.optString("id"))) {
+                    list.add(fileEntityParser.parseEntity(userId, item));
+                }
+            }
+        } while (Strings.isNotEmpty(skipToken));
+        return list;
+    }
+
     //////////////////////////////////////// HELPERS /////////////////////////////////////
 
     /**
@@ -516,7 +556,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * @return A {@link List} with the {@link OneDriveFolder}s
      * @throws OXException
      */
-    public List<OneDriveFolder> parseEntities(int userId, String accessToken, JSONArray entities) throws OXException {
+    private List<OneDriveFolder> parseEntities(int userId, String accessToken, JSONArray entities) throws OXException {
         if (entities == null || entities.isEmpty()) {
             return Collections.emptyList();
         }

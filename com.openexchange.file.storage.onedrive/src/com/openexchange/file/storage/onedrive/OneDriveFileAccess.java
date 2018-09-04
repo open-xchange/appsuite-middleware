@@ -49,8 +49,6 @@
 
 package com.openexchange.file.storage.onedrive;
 
-import static com.openexchange.file.storage.onedrive.OneDriveConstants.QUERY_PARAM_LIMIT;
-import static com.openexchange.file.storage.onedrive.OneDriveConstants.QUERY_PARAM_OFFSET;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -63,7 +61,6 @@ import java.util.stream.Collectors;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -74,7 +71,6 @@ import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -721,89 +717,88 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final boolean includeSubfolders, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        final Map<String, Boolean> allowedFolders;
-        if (null != folderId) {
-            allowedFolders = new HashMap<>();
-            allowedFolders.put(folderId, Boolean.TRUE);
-        } else {
-            allowedFolders = null;
-        }
-        return perform(new OneDriveClosure<SearchIterator<File>>() {
-
-            @Override
-            protected SearchIterator<File> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpRequestBase request = null;
-                try {
-                    List<File> files = new LinkedList<>();
-                    int limit = 100;
-                    int offset = 0;
-                    int resultsFound;
-
-                    do {
-                        List<NameValuePair> qparams = initiateQueryString();
-                        if (null != pattern) {
-                            qparams.add(new BasicNameValuePair("q", pattern));
-                        }
-                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
-                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
-                        HttpGet method = new HttpGet(buildUri("me/skydrive/search", qparams));
-                        request = method;
-
-                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
-                        JSONArray jData = jResponse.getJSONArray("data");
-                        int length = jData.length();
-                        resultsFound = length;
-                        for (int i = 0; i < length; i++) {
-                            JSONObject jItem = jData.getJSONObject(i);
-                            if (isFile(jItem)) {
-                                OneDriveFile metadata = new OneDriveFile(jItem.getString("parent_id"), jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem);
-                                if (null != allowedFolders) {
-                                    Boolean allowed = allowedFolders.get(metadata.getFolderId());
-                                    if (null == allowed) {
-                                        allowed = Boolean.valueOf(includeSubfolders && isSubfolderOf(metadata.getFolderId(), folderId));
-                                        allowedFolders.put(metadata.getFolderId(), allowed);
-                                    }
-                                    if (false == allowed.booleanValue()) {
-                                        continue; // skip this file
-                                    }
-                                }
-                                files.add(metadata);
-                            }
-                        }
-
-                        reset(request);
-                        request = null;
-
-                        offset += limit;
-                    } while (resultsFound == limit);
-
-                    // Sort collection
-                    sort(files, sort, order);
-                    if ((start != NOT_SET) && (end != NOT_SET)) {
-                        final int size = files.size();
-                        if ((start) > size) {
-                            /*
-                             * Return empty iterator if start is out of range
-                             */
-                            return SearchIteratorAdapter.emptyIterator();
-                        }
-                        /*
-                         * Reset end index if out of range
-                         */
-                        int toIndex = end;
-                        if (toIndex >= size) {
-                            toIndex = size;
-                        }
-                        files = files.subList(start, toIndex);
-                    }
-
-                    return new SearchIteratorAdapter<>(files.iterator(), files.size());
-                } finally {
-                    reset(request);
-                }
+        //        final Map<String, Boolean> allowedFolders;
+        //        if (null != folderId) {
+        //            allowedFolders = new HashMap<>();
+        //            allowedFolders.put(folderId, Boolean.TRUE);
+        //        } else {
+        //            allowedFolders = null;
+        //        }
+        //        return perform(new OneDriveClosure<SearchIterator<File>>() {
+        //
+        //            @Override
+        //            protected SearchIterator<File> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpRequestBase request = null;
+        //                try {
+        //                    List<File> files = new LinkedList<>();
+        //                    int limit = 100;
+        //                    int offset = 0;
+        //                    int resultsFound;
+        //
+        //                    do {
+        //                        List<NameValuePair> qparams = initiateQueryString();
+        //                        if (null != pattern) {
+        //                            qparams.add(new BasicNameValuePair("q", pattern));
+        //                        }
+        //                        qparams.add(new BasicNameValuePair(QUERY_PARAM_OFFSET, Integer.toString(offset)));
+        //                        qparams.add(new BasicNameValuePair(QUERY_PARAM_LIMIT, Integer.toString(limit)));
+        //                        HttpGet method = new HttpGet(buildUri("me/skydrive/search", qparams));
+        //                        request = method;
+        //
+        //                        JSONObject jResponse = handleHttpResponse(execute(method, httpClient), JSONObject.class);
+        //                        JSONArray jData = jResponse.getJSONArray("data");
+        //                        int length = jData.length();
+        //                        resultsFound = length;
+        //                        for (int i = 0; i < length; i++) {
+        //                            JSONObject jItem = jData.getJSONObject(i);
+        //                            if (isFile(jItem)) {
+        //                                OneDriveFile metadata = new OneDriveFile(jItem.getString("parent_id"), jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem);
+        //                                if (null != allowedFolders) {
+        //                                    Boolean allowed = allowedFolders.get(metadata.getFolderId());
+        //                                    if (null == allowed) {
+        //                                        allowed = Boolean.valueOf(includeSubfolders && isSubfolderOf(metadata.getFolderId(), folderId));
+        //                                        allowedFolders.put(metadata.getFolderId(), allowed);
+        //                                    }
+        //                                    if (false == allowed.booleanValue()) {
+        //                                        continue; // skip this file
+        //                                    }
+        //                                }
+        //                                files.add(metadata);
+        //                            }
+        //                        }
+        //
+        //                        reset(request);
+        //                        request = null;
+        //
+        //                        offset += limit;
+        //                    } while (resultsFound == limit);
+        List<File> files = new LinkedList<>(driveService.searchFiles(end, getAccessToken(), pattern, folderId, includeSubfolders));
+        // Sort collection
+        sort(files, sort, order);
+        if ((start != NOT_SET) && (end != NOT_SET)) {
+            final int size = files.size();
+            if ((start) > size) {
+                /*
+                 * Return empty iterator if start is out of range
+                 */
+                return SearchIteratorAdapter.emptyIterator();
             }
+            /*
+             * Reset end index if out of range
+             */
+            int toIndex = end;
+            if (toIndex >= size) {
+                toIndex = size;
+            }
+            files = files.subList(start, toIndex);
+        }
 
-        });
+        return new SearchIteratorAdapter<>(files.iterator(), files.size());
+        //                } finally {
+        //                    reset(request);
+        //                }
+        //            }
+        //        });
     }
 
     @Override

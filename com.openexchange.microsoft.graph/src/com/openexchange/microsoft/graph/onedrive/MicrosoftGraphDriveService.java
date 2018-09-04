@@ -148,7 +148,7 @@ public interface MicrosoftGraphDriveService {
     String moveFolder(String accessToken, String folderId, String parentId) throws OXException;
 
     String moveFolder(String accessToken, String folderId, String parentId, String newName) throws OXException;
-    
+
     /**
      * Deletes the file with the specified identifier
      * 
@@ -223,7 +223,7 @@ public interface MicrosoftGraphDriveService {
      * @throws OXException
      */
     String copyFile(String accessToken, String itemId, File file, List<Field> modifiedFields, String parentId) throws OXException;
-    
+
     InputStream getThumbnail(String accessToken, String itemId) throws OXException;
 
     /**
@@ -234,4 +234,6 @@ public interface MicrosoftGraphDriveService {
      * @throws OXException if an error is occurred
      */
     Quota getQuota(String accessToken) throws OXException;
+
+    List<OneDriveFile> searchFiles(int userId, String accessToken, String query, String folderId, boolean includeSubfolders) throws OXException;
 }
