@@ -52,7 +52,6 @@ package com.openexchange.microsoft.graph.api.client;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
@@ -110,29 +109,6 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
             return httpRequest;
         } catch (URISyntaxException e) {
             throw RESTExceptionCodes.INVALID_URI_PATH.create(e, API_VERSION + request.getEndPoint());
-        }
-    }
-
-    /**
-     * Adds an optional body to the specified HTTP request
-     * 
-     * @param httpRequest the request to add the body to
-     * @param body The body to add to the request
-     * @throws OXException if the default HTTP charset is not supported
-     */
-    private void addOptionalBody(HttpRequestBase httpRequest, MicrosoftGraphRequest request) throws OXException {
-        if (request.getBodyEntity() == null) {
-            return;
-        }
-
-        switch (request.getMethod()) {
-            case PATCH:
-            case POST:
-            case PUT:
-                ((HttpEntityEnclosingRequestBase) httpRequest).setEntity(request.getBodyEntity().getBodyEntity());
-                return;
-            default:
-                return;
         }
     }
 }

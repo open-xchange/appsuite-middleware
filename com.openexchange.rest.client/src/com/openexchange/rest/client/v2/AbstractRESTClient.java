@@ -58,6 +58,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPatch;
@@ -183,6 +184,29 @@ public abstract class AbstractRESTClient implements Closeable {
     protected void addAdditionalHeaders(HttpRequestBase httpRequest, Map<String, String> headers) {
         for (Entry<String, String> header : headers.entrySet()) {
             httpRequest.addHeader(header.getKey(), header.getValue());
+        }
+    }
+
+    /**
+     * Adds an optional body to the specified HTTP request
+     * 
+     * @param httpRequest the request to add the body to
+     * @param body The body to add to the request
+     * @throws OXException if the default HTTP charset is not supported
+     */
+    protected void addOptionalBody(HttpRequestBase httpRequest, RESTRequest request) throws OXException {
+        if (request.getBodyEntity() == null) {
+            return;
+        }
+
+        switch (request.getMethod()) {
+            case PATCH:
+            case POST:
+            case PUT:
+                ((HttpEntityEnclosingRequestBase) httpRequest).setEntity(request.getBodyEntity().getBodyEntity());
+                return;
+            default:
+                return;
         }
     }
 
