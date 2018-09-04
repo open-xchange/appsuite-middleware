@@ -54,12 +54,11 @@ import java.util.ArrayList;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.ContactPictureService;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.ContactHalo;
-import com.openexchange.halo.Picture;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -140,8 +139,8 @@ public class GetPictureAction extends AbstractGetPictureAction {
             emails.add(contact.getEmail3());
         }
 
-        if (!hadCriterium) {
-            return (V) (eTagOnly ? null : fallbackPicture());
+        if (!hadCriterium && eTagOnly) {
+            return null;
         }
 
         PictureSearchData data = new PictureSearchData(I(contact.getInternalUserId()), I(contact.getParentFolderID()), I(contact.getObjectID()), emails);
@@ -152,11 +151,11 @@ public class GetPictureAction extends AbstractGetPictureAction {
             }
 
             if (!contactPicture.containsContactPicture()) {
-                return (V) fallbackPicture();
+                return (V) ContactPicture.FALLBACK_PICTURE;
             }
-            return (V) new Picture(contactPicture.getETag(), contactPicture.getFileHolder());
+            return (V) new ContactPicture(contactPicture.getETag(), contactPicture.getFileHolder());
         } catch (OXException x) {
-            return (V) (eTagOnly ? null : fallbackPicture());
+            return null;
         }
     }
 }
