@@ -237,5 +237,5 @@ public interface MicrosoftGraphDriveService {
 
     List<OneDriveFile> searchFiles(int userId, String accessToken, String query, String folderId, boolean includeSubfolders) throws OXException;
 
-    String upload(String accessToken, File file, InputStream inputStream);
+    String upload(String accessToken, File file, InputStream inputStream) throws OXException;
 }

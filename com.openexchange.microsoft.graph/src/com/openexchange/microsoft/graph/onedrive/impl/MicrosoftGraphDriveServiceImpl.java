@@ -478,9 +478,13 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#upload(java.lang.String, com.openexchange.file.storage.File, java.io.InputStream)
      */
     @Override
-    public String upload(String accessToken, File file, InputStream inputStream) {
-        // TODO Auto-generated method stub
-        return null;
+    public String upload(String accessToken, File file, InputStream inputStream) throws OXException {
+        if (file.getFileSize() < ONE_SHOT_UPLOAD_LIMIT) {
+            JSONObject responseBody = api.singleUploadNew(accessToken, file.getFolderId(), file.getFileName(), file.getFileMIMEType(), file.getFileSize(), inputStream);
+            return responseBody.optString("id");
+        }
+        JSONObject responseBody = api.streamingUpload(accessToken, file.getFolderId(), file.getFileName(), file.getFileMIMEType(), file.getFileSize(), inputStream);
+        return responseBody.optString("id");
     }
 
     //////////////////////////////////////// HELPERS /////////////////////////////////////

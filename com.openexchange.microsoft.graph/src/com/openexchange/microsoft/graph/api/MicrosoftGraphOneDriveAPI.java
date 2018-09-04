@@ -50,13 +50,17 @@
 package com.openexchange.microsoft.graph.api;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ByteArrayEntity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -426,13 +430,68 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @return The metadata of the new item
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_put_content">Upload a new File</a>
      */
-    public JSONObject uploadNew(String accessToken, String folderId, String filename, String contentType, InputStream inputStream) throws OXException {
+    public JSONObject singleUploadNew(String accessToken, String folderId, String filename, String contentType, long contentLength, InputStream inputStream) throws OXException {
         String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/content";
+        return putResource(accessToken, path, contentType, contentLength, inputStream);
+    }
 
+    public JSONObject singleUploadReplace(String accessToken, String itemId) {
         return null;
     }
 
-    public JSONObject uploadReplace(String accessToken, String itemId) {
-        return null;
+    /**
+     * 
+     * @param accessToken
+     * @param folderId
+     * @param filename
+     * @param contentType
+     * @param contentLength
+     * @param inputStream
+     * @return
+     * @throws OXException
+     */
+    public JSONObject streamingUpload(String accessToken, String folderId, String filename, String contentType, long contentLength, InputStream inputStream) throws OXException {
+        String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/createUploadSession";
+        try {
+            JSONObject body = new JSONObject();
+            body.put("name", filename);
+
+            JSONObject sessionBody = postResource(accessToken, path, body);
+            String uploadUrl = sessionBody.optString("uploadUrl");
+            if (Strings.isEmpty(uploadUrl)) {
+                throw new OXException(666, "Upload failed");
+            }
+
+            int chunkSize = 1310720;
+            byte[] b = new byte[chunkSize];
+            int read = 0;
+            String range;
+            int offset = 0;
+            int end = 0;
+            int length = chunkSize;
+            long remainingSize = contentLength;
+            while ((read = inputStream.read(b, 0, length)) > 0) {
+                remainingSize -= read;
+                length = (int) (remainingSize > chunkSize ? chunkSize : remainingSize);
+                end = offset + read - 1;
+                range = "bytes " + offset + "-" + end + "/" + contentLength;
+                offset += read;
+                HttpEntityEnclosingRequestBase put = new HttpPut(uploadUrl);
+                put.setHeader(HttpHeaders.CONTENT_RANGE, range);
+                put.setEntity(new ByteArrayEntity(b, 0, read));
+                RESTResponse response = client.executeRequest(put);
+                if (response.getStatusCode() < 200 || response.getStatusCode() > 203) {
+                    throw new OXException(666, "Upload failed: " + response.getStatusCode() + " " + response.getResponseBody());
+                }
+                if (response.getStatusCode() == 201) {
+                    return ((JSONValue) response.getResponseBody()).toObject();
+                }
+            }
+            throw new OXException(666, "Upload failed");
+        } catch (JSONException e) {
+            throw RESTExceptionCodes.JSON_ERROR.create(e);
+        } catch (IOException e) {
+            throw RESTExceptionCodes.IO_ERROR.create(e);
+        }
     }
 }

@@ -151,11 +151,11 @@ abstract class AbstractMicrosoftGraphAPI {
         return executeRequest(request);
     }
 
-    JSONObject putResource(String accessToken, String path, String contentType, InputStream body) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, path);
+    JSONObject putResource(String accessToken, String path, String contentType, long contentLength, InputStream body) throws OXException {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.PUT, path);
         request.setAccessToken(accessToken);
         request.withHeader(HttpHeaders.CONTENT_TYPE, contentType);
-        request.withBodyEntity(new InputStreamEntity(body));
+        request.withBodyEntity(new InputStreamEntity(body, contentLength, contentType));
         return executeRequest(request);
     }
 
@@ -185,6 +185,7 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     private JSONObject executeRequest(MicrosoftGraphRequest request) throws OXException {
         RESTResponse restResponse = client.execute(request);
+        //FIXME: Check the returned entity type
         JSONObject response = ((JSONValue) restResponse.getResponseBody()).toObject();
         checkForErrors(response);
         return response;
