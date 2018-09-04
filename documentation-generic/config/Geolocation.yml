@@ -1,5 +1,5 @@
 feature_name: Geolocation
-description: Described properties related to the geolocation service.
+feature_description: Described properties related to the geolocation service.
 properties:
     - key: com.openexchange.geolocation.maxmind.databasePath
       description: |
