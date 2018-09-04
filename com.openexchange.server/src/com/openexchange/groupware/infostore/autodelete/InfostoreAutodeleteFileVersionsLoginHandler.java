@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,38 +47,55 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.infostore.autodelete;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.login.LoginHandlerService;
+import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
+
 
 /**
- * {@link IValueHandlerExtended} - Extends {@link IValueHandler} by {@link #isAvailable(Session, UserConfiguration)} to allow session-based
- * availability checks.
+ * {@link InfostoreAutodeleteFileVersionsLoginHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.10.1
  */
-public interface IValueHandlerExtended extends IValueHandler {
+public class InfostoreAutodeleteFileVersionsLoginHandler implements LoginHandlerService {
+
+    private final InfostoreFacadeImpl infostoreFacade;
 
     /**
-     * Checks if the associated setting is available to session-associated user.
-     *
-     * @param session The session providing user data
-     * @param userConfig The user configuration
-     * @return <code>true</code> if this setting is available; otherwise <code>false</code>
-     * @throws OXException if an error occurs.
+     * Initializes a new {@link InfostoreAutodeleteFileVersionsLoginHandler}.
      */
-    boolean isAvailable(Session session, UserConfiguration userConfig) throws OXException;
+    public InfostoreAutodeleteFileVersionsLoginHandler(InfostoreFacadeImpl infostoreFacade) {
+        super();
+        this.infostoreFacade = infostoreFacade;
+    }
 
-    /**
-     * Checks if the setting can be written.
-     *
-     * @param session The session providing user data
-     * @return <code>true</code> if the setting can be written; otherwise <code>false</code>
-     * @throws OXException if an error occurs.
-     */
-    boolean isWritable(Session session) throws OXException;
+    @Override
+    public void handleLogin(LoginResult login) throws OXException {
+        User user = login.getUser();
+        if (user.isGuest()) {
+            // Not for guest users
+            return;
+        }
+
+        Session session = login.getSession();
+        if (InfostoreAutodeleteSettings.hasAutodeleteCapability(session)) {
+            int retentionDays = InfostoreAutodeleteSettings.getNumberOfRetentionDays(session);
+            if (retentionDays > 0) {
+                new InfostoreAutodeletePerformer(infostoreFacade).removeVersionsByRetentionDays(retentionDays, ServerSessionAdapter.valueOf(session));
+            }
+        }
+    }
+
+    @Override
+    public void handleLogout(LoginResult logout) throws OXException {
+        // Ignore
+    }
 
 }
