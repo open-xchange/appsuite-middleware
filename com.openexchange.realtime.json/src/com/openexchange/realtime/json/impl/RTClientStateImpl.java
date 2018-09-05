@@ -76,6 +76,7 @@ import com.openexchange.realtime.util.OwnerAwareReentrantLock;
  */
 public class RTClientStateImpl implements RTClientState {
 
+    private static final long MAX_IDLE_TIME_IN_MIN = 15;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SendAction.class);
 
     private final ID id;
@@ -229,7 +230,7 @@ public class RTClientStateImpl implements RTClientState {
 
     @Override
     public boolean isTimedOut(long timestamp) {
-        return 30 * 60 * 1000 < (timestamp - lastSeen);
+        return MAX_IDLE_TIME_IN_MIN * 60 * 1000 < (timestamp - lastSeen);
     }
 
     public void setLastSeen(long lastSeen) {
