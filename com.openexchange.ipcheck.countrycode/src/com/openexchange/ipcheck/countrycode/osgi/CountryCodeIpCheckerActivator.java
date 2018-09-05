@@ -50,6 +50,8 @@
 package com.openexchange.ipcheck.countrycode.osgi;
 
 import javax.management.ObjectName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.ipcheck.spi.IPChecker;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.ipcheck.countrycode.CountryCodeIpChecker;
@@ -69,6 +71,7 @@ import com.openexchange.timer.TimerService;
  */
 public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CountryCodeIpCheckerActivator.class);
     private IPCheckMBeanImpl metricsMBean;
 
     /**
@@ -90,14 +93,15 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        CountryCodeIpChecker service = new CountryCodeIpChecker(getService(GeoLocationService.class), new IPCheckMetricCollector(getService(MetricService.class)));
+        CountryCodeIpChecker service = new CountryCodeIpChecker(getServiceSafe(GeoLocationService.class), new IPCheckMetricCollector(getServiceSafe(MetricService.class)));
         registerService(IPChecker.class, service);
 
         ObjectName objectName = new ObjectName(IPCheckMBean.NAME);
 
         metricsMBean = new IPCheckMBeanImpl(this, service);
-        ManagementService managementService = getService(ManagementService.class);
+        ManagementService managementService = getServiceSafe(ManagementService.class);
         managementService.registerMBean(objectName, metricsMBean);
+        LOG.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
     }
 
     /*
@@ -113,8 +117,9 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
             metricsMBean.stop();
         }
         ObjectName objectName = new ObjectName(IPCheckMBean.NAME);
-        ManagementService managementService = getService(ManagementService.class);
+        ManagementService managementService = getServiceSafe(ManagementService.class);
         managementService.unregisterMBean(objectName);
         super.stopBundle();
+        LOG.info("Bundle successfully stopped: {}", context.getBundle().getSymbolicName());
     }
 }
