@@ -100,6 +100,7 @@ public class ConfigDBHealthCheck extends DefaultHealthCheck {
                 data.put("readConnectionRoundTripTime", end - start + "ms");
             } catch (OXException | SQLException e) {
                 status = false;
+                data.put("readConnectionError", e.getMessage());
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
                 dbService.backReadOnly(con);
@@ -119,6 +120,7 @@ public class ConfigDBHealthCheck extends DefaultHealthCheck {
                 data.put("writeConnectionRoundTripTime", end - start + "ms");
             } catch (OXException | SQLException e) {
                 status = false;
+                data.put("writeConnectionError", e.getMessage());
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
                 dbService.backWritable(con);
