@@ -111,11 +111,7 @@ public class HealthCheckService {
                 DefaultHealthCheckResponse response = future.get(1000, TimeUnit.MILLISECONDS);
                 result.put(response.getName(), response);
             }
-        } catch (InterruptedException e) {
-            LOG.error(e.getMessage());
-        } catch (ExecutionException e) {
-            LOG.error(e.getMessage());
-        } catch (TimeoutException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.error(e.getMessage());
         }
 
