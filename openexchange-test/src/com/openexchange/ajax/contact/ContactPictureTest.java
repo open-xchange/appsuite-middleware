@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.contact;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.UUID;
 import org.junit.Assert;
@@ -94,8 +92,6 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
 
         byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
         
-        System.out.println(Arrays.toString(contactPicture));
-
         Assert.assertNotNull("Response should not be null.", contactPicture);
         Assert.assertEquals(Photos.FALLBACK_PICTURE.length, contactPicture.length);
         Assert.assertTrue("Wrong image", Arrays.equals(contactPicture, Photos.FALLBACK_PICTURE));
