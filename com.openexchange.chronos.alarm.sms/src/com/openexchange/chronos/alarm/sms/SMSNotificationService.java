@@ -67,6 +67,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.sms.SMSServiceSPI;
+import com.openexchange.sms.tools.SMSBucketService;
 import com.openexchange.user.UserService;
 
 /**
@@ -83,16 +84,22 @@ public class SMSNotificationService implements AlarmNotificationService {
     private final TranslatorFactory translatorFactory;
     private final UserService userService;
     private final LeanConfigurationService leanConfigurationService;
+    private final SMSBucketService smsBucketService;
 
     /**
      * Initializes a new {@link SMSNotificationService}.
      */
-    public SMSNotificationService(SMSServiceSPI smsService, TranslatorFactory translatorFactory, UserService userService, LeanConfigurationService leanConfigurationService) {
+    public SMSNotificationService(  SMSServiceSPI smsService,
+                                    TranslatorFactory translatorFactory,
+                                    UserService userService,
+                                    LeanConfigurationService leanConfigurationService,
+                                    SMSBucketService smsBucketService) {
         super();
         this.smsService = smsService;
         this.translatorFactory = translatorFactory;
         this.userService = userService;
         this.leanConfigurationService = leanConfigurationService;
+        this.smsBucketService = smsBucketService;
     }
 
     @Override
@@ -107,6 +114,9 @@ public class SMSNotificationService implements AlarmNotificationService {
             LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", userId, contextId);
             return;
         } else {
+            if (smsBucketService.isEnabled(userId, contextId)) {
+                smsBucketService.getSMSToken(userId, contextId);
+            }
             smsService.sendMessage(new String[] {phoneNumber}, generateSMS(event, locale), userId, contextId);
         }
     }

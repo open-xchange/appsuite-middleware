@@ -50,7 +50,6 @@
 package com.openexchange.sms.tools;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link SMSBucketService} provides a user based token-bucket for sms tokens
@@ -62,27 +61,31 @@ public interface SMSBucketService {
 
     /**
      * Retrieves the number of available sms tokens for the given user and reduce the amount by one.
-     * 
-     * @param session The user session
+     *
+     * @param userId The user id
+     * @param contextId The context id
      * @return The previous amount of sms tokens
      * @throws OXException if it was unable to retrieve the sms token or if the sms limit is reached
      */
-    public int getSMSToken(Session session) throws OXException;
+    public int getSMSToken(int userId, int contextId) throws OXException;
 
     /**
      * Checks if the user sms limit is enabled for the given user
-     * @param session The user session
+     * 
+     * @param userId The user id
+     * @param contextId The context id
      * @return true if SMSUserLimit is enabled, false otherwise
      * @throws OXException
      */
-    public boolean isEnabled(Session session) throws OXException;
+    public boolean isEnabled(int userId, int contextId) throws OXException;
 
     /**
      * Retrieves the refresh interval in hours rounded up
-     * 
-     * @param session The user session
+     *
+     * @param userId The user id
+     * @param contextId The context id
      * @return The time in hours rounded up
      * @throws OXException if it was unable to retrieve the interval
      */
-    public int getRefreshInterval(Session session) throws OXException;
+    public int getRefreshInterval(int userId, int contextId) throws OXException;
 }
