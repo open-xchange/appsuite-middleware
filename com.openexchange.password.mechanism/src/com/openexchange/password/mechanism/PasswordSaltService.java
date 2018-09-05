@@ -47,23 +47,30 @@
  *
  */
 
-package com.openexchange.passwordmechs.mechs;
+package com.openexchange.password.mechanism;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import com.openexchange.java.Charsets;
+/**
+ * {@link PasswordSaltService}
+ *
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.1
+ */
+public interface PasswordSaltService {
 
-public final class SHACrypt {
+    /**
+     * Generates a random and salt value based on {@link java.security.SecureRandom}
+     * 
+     * @return The salt value
+     */
+    String generateSalt();
 
-    private SHACrypt() {
-        super();
-    }
-
-    public static String makeSHAPasswd(String raw) throws NoSuchAlgorithmException {
-        final MessageDigest sha = MessageDigest.getInstance("SHA-1");
-        sha.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
-        final byte[] hash = sha.digest();
-        return Charsets.toAsciiString(org.apache.commons.codec.binary.Base64.encodeBase64(hash));
-    }
+    /**
+     * Get the salt value for a specific user
+     * 
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return The salt value for the users password
+     */
+    String getSalt(int contextId, int userId);
 
 }

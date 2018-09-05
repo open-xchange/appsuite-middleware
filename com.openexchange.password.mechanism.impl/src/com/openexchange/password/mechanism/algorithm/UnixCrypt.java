@@ -59,10 +59,17 @@
  * @author jdumas@zgs.com (John Dumas)
  */
 
-package com.openexchange.passwordmechs.mechs;
+package com.openexchange.password.mechanism.algorithm;
 
 import java.io.UnsupportedEncodingException;
 
+/**
+ * 
+ * {@link UnixCrypt}
+ *
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved from c.o.global
+ * @since v7.10.1
+ */
 public final class UnixCrypt {
 
     private UnixCrypt() {

@@ -50,9 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user;
 
 import static com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon.isEmpty;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -205,7 +203,7 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                 }
                 try {
                     return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.USER_PASSWORD, adminCache.encryptPassword(userData)), connection);
-                } catch (NoSuchAlgorithmException | UnsupportedEncodingException | StorageException e) {
+                } catch (StorageException e) {
                     // TODO: throw storage exception?
                 }
                 return false;

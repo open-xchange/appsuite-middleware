@@ -47,56 +47,70 @@
  *
  */
 
-package com.openexchange.passwordmechs;
+package com.openexchange.password.mechanism.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordMechExceptionCode;
 
 /**
- * {@link IPasswordMech}
+ * {@link AbstractPasswordMech}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.1
  */
-public interface IPasswordMech {
+public abstract class AbstractPasswordMech implements IPasswordMech {
 
-    public static final String CRYPT = "{CRYPT}";
+    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractPasswordMech.class);
 
-    public static final String SHA = "{SHA}";
-
-    public static final String BCRYPT = "{BCRYPT}";
+    private final PasswordMech mech;
 
     /**
-     * Returns the string representation of the password mechanism identifier
-     *
-     * @return The identifier
+     * Initializes a new {@link AbstractPasswordMech}.
+     * 
+     * @param mech The algorithm
+     * 
      */
-    public String getIdentifier();
+    public AbstractPasswordMech(PasswordMech mech) {
+        super();
+        this.mech = mech;
+
+    }
+
+    @Override
+    public boolean check(String toCheck, String encoded) throws OXException {
+        if ((Strings.isEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
+            return true;
+        } else if ((Strings.isEmpty(toCheck)) && (Strings.isNotEmpty(encoded))) {
+            return false;
+        } else if ((Strings.isNotEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
+            return false;
+        }
+        return checkPassword(toCheck, encoded);
+    }
 
     /**
-     * Encodes the given string according to this password mechanism and returns the encoded string.
-     *
-     * @param password The password to encode
-     * @return The encoded string
-     * @throws OXException
+     * Checks the password candidate against the encoded password
+     * 
+     * @param candidate The plain text candidate
+     * @param encoded The encoded password
+     * @return <code>true</code> if the password match
+     * @throws OXException In case of error
      */
-    public String encode(String password) throws OXException;
+    abstract boolean checkPassword(String candidate, String encoded) throws OXException;
 
-    /**
-     * Decodes the given string according to its password mechanism and returns the decoded string.
-     *
-     * @param password The password to decode
-     * @return The decoded string
-     * @throws OXException
-     */
-    public String decode(String encodedPassword) throws OXException;
+    @Override
+    public String decode(String encodedPassword) throws OXException {
+        throw PasswordMechExceptionCode.UNSUPPORTED_OPERATION.create(getIdentifier());
+    }
 
-    /**
-     * Checks if given password matches the encoded string according to this password mechanism.
-     *
-     * @param toCheck The password to check
-     * @param encoded The encoded string to check against
-     * @return <code>true</code> if string matches; otherwise <code>false</code>
-     * @throws OXException
-     */
-    public boolean check(String toCheck, String encoded) throws OXException;
+    @Override
+    public String getIdentifier() {
+        return mech.getIdentifier();
+    }
+
 }

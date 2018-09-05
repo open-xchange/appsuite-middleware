@@ -51,8 +51,6 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.leaseConnectionForContext;
 import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.releaseWriteContextConnectionAfterReading;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -221,7 +219,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 cache.setAdminCredentials(context, passwordMechanism, cauth);
             }
             return true;
-        } catch (SQLException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        } catch (SQLException e) {
             log.error("", e);
             throw new StorageException(e);
         } finally {

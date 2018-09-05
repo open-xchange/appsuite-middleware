@@ -63,7 +63,7 @@ import com.openexchange.guest.impl.internal.GuestDeleteContextGroupListener;
 import com.openexchange.guest.impl.internal.GuestDeleteListenerImpl;
 import com.openexchange.guest.impl.internal.GuestStorageServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechFactory;
 import com.openexchange.user.UserService;
 
 /**

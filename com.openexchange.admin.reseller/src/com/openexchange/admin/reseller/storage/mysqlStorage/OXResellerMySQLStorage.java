@@ -51,8 +51,6 @@ package com.openexchange.admin.reseller.storage.mysqlStorage;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -209,12 +207,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         } catch (final InvalidDataException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
-        } catch (final NoSuchAlgorithmException e) {
-            log.error("", e);
-            throw new StorageException(e.getMessage());
-        } catch (final UnsupportedEncodingException e) {
-            log.error("", e);
-            throw new StorageException(e.getMessage());
         } finally {
             if (rollback) {
                 doRollback(oxcon);
@@ -278,12 +270,6 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } catch (final SQLException e) {
-            log.error("", e);
-            throw new StorageException(e.getMessage());
-        } catch (final NoSuchAlgorithmException e) {
-            log.error("", e);
-            throw new StorageException(e.getMessage());
-        } catch (final UnsupportedEncodingException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {

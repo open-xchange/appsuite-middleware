@@ -47,29 +47,64 @@
  *
  */
 
-package com.openexchange.passwordmechs;
+package com.openexchange.password.mechanism.groupware;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.TaskAttributes;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * Factory to register available {@link IPasswordMech} implementations that can be retrieved via com.openexchange.passwordmechs.PasswordMechFactory.get(String) by giving the crypt mechanism identifier.
+ * {@link AddUserSaltColumnTask} Adds the column <code>salt</code> to the <code>user</code> table
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.1
  */
-public interface PasswordMechFactory {
+public class AddUserSaltColumnTask implements UpdateTaskV2 {
 
-    /**
-     * Register additional {@link IPasswordMech} implementations that can be used for password validation after retrieving it via com.openexchange.passwordmechs.PasswordMechFactory.get(String)
-     *
-     * @param passwordMech The {@link IPasswordMech} to register
-     */
-    public void register(IPasswordMech... passwordMech);
+    private final static String TABLE_NAME = "user";
 
-    /**
-     * Returns the password mechanism related to given identifier or <code>null</code> if no password mechanism is registered for the given identifier.
-     *
-     * @param identifier The identifier for the password mechanism
-     * @return {@link IPasswordMech} associated to given identifier or <code>null</code> if no password mechanism is registered for the given identifier
-     */
-    public IPasswordMech get(String identifier);
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            Column saltColumn = new Column("salt", "VARCHAR(128) COLLATE utf8_unicode_ci DEFAULT NULL");
+            Tools.checkAndAddColumns(con, TABLE_NAME, saltColumn);
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+        }
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
+    }
+
+    @Override
+    public TaskAttributes getAttributes() {
+        // Blocking, schema wide
+        return new Attributes();
+    }
 
 }

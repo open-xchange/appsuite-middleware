@@ -46,28 +46,55 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.tools;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+package com.openexchange.password.mechanism.impl;
 
-public class SHACrypt {
-    public static String makeSHAPasswd(final String raw) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest md;
+import com.openexchange.java.Strings;
+import com.openexchange.password.mechanism.PasswordMech;
 
-        md = MessageDigest.getInstance("SHA-1");
+/**
+ * {@link PasswordMechUtil}
+ * 
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved
+ * @since v7.10.1
+ */
+public class PasswordMechUtil {
 
-        final byte[] salt = {};
+    /**
+     * Adapts the given identifier to the expected format.
+     *
+     * @param identifier The given identifier
+     * @return the expected identifier that looks like {UPPER_CASE_MECHANISM}
+     */
+    public static String adaptIdentifier(String identifier) {
+        String id = Strings.toUpperCase(identifier);
+        if (!id.startsWith("{")) {
+            id = new StringBuilder(id.length() + 1).append('{').append(id).toString();
+        }
+        if (!id.endsWith("}")) {
+            id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
+        }
+        return id;
+    }
 
-        md.reset();
-        md.update(raw.getBytes("UTF-8"));
-        md.update(salt);
-
-        final byte[] pwhash = md.digest();
-        final String ret = com.openexchange.tools.encoding.Base64.encode(pwhash);
-
-        return ret;
+    /**
+     * get the {@link PasswordMech} for given identifier
+     * 
+     * @param toMatch The identifier of the password mechanism
+     * @return The {@link PasswordMech} or <code>null</code>
+     */
+    public static PasswordMech getMatching(String toMatch) {
+        if (Strings.isEmpty(toMatch)) {
+            return null;
+        }
+        String id = adaptIdentifier(toMatch);
+        for (PasswordMech passwordMech : PasswordMech.values()) {
+            if (passwordMech.getIdentifier().equals(id)) {
+                return passwordMech;
+            }
+        }
+        return null;
     }
 
 }

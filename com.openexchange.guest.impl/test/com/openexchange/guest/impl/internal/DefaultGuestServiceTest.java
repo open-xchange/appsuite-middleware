@@ -79,7 +79,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.impl.storage.GuestStorage;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -279,7 +279,7 @@ public class DefaultGuestServiceTest {
 
         defaultGuestService.removeGuests(CONTEXT_ID);
 
-        Mockito.verify(guestStorage, Mockito.times(removedGuests.size())).removeGuest(ArgumentMatchers.anyLong(), (Connection) ArgumentMatchers.any(Connection.class));
+        Mockito.verify(guestStorage, Mockito.times(removedGuests.size())).removeGuest(ArgumentMatchers.anyLong(), ArgumentMatchers.any(Connection.class));
         Mockito.verify(databaseService, Mockito.times(1)).backWritableForGlobal(CONTEXT_ID, connection);
     }
 

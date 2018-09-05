@@ -72,8 +72,9 @@ import com.openexchange.cli.AbstractCLI;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMech;
+import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.impl.PasswordMechFactoryImpl;
 
 /**
  * {@link GenerateMasterPasswordCLT}
@@ -337,10 +338,9 @@ public class GenerateMasterPasswordCLT extends AbstractCLI<Void, Map<GenerateMas
             id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
         }
 
-        for (IPasswordMech pm : PasswordMech.values()) {
-            if (id.equals(pm.getIdentifier())) {
-                return pm;
-            }
+        IPasswordMech mech = PasswordMechFactoryImpl.getInstance().get(id);
+        if (null != mech) {
+            return mech;
         }
         throw new IllegalArgumentException("The identifier '" + identifier + "' for the password mechanism is unknown.");
     }

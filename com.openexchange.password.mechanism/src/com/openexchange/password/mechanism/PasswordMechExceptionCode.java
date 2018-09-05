@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.passwordmechs;
+package com.openexchange.password.mechanism;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;

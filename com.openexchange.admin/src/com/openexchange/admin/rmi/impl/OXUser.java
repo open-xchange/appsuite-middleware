@@ -51,11 +51,9 @@ package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,7 +66,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
-import com.damienmiller.BCrypt;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.OXUserPluginInterfaceExtended;
@@ -103,8 +100,6 @@ import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.admin.tools.SHACrypt;
-import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.admin.tools.filestore.FilestoreDataMover;
 import com.openexchange.admin.tools.filestore.PostProcessTask;
 import com.openexchange.caching.Cache;
@@ -123,6 +118,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMechFactory;
 
 /**
  * @author d7
@@ -1281,30 +1278,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             final String mech = cache.getAdminAuthMech(ctx);
-            if ("{CRYPT}".equalsIgnoreCase(mech)) {
-                try {
-                    cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
-                } catch (final UnsupportedEncodingException e) {
-                    LOGGER.error("Error encrypting password for credential cache ", e);
+            try {
+                PasswordMechFactory mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechFactory.class, true);
+                IPasswordMech passwordMech = mechFactory.get(mech);
+                if (null != passwordMech) {
+                    cauth.setPassword(passwordMech.encode(usrdata.getPassword()));
+                } else {
+                    IllegalStateException e = new IllegalStateException("There must be a useable password mechanism.");
+                    LOGGER.error("Error encrypting password for credential cache.", e);
                     throw new StorageException(e);
                 }
-            } else if ("{SHA}".equalsIgnoreCase(mech)) {
-                try {
-                    cauth.setPassword(SHACrypt.makeSHAPasswd(usrdata.getPassword()));
-                } catch (final NoSuchAlgorithmException e) {
-                    LOGGER.error("Error encrypting password for credential cache ", e);
-                    throw new StorageException(e);
-                } catch (final UnsupportedEncodingException e) {
-                    LOGGER.error("Error encrypting password for credential cache ", e);
-                    throw new StorageException(e);
-                }
-            } else if ("{BCRYPT}".equalsIgnoreCase(mech)) {
-                try {
-                    cauth.setPassword(BCrypt.hashpw(usrdata.getPassword(), BCrypt.gensalt()));
-                } catch (final RuntimeException e) {
-                    LOGGER.error("Error encrypting password for credential cache ", e);
-                    throw new StorageException(e);
-                }
+            } catch (OXException e) {
+                LOGGER.error("Error encrypting password for credential cache.", e);
+                throw new StorageException(e);
             }
             cache.setAdminCredentials(ctx, mech, cauth);
         }

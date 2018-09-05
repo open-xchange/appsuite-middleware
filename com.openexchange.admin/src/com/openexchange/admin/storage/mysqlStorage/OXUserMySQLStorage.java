@@ -66,12 +66,10 @@ import static com.openexchange.java.Autoboxing.i;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -1311,16 +1309,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         } catch (final OXException e) {
             throw new StorageException(e.toString(), e);
-        } catch (final NoSuchAlgorithmException e) {
-            // Here we throw without rollback, because at the point this
-            // exception is thrown
-            // no database activity has happened
-            throw new StorageException(e);
-        } catch (final UnsupportedEncodingException e) {
-            // Here we throw without rollback, because at the point this
-            // exception is thrown
-            // no database activity has happened
-            throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
             LOG.error("IllegalArgument Error", e);
             throw new StorageException(e);

@@ -55,8 +55,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordMechFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
@@ -114,7 +115,7 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
             updatedUser.setUserPassword(null);
         } else {
             PasswordMechFactory passwordMechFactory = ServerServiceRegistry.getInstance().getService(PasswordMechFactory.class);
-            IPasswordMech iPasswordMech = passwordMechFactory.get(IPasswordMech.BCRYPT);
+            IPasswordMech iPasswordMech = passwordMechFactory.get(PasswordMech.BCRYPT);
             if (Strings.isNotEmpty(user.getPasswordMech())) {
                 iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
             }

@@ -52,7 +52,7 @@ package com.openexchange.share.impl;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.password.mechanism.IPasswordMech;
 import com.openexchange.share.core.ShareConstants;
 
 /**

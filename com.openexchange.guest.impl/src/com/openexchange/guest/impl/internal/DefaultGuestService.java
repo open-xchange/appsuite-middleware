@@ -70,8 +70,8 @@ import com.openexchange.guest.GuestService;
 import com.openexchange.guest.impl.storage.GuestStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMechFactory;
 import com.openexchange.user.UserService;
 
 /**

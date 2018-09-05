@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Password Change Database
+Bundle-SymbolicName: com.openexchange.password.mechanism
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Description: The Open-Xchange password-mechanism bundle
+Import-Package: com.openexchange.exception
+Export-Package: com.openexchange.password.mechanism

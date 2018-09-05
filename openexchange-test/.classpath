@@ -173,6 +173,8 @@
 	<classpathentry kind="lib" path="lib/migbase64-2.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.session.management"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.password.mechanism"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.password.mechanism.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.passwordchange.history"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rest.passwordchange.history"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer.impl"/>

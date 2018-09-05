@@ -47,57 +47,84 @@
  *
  */
 
-package com.openexchange.passwordmechs;
+package com.openexchange.password.mechanism.algorithm;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.java.Strings;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.tools.encoding.Base64;
 
 /**
- * {@link PasswordMechFactoryImpl}
+ * 
+ * {@link SHACrypt}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved from global & update to new versions
+ * @since v7.10.1
  */
-public class PasswordMechFactoryImpl implements PasswordMechFactory {
+public final class SHACrypt {
 
-    private final Map<String, IPasswordMech> registeredPasswordMechs = new HashMap<String, IPasswordMech>();
+    // -------------------------------------------------------------------
 
     /**
-     * {@inheritDoc}
+     * SHA-1 algorithm.
+     * 
+     * @deprecated Use SHA256 to generate new password instead
      */
-    @Override
-    public void register(IPasswordMech... passwordMech) {
-        for (IPasswordMech mech : passwordMech) {
-            String id = adaptIdentifier(mech.getIdentifier());
-            registeredPasswordMechs.put(id, mech);
-        }
+    @Deprecated
+    public static final SHACrypt SHA1 = new SHACrypt(PasswordMech.SHA, "SHA-1");
+
+    /**
+     * SHA-256 algorithm
+     */
+    public static final SHACrypt SHA256 = new SHACrypt(PasswordMech.SHA_256, "SHA-256");
+
+    /**
+     * SHA-512 algorithm.
+     * Note: Might not run will all JVMs.
+     * 
+     * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/security/MessageDigest.html">MessageDigest</a>
+     * 
+     */
+    public static final SHACrypt SHA512 = new SHACrypt(PasswordMech.SHA_512, "SHA-512");
+
+    // -------------------------------------------------------------------
+
+    private final PasswordMech mech;
+
+    private final String algorithm;
+
+    private SHACrypt(PasswordMech mech, String algorithm) {
+        super();
+        this.mech = mech;
+        this.algorithm = algorithm;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IPasswordMech get(String identifier) {
-        String id = adaptIdentifier(identifier);
+    // -------------------------------------------------------------------
 
-        return registeredPasswordMechs.get(id);
+    public String makeSHAPasswd(String raw) throws NoSuchAlgorithmException {
+        return makeSHAPasswd(raw, null);
     }
 
-    /**
-     * Adapts the given identifier to the expected format.
-     *
-     * @param identifier The given identifier
-     * @return the expected identifier that looks like {UPPER_CASE_MECHANISM}
-     */
-    private String adaptIdentifier(String identifier) {
-        String id = Strings.toUpperCase(identifier);
-        if (!id.startsWith("{")) {
-            id = new StringBuilder(id.length() + 1).append('{').append(id).toString();
+    public String makeSHAPasswd(String raw, String salt) throws NoSuchAlgorithmException {
+        final MessageDigest sha = MessageDigest.getInstance(algorithm);
+
+        sha.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
+        if (null != salt) {
+            sha.update(salt.getBytes());
         }
-        if (!id.endsWith("}")) {
-            id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
-        }
-        return id;
+
+        final byte[] hash = sha.digest();
+
+        return Base64.encode(hash);
+    }
+
+    // -------------------------------------------------------------------
+
+    public String getAlgorithm() {
+        return algorithm;
+    }
+
+    public PasswordMech getPasswordMech() {
+        return mech;
     }
 }

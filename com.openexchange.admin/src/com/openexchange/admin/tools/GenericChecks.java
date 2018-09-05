@@ -49,14 +49,15 @@
 
 package com.openexchange.admin.tools;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import javax.mail.internet.AddressException;
-import com.damienmiller.BCrypt;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMechFactory;
 
 /**
  * @author choeger
@@ -145,29 +146,27 @@ public class GenericChecks {
     }
 
     /**
-     * Authenticate the cleartext password against the crypted string using the
-     * specified authmech
+     * Authenticate the clear text password against the encrypted string using the
+     * specified {@link IPasswordMech}
      *
-     * @param crypted
-     * @param clear
-     * @param mech
-     * @return true if authentication succeeds and false if it fails
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException
+     * @param crypted The encrypted password
+     * @param clear The password in clear text
+     * @param mech The password mechanism to use
+     * @return <code>true</code> if authentication succeeds and false if it fails
      */
-    public final static boolean authByMech(String crypted, String clear, String mech) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        if (mech == null) {
+    public final static boolean authByMech(String crypted, String clear, String mech) {
+        if (Strings.isEmpty(mech)) {
             return false;
         }
-        switch (mech) {
-            case "{CRYPT}":
-                return UnixCrypt.matches(crypted, clear);
-            case "{SHA}":
-                return SHACrypt.makeSHAPasswd(clear).equals(crypted);
-            case "{BCRYPT}":
-                return BCrypt.checkpw(clear, crypted);
-            default:
-                return false;
+        try {
+            PasswordMechFactory mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechFactory.class, true);
+            IPasswordMech passwordMech = mechFactory.get(mech);
+            if (null != passwordMech) {
+                return passwordMech.check(clear, crypted);
+            }
+        } catch (OXException e) {
+            // Ignore
         }
+        return false;
     }
 }

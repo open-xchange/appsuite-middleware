@@ -68,7 +68,7 @@ import com.openexchange.groupware.ldap.RdbUserStorage.ValuePair;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.lock.LockService;
 import com.openexchange.log.LogProperties;
-import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.password.mechanism.IPasswordMech;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.internal.mapping.UserMapper;
 import gnu.trove.map.TIntObjectMap;

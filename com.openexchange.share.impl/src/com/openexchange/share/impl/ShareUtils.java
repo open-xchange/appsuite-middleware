@@ -70,8 +70,9 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordMechFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -204,7 +205,7 @@ public class ShareUtils {
             guestUser.setPreferredLanguage(recipient.getPreferredLanguage());
         }
         PasswordMechFactory passwordMechFactory = services.getService(PasswordMechFactory.class);
-        IPasswordMech iPasswordMech = passwordMechFactory.get(IPasswordMech.BCRYPT);
+        IPasswordMech iPasswordMech = passwordMechFactory.get(PasswordMech.BCRYPT);
         guestUser.setPasswordMech(iPasswordMech.getIdentifier());
         if (Strings.isNotEmpty(recipient.getPassword())) {
             guestUser.setUserPassword(iPasswordMech.encode(recipient.getPassword()));
