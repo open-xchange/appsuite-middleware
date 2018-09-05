@@ -66,7 +66,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.SMSServiceSPI;
 import com.openexchange.user.UserService;
 
@@ -83,18 +82,16 @@ public class SMSNotificationService implements AlarmNotificationService {
     private final SMSServiceSPI smsService;
     private final TranslatorFactory translatorFactory;
     private final UserService userService;
-    private final PhoneNumberParserService phoneNumberParsingService;
     private final LeanConfigurationService leanConfigurationService;
 
     /**
      * Initializes a new {@link SMSNotificationService}.
      */
-    public SMSNotificationService(SMSServiceSPI smsService, TranslatorFactory translatorFactory, UserService userService, PhoneNumberParserService phoneNumberParserService, LeanConfigurationService leanConfigurationService) {
+    public SMSNotificationService(SMSServiceSPI smsService, TranslatorFactory translatorFactory, UserService userService, LeanConfigurationService leanConfigurationService) {
         super();
         this.smsService = smsService;
         this.translatorFactory = translatorFactory;
         this.userService = userService;
-        this.phoneNumberParsingService = phoneNumberParserService;
         this.leanConfigurationService = leanConfigurationService;
     }
 
@@ -129,12 +126,7 @@ public class SMSNotificationService implements AlarmNotificationService {
         if(extendedProperty == null) {
             return null;
         }
-        try {
-            return phoneNumberParsingService.parsePhoneNumber(extendedProperty.getValue().toString(), locale);
-        } catch (OXException e) {
-            LOG.debug("Unable to parse phone number.", e);
-            return null;
-        }
+        return extendedProperty.getValue().toString();
     }
 
     private String generateSMS(Event event, Locale locale) {
