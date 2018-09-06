@@ -60,6 +60,8 @@ import com.openexchange.config.lean.Property;
  */
 public enum HealthCheckProperty implements Property {
 
+    username(HealthCheckProperty.PREFIX, HealthCheckProperty.EMPTY),
+    password(HealthCheckProperty.PREFIX, HealthCheckProperty.EMPTY),
     skip(HealthCheckProperty.PREFIX, HealthCheckProperty.EMPTY),
     ignore(HealthCheckProperty.PREFIX, HealthCheckProperty.EMPTY)
     ;

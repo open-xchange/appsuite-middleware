@@ -71,12 +71,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.health.DefaultHealthCheckResponse;
+import com.openexchange.health.internal.HealthCheckProperty;
 import com.openexchange.health.internal.HealthCheckService;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.rest.services.EndpointAuthenticator;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.version.Version;
 
 /**
@@ -100,26 +106,12 @@ public class HealthCheckRestEndpoint implements EndpointAuthenticator {
     }
 
     private final HealthCheckService service;
+    private final ServiceLookup services;
 
-    public HealthCheckRestEndpoint(HealthCheckService service) {
+    public HealthCheckRestEndpoint(HealthCheckService service, ServiceLookup services) {
         super();
         this.service = service;
-    }
-
-    @Override
-    public boolean permitAll(Method invokedMethod) {
-        return true;
-    }
-
-    @Override
-    public boolean authenticate(String login, String password, Method invokedMethod) {
-        // TODO Check against configured login/password
-        return true;
-    }
-
-    @Override
-    public String getRealmName() {
-        return "OX HEALTH";
+        this.services = services;
     }
 
     @GET
@@ -186,5 +178,42 @@ public class HealthCheckRestEndpoint implements EndpointAuthenticator {
         serverInfo.put("locale", Locale.getDefault());
         serverInfo.put("charset", Charset.defaultCharset().name());
         return serverInfo;
+    }
+
+    @Override
+    public boolean permitAll(Method invokedMethod) {
+        Pair<String, String> credentials;
+        try {
+            credentials = getCredentials();
+            return (null == credentials || (Strings.isEmpty(credentials.getFirst()) && Strings.isEmpty(credentials.getSecond())));
+        } catch (OXException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean authenticate(String login, String password, Method invokedMethod) {
+        Pair<String, String> credentials;
+        try {
+            credentials = getCredentials();
+            return (null != credentials && credentials.getFirst().equals(login) && credentials.getSecond().equals(password));
+        } catch (OXException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public String getRealmName() {
+        return "OX HEALTH";
+    }
+
+    private Pair<String, String> getCredentials() throws OXException {
+        LeanConfigurationService configurationService = services.getService(LeanConfigurationService.class);
+        if (null == configurationService) {
+            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
+        }
+        String username = configurationService.getProperty(HealthCheckProperty.username);
+        String password = configurationService.getProperty(HealthCheckProperty.password);
+        return new Pair<String, String>(username, password);
     }
 }

@@ -91,7 +91,7 @@ public class HealthActivator extends HousekeepingActivator {
         registry.add(new JVMHeapHealthCheck(this));
         registry.add(new HazelcastHealthCheck(this));
         HealthCheckService service = new HealthCheckService(this, registry);
-        registerService(HealthCheckRestEndpoint.class, new HealthCheckRestEndpoint(service));
+        registerService(HealthCheckRestEndpoint.class, new HealthCheckRestEndpoint(service, this));
     }
 
 }
