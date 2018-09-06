@@ -270,7 +270,7 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
         }
         for (RESTResponseBodyParser bodyParser : responseBodyParsers.values()) {
             if (bodyParser.getContentTypes().contains(contentType)) {
-                response.setResponseBody(bodyParser.parse(httpResponse, response));
+                bodyParser.parse(httpResponse, response);
                 return;
             }
         }

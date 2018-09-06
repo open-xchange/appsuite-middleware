@@ -92,9 +92,9 @@ public class TextRESTResponseBodyParser implements RESTResponseBodyParser {
      * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
      */
     @Override
-    public Object parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
+    public void parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
         try (InputStream inputStream = Streams.bufferedInputStreamFor(httpResponse.getEntity().getContent())) {
-            return Streams.stream2string(inputStream, CHARSET);
+            restResponse.setResponseBody(Streams.stream2string(inputStream, CHARSET));
         } catch (IOException e) {
             throw RESTExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }

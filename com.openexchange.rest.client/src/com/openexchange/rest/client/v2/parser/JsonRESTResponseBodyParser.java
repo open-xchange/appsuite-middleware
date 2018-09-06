@@ -87,15 +87,17 @@ public class JsonRESTResponseBodyParser implements RESTResponseBodyParser {
      * @see com.openexchange.rest.client.v2.parser.RESTResponseBodyParser#parse(org.apache.http.HttpResponse, com.openexchange.rest.client.v2.RESTResponse)
      */
     @Override
-    public Object parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
+    public void parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
         try (InputStream inputStream = Streams.bufferedInputStreamFor(httpResponse.getEntity().getContent())) {
             String string = Streams.stream2string(inputStream, CHARSET);
             char c = string.charAt(0);
             switch (c) {
                 case '{':
-                    return new JSONObject(string);
+                    restResponse.setResponseBody(new JSONObject(string));
+                    return;
                 case '[':
-                    return new JSONArray(string);
+                    restResponse.setResponseBody(new JSONArray(string));
+                    return;
                 default:
                     throw RESTExceptionCodes.JSON_ERROR.create("Unexpected start token detected '" + c + "'");
             }

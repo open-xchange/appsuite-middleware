@@ -87,17 +87,17 @@ public class ImageRESTResponseBodyParser implements RESTResponseBodyParser {
      * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
      */
     @Override
-    public Object parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
+    public void parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream(); InputStream stream = httpResponse.getEntity().getContent()) {
             if (stream == null) {
-                return null;
+                return;
             }
             int read = 0;
             byte[] buffer = new byte[4096];
             while ((read = stream.read(buffer)) != -1) {
                 out.write(buffer, 0, read);
             }
-            return out.toByteArray();
+            restResponse.setResponseBody(out.toByteArray());
         } catch (IOException e) {
             throw RESTExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }

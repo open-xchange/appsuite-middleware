@@ -88,14 +88,14 @@ public class SchedJoulesCalendarRESTResponseBodyParser implements RESTResponseBo
      * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
      */
     @Override
-    public Object parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
+    public void parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
         ICalService iCalService = Services.getService(ICalService.class);
         ICalParameters parameters = iCalService.initParameters();
         parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
 
         try (InputStream inputStream = Streams.bufferedInputStreamFor(httpResponse.getEntity().getContent())) {
             Calendar calendar = iCalService.importICal(inputStream, parameters);
-            return new SchedJoulesCalendar(calendar.getName(), calendar.getEvents(), restResponse.getHeader(HttpHeaders.ETAG), RESTResponseUtil.getLastModified(restResponse));
+            restResponse.setResponseBody(new SchedJoulesCalendar(calendar.getName(), calendar.getEvents(), restResponse.getHeader(HttpHeaders.ETAG), RESTResponseUtil.getLastModified(restResponse)));
         } catch (IOException e) {
             throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }

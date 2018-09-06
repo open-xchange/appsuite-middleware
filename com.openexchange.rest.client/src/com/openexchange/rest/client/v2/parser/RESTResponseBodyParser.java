@@ -65,13 +65,18 @@ public interface RESTResponseBodyParser {
 
     /**
      * Parses the {@link InputStream} from the specified {@link HttpResponse}
+     * and sets the response body to the specified {@link RESTResponse}
      * 
      * @param httpResponse The {@link HttpResponse}
-     * @param restResponse TODO
-     * @return The parsed {@link R} object
+     * @param restResponse The {@link RESTResponse}
      * @throws OXException if a parsing error occurs
      */
-    Object parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException;
+    void parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException;
 
+    /**
+     * Returns a {@link Set} with all the content types that this parser supports
+     * 
+     * @return a {@link Set} with all the content types that this parser supports
+     */
     Set<String> getContentTypes();
 }
