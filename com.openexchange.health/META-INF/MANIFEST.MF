@@ -23,13 +23,11 @@ Import-Package: com.hazelcast.core,
  javax.annotation.security,
  javax.ws.rs,
  javax.ws.rs.core,
+ org.eclipse.microprofile.health,
+ org.eclipse.microprofile.health.spi,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ActivationPolicy: lazy
-Bundle-ClassPath: .,
- lib/microprofile-health-api-1.0.jar
-Export-Package: com.openexchange.health,
- org.eclipse.microprofile.health,
- org.eclipse.microprofile.health.spi
+Export-Package: com.openexchange.health
