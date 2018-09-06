@@ -268,7 +268,7 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
      * @return The parsed {@link R} object
      * @throws OXException if a parsing error occurs
      */
-    public Object parseResponseBody(RESTResponse response) throws OXException {
+    private Object parseResponseBody(RESTResponse response) throws OXException {
         String contentType = response.getHeader(HttpHeaders.CONTENT_TYPE);
         if (Strings.isEmpty(contentType)) {
             throw new IllegalArgumentException("The content type can be neither 'null' nor empty");

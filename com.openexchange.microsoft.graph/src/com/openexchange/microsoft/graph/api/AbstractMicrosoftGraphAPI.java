@@ -110,7 +110,10 @@ abstract class AbstractMicrosoftGraphAPI {
         request.setAccessToken(accessToken);
         RESTResponse restResponse = client.execute(request);
         // TODO: Check for errors
-        return (byte[]) client.execute(request).getResponseBody();
+        if (!(restResponse.getResponseBody() instanceof byte[])) {
+            throw new OXException(666, "binary resournce not found");
+        }
+        return (byte[]) restResponse.getResponseBody();
     }
 
     /**

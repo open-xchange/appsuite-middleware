@@ -115,8 +115,6 @@ public abstract class AbstractRESTClient implements Closeable {
 
     /**
      * Executes the specified {@link HttpRequestBase} and returns the response.
-     * This is the lower layer of the RESTClient stack before data leaves the middleware's
-     * premises.
      * 
      * @param httpRequest The HTTP request to execute
      * @return The parsed HTTP REST response
@@ -125,10 +123,7 @@ public abstract class AbstractRESTClient implements Closeable {
     public RESTResponse executeRequest(HttpRequestBase httpRequest) throws OXException {
         CloseableHttpResponse httpResponse = null;
         try {
-            LOGGER.debug("Executing request: '{}'", httpRequest.getURI());
-            httpResponse = httpClient.execute(httpRequest);
-            LOGGER.debug("Request '{}' completed with status code '{}'", httpRequest.getURI(), httpResponse.getStatusLine().getStatusCode());
-
+            httpResponse = execute(httpRequest);
             return parser.parse(httpResponse);
         } catch (ClientProtocolException e) {
             throw RESTExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e, e.getMessage());
@@ -139,19 +134,29 @@ public abstract class AbstractRESTClient implements Closeable {
             reset(httpRequest);
         }
     }
-    
+
+    /**
+     * Executes the specified {@link HttpRequestBase} and returns the {@link InputStream}
+     * of the response. Use to stream data to client.
+     * 
+     * @param httpRequest The HTTP request to execute
+     * @return The {@link InputStream} of the response
+     * @throws OXException if a client protocol error or an I/O error occurs
+     */
     public InputStream download(HttpRequestBase httpRequest) throws OXException {
         CloseableHttpResponse httpResponse = null;
         try {
-            LOGGER.debug("Executing request: '{}'", httpRequest.getURI());
-            httpResponse = httpClient.execute(httpRequest);
-            LOGGER.debug("Request '{}' completed with status code '{}'", httpRequest.getURI(), httpResponse.getStatusLine().getStatusCode());
-
-            return httpResponse.getEntity().getContent();
+            httpResponse = execute(httpRequest);
+            if (httpResponse.getStatusLine().getStatusCode() == 200) {
+                return httpResponse.getEntity().getContent();
+            }
+            throw RESTExceptionCodes.UNEXPECTED_ERROR.create(httpResponse.getStatusLine());
         } catch (ClientProtocolException e) {
             throw RESTExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e, e.getMessage());
+        } finally {
+            reset(httpRequest);
         }
     }
 
@@ -257,6 +262,23 @@ public abstract class AbstractRESTClient implements Closeable {
         clientConfig.setUserAgent(userAgent);
 
         return HttpClients.getHttpClient(clientConfig);
+    }
+
+    /**
+     * Executes the specified {@link HttpRequestBase} and returns the response.
+     * This is the lower layer of the RESTClient stack before data leaves the middleware's
+     * premises.
+     * 
+     * @param httpRequest The HTTP request to execute
+     * @return The HTTP response
+     * @throws ClientProtocolException if a client protocol error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    private CloseableHttpResponse execute(HttpRequestBase httpRequest) throws ClientProtocolException, IOException {
+        LOGGER.debug("Executing request: '{}'", httpRequest.getURI());
+        CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);
+        LOGGER.debug("Request '{}' completed with status code '{}'", httpRequest.getURI(), httpResponse.getStatusLine().getStatusCode());
+        return httpResponse;
     }
 
     /**

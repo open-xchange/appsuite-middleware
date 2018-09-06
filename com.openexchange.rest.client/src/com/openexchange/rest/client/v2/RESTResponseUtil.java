@@ -76,5 +76,4 @@ public final class RESTResponseUtil {
             return 0;
         }
     }
-
 }
