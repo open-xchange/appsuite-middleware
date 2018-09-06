@@ -10,6 +10,8 @@ Package: open-xchange-hazelcast-community
 Architecture: all
 Depends: ${misc:Depends}
 Conflicts: open-xchange-hazelcast-enterprise
+Replaces: open-xchange-core (<< 7.10.1)
+Breaks: open-xchange-core (<< 7.10.1)
 Provides: open-xchange-hazelcast
 Description: This package installs the community version of Hazelcast. The
  implementation uses the freely available version of Hazelcast with a limited
