@@ -131,7 +131,6 @@ public abstract class AbstractRESTClient implements Closeable {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e, e.getMessage());
         } finally {
             consume(httpResponse);
-            reset(httpRequest);
         }
     }
 
@@ -155,8 +154,6 @@ public abstract class AbstractRESTClient implements Closeable {
             throw RESTExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
             throw RESTExceptionCodes.IO_EXCEPTION.create(e, e.getMessage());
-        } finally {
-            reset(httpRequest);
         }
     }
 
@@ -298,22 +295,6 @@ public abstract class AbstractRESTClient implements Closeable {
             EntityUtils.consume(entity);
         } catch (Throwable e) {
             LOGGER.debug("Error while consuming the entity of the HTTP response {}", e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Resets the specified {@link HttpRequestBase}
-     *
-     * @param httpRequest The {@link HttpRequestBase} to reset
-     */
-    private void reset(HttpRequestBase httpRequest) {
-        if (httpRequest == null) {
-            return;
-        }
-        try {
-            httpRequest.reset();
-        } catch (final Throwable e) {
-            LOGGER.debug("Error while resetting the HTTP request {}", e.getMessage(), e);
         }
     }
 }

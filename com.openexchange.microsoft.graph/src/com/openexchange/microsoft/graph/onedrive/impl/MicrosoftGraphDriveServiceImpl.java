@@ -92,6 +92,10 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_put_content">Upload files</a>
      */
     private static final long ONE_SHOT_UPLOAD_LIMIT = 1024 * 1024 * 4;
+    /**
+     * Infostore's root folder id
+     */
+    private static final String ROOT_ID = "";
 
     private final MicrosoftGraphOneDriveAPI api;
     private final OneDriveFolderParser folderEntityParser;
@@ -368,6 +372,10 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     @Override
     public String copyFile(String accessToken, String itemId, File file, List<Field> modifiedFields, String parentId) throws OXException {
         try {
+            if (ROOT_ID.equals(parentId)) {
+                JSONObject rootFolder = api.getRoot(accessToken);
+                parentId = rootFolder.optString("id");
+            }
             return api.copyItem(accessToken, itemId, compileUpdateBody(file, modifiedFields, parentId));
         } catch (JSONException e) {
             throw new OXException(666, "JSON error", e);
@@ -382,6 +390,10 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     @Override
     public String copyFile(String accessToken, String itemId, String parentId) throws OXException {
         try {
+            if (ROOT_ID.equals(parentId)) {
+                JSONObject rootFolder = api.getRoot(accessToken);
+                parentId = rootFolder.optString("id");
+            }
             JSONObject parentRef = new JSONObject();
             parentRef.put("id", parentId);
             //parentRef.put("driveId", getDriveId());
