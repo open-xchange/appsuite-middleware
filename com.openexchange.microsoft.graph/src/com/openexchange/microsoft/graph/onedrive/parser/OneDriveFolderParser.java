@@ -102,6 +102,7 @@ public class OneDriveFolderParser {
             // and retain the original in the metadata for future reference.
             folder.setMeta(Collections.singletonMap("id", folder.getId()));
             folder.setId(FileStorageFolder.ROOT_FULLNAME);
+            folder.setName("My Microsoft Account");
         }
 
         JSONObject fileSystemInfo = entity.optJSONObject("fileSystemInfo");
