@@ -106,13 +106,13 @@ public class HealthCheckService {
         }
 
         Map<String, DefaultHealthCheckResponse> result = new HashMap<>();
-        try {
-            for (Future<DefaultHealthCheckResponse> future : futures) {
+        for (Future<DefaultHealthCheckResponse> future : futures) {
+            try {
                 DefaultHealthCheckResponse response = future.get(1000, TimeUnit.MILLISECONDS);
                 result.put(response.getName(), response);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                LOG.error(e.getMessage());
             }
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOG.error(e.getMessage());
         }
 
         return result;
