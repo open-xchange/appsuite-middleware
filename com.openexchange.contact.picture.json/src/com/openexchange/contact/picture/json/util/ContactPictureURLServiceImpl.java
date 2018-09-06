@@ -49,11 +49,13 @@
 
 package com.openexchange.contact.picture.json.util;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.net.URISyntaxException;
+import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.contact.picture.json.ContactPictureActionFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.ContactPictureURLService;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -70,90 +72,75 @@ import com.openexchange.session.Sessions;
  */
 public class ContactPictureURLServiceImpl implements ContactPictureURLService {
 
-    private final AtomicReference<DispatcherPrefixService> DPS_REF = new AtomicReference<DispatcherPrefixService>();
     private final ServiceLookup services;
 
     /**
      * Initializes a new {@link ContactPictureURLServiceImpl}.
      * 
-     * @param serviceLookup The {@link ServiceLookup} 
+     * @param serviceLookup The {@link ServiceLookup}
      */
     public ContactPictureURLServiceImpl(ServiceLookup serviceLookup) {
         this.services = serviceLookup;
     }
 
     @Override
-    public String getContactPictureUrl(Integer contactId, Integer folderId, Session session, boolean preferRelativeUrl) throws OXException {
-        if (contactId == null || folderId == null) {
-            throw ContactExceptionCodes.UNEXPECTED_ERROR.create("The contactId and the folderId must not be null!");
+    public String getContactPictureUrl(int contactId, int folderId, Session session, boolean preferRelativeUrl) throws OXException {
+        if (contactId < 0 || folderId < 0) {
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create("The contactId and the folderId must be set!");
         }
-        return getPictureUrl(contactId, folderId, null, session, preferRelativeUrl);
+        return getPictureUrl(contactId, folderId, -1, session, preferRelativeUrl);
     }
 
     @Override
-    public String getUserPictureUrl(Integer userId, Session session, boolean preferRelativeUrl) throws OXException {
-        if (userId == null) {
-            throw ContactExceptionCodes.UNEXPECTED_ERROR.create("The userId must not be null!");
+    public String getUserPictureUrl(int userId, Session session, boolean preferRelativeUrl) throws OXException {
+        if (userId < 0) {
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create("The userId must be set!");
         }
-        return getPictureUrl(null, null, userId, session, preferRelativeUrl);
+        return getPictureUrl(-1, -1, userId, session, preferRelativeUrl);
     }
 
-    private String getPictureUrl(Integer contactId, Integer folderId, Integer userId, final Session session, final boolean preferRelativeUrl) throws OXException {
-        StringBuilder sb = new StringBuilder();
-        final String prefix;
-        final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
-        if (hostData == null) {
-            /*
-             * Compose relative URL
-             */
-            prefix = "";
-        } else {
-            /*
-             * Compose absolute URL if a relative one is not preferred
-             */
-            if (preferRelativeUrl) {
-                prefix = "";
+    private String getPictureUrl(int contactId, int folderId, int userId, final Session session, final boolean preferRelativeUrl) throws OXException {
+        URIBuilder builder = new URIBuilder();
+        if (false == preferRelativeUrl) {
+            final HostData hostData;
+            com.openexchange.framework.request.RequestContext requestContext = RequestContextHolder.get();
+            if (null != requestContext) {
+                hostData = requestContext.getHostData();
             } else {
-                sb.append(hostData.isSecure() ? "https://" : "http://");
-                sb.append(hostData.getHost());
+                hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+            }
+
+            if (null != hostData) {
+                // Set absolute path
+                builder.setScheme(hostData.isSecure() ? "https://" : "http://");
+                builder.setHost(hostData.getHost());
                 final int port = hostData.getPort();
                 if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
-                    sb.append(':').append(port);
+                    builder.setPort(hostData.getPort());
                 }
-                prefix = sb.toString();
-                sb.setLength(0);
             }
         }
-        /*
-         * Compose URL parameters
-         */
-        sb.append(prefix.endsWith("/") ? prefix.substring(0, prefix.length() - 1) : prefix);
-        sb.append(getDispatcherPrefix());
-        boolean isOAuthSession = Sessions.isOAuthSession(session);
-        if (isOAuthSession) {
+
+        // Get path
+        StringBuilder sb = new StringBuilder();
+        sb.append(services.getServiceSafe(DispatcherPrefixService.class).getPrefix());
+        if (Sessions.isOAuthSession(session)) {
             sb.append(OAuthConstants.OAUTH_SERVLET_SUBPREFIX);
         }
-
         sb.append(ContactPictureActionFactory.Module);
         sb.append("?action=get");
+        builder.setPath(sb.toString());
+        if (contactId > -1 && folderId > -1) {
+            builder.setParameter("contactId", String.valueOf(contactId));
+            builder.setParameter("folderId", String.valueOf(folderId));
 
-        if (contactId != null && folderId != null) {
-            sb.append("&contactId=").append(contactId);
-            sb.append("&folderId=").append(folderId);
         } else {
-            sb.append("&userId=").append(userId);
+            builder.setParameter("userId", String.valueOf(userId));
         }
-        return sb.toString();
-    }
-
-    String getDispatcherPrefix() throws OXException {
-        DispatcherPrefixService dispatcherPrefixService = DPS_REF.get();
-        if (dispatcherPrefixService == null) {
-            dispatcherPrefixService = services.getServiceSafe(DispatcherPrefixService.class);
-            DPS_REF.set(dispatcherPrefixService);
+        try {
+            return builder.build().toString();
+        } catch (URISyntaxException e) {
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Unable to build URI for contact.");
         }
-
-        return dispatcherPrefixService.getPrefix();
     }
-
 }

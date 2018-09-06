@@ -70,7 +70,7 @@ public interface ContactPictureURLService {
      * @return The URL to the picture.
      * @throws OXException If user or folder ID is missing or DispatcherPrefixService is absent
      */
-    public String getContactPictureUrl(Integer contactId, Integer folderId, final Session session, final boolean preferRelativeUrl) throws OXException;
+    public String getContactPictureUrl(int contactId, int folderId, final Session session, final boolean preferRelativeUrl) throws OXException;
 
     /**
      * Provides a URL to the picture of an internal user.
@@ -81,5 +81,5 @@ public interface ContactPictureURLService {
      * @return The URL to the picture.
      * @throws OXException If user ID is missing or DispatcherPrefixService is absent
      */
-    public String getUserPictureUrl(Integer userId, final Session session, final boolean preferRelativeUrl) throws OXException;
+    public String getUserPictureUrl(int userId, final Session session, final boolean preferRelativeUrl) throws OXException;
 }
