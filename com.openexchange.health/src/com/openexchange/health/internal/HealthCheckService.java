@@ -49,10 +49,10 @@
 
 package com.openexchange.health.internal;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -100,18 +100,33 @@ public class HealthCheckService {
         }
 
         Map<String, DefaultHealthCheckTask> tasks = applySkipBlacklist();
-        List<Future<DefaultHealthCheckResponse>> futures = new ArrayList<>();
+        Map<Future<DefaultHealthCheckResponse>, DefaultHealthCheckTask> futures = new LinkedHashMap<>(tasks.size());
         for (DefaultHealthCheckTask task : tasks.values()) {
-            futures.add(threadPoolService.submit(task));
+            futures.put(threadPoolService.submit(task), task);
         }
 
-        Map<String, DefaultHealthCheckResponse> result = new HashMap<>();
-        for (Future<DefaultHealthCheckResponse> future : futures) {
+        Map<String, DefaultHealthCheckResponse> result = new HashMap<>(tasks.size());
+        for (Map.Entry<Future<DefaultHealthCheckResponse>, DefaultHealthCheckTask> futureAndTask : futures.entrySet()) {
             try {
-                DefaultHealthCheckResponse response = future.get(1000, TimeUnit.MILLISECONDS);
+                DefaultHealthCheckResponse response = futureAndTask.getKey().get(1000, TimeUnit.MILLISECONDS);
                 result.put(response.getName(), response);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                LOG.error(e.getMessage());
+            } catch (InterruptedException e) {
+                // Keep interrupted status
+                Thread.currentThread().interrupt();
+                DefaultHealthCheckTask task = futureAndTask.getValue();
+                LOG.warn("Interrupted while obtaining health check response from task {}: {}", task.getName(), task.getClass().getName(), e);
+            } catch (TimeoutException e) {
+                DefaultHealthCheckTask task = futureAndTask.getValue();
+                LOG.warn("Timed out while obtaining health check response from task {}: {}", task.getName(), task.getClass().getName(), e);
+            } catch (ExecutionException e) {
+                DefaultHealthCheckTask task = futureAndTask.getValue();
+                Throwable cause = e.getCause();
+                if (null == cause) {
+                    // Huh...? ExecutionException w/o a cause
+                    LOG.error("Failed to obtain health check response from task {}: {}", task.getName(), task.getClass().getName(), e);
+                } else {
+                    LOG.error("Failed to obtain health check response from task {}: {}", task.getName(), task.getClass().getName(), cause);
+                }
             }
         }
 
