@@ -53,9 +53,10 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.health.DefaultHealthCheck;
 import com.openexchange.health.DefaultHealthCheckResponse;
 import com.openexchange.health.DefaultHealthCheckResponseBuilder;
@@ -91,10 +92,10 @@ public class JVMHeapHealthCheck extends DefaultHealthCheck {
         data.put("used", String.valueOf(usage.getUsed()));
         data.put("commited", String.valueOf(usage.getCommitted()));
 
-        Properties systemProperties = System.getProperties();
-        if (null != systemProperties && systemProperties.contains("__lastOOM")) {
+        Date lastOOM = ExceptionUtils.getLastOOM();
+        if (null != lastOOM) {
             status = false;
-            data.put("lastOOM", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss,SSSZ").format(systemProperties.getProperty("__lastOOM")));
+            data.put("lastOOM", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss,SSSZ").format(lastOOM));
         }
 
         DefaultHealthCheckResponseBuilder builder = new DefaultHealthCheckResponseBuilder();
