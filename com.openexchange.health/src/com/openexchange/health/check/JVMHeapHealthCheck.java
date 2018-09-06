@@ -52,6 +52,7 @@ package com.openexchange.health.check;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -93,7 +94,7 @@ public class JVMHeapHealthCheck extends DefaultHealthCheck {
         Properties systemProperties = System.getProperties();
         if (null != systemProperties && systemProperties.contains("__lastOOM")) {
             status = false;
-            data.put("lastOOM", String.valueOf(systemProperties.getProperty("__lastOOM")));
+            data.put("lastOOM", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss,SSSZ").format(systemProperties.getProperty("__lastOOM")));
         }
 
         DefaultHealthCheckResponseBuilder builder = new DefaultHealthCheckResponseBuilder();
