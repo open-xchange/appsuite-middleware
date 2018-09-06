@@ -7,7 +7,9 @@ Bundle-Activator: com.openexchange.health.osgi.HealthActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.openexchange.health
-Import-Package: com.hazelcast.core,
+Import-Package: com.hazelcast.cluster,
+ com.hazelcast.core,
+ com.hazelcast.version,
  com.openexchange.config.lean,
  com.openexchange.database,
  com.openexchange.exception,

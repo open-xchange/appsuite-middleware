@@ -49,6 +49,8 @@
 
 package com.openexchange.health.check;
 
+import com.hazelcast.cluster.ClusterState;
+import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.health.DefaultHealthCheck;
 import com.openexchange.health.DefaultHealthCheckResponse;
@@ -78,10 +80,24 @@ public class HazelcastHealthCheck extends DefaultHealthCheck {
         DefaultHealthCheckResponseBuilder builder = new DefaultHealthCheckResponseBuilder();
         builder.name(NAME);
         HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
-        //        if (null == hzInstance) {
-        return builder.up().build();
-        //        }
-        //        return null;
+        if (null == hzInstance) {
+            return builder.up().build();
+        }
+        boolean status = true;
+        Cluster cluster = hzInstance.getCluster();
+        if (null != cluster) {
+            builder.withData("memberCount", cluster.getMembers().size());
+            ClusterState clusterState = cluster.getClusterState();
+            if (!ClusterState.ACTIVE.equals(clusterState)) {
+                status = false;
+            }
+            builder.withData("clusterState", clusterState.name());
+            builder.withData("clusterVersion", cluster.getClusterVersion().toString());
+            builder.withData("memberVersion", cluster.getLocalMember().getVersion().toString());
+            builder.withData("isLiteMember", cluster.getLocalMember().isLiteMember());
+        }
+        builder.state(status);
+        return builder.build();
     }
 
 }
