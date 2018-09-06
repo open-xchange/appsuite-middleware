@@ -14,6 +14,7 @@ There are some different modes for the start- and end-date of events. This affec
 A calendar date with no time component, i.e. only year, month and date are set. It is not possible to assign a concrete timezone to a date, so that dates do always appear in the timezone of the actual viewer. *All-day* events start- and end on a date. This characteristic is called *floating*, and needs to be handled appropriately whenever concrete periods of such *all-day* events need to be considered, e.g. during free/busy lookups or conflict checks.
 
 **Date**
+
   - Used for *all-day* events
   - Are *floating*, implicitly
     - Example in iCal: ``DTSTART:19980118``
@@ -29,25 +30,26 @@ A precise calendar date and time consisting of day, year, month, date, hour, min
     - Represent the same year, month, day, hour, minute, second no matter in what time zone they are observed
     - Example in iCal: ``DTSTART:19980118T230000``
     - In the database, the unix timestamp is stored, and the timezone is set to ``NULL``
-    - In the HTTP-API, only the ``value`` property is set, e.g.: { "value":"19980118T230000" }
+    - In the HTTP-API, only the ``value`` property is set, e.g.: ``{ "value":"19980118T230000" }``
 
 2. **UTC** - UTC timezone
     - Easiest form, but not much useful for events
     - Example in iCal: ``DTSTART:19980118T230000Z``
     - In the database, the unix timestamp is stored, and the timezone is set to ``UTC``
-    - In the HTTP-API, the ``value`` property is set with a trailing ``Z`` as in RFC 5545, e.g.: { "value":"19980118T230000Z" }
+    - In the HTTP-API, the ``value`` property is set with a trailing ``Z`` as in RFC 5545, e.g.: ``{ "value":"19980118T230000Z" }``
 
 3. **Local time with Timezone reference** - specific timezone
     - Most common form for events
     - Example in iCal: ``DTSTART;TZID=America/New_York:19980119T020000``
     - In the database, the unix timestamp ans the timezone are stored
-    - In the HTTP-API, an additional ``tzid`` property is included, e.g.: { "value":"19980118T230000", "tzid":"America/New_York" }
+    - In the HTTP-API, an additional ``tzid`` property is included, e.g.: ``{ "value":"19980118T230000", "tzid":"America/New_York" }``
 
 ## Usage
 
 Internally, throughout the new Chronos stack, a DateTime object from the 3rd party library ``rfc5545-datetime`` is used, where dedicated support for the different modes are available. In the database, we have separate columns for the actual value of the start- and end-date of an event, the associated timezones and the *all-day* flag. 
 
 In the HTTP-API, the start- and end-date properties of events are serialized within a JSON object, which is based on the definitions in RFC 5545, as follows:
+
 ```js
 DateTimeData {
   value (string, optional): A date-time value without timezone information as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000" ,
@@ -56,11 +58,14 @@ DateTimeData {
 ```
 
 ***
+
 **_References / further reading:_**
+
 - https://tools.ietf.org/html/rfc5545
 - https://github.com/dmfs/rfc5545-datetime
 - https://devguide.calconnect.org/Handling-Dates-and-Times/
 - https://tools.ietf.org/html/rfc4791#section-7.3
+
 ***
 
 
@@ -79,6 +84,7 @@ The matching timezone is looked up based on the *timezone identifier*, which is 
 Not all clients are using the same set of timezone definitions, and especially clients that do not use timezones from the common Olson database may be problematic as an internally known timezone needs to be selected so that it can be processed by the server. The most prominent example are clients from Windows, which often rely on a Windows-internal set of timezone definitions that use different identifiers. 
 
 In order to also accept non-Olson timezones, such unknown timezones are attempted to be mapped in the following, best-effort way:
+
 - If an unknown timezone is parsed during an update operation, and the parsed timezone has the same rules as the timezone of the originally set timezone, fall back to the original timezone
 - If an unknown timezone is parsed, and the parsed timezone has the same rules as the timezone of the calendar user, fall back to the timezone of the calendar user
 - If an unknown timezone is parsed, and the parsed timezone has the same rules as the timezone of the current session's user, fall back to the timezone of the session user
@@ -87,6 +93,7 @@ In order to also accept non-Olson timezones, such unknown timezones are attempte
 - Use the calendar user timezone, otherwise
 
 ***
+
 **_References / further reading:_**
 - https://tools.ietf.org/html/rfc5545
 - https://devguide.calconnect.org/Time-Zones/Time-Zones/
@@ -94,6 +101,7 @@ In order to also accept non-Olson timezones, such unknown timezones are attempte
 - http://www.oracle.com/technetwork/java/javase/timezones-137583.html
 - com.openexchange.chronos.impl.Utils#selectTimeZone
 - http://unicode.org/repos/cldr/trunk/common/supplemental/windowsZones.xml
+
 ***
 
 
@@ -102,12 +110,14 @@ In order to also accept non-Olson timezones, such unknown timezones are attempte
 ## Terminology
 
 **Folder-Owner** ~ The owner of a personal calendar folder
+
 - In OX, this is the user with the identifier of the folder's ``createdBy`` property, if the folder type is *private*
 - In CalDAV, this is expressed in the calendar collection's ``calendar-owner`` property:  
   RFC 4791, 12.1: *This property is used for browsing clients to find out the user, group or resource for which the calendar events are scheduled. Sometimes the calendar is a user's calendar, in which case the value SHOULD be the user's principal URL from WebDAV ACL. (In this case the DAV:owner property probably has the same principal URL value.)*
 - In Outlook, this owner is usually called the *principal*, which is the principal name for the mailbox user.
 
 **Organizer** ~ The organizer of an event
+
 - In OX (legacy), this is the user who created the event
 - In iCalendar, this is the ``ORGANIZER`` property and points to the organizer of the event
 - In CalDAV, the organizer determines the type of scheduling object resources:  
@@ -127,6 +137,7 @@ The ``organizer`` (and ``organizerId``) always holds the user who creates the ap
 The properties are stored as-is in the database, and are accessible in the same way via the HTTP API. The ``createdBy`` property is set to the identifier of the folder owner as well.
 
 **Example:**
+
 - Eva (id 5) has granted read/write permissions for his personal calendar folder to Tobias (id 4)
 - Tobias creates a new appointment in Eva's calendar
 - Database: ``created_from=5,principalId=5,principal='eva@local.ox',organizerId=4,organizer='tobias@local.ox'``
@@ -141,6 +152,7 @@ In the Chronos stack, there's no dedicated "principal". Instead, it is ensured t
 In order to convert between the legacy properties for organizer/principal and the organizer as it is used within the Chronos stack, the following conversions are performed:
 
 **HTTP API, Appointment->Event and Database, prg_dates->Event**
+
 - ``principal``/``principalId`` not set:  
   Organizer is taken from ``organizer``/``organizerId``
   Organizer's "sent-by" is empty
@@ -149,6 +161,7 @@ In order to convert between the legacy properties for organizer/principal and th
   Organizer's ``sentBy`` is constructed from ``organizer``/``organizerId``
 
 **HTTP API, Event->Appointment and Database, Event->prg_dates**
+
 - Organizer's "sent-by" is set:  
   ``organizer``/``organizerId`` is taken from Organizer's sent-by  
   ``principal``/``principalId`` is taken from Organizer  
@@ -157,6 +170,7 @@ In order to convert between the legacy properties for organizer/principal and th
   ``principal``/``principalId`` empty  
   
 ***
+
 **_References / further reading:_**
 - https://tools.ietf.org/html/rfc4791
 - https://tools.ietf.org/html/rfc6638
@@ -168,6 +182,7 @@ In order to convert between the legacy properties for organizer/principal and th
 - com.openexchange.calendar.itip.ITipCalendarWrapper.onBehalfOf(int)
 - com.openexchange.calendar.itip.ITipConsistencyCalendar.setPrincipal(CalendarDataObject)
 - com.openexchange.calendar.json.actions.chronos.EventConverter.getOrganizer(int, String, int, String)
+
 ***
 
 
@@ -606,10 +621,11 @@ When interacting with the calendar and scheduling subsystem, three different per
 
 As stated above, within *group-scheduled* events with multiple attendees, a calendar user can have certain roles - i.e. the user is *organizer* of the event, or he is an *attendee*. For events that are located in personal calendar folders (*shared* or *private*), these are actually the only possibilities. In *public* calendar folders, the user might also be neither organizer, nor attendee.
 
-Considering the role, a user that is attendee or organizer of a group-scheduled event is able to read event data. Also, an attendee is always allowed to modify his own attendee property (especially his participation status), as well as he has control over his own alarms. Additionally, he may still delete himself from the attendee list. However, whenever event data should be manipulated in way beyond the allowed attendee changes (see above), the calendar user needs to be the organizer of the event.
+Considering the role, a user that is attendee or organizer of a group-scheduled event is always able to read event data. Also, an attendee is always allowed to modify his own attendee property (especially his participation status), as well as he has control over his own alarms. Additionally, he may still delete himself from the attendee list. However, whenever event data should be manipulated in way beyond the allowed attendee changes (see above), the calendar user needs to be the organizer of the event. Note that the *role* is always interpreted for the actual calendar user based on the folder that represents the current view on an event, which means that this calendar user may be different from the current session user in case of a *shared* calendar folder, while the calendar user equals the current session user in *private* folders. So, when interacting with an event under the perspective of a *shared* folder, the current user always acts on behalf of the folder owner - even if he also attends or is the organizer of the event.
+ 
+The access rights that are implicitly given by the user's role in an event are always valid, even if the event is statically located in a (*public*) calendar folder that is not visible for the user. For example, the API allows to create an event in a *public* calendar folder and invite attendees that do not have access to this folder. Interaction with such events would still be possible (e.g. by using the corresponding links from the invitation mail, by looking up the events via search, or by querying virtual event collections for the user ("all my events"). Note that the *role* is always interpreted for the actual calendar user based on the folder that represents the current view on an event, which means that this calendar user may be different from the current session user in case of a *shared* calendar folder, while the calendar user equals the current session user in *private* and *public* folders. See chapter "Relation of Organizer / Principal / Folder-Owner / Creator" for further details. 
 
-The access rights that are implicitly given by the user's role in an event are always valid, even if the event is statically located in a (public) calendar folder that is not visible for the user. For example, the API allows to create an event in a *public* calendar folder and invite attendees that do not have access to this folder. Interaction with such events would still be possible (e.g. by using the corresponding links from the invitation mail, by looking up the events via search, or by querying virtual event collections for the user ("all my events").
-Note that the *role* is always interpreted for the actual calendar user based on the folder that represents the current view on an event, which means that this calendar user may be different from the current session user in case of a *shared* calendar folder, while the calendar user equals the current session user in *private* and *public* folders. See chapter "Relation of Organizer / Principal / Folder-Owner / Creator" for further details. 
+In contrast to personal calendar folders, *public* folders are not associated with a dedicated calendar owner. So, whenever a new event is created within a *public* folder, the creator automatically becomes the *organizer* of this event. Each consecutive modification of the event data by other users beyond the allowed attendee changes is then implicitly performed on behalf of the organizer. That means that all other users can edit events in *public* folders by implicitly impersonating as *organizer* of the event, given that the underlying folder access rights are sufficient. However, it is not possible to act on behalf of another attendee in *public* folders, so that the current session user is always interacting with his "own" attendee property here, i.e. he cannot change the participation status of another attendee. 
 
 ## Folder Permissions
 
@@ -625,10 +641,10 @@ More details about the possible event classifications are described in chapter "
 
 ## HTTP API
 
-Clients that need to be aware of which actions are actually possible by a certain calendar user for a group-scheduled event in a specific folder should consider the appropriate event flags ``scheduled``, ``organizer`` and ``attendee``, along with the effective permissions of the current session user in the underlying folder. Then, the following rules apply:
+Clients that need to be aware of which actions are actually possible by a certain calendar user for a group-scheduled event in a specific folder should consider the appropriate event flags ``scheduled``, ``organizer`` / ``organizer_on_behalf`` and ``attendee`` / ``attendee_on_behalf``, along with the effective permissions of the current session user in the underlying folder. Then, the following rules apply:
 - New events can be created in case the folder permissions include at least *create own* objects.
-- Whenever data should be manipulated in a way beyond the allowed attendee changes (see above), the calendar user needs to be the organizer of the event, hence the ``organizer`` flag would have to be present. Additionally, the folder permissions need to allow *write object* permissions for the event in question (i.e. either *write all* or *write own* objects).
-- Whenever attendee-related data such as the participation status or the user's personal alarms should be modified, the calendar user needs to be an attendee of the event, hence the ``attendee`` flag would have to be present. No additional folder permissions are required.
+- Whenever data should be manipulated in a way beyond the allowed attendee changes (see above), the calendar user needs to be or act as organizer of the event, hence the ``organizer`` or ``organizer_on_behalf`` flag would have to be present. Additionally, the folder permissions need to allow *write object* permissions for the event in question (i.e. either *write all* or *write own* objects).
+- Whenever attendee-related data such as the participation status or the user's personal alarms should be modified, the calendar user needs to be or act as an attendee of the event, hence the ``attendee`` or ``attendee_on_behalf`` flag would have to be present. No additional folder permissions are required.
 
 
 # UTF-8 Support
