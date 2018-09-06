@@ -73,7 +73,6 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.health.DefaultHealthCheckResponse;
 import com.openexchange.health.internal.HealthCheckService;
-import com.openexchange.rest.services.EndpointAuthenticator;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.version.Version;
@@ -166,8 +165,7 @@ public class HealthCheckRestEndpoint implements EndpointAuthenticator {
         } catch (JSONException e) {
             // will not happen
         }
-        ResponseBuilder builder = Response.ok(jsonResponse, MediaType.APPLICATION_JSON);
-        return builder.build();
+        return Response.ok(jsonResponse, MediaType.APPLICATION_JSON).build();
     }
 
     private JSONObject getServerInfo() throws JSONException {
