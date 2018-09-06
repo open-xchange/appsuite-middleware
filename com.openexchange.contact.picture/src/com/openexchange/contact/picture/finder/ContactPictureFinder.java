@@ -57,34 +57,35 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ContactPictureFinder} - Class that tries to lookup a contact picture in a specific service
+ * 
+ * Ranking of registered {@link ContactPictureFinder}:
+ * <li>1 : UserPictureFinder</li>
+ * <li>20 : ContactFinders (Children will register with 20 + continuous number)</li>
+ * <li>50 : GAB</li>
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public interface ContactPictureFinder extends Ranked{
+public interface ContactPictureFinder extends Ranked {
 
     /**
      * Get the contact picture for the provided {@link PictureSearchData}
      *
      * @param session The {@link Session}
-     * @param original The unmodifiable {@link UnmodifiablePictureSearchData}
-     * @param modified An updated version of the {@link PictureSearchData} which has been modified by previous {@link ContactPictureFinder}s.
-     * @param onlyETag <code>true</code> if only the eTag should be generated, <code>false</code> otherwise
+     * @param data The {@link PictureSearchData}
      * @return The {@link ContactPicture} or <code>null</code> if none could be found.
      * @throws OXException If harmful picture was found
      */
-    ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException;
+    PictureResult getPicture(Session session, PictureSearchData data) throws OXException;
 
     /**
-     * Checks if the {@link ContactPictureFinder} is applicable for the given parameter.
-     *
-     * E.g. can check if the user is allowed to use this finder or if the original/modified data contains enough informations
+     * Get the ETag for an contact picture
      *
      * @param session The {@link Session}
-     * @param original The original {@link PictureSearchData}
-     * @param modified The modified {@link PictureSearchData}
-     * @return <code>true</code> if the {@link ContactPictureFinder} is applicable for the given parameters, <code>false</code> otherwise.
+     * @param data The {@link PictureSearchData}
+     * @return The ETag or <code>null</code> if none could be found.
+     * @throws OXException On error
      */
-    boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified);
+    PictureResult getETag(Session session, PictureSearchData data) throws OXException;
 
 }

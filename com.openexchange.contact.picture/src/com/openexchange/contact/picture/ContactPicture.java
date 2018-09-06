@@ -125,16 +125,6 @@ public class ContactPicture {
         return lastModified;
     }
 
-    /**
-     * Gets a value indicating if this objects holds a valid contact picture
-     * 
-     * @return <code>true</code> if this objects contains a contact picture,
-     *         <code>false</code> otherwise
-     */
-    public boolean containsContactPicture() {
-        return Strings.isNotEmpty(eTag) || null != fileHolder;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -218,11 +208,7 @@ public class ContactPicture {
 
     @Override
     public String toString() {
-        return new StringBuilder("ContactPicture ").append("[eTag=").append(eTag)
-            .append(", ")
-            .append("fileHolder=").append(null == fileHolder ? "<empty>" : Strings.isEmpty(fileHolder.getName()) ? fileHolder.getClass() : fileHolder.getName())
-            .append(", ")
-            .append("lastModified=").append(lastModified).append(" ]").toString();
+        return new StringBuilder("ContactPicture ").append("[eTag=").append(eTag).append(", ").append("fileHolder=").append(null == fileHolder ? "<empty>" : Strings.isEmpty(fileHolder.getName()) ? fileHolder.getClass() : fileHolder.getName()).append(", ").append("lastModified=").append(lastModified).append(" ]").toString();
     }
 
 }

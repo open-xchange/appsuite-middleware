@@ -57,7 +57,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
-import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
+import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -110,10 +110,10 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     /**
      * Modifies the {@link PictureSearchData} in the result
      *
-     * @param data The {@link PictureSearchData}
      * @param contact To get the data from
+     * @return The modified {@link PictureSearchData}
      */
-    abstract void modfiyResult(PictureSearchData data, Contact contact);
+    abstract PictureSearchData modfiyResult(Contact contact);
 
     /**
      * Personalized error logging
@@ -124,24 +124,37 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     abstract void handleException(PictureSearchData data, OXException exception);
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException {
-        try {
-            Contact contact = getContact(session, modified);
-            if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, modified)) {
-                return ContactPictureUtil.fromContact(original, contact, onlyETag);
-            } else {
-                if (null != contact) {
-                    modfiyResult(modified, contact);
-                }
-            }
-        } catch (OXException e) {
-            handleException(modified, e);
-        }
-        return null;
+    public PictureResult getPicture(Session session, PictureSearchData data) throws OXException {
+        return getPicture(session, data, false);
     }
 
     @Override
-    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
+    public PictureResult getETag(Session session, PictureSearchData data) throws OXException {
+        return getPicture(session, data, true);
+    }
+
+    private PictureResult getPicture(Session session, PictureSearchData data, boolean eTag) {
+        ContactPicture picture = null;
+        PictureSearchData modified = null;
+        if (isApplicable(session)) {
+
+            try {
+                Contact contact = getContact(session, data);
+                if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
+                    picture = ContactPictureUtil.fromContact(contact, eTag);
+                } else {
+                    if (null != contact) {
+                        modified = modfiyResult(contact);
+                    }
+                }
+            } catch (OXException e) {
+                handleException(data, e);
+            }
+        }
+        return new PictureResult(null != picture, picture, modified);
+    }
+
+    private boolean isApplicable(Session session) {
         if (null != userPermissionService && null != contactService) {
             try {
                 return userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).hasContact();

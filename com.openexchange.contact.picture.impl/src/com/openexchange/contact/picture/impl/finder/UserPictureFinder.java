@@ -51,12 +51,12 @@ package com.openexchange.contact.picture.impl.finder;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import java.util.LinkedHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
-import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
+import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -85,24 +85,30 @@ public class UserPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException {
-        try {
-            User user = userService.getUser(i(modified.getUserId()), session.getContextId());
-            if (null != user) {
-                modified.setContactId(I(user.getContactId()));
+    public PictureResult getPicture(Session session, PictureSearchData data) throws OXException {
+        return provideUserData(session, data);
+    }
 
-                /*
-                 * Add mail addresses from user.
-                 * Make sure internal, reliable mails are stored first in modified object
-                 */
-                modified.setEmails(user.getMail());
-                modified.addEmails(user.getAliases());
-                if (original.hasEmail()) {
-                    modified.addEmails(original.getEmails().toArray(new String[original.getEmails().size()]));
+    @Override
+    public PictureResult getETag(Session session, PictureSearchData data) throws OXException {
+        return provideUserData(session, data);
+    }
+
+    private PictureResult provideUserData(Session session, PictureSearchData data) {
+        if (data.hasUser()) {
+            try {
+                User user = userService.getUser(i(data.getUserId()), session.getContextId());
+                if (null != user) {
+                    LinkedHashSet<String> set = new LinkedHashSet<>();
+                    set.add(user.getMail());
+                    for (String string : user.getAliases()) {
+                        set.add(string);
+                    }
+                    return new PictureResult(false, null, new PictureSearchData(null, null, I(user.getContactId()), set));
                 }
+            } catch (OXException e) {
+                LOGGER.debug("Unable to find user with identifier {} in context {}", data.getUserId(), I(session.getContextId()), e);
             }
-        } catch (OXException e) {
-            LOGGER.debug("Unable to find user with identifier {} in context {}", modified.getUserId(), I(session.getContextId()), e);
         }
 
         return null;
@@ -111,11 +117,6 @@ public class UserPictureFinder implements ContactPictureFinder {
     @Override
     public int getRanking() {
         return 1;
-    }
-
-    @Override
-    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
-        return modified.hasUser();
     }
 
 }

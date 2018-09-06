@@ -62,7 +62,6 @@ import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -78,10 +77,12 @@ import com.openexchange.tools.session.ServerSession;
 public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     private static final String MAIL_PARAM = "mail";
-    private static final String USER_PARAM = "userId";
-    private static final String CONTACT_PARAM = "contactId";
-    private static final String CONTACT_FOLDER_PARAM = "folderId";
 
+    private static final String USER_PARAM = "userId";
+
+    private static final String CONTACT_PARAM = "contactId";
+
+    private static final String CONTACT_FOLDER_PARAM = "folderId";
 
     // -----------------------------------------------------------------------------------------------------------------------------
 
@@ -99,7 +100,7 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        ContactPicture picture = getPicture(session, getData(requestData), false);
+        ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, getData(requestData));
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
         setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
         return result;
@@ -122,12 +123,11 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
 
     @Override
     public boolean checkETag(String clientETag, AJAXRequestData request, ServerSession session) throws OXException {
-        ContactPicture contactPicture = getPicture(session, getData(request), true);
-        String etag = contactPicture.getETag();
-        if (etag == null) {
+        String eTag = services.getServiceSafe(ContactPictureService.class).getETag(session, getData(request));
+        if (eTag == null) {
             return false;
         }
-        if (etag.equals(clientETag)) {
+        if (eTag.equals(clientETag)) {
             return true;
         }
         return false;
@@ -141,13 +141,9 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
         }
     }
 
-    private ContactPicture getPicture(Session session, PictureSearchData data, boolean onlyETag) throws OXException {
-        return services.getServiceSafe(ContactPictureService.class).getPicture(session, data, onlyETag);
-    }
-
     @Override
     public boolean checkLastModified(long clientLastModified, AJAXRequestData request, ServerSession session) throws OXException {
-        ContactPicture contactPicture = getPicture(session, getData(request), true);
+        ContactPicture contactPicture = services.getServiceSafe(ContactPictureService.class).getPicture(session, getData(request));
         return contactPicture.getLastModified() == clientLastModified;
     }
 }

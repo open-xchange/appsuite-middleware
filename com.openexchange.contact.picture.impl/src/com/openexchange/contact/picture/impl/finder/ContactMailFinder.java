@@ -51,7 +51,6 @@ package com.openexchange.contact.picture.impl.finder;
 
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.PictureSearchData;
-import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -78,17 +77,16 @@ public class ContactMailFinder extends AbstractContactFinder {
 
     @Override
     public Contact getContact(Session session, PictureSearchData data) throws OXException {
-        return ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), session, false);
+        if (data.hasEmail()) {
+            return ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), session, false);
+        }
+        return null;
     }
 
     @Override
-    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
-        return super.isApplicable(session, original, modified) && modified.hasEmail();
-    }
-
-    @Override
-    public void modfiyResult(PictureSearchData data, Contact contact) {
-        // Nothing to add
+    public PictureSearchData modfiyResult(Contact contact) {
+        // Do nothing
+        return new PictureSearchData(null, null, null, null);
     }
 
     @Override

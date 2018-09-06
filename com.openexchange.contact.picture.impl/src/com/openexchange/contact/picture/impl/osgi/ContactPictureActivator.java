@@ -104,12 +104,6 @@ public final class ContactPictureActivator extends HousekeepingActivator {
         UserPermissionService userPermissionService = getServiceSafe(UserPermissionService.class);
         UserService userService = getServiceSafe(UserService.class);
 
-        /*
-         * Register Finder. Rankings:
-         * 1 : UserPictureFinder
-         * 20 : ContactFinders (Children will register with 20 + continuous number)
-         * 50 : GAB
-         */
         registerService(ContactPictureFinder.class, new UserPictureFinder(userService));
         registerService(ContactPictureFinder.class, new ContactUserFinder(userPermissionService, contactService));
         registerService(ContactPictureFinder.class, new ContactIDFinder(userPermissionService, contactService));

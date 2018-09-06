@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import com.openexchange.java.Strings;
 
 /**
  * {@link PictureSearchData} - The object containing information about the contact to find a picture for.
@@ -63,11 +62,11 @@ import com.openexchange.java.Strings;
  */
 public class PictureSearchData {
 
-    private Integer userId;
+    private final Integer userId;
 
-    private Integer folderId;
+    private final Integer folderId;
 
-    private Integer contactId;
+    private final Integer contactId;
 
     private final Set<String> emails;
 
@@ -161,110 +160,6 @@ public class PictureSearchData {
      */
     public boolean hasEmail() {
         return false == emails.isEmpty();
-    }
-
-    /**
-     * Set the user identifier
-     *
-     * @param userId The identifier
-     */
-    public void setUser(Integer userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * Set the folder identifier
-     *
-     * @param folderId The folder identifier
-     */
-    public void setFolder(Integer folderId) {
-        this.folderId = folderId;
-    }
-
-    /**
-     * Set the contact identifier
-     *
-     * @param contactId the contact identifier
-     */
-    public void setContactId(Integer contactId) {
-        this.contactId = contactId;
-    }
-
-    /**
-     * Set the contacts E-Mails
-     *
-     * @param emails The E-Mails
-     */
-    public void setEmails(String... emails) {
-        this.emails.clear();
-        addEmails(emails);
-    }
-
-    /**
-     * Add contacts E-Mails
-     *
-     * @param emails The E-Mails
-     */
-    public void addEmails(String... emails) {
-        for (String mail : emails) {
-            if (Strings.isNotEmpty(mail)) {
-                this.emails.add(mail);
-            }
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((contactId == null) ? 0 : contactId.hashCode());
-        result = prime * result + ((emails == null) ? 0 : emails.hashCode());
-        result = prime * result + ((folderId == null) ? 0 : folderId.hashCode());
-        result = prime * result + ((userId == null) ? 0 : userId.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        PictureSearchData other = (PictureSearchData) obj;
-        if (contactId == null) {
-            if (other.contactId != null) {
-                return false;
-            }
-        } else if (!contactId.equals(other.contactId)) {
-            return false;
-        }
-        if (emails == null) {
-            if (other.emails != null) {
-                return false;
-            }
-        } else if (!emails.equals(other.emails)) {
-            return false;
-        }
-        if (folderId == null) {
-            if (other.folderId != null) {
-                return false;
-            }
-        } else if (!folderId.equals(other.folderId)) {
-            return false;
-        }
-        if (userId == null) {
-            if (other.userId != null) {
-                return false;
-            }
-        } else if (!userId.equals(other.userId)) {
-            return false;
-        }
-        return true;
     }
 
     @Override

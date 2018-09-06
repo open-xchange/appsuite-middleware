@@ -56,7 +56,6 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.finder.FinderUtil;
-import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -78,31 +77,27 @@ public class ContactPictureUtil extends FinderUtil {
     /**
      * Generates a {@link ContactPicture} based on the given bytes
      *
-     * @param unmodifiableData The {@link UnmodifiablePictureSearchData}
      * @param contact The {@link Contact}
      * @param onlyETag <code>true</code> if only eTag should be set
      * @return A {@link ContactPicture}
      */
-    public static ContactPicture fromContact(UnmodifiablePictureSearchData unmodifiableData, Contact contact, boolean onlyETag) {
-        return new ContactPicture(genereateETag(unmodifiableData, contact), onlyETag ? null : transformToFileHolder(contact), contact.getImageLastModified().getTime());
+    public static ContactPicture fromContact(Contact contact, boolean onlyETag) {
+        return new ContactPicture(generateETag(contact), onlyETag ? null : transformToFileHolder(contact), contact.getImageLastModified().getTime());
     }
 
     /**
      * Generates the ETag
      *
-     * @param unmodifiableData The {@link UnmodifiablePictureSearchData}
      * @param contact The {@link Contact}
      * @return The ETag
      */
-    private static String genereateETag(UnmodifiablePictureSearchData unmodifiableData, Contact contact) {
+    private static String generateETag(Contact contact) {
         /*
-         *  Use the request, so that changed request will lead in different eTags.
-         *  This is important for requests containing resizing. If the picture shall be delivered in a
-         *  different size the eTag must not be the same compared to the original size
+         * Use the request, so that changed request will lead in different eTags.
+         * This is important for requests containing resizing. If the picture shall be delivered in a
+         * different size the eTag must not be the same compared to the original size
          */
         return null == contact ? null : new StringBuilder(512) // @formatter:off#
-            .append(unmodifiableData.hashCode())
-            .append('/')
             .append(contact.getParentFolderID())
             .append('/')
             .append(contact.getObjectID())

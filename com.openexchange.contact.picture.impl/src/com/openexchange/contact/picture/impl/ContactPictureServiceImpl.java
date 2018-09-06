@@ -51,15 +51,16 @@ package com.openexchange.contact.picture.impl;
 
 import static com.openexchange.contact.picture.ContactPicture.FALLBACK_PICTURE;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureExceptionCodes;
-import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.ContactPictureService;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
-import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
+import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.session.Session;
@@ -84,31 +85,70 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
     }
 
     @Override
-    public ContactPicture getPicture(Session session, PictureSearchData data, boolean eTag) {
+    public ContactPicture getPicture(Session session, PictureSearchData searchData) {
         try {
-            // Check session
-            if (null == session) {
-                throw ContactPictureExceptionCodes.MISSING_SESSION.create();
-            }
+            checkSession(session);
 
-            UnmodifiablePictureSearchData original = new UnmodifiablePictureSearchData(data);
-            PictureSearchData modified = data;
-
+            PictureSearchData data = searchData;
             // Ask each finder if it contains the picture
             for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
                 ContactPictureFinder next = iterator.next();
 
                 // Try to get contact picture
-                if (next.isApplicable(session, original, modified)) {
-                    ContactPicture result = next.getPicture(session, original, modified, eTag);
-                    if (null != result && result.containsContactPicture()) {
-                        return result;
-                    }
+                PictureResult pictureResult = next.getPicture(session, data);
+                if (pictureResult.wasFound()) {
+                    return pictureResult.getPicture();
+                } else {
+                    data = mergeResult(data, pictureResult);
                 }
             }
         } catch (OXException e) {
             LOGGER.debug("Unable to get contact picture. Using fallback instead.", e);
         }
         return FALLBACK_PICTURE;
+    }
+
+    @Override
+    public String getETag(Session session, PictureSearchData searchData) {
+        try {
+            checkSession(session);
+
+            PictureSearchData data = searchData;
+            // Ask each finder if it contains the picture
+            for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
+                ContactPictureFinder next = iterator.next();
+
+                // Try to get contact picture
+                PictureResult pictureResult = next.getETag(session, data);
+                if (pictureResult.wasFound()) {
+                    return pictureResult.getPicture().getETag();
+                } else {
+                    data = mergeResult(data, pictureResult);
+                }
+            }
+        } catch (OXException e) {
+            LOGGER.debug("Unable to get ETag for contact picture. Using fallback instead.", e);
+        }
+        return FALLBACK_PICTURE.getETag();
+    }
+
+    private PictureSearchData mergeResult(PictureSearchData data, PictureResult pictureResult) {
+        PictureSearchData modified = pictureResult.getData();
+
+        // Use client parameters prior the data we found out
+        Integer userId = data.hasUser() ? data.getUserId() : modified.getUserId();
+        Integer folderId = data.hasFolder() ? data.getFolderId() : modified.getFolderId();
+        Integer contactId = data.hasContact() ? data.getContactId() : modified.getContactId();
+
+        LinkedHashSet<String> set = new LinkedHashSet<>(data.getEmails());
+        set.addAll(modified.getEmails());
+
+        return new PictureSearchData(userId, folderId, contactId, set);
+    }
+
+    private void checkSession(Session session) throws OXException {
+        if (null == session) {
+            throw ContactPictureExceptionCodes.MISSING_SESSION.create();
+        }
     }
 }

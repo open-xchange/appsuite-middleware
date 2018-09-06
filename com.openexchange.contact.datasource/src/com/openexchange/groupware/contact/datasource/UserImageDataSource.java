@@ -120,7 +120,7 @@ public final class UserImageDataSource implements ImageDataSource {
         }
 
         PictureSearchData contactPictureRequestData = new PictureSearchData(I(userID), null, null, null);
-        ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData, false);
+        ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData);
 
         IFileHolder fileHolder = picture.getFileHolder();
 
@@ -198,7 +198,7 @@ public final class UserImageDataSource implements ImageDataSource {
     @Override
     public String getETag(ImageLocation imageLocation, Session session) throws OXException {
         PictureSearchData contactPictureRequestData = new PictureSearchData(I(Tools.getUnsignedInteger(imageLocation.getId())), null, null, null);
-        return services.getServiceSafe(ContactPictureService.class).getPicture(session, contactPictureRequestData, true).getETag();
+        return services.getServiceSafe(ContactPictureService.class).getETag(session, contactPictureRequestData);
     }
 
     @Override

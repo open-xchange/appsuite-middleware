@@ -65,10 +65,18 @@ public interface ContactPictureService {
      * Get the contact picture for the provided {@link PictureSearchData}
      * 
      * @param session The session
-     * @param contactPictureRequestData The {@link PictureSearchData} to get the picture for
-     * @param onlyETag <code>true</code> if only the eTag should be generated, <code>false</code> otherwise
+     * @param data The {@link PictureSearchData} to get the picture for
      * @return The {@link ContactPicture} and never <code>null</code>. If no picture is found {@link ContactPicture#FALLBACK_PICTURE} is used
      */
-    ContactPicture getPicture(Session session, PictureSearchData contactPictureRequestData, boolean onlyETag);
+    ContactPicture getPicture(Session session, PictureSearchData data);
+
+    /**
+     * Get the ETag for a contact picture.
+     * 
+     * @param session The session
+     * @param data The {@link PictureSearchData} to get the pictures ETag for
+     * @return The ETag and never <code>null</code>. If no picture is found {@link ContactPicture#FALLBACK_PICTURE} is used to get the ETag
+     */
+    String getETag(Session session, PictureSearchData data);
 
 }

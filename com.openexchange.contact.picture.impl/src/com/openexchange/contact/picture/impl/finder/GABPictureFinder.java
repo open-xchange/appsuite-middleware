@@ -56,7 +56,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
-import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
+import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -90,20 +90,30 @@ public class GABPictureFinder implements ContactPictureFinder {
     }
 
     @Override
-    public ContactPicture getPicture(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified, boolean onlyETag) throws OXException {
-        // Use original data to avoid
-        Contact contact = ContactPictureUtil.getContactFromMail(contactService, modified.getEmails(), session, true);
-        if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, original)) {
-            return ContactPictureUtil.fromContact(original, contact, onlyETag);
-        }
-        return null;
+    public PictureResult getPicture(Session session, PictureSearchData data) throws OXException {
+        return getPicture(session, data, false);
     }
 
     @Override
-    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
+    public PictureResult getETag(Session session, PictureSearchData data) throws OXException {
+        return getPicture(session, data, true);
+    }
+
+    private PictureResult getPicture(Session session, PictureSearchData data, boolean onlyETag) throws OXException {
+        ContactPicture picture = null;
+        if (isApplicable(session, data)) {
+            Contact contact = ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), session, true);
+            if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
+                picture = ContactPictureUtil.fromContact(contact, onlyETag);
+            }
+        }
+        return new PictureResult(null != picture, picture, data);
+    }
+
+    private boolean isApplicable(Session session, PictureSearchData data) {
         try {
             // Use ID of the user requesting the picture
-            return modified.hasEmail() && userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).isGlobalAddressBookEnabled();
+            return data.hasEmail() && userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).isGlobalAddressBookEnabled();
         } catch (OXException e) {
             LOGGER.debug("Unable to check if GlobalAddressBook is enabled.", e);
         }
@@ -114,4 +124,5 @@ public class GABPictureFinder implements ContactPictureFinder {
     public int getRanking() {
         return 50;
     }
+
 }

@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.ContactPictureService;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
@@ -145,15 +144,10 @@ public class GetPictureAction extends AbstractGetPictureAction {
 
         PictureSearchData data = new PictureSearchData(I(contact.getInternalUserId()), I(contact.getParentFolderID()), I(contact.getObjectID()), emails);
         try {
-            ContactPicture contactPicture = services.getServiceSafe(ContactPictureService.class).getPicture(session, data, eTagOnly);
             if (eTagOnly) {
-                return (V) contactPicture.getETag();
+                return (V) services.getServiceSafe(ContactPictureService.class).getETag(session, data);
             }
-
-            if (!contactPicture.containsContactPicture()) {
-                return (V) ContactPicture.FALLBACK_PICTURE;
-            }
-            return (V) contactPicture;
+            return (V) services.getServiceSafe(ContactPictureService.class).getPicture(session, data);
         } catch (OXException x) {
             return null;
         }

@@ -49,9 +49,9 @@
 
 package com.openexchange.contact.picture.impl.finder;
 
+import java.util.LinkedHashSet;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.PictureSearchData;
-import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -77,18 +77,20 @@ public class ContactIDFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
-        return super.isApplicable(session, original, modified) && modified.hasContact() && modified.hasFolder();
-    }
-
-    @Override
     public Contact getContact(Session session, PictureSearchData data) throws OXException {
-        return contactService.getContact(session, String.valueOf(data.getFolderId()), String.valueOf(data.getContactId()), ContactPictureUtil.IMAGE_FIELD);
+        if (data.hasContact() && data.hasFolder()) {
+            return contactService.getContact(session, String.valueOf(data.getFolderId()), String.valueOf(data.getContactId()), ContactPictureUtil.IMAGE_FIELD);
+        }
+        return null;
     }
 
     @Override
-    public void modfiyResult(PictureSearchData data, Contact contact) {
-        data.addEmails(contact.getEmail1(), contact.getEmail2(), contact.getEmail3());
+    public PictureSearchData modfiyResult(Contact contact) {
+        LinkedHashSet<String> set = new LinkedHashSet<>(4);
+        set.add(contact.getEmail1());
+        set.add(contact.getEmail2());
+        set.add(contact.getEmail3());
+        return new PictureSearchData(null, null, null, set);
     }
 
     @Override

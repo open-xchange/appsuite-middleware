@@ -49,43 +49,63 @@
 
 package com.openexchange.contact.picture.finder;
 
-import java.util.Set;
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.PictureSearchData;
 
 /**
- * {@link UnmodifiablePictureSearchData} is a wrapper object for the {@link PictureSearchData} which renders it unmodifiable.
+ * {@link PictureResult}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class UnmodifiablePictureSearchData extends PictureSearchData {
+public class PictureResult {
 
-    public UnmodifiablePictureSearchData(Integer userId, Integer folderId, Integer contactId, Set<String> emails) {
-        super(userId, folderId, contactId, emails);
+    private final boolean found;
+
+    private final PictureSearchData data;
+
+    private final ContactPicture picture;
+
+    /**
+     * Initializes a new {@link PictureResult}.
+     * 
+     * @param found If the picture was found
+     * @param picuter The {@link ContactPicture} or <code>null</code>
+     * @param data New data that can be provided by the caller
+     * 
+     */
+    public PictureResult(boolean found, ContactPicture picture, PictureSearchData data) {
+        super();
+        this.found = found;
+        this.picture = picture;
+        this.data = data;
     }
 
-    public UnmodifiablePictureSearchData(PictureSearchData data) {
-        super(data.getUserId(), data.getFolderId(), data.getContactId(), data.getEmails());
+    /**
+     * If the picture was found
+     * 
+     * @return <code>true</code> if the picture was found
+     */
+    public boolean wasFound() {
+        return found;
     }
 
-    @Override
-    public void setUser(Integer userId) {
-        throw new UnsupportedOperationException();
+    /**
+     * Get additional data to make next search more successful
+     * 
+     * @return Updated {@link PictureSearchData}
+     */
+    public PictureSearchData getData() {
+        return data;
     }
 
-    @Override
-    public void setFolder(Integer folderId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setContactId(Integer contactId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setEmails(String... emails) {
-        throw new UnsupportedOperationException();
+    /**
+     * The {@link ContactPicture}
+     * 
+     * @return The {@link ContactPicture}
+     */
+    public ContactPicture getPicture() {
+        return picture;
     }
 
 }

@@ -52,7 +52,6 @@ package com.openexchange.contact.picture.impl.finder;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.PictureSearchData;
-import com.openexchange.contact.picture.finder.UnmodifiablePictureSearchData;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -79,21 +78,16 @@ public class ContactUserFinder extends AbstractContactFinder {
     }
 
     @Override
-    public boolean isApplicable(Session session, UnmodifiablePictureSearchData original, PictureSearchData modified) {
-        return super.isApplicable(session, original, modified) && original.hasUser();
-    }
-
-    @Override
     public Contact getContact(Session session, PictureSearchData data) throws OXException {
-        return contactService.getUser(session, data.getUserId().intValue(), ContactPictureUtil.IMAGE_FIELD);
+        if (data.hasUser()) {
+            return contactService.getUser(session, data.getUserId().intValue(), ContactPictureUtil.IMAGE_FIELD);
+        }
+        return null;
     }
 
     @Override
-    public void modfiyResult(PictureSearchData data, Contact contact) {
-        data.setContactId(I(contact.getObjectID()));
-        if (false == data.hasFolder()) {
-            data.setFolder(I(FolderObject.SYSTEM_LDAP_FOLDER_ID));
-        }
+    public PictureSearchData modfiyResult(Contact contact) {
+        return new PictureSearchData(null, I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(contact.getObjectID()), null);
     }
 
     @Override

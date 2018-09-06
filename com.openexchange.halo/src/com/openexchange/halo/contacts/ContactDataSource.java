@@ -78,24 +78,24 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
         this.services = services;
     }
 
-	@Override
-	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
-		List<Contact> mergedContacts = query.getMergedContacts();
-		List<Contact> allContacts = new ArrayList<Contact>(mergedContacts.size() + 1);
-		allContacts.add(query.getContact());
-		allContacts.addAll(mergedContacts);
-		return new AJAXRequestResult(allContacts, "contact");
-	}
+    @Override
+    public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
+        List<Contact> mergedContacts = query.getMergedContacts();
+        List<Contact> allContacts = new ArrayList<Contact>(mergedContacts.size() + 1);
+        allContacts.add(query.getContact());
+        allContacts.addAll(mergedContacts);
+        return new AJAXRequestResult(allContacts, "contact");
+    }
 
-	@Override
-	public String getId() {
-		return "com.openexchange.halo.contacts";
-	}
+    @Override
+    public String getId() {
+        return "com.openexchange.halo.contacts";
+    }
 
-	@Override
-	public boolean isAvailable(ServerSession session) {
-		return true;
-	}
+    @Override
+    public boolean isAvailable(ServerSession session) {
+        return true;
+    }
 
     @Override
     public int getPriority() {
@@ -104,13 +104,20 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
 
     @Override
     public ContactPicture getPicture(HaloContactQuery contactQuery, ServerSession session) throws OXException {
-        return getPicture0(contactQuery, session, true);
+        final ContactPicture picture = getPicture0(contactQuery, session, true);
+        if (null == picture) {
+            return services.getServiceSafe(ContactPictureService.class).getPicture(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, I(contactQuery.getContact().getObjectID()), null));
+        }
+        return picture;
     }
 
     @Override
     public String getPictureETag(HaloContactQuery contactQuery, ServerSession session) throws OXException {
         final ContactPicture picture = getPicture0(contactQuery, session, true);
-        return null == picture ? null : picture.getETag();
+        if (null == picture) {
+            return services.getServiceSafe(ContactPictureService.class).getETag(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, I(contactQuery.getContact().getObjectID()), null));
+        }
+        return picture.getETag();
     }
 
     private ContactPicture getPicture0(HaloContactQuery contactQuery, ServerSession session, boolean withBytes) throws OXException {
@@ -118,7 +125,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
         if (mergedContacts == null) {
             mergedContacts = new ArrayList<>(0);
         }
-        Collections.sort(mergedContacts,  new ImagePrecedence());
+        Collections.sort(mergedContacts, new ImagePrecedence());
 
         for (final Contact contact : mergedContacts) {
             if (contact.getImage1() != null) {
@@ -152,14 +159,13 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
             }
         }
 
-        return services.getServiceSafe(ContactPictureService.class).getPicture(session, new PictureSearchData(null == contactQuery.getUser() ? null : I(contactQuery.getUser().getId()), null, I(contactQuery.getContact().getObjectID()), null), !withBytes);
+        return null;
     }
-
 
     private Contact getContact(ServerSession session, String folderId, String id) throws OXException {
         return services.getService(ContactService.class).getContact(session, folderId, id);
     }
-    
+
     private static String buildETagFor(final Contact contact) {
         return null == contact ? null : new StringBuilder(512).append(contact.getParentFolderID()).append('/').append(contact.getObjectID()).append('/').append(contact.getLastModified().getTime()).toString();
     }
