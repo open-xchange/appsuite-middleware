@@ -54,9 +54,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
+import com.openexchange.ajax.requesthandler.LastModifiedAwareAJAXActionService;
 import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.ContactPictureService;
+import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -74,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true, publicSessionAuth = true)
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
-public class GetAction implements ETagAwareAJAXActionService {
+public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareAJAXActionService {
 
     private static final String MAIL_PARAM = "mail";
     private static final String USER_PARAM = "userId";
@@ -105,6 +106,9 @@ public class GetAction implements ETagAwareAJAXActionService {
     }
 
     private PictureSearchData getData(AJAXRequestData requestData) throws OXException {
+        if (null == requestData) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
         Integer contactId = requestData.getParameter(CONTACT_PARAM, Integer.class, true);
         Integer folderId = requestData.getParameter(CONTACT_FOLDER_PARAM, Integer.class, true);
         if (folderId == null && contactId != null) {
@@ -139,5 +143,11 @@ public class GetAction implements ETagAwareAJAXActionService {
 
     private ContactPicture getPicture(Session session, PictureSearchData data, boolean onlyETag) throws OXException {
         return services.getServiceSafe(ContactPictureService.class).getPicture(session, data, onlyETag);
+    }
+
+    @Override
+    public boolean checkLastModified(long clientLastModified, AJAXRequestData request, ServerSession session) throws OXException {
+        ContactPicture contactPicture = getPicture(session, getData(request), true);
+        return contactPicture.getLastModified() == clientLastModified;
     }
 }

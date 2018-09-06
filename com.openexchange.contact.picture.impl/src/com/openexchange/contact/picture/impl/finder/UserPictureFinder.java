@@ -110,7 +110,7 @@ public class UserPictureFinder implements ContactPictureFinder {
 
     @Override
     public int getRanking() {
-        return ContactPicture.HIGHEST_RANKING;
+        return 1;
     }
 
     @Override

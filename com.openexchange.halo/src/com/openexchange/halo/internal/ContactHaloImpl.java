@@ -145,7 +145,7 @@ public class ContactHaloImpl implements ContactHalo {
             if (picture != null){
                 StringBuilder etagBuilder = new StringBuilder();
                 etagBuilder.append(source.getClass().getName()).append("://").append(picture.getETag());
-                return new ContactPicture(etagBuilder.toString(), picture.getFileHolder());
+                return new ContactPicture(etagBuilder.toString(), picture.getFileHolder(), picture.getLastModified());
             }
         }
         return null;

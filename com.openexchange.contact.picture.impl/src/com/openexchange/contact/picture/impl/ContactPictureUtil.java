@@ -84,7 +84,7 @@ public class ContactPictureUtil extends FinderUtil {
      * @return A {@link ContactPicture}
      */
     public static ContactPicture fromContact(UnmodifiablePictureSearchData unmodifiableData, Contact contact, boolean onlyETag) {
-        return new ContactPicture(genereateETag(unmodifiableData, contact), onlyETag ? null : transformToFileHolder(contact));
+        return new ContactPicture(genereateETag(unmodifiableData, contact), onlyETag ? null : transformToFileHolder(contact), contact.getImageLastModified().getTime());
     }
 
     /**

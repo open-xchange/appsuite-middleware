@@ -131,7 +131,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
                     holder = null;
                 }
 
-                return new ContactPicture(buildETagFor(contact), holder);
+                return new ContactPicture(buildETagFor(contact), holder, contact.getImageLastModified().getTime());
             }
         }
 
@@ -148,7 +148,7 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
                     holder = null;
                 }
 
-                return new ContactPicture(buildETagFor(contact), holder);
+                return new ContactPicture(buildETagFor(contact), holder, contact.getImageLastModified().getTime());
             }
         }
 

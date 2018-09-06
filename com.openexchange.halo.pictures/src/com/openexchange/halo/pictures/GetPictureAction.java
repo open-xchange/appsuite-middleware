@@ -153,7 +153,7 @@ public class GetPictureAction extends AbstractGetPictureAction {
             if (!contactPicture.containsContactPicture()) {
                 return (V) ContactPicture.FALLBACK_PICTURE;
             }
-            return (V) new ContactPicture(contactPicture.getETag(), contactPicture.getFileHolder());
+            return (V) contactPicture;
         } catch (OXException x) {
             return null;
         }

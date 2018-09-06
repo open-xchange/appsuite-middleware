@@ -64,7 +64,7 @@ import com.openexchange.java.Strings;
  */
 public class ContactPicture {
 
-    public static final int HIGHEST_RANKING = 1;
+    public static final long UNMODIFIED = 0l;
 
     public static final ContactPicture FALLBACK_PICTURE;
 
@@ -76,31 +76,26 @@ public class ContactPicture {
          * If default changes, increment ETag for a quick invalidation.
          * (char-by-char comparison, see https://tools.ietf.org/html/rfc7232#section-2.3.2)
          */
-        FALLBACK_PICTURE = new ContactPicture("1-fallback-image", fileHolder);
+        FALLBACK_PICTURE = new ContactPicture("1-fallback-image", fileHolder, UNMODIFIED);
     }
 
     private final String eTag;
 
     private final IFileHolder fileHolder;
 
-    /**
-     * Initializes a new {@link ContactPicture}.
-     *
-     * @param eTag The associated eTag
-     */
-    public ContactPicture(String eTag) {
-        this(eTag, null);
-    }
+    private final long lastModified;
 
     /**
      * Initializes a new {@link ContactPicture}.
      *
      * @param eTag The associated eTag
      * @param fileHolder The file holder
+     * @param lastModified The time the file was last modified
      */
-    public ContactPicture(String eTag, IFileHolder fileHolder) {
+    public ContactPicture(String eTag, IFileHolder fileHolder, long lastModified) {
         this.eTag = eTag;
         this.fileHolder = fileHolder;
+        this.lastModified = lastModified;
     }
 
     /**
@@ -122,6 +117,15 @@ public class ContactPicture {
     }
 
     /**
+     * Get the time the picture was last modified
+     * 
+     * @return The time the picture was last modified or {@value #UNMODIFIED}
+     */
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    /**
      * Gets a value indicating if this objects holds a valid contact picture
      * 
      * @return <code>true</code> if this objects contains a contact picture,
@@ -135,6 +139,7 @@ public class ContactPicture {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + Long.valueOf(lastModified).intValue();
         result = prime * result + ((eTag == null) ? 0 : eTag.hashCode());
         if (fileHolder == null) {
             result = prime * result;
@@ -160,6 +165,9 @@ public class ContactPicture {
             return false;
         }
         ContactPicture other = (ContactPicture) obj;
+        if (lastModified != other.lastModified) {
+            return false;
+        }
         if (eTag == null) {
             if (other.eTag != null) {
                 return false;
@@ -210,7 +218,11 @@ public class ContactPicture {
 
     @Override
     public String toString() {
-        return new StringBuilder("ContactPicture ").append("[eTag=").append(eTag).append(", ").append("fileHolder=").append(null == fileHolder ? "<empty>" : Strings.isEmpty(fileHolder.getName()) ? fileHolder.getClass() : fileHolder.getName()).append(" ]").toString();
+        return new StringBuilder("ContactPicture ").append("[eTag=").append(eTag)
+            .append(", ")
+            .append("fileHolder=").append(null == fileHolder ? "<empty>" : Strings.isEmpty(fileHolder.getName()) ? fileHolder.getClass() : fileHolder.getName())
+            .append(", ")
+            .append("lastModified=").append(lastModified).append(" ]").toString();
     }
 
 }
