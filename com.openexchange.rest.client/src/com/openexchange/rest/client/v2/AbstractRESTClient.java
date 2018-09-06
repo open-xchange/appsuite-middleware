@@ -51,6 +51,7 @@ package com.openexchange.rest.client.v2;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.http.HttpEntity;
@@ -136,6 +137,21 @@ public abstract class AbstractRESTClient implements Closeable {
         } finally {
             consume(httpResponse);
             reset(httpRequest);
+        }
+    }
+    
+    public InputStream download(HttpRequestBase httpRequest) throws OXException {
+        CloseableHttpResponse httpResponse = null;
+        try {
+            LOGGER.debug("Executing request: '{}'", httpRequest.getURI());
+            httpResponse = httpClient.execute(httpRequest);
+            LOGGER.debug("Request '{}' completed with status code '{}'", httpRequest.getURI(), httpResponse.getStatusLine().getStatusCode());
+
+            return httpResponse.getEntity().getContent();
+        } catch (ClientProtocolException e) {
+            throw RESTExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw RESTExceptionCodes.IO_EXCEPTION.create(e, e.getMessage());
         }
     }
 

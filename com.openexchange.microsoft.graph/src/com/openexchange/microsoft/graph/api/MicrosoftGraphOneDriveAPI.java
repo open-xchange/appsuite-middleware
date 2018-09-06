@@ -49,12 +49,9 @@
 
 package com.openexchange.microsoft.graph.api;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -220,28 +217,10 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_get_content">Download the contents of a file</a>
      */
     public InputStream getContent(String accessToken, String itemId) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, BASE_URL + "/items/" + itemId + "/content");
-        request.setAccessToken(accessToken);
-        RESTResponse response = client.execute(request);
-        switch (response.getStatusCode()) {
-            case 200:
-                return new ByteArrayInputStream((byte[]) response.getResponseBody());
-            case 302:
-                // OK we follow the location
-                // see: https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_get_content
-                String location = response.getHeader(HttpHeaders.LOCATION);
-                if (Strings.isEmpty(location)) {
-                    throw new OXException(666, "No location found");
-                }
-                try {
-                    HttpRequestBase httpRequest = new HttpGet();
-                    httpRequest.setURI(new URI(location));
-                    return client.executeRequest(httpRequest).getStream();
-                } catch (URISyntaxException e) {
-                    throw RESTExceptionCodes.INVALID_URI_PATH.create(e, location);
-                }
-        }
-        throw new OXException(666, "Cannot get item " + itemId + ": code: " + response.getStatusCode() + ", response" + response.getResponseBody());
+        JSONObject o = getItem(accessToken, itemId);
+        String location = o.optString("@microsoft.graph.downloadUrl");
+        HttpRequestBase get = new HttpGet(location);
+        return client.download(get);
     }
 
     /**
@@ -349,8 +328,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                 continue;
             }
             HttpRequestBase get = new HttpGet(location);
-            RESTResponse response = client.executeRequest(get);
-            return new ByteArrayInputStream((byte[]) response.getResponseBody()); // FIXME: asap!
+            return client.download(get);
         }
         // No thumbnail available
         return null;
