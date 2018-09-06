@@ -64,6 +64,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import org.eclipse.microprofile.health.HealthCheckResponse.State;
+import org.json.ImmutableJSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,10 +89,12 @@ public class HealthCheckRestEndpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(HealthCheckRestEndpoint.class);
 
-    private static final JSONObject SIMPLE_UP_RESPONSE = new JSONObject(3);
+    private static final JSONObject SIMPLE_UP_RESPONSE;
     static {
-        SIMPLE_UP_RESPONSE.putSafe("status", "UP");
-        SIMPLE_UP_RESPONSE.putSafe("checks", JSONArray.EMPTY_ARRAY);
+        JSONObject simpleUpResponse = new JSONObject(3);
+        simpleUpResponse.putSafe("status", "UP");
+        simpleUpResponse.putSafe("checks", JSONArray.EMPTY_ARRAY);
+        SIMPLE_UP_RESPONSE = ImmutableJSONObject.immutableFor(simpleUpResponse);
     }
 
     private final HealthCheckService service;
