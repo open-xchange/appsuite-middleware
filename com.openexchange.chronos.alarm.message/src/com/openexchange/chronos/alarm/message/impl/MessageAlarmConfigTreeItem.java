@@ -82,7 +82,7 @@ public class MessageAlarmConfigTreeItem implements PreferencesItemService, Confi
 
     @Override
     public String[] getPath() {
-        return new String[] { "modules", "calendar", "supportedAlarms" };
+        return new String[] { "modules", "calendar", "availableAlarmTypes" };
     }
 
     @Override
@@ -99,7 +99,9 @@ public class MessageAlarmConfigTreeItem implements PreferencesItemService, Confi
                 setting.addMultiValue(AlarmAction.DISPLAY.getValue());
                 setting.addMultiValue(AlarmAction.AUDIO.getValue());
                 for(AlarmAction action: registry.getActions()) {
-                    setting.addMultiValue(action.getValue());
+                    if(registry.getService(action).isEnabled(user.getId(), ctx.getContextId())) {
+                        setting.addMultiValue(action.getValue());
+                    }
                 }
             }
         };
@@ -107,12 +109,12 @@ public class MessageAlarmConfigTreeItem implements PreferencesItemService, Confi
 
     @Override
     public String getConfigTreePath() {
-        return "modules/calendar/supportedAlarms";
+        return "modules/calendar/availableAlarmTypes";
     }
 
     @Override
     public String getJslobPath() {
-        return "io.ox/calendar//supportedAlarms";
+        return "io.ox/calendar//availableAlarmTypes";
     }
 
 }

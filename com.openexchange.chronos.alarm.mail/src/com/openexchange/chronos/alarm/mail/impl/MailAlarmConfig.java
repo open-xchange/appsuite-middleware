@@ -60,13 +60,18 @@ import com.openexchange.config.lean.Property;
  */
 public class MailAlarmConfig {
 
-    private static final String PREFIX = "com.openexchange.calendar.alarm.message.backgroundWorker.";
+    private static final String PREFIX = "com.openexchange.calendar.alarm.mail.";
 
     /**
      * Defines the time in milliseconds an alarm mail should be send out before the trigger time.
      * With this property the admin can configure the average time needed by the mail system to send out the mail.
      * This way the mail should usually be send out on time and not a few seconds late.
      */
-    public static final Property MAIL_SHIFT = DefaultProperty.valueOf(PREFIX + "mail.time.shift", 0);
+    public static final Property MAIL_SHIFT = DefaultProperty.valueOf(PREFIX + "time.shift", 0);
+
+    /**
+     * Enabled or disables mail alarms.
+     */
+    public static final Property MAIL_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", true);
 
 }

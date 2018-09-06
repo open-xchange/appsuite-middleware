@@ -388,8 +388,12 @@ class SingleMessageDeliveryTask implements Runnable {
     private void sendMessage(Event event) {
             Key key = new Key(ctx.getContextId(), account, event.getId(), alarm.getId());
             try {
-                notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
-                LOG.trace("Message successfully send for {}", key);
+                if(notificationService.isEnabled(trigger.getUserId(), ctx.getContextId())) {
+                    notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
+                    LOG.trace("Message successfully send for {}", key);
+                } else {
+                    LOG.trace("Message dropped because the AlarmNotificationService is not enabled for user {}.", trigger.getUserId());
+                }
             } catch (OXException e) {
                 LOG.warn("Unable to send message for calendar alarm ({}): {}", key, e.getMessage(), e);
             }

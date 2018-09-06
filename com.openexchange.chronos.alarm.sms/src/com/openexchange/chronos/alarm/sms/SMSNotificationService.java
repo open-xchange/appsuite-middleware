@@ -104,12 +104,7 @@ public class SMSNotificationService implements AlarmNotificationService {
 
     @Override
     public void send(Event event, Alarm alarm, int contextId, int accountId, int userId, long trigger) throws OXException {
-        User user = userService.getUser(userId, contextId);
-        Locale locale = user.getLocale();
-        if (locale == null) {
-            locale = Locale.getDefault();
-        }
-        String phoneNumber = getPhoneNumber(alarm, locale);
+        String phoneNumber = getPhoneNumber(alarm);
         if(phoneNumber == null) {
             LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", userId, contextId);
             return;
@@ -117,7 +112,7 @@ public class SMSNotificationService implements AlarmNotificationService {
             if (smsBucketService.isEnabled(userId, contextId)) {
                 smsBucketService.getSMSToken(userId, contextId);
             }
-            smsService.sendMessage(new String[] {phoneNumber}, generateSMS(event, locale), userId, contextId);
+            smsService.sendMessage(new String[] {phoneNumber}, generateSMS(event, userId, contextId), userId, contextId);
         }
     }
 
@@ -127,7 +122,7 @@ public class SMSNotificationService implements AlarmNotificationService {
      * @param alarm The {@link Alarm}
      * @return The phone number or null
      */
-    private String getPhoneNumber(Alarm alarm, Locale locale) {
+    private String getPhoneNumber(Alarm alarm) {
         ExtendedProperties extendedProperties = alarm.getExtendedProperties();
         if(extendedProperties == null) {
             return null;
@@ -139,7 +134,12 @@ public class SMSNotificationService implements AlarmNotificationService {
         return extendedProperty.getValue().toString();
     }
 
-    private String generateSMS(Event event, Locale locale) {
+    private String generateSMS(Event event, int userId, int contextId) throws OXException {
+        User user = userService.getUser(userId, contextId);
+        Locale locale = user.getLocale();
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
         Translator translator = translatorFactory.translatorFor(locale);
         DateFormat df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, locale) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
         String formattedStartDate = df.format(new Date(event.getStartDate().getTimestamp()));
@@ -160,6 +160,11 @@ public class SMSNotificationService implements AlarmNotificationService {
     @Override
     public int getShift() throws OXException {
         return leanConfigurationService.getIntProperty(SMSAlarmConfig.SMS_SHIFT);
+    }
+
+    @Override
+    public boolean isEnabled(int userId, int contextId) throws OXException {
+        return leanConfigurationService.getBooleanProperty(userId, contextId, SMSAlarmConfig.SMS_ENABLED);
     }
 
 }

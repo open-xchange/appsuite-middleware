@@ -93,4 +93,12 @@ public interface AlarmNotificationService {
      */
     int getShift() throws OXException;
 
+    /**
+     * Checks if the {@link AlarmNotificationService} is available for the given user.
+     *
+     * @return true if it is available, false otherwise
+     * @throws OXException
+     */
+    boolean isEnabled(int userId, int contextId) throws OXException;
+
 }

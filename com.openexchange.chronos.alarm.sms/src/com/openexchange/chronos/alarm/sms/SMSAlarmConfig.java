@@ -60,13 +60,18 @@ import com.openexchange.config.lean.Property;
  */
 public class SMSAlarmConfig {
 
-    private static final String PREFIX = "com.openexchange.calendar.alarm.message.backgroundWorker.";
+    private static final String PREFIX = "com.openexchange.calendar.alarm.sms.";
 
     /**
      * Defines the time in milliseconds an alarm sms should be send out before the trigger time.
      * With this property the admin can configure the average time needed by the sms system to send out the sms.
      * This way the sms should usually be send out on time and not a few seconds late.
      */
-    public static final Property SMS_SHIFT = DefaultProperty.valueOf(PREFIX + "sms.time.shift", 0);
+    public static final Property SMS_SHIFT = DefaultProperty.valueOf(PREFIX + "time.shift", 0);
+
+    /**
+     * Enabled or disables sms alarms.
+     */
+    public static final Property SMS_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", true);
 
 }

@@ -109,4 +109,10 @@ public class MailAlarmNotificationServiceImpl implements AlarmNotificationServic
         LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, services);
         return leanConfig.getIntProperty(MailAlarmConfig.MAIL_SHIFT);
     }
+
+    @Override
+    public boolean isEnabled(int userId, int contextId) throws OXException {
+        LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, services);
+        return leanConfig.getBooleanProperty(userId, contextId, MailAlarmConfig.MAIL_ENABLED);
+    }
 }
