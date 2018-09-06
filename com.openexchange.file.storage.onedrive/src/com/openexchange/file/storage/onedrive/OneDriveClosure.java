@@ -117,5 +117,4 @@ public abstract class OneDriveClosure<R> {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-
 }

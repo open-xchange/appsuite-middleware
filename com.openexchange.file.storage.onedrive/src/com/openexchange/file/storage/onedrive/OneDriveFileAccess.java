@@ -88,9 +88,11 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
- * {@link OneDriveFileAccess}
+ * {@link OneDriveFileAccess} - Just a light-weighted proxy that bridges the Infostore and the real
+ * the real service that handles the actual requests, {@link MicrosoftGraphDriveService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
 

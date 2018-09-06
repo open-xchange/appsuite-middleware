@@ -73,7 +73,8 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
- * {@link OneDriveFolderAccess}
+ * {@link OneDriveFolderAccess} - Just a light-weighted proxy that bridges the Infostore and the real
+ * the real service that handles the actual requests, {@link MicrosoftGraphDriveService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
