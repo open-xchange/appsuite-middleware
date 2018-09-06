@@ -70,7 +70,7 @@ public enum Role {
      * {@link javax.annotation.security.RolesAllowed} annotation respectively allowing end-point-specific basic-auth.
      * <p>
      * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
-     * The concrete REST end-point is supposed to implement interface <code>com.openexchange.rest.services.security.EndpointAuthenticator</code>.
+     * The concrete REST end-point is supposed to implement interface <code>com.openexchange.rest.services.EndpointAuthenticator</code>.
      * </div>
      */
     INDIVIDUAL_BASIC_AUTHENTICATED("Individual-Basic-Authenticated"),
