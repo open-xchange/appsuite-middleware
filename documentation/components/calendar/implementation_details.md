@@ -95,6 +95,7 @@ In order to also accept non-Olson timezones, such unknown timezones are attempte
 ***
 
 **_References / further reading:_**
+
 - https://tools.ietf.org/html/rfc5545
 - https://devguide.calconnect.org/Time-Zones/Time-Zones/
 - http://www.twinsun.com/tz/tz-link.htm
@@ -121,8 +122,7 @@ In order to also accept non-Olson timezones, such unknown timezones are attempte
 - In OX (legacy), this is the user who created the event
 - In iCalendar, this is the ``ORGANIZER`` property and points to the organizer of the event
 - In CalDAV, the organizer determines the type of scheduling object resources:  
-  RFC 6638, 3.1: *A calendar object resource is considered to be a valid organizer scheduling object resource if the "ORGANIZER" iCalendar property is present and set in all the calendar components to a value that matches one of the calendar user addresses of the owner of the calendar collection.*  
-  And: * "A calendar object resource is considered to be a valid attendee scheduling object resource if the "ORGANIZER" iCalendar property is present and set in all the calendar components to the same value and doesn't match one of the calendar user addresses of the owner of the calendar collection, and if at least one of the "ATTENDEE" iCalendar property values matches one of the calendar user addresses of the owner of the calendar collection."*  
+  RFC 6638, 3.1: *A calendar object resource is considered to be a valid organizer scheduling object resource if the "ORGANIZER" iCalendar property is present and set in all the calendar components to a value that matches one of the calendar user addresses of the owner of the calendar collection.* and *A calendar object resource is considered to be a valid attendee scheduling object resource if the "ORGANIZER" iCalendar property is present and set in all the calendar components to the same value and doesn't match one of the calendar user addresses of the owner of the calendar collection, and if at least one of the "ATTENDEE" iCalendar property values matches one of the calendar user addresses of the owner of the calendar collection.*  
   So, for newly created events, the ``ORGANIZER`` property of the iCal data must match the *owner* of the parent calendar collection.
 - In Outlook, this is the meeting organizer
 
@@ -172,6 +172,7 @@ In order to convert between the legacy properties for organizer/principal and th
 ***
 
 **_References / further reading:_**
+
 - https://tools.ietf.org/html/rfc4791
 - https://tools.ietf.org/html/rfc6638
 - https://msdn.microsoft.com/en-us/library/office/bb856541.aspx
@@ -197,10 +198,13 @@ According to the RFC 6638, in such a scenario the attendee effectively gets a di
 While appropriate handling has originally been in place as incoming/outgoing "patches" within the CalDAV implementation, this is now considered directly within the Chronos service itself, so that the change- and delete-exception arrays in series events may be different based on the actual calendar user.
 
 ***
+
 **_References / further reading:_**
+
 - https://tools.ietf.org/html/rfc6638#section-3.2.6
 - com.openexchange.chronos.impl.Utils.applyExceptionDates(CalendarStorage, Event, int)
 - com.openexchange.chronos.impl.performer.UpdatePerformer.updateDeleteExceptions(Event, Event)
+
 ***
  
 
@@ -222,7 +226,9 @@ Internally, the following semantics apply for the classifications:
 For synchronization via CalDAV, the event classification is passed and read *as-is*, with the exception of the Apple calendar clients who require some special treatment (in form of a proprietary spec) in this topic. When exporting calendar object resources whose classification is different from ``PUBLIC`` for an Apple client, the parent ``VCALENDAR`` component is decorated with an additional property ``X-CALENDARSERVER-ACCESS``, set to the value of the (series master) event's classification. In the same way during import, the passed value of ``X-CALENDARSERVER-ACCESS`` is considered and transferred from the parent ``VCALENDAR`` component to each contained ``VEVENT``.
 
 ***
+
 **_References / further reading:_**
+
 - https://tools.ietf.org/html/rfc5545#section-3.8.1.3
 - https://github.com/apple/ccs-calendarserver/blob/master/doc/Extensions/caldav-privateevents.txt
 - http://blog.coeno.com/offentliche-private-und-vertrauliche-kalenderereignisse-und-wie-man-sie-richtig-nutzt/
@@ -231,6 +237,7 @@ For synchronization via CalDAV, the event classification is passed and read *as-
 - com.openexchange.chronos.compat.Appointment2Event.getClassification(boolean)
 - com.openexchange.chronos.impl.Check.classificationIsValid(Classification, UserizedFolder)
 - com.openexchange.chronos.impl.Utils.NON_CLASSIFIED_FIELDS
+
 ***
 
 
@@ -272,10 +279,13 @@ After the general restrictions have been checked and are fulfilled, the followin
 - Take over common public folder identifier for all user attendees 
 
 ***
+
 **_References / further reading:_**
+
 - com.openexchange.chronos.impl.performer.MovePerformer
 - https://intranet.open-xchange.com/wiki/backend-team:info:calendar#move_appointments_between_folders
 - com.openexchange.ajax.appointment.MoveTestNew
+
 ***
 
    
@@ -288,6 +298,7 @@ For interoperability with the old API and database format, distinct conversion r
 ## Supported ``RRULE`` parts
 
 The following list gives an overview about the supported ``RRULE`` parts, based on the limitations described before.
+
 - ``FREQ:DAILY``: ``INTERVAL``, ``UNTIL``, ``COUNT``
 - ``FREQ:WEEKLY``: ``INTERVAL``, ``UNTIL``, ``COUNT``, ``BYDAY``
 - ``FREQ:MONTHLY``: ``INTERVAL``, ``UNTIL``, ``COUNT``, ``BYDAY``, ``BYSETPOS``, ``BYMONTHDAY``
@@ -301,12 +312,15 @@ If an event series is decorated with an end date, this used to be stored as *the
 Therefore, some information might currently get lost when converting a recurrence rule to a legacy series pattern, since the time fraction of the date-time value from the ``RRULE`` has to be truncated prior saving. Also, some special checks need to be in place during conversion to prevent an additional occurrence if the client-supplied ``UNTIL`` lies behind the last occurrence (and possibly right before the start date of a next occurrence).  
 
 ***
+
 **_References / further reading:_**
+
 - https://tools.ietf.org/html/rfc5545#section-3.3.10
 - https://intranet.open-xchange.com/wiki/backend-team:info:calendar#serientermine
 - com.openexchange.groupware.calendar.CalendarDataObject
 - com.openexchange.chronos.compat.Recurrence
 - com.openexchange.chronos.compat.Recurrence.getSeriesEnd
+
 ***
 
 
@@ -329,9 +343,12 @@ In contrast to the rather strict definition in the standard, the following, slig
 Doing so, the parstats are not resetted whenever the event's effective timeframe is reduced, e.g. the event is re-scheduled to start half an hour later, or end a couple of minutes earlier.
 
 ***
+
 **_References / further reading:_**
+
 - https://tools.ietf.org/html/rfc6638#section-3.2.8
 - com.openexchange.chronos.impl.performer.EventUpdateProcessor#needsParticipationStatusReset
+
 ***
 
 
@@ -344,10 +361,13 @@ In the Chronos stack, a slightly enhanced approach is used so that not necessari
 Additionally, it is now possible to apply a changed recurrence rule to a specific and all future occurrences of the series, which is handled by splitting the event series into two parts - see below for more details.
 
 ***
+
 **_References / further reading:_**
+
 - com.openexchange.calendar.api.CalendarCollection.detectTimeChange
 - com.openexchange.calendar.CalendarOperation.checkPatternChange
 - com.openexchange.calendar.CalendarMySQL.deleteAllRecurringExceptions
+
 ***
 
 
@@ -362,6 +382,7 @@ Splitting an existing event series into two parts is the basis to support use ca
 The split is actually performed by creating a new, detached event series for the part prior the split point, and shifting the date of the first occurrence of the existing series to the split point. Existing overridden instances and any per-attendee data is preserved in both resulting event series, additionally, the series are linked via the ``RELATED-TO`` property. 
 
 Technically, the following steps are performed when an event series is splitted:
+
 1. A new series event representing the 'detached' part prior to the split time is created, based on the original series master
 2. The recurrence rule of the detached series is adjusted to have a fixed ``UNTIL`` one second or day prior the split point
 3. The recurrence rule, start- and end-date for the existing event series are modified to begin on or after the split point
@@ -378,16 +399,20 @@ As described above, when dealing with recurring events, it is often necessary to
 Previously, existing change exceptions are not touched at all when the series master event is modified. In the calendar implementation, we integrated some smart detection if a change to the recurring master event could also be applied to existing change excpetions, e.g. after a new attendee is added, or if the event location changes. As the web client does not have all change exceptions handy, the logic to 'propagate' the changes is implemented in the middleware.
 
 To avoid possible ambiguities, only certain changes considered, where the change can also be applied in some or all change exceptions intuitively. In particular, the following cases are taken into account:
+
 - For all *simple* changed event fields, it is checked if the modified property is equal in the original series master event and in the change exception. Simple event fields are (preliminary): ``CLASSIFICATION``, ``TRANSP``, ``SUMMARY``, ``LOCATION``, ``DESCRIPTION``, ``CATEGORIES``, ``COLOR``, ``URL``, ``GEO``, ``TRANSP``, ``STATUS``. If not, leave the property in the change exception as-is (i.e. do not propagate this change). If yes, also apply the change in the change exception.
 - Newly added attendees are also added in existing change exception events, unless they're not already attending there.
 - Removed attendees are also removed from change exceptions, in case they previously attended there, too.
 - For changes to an event's start- and/or enddate, the same change is only propagated if both properties are equal to the original value in the change exception, i.e. the change exception's timeslot is still matching the recurrence.
 
 ***
+
 **_References / further reading:_**
+
 - https://raw.githubusercontent.com/apple/ccs-calendarserver/master/doc/Extensions/caldav-recursplit.txt
 - com.openexchange.chronos.impl.performer.EventUpdateProcessor#propagateToChangeExceptions
 - com.openexchange.chronos.impl.performer#SplitPerformer
+
 ***
 
 
@@ -410,10 +435,13 @@ Internally within the Chronos stack, all URIs are kept as (escaped) URI string, 
 When being converted back to a plain e-mail address string (as used for external participants in the legacy stack), such URIs are decoded implicitly; additionally, ASCII-encoded (punycode) addresses with international domain names (IDN) are converted back to their unicode representation, too. This is the case when converting to an external participant in the legacy HTTP API, as well as when storing such an attendee in the ``dateExternal`` table. 
 
 ***
+
 **_References / further reading:_**
+
 - https://tools.ietf.org/html/rfc5545#section-3.3.3
 - com.openexchange.chronos.common.CalendarUtils.extractEMailAddress(String)
 - com.openexchange.chronos.impl.Check.requireValidEMail(T)
+
 ***
 
 
@@ -519,9 +547,12 @@ While not necessarily needed, for now events are still stored using the calendar
 Eventually, once no backwards compatibility is needed anymore, this quirk will be removed, i.e. we'll no longer add the current calendar user as attendee and organizer implicitly in case no further attendees are defined. 
 
 ***
+
 **_References / further reading:_**
+
 - https://bugs.horde.org/ticket/10697
 - com.openexchange.chronos.impl.Utils#isEnforceDefaultAttendee
+
 ***
 
 
@@ -533,7 +564,8 @@ Previously, a client needed to fetch virtually all available properties when loa
 
 Therefore, a new, virtual *read-only* property for events was introduced: event *flags*.
 
-Via this property, events will get decorated with different aspects that are relevant for the client, e.g. "has attachments", "is recurring", "has alarm(s)", "is organizer", and so on. In particular, the following event flags are supported: 
+Via this property, events will get decorated with different aspects that are relevant for the client, e.g. "has attachments", "is recurring", "has alarm(s)", "is organizer", and so on. In particular, the following event flags are supported:
+ 
 - ``attachment``: The event contains at least one attachment. 
 - ``alarms``: The calendar user has at least one alarm associated with the event.
 - ``scheduled``: Event is a *group-scheduled* meeting with an organizer.
@@ -556,9 +588,12 @@ Via this property, events will get decorated with different aspects that are rel
 - ``last_occurrence``: The event represents the *last* occurrence of a recurring event series.
 
 ***
+
 **_References / further reading:_**
+
 - com.openexchange.chronos.EventFlag
 - com.openexchange.chronos.common.CalendarUtils#getFlags
+
 ***
 
 
@@ -577,10 +612,13 @@ While letting the server assign those timestamps based on the current time autom
 For backwards compatibility, the new ``timestamp`` property is used to drive the ``last-modified`` property in the legacy HTTP API. Additionally, due to the ``NOT NULL`` column definitions, the respective values in the legacy storage are derived from the acting calendar user and the timestamp property as needed. 
 
 ***
+
 **_References / further reading:_**
+
 - https://tools.ietf.org/html/rfc5545#section-3.8.7
 - http://oxpedia.org/index.php?title=HTTP_API#Date_and_time
 - https://bugzilla.mozilla.org/show_bug.cgi?id=303663#c2
+
 ***
 
 
@@ -607,9 +645,12 @@ Additionally, to aid the typical *reply* of an attendee to a meeting request, a 
 In case a client attempts to modify a group-scheduled event using the CalDAV interface in a not allowed way, the request is answered with the ``CALDAV:allowed-attendee-scheduling-object-change`` precondition error. Besides the per-user properties defined in RFC 6638, there are no further exceptions. However, if a client attempts to store a non-standard *X*-property in the iCalendar resource, no error is thrown and the extended property is dropped silently (as clients actually do it, e.g. a custom ``X-APPLE-TRAVEL-ADVISORY-BEHAVIOR`` or ``X-LIC-ERROR``).
 
 ***
+
 **_References / further reading:_**
+
 - https://tools.ietf.org/html/rfc6638#section-3.2.2
 - com.openexchange.chronos.impl.performer.AbstractUpdatePerformer#requireWritePermissions
+
 ***
 
 
@@ -621,11 +662,11 @@ When interacting with the calendar and scheduling subsystem, three different per
 
 As stated above, within *group-scheduled* events with multiple attendees, a calendar user can have certain roles - i.e. the user is *organizer* of the event, or he is an *attendee*. For events that are located in personal calendar folders (*shared* or *private*), these are actually the only possibilities. In *public* calendar folders, the user might also be neither organizer, nor attendee.
 
-Considering the role, a user that is attendee or organizer of a group-scheduled event is always able to read event data. Also, an attendee is always allowed to modify his own attendee property (especially his participation status), as well as he has control over his own alarms. Additionally, he may still delete himself from the attendee list. However, whenever event data should be manipulated in way beyond the allowed attendee changes (see above), the calendar user needs to be the organizer of the event. Note that the *role* is always interpreted for the actual calendar user based on the folder that represents the current view on an event, which means that this calendar user may be different from the current session user in case of a *shared* calendar folder, while the calendar user equals the current session user in *private* folders. So, when interacting with an event under the perspective of a *shared* folder, the current user always acts on behalf of the folder owner - even if he also attends or is the organizer of the event.
- 
-The access rights that are implicitly given by the user's role in an event are always valid, even if the event is statically located in a (*public*) calendar folder that is not visible for the user. For example, the API allows to create an event in a *public* calendar folder and invite attendees that do not have access to this folder. Interaction with such events would still be possible (e.g. by using the corresponding links from the invitation mail, by looking up the events via search, or by querying virtual event collections for the user ("all my events"). Note that the *role* is always interpreted for the actual calendar user based on the folder that represents the current view on an event, which means that this calendar user may be different from the current session user in case of a *shared* calendar folder, while the calendar user equals the current session user in *private* and *public* folders. See chapter "Relation of Organizer / Principal / Folder-Owner / Creator" for further details. 
+Considering the role, a user that is attendee or organizer of a group-scheduled event is able to read event data. Also, an attendee is always allowed to modify his own attendee property (especially his participation status), as well as he has control over his own alarms. Additionally, he may still delete himself from the attendee list. However, whenever event data should be manipulated in way beyond the allowed attendee changes (see above), the calendar user needs to be the organizer of the event.
 
-In contrast to personal calendar folders, *public* folders are not associated with a dedicated calendar owner. So, whenever a new event is created within a *public* folder, the creator automatically becomes the *organizer* of this event. Each consecutive modification of the event data by other users beyond the allowed attendee changes is then implicitly performed on behalf of the organizer. That means that all other users can edit events in *public* folders by implicitly impersonating as *organizer* of the event, given that the underlying folder access rights are sufficient. However, it is not possible to act on behalf of another attendee in *public* folders, so that the current session user is always interacting with his "own" attendee property here, i.e. he cannot change the participation status of another attendee. 
+The access rights that are implicitly given by the user's role in an event are always valid, even if the event is statically located in a (public) calendar folder that is not visible for the user. For example, the API allows to create an event in a *public* calendar folder and invite attendees that do not have access to this folder. Interaction with such events would still be possible (e.g. by using the corresponding links from the invitation mail, by looking up the events via search, or by querying virtual event collections for the user ("all my events").
+
+Note that the *role* is always interpreted for the actual calendar user based on the folder that represents the current view on an event, which means that this calendar user may be different from the current session user in case of a *shared* calendar folder, while the calendar user equals the current session user in *private* and *public* folders. See chapter "Relation of Organizer / Principal / Folder-Owner / Creator" for further details. 
 
 ## Folder Permissions
 
@@ -641,10 +682,11 @@ More details about the possible event classifications are described in chapter "
 
 ## HTTP API
 
-Clients that need to be aware of which actions are actually possible by a certain calendar user for a group-scheduled event in a specific folder should consider the appropriate event flags ``scheduled``, ``organizer`` / ``organizer_on_behalf`` and ``attendee`` / ``attendee_on_behalf``, along with the effective permissions of the current session user in the underlying folder. Then, the following rules apply:
+Clients that need to be aware of which actions are actually possible by a certain calendar user for a group-scheduled event in a specific folder should consider the appropriate event flags ``scheduled``, ``organizer`` and ``attendee``, along with the effective permissions of the current session user in the underlying folder. Then, the following rules apply:
+
 - New events can be created in case the folder permissions include at least *create own* objects.
-- Whenever data should be manipulated in a way beyond the allowed attendee changes (see above), the calendar user needs to be or act as organizer of the event, hence the ``organizer`` or ``organizer_on_behalf`` flag would have to be present. Additionally, the folder permissions need to allow *write object* permissions for the event in question (i.e. either *write all* or *write own* objects).
-- Whenever attendee-related data such as the participation status or the user's personal alarms should be modified, the calendar user needs to be or act as an attendee of the event, hence the ``attendee`` or ``attendee_on_behalf`` flag would have to be present. No additional folder permissions are required.
+- Whenever data should be manipulated in a way beyond the allowed attendee changes (see above), the calendar user needs to be the organizer of the event, hence the ``organizer`` flag would have to be present. Additionally, the folder permissions need to allow *write object* permissions for the event in question (i.e. either *write all* or *write own* objects).
+- Whenever attendee-related data such as the participation status or the user's personal alarms should be modified, the calendar user needs to be an attendee of the event, hence the ``attendee`` flag would have to be present. No additional folder permissions are required.
 
 
 # UTF-8 Support
@@ -670,10 +712,13 @@ So, in order to finally use 4-byte UTF-8 character sets, the MySQL server should
 As noted above in "Migration of legacy data", the database will work temporarily in a mode where all write operations are 'replayed' to the legacy database tables after the migration is finished, to prevent data loss in case a downgrade should ever be required. As the previously used database tables do still not support astral symbols, those problematic characters are removed implicitly when storing them there. 
 
 ***
+
 **_References / further reading:_**
+
 - https://dev.mysql.com/doc/connector-j/en/connector-j-reference-charsets.html
 - https://bugs.open-xchange.com/show_bug.cgi?id=54504
 - https://confluence.open-xchange.com/display/MID/MySql+charsets+and+collations
+
 ***
 
 
