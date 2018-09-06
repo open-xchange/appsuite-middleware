@@ -56,6 +56,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFile;
 
 /**
@@ -99,7 +100,7 @@ public class OneDriveFileParser {
 
         JSONObject parentRef = entity.optJSONObject("parentReference");
         if (parentRef != null && !parentRef.isEmpty()) {
-            file.setFolderId(parentRef.optString("id"));
+            file.setFolderId(parentRef.optString("path").equals("/drive/root:") ? FileStorageFolder.ROOT_FULLNAME : parentRef.optString("id"));
         }
 
         JSONObject fileJson = entity.optJSONObject("file");
