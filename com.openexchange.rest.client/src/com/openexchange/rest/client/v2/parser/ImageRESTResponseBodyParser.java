@@ -51,10 +51,11 @@ package com.openexchange.rest.client.v2.parser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.v2.RESTResponse;
@@ -86,21 +87,19 @@ public class ImageRESTResponseBodyParser implements RESTResponseBodyParser {
      * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
      */
     @Override
-    public Object parse(RESTResponse response) throws OXException {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            if (response.getStream() == null) {
+    public Object parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream(); InputStream stream = httpResponse.getEntity().getContent()) {
+            if (stream == null) {
                 return null;
             }
             int read = 0;
             byte[] buffer = new byte[4096];
-            while ((read = response.getStream().read(buffer)) != -1) {
+            while ((read = stream.read(buffer)) != -1) {
                 out.write(buffer, 0, read);
             }
             return out.toByteArray();
         } catch (IOException e) {
             throw RESTExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            IOUtils.closeQuietly(response.getStream());
         }
     }
 

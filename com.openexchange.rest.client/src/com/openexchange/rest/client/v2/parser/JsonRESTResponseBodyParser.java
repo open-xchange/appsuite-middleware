@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Set;
+import org.apache.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,11 +84,11 @@ public class JsonRESTResponseBodyParser implements RESTResponseBodyParser {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
+     * @see com.openexchange.rest.client.v2.parser.RESTResponseBodyParser#parse(org.apache.http.HttpResponse, com.openexchange.rest.client.v2.RESTResponse)
      */
     @Override
-    public Object parse(RESTResponse response) throws OXException {
-        try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
+    public Object parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
+        try (InputStream inputStream = Streams.bufferedInputStreamFor(httpResponse.getEntity().getContent())) {
             String string = Streams.stream2string(inputStream, CHARSET);
             char c = string.charAt(0);
             switch (c) {

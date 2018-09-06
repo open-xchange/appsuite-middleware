@@ -49,7 +49,6 @@
 
 package com.openexchange.rest.client.v2;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.java.Strings;
@@ -63,7 +62,6 @@ import com.openexchange.java.Strings;
 public class RESTResponse {
 
     private final int statusCode;
-    private InputStream stream;
     private Object responseBody;
     private final Map<String, String> headers;
 
@@ -74,15 +72,6 @@ public class RESTResponse {
         super();
         this.statusCode = statusCode;
         headers = new HashMap<>(4);
-    }
-
-    /**
-     * Returns the {@link InputStream} of the response
-     * 
-     * @return the {@link InputStream} of the response
-     */
-    public InputStream getStream() {
-        return stream;
     }
 
     /**
@@ -133,15 +122,6 @@ public class RESTResponse {
      */
     public void setResponseBody(Object responseBody) {
         this.responseBody = responseBody;
-    }
-
-    /**
-     * Sets the stream
-     *
-     * @param stream The stream to set
-     */
-    public void setStream(InputStream stream) {
-        this.stream = stream;
     }
 
     /**

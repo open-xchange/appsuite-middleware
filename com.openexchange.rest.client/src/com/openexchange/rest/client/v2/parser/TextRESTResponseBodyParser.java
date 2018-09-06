@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.http.HttpResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
@@ -91,8 +92,8 @@ public class TextRESTResponseBodyParser implements RESTResponseBodyParser {
      * @see com.openexchange.rest.client.RESTResponseBodyParser#parse(com.openexchange.rest.client.RESTResponse)
      */
     @Override
-    public Object parse(RESTResponse response) throws OXException {
-        try (InputStream inputStream = Streams.bufferedInputStreamFor(response.getStream())) {
+    public Object parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException {
+        try (InputStream inputStream = Streams.bufferedInputStreamFor(httpResponse.getEntity().getContent())) {
             return Streams.stream2string(inputStream, CHARSET);
         } catch (IOException e) {
             throw RESTExceptionCodes.IO_ERROR.create(e, e.getMessage());

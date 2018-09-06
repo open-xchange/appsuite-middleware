@@ -182,8 +182,7 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
         if (entity == null) {
             return response;
         }
-        response.setStream(entity.getContent());
-        response.setResponseBody(parseResponseBody(response));
+        parseResponseBody(httpResponse, response);
         return response;
     }
 
@@ -268,16 +267,15 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
      * @return The parsed {@link R} object
      * @throws OXException if a parsing error occurs
      */
-    private Object parseResponseBody(RESTResponse response) throws OXException {
+    private void parseResponseBody(HttpResponse httpResponse, RESTResponse response) throws OXException {
         String contentType = response.getHeader(HttpHeaders.CONTENT_TYPE);
         if (Strings.isEmpty(contentType)) {
             throw new IllegalArgumentException("The content type can be neither 'null' nor empty");
         }
         for (RESTResponseBodyParser bodyParser : responseBodyParsers.values()) {
             if (bodyParser.getContentTypes().contains(contentType)) {
-                return bodyParser.parse(response);
+                response.setResponseBody(bodyParser.parse(httpResponse, response));
             }
         }
-        throw RESTExceptionCodes.NO_STREAM_PARSER.create(contentType);
     }
 }

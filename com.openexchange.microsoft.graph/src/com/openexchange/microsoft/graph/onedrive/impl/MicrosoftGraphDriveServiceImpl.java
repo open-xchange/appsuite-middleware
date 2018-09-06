@@ -396,7 +396,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             }
             JSONObject parentRef = new JSONObject();
             parentRef.put("id", parentId);
-            //parentRef.put("driveId", getDriveId());
             JSONObject body = new JSONObject();
             body.put("parentReference", parentRef);
             return api.copyItem(accessToken, itemId, body);

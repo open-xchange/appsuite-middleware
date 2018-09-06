@@ -163,6 +163,8 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      */
     protected boolean isExpired() {
         long now = System.currentTimeMillis();
+        // FIXME: Should use the TTL returned when acquiring the token
+        //        instead of a static value like RECHECK_THRESHOLD_MILLIS
         return (now - lastAccessedMillis) > RECHECK_THRESHOLD_MILLIS;
     }
 

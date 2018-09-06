@@ -51,6 +51,7 @@ package com.openexchange.rest.client.v2.parser;
 
 import java.io.InputStream;
 import java.util.Set;
+import org.apache.http.HttpResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.v2.RESTResponse;
 
@@ -63,13 +64,14 @@ import com.openexchange.rest.client.v2.RESTResponse;
 public interface RESTResponseBodyParser {
 
     /**
-     * Parses the {@link InputStream} from the specified {@link RESTResponse}
-     *
-     * @param response The {@link SchedJoulesResponse}
+     * Parses the {@link InputStream} from the specified {@link HttpResponse}
+     * 
+     * @param httpResponse The {@link HttpResponse}
+     * @param restResponse TODO
      * @return The parsed {@link R} object
      * @throws OXException if a parsing error occurs
      */
-    Object parse(RESTResponse response) throws OXException;
+    Object parse(HttpResponse httpResponse, RESTResponse restResponse) throws OXException;
 
     Set<String> getContentTypes();
 }
