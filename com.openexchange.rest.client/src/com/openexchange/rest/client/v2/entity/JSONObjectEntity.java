@@ -49,10 +49,10 @@
 
 package com.openexchange.rest.client.v2.entity;
 
-import java.io.UnsupportedEncodingException;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.StringEntity;
 import org.json.JSONObject;
+import com.openexchange.java.Charsets;
 import com.openexchange.rest.client.v2.RESTBodyEntity;
 
 /**
@@ -67,12 +67,10 @@ public class JSONObjectEntity implements RESTBodyEntity {
 
     /**
      * Initialises a new {@link JSONObjectEntity}.
-     * 
-     * @throws UnsupportedEncodingException if the default HTTP charset is not supported.
      */
-    public JSONObjectEntity(JSONObject body) throws UnsupportedEncodingException {
+    public JSONObjectEntity(JSONObject body) {
         super();
-        entity = new StringEntity(body.toString());
+        entity = new StringEntity(body.toString(), Charsets.UTF_8);
     }
 
     /*

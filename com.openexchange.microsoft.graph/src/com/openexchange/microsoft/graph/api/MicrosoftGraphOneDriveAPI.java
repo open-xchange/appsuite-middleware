@@ -50,11 +50,8 @@
 package com.openexchange.microsoft.graph.api;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -242,11 +239,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/itames/" + itemId + "/copy");
         request.setAccessToken(accessToken);
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        try {
-            request.sethBodyEntity(new JSONObjectEntity(body));
-        } catch (UnsupportedEncodingException e) {
-            throw new OXException(666, "charset is not supported");
-        }
+        request.sethBodyEntity(new JSONObjectEntity(body));
         RESTResponse restResponse = client.execute(request);
         if (restResponse.getStatusCode() == 202) {
             return restResponse.getHeader(HttpHeaders.LOCATION);
@@ -268,11 +261,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, BASE_URL + "/items/" + itemId + "/copy");
         request.setAccessToken(accessToken);
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        try {
-            request.sethBodyEntity(new JSONObjectEntity(body));
-        } catch (UnsupportedEncodingException e) {
-            throw new OXException(666, "charset is not supported");
-        }
+        request.sethBodyEntity(new JSONObjectEntity(body));
         RESTResponse restResponse = client.execute(request);
         if (restResponse.getStatusCode() != 202) {
             throw new OXException(666, "Copy failed: " + restResponse.getStatusCode());

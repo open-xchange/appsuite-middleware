@@ -54,7 +54,7 @@ package com.openexchange.microsoft.graph.api.exception;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
- * @see https://developer.microsoft.com/en-us/graph/docs/concepts/errors
+ * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/errors#code-property">Basic Error Codes</a>
  */
 public enum ErrorCode {
     /**

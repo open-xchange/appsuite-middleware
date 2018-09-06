@@ -50,7 +50,6 @@
 package com.openexchange.microsoft.graph.api;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -146,11 +145,7 @@ abstract class AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, path);
         request.setAccessToken(accessToken);
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        try {
-            request.sethBodyEntity(new JSONObjectEntity(body));
-        } catch (UnsupportedEncodingException e) {
-            throw new OXException(666, "charset is not supported");
-        }
+        request.sethBodyEntity(new JSONObjectEntity(body));
         return executeRequest(request);
     }
 
@@ -172,11 +167,7 @@ abstract class AbstractMicrosoftGraphAPI {
         MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.PATCH, path);
         request.setAccessToken(accessToken);
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-        try {
-            request.sethBodyEntity(new JSONObjectEntity(body));
-        } catch (UnsupportedEncodingException e) {
-            throw new OXException(666, "charset is not supported");
-        }
+        request.sethBodyEntity(new JSONObjectEntity(body));
         return executeRequest(request);
     }
 
@@ -195,8 +186,11 @@ abstract class AbstractMicrosoftGraphAPI {
     }
 
     /**
-     * @param response
-     * @throws OXException
+     * Checks whether the specified response contains any API errors and if
+     * it does throws the appropriate exception.
+     * 
+     * @param response the {@link JSONObject} response body
+     * @throws OXException The appropriate API exception if an error is detected
      */
     private void checkForErrors(JSONObject response) throws OXException {
         if (!response.hasAndNotNull("error")) {

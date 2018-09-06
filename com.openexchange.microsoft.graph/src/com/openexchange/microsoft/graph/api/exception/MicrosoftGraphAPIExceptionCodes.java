@@ -60,10 +60,12 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.java.Strings;
 
 /**
- * {@link MicrosoftGraphAPIExceptionCodes}
+ * {@link MicrosoftGraphAPIExceptionCodes} - Defines the API exceptions codes that
+ * the Microsoft Graph endpoint might return.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
+ * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/errors#code-property">Basic Error Codes</a>
  */
 public enum MicrosoftGraphAPIExceptionCodes implements DisplayableOXExceptionCode {
 
