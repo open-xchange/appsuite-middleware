@@ -30,4 +30,6 @@ Import-Package: com.hazelcast.core,
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/microprofile-health-api-1.0.jar
-Export-Package: com.openexchange.health
+Export-Package: com.openexchange.health,
+ org.eclipse.microprofile.health,
+ org.eclipse.microprofile.health.spi
