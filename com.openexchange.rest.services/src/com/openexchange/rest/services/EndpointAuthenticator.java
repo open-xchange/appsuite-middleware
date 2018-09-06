@@ -49,37 +49,27 @@
 
 package com.openexchange.rest.services;
 
-import javax.annotation.security.RolesAllowed;
-
 /**
- * {@link Role}
+ * {@link EndpointAuthenticator} - Performs authentication for a certain REST end-point.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.10.1
  */
-public enum Role {
+public interface EndpointAuthenticator {
 
     /**
-     * The role identifier for {@link RolesAllowed} annotation signaling to perform basic-auth.
-     * <p>
-     * Properties <code>"com.openexchange.rest.services.basic-auth.login"</code> and <code>"com.openexchange.rest.services.basic-auth.password"</code> are required to be set.
-     */
-    BASIC_AUTHENTICATED("Basic-Authenticated"),
-
-    ;
-
-    private final String id;
-
-    private Role(String id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets the role identifier.
+     * Authenticates specified request context for a certain REST end-point.
      *
-     * @return The role identifier
+     * @param login The login to check
+     * @param password The password to check
+     * @return <code>true</code> if successfully authenticated; otherwise <code>false</code>
      */
-    public String getId() {
-        return id;
-    }
+    boolean authenticate(String login, String password);
+
+    /**
+     * Gets the name of the realm.
+     *
+     * @return The realm name
+     */
+    String getRealmName();
 }

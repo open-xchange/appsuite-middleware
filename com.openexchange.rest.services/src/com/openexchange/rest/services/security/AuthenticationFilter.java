@@ -60,6 +60,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.ResourceContext;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -70,6 +71,7 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.services.EndpointAuthenticator;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
@@ -100,6 +102,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
+    @Context
+    private ResourceContext resourceContext;
+
     private final boolean doFail;
     private final String authLogin;
     private final String authPassword;
@@ -126,6 +131,14 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         if (null != annotation) {
             return annotation;
         }
+        return null;
+    }
+
+    private EndpointAuthenticator acquireAuthenticator() {
+        if (EndpointAuthenticator.class.isInstance(resourceInfo.getResourceClass())) {
+            return (EndpointAuthenticator) resourceContext.getResource(resourceInfo.getResourceClass());
+        }
+
         return null;
     }
 
@@ -166,6 +179,21 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                     basicAuth(requestContext);
                     return;
                 }
+                if (hasRole(Role.INDIVIDUAL_BASIC_AUTHENTICATED.getId(), roles)) {
+                    EndpointAuthenticator authenticator = acquireAuthenticator();
+                    if (null == authenticator) {
+                        LOG.warn("Detected role '{}' in class {}, but that end-point does not implement interface {}", Role.INDIVIDUAL_BASIC_AUTHENTICATED.getId(), resourceInfo.getResourceClass().getName(), EndpointAuthenticator.class.getName());
+                        deny(requestContext);
+                        return;
+                    }
+
+                    String authHeader = requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+                    Credentials credentials = acquireCredentialsFromAuthHeader(authHeader);
+
+                    boolean authenticated = authenticator.authenticate(credentials.getLogin(), credentials.getPassword());
+                    reflectAuthenticated(authenticated, authenticator.getRealmName(), requestContext);
+                    return;
+                }
 
                 // Other roles unknown...
                 LOG.warn("Encountered unknown roles '{}' in class {}", Arrays.toString(roles), resourceInfo.getResourceClass().getName());
@@ -197,15 +225,20 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 new Throwable("Denied request to REST interface"));
             deny(requestContext);
         } else {
-            if (authenticated(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION))) {
-                boolean secure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
-                Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
-                requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
-            } else {
-                requestContext.abortWith(Response.status(Status.UNAUTHORIZED)
-                    .header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"OX REST\", encoding=\"UTF-8\"")
-                    .build());
-            }
+            boolean authenticated = authenticated(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
+            reflectAuthenticated(authenticated, "OX REST", requestContext);
+        }
+    }
+
+    private void reflectAuthenticated(boolean authenticated, String realm, ContainerRequestContext requestContext) {
+        if (authenticated) {
+            boolean secure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
+            Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
+            requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
+        } else {
+            requestContext.abortWith(Response.status(Status.UNAUTHORIZED)
+                .header(HttpHeaders.WWW_AUTHENTICATE, new StringBuilder(32).append("Basic realm=\"").append(realm).append("\", encoding=\"UTF-8\"").toString())
+                .build());
         }
     }
 
@@ -224,24 +257,35 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         return false;
     }
 
-    private boolean authenticated(String authHeader) {
+    private Credentials acquireCredentialsFromAuthHeader(String authHeader) {
         if (null == authHeader) {
             // Authorization header missing
-            return false;
+            return null;
         }
 
         if (com.openexchange.tools.servlet.http.Authorization.checkForBasicAuthorization(authHeader)) {
             final Credentials creds = com.openexchange.tools.servlet.http.Authorization.decode(authHeader);
             if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) {
                 // Empty password
-                return false;
+                return null;
             }
             // Check parsed credentials
-            return authLogin.equals(creds.getLogin()) && authPassword.equals(creds.getPassword());
+            return creds;
         }
 
         // Unsupported auth scheme
-        return false;
+        return null;
+    }
+
+    private boolean authenticated(String authHeader) {
+        Credentials creds = acquireCredentialsFromAuthHeader(authHeader);
+        if (null == creds) {
+            // Authorization header missing, invalid credentials or unsupported authentication scheme
+            return false;
+        }
+
+        // Check parsed credentials
+        return authLogin.equals(creds.getLogin()) && authPassword.equals(creds.getPassword());
     }
 
 }

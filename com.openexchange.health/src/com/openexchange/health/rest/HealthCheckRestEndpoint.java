@@ -73,6 +73,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.health.DefaultHealthCheckResponse;
 import com.openexchange.health.internal.HealthCheckService;
+import com.openexchange.rest.services.EndpointAuthenticator;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.version.Version;
@@ -84,8 +85,8 @@ import com.openexchange.version.Version;
  * @since v7.10.1
  */
 @Path("/health")
-@RoleAllowed(Role.BASIC_AUTHENTICATED)
-public class HealthCheckRestEndpoint {
+@RoleAllowed(Role.INDIVIDUAL_BASIC_AUTHENTICATED)
+public class HealthCheckRestEndpoint implements EndpointAuthenticator {
 
     private static final Logger LOG = LoggerFactory.getLogger(HealthCheckRestEndpoint.class);
 
@@ -102,6 +103,17 @@ public class HealthCheckRestEndpoint {
     public HealthCheckRestEndpoint(HealthCheckService service) {
         super();
         this.service = service;
+    }
+
+    @Override
+    public boolean authenticate(String login, String password) {
+        // TODO Check against configured login/password
+        return true;
+    }
+
+    @Override
+    public String getRealmName() {
+        return "OX HEALTH";
     }
 
     @GET
