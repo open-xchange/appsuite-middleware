@@ -47,42 +47,22 @@
  *
  */
 
-package com.openexchange.sms.tools;
+package com.openexchange.ratelimit;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link SMSBucketService} provides a user based token-bucket for sms tokens
+ * {@link RateLimiter} provides methods to do rate limiting
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.1
+ * @since v7.10.1
  */
-public interface SMSBucketService {
+public interface RateLimiter {
 
     /**
-     * Retrieves the number of available sms tokens for the given user and reduce the amount by one.
-     * 
-     * @param session The user session
-     * @return The previous amount of sms tokens
-     * @throws OXException if it was unable to retrieve the sms token or if the sms limit is reached
+     * Tries to acquire a permit
+     *
+     * @return true if allowed, false otherwise
      */
-    public int getSMSToken(Session session) throws OXException;
+    public boolean acquire();
 
-    /**
-     * Checks if the user sms limit is enabled for the given user
-     * @param session The user session
-     * @return true if SMSUserLimit is enabled, false otherwise
-     * @throws OXException
-     */
-    public boolean isEnabled(Session session) throws OXException;
-
-    /**
-     * Retrieves the refresh interval in hours rounded up
-     * 
-     * @param session The user session
-     * @return The time in hours rounded up
-     * @throws OXException if it was unable to retrieve the interval
-     */
-    public int getRefreshInterval(Session session) throws OXException;
 }

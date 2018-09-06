@@ -47,42 +47,29 @@
  *
  */
 
-package com.openexchange.sms.tools;
+package com.openexchange.ratelimit;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link SMSBucketService} provides a user based token-bucket for sms tokens
+ * {@link RateLimitFactory}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.1
+ * @since v7.10.1
  */
-public interface SMSBucketService {
+public interface RateLimitFactory {
 
     /**
-     * Retrieves the number of available sms tokens for the given user and reduce the amount by one.
-     * 
-     * @param session The user session
-     * @return The previous amount of sms tokens
-     * @throws OXException if it was unable to retrieve the sms token or if the sms limit is reached
-     */
-    public int getSMSToken(Session session) throws OXException;
-
-    /**
-     * Checks if the user sms limit is enabled for the given user
-     * @param session The user session
-     * @return true if SMSUserLimit is enabled, false otherwise
+     * Creates a {@link RateLimiter} with the given ratePerSecond for the given user and context.
+     *
+     * @param id The identifier of the {@link RateLimiter}
+     * @param amount The amount of permits per time-frame
+     * @param timeframe The time-frame in milliseconds
+     * @param userId The user id
+     * @param ctxId The context id
+     * @return
      * @throws OXException
      */
-    public boolean isEnabled(Session session) throws OXException;
+    public RateLimiter createLimiter(String id, int amount, long timeframe, int userId, int ctxId) throws OXException;
 
-    /**
-     * Retrieves the refresh interval in hours rounded up
-     * 
-     * @param session The user session
-     * @return The time in hours rounded up
-     * @throws OXException if it was unable to retrieve the interval
-     */
-    public int getRefreshInterval(Session session) throws OXException;
 }

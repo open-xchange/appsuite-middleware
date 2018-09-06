@@ -47,42 +47,68 @@
  *
  */
 
-package com.openexchange.sms.tools;
+package com.openexchange.ratelimit.hz;
 
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.ratelimit.RateLimiter;
 
 /**
- * {@link SMSBucketService} provides a user based token-bucket for sms tokens
+ * {@link RateLimiterImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.1
+ * @since v7.10.1
  */
-public interface SMSBucketService {
+public class RateLimiterImpl implements RateLimiter {
+
+    private static final String MAP_ID = "com.openexchange.ratelimit.hz.map";
+
+    private final HazelcastInstance hz;
+    private final String key;
+    private final long timeframe;
+    private final int amount;
 
     /**
-     * Retrieves the number of available sms tokens for the given user and reduce the amount by one.
-     * 
-     * @param session The user session
-     * @return The previous amount of sms tokens
-     * @throws OXException if it was unable to retrieve the sms token or if the sms limit is reached
+     * Initializes a new {@link RateLimiterImpl}.
      */
-    public int getSMSToken(Session session) throws OXException;
+    public RateLimiterImpl(String id, int user, int ctx, int amount, long timeframe, HazelcastInstance hz) {
+        this.hz = hz;
+        this.amount = amount;
+        this.timeframe = timeframe;
+        this.key = id + "_" + ctx + "_" + user;
+    }
+
+    @Override
+    public boolean acquire() {
+        MultiMap<String, Long> map = hz.getMultiMap(MAP_ID);
+        boolean result = checkLimitAndRemoveOldEntries(map);
+        if (result == false) {
+            return result;
+        }
+        map.put(key, Long.valueOf(System.currentTimeMillis()));
+        return true;
+    }
 
     /**
-     * Checks if the user sms limit is enabled for the given user
-     * @param session The user session
-     * @return true if SMSUserLimit is enabled, false otherwise
+     * Checks the for rate limit and removes old entries
+     *
+     * @param map The hazelcast multimap containing the most recent timestamps
      * @throws OXException
      */
-    public boolean isEnabled(Session session) throws OXException;
+    private boolean checkLimitAndRemoveOldEntries(MultiMap<String, Long> map) {
+        long start = System.currentTimeMillis() - timeframe;
+        if (map.containsKey(key)) {
+            for (Long stamp : map.get(key)) {
+                if (stamp < start) {
+                    map.remove(key, stamp);
+                }
+            }
+            if (map.size() >= amount) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-    /**
-     * Retrieves the refresh interval in hours rounded up
-     * 
-     * @param session The user session
-     * @return The time in hours rounded up
-     * @throws OXException if it was unable to retrieve the interval
-     */
-    public int getRefreshInterval(Session session) throws OXException;
 }

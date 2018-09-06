@@ -55,7 +55,6 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sms.SMSServiceSPI;
-import com.openexchange.sms.tools.SMSBucketService;
 import com.openexchange.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +71,7 @@ public class SMSAlarmActivator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SMSServiceSPI.class, UserService.class, TranslatorFactory.class, LeanConfigurationService.class, SMSBucketService.class };
+        return new Class[] { SMSServiceSPI.class, UserService.class, TranslatorFactory.class, LeanConfigurationService.class };
     }
 
     @Override
@@ -81,8 +80,7 @@ public class SMSAlarmActivator extends HousekeepingActivator{
         TranslatorFactory translatorFactory = getServiceSafe(TranslatorFactory.class);
         UserService userService = getServiceSafe(UserService.class);
         LeanConfigurationService leanConfigurationService = getServiceSafe(LeanConfigurationService.class);
-        SMSBucketService smsBucketService = getServiceSafe(SMSBucketService.class);
-        registerService(AlarmNotificationService.class, new SMSNotificationService(smsService, translatorFactory, userService, leanConfigurationService, smsBucketService));
+        registerService(AlarmNotificationService.class, new SMSNotificationService(smsService, translatorFactory, userService, leanConfigurationService));
         LOG.info("Successfully started bundle "+this.context.getBundle().getSymbolicName());
     }
 

@@ -84,6 +84,7 @@ import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.Tools;
+import com.openexchange.ratelimit.RateLimitFactory;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.templating.TemplateService;
@@ -109,7 +110,7 @@ public class Activator extends HousekeepingActivator {
         return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class,
             LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
             ConfigurationService.class, ClusterTimerService.class, AdministrativeAlarmTriggerStorage.class, TemplateService.class,
-            ResourceService.class, HtmlService.class, CalendarProviderRegistry.class, AdministrativeCalendarAccountService.class };
+            ResourceService.class, HtmlService.class, CalendarProviderRegistry.class, AdministrativeCalendarAccountService.class, RateLimitFactory.class};
     }
 
     @Override
@@ -138,6 +139,7 @@ public class Activator extends HousekeepingActivator {
         CalendarUtilities calUtil = Tools.requireService(CalendarUtilities.class, this);
         CalendarProviderRegistry calendarProviderRegistry = Tools.requireService(CalendarProviderRegistry.class, this);
         AdministrativeCalendarAccountService administrativeCalendarAccountService = Tools.requireService(AdministrativeCalendarAccountService.class, this);
+        RateLimitFactory rateLimitFactory = Tools.requireService(RateLimitFactory.class, this);
 
 
         int period = leanConfig.getIntProperty(MessageAlarmConfig.PERIOD);
@@ -173,7 +175,8 @@ public class Activator extends HousekeepingActivator {
                                                  .setCalendarProviderRegistry(calendarProviderRegistry)
                                                  .setAdministrativeCalendarAccountService(administrativeCalendarAccountService)
                                                  .setLookAhead(lookAhead)
-                                                 .setOverdueWaitTime(overdueWaitTime).build();
+                                                 .setOverdueWaitTime(overdueWaitTime)
+                                                 .setRateLimitFactory(rateLimitFactory).build();
             ScheduledTimerTask scheduledTimerTask = clusterTimerService.scheduleAtFixedRate(CLUSTER_ID, worker, initialDelay, period, TimeUnit.MINUTES);
             scheduledTasks.put(scheduledTimerTask, worker);
             if (!registeredCalendarHandler) {

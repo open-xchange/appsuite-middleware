@@ -74,4 +74,14 @@ public class SMSAlarmConfig {
      */
     public static final Property SMS_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", true);
 
+    /**
+     * The amount of sms allowed to be sent in a given timeframe (see {@link #SMS_LIMIT_TIME_FRAME})
+     */
+    public static final Property SMS_LIMIT_AMOUNT = DefaultProperty.valueOf(PREFIX + "limit.amount", 50);
+
+    /**
+     * The timeframe in milliseconds used for the amount limit (see {@link #SMS_LIMIT_AMOUNT}
+     */
+    public static final Property SMS_LIMIT_TIME_FRAME = DefaultProperty.valueOf(PREFIX + "limit.timeframe", 60000l);
+
 }

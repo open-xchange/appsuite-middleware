@@ -96,9 +96,31 @@ public interface AlarmNotificationService {
     /**
      * Checks if the {@link AlarmNotificationService} is available for the given user.
      *
+     * @param userId The user id
+     * @param contextId The context id
      * @return true if it is available, false otherwise
      * @throws OXException
      */
     boolean isEnabled(int userId, int contextId) throws OXException;
+
+    /**
+     * Returns the maximum amount of messages this services allows a single user to send in a given time-frame.
+     *
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The amount or -1 to disable the rate limit
+     * @throws OXException
+     */
+    int getAmount(int userId, int contextId) throws OXException;
+
+    /**
+     * Returns the time-frame for the amount limit in milliseconds
+     *
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The time in milliseconds
+     * @throws OXException
+     */
+    long getTimeframe(int userId, int contextId) throws OXException;
 
 }

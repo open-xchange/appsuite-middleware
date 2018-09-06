@@ -47,42 +47,55 @@
  *
  */
 
-package com.openexchange.sms.tools;
+package com.openexchange.ratelimit.hz;
 
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.ratelimit.RateLimitFactory;
+import com.openexchange.ratelimit.RateLimiter;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * {@link SMSBucketService} provides a user based token-bucket for sms tokens
+ * {@link RateLimiterFactoryImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.1
+ * @since v7.10.1
  */
-public interface SMSBucketService {
+public class RateLimiterFactoryImpl implements RateLimitFactory{
+
+    private static final Logger LOG = LoggerFactory.getLogger(RateLimiterFactoryImpl.class);
+    private final ServiceLookup services;
 
     /**
-     * Retrieves the number of available sms tokens for the given user and reduce the amount by one.
-     * 
-     * @param session The user session
-     * @return The previous amount of sms tokens
-     * @throws OXException if it was unable to retrieve the sms token or if the sms limit is reached
+     * Initializes a new {@link RateLimiterFactoryImpl}.
      */
-    public int getSMSToken(Session session) throws OXException;
+    public RateLimiterFactoryImpl(ServiceLookup services) {
+        this.services = services;
+    }
+
+    @Override
+    public RateLimiter createLimiter(String id, int amount, long timeframe, int userId, int ctxId) throws OXException {
+        HazelcastInstance hazelcastInstance = getHazelcastInstance();
+        return new RateLimiterImpl(id, userId, ctxId, amount, timeframe, hazelcastInstance);
+    }
 
     /**
-     * Checks if the user sms limit is enabled for the given user
-     * @param session The user session
-     * @return true if SMSUserLimit is enabled, false otherwise
-     * @throws OXException
+     * Returns the {@link HazelcastInstance}. If the instance cannot be returned (i.e. due its absence)
+     * then an {@link OXException} will be thrown
+     *
+     * @return The {@link HazelcastInstance}
+     * @throws OXException if the {@link HazelcastInstance} is absent
      */
-    public boolean isEnabled(Session session) throws OXException;
+    private HazelcastInstance getHazelcastInstance() throws OXException {
+        HazelcastInstance hazelcastInstance = services.getOptionalService(HazelcastInstance.class);
+        if (hazelcastInstance == null) {
+            LOG.warn("The Hazelcast service is not available on this node.");
+            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
+        }
+        return hazelcastInstance;
+    }
 
-    /**
-     * Retrieves the refresh interval in hours rounded up
-     * 
-     * @param session The user session
-     * @return The time in hours rounded up
-     * @throws OXException if it was unable to retrieve the interval
-     */
-    public int getRefreshInterval(Session session) throws OXException;
 }

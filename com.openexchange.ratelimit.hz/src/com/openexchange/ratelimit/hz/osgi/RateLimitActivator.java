@@ -47,42 +47,29 @@
  *
  */
 
-package com.openexchange.sms.tools;
+package com.openexchange.ratelimit.hz.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.ratelimit.RateLimitFactory;
+import com.openexchange.ratelimit.hz.RateLimiterFactoryImpl;
 
 /**
- * {@link SMSBucketService} provides a user based token-bucket for sms tokens
+ * {@link RateLimitActivator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.1
+ * @since v7.10.1
  */
-public interface SMSBucketService {
+public class RateLimitActivator extends HousekeepingActivator{
 
-    /**
-     * Retrieves the number of available sms tokens for the given user and reduce the amount by one.
-     * 
-     * @param session The user session
-     * @return The previous amount of sms tokens
-     * @throws OXException if it was unable to retrieve the sms token or if the sms limit is reached
-     */
-    public int getSMSToken(Session session) throws OXException;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] {HazelcastInstance.class};
+    }
 
-    /**
-     * Checks if the user sms limit is enabled for the given user
-     * @param session The user session
-     * @return true if SMSUserLimit is enabled, false otherwise
-     * @throws OXException
-     */
-    public boolean isEnabled(Session session) throws OXException;
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(RateLimitFactory.class, new RateLimiterFactoryImpl(this));
+    }
 
-    /**
-     * Retrieves the refresh interval in hours rounded up
-     * 
-     * @param session The user session
-     * @return The time in hours rounded up
-     * @throws OXException if it was unable to retrieve the interval
-     */
-    public int getRefreshInterval(Session session) throws OXException;
 }

@@ -56,8 +56,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
+import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.hazelcast.config.Config;
@@ -72,6 +74,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.sms.tools.internal.SMSBucket;
 import com.openexchange.sms.tools.internal.SMSBucketServiceImpl;
 import com.openexchange.sms.tools.osgi.Services;
@@ -96,6 +99,8 @@ public class SMSBucketHZTest {
     private static HazelcastInstance hz2;
 
     private static SMSBucketService smsBucketService;
+
+    private static Session fake;
 
     @BeforeClass
     public static void initHazelcast() throws Exception {
@@ -145,10 +150,18 @@ public class SMSBucketHZTest {
             }
         });
         //        PowerMockito.when(Services.getService(ConfigViewFactory.class)).thenReturn(factory);
-        PowerMockito.when(factory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(view);
+        PowerMockito.when(factory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(view);
         PowerMockito.when(view.get(SMSConstants.SMS_USER_LIMIT_ENABLED, boolean.class)).thenReturn(true);
         PowerMockito.when(view.get(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, String.class)).thenReturn("2");
         PowerMockito.when(view.get(SMSConstants.SMS_USER_LIMIT_PROPERTY, String.class)).thenReturn("3");
+        fake = PowerMockito.mock(Session.class, new Answer<Integer>() {
+
+            @Override
+            public Integer answer(InvocationOnMock invocation) throws Throwable {
+                return 1;
+            }
+        });
+
         smsBucketService = new SMSBucketServiceImpl(hz1);
     }
 
@@ -157,7 +170,7 @@ public class SMSBucketHZTest {
 
         IMap<String, SMSBucket> map = hz2.getMap("SMS_Bucket");
         for (int x = 3; x > 0; x--) {
-            assertEquals("Unexpected amount", x, smsBucketService.getSMSToken(1, 1));
+            assertEquals("Unexpected amount", x, smsBucketService.getSMSToken(fake));
             assertEquals("Map in second hazelcast instace has a wrong size", 1, map.size());
             assertTrue("Map in second hazelcast instace dont have a SMSBucket for the given user", map.containsKey("1/1"));
             if (x != 1) {

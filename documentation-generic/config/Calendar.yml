@@ -361,7 +361,33 @@ properties:
         - com.openexchange.calendar.alarm.message.backgroundWorker.enabled
       file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Calendar", "Mail"]  
+      tags: ["Calendar", "Mail"]
+    - key: com.openexchange.calendar.alarm.mail.limit.amount
+      description: |
+        Defines the amount of mails which are allowed to be send within the given time-frame. A negative value deactivates this limit.
+      defaultValue: -1
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: 
+        - com.openexchange.calendar.alarm.mail.enabled
+        - com.openexchange.calendar.alarm.mail.limit.timeframe
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "Mail"]
+    - key: com.openexchange.calendar.alarm.mail.limit.timeframe
+      description: |
+        Defines the timeframe in milliseconds for the [[com.openexchange.calendar.alarm.mail.limit.amount]].
+      defaultValue: 60000
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.mail.enabled
+        - com.openexchange.calendar.alarm.mail.limit.amount
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "Mail"]      
 
     - key: com.openexchange.calendar.alarm.sms.time.shift
       description: |
@@ -386,6 +412,32 @@ properties:
       configcascadeAware: true
       related: 
         - com.openexchange.calendar.alarm.message.backgroundWorker.enabled
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "SMS"]
+    - key: com.openexchange.calendar.alarm.sms.limit.amount
+      description: |
+        Defines the amount of sms which are allowed to be send within the given time-frame. A negative value deactivates this limit.
+      defaultValue: 50
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: 
+        - com.openexchange.calendar.alarm.sms.enabled
+        - com.openexchange.calendar.alarm.sms.limit.timeframe
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "SMS"]
+    - key: com.openexchange.calendar.alarm.sms.limit.timeframe
+      description: |
+        Defines the timeframe in milliseconds for the [[com.openexchange.calendar.alarm.sms.limit.amount]].
+      defaultValue: 60000
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: 
+        - com.openexchange.calendar.alarm.sms.enabled
+        - com.openexchange.calendar.alarm.sms.limit.amount
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar", "SMS"]      

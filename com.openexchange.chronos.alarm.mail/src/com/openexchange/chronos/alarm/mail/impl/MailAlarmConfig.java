@@ -74,4 +74,14 @@ public class MailAlarmConfig {
      */
     public static final Property MAIL_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", true);
 
+    /**
+     * The amount of mails allowed to be sent in a given time-frame (see {@link #MAIL_LIMIT_TIME_FRAME})
+     */
+    public static final Property MAIL_LIMIT_AMOUNT = DefaultProperty.valueOf(PREFIX + "limit.amount", -1);
+
+    /**
+     * The timeframe in milliseconds used for the amount limit (see {@link #MAIL_LIMIT_AMOUNT}
+     */
+    public static final Property MAIL_LIMIT_TIME_FRAME = DefaultProperty.valueOf(PREFIX + "limit.timeframe", 60000l);
+
 }

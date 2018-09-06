@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hazelcast RateLimiter
+Bundle-SymbolicName: com.openexchange.ratelimit.hz
+Bundle-Version: 7.10.1
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.ratelimit.hz
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.openexchange.ratelimit.hz.osgi.RateLimitActivator
+Import-Package: com.hazelcast.core;version="3.10.2",
+ com.hazelcast.ringbuffer;version="3.10.2",
+ com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.ratelimit,
+ com.openexchange.server,
+ org.slf4j;version="1.7.25",
+ org.osgi.framework

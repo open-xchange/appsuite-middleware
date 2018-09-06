@@ -290,7 +290,7 @@ public class PlistResult implements Result {
         ResultObject resultObject;
         resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
         if (smsRemaining == 2) {
-            int hours = smsBucketService.getRefreshInterval(session.getUserId(), session.getContextId());
+            int hours = smsBucketService.getRefreshInterval(session);
             resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create(hours));
         }
 
@@ -380,8 +380,8 @@ public class PlistResult implements Result {
         }
 
         int remainingSMS = -1;
-        if (smsBucketService.isEnabled(session.getUserId(), session.getContextId())) {
-            remainingSMS = smsBucketService.getSMSToken(session.getUserId(), session.getContextId());
+        if (smsBucketService.isEnabled(session)) {
+            remainingSMS = smsBucketService.getSMSToken(session);
         }
         return remainingSMS;
     }

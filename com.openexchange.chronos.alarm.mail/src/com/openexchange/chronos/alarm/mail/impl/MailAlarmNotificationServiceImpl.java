@@ -115,4 +115,16 @@ public class MailAlarmNotificationServiceImpl implements AlarmNotificationServic
         LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, services);
         return leanConfig.getBooleanProperty(userId, contextId, MailAlarmConfig.MAIL_ENABLED);
     }
+
+    @Override
+    public int getAmount(int userId, int contextId) throws OXException {
+        LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, services);
+        return leanConfig.getIntProperty(userId, contextId, MailAlarmConfig.MAIL_LIMIT_AMOUNT);
+    }
+
+    @Override
+    public long getTimeframe(int userId, int contextId) throws OXException {
+        LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, services);
+        return leanConfig.getLongProperty(userId, contextId, MailAlarmConfig.MAIL_LIMIT_TIME_FRAME);
+    }
 }

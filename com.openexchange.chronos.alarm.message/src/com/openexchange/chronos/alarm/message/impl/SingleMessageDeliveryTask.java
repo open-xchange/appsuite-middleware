@@ -58,6 +58,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.alarm.message.AlarmNotificationService;
@@ -78,6 +79,7 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.util.Pair;
+import com.openexchange.ratelimit.RateLimitFactory;
 
 /**
  *
@@ -102,6 +104,7 @@ class SingleMessageDeliveryTask implements Runnable {
         private AlarmNotificationService alarmNotificationService;
         private CalendarProviderRegistry calendarProviderRegistry;
         private AdministrativeCalendarAccountService administrativeCalendarAccountService;
+        private RateLimitFactory rateLimitFactory;
 
         public Builder setCtx(Context ctx) {
             this.ctx = ctx;
@@ -168,20 +171,26 @@ class SingleMessageDeliveryTask implements Runnable {
             return this;
         }
 
+        public Builder setRateLimitFactory(RateLimitFactory rateLimitFactory) {
+            this.rateLimitFactory = rateLimitFactory;
+            return this;
+        }
+
         public SingleMessageDeliveryTask build() {
-            return new SingleMessageDeliveryTask(  dbservice,
-                                                storage,
-                                                alarmNotificationService,
-                                                factory,
-                                                calUtil,
-                                                calendarProviderRegistry,
-                                                administrativeCalendarAccountService,
-                                                ctx,
-                                                account,
-                                                alarm,
-                                                trigger,
-                                                processed,
-                                                callback);
+            return new SingleMessageDeliveryTask(   dbservice,
+                                                    storage,
+                                                    alarmNotificationService,
+                                                    factory,
+                                                    calUtil,
+                                                    calendarProviderRegistry,
+                                                    administrativeCalendarAccountService,
+                                                    rateLimitFactory,
+                                                    ctx,
+                                                    account,
+                                                    alarm,
+                                                    trigger,
+                                                    processed,
+                                                    callback);
         }
     }
 
@@ -200,6 +209,7 @@ class SingleMessageDeliveryTask implements Runnable {
     private final AlarmNotificationService notificationService;
     private final CalendarProviderRegistry calendarProviderRegistry;
     private final AdministrativeCalendarAccountService administrativeCalendarAccountService;
+    private final RateLimitFactory rateLimitFactory;
 
     /**
      * Initializes a new {@link SingleMessageDeliveryTask}.
@@ -225,6 +235,7 @@ class SingleMessageDeliveryTask implements Runnable {
                                         CalendarUtilities calUtil,
                                         CalendarProviderRegistry calendarProviderRegistry,
                                         AdministrativeCalendarAccountService administrativeCalendarAccountService,
+                                        RateLimitFactory rateLimitFactory,
                                         Context ctx,
                                         int account,
                                         Alarm alarm,
@@ -244,6 +255,7 @@ class SingleMessageDeliveryTask implements Runnable {
         this.notificationService = notificationService;
         this.calendarProviderRegistry = calendarProviderRegistry;
         this.administrativeCalendarAccountService = administrativeCalendarAccountService;
+        this.rateLimitFactory = rateLimitFactory;
 
     }
 
@@ -262,6 +274,7 @@ class SingleMessageDeliveryTask implements Runnable {
             if (event != null) {
                 Databases.autocommit(writeCon);
                 dbservice.backWritable(ctx, writeCon);
+                writeCon = null;
                 // send the message
                 sendMessage(event);
                 // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
@@ -388,15 +401,38 @@ class SingleMessageDeliveryTask implements Runnable {
     private void sendMessage(Event event) {
             Key key = new Key(ctx.getContextId(), account, event.getId(), alarm.getId());
             try {
-                if(notificationService.isEnabled(trigger.getUserId(), ctx.getContextId())) {
-                    notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
-                    LOG.trace("Message successfully send for {}", key);
+                int userId = trigger.getUserId();
+                int contextId = ctx.getContextId();
+                if(notificationService.isEnabled(userId, contextId)) {
+                    if(checkRateLimit(alarm.getAction(), notificationService.getAmount(userId, contextId), notificationService.getTimeframe(userId, contextId), trigger.getUserId(), ctx.getContextId())) {
+                        notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
+                        LOG.trace("Message successfully send for {}", key);
+                    } else {
+                        LOG.info("Due to the rate limit it is not possible to send the message for {}", key);
+                    }
                 } else {
                     LOG.trace("Message dropped because the AlarmNotificationService is not enabled for user {}.", trigger.getUserId());
                 }
             } catch (OXException e) {
                 LOG.warn("Unable to send message for calendar alarm ({}): {}", key, e.getMessage(), e);
             }
+    }
+
+    private static final String RATE_LIMIT_PREFIX = "MESSAGE_ALARM_";
+
+    /**
+     *
+     */
+    private boolean checkRateLimit(AlarmAction action, int amount, long timeframe, int userId, int ctxId) {
+        if(amount < 0 || rateLimitFactory == null) {
+            return true;
+        }
+        try {
+            return rateLimitFactory.createLimiter(RATE_LIMIT_PREFIX+action.getValue(), amount, timeframe, userId, ctxId).acquire();
+        } catch (OXException e) {
+            LOG.warn("Unable to create RateLimiter.", e);
+            return false;
+        }
     }
 
     private boolean checkEvent(Connection writeCon, Event event) throws OXException {

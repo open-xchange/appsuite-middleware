@@ -67,7 +67,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.sms.SMSServiceSPI;
-import com.openexchange.sms.tools.SMSBucketService;
 import com.openexchange.user.UserService;
 
 /**
@@ -84,7 +83,6 @@ public class SMSNotificationService implements AlarmNotificationService {
     private final TranslatorFactory translatorFactory;
     private final UserService userService;
     private final LeanConfigurationService leanConfigurationService;
-    private final SMSBucketService smsBucketService;
 
     /**
      * Initializes a new {@link SMSNotificationService}.
@@ -92,14 +90,12 @@ public class SMSNotificationService implements AlarmNotificationService {
     public SMSNotificationService(  SMSServiceSPI smsService,
                                     TranslatorFactory translatorFactory,
                                     UserService userService,
-                                    LeanConfigurationService leanConfigurationService,
-                                    SMSBucketService smsBucketService) {
+                                    LeanConfigurationService leanConfigurationService) {
         super();
         this.smsService = smsService;
         this.translatorFactory = translatorFactory;
         this.userService = userService;
         this.leanConfigurationService = leanConfigurationService;
-        this.smsBucketService = smsBucketService;
     }
 
     @Override
@@ -109,9 +105,7 @@ public class SMSNotificationService implements AlarmNotificationService {
             LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", userId, contextId);
             return;
         } else {
-            if (smsBucketService.isEnabled(userId, contextId)) {
-                smsBucketService.getSMSToken(userId, contextId);
-            }
+            // TODO add rate limit
             smsService.sendMessage(new String[] {phoneNumber}, generateSMS(event, userId, contextId), userId, contextId);
         }
     }
@@ -165,6 +159,16 @@ public class SMSNotificationService implements AlarmNotificationService {
     @Override
     public boolean isEnabled(int userId, int contextId) throws OXException {
         return leanConfigurationService.getBooleanProperty(userId, contextId, SMSAlarmConfig.SMS_ENABLED);
+    }
+
+    @Override
+    public int getAmount(int userId, int contextId) throws OXException {
+        return leanConfigurationService.getIntProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_AMOUNT);
+    }
+
+    @Override
+    public long getTimeframe(int userId, int contextId) throws OXException {
+        return leanConfigurationService.getLongProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_TIME_FRAME);
     }
 
 }
