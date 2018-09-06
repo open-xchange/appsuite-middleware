@@ -1,3 +1,4 @@
+package com.openexchange.health;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,35 +48,33 @@
  *
  */
 
-package com.openexchange.health;
-
-import com.openexchange.threadpool.AbstractTask;
-
-
 /**
- * {@link DefaultHealthCheckTask}
+ * {@link NodeHealthState}- The node health state enum
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class DefaultHealthCheckTask extends AbstractTask<DefaultHealthCheckResponse> {
+public enum NodeHealthState {
 
-    private final DefaultHealthCheck healthCheck;
-    private final String name;
+    /**
+     * Node health state determining the node is running fine
+     */
+    UP("UP"),
 
-    public DefaultHealthCheckTask(DefaultHealthCheck healthCheck, String name) {
-        super();
-        this.healthCheck = healthCheck;
-        this.name = name;
+    /**
+     * Node health state determining the node is in trouble
+     */
+    DOWN("DOWN")
+    ;
+
+    private final String state;
+
+    private NodeHealthState(String state) {
+        this.state = state;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public DefaultHealthCheckResponse call() throws Exception {
-        return healthCheck.execute();
+    public String getState() {
+        return state;
     }
 
 }

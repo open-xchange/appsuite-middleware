@@ -1,3 +1,4 @@
+package com.openexchange.health;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,74 +48,32 @@
  *
  */
 
-package com.openexchange.health;
-
-import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.microprofile.health.HealthCheckResponse.State;
-import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 
 /**
- * {@link DefaultHealthCheckResponseBuilder}
+ * {@link NodeHealthCheckResponse}- The node health check response interface
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class DefaultHealthCheckResponseBuilder extends HealthCheckResponseBuilder {
+public interface NodeHealthCheckResponse {
 
-    private String name = "unknown";
-    private State state = State.UP;
-    private Map<String, Object> data = null;
+    /**
+     * Gets the name of the executed node health check
+     * @return The name
+     */
+    String getName();
 
-    @Override
-    public DefaultHealthCheckResponseBuilder name(String name) {
-        this.name = name;
-        return this;
-    }
+    /**
+     * Gets additional data from node health check execution
+     * @return The map containing additional data
+     */
+    Map<String, Object> getData();
 
-    @Override
-    public DefaultHealthCheckResponseBuilder withData(String key, String value) {
-        return putData(key, value);
-    }
-
-    @Override
-    public DefaultHealthCheckResponseBuilder withData(String key, long value) {
-        return putData(key, value);
-    }
-
-    @Override
-    public DefaultHealthCheckResponseBuilder withData(String key, boolean value) {
-        return putData(key, value);
-    }
-
-    @Override
-    public DefaultHealthCheckResponseBuilder up() {
-        this.state = State.UP;
-        return this;
-    }
-
-    @Override
-    public DefaultHealthCheckResponseBuilder down() {
-        this.state = State.DOWN;
-        return this;
-    }
-
-    @Override
-    public DefaultHealthCheckResponseBuilder state(boolean up) {
-        return up ? up() : down();
-    }
-
-    @Override
-    public DefaultHealthCheckResponse build() {
-        return new DefaultHealthCheckResponse(name, state, data);
-    }
-
-    private DefaultHealthCheckResponseBuilder putData(String key, Object value) {
-        if (data == null) {
-            data = new HashMap<>();
-        }
-        data.put(key, value);
-        return this;
-    }
+    /**
+     * Gets the node health state determined by node health check execution.
+     * @return NodeHealthState.UP in case of successful node health check execution, NodeHealthState.DOWN otherwise
+     */
+    NodeHealthState getState();
 
 }

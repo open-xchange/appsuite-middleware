@@ -47,48 +47,27 @@
  *
  */
 
-package com.openexchange.health.internal;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.health.DefaultHealthCheck;
+package com.openexchange.health;
 
 
 /**
- * {@link HealthCheckRegistry}
+ * {@link NodeHealthCheck} - The node health check interface
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class HealthCheckRegistry {
+public interface NodeHealthCheck {
 
-    private final Map<String, DefaultHealthCheck> healthChecks;
+    /**
+     * Gets the name of the node health check
+     * @return The name
+     */
+    String getName();
 
-    public HealthCheckRegistry() {
-        healthChecks = new ConcurrentHashMap<>();
-    }
-
-    public Map<String, DefaultHealthCheck> getAll() {
-        return Collections.unmodifiableMap(healthChecks);
-    }
-
-    public DefaultHealthCheck get(String name) {
-        return healthChecks.get(name);
-    }
-
-    public DefaultHealthCheck add(DefaultHealthCheck healthCheck) {
-        return healthChecks.putIfAbsent(healthCheck.getName(), healthCheck);
-    }
-
-    //    public DefaultHealthCheck add(HealthCheck healthCheck) {
-    //        return healthChecks.putIfAbsent(healthCheck.getClass().getName(), new DefaultHealthCheck(healthCheck, healthCheck.getClass().getName()));
-    //    }
-
-    public DefaultHealthCheck remove(String name) {
-        return healthChecks.remove(name);
-    }
-
-
+    /**
+     * Executes the node health check
+     * @return The node health check response
+     */
+    NodeHealthCheckResponse call();
 
 }

@@ -47,48 +47,43 @@
  *
  */
 
-package com.openexchange.health.osgi;
+package com.openexchange.health;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.health.DefaultHealthCheck;
-import com.openexchange.health.internal.HealthCheckRegistry;
-
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link HealthCheckServiceTracker}
+ * {@link NodeHealthCheckProperty}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class HealthCheckServiceTracker implements ServiceTrackerCustomizer<DefaultHealthCheck, DefaultHealthCheck> {
+public enum NodeHealthCheckProperty implements Property {
 
-    private final BundleContext context;
-    private final HealthCheckRegistry registry;
+    username(NodeHealthCheckProperty.PREFIX, NodeHealthCheckProperty.EMPTY),
+    password(NodeHealthCheckProperty.PREFIX, NodeHealthCheckProperty.EMPTY),
+    skip(NodeHealthCheckProperty.PREFIX, NodeHealthCheckProperty.EMPTY),
+    ignore(NodeHealthCheckProperty.PREFIX, NodeHealthCheckProperty.EMPTY)
+    ;
 
-    public HealthCheckServiceTracker(BundleContext context, HealthCheckRegistry registry) {
-        super();
-        this.context = context;
-        this.registry = registry;
+    private static final String PREFIX = "com.openexchange.health.";
+    private static final String EMPTY = "";
+
+    private final String name;
+    private final String defaultValue;
+
+    private NodeHealthCheckProperty(String name, String value) {
+        this.name = name;
+        this.defaultValue = value;
     }
 
     @Override
-    public DefaultHealthCheck addingService(ServiceReference<DefaultHealthCheck> reference) {
-        DefaultHealthCheck service = context.getService(reference);
-        registry.add(service);
-        return service;
+    public String getFQPropertyName() {
+        return name + name();
     }
 
     @Override
-    public void modifiedService(ServiceReference<DefaultHealthCheck> reference, DefaultHealthCheck service) {
-        // nothing to do
-    }
-
-    @Override
-    public void removedService(ServiceReference<DefaultHealthCheck> reference, DefaultHealthCheck service) {
-        registry.remove(service.getName());
-        context.ungetService(reference);
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
 }

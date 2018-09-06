@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Health check bundle
 Bundle-SymbolicName: com.openexchange.health
 Bundle-Version: 7.10.1
-Bundle-Activator: com.openexchange.health.osgi.HealthActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.openexchange.health
