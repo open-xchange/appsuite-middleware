@@ -123,7 +123,7 @@ public class ConfigDBHealthCheck extends DefaultHealthCheck {
                 data.put("writeConnectionError", e.getMessage());
             } finally {
                 Databases.closeSQLStuff(rs, stmt);
-                dbService.backWritable(con);
+                dbService.backWritableAfterReading(con);
             }
         }
 
