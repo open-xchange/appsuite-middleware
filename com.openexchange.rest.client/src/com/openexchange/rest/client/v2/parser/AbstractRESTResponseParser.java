@@ -60,7 +60,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -145,7 +144,7 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
      * @see com.openexchange.rest.client.RESTResponseParser#parse(org.apache.http.client.methods.CloseableHttpResponse)
      */
     @Override
-    public RESTResponse parse(CloseableHttpResponse response) throws OXException, IOException {
+    public RESTResponse parse(HttpResponse response) throws OXException, IOException {
         // Get the response code and assert
         int statusCode = assertStatusCode(response);
         if (statusCode == 304) {

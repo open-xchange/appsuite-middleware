@@ -50,6 +50,7 @@
 package com.openexchange.rest.client.v2.parser;
 
 import java.io.IOException;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.client.v2.RESTResponse;
@@ -68,5 +69,5 @@ public interface RESTResponseParser {
      * @param response The response to parse
      * @return The parsed {@link RESTResponse}.
      */
-    RESTResponse parse(CloseableHttpResponse response) throws OXException, IOException;
+    RESTResponse parse(HttpResponse response) throws OXException, IOException;
 }

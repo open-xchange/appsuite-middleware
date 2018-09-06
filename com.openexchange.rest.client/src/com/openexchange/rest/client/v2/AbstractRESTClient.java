@@ -57,7 +57,6 @@ import java.util.Map.Entry;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -121,7 +120,7 @@ public abstract class AbstractRESTClient implements Closeable {
      * @throws OXException if a client protocol error or an I/O error occurs
      */
     public RESTResponse executeRequest(HttpRequestBase httpRequest) throws OXException {
-        CloseableHttpResponse httpResponse = null;
+        HttpResponse httpResponse = null;
         try {
             httpResponse = execute(httpRequest);
             return parser.parse(httpResponse);
@@ -143,7 +142,7 @@ public abstract class AbstractRESTClient implements Closeable {
      * @throws OXException if a client protocol error or an I/O error occurs
      */
     public InputStream download(HttpRequestBase httpRequest) throws OXException {
-        CloseableHttpResponse httpResponse = null;
+        HttpResponse httpResponse = null;
         try {
             httpResponse = execute(httpRequest);
             if (httpResponse.getStatusLine().getStatusCode() == 200) {
@@ -271,9 +270,9 @@ public abstract class AbstractRESTClient implements Closeable {
      * @throws ClientProtocolException if a client protocol error occurs
      * @throws IOException if an I/O error occurs
      */
-    private CloseableHttpResponse execute(HttpRequestBase httpRequest) throws ClientProtocolException, IOException {
+    private HttpResponse execute(HttpRequestBase httpRequest) throws ClientProtocolException, IOException {
         LOGGER.debug("Executing request: '{}'", httpRequest.getURI());
-        CloseableHttpResponse httpResponse = httpClient.execute(httpRequest);
+        HttpResponse httpResponse = httpClient.execute(httpRequest);
         LOGGER.debug("Request '{}' completed with status code '{}'", httpRequest.getURI(), httpResponse.getStatusLine().getStatusCode());
         return httpResponse;
     }
