@@ -133,15 +133,6 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
             response.addHeader(HttpHeaders.CONTENT_TYPE, indexOf < 0 ? value : value.substring(0, indexOf));
         });
 
-        // Location header parser
-        headerParsers.put(HttpHeaders.LOCATION, (response, httpResponse) -> {
-            String value = getHeaderValue(httpResponse, HttpHeaders.LOCATION);
-            if (Strings.isEmpty(value)) {
-                return;
-            }
-            response.addHeader(HttpHeaders.LOCATION, value);
-        });
-
         //////////////////// RESPONSE BODY PARSERS //////////////////////////
         responseBodyParsers = new HashMap<>(4);
         responseBodyParsers.put(RESTMimeType.JSON, new JsonRESTResponseBodyParser());
@@ -201,8 +192,13 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
      * @param restResponse The {@link RESTResponse}
      */
     private void parseHeaders(HttpResponse httpResponse, RESTResponse restResponse) {
-        for (String key : headerParsers.keySet()) {
-            headerParsers.get(key).accept(restResponse, httpResponse);
+        for (Header header : httpResponse.getAllHeaders()) {
+            BiConsumer<RESTResponse, HttpResponse> consumer = headerParsers.get(header.getName());
+            if (consumer == null) {
+                restResponse.addHeader(header.getName(), header.getValue());
+                continue;
+            }
+            consumer.accept(restResponse, httpResponse);
         }
     }
 
@@ -275,6 +271,7 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
         for (RESTResponseBodyParser bodyParser : responseBodyParsers.values()) {
             if (bodyParser.getContentTypes().contains(contentType)) {
                 response.setResponseBody(bodyParser.parse(httpResponse, response));
+                return;
             }
         }
     }
