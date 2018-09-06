@@ -49,9 +49,12 @@
 
 package com.openexchange.microsoft.graph.api;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -328,7 +331,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                 continue;
             }
             HttpRequestBase get = new HttpGet(location);
-            return client.download(get);
+            RESTResponse response = client.executeRequest(get);
+            return new ByteArrayInputStream((byte[]) response.getResponseBody()); //FIXME: asap!
         }
         // No thumbnail available
         return null;

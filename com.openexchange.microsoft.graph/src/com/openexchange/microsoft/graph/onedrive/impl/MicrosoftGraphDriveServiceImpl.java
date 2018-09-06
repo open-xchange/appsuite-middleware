@@ -654,7 +654,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         if (modifiedFields == null || modifiedFields.contains(Field.DESCRIPTION)) {
             body.put("description", file.getDescription());
         }
-        if (Strings.isNotEmpty(parentId)) {
+        if (parentId != null) {
             JSONObject parentRef = new JSONObject();
             parentRef.put("id", parentId);
             body.put("parentReference", parentRef);
