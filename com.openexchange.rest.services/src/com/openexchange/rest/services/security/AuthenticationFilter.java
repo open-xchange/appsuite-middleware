@@ -95,10 +95,32 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
 
-    private static interface AnnotationProvider {
+    /** The authenticator using default credentials */
+    private static final class DefaultEndpointAuthenticator implements EndpointAuthenticator {
 
-        <A extends Annotation> A getAnnotation(Class<A> annotationClass);
+        private final String authLogin;
+        private final String authPassword;
+
+        /**
+         * Initializes a new {@link EndpointAuthenticatorImplementation}.
+         */
+        DefaultEndpointAuthenticator(String authLogin, String authPassword) {
+            this.authLogin = authLogin;
+            this.authPassword = authPassword;
+        }
+
+        @Override
+        public String getRealmName() {
+            return "OX REST";
+        }
+
+        @Override
+        public boolean authenticate(String login, String password, Method invokedMethod) {
+            return authLogin.equals(login) && authPassword.equals(password);
+        }
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     @Context
     private ResourceInfo resourceInfo;
@@ -107,19 +129,16 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     private ResourceContext resourceContext;
 
     private final boolean doFail;
-    private final String authLogin;
-    private final String authPassword;
+    private final EndpointAuthenticator defaultAuthenticator;
 
     public AuthenticationFilter(String authLogin, String authPassword) {
         super();
         if (Strings.isEmpty(authLogin) || Strings.isEmpty(authPassword)) {
             doFail = true;
-            this.authLogin = null;
-            this.authPassword = null;
+            defaultAuthenticator = null;
         } else {
             doFail = false;
-            this.authLogin = authLogin.trim();
-            this.authPassword = authPassword.trim();
+            defaultAuthenticator = new DefaultEndpointAuthenticator(authLogin.trim(), authPassword.trim());
         }
     }
 
@@ -234,8 +253,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 new Throwable("Denied request to REST interface"));
             deny(requestContext);
         } else {
-            boolean authenticated = authenticated(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
-            reflectAuthenticated(authenticated, "OX REST", requestContext);
+            authenticatorAuth(defaultAuthenticator, requestContext, null);
         }
     }
 
@@ -302,17 +320,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
         // Unsupported auth scheme
         return null;
-    }
-
-    private boolean authenticated(String authHeader) {
-        Credentials creds = acquireCredentialsFromAuthHeader(authHeader);
-        if (null == creds) {
-            // Authorization header missing, invalid credentials or unsupported authentication scheme
-            return false;
-        }
-
-        // Check parsed credentials
-        return authLogin.equals(creds.getLogin()) && authPassword.equals(creds.getPassword());
     }
 
 }
