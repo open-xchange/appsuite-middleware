@@ -187,7 +187,7 @@ abstract class AbstractMicrosoftGraphAPI {
      * @throws OXException if an error is occurred
      */
     void deleteResource(String accessToken, String path) throws OXException {
-        executeRequest(createRequest(RESTMethod.DELETE, accessToken, path));
+        client.execute(createRequest(RESTMethod.DELETE, accessToken, path));
     }
 
     //////////////////////////////// PATCH ///////////////////////////////////////
