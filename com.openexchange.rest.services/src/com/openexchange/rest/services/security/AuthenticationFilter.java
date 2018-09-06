@@ -51,6 +51,7 @@ package com.openexchange.rest.services.security;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Arrays;
 import javax.annotation.Priority;
@@ -135,8 +136,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     }
 
     private EndpointAuthenticator acquireAuthenticator() {
-        if (EndpointAuthenticator.class.isInstance(resourceInfo.getResourceClass())) {
-            return (EndpointAuthenticator) resourceContext.getResource(resourceInfo.getResourceClass());
+        Object resourceInstance = resourceContext.getResource(resourceInfo.getResourceClass());
+        if (EndpointAuthenticator.class.isInstance(resourceInstance)) {
+            return (EndpointAuthenticator) resourceInstance;
         }
 
         return null;
@@ -160,6 +162,17 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 Role role = roleAllowed.value();
                 if (Role.BASIC_AUTHENTICATED == role) {
                     basicAuth(requestContext);
+                    return;
+                }
+                if (Role.INDIVIDUAL_BASIC_AUTHENTICATED == role) {
+                    EndpointAuthenticator authenticator = acquireAuthenticator();
+                    if (null == authenticator) {
+                        LOG.warn("Detected role '{}' in class {}, but that end-point does not implement interface {}", Role.INDIVIDUAL_BASIC_AUTHENTICATED.getId(), resourceInfo.getResourceClass().getName(), EndpointAuthenticator.class.getName());
+                        deny(requestContext);
+                        return;
+                    }
+
+                    authenticatorAuth(authenticator, requestContext, resourceInfo.getResourceMethod());
                     return;
                 }
 
@@ -187,11 +200,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                         return;
                     }
 
-                    String authHeader = requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-                    Credentials credentials = acquireCredentialsFromAuthHeader(authHeader);
-
-                    boolean authenticated = authenticator.authenticate(credentials.getLogin(), credentials.getPassword());
-                    reflectAuthenticated(authenticated, authenticator.getRealmName(), requestContext);
+                    authenticatorAuth(authenticator, requestContext, resourceInfo.getResourceMethod());
                     return;
                 }
 
@@ -228,6 +237,24 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             boolean authenticated = authenticated(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION));
             reflectAuthenticated(authenticated, "OX REST", requestContext);
         }
+    }
+
+    private void authenticatorAuth(EndpointAuthenticator authenticator, ContainerRequestContext requestContext, Method invokedMethod) {
+        if (authenticator.permitAll(invokedMethod)) {
+            // Nothing to do
+            return;
+        }
+
+        String authHeader = requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        Credentials credentials = acquireCredentialsFromAuthHeader(authHeader);
+        if (null == credentials) {
+            reflectAuthenticated(false, authenticator.getRealmName(), requestContext);
+            return;
+        }
+
+        boolean authenticated = authenticator.authenticate(credentials.getLogin(), credentials.getPassword(), invokedMethod);
+        reflectAuthenticated(authenticated, authenticator.getRealmName(), requestContext);
+        return;
     }
 
     private void reflectAuthenticated(boolean authenticated, String realm, ContainerRequestContext requestContext) {

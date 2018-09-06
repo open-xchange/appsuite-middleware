@@ -49,6 +49,8 @@
 
 package com.openexchange.rest.services;
 
+import java.lang.reflect.Method;
+
 /**
  * {@link EndpointAuthenticator} - Performs authentication for a certain REST end-point.
  *
@@ -58,13 +60,29 @@ package com.openexchange.rest.services;
 public interface EndpointAuthenticator {
 
     /**
+     * Whether all accesses are permitted.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: If this method returns <code>true</code>, {@link #authenticate(String, String, Method) authenticate()} is no more called.
+     * </div>
+     *
+     * @param invokedMethod The method of the REST end-point that is attempted being accessed
+     * @return <code>true</code> if all accesses are permitted; otherwise <code>false</code>
+     */
+    default boolean permitAll(Method invokedMethod) {
+        return false;
+    }
+
+    /**
      * Authenticates specified request context for a certain REST end-point.
      *
      * @param login The login to check
      * @param password The password to check
+     * @param invokedMethod The method of the REST end-point that is attempted being accessed
      * @return <code>true</code> if successfully authenticated; otherwise <code>false</code>
+     * @see #permitAll(Method)
      */
-    boolean authenticate(String login, String password);
+    boolean authenticate(String login, String password, Method invokedMethod);
 
     /**
      * Gets the name of the realm.

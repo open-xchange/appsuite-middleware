@@ -49,6 +49,7 @@
 
 package com.openexchange.health.rest;
 
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -73,6 +74,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.health.DefaultHealthCheckResponse;
 import com.openexchange.health.internal.HealthCheckService;
+import com.openexchange.rest.services.EndpointAuthenticator;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.version.Version;
@@ -105,7 +107,12 @@ public class HealthCheckRestEndpoint implements EndpointAuthenticator {
     }
 
     @Override
-    public boolean authenticate(String login, String password) {
+    public boolean permitAll(Method invokedMethod) {
+        return true;
+    }
+
+    @Override
+    public boolean authenticate(String login, String password, Method invokedMethod) {
         // TODO Check against configured login/password
         return true;
     }
