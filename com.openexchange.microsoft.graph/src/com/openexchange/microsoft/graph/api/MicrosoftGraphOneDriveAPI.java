@@ -219,8 +219,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     public InputStream getContent(String accessToken, String itemId) throws OXException {
         JSONObject o = getItem(accessToken, itemId);
         String location = o.optString("@microsoft.graph.downloadUrl");
-        HttpRequestBase get = new HttpGet(location);
-        return client.download(get);
+        return getStream(location);
     }
 
     /**

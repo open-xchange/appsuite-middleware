@@ -54,9 +54,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.HttpGet;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
 import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
@@ -84,6 +86,8 @@ abstract class AbstractMicrosoftGraphAPI {
         this.client = client;
     }
 
+    //////////////////////////////// GET ///////////////////////////////////////
+
     /**
      * Gets the REST resource from the specified path
      * 
@@ -97,25 +101,6 @@ abstract class AbstractMicrosoftGraphAPI {
     }
 
     /**
-     * Gets the binary resource from the specified path
-     * 
-     * @param accessToken The oauth access token
-     * @param path The resource's path
-     * @return The byte array with the resource's contents
-     * @throws OXException if an error is occurred
-     */
-    byte[] getBinaryResource(String accessToken, String path) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, path);
-        request.setAccessToken(accessToken);
-        RESTResponse restResponse = client.execute(request);
-        // TODO: Check for errors
-        if (!(restResponse.getResponseBody() instanceof byte[])) {
-            throw new OXException(666, "binary resournce not found");
-        }
-        return (byte[]) restResponse.getResponseBody();
-    }
-
-    /**
      * Gets the REST resource from the specified path and the specified query
      * parameters
      * 
@@ -126,59 +111,179 @@ abstract class AbstractMicrosoftGraphAPI {
      * @throws OXException if an error is occurred
      */
     JSONObject getResource(String accessToken, String path, Map<String, String> queryParams) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.GET, path);
-        request.setAccessToken(accessToken);
-        for (Entry<String, String> queryParam : queryParams.entrySet()) {
-            request.setQueryParameter(queryParam.getKey(), queryParam.getValue());
-        }
-        return executeRequest(request);
+        return executeRequest(createRequest(RESTMethod.GET, accessToken, path, queryParams));
     }
 
     /**
+     * Gets the binary resource from the specified path
      * 
-     * @param accessToken
-     * @param path
-     * @return
-     * @throws OXException
+     * @param accessToken The oauth access token
+     * @param path The resource's path
+     * @return The byte array with the resource's contents
+     * @throws OXException if an error is occurred
+     */
+    byte[] getBinaryResource(String accessToken, String path) throws OXException {
+        RESTResponse restResponse = client.execute(createRequest(RESTMethod.GET, accessToken, path));
+        // TODO: Check for errors
+        if (!(restResponse.getResponseBody() instanceof byte[])) {
+            throw new OXException(666, "binary resournce not found");
+        }
+        return (byte[]) restResponse.getResponseBody();
+    }
+
+    /**
+     * Gets the stream from the specified path. Use to stream data from the
+     * remote end-point to the client, i.e. download.
+     * 
+     * @param path The path
+     * @return The {@link InputStream}
+     * @throws OXException if an error is occurred
+     */
+    InputStream getStream(String path) throws OXException {
+        return client.download(new HttpGet(path));
+    }
+
+    //////////////////////////////// POST ///////////////////////////////////////
+
+    /**
+     * Posts the specified {@link JSONObject} body to the specified path
+     * 
+     * @param accessToken The oauth access token
+     * @param path The path
+     * @param body The body to post
+     * @return A {@link JSONObject} with the resource metadata
+     * @throws OXException if an error is occurred
      */
     JSONObject postResource(String accessToken, String path, JSONObject body) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.POST, path);
-        request.setAccessToken(accessToken);
-        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        MicrosoftGraphRequest request = createRequest(RESTMethod.POST, accessToken, path);
         request.sethBodyEntity(new JSONObjectEntity(body));
         return executeRequest(request);
     }
 
+    //////////////////////////////// PUT ///////////////////////////////////////
+
+    /**
+     * Puts the specified {@link JSONObject} body to the specified path
+     * 
+     * @param accessToken The oauth access token
+     * @param path The path
+     * @param body The body to post
+     * @return A {@link JSONObject} with the resource metadata
+     * @throws OXException if an error is occurred
+     */
     JSONObject putResource(String accessToken, String path, String contentType, long contentLength, InputStream body) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.PUT, path);
-        request.setAccessToken(accessToken);
-        request.setHeader(HttpHeaders.CONTENT_TYPE, contentType);
+        MicrosoftGraphRequest request = createRequest(RESTMethod.POST, accessToken, path, contentType);
         request.sethBodyEntity(new InputStreamEntity(body, contentLength, contentType));
         return executeRequest(request);
     }
 
+    //////////////////////////////// DELETE ///////////////////////////////////////
+
+    /**
+     * Deletes a resource
+     * 
+     * @param accessToken The oauth access token
+     * @param path The path
+     * @throws OXException if an error is occurred
+     */
     void deleteResource(String accessToken, String path) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.DELETE, path);
-        request.setAccessToken(accessToken);
-        client.execute(request);
+        executeRequest(createRequest(RESTMethod.DELETE, accessToken, path));
     }
 
+    //////////////////////////////// PATCH ///////////////////////////////////////
+
+    /**
+     * Patches the specified {@link JSONObject} body to the specified path
+     * 
+     * @param accessToken The oauth access token
+     * @param path The path
+     * @param body The body to post
+     * @return A {@link JSONObject} with the resource metadata
+     * @throws OXException if an error is occurred
+     */
     JSONObject patchResource(String accessToken, String path, JSONObject body) throws OXException {
-        MicrosoftGraphRequest request = new MicrosoftGraphRequest(RESTMethod.PATCH, path);
-        request.setAccessToken(accessToken);
-        request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        MicrosoftGraphRequest request = createRequest(RESTMethod.PATCH, accessToken, path);
         request.sethBodyEntity(new JSONObjectEntity(body));
         return executeRequest(request);
     }
 
+    //////////////////////////////// HELPERS ///////////////////////////////////
+
     /**
+     * Creates a {@link MicrosoftGraphRequest} with the specified {@link RESTMethod} and access token
+     * for the specified end-point
      * 
-     * @param request
-     * @return
-     * @throws OXException
+     * @param method the {@link RESTMethod}
+     * @param accessToken The oauth access token
+     * @param path The path
+     * @return The {@link MicrosoftGraphRequest}
+     */
+    private MicrosoftGraphRequest createRequest(RESTMethod method, String accessToken, String path) {
+        return createRequest(method, accessToken, path, APPLICATION_JSON, Collections.emptyMap());
+    }
+
+    /**
+     * Creates a {@link MicrosoftGraphRequest} with the specified {@link RESTMethod}, access token
+     * and content type for the specified end-point
+     * 
+     * @param method the {@link RESTMethod}
+     * @param accessToken The oauth access token
+     * @param path The path
+     * @param contentType The Contenty-Type
+     * @return The {@link MicrosoftGraphRequest}
+     */
+    private MicrosoftGraphRequest createRequest(RESTMethod method, String accessToken, String path, String contentType) {
+        return createRequest(method, accessToken, path, contentType, Collections.emptyMap());
+    }
+
+    /**
+     * Creates a {@link MicrosoftGraphRequest} with the specified {@link RESTMethod}, access token
+     * and query parameters for the specified end-point
+     * 
+     * @param method the {@link RESTMethod}
+     * @param accessToken The oauth access token
+     * @param path The path
+     * @param queryParameters The query parameters
+     * @return The {@link MicrosoftGraphRequest}
+     */
+    private MicrosoftGraphRequest createRequest(RESTMethod method, String accessToken, String path, Map<String, String> queryParameters) {
+        return createRequest(method, accessToken, path, APPLICATION_JSON, queryParameters);
+    }
+
+    /**
+     * Creates a {@link MicrosoftGraphRequest} with the specified {@link RESTMethod}, access token, content type
+     * and query parameters for the specified end-point
+     * 
+     * @param method the {@link RESTMethod}
+     * @param accessToken The oauth access token
+     * @param path The path
+     * @param contentType The Contenty-Type
+     * @param queryParameters The query parameters
+     * @return The {@link MicrosoftGraphRequest}
+     */
+    private MicrosoftGraphRequest createRequest(RESTMethod method, String accessToken, String path, String contentType, Map<String, String> queryParameters) {
+        MicrosoftGraphRequest request = new MicrosoftGraphRequest(method, path);
+        request.setAccessToken(accessToken);
+        request.setHeader(HttpHeaders.CONTENT_TYPE, Strings.isEmpty(contentType) ? APPLICATION_JSON : contentType);
+        for (Entry<String, String> queryParam : queryParameters.entrySet()) {
+            request.setQueryParameter(queryParam.getKey(), queryParam.getValue());
+        }
+        return request;
+    }
+
+    /**
+     * Executes the specified {@link MicrosoftGraphRequest}
+     * 
+     * @param request the request to execute
+     * @return The response body as a {@link JSONObject}
+     * @throws OXException if an error is occurred
      */
     private JSONObject executeRequest(MicrosoftGraphRequest request) throws OXException {
         RESTResponse restResponse = client.execute(request);
+        Object responseBody = restResponse.getResponseBody();
+        if (responseBody == null) {
+            throw new OXException(666, "no response body");
+        }
         //FIXME: Check the returned entity type
         JSONObject response = ((JSONValue) restResponse.getResponseBody()).toObject();
         checkForErrors(response);
