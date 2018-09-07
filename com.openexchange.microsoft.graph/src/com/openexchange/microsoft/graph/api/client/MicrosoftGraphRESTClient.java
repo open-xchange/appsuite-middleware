@@ -117,8 +117,10 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
             // Fine, we try to see if the response contains any JSON body
             if (responseBody instanceof String) {
                 responseBodyCandidate = tryParseAsJSON((String) responseBody);
-                // After type correction, explicitly set it as JSONObject.
-                restResponse.setResponseBody(responseBodyCandidate);
+                if (responseBodyCandidate != null) {
+                    // After type correction, explicitly set it as JSONObject.
+                    restResponse.setResponseBody(responseBodyCandidate);
+                }
             } else if (responseBody instanceof JSONObject) {
                 checkForErrors((JSONObject) responseBody);
                 return restResponse;
