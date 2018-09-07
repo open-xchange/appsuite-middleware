@@ -140,15 +140,16 @@ flags:
   description: Flags indicating certain aspects of an event.
   items:
     type: string
-    enum: ["attachments", "alarms", "scheduled", "organizer", "attendee", "on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ]
+    enum: ["attachments", "alarms", "scheduled", "organizer", "organizer_on_behalf", "attendee", "attendee_on_behalf", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ]
     description: >
       Event Flags:
        * `attachments` - The event contains at least one attachment. 
        * `alarms` - The calendar user has at least one alarm associated with the event.
        * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.
        * `organizer` - The calendar user is the <i>organizer<i> of the meeting. 
+       * `organizer_on_behalf` - The calendar user is the <i>organizer<i> of the meeting, and the current user acts on behalf of him.
        * `attendee` - The calendar user is <i>attendee<i> of the meeting.
-       * `on_behalf` - The current user is different from the calendar user, hence acts <i>on behalf of</i> the calendar user.
+       * `attendee_on_behalf` - The calendar user is <i>attendee<i> of the meeting, and the current user acts on behalf of him.
        * `private` - Event is classified <i>private</i>, so is invisible for others. 
        * `confidential` - Event is classified as <i>confidential</i>, so only start and end time are visible for others.
        * `transparent` - Event is <i>transparent</i> for the calendar user, i.e. invisible to free/busy time searches.
