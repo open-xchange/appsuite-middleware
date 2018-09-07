@@ -308,6 +308,12 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 case FOLDER_ID:
                     checkFolderUpdate(originalEvent, originalAttendee, attendeeUpdate.getFolderId());
                     break;
+                case PARTSTAT:
+                    /*
+                     * ensure to reset RSVP expectation along with change of participation status
+                     */
+                    attendeeUpdate.setRsvp(null);
+                    break;
                 case CU_TYPE:
                 case ENTITY:
                 case MEMBER:

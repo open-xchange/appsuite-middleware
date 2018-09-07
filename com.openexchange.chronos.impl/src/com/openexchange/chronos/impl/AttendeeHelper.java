@@ -289,6 +289,12 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
             if (false == isInternal(attendee) && false == session.getConfig().isSkipExternalAttendeeURIChecks()) {
                 attendee = Check.requireValidEMail(attendee);
             }
+            if (attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT)) {
+                /*
+                 * ensure to reset RSVP expectation along with change of participation status
+                 */
+                attendee.setRsvp(null);
+            }
             attendeesToUpdate.add(new DefaultItemUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), attendeeUpdate.getOriginal(), attendee));
         }
         /*
