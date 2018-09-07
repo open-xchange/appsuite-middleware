@@ -192,12 +192,12 @@ public class ContactConfig {
         /**
          * Defines the width of scaled contact images
          */
-        SCALED_IMAGE_WIDTH("com.openexchange.contact.image.maxWidth", "250"),
+        SCALED_IMAGE_WIDTH("com.openexchange.contact.image.maxWidth", "600"),
 
         /**
          * Defines the height of scaled contact images
          */
-        SCALED_IMAGE_HEIGHT("com.openexchange.contact.image.maxHeight", "250"),
+        SCALED_IMAGE_HEIGHT("com.openexchange.contact.image.maxHeight", "800"),
 
         /**
          * Defines the scale type
