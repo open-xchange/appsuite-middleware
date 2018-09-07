@@ -47,32 +47,48 @@
  *
  */
 
-package com.openexchange.ajax.drive;
+package com.openexchange.drive.json.internal;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.ajax.drive.test.DeleteLinkTest;
-import com.openexchange.ajax.drive.test.GetLinkTest;
-import com.openexchange.ajax.drive.test.QuotaForSyncTest;
-import com.openexchange.ajax.drive.test.UpdateLinkTest;
-import com.openexchange.ajax.drive.updater.UpdaterXMLTest;
-import com.openexchange.test.concurrent.ParallelSuite;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.drive.DriveQuota;
+import com.openexchange.file.storage.Quota;
 
 /**
- * {@link DriveAJAXSuite}
+ * {@link DriveQuota2JsonHandler}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.1
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    GetLinkTest.class,
-    UpdateLinkTest.class,
-    DeleteLinkTest.class,
-    UpdaterXMLTest.class,
-    QuotaForSyncTest.class,
+public class DriveQuota2JsonHandler {
 
-})
-public class DriveAJAXSuite  {
-
+    /**
+     * Converts given {@link DriveQuota} object to JSON and adds it to the given {@link JSONObject}
+     * 
+     * @param jsonObject The {@link JSONObject} the quota should be added to
+     * @param quota The quota that will be added
+     * @throws JSONException
+     */
+    public static void process(JSONObject jsonObject, DriveQuota quota) throws JSONException {
+        if (null != quota) {
+            if (jsonObject == null) {
+                jsonObject = new JSONObject();
+            }
+            JSONArray jsonArray = new JSONArray(2);
+            Quota[] quota2 = quota.getQuota();
+            if (null != quota2 && quota2.length > 0) {
+                for (Quota q : quota2) {
+                    if (Quota.UNLIMITED != q.getLimit()) {
+                        JSONObject jsonQuota = new JSONObject();
+                        jsonQuota.put("limit", q.getLimit());
+                        jsonQuota.put("use", q.getUsage());
+                        jsonQuota.put("type", String.valueOf(q.getType()).toLowerCase());
+                        jsonArray.put(jsonQuota);
+                    }
+                }
+            }
+            jsonObject.put("quota", jsonArray);
+        }
+    }
 }

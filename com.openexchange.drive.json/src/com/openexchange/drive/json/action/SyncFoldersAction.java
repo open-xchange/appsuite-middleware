@@ -58,6 +58,7 @@ import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.internal.DriveQuota2JsonHandler;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonDirectoryVersion;
 import com.openexchange.drive.json.json.JsonDriveAction;
@@ -111,10 +112,16 @@ public class SyncFoldersAction extends AbstractDriveAction {
          */
         try {
             DriveService driveService = Services.getService(DriveService.class, true);
-            SyncResult<DirectoryVersion> syncResult = driveService.syncFolders(session, originalVersions, clientVersions);
-            if (null != session.isDiagnostics()) {
+            boolean includeQuota = requestData.containsParameter("quota") ? requestData.getParameter("quota", Boolean.class).booleanValue() : false;
+            SyncResult<DirectoryVersion> syncResult = driveService.syncFolders(session, originalVersions, clientVersions, includeQuota);
+            if (null != session.isDiagnostics() || includeQuota) {
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("diagnostics", syncResult.getDiagnostics());
+                if (null != session.isDiagnostics()) { 
+                    jsonObject.put("diagnostics", syncResult.getDiagnostics());
+                }
+                if (includeQuota) {
+                    DriveQuota2JsonHandler.process(jsonObject, syncResult.getQuota());
+                }
                 jsonObject.put("actions", JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()));
                 return new AJAXRequestResult(jsonObject, "json");
             }

@@ -49,15 +49,14 @@
 
 package com.openexchange.drive.json.action;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.internal.DriveQuota2JsonHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Quota;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -87,22 +86,7 @@ public class QuotaAction extends AbstractDriveAction {
          */
         try {
             JSONObject jsonObject = new JSONObject();
-            if (null != quota) {
-                JSONArray jsonArray = new JSONArray(2);
-                if (null != quota.getQuota()) {
-                    for (Quota q : quota.getQuota()) {
-                        if (Quota.UNLIMITED != q.getLimit()) {
-                            JSONObject jsonQuota = new JSONObject();
-                            jsonQuota.put("limit", q.getLimit());
-                            jsonQuota.put("use", q.getUsage());
-                            jsonQuota.put("type", String.valueOf(q.getType()).toLowerCase());
-                            jsonArray.put(jsonQuota);
-                        }
-                    }
-                }
-                jsonObject.put("quota", jsonArray);
-                jsonObject.put("manageLink", quota.getManageLink());
-            }
+            DriveQuota2JsonHandler.process(jsonObject, quota);
             return new AJAXRequestResult(jsonObject, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

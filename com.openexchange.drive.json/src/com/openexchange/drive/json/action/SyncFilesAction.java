@@ -58,6 +58,7 @@ import com.openexchange.drive.DriveService;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.internal.DriveQuota2JsonHandler;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.drive.json.json.JsonFileVersion;
@@ -85,11 +86,12 @@ public class SyncFilesAction extends AbstractDriveAction {
         if (Strings.isEmpty(path)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
         }
+
         Object data = requestData.getData();
         if (null == data || false == JSONObject.class.isInstance(data)) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-        JSONObject dataObject = (JSONObject)data;
+        JSONObject dataObject = (JSONObject) data;
         /*
          * get original and current client file versions
          */
@@ -115,10 +117,16 @@ public class SyncFilesAction extends AbstractDriveAction {
          */
         try {
             DriveService driveService = Services.getService(DriveService.class, true);
-            SyncResult<FileVersion> syncResult = driveService.syncFiles(session, path, originalFiles, clientFiles);
-            if (null != session.isDiagnostics()) {
+            boolean includeQuota = requestData.containsParameter("quota") ? requestData.getParameter("quota", Boolean.class).booleanValue() : false;
+            SyncResult<FileVersion> syncResult = driveService.syncFiles(session, path, originalFiles, clientFiles, includeQuota);
+            if (null != session.isDiagnostics() || includeQuota) {
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("diagnostics", syncResult.getDiagnostics());
+                if (null != session.isDiagnostics()) {
+                    jsonObject.put("diagnostics", syncResult.getDiagnostics());
+                }
+                if (includeQuota) {
+                    DriveQuota2JsonHandler.process(jsonObject, syncResult.getQuota());
+                }
                 jsonObject.put("actions", JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()));
                 return new AJAXRequestResult(jsonObject, "json");
             }
@@ -134,5 +142,4 @@ public class SyncFilesAction extends AbstractDriveAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
-
 }

@@ -92,22 +92,20 @@ public class ThrottlingDriveService implements DriveService {
     }
 
     @Override
-    public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions,
-        List<DirectoryVersion> clientVersions) throws OXException {
+    public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions, boolean includeQuota) throws OXException {
         try {
             enterSyncOperation();
-            return delegate.syncFolders(session, originalVersions, clientVersions);
+            return delegate.syncFolders(session, originalVersions, clientVersions, includeQuota);
         } finally {
             leaveSyncOperation();
         }
     }
 
     @Override
-    public SyncResult<FileVersion> syncFiles(DriveSession session, String path, List<FileVersion> originalVersions,
-        List<FileVersion> clientVersions) throws OXException {
+    public SyncResult<FileVersion> syncFiles(DriveSession session, String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions, boolean includeQuota) throws OXException {
         try {
             enterSyncOperation();
-            return delegate.syncFiles(session, path, originalVersions, clientVersions);
+            return delegate.syncFiles(session, path, originalVersions, clientVersions, includeQuota);
         } finally {
             leaveSyncOperation();
         }

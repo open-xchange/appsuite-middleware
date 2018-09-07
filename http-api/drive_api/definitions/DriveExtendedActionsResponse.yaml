@@ -3,6 +3,8 @@ properties:
   $ref: ./CommonResponseData.yaml
   data:
     type: array
-    description: An array containing the actions the client should execute for synchronization.  If `diagnostics` parameter is set, this is a JSON object with the fields `actions` (array of actions to execute) and `diagnostics` (contains diagnostics trace).
+    description: An array containing the actions the client should execute for synchronization.
+      If `diagnostics` parameter is set, this is a JSON object with the fields `actions` (array of actions to execute) and `diagnostics` (contains diagnostics trace).
+      If `quota` parameter is set, this is a JSON object with the fields `actions` (array of actions to execute) and `quota` (contains quota information).
     items:
       $ref: "#/definitions/DriveExtendedAction"

@@ -52,10 +52,10 @@ package com.openexchange.drive.impl.sync;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.impl.actions.AbstractAction;
-
 
 /**
  * {@link DefaultSyncResult}
@@ -66,20 +66,34 @@ public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T> 
 
     private final List<DriveAction<T>> actionsForClient;
     private final String diagnosticsLog;
+    private final DriveQuota quota;
+
+    /**
+     * 
+     * Initializes a new {@link DefaultSyncResult}.
+     * 
+     * @param actionsForClient The resulting actions for the client
+     * @param diagnosticsLog The diagnostics log
+     */
+    public DefaultSyncResult(List<AbstractAction<T>> actionsForClient, String diagnosticsLog) {
+        this(actionsForClient, diagnosticsLog, null);
+    }
 
     /**
      * Initializes a new {@link DefaultSyncResult}.
      *
      * @param actionsForClient The resulting actions for the client
      * @param diagnosticsLog The diagnostics log
+     * @param quota The quota information
      */
-    public DefaultSyncResult(List<AbstractAction<T>> actionsForClient, String diagnosticsLog) {
+    public DefaultSyncResult(List<AbstractAction<T>> actionsForClient, String diagnosticsLog, DriveQuota quota) {
         super();
         this.actionsForClient = new ArrayList<DriveAction<T>>(actionsForClient.size());
         for (DriveAction<? extends T> driveAction : actionsForClient) {
             this.actionsForClient.add((DriveAction<T>) driveAction);
         }
         this.diagnosticsLog = diagnosticsLog;
+        this.quota = quota;
     }
 
     /**
@@ -100,6 +114,14 @@ public class DefaultSyncResult<T extends DriveVersion> implements SyncResult<T> 
     @Override
     public String getDiagnostics() {
         return diagnosticsLog;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public DriveQuota getQuota() {
+        return quota;
     }
 
     @Override
