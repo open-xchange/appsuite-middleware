@@ -47,65 +47,103 @@
  *
  */
 
-package com.openexchange.health.impl.osgi;
+package com.openexchange.health.impl;
 
-import org.eclipse.microprofile.health.HealthCheck;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponse.State;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.health.NodeHealthCheck;
-import com.openexchange.health.NodeHealthCheckResponse;
-import com.openexchange.health.NodeHealthCheckService;
-import com.openexchange.health.impl.NodeHealthCheckResponseImpl;
+import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
+import org.eclipse.microprofile.health.spi.HealthCheckResponseProvider;
+
 
 /**
- * {@link HealthCheckTracker}
+ * {@link HealthCheckResponseProviderImpl}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class HealthCheckTracker implements ServiceTrackerCustomizer<HealthCheck, HealthCheck> {
-
-    private final BundleContext context;
-    private final NodeHealthCheckService nodeHealthCheckService;
-
-    public HealthCheckTracker(BundleContext context, NodeHealthCheckService nodeHealthCheckService) {
-        super();
-        this.context = context;
-        this.nodeHealthCheckService = nodeHealthCheckService;
-    }
+public class HealthCheckResponseProviderImpl implements HealthCheckResponseProvider {
 
     @Override
-    public HealthCheck addingService(ServiceReference<HealthCheck> reference) {
-        HealthCheck check = context.getService(reference);
-        NodeHealthCheck wrappingCheck = new NodeHealthCheck() {
+    public HealthCheckResponseBuilder createResponseBuilder() {
+        return new HealthCheckResponseBuilderImpl();
+    }
 
-            @Override
-            public String getName() {
-                return check.getClass().getName();
+    class HealthCheckResponseBuilderImpl extends HealthCheckResponseBuilder {
+
+        private String name = "unknown";
+        private State state = State.UP;
+        private Map<String, Object> data;
+
+        @Override
+        public HealthCheckResponseBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        @Override
+        public HealthCheckResponseBuilder withData(String key, String value) {
+            return putData(key, value);
+        }
+
+        @Override
+        public HealthCheckResponseBuilder withData(String key, long value) {
+            return putData(key, value);
+        }
+
+        @Override
+        public HealthCheckResponseBuilder withData(String key, boolean value) {
+            return putData(key, value);
+        }
+
+        @Override
+        public HealthCheckResponseBuilder up() {
+            this.state = State.UP;
+            return this;
+        }
+
+        @Override
+        public HealthCheckResponseBuilder down() {
+            this.state = State.DOWN;
+            return this;
+        }
+
+        @Override
+        public HealthCheckResponseBuilder state(boolean up) {
+            return up ? up() : down();
+        }
+
+        @Override
+        public HealthCheckResponse build() {
+            return new HealthCheckResponse() {
+
+                @Override
+                public State getState() {
+                    return state;
+                }
+
+                @Override
+                public String getName() {
+                    return name;
+                }
+
+                @Override
+                public Optional<Map<String, Object>> getData() {
+                    return Optional.ofNullable(data);
+                }
+            };
+        }
+
+        private HealthCheckResponseBuilder putData(String key, Object value) {
+            if (null == data) {
+                data = new ConcurrentHashMap<>();
             }
+            data.put(key, value);
+            return this;
+        }
 
-            @Override
-            public NodeHealthCheckResponse call() {
-                HealthCheckResponse response = check.call();
-                return new NodeHealthCheckResponseImpl(getName(), response.getData().isPresent() ? response.getData().get() : null, State.UP.equals(response.getState()));
-            }
-        };
-        nodeHealthCheckService.addCheck(wrappingCheck);
-        return check;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<HealthCheck> reference, HealthCheck service) {
-        // nothing to do
-    }
-
-    @Override
-    public void removedService(ServiceReference<HealthCheck> reference, HealthCheck service) {
-        nodeHealthCheckService.removeCheck(service.getClass().getName());
-        context.ungetService(reference);
     }
 
 }
