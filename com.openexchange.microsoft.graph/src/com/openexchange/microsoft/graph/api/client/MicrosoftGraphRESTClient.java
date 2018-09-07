@@ -53,7 +53,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
 import com.openexchange.rest.client.v2.AbstractRESTClient;
 import com.openexchange.rest.client.v2.RESTResponse;
@@ -66,10 +74,13 @@ import com.openexchange.rest.client.v2.RESTResponse;
  */
 public class MicrosoftGraphRESTClient extends AbstractRESTClient {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MicrosoftGraphRESTClient.class);
+
     private static final String USER_AGENT = "Open-Xchange Microsoft Graph Client";
     private static final String API_URL = "graph.microsoft.com";
     private static final String API_VERSION = "v1.0";
     private static final String SCHEME = "https";
+    private static final String APPLICATION_JSON = "application/json";
 
     /**
      * Initialises a new {@link MicrosoftGraphRESTClient}.
@@ -81,14 +92,73 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     }
 
     /**
-     * Executes the request
+     * Executes the request and examines the response body.
      * 
-     * @param request
-     * @return
-     * @throws OXException
+     * @param request The {@link MicrosoftGraphRequest} to execute
+     * @return The {@link RESTResponse}
+     * @throws OXException if an error is occurred
      */
     public RESTResponse execute(MicrosoftGraphRequest request) throws OXException {
-        return executeRequest(prepareRequest(request));
+        RESTResponse restResponse = executeRequest(prepareRequest(request));
+        Object responseBody = restResponse.getResponseBody();
+        if (responseBody == null) {
+            // Huh? OK, we assert the status code and act accordingly
+            assertStatusCode(restResponse.getStatusCode());
+            return restResponse;
+        }
+        // OK, let's check the Content-Type
+        JSONValue responseBodyCandidate = null;
+        String contentType = restResponse.getHeader(HttpHeaders.CONTENT_TYPE);
+        if (APPLICATION_JSON.equals(contentType)) {
+            // We got 'application/json'. We know it's a JSONValue
+            // since it is already parsed via the JsonRESTResponseBodyParser
+            responseBodyCandidate = ((JSONValue) responseBody);
+        } else if (Strings.isEmpty(contentType)) {
+            // Fine, we try to see if the response contains any JSON body
+            if (responseBody instanceof String) {
+                responseBodyCandidate = tryParseAsJSON((String) responseBody);
+                // After type correction, explicitly set it as JSONObject.
+                restResponse.setResponseBody(responseBodyCandidate);
+            } else if (responseBody instanceof JSONObject) {
+                checkForErrors((JSONObject) responseBody);
+                return restResponse;
+            } else if (responseBody instanceof JSONValue) {
+                responseBodyCandidate = (JSONValue) responseBody;
+            }
+        } else {
+            // Response body other than JSONObject
+            assertStatusCode(restResponse.getStatusCode());
+            return restResponse;
+        }
+
+        // Did we manage to extract it?
+        if (responseBodyCandidate == null || false == responseBodyCandidate.isObject() || responseBodyCandidate.isEmpty()) {
+            assertStatusCode(restResponse.getStatusCode());
+            return restResponse;
+        }
+        // Hooray, we made it! Check for errors and return the response
+        checkForErrors(responseBodyCandidate.toObject());
+        return restResponse;
+    }
+
+    /**
+     * @param responseBody
+     * @return
+     */
+    private JSONValue tryParseAsJSON(String responseBody) {
+        try {
+            char c = responseBody.charAt(0);
+            switch (c) {
+                case '{':
+                    return new JSONObject(responseBody);
+                case '[':
+                    return new JSONArray(responseBody);
+            }
+            return null;
+        } catch (JSONException e) {
+            LOG.debug("", e);
+            return null;
+        }
     }
 
     /**
@@ -110,5 +180,29 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
         } catch (URISyntaxException e) {
             throw RESTExceptionCodes.INVALID_URI_PATH.create(e, API_VERSION + request.getEndPoint());
         }
+    }
+
+    /**
+     * Checks whether the specified response contains any API errors and if
+     * it does throws the appropriate exception.
+     * 
+     * @param response the {@link JSONObject} response body
+     * @throws OXException The appropriate API exception if an error is detected
+     */
+    private void checkForErrors(JSONObject response) throws OXException {
+        if (!response.hasAndNotNull("error")) {
+            return;
+        }
+        JSONObject error = response.optJSONObject("error");
+        if (error == null || error.isEmpty()) {
+            throw MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION.create("Unexpected error");
+        }
+        String message = error.optString("message");
+        String code = error.optString("code");
+        throw MicrosoftGraphAPIExceptionCodes.parse(code).create(message);
+    }
+
+    private void assertStatusCode(int statusCode) {
+        LOG.info("Check for status code '{}'", statusCode);
     }
 }

@@ -51,10 +51,13 @@ package com.openexchange.microsoft.graph.api;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.http.HttpHeaders;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTEndPoint;
+import com.openexchange.rest.client.v2.RESTMethod;
+import com.openexchange.rest.client.v2.RESTResponse;
 
 /**
  * {@link MicrosoftGraphContactsAPI}
@@ -117,18 +120,6 @@ public class MicrosoftGraphContactsAPI extends AbstractMicrosoftGraphAPI {
     }
 
     /**
-     * Retrieves the photo of the contact with the specified identifier
-     * 
-     * @param contactId The contact identifier
-     * @param accessToken The OAuth access token previously acquired by the OAuthService
-     * @return The byte array with the photo's contents
-     * @throws OXException if an error is occurred
-     */
-    public byte[] getContactPhoto(String contactId, String accessToken) throws OXException {
-        return getBinaryResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath() + "/" + contactId + "/photo/$value");
-    }
-
-    /**
      * Retrieves the metadata of the photo of the contact with the specified identifier
      * 
      * @param contactId The contact identifier
@@ -138,5 +129,39 @@ public class MicrosoftGraphContactsAPI extends AbstractMicrosoftGraphAPI {
      */
     public JSONObject getContactPhotoMetadata(String contactId, String accessToken) throws OXException {
         return getResource(accessToken, "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath() + "/" + contactId + "/photo");
+    }
+
+    /**
+     * Retrieves the photo of the contact with the specified identifier
+     * 
+     * @param contactId The contact identifier
+     * @param accessToken The OAuth access token previously acquired by the OAuthService
+     * @return The byte array with the photo's contents
+     * @throws OXException if an error is occurred
+     */
+    public byte[] getContactPhoto(String contactId, String accessToken) throws OXException {
+        String path = "/me" + MicrosoftGraphRESTEndPoint.contacts.getAbsolutePath() + "/" + contactId + "/photo/$value";
+        RESTResponse restResponse = client.execute(createRequest(RESTMethod.GET, accessToken, path));
+        checkResponseBody(restResponse);
+        return byte[].class.cast(restResponse.getResponseBody());
+    }
+
+    /**
+     * Checks whether the response body contains a byte array
+     * 
+     * @param restResponse The {@link RESTResponse} to check
+     * @throws OXException if the response body does not contain a byte array
+     */
+    private void checkResponseBody(RESTResponse restResponse) throws OXException {
+        String contentType = restResponse.getHeader(HttpHeaders.CONTENT_TYPE);
+        if (contentType.isEmpty()) {
+            throw new OXException(666, "No contact photo found.");
+        }
+        if (!contentType.startsWith("image") || restResponse.getResponseBody() == null) {
+            throw new OXException(666, "No contact photo found.");
+        }
+        if (!(restResponse.getResponseBody() instanceof byte[])) {
+            throw new OXException(666, "No contact photo found.");
+        }
     }
 }

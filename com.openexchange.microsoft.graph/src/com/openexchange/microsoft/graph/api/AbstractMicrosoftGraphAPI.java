@@ -56,12 +56,10 @@ import java.util.Map.Entry;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
-import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.rest.client.v2.RESTMethod;
 import com.openexchange.rest.client.v2.RESTResponse;
 import com.openexchange.rest.client.v2.entity.InputStreamEntity;
@@ -112,23 +110,6 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     JSONObject getResource(String accessToken, String path, Map<String, String> queryParams) throws OXException {
         return executeRequest(createRequest(RESTMethod.GET, accessToken, path, queryParams));
-    }
-
-    /**
-     * Gets the binary resource from the specified path
-     * 
-     * @param accessToken The oauth access token
-     * @param path The resource's path
-     * @return The byte array with the resource's contents
-     * @throws OXException if an error is occurred
-     */
-    byte[] getBinaryResource(String accessToken, String path) throws OXException {
-        RESTResponse restResponse = client.execute(createRequest(RESTMethod.GET, accessToken, path));
-        // TODO: Check for errors
-        if (!(restResponse.getResponseBody() instanceof byte[])) {
-            throw new OXException(666, "binary resournce not found");
-        }
-        return (byte[]) restResponse.getResponseBody();
     }
 
     /**
@@ -218,7 +199,7 @@ abstract class AbstractMicrosoftGraphAPI {
      * @param path The path
      * @return The {@link MicrosoftGraphRequest}
      */
-    private MicrosoftGraphRequest createRequest(RESTMethod method, String accessToken, String path) {
+    protected MicrosoftGraphRequest createRequest(RESTMethod method, String accessToken, String path) {
         return createRequest(method, accessToken, path, APPLICATION_JSON, Collections.emptyMap());
     }
 
@@ -229,7 +210,7 @@ abstract class AbstractMicrosoftGraphAPI {
      * @param method the {@link RESTMethod}
      * @param accessToken The oauth access token
      * @param path The path
-     * @param contentType The Contenty-Type
+     * @param contentType The Contenty-Type of the request body
      * @return The {@link MicrosoftGraphRequest}
      */
     private MicrosoftGraphRequest createRequest(RESTMethod method, String accessToken, String path, String contentType) {
@@ -257,7 +238,7 @@ abstract class AbstractMicrosoftGraphAPI {
      * @param method the {@link RESTMethod}
      * @param accessToken The oauth access token
      * @param path The path
-     * @param contentType The Contenty-Type
+     * @param contentType The Content-Type of the request body
      * @param queryParameters The query parameters
      * @return The {@link MicrosoftGraphRequest}
      */
@@ -280,33 +261,9 @@ abstract class AbstractMicrosoftGraphAPI {
      */
     private JSONObject executeRequest(MicrosoftGraphRequest request) throws OXException {
         RESTResponse restResponse = client.execute(request);
-        Object responseBody = restResponse.getResponseBody();
-        if (responseBody == null) {
-            throw new OXException(666, "no response body");
+        if (restResponse.getResponseBody() != null && restResponse.getResponseBody() instanceof JSONObject) {
+            return JSONObject.class.cast(restResponse.getResponseBody());
         }
-        //FIXME: Check the returned entity type
-        JSONObject response = ((JSONValue) restResponse.getResponseBody()).toObject();
-        checkForErrors(response);
-        return response;
-    }
-
-    /**
-     * Checks whether the specified response contains any API errors and if
-     * it does throws the appropriate exception.
-     * 
-     * @param response the {@link JSONObject} response body
-     * @throws OXException The appropriate API exception if an error is detected
-     */
-    private void checkForErrors(JSONObject response) throws OXException {
-        if (!response.hasAndNotNull("error")) {
-            return;
-        }
-        JSONObject error = response.optJSONObject("error");
-        if (error == null || error.isEmpty()) {
-            throw MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION.create("Unexpected error");
-        }
-        String message = error.optString("message");
-        String code = error.optString("code");
-        throw MicrosoftGraphAPIExceptionCodes.parse(code).create(message);
+        throw new OXException(666, "No JSONObject in response");
     }
 }

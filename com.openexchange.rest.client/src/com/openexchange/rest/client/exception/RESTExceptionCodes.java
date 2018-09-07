@@ -167,7 +167,17 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>No stream parser found for the specified content type '%1$s'</li>
      */
-    NO_STREAM_PARSER("No stream parser found for the specified content type '%1$s'", MESSAGE, CATEGORY_ERROR, 22);
+    NO_STREAM_PARSER("No stream parser found for the specified content type '%1$s'", MESSAGE, CATEGORY_ERROR, 22),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>Bad request: %1$s</li>
+     */
+    BAD_REQUEST("Bad request: '%1$s'", MESSAGE, CATEGORY_ERROR, 23),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>Forbidden: %1$s</li>
+     */
+    FORBIDDEN("Forbidden: '%1$s'", MESSAGE, CATEGORY_ERROR, 23),
 
     ;
 

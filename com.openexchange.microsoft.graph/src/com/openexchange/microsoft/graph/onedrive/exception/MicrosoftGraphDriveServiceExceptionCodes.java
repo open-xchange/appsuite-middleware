@@ -97,7 +97,7 @@ public enum MicrosoftGraphDriveServiceExceptionCodes implements DisplayableOXExc
 
     @Override
     public String getPrefix() {
-        return "GRD-ACCOUNT";
+        return "MS-GRAPH-ONE-DRIVE-SERVICE";
     }
 
     @Override

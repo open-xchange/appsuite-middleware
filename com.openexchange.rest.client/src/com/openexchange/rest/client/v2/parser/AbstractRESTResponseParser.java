@@ -233,8 +233,12 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
         int statusCode = httpResponse.getStatusLine().getStatusCode();
         // Assert the 4xx codes
         switch (statusCode) {
+            case 400:
+                throw RESTExceptionCodes.BAD_REQUEST.create(httpResponse.getStatusLine().getReasonPhrase());
             case 401:
                 throw RESTExceptionCodes.UNAUTHORIZED.create(httpResponse.getStatusLine().getReasonPhrase());
+            case 403:
+                throw RESTExceptionCodes.FORBIDDEN.create(httpResponse.getStatusLine().getReasonPhrase());
             case 404:
                 throw RESTExceptionCodes.PAGE_NOT_FOUND.create();
         }
