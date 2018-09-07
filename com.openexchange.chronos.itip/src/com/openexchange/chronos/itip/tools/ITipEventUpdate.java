@@ -82,6 +82,7 @@ public class ITipEventUpdate implements EventUpdate {
         IGNOREES.add(AttendeeField.CU_TYPE);
         IGNOREES.add(AttendeeField.ENTITY);
         IGNOREES.add(AttendeeField.ROLE);
+        IGNOREES.add(AttendeeField.RSVP);
     }
 
     private EventUpdate delegate;
