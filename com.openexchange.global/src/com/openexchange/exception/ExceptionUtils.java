@@ -60,6 +60,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import com.openexchange.java.Strings;
@@ -78,6 +79,7 @@ public class ExceptionUtils {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExceptionUtils.class);
 
     private static final String MARKER = " ---=== /!\\ ===--- ";
+    private static AtomicReference<Date> lastOOM = new AtomicReference<>();
 
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be re-thrown and swallows all others.
@@ -110,6 +112,7 @@ public class ExceptionUtils {
      * @param oom The OutOfMemoryError instance
      */
     public static void handleOOM(final OutOfMemoryError oom) {
+        lastOOM.set(new Date());
         String message = oom.getMessage();
         if ("unable to create new native thread".equalsIgnoreCase(message)) {
             if (null == System.getProperties().put("__thread_dump_created", Boolean.TRUE)) {
@@ -238,18 +241,18 @@ public class ExceptionUtils {
      * @param clazz The exception class to check for
      * @return <code>true</code> if the exception class occurs in exception chain; otherwise <code>false</code>
      */
-	public static boolean isEitherOf(Throwable e, Class<? extends Exception> clazz) {
-		if (null == e || null == clazz) {
-			return false;
-		}
+    public static boolean isEitherOf(Throwable e, Class<? extends Exception> clazz) {
+        if (null == e || null == clazz) {
+            return false;
+        }
 
-		if (clazz.isInstance(e)) {
-			return true;
-		}
+        if (clazz.isInstance(e)) {
+            return true;
+        }
 
-		Throwable next = e.getCause();
-		return null == next ? false : isEitherOf(next, clazz);
-	}
+        Throwable next = e.getCause();
+        return null == next ? false : isEitherOf(next, clazz);
+    }
 
     /**
      * Checks if any of specified exception (classes) occurs in exception chain of given {@link Throwable} instance.
@@ -293,5 +296,12 @@ public class ExceptionUtils {
 
         Throwable next = e.getCause();
         return null == next ? false : isEitherOf(next, classes);
+    }
+
+    public static Date getLastOOM() {
+        if (null == lastOOM) {
+            return null;
+        }
+        return lastOOM.get();
     }
 }

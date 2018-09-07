@@ -1,3 +1,9 @@
+open-xchange-cluster-upgrade-from-780-782 (7.10.1-0) unstable; urgency=medium
+
+  * prepare for 7.10.1 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 06 Sep 2018 12:29:19 +0200
+
 open-xchange-cluster-upgrade-from-780-782 (7.10.0-10) stable; urgency=medium
 
   * Fourth candidate for 7.10.0 release

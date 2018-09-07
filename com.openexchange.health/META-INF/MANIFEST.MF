@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Health check bundle
+Bundle-SymbolicName: com.openexchange.health
+Bundle-Version: 7.10.1
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: com.openexchange.health
+Bundle-ActivationPolicy: lazy
+Export-Package: com.openexchange.health
+Import-Package: com.openexchange.config.lean,
+ com.openexchange.exception

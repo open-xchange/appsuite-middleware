@@ -52,6 +52,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-geoip"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-halo"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hazelcast-community"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-76x"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-780-782"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-cluster-upgrade-from-783"/>

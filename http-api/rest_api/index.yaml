@@ -16,6 +16,8 @@ tags:
     description: The advertisement module
   - name: Admin
     description: Interface for provisioning and other administrative operations.
+  - name: Health
+    description: The health-check module
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml

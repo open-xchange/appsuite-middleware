@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,39 +47,47 @@
  *
  */
 
-package com.openexchange.rest.services;
+package com.openexchange.health.impl.osgi;
 
-import javax.annotation.security.RolesAllowed;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.health.NodeHealthCheck;
+import com.openexchange.health.NodeHealthCheckService;
 
 /**
- * {@link Role}
+ * {@link NodeHealthCheckTracker}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.1
  */
-public enum Role {
+public class NodeHealthCheckTracker implements ServiceTrackerCustomizer<NodeHealthCheck, NodeHealthCheck> {
 
-    /**
-     * The role identifier for {@link RolesAllowed} annotation signaling to perform basic-auth.
-     * <p>
-     * Properties <code>"com.openexchange.rest.services.basic-auth.login"</code> and <code>"com.openexchange.rest.services.basic-auth.password"</code> are required to be set.
-     */
-    BASIC_AUTHENTICATED("Basic-Authenticated"),
+    private final BundleContext context;
+    private final NodeHealthCheckService nodeHealthCheckService;
 
-    ;
-
-    private final String id;
-
-    private Role(String id) {
-        this.id = id;
+    public NodeHealthCheckTracker(BundleContext context, NodeHealthCheckService nodeHealthCheckService) {
+        super();
+        this.context = context;
+        this.nodeHealthCheckService = nodeHealthCheckService;
     }
 
-    /**
-     * Gets the role identifier.
-     *
-     * @return The role identifier
-     */
-    public String getId() {
-        return id;
+    @Override
+    public NodeHealthCheck addingService(ServiceReference<NodeHealthCheck> reference) {
+        NodeHealthCheck check = context.getService(reference);
+        nodeHealthCheckService.addCheck(check);
+        return check;
     }
+
+    @Override
+    public void modifiedService(ServiceReference<NodeHealthCheck> reference, NodeHealthCheck service) {
+        // nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<NodeHealthCheck> reference, NodeHealthCheck service) {
+        nodeHealthCheckService.removeCheck(service);
+        context.ungetService(reference);
+    }
+
 }
