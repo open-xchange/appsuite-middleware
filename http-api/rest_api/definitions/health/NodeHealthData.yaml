@@ -1,0 +1,14 @@
+type: object
+properties:
+  status:
+    type: string
+    description: The node-health overall status
+    enum:
+      - UP
+      - DOWN
+  checks:
+    type: array
+    items:
+      $ref: '#/definitions/HealthCheckData'
+  service:
+    $ref: '#/definitions/ServiceData'
