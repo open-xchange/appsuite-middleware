@@ -62,15 +62,17 @@ import com.openexchange.java.Strings;
 public class RESTResponse {
 
     private final int statusCode;
+    private final String statusLine;
     private Object responseBody;
     private final Map<String, String> headers;
 
     /**
      * Initialises a new {@link MicrosoftGraphResponse}.
      */
-    public RESTResponse(int statusCode) {
+    public RESTResponse(int statusCode, String statusLine) {
         super();
         this.statusCode = statusCode;
+        this.statusLine = statusLine;
         headers = new HashMap<>(4);
     }
 
@@ -111,6 +113,15 @@ public class RESTResponse {
      */
     public String getHeader(String headerName) {
         return headers.get(headerName);
+    }
+
+    /**
+     * Gets the statusLine
+     *
+     * @return The statusLine
+     */
+    public String getStatusLine() {
+        return statusLine;
     }
 
     //////////////////////////// SETTERS //////////////////////////////

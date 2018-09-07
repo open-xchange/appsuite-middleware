@@ -149,7 +149,7 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
         int statusCode = assertStatusCode(response);
         if (statusCode == 304) {
             // OK, nothing was modified, no response body, return as is
-            return new RESTResponse(statusCode);
+            return new RESTResponse(statusCode, response.getStatusLine().getReasonPhrase());
         }
 
         // Prepare the response
@@ -165,7 +165,7 @@ public abstract class AbstractRESTResponseParser implements RESTResponseParser {
      * @throws OXException if any other error is occurred
      */
     private RESTResponse prepareResponse(HttpResponse httpResponse) throws IOException, OXException {
-        RESTResponse response = new RESTResponse(httpResponse.getStatusLine().getStatusCode());
+        RESTResponse response = new RESTResponse(httpResponse.getStatusLine().getStatusCode(), httpResponse.getStatusLine().getReasonPhrase());
         parseHeaders(httpResponse, response);
 
         HttpEntity entity = httpResponse.getEntity();

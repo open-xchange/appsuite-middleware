@@ -92,7 +92,8 @@ public class MicrosoftGraphRESTResponseParser extends AbstractRESTResponseParser
     protected int assertStatusCode(HttpResponse httpResponse) throws OXException {
         // No assertion of the status code, we will check the response body later
         // and throw an exception (if necessary) on a higher API level, i.e.
-        // in {@link AbstractMicrosoftGraphAPI#checkForErrors(org.json.JSONObject))
+        // in {@link MicrosoftGraphRESTClient#checkForErrors(org.json.JSONObject)}
+        // and {@link MicrosoftGraphRESTClient#assertStatusCode(int)}
         return httpResponse.getStatusLine().getStatusCode();
     }
 }

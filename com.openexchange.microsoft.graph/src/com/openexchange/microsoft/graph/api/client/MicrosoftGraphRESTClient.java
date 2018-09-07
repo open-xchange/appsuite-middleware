@@ -103,7 +103,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
         Object responseBody = restResponse.getResponseBody();
         if (responseBody == null) {
             // Huh? OK, we assert the status code and act accordingly
-            assertStatusCode(restResponse.getStatusCode());
+            assertStatusCode(restResponse);
             return restResponse;
         }
         // OK, let's check the Content-Type
@@ -129,13 +129,13 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
             }
         } else {
             // Response body other than JSONObject
-            assertStatusCode(restResponse.getStatusCode());
+            assertStatusCode(restResponse);
             return restResponse;
         }
 
         // Did we manage to extract it?
         if (responseBodyCandidate == null || false == responseBodyCandidate.isObject() || responseBodyCandidate.isEmpty()) {
-            assertStatusCode(restResponse.getStatusCode());
+            assertStatusCode(restResponse);
             return restResponse;
         }
         // Hooray, we made it! Check for errors and return the response
@@ -204,7 +204,48 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
         throw MicrosoftGraphAPIExceptionCodes.parse(code).create(message);
     }
 
-    private void assertStatusCode(int statusCode) {
-        LOG.info("Check for status code '{}'", statusCode);
+    /**
+     * Asserts the status code of the specified {@link RESTResponse}
+     * and throws the appropriate exception if necessary.
+     * 
+     * @param restResponse The {@link RESTResponse}
+     * @throws OXException if an error is detected
+     */
+    private void assertStatusCode(RESTResponse restResponse) throws OXException {
+        int statusCode = restResponse.getStatusCode();
+        LOG.debug("Check for status code '{}'", statusCode);
+        // All good
+        if (statusCode < 400) {
+            return;
+        }
+        // Assert the 4xx codes
+        switch (statusCode) {
+            case 400:
+                throw MicrosoftGraphAPIExceptionCodes.INVALID_REQUEST.create(restResponse.getStatusLine());
+            case 401:
+                throw MicrosoftGraphAPIExceptionCodes.UNAUTHENTICATED.create(restResponse.getStatusLine());
+            case 403:
+                throw MicrosoftGraphAPIExceptionCodes.ACCESS_DENIED.create(restResponse.getStatusLine());
+            case 404:
+                throw MicrosoftGraphAPIExceptionCodes.ITEM_NOT_FOUND.create(restResponse.getStatusLine());
+            case 409:
+                throw MicrosoftGraphAPIExceptionCodes.NAME_ALREADY_EXISTS.create(restResponse.getStatusLine());
+            case 416:
+                throw MicrosoftGraphAPIExceptionCodes.INVALID_RANGE.create(restResponse.getStatusLine());
+        }
+        if (statusCode >= 400 && statusCode <= 499) {
+            throw MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION.create(restResponse.getStatusLine());
+        }
+
+        // Assert the 5xx codes
+        switch (statusCode) {
+            case 507:
+                throw MicrosoftGraphAPIExceptionCodes.QUOTA_LIMIT_REACHED.create(restResponse.getStatusLine());
+            case 509:
+                throw MicrosoftGraphAPIExceptionCodes.ACTIVITY_LIMIT_REACHED.create(restResponse.getStatusLine());
+        }
+        if (statusCode >= 500 && statusCode <= 599) {
+            throw MicrosoftGraphAPIExceptionCodes.SERVICE_NOT_AVAILABLE.create(restResponse.getStatusLine());
+        }
     }
 }
