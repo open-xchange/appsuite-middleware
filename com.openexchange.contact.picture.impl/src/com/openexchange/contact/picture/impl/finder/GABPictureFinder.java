@@ -61,7 +61,7 @@ import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link GABPictureFinder} - implements a {@link ContactPictureFinder} for the global address book.
@@ -73,19 +73,15 @@ public class GABPictureFinder implements ContactPictureFinder {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ContactPictureFinder.class);
 
-    private final UserPermissionService userPermissionService;
-
     private final ContactService contactService;
 
     /**
      * Initializes a new {@link GABPictureFinder}.
      *
-     * @param userPermissionService The {@link UserPermissionService}
      * @param contactService The {@link ContactService}
      */
-    public GABPictureFinder(UserPermissionService userPermissionService, ContactService contactService) {
+    public GABPictureFinder(ContactService contactService) {
         super();
-        this.userPermissionService = userPermissionService;
         this.contactService = contactService;
     }
 
@@ -102,7 +98,7 @@ public class GABPictureFinder implements ContactPictureFinder {
     private PictureResult getPicture(Session session, PictureSearchData data, boolean onlyETag) throws OXException {
         ContactPicture picture = null;
         if (isApplicable(session, data)) {
-            Contact contact = ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), session, true);
+            Contact contact = ContactPictureUtil.findContactInGlobalAddressBookByMail(contactService, data.getEmails(), session);
             if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
                 picture = ContactPictureUtil.fromContact(contact, onlyETag);
             }
@@ -113,7 +109,7 @@ public class GABPictureFinder implements ContactPictureFinder {
     private boolean isApplicable(Session session, PictureSearchData data) {
         try {
             // Use ID of the user requesting the picture
-            return data.hasEmail() && userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).isGlobalAddressBookEnabled();
+            return data.hasEmail() && ServerSessionAdapter.valueOf(session).getUserPermissionBits().isGlobalAddressBookEnabled();
         } catch (OXException e) {
             LOGGER.debug("Unable to check if GlobalAddressBook is enabled.", e);
         }

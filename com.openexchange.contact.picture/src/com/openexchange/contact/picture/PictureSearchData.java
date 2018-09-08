@@ -70,6 +70,8 @@ public class PictureSearchData {
 
     private final Set<String> emails;
 
+    public static final PictureSearchData EMPTY_DATA = new PictureSearchData(null, null, null, null);
+
     /**
      * Initializes a new {@link PictureSearchData}.
      *

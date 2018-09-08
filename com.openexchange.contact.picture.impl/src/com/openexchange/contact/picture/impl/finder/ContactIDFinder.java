@@ -52,11 +52,11 @@ package com.openexchange.contact.picture.impl.finder;
 import java.util.LinkedHashSet;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.PictureSearchData;
-import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link ContactIDFinder} - Finds picture based on contact identifier
@@ -68,18 +68,19 @@ public class ContactIDFinder extends AbstractContactFinder {
 
     /**
      * Initializes a new {@link ContactUserFinder}.
-     * 
-     * @param userPermissionService The {@link UserPermissionService}
+     *
      * @param contactService The {@link ContactService}
      */
-    public ContactIDFinder(UserPermissionService userPermissionService, ContactService contactService) {
-        super(userPermissionService, contactService);
+    public ContactIDFinder(ContactService contactService) {
+        super(contactService);
     }
 
+    private static final ContactField[] FIELDS = new ContactField[] { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
+
     @Override
-    public Contact getContact(Session session, PictureSearchData data) throws OXException {
+    public Contact getContact(Session session, PictureSearchData data, ContactField... fields) throws OXException {
         if (data.hasContact() && data.hasFolder()) {
-            return contactService.getContact(session, String.valueOf(data.getFolderId()), String.valueOf(data.getContactId()), ContactPictureUtil.IMAGE_FIELD);
+            return contactService.getContact(session, String.valueOf(data.getFolderId()), String.valueOf(data.getContactId()), Arrays.add(fields, FIELDS));
         }
         return null;
     }

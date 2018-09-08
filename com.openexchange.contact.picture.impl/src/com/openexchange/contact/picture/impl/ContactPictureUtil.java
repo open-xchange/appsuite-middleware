@@ -49,20 +49,25 @@
 
 package com.openexchange.contact.picture.impl;
 
-import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.finder.FinderUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Streams;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -121,6 +126,35 @@ public class ContactPictureUtil extends FinderUtil {
     public final static ContactField[] IMAGE_FIELD = new ContactField[] { ContactField.OBJECT_ID, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE1_URL,
         ContactField.IMAGE_LAST_MODIFIED, ContactField.LAST_MODIFIED };
 
+
+    /**
+     * Searches for a contact via its mail address in all folders but the global address book.
+     *
+     * @param contactService The {@link ContactService}
+     * @param emails The mail addresses
+     * @param session The {@link Session}
+     * @param fields The {@link ContactField}s that should be retrieved
+     * @return The {@link Contact} or <code>null</code>
+     * @throws OXException If the contact could not be found
+     */
+    public static Contact findContactByMail(ContactService contactService, Set<String> emails, Session session, ContactField... fields) throws OXException {
+        return findContactByMail(contactService, emails, session, false, fields);
+    }
+
+    /**
+     * Searches for a contact via its mail address in the global address book.
+     *
+     * @param contactService The {@link ContactService}
+     * @param emails The mail addresses
+     * @param session The {@link Session}
+     * @param fields The {@link ContactField}s that should be retrieved
+     * @return The {@link Contact} or <code>null</code>
+     * @throws OXException If the contact could not be found
+     */
+    public static Contact findContactInGlobalAddressBookByMail(ContactService contactService, Set<String> emails, Session session, ContactField... fields) throws OXException {
+        return findContactByMail(contactService, emails, session, true, fields);
+    }
+
     /**
      * Searches for a contact via its mail address.
      *
@@ -131,42 +165,67 @@ public class ContactPictureUtil extends FinderUtil {
      * @return The {@link Contact} or <code>null</code>
      * @throws OXException If the contact could not be found
      */
-    public static Contact getContactFromMail(ContactService contactService, Set<String> emails, Session session, boolean useGAB) throws OXException {
-        for (Iterator<String> iterator = emails.iterator(); iterator.hasNext();) {
-            String email = iterator.next();
+    private static Contact findContactByMail(ContactService contactService, Set<String> emails, Session session, boolean useGAB, ContactField... fields) throws OXException {
 
-            ContactSearchObject cso = new ContactSearchObject();
-            cso.setEmail1(email);
-            cso.setEmail2(email);
-            cso.setEmail3(email);
-            cso.setOrSearch(true);
-
-            // Search in GAB or exclude GAB
-            if (useGAB) {
-                cso.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-            } else {
-                cso.setExcludeFolders(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-            }
-
-            SearchIterator<Contact> result = null;
-            try {
-                result = contactService.searchContacts(session, cso, new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING));
-                if (result == null) {
-                    continue;
-                }
-
-                while (result.hasNext()) {
-                    Contact contact = result.next();
-                    if (null != contact.getImage1() && (checkEmails(contact, email))) {
-                        return contact;
-                    }
-                }
-            } finally {
-                Streams.close(result);
-            }
-
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        SingleSearchTerm folderTerm = null;
+        if (useGAB) {
+            folderTerm = getFieldSearchTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        } else {
+            folderTerm = getFieldSearchTerm(ContactField.FOLDER_ID, SingleOperation.NOT_EQUALS, FolderObject.SYSTEM_LDAP_FOLDER_ID);
         }
+
+        searchTerm.addSearchTerm(folderTerm);
+        searchTerm.addSearchTerm(getFieldSearchTerm(ContactField.NUMBER_OF_IMAGES, SingleOperation.GREATER_THAN, 0));
+
+        CompositeSearchTerm mailOrTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        searchTerm.addSearchTerm(mailOrTerm);
+
+
+        for (String mail : emails) {
+            mailOrTerm.addSearchTerm(getMailTerm(mail));
+        }
+
+        SearchIterator<Contact> result = null;
+        try {
+
+            result = contactService.searchContacts( session,
+                                                    searchTerm,
+                                                    fields,
+                                                    new SortOptions(
+                                                        new SortOrder(ContactField.FOLDER_ID, Order.DESCENDING),
+                                                        new SortOrder(ContactField.OBJECT_ID, Order.DESCENDING)));
+
+            if (result == null) {
+                return null;
+            }
+
+            while (result.hasNext()) {
+                Contact contact = result.next();
+                if (null != contact.getImage1()) {
+                    return contact;
+                }
+            }
+        } finally {
+            Streams.close(result);
+        }
+
         return null;
+    }
+
+    private static CompositeSearchTerm getMailTerm(String mail) {
+        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        orTerm.addSearchTerm(getFieldSearchTerm(ContactField.EMAIL1, SingleOperation.EQUALS, mail));
+        orTerm.addSearchTerm(getFieldSearchTerm(ContactField.EMAIL2, SingleOperation.EQUALS, mail));
+        orTerm.addSearchTerm(getFieldSearchTerm(ContactField.EMAIL3, SingleOperation.EQUALS, mail));
+        return orTerm;
+    }
+
+    private static <T> SingleSearchTerm getFieldSearchTerm(ContactField field, SingleOperation operation, T constant) {
+        SingleSearchTerm term = new SingleSearchTerm(operation);
+        term.addOperand(new ContactFieldOperand(field));
+        term.addOperand(new ConstantOperand<T>(constant));
+        return term;
     }
 
 }

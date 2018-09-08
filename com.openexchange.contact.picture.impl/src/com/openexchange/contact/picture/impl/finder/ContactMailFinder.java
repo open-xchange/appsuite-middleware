@@ -53,9 +53,9 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
-import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link ContactMailFinder} - Finds picture based on user identifier
@@ -67,18 +67,17 @@ public class ContactMailFinder extends AbstractContactFinder {
 
     /**
      * Initializes a new {@link ContactMailFinder}.
-     * 
-     * @param userPermissionService The {@link UserPermissionService}
+     *
      * @param contactService The {@link ContactService}
      */
-    public ContactMailFinder(UserPermissionService userPermissionService, ContactService contactService) {
-        super(userPermissionService, contactService);
+    public ContactMailFinder(ContactService contactService) {
+        super(contactService);
     }
 
     @Override
-    public Contact getContact(Session session, PictureSearchData data) throws OXException {
+    public Contact getContact(Session session, PictureSearchData data, ContactField... fields) throws OXException {
         if (data.hasEmail()) {
-            return ContactPictureUtil.getContactFromMail(contactService, data.getEmails(), session, false);
+            return ContactPictureUtil.findContactByMail(contactService, data.getEmails(), session, fields);
         }
         return null;
     }
@@ -86,7 +85,7 @@ public class ContactMailFinder extends AbstractContactFinder {
     @Override
     public PictureSearchData modfiyResult(Contact contact) {
         // Do nothing
-        return new PictureSearchData(null, null, null, null);
+        return PictureSearchData.EMPTY_DATA;
     }
 
     @Override

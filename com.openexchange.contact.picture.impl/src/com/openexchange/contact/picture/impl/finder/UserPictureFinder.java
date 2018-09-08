@@ -111,7 +111,7 @@ public class UserPictureFinder implements ContactPictureFinder {
             }
         }
 
-        return null;
+        return new PictureResult(false, null, data);
     }
 
     @Override

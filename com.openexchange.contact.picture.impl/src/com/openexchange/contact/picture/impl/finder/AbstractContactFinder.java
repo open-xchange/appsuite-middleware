@@ -60,9 +60,10 @@ import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
-import com.openexchange.userconf.UserPermissionService;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AbstractContactFinder} - Abstract class for all {@link ContactService} related searches for contact pictures.
@@ -82,17 +83,13 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     private final int child;
 
-    private final UserPermissionService userPermissionService;
-
     /**
      * Initializes a new {@link AbstractContactFinder}.
      *
-     * @param userPermissionService The {@link UserPermissionService}
      * @param contactService The {@link ContactService}
      */
-    public AbstractContactFinder(UserPermissionService userPermissionService, ContactService contactService) {
+    protected AbstractContactFinder(ContactService contactService) {
         super();
-        this.userPermissionService = userPermissionService;
         this.contactService = contactService;
         this.child = childCount.incrementAndGet();
     }
@@ -105,7 +102,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
      * @return The {@link Contact}
      * @throws OXException If contact can't be found
      */
-    abstract Contact getContact(Session session, PictureSearchData data) throws OXException;
+    abstract Contact getContact(Session session, PictureSearchData data, ContactField... fields) throws OXException;
 
     /**
      * Modifies the {@link PictureSearchData} in the result
@@ -133,14 +130,24 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         return getPicture(session, data, true);
     }
 
+    private static final ContactField[] ETAG_FIELDS = new ContactField[] { ContactField.OBJECT_ID,
+                                                                           ContactField.FOLDER_ID,
+                                                                           ContactField.LAST_MODIFIED };
+    private static final ContactField[] IMAGE_FIELDS = new ContactField[] { ContactField.OBJECT_ID,
+                                                                            ContactField.FOLDER_ID,
+                                                                            ContactField.LAST_MODIFIED,
+                                                                            ContactField.IMAGE1,
+                                                                            ContactField.IMAGE1_CONTENT_TYPE,
+                                                                            ContactField.IMAGE_LAST_MODIFIED};
+
     private PictureResult getPicture(Session session, PictureSearchData data, boolean eTag) {
         ContactPicture picture = null;
         PictureSearchData modified = null;
         if (isApplicable(session)) {
 
             try {
-                Contact contact = getContact(session, data);
-                if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
+                Contact contact = getContact(session, data, eTag ? ETAG_FIELDS : IMAGE_FIELDS);
+                if (eTag || ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
                     picture = ContactPictureUtil.fromContact(contact, eTag);
                 } else {
                     if (null != contact) {
@@ -155,14 +162,12 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     }
 
     private boolean isApplicable(Session session) {
-        if (null != userPermissionService && null != contactService) {
-            try {
-                return userPermissionService.getUserPermissionBits(session.getUserId(), session.getContextId()).hasContact();
-            } catch (OXException e) {
-                LOGGER.trace("Unable to get user permissions. Therefore can't allow to access contacts.", e);
-            }
+        try {
+            return ServerSessionAdapter.valueOf(session).getUserPermissionBits().hasContact();
+        } catch (OXException e) {
+            LOGGER.trace("Unable to get user permissions. Therefore can't allow to access contacts.", e);
+            return false;
         }
-        return false;
     }
 
     @Override
