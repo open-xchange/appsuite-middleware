@@ -53,6 +53,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -79,19 +80,19 @@ import com.openexchange.java.Strings;
  */
 class HazelcastSSLFactory implements SSLContextFactory {
 
-    private static final String SSL_PROTOCOLS = "com.openexchange.hazelcast.network.ssl.protocols";
-
-    private static final String TRUST_STORE     = "com.openexchange.hazelcast.network.ssl.trustStore";
-    private static final String TRUST_PASSWORD  = "com.openexchange.hazelcast.network.ssl.trustStorePassword";
-    private static final String TRUST_TYPE      = "com.openexchange.hazelcast.network.ssl.trustStoreType";
-    private static final String TRUST_ALGORITHM = "com.openexchange.hazelcast.network.ssl.trustManagerAlgorithm";
-
-    private static final String KEY_STORE     = "com.openexchange.hazelcast.network.ssl.keyStore";
-    private static final String KEY_PASSWORD  = "com.openexchange.hazelcast.network.ssl.keyStorePassword";
-    private static final String KEY_TYPE      = "com.openexchange.hazelcast.network.ssl.keyStoreType";
-    private static final String KEY_ALGORITHM = "com.openexchange.hazelcast.network.ssl.keyManagerAlgorithm";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastSSLFactory.class);
+
+    private static final String PROP_SSL_PROTOCOLS = "com.openexchange.hazelcast.network.ssl.protocols";
+
+    private static final String PROP_TRUST_STORE     = "com.openexchange.hazelcast.network.ssl.trustStore";
+    private static final String PROP_TRUST_PASSWORD  = "com.openexchange.hazelcast.network.ssl.trustStorePassword";
+    private static final String PROP_TRUST_TYPE      = "com.openexchange.hazelcast.network.ssl.trustStoreType";
+    private static final String PROP_TRUST_ALGORITHM = "com.openexchange.hazelcast.network.ssl.trustManagerAlgorithm";
+
+    private static final String PROP_KEY_STORE     = "com.openexchange.hazelcast.network.ssl.keyStore";
+    private static final String PROP_KEY_PASSWORD  = "com.openexchange.hazelcast.network.ssl.keyStorePassword";
+    private static final String PROP_KEY_TYPE      = "com.openexchange.hazelcast.network.ssl.keyStoreType";
+    private static final String PROP_KEY_ALGORITHM = "com.openexchange.hazelcast.network.ssl.keyManagerAlgorithm";
 
     private final AtomicReference<SSLContext> sslContext;
 
@@ -103,8 +104,8 @@ class HazelcastSSLFactory implements SSLContextFactory {
     public HazelcastSSLFactory() {
         super();
         this.stores = new ConcurrentHashMap<>(3);
-        stores.put("truststore", new ConfigAwareKeyStore(TRUST_STORE, TRUST_PASSWORD, TRUST_TYPE));
-        stores.put("keystore", new ConfigAwareKeyStore(KEY_STORE, KEY_PASSWORD, KEY_TYPE));
+        stores.put("truststore", new ConfigAwareKeyStore(PROP_TRUST_STORE, PROP_TRUST_PASSWORD, PROP_TRUST_TYPE));
+        stores.put("keystore", new ConfigAwareKeyStore(PROP_KEY_STORE, PROP_KEY_PASSWORD, PROP_KEY_TYPE));
         this.sslContext = new AtomicReference<SSLContext>(null);
     }
 
@@ -121,9 +122,9 @@ class HazelcastSSLFactory implements SSLContextFactory {
         }
 
         SSLContext context = this.sslContext.get();
-        String protocols = properties.getProperty(SSL_PROTOCOLS, "TLS,TLSv1,TLSv1.1,TLSv1.2");
+        String protocols = properties.getProperty(PROP_SSL_PROTOCOLS, "TLS,TLSv1,TLSv1.1,TLSv1.2");
         if (Strings.isEmpty(protocols)) {
-            throw new IllegalArgumentException("\"com.openexchange.hazelcast.ssl.protocols\" must not be empty!");
+            throw new IllegalArgumentException("Property \"" + PROP_SSL_PROTOCOLS + "\" must not be empty!");
         }
 
         // Check if this is a reload
@@ -149,14 +150,14 @@ class HazelcastSSLFactory implements SSLContextFactory {
 
             ConfigAwareKeyStore trustStore = stores.get("truststore");
             if (null != trustStore && trustStore.isConfigured()) {
-                trustManagerFactory = TrustManagerFactory.getInstance(properties.getProperty(TRUST_ALGORITHM, TrustManagerFactory.getDefaultAlgorithm()));
+                trustManagerFactory = TrustManagerFactory.getInstance(properties.getProperty(PROP_TRUST_ALGORITHM, TrustManagerFactory.getDefaultAlgorithm()));
                 trustManagerFactory.init(trustStore.getKeyStore());
             }
 
             ConfigAwareKeyStore keyStore = stores.get("keystore");
             if (null != keyStore && keyStore.isConfigured()) {
-                keyManagerFactory = KeyManagerFactory.getInstance(properties.getProperty(KEY_ALGORITHM, KeyManagerFactory.getDefaultAlgorithm()));
-                keyManagerFactory.init(keyStore.getKeyStore(), null != properties.getProperty(KEY_PASSWORD) ? properties.getProperty(KEY_PASSWORD).toCharArray() : null);
+                keyManagerFactory = KeyManagerFactory.getInstance(properties.getProperty(PROP_KEY_ALGORITHM, KeyManagerFactory.getDefaultAlgorithm()));
+                keyManagerFactory.init(keyStore.getKeyStore(), null != properties.getProperty(PROP_KEY_PASSWORD) ? properties.getProperty(PROP_KEY_PASSWORD).toCharArray() : null);
             }
 
             context.init(null == keyManagerFactory ? new KeyManager[] {} : keyManagerFactory.getKeyManagers(), null == trustManagerFactory ? new TrustManager[] {} : trustManagerFactory.getTrustManagers(), null);
@@ -170,27 +171,32 @@ class HazelcastSSLFactory implements SSLContextFactory {
     /**
      * Get the {@link SSLContext} to the first matching protocol
      *
-     * @param protocols Comma separated list of protocols to get the {@link SSLContext} for
+     * @param protocols A comma-separated list of protocols to get the {@link SSLContext} for
      * @param log <code>true</code> if log messages should be written
      * @return The {@link SSLContext} for the first protocol that matches. See {@link SSLContext#getInstance(String)}
      * @throws IllegalStateException If no SSLContext could be loaded
      */
     private SSLContext getSSLContext(String protocols, boolean log) throws IllegalStateException {
-        String[] candidates = Strings.splitByComma(protocols);
-        for (int i = candidates.length - 1; i >= 0; i--) {
+        String[] prots = Strings.splitByComma(protocols);
+        if (prots.length == 0) {
+            throw new IllegalStateException("No protocols given to find an SSLContext");
+        }
+
+        for (int i = prots.length; i-- > 0;) {
+            String protocol = prots[i];
             try {
-                SSLContext context = SSLContext.getInstance(candidates[i]);
+                SSLContext context = SSLContext.getInstance(protocol);
                 if (log) {
-                    LOGGER.info("Using {} for Hazelcast encryption", candidates[i]);
+                    LOGGER.info("Using {} for Hazelcast encryption", protocol);
                 }
                 return context;
             } catch (Throwable e) {
                 if (log) {
-                    LOGGER.info("Didn't find SSLContext for {}. Trying next protocol in list.", candidates[i]);
+                    LOGGER.info("Didn't find SSLContext for {}. Trying next protocol in list.", protocol);
                 }
             }
         }
-        throw new IllegalStateException("Unable to find SSLContexts for " + candidates);
+        throw new IllegalStateException("Unable to find SSLContexts for: " + Arrays.toString(prots));
     }
 
     private boolean loadKeyStore(Properties properties) {
@@ -205,7 +211,16 @@ class HazelcastSSLFactory implements SSLContextFactory {
         return retval;
     }
 
-    private static final List<String> SSL_PROPERTY_NAMES = ImmutableList.of(SSL_PROTOCOLS, TRUST_STORE, TRUST_PASSWORD, TRUST_TYPE, TRUST_ALGORITHM, KEY_STORE, KEY_PASSWORD, KEY_TYPE, KEY_ALGORITHM);
+    private static final List<String> SSL_PROPERTY_NAMES = ImmutableList.of(
+        PROP_SSL_PROTOCOLS,
+        PROP_TRUST_STORE,
+        PROP_TRUST_PASSWORD,
+        PROP_TRUST_TYPE,
+        PROP_TRUST_ALGORITHM,
+        PROP_KEY_STORE,
+        PROP_KEY_PASSWORD,
+        PROP_KEY_TYPE,
+        PROP_KEY_ALGORITHM);
 
     /**
      * Gets all necessary properties for an SSL configuration
@@ -215,10 +230,10 @@ class HazelcastSSLFactory implements SSLContextFactory {
      */
     static Properties getPropertiesFromService(ConfigurationService configService) {
         Properties properties = new Properties();
-        for (String property : SSL_PROPERTY_NAMES) {
-            String value = configService.getProperty(property);
+        for (String propertyName : SSL_PROPERTY_NAMES) {
+            String value = configService.getProperty(propertyName);
             if (Strings.isNotEmpty(value)) {
-                properties.setProperty(property, value);
+                properties.setProperty(propertyName, value);
             }
         }
         return properties;
