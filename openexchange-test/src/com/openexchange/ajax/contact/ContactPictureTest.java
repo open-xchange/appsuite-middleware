@@ -79,7 +79,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
     @Test
     public void testFallbackContactPicture() throws Exception {
         final ContactData contactObj = new ContactData();
-        
+
         contactObj.setLastName("Fallback");
         contactObj.setFirstName("Picture");
         contactObj.setCountryBusiness("Deutschland");
@@ -91,7 +91,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         final String contactId = createContact(contactObj);
 
         byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
-        
+
         Assert.assertNotNull("Response should not be null.", contactPicture);
         Assert.assertEquals(Photos.FALLBACK_PICTURE.length, contactPicture.length);
         Assert.assertTrue("Wrong image", Arrays.equals(contactPicture, Photos.FALLBACK_PICTURE));
@@ -117,7 +117,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         contactObj.setImage1ContentType(IMAGE_TYPE);
         contactObj.setEmail1(mail);
         createContact(contactObj);
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, contactFolderId, mail);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail);
         Assert.assertNotNull("Response should not be null.", contactPicture);
         Assert.assertEquals(IMAGE.length, contactPicture.length);
         Assert.assertArrayEquals(IMAGE, contactPicture);

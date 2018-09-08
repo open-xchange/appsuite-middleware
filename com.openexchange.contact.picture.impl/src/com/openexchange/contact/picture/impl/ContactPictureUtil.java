@@ -170,9 +170,9 @@ public class ContactPictureUtil extends FinderUtil {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         SingleSearchTerm folderTerm = null;
         if (useGAB) {
-            folderTerm = getFieldSearchTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            folderTerm = getFieldSearchTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
         } else {
-            folderTerm = getFieldSearchTerm(ContactField.FOLDER_ID, SingleOperation.NOT_EQUALS, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            folderTerm = getFieldSearchTerm(ContactField.FOLDER_ID, SingleOperation.NOT_EQUALS, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
         }
 
         searchTerm.addSearchTerm(folderTerm);

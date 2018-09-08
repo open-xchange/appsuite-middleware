@@ -118,7 +118,7 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
         String email = requestData.getParameter(MAIL_PARAM);
         Integer userId = requestData.getParameter(USER_PARAM, Integer.class, true);
 
-        return new PictureSearchData(userId, folderId, contactId, Collections.singleton(email));
+        return new PictureSearchData(userId, folderId, contactId, email == null ? null : Collections.singleton(email));
     }
 
     @Override

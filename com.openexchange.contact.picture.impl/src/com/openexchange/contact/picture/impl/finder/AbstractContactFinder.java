@@ -158,7 +158,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
                 handleException(data, e);
             }
         }
-        return new PictureResult(null != picture, picture, modified);
+        return new PictureResult(null != picture, picture, modified == null ? PictureSearchData.EMPTY_DATA : modified);
     }
 
     private boolean isApplicable(Session session) {
