@@ -1,3 +1,9 @@
+open-xchange-file-storage-mail (7.10.0-15) stable; urgency=medium
+
+  * Build for patch 2018-09-17 (4882)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 10 Sep 2018 15:21:55 +0200
+
 open-xchange-file-storage-mail (7.10.0-14) stable; urgency=medium
 
   * Build for patch 2018-09-03 (4870)
