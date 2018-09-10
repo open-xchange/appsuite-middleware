@@ -459,7 +459,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     /**
      * Performs a resumable upload, i.e. a chunk-wise streaming of the data. This is a blocking operation.
      * If another file is already present with the same filename in the same folder then its contents will be
-     * overriden.
+     * overridden.
      * 
      * @param accessToken The oauth access token
      * @param folderId The folder identifier of the parent folder (if empty or <code>null</code> the root folder will be used)
