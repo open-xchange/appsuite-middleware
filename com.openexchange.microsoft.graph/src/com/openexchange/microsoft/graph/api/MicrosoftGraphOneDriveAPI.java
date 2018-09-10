@@ -458,6 +458,8 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Performs a resumable upload, i.e. a chunk-wise streaming of the data. This is a blocking operation.
+     * If another file is already present with the same filename in the same folder then its contents will be
+     * overriden.
      * 
      * @param accessToken The oauth access token
      * @param folderId The folder identifier of the parent folder (if empty or <code>null</code> the root folder will be used)
@@ -508,7 +510,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                 if (response.getStatusCode() < 200 || response.getStatusCode() > 203) {
                     throw new OXException(666, "Upload failed: " + response.getStatusCode() + " " + response.getResponseBody());
                 }
-                if (response.getStatusCode() == 201) {
+                if (response.getStatusCode() == 200 || response.getStatusCode() == 201) {
                     LOG.debug("Upload status for upload with id '{}': Successfully completed.", uploadId);
                     return ((JSONValue) response.getResponseBody()).toObject();
                 }
