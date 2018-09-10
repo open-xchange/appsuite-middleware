@@ -9,6 +9,7 @@ Import-Package: com.google.common.collect;version="25.0.0",
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.groupware.container,
+ com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.osgi,
@@ -29,5 +30,6 @@ Import-Package: com.google.common.collect;version="25.0.0",
  org.slf4j
 Export-Package: com.openexchange.microsoft.graph.api.exception,
  com.openexchange.microsoft.graph.contacts,
- com.openexchange.microsoft.graph.onedrive
+ com.openexchange.microsoft.graph.onedrive,
+ com.openexchange.microsoft.graph.onedrive.exception
 Bundle-Activator: com.openexchange.microsoft.graph.osgi.MicrosoftGraphAPIActivator

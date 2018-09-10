@@ -67,8 +67,8 @@ import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
-import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
+import com.openexchange.microsoft.graph.onedrive.exception.MicrosoftGraphDriveServiceExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
@@ -80,11 +80,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess implements FileStorageFolderAccess, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
-
-    private static final String FILTER_FOLDERS = OneDriveConstants.FILTER_FOLDERS;
-    private static final String QUERY_PARAM_LIMIT = OneDriveConstants.QUERY_PARAM_LIMIT;
-    private static final String QUERY_PARAM_OFFSET = OneDriveConstants.QUERY_PARAM_OFFSET;
-    private static final String QUERY_PARAM_FILTER = OneDriveConstants.QUERY_PARAM_FILTER;
 
     private final OneDriveAccountAccess accountAccess;
     private final int userId;
@@ -111,41 +106,6 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.onedrive.useOptimisticSubfolderDetection", true, view);
     }
-
-    //    private boolean hasSubfolders(String oneDriveFolderId, HttpClient httpClient) throws OXException, JSONException, IOException {
-    //        if (useOptimisticSubfolderDetection) {
-    //            return true;
-    //        }
-    //        HttpRequestBase request = null;
-    //        try {
-    //            List<NameValuePair> qparams = initiateQueryString();
-    //            //qparams.add(new BasicNameValuePair(QUERY_PARAM_FILTER, FILTER_FOLDERS));
-    //            HttpGet method = new HttpGet(buildUri(oneDriveFolderId + "/files", qparams));
-    //            request = method;
-    //
-    //            JSONArray jData = handleHttpResponse(execute(method, httpClient), JSONObject.class).getJSONArray("data");
-    //            int length = jData.length();
-    //            if (length > 0) {
-    //                for (int i = 0; i < length; i++) {
-    //                    JSONObject jItem = jData.getJSONObject(i);
-    //                    if (isFolder(jItem)) {
-    //                        return true;
-    //                    }
-    //                }
-    //            }
-    //            return false;
-    //        } finally {
-    //            reset(request);
-    //        }
-    //    }
-
-    //    protected OneDriveFolder parseFolder(String oneDriveFolderId, RestFolder restFolder, HttpClient httpClient) throws OXException, JSONException, IOException {
-    //        return new OneDriveFolder(userId).parseDirEntry(restFolder, getRootFolderId(), accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
-    //    }
-    //
-    //    protected OneDriveFolder parseFolder(String oneDriveFolderId, JSONObject jFolder, HttpClient httpClient) throws OXException, JSONException, IOException {
-    //        return new OneDriveFolder(userId).parseDirEntry(jFolder, getRootFolderId(), accountDisplayName, hasSubfolders(oneDriveFolderId, httpClient));
-    //    }
 
     @Override
     public boolean exists(final String folderId) throws OXException {
@@ -289,7 +249,14 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     @Override
     public String createFolder(final FileStorageFolder toCreate, final boolean autoRename) throws OXException {
-        return driveService.createFolder(userId, getAccessToken(), toCreate.getName(), toCreate.getParentId(), autoRename).getId();
+        try {
+            return driveService.createFolder(userId, getAccessToken(), toCreate.getName(), toCreate.getParentId(), autoRename).getId();
+        } catch (OXException e) {
+            if (MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.equals(e)) {
+                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, toCreate.getName(), toCreate.getParentId());
+            }
+            throw e;
+        }
         //        if (false == autoRename) {
         //            return perform(new OneDriveClosure<String>() {
         //
@@ -390,8 +357,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
             try {
                 return driveService.moveFolder(getAccessToken(), folderId, newParentId, name.toString());
             } catch (OXException e) {
-                // FIXME: DO NOT use the API exception codes. Use the OneDrive service's codes once in place.
-                if (MicrosoftGraphAPIExceptionCodes.NAME_ALREADY_EXISTS.equals(e)) {
+                if (MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.equals(e)) {
                     name.advance();
                     continue;
                 }
@@ -545,14 +511,12 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
                 driveService.renameFolder(getAccessToken(), folderId, newName.toString());
                 return folderId;
             } catch (OXException e) {
-                // FIXME: DO NOT use the API exception codes. Use the OneDrive service's codes once in place.
-                if (MicrosoftGraphAPIExceptionCodes.NAME_ALREADY_EXISTS.equals(e)) {
-                    if (autoRename) {
-                        newName.advance();
-                        continue;
-                    }
-                } else {
+                if (false == MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.equals(e)) {
                     throw e;
+                }
+                if (autoRename) {
+                    newName.advance();
+                    continue;
                 }
                 FileStorageFolder folder = getFolder(folderId);
                 FileStorageFolder parent = getFolder(folder.getParentId());

@@ -132,12 +132,26 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     public JSONObject getRoot(String accessToken) throws OXException {
         return getResource(accessToken, BASE_URL + "/root");
     }
+    
+    /**
+     * Returns the metadata of the root folder for a user's default Drive
+     * 
+     * @param accessToken The oauth access token
+     * @param queryParams The request query parameters
+     * @return A {@link JSONObject} with the metadata of the user's root folder
+     *         of the default Drive
+     * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_get">Get a file or folder</a>
+     */
+    public JSONObject getRoot(String accessToken, MicrosoftGraphQueryParameters queryParameters) throws OXException {
+        return getResource(accessToken, BASE_URL + "/root", queryParameters.getQueryParametersMap());
+    }
 
     /**
      * Returns the metadata of all children (files and folders) of the specified folder.
      * 
      * @param accessToken The oauth access token
-     * @param folderPath The folder's absolute path, e.g. <code>/path/to/folder</code>
+     * @param queryParams The request query parameters
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
      * @throws OXException if an error is occurred
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_list_children">List the contents of a folder</a>
@@ -161,6 +175,24 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
             return getRoot(accessToken);
         }
         return getResource(accessToken, BASE_URL + "/items/" + folderId);
+    }
+    
+    /**
+     * Returns the metadata of the folder with the specified identifier for a user's default Drive
+     * 
+     * @param accessToken The oauth access token
+     * @param folderPath The folder's unique identifier
+     * @param queryParams The request query parameters
+     * @return A {@link JSONObject} with the metadata of the user's specified folder
+     *         of the default Drive
+     * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/beta/api/driveitem_get">Get a file or folder</a>
+     */
+    public JSONObject getFolder(String accessToken, String folderId, MicrosoftGraphQueryParameters queryParameters) throws OXException {
+        if (Strings.isEmpty(folderId)) {
+            return getRoot(accessToken);
+        }
+        return getResource(accessToken, BASE_URL + "/items/" + folderId, queryParameters.getQueryParametersMap());
     }
 
     /**

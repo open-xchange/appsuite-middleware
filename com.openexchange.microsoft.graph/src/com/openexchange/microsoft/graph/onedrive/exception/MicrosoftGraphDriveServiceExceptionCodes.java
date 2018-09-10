@@ -62,6 +62,22 @@ import com.openexchange.exception.OXExceptionStrings;
  * @since v7.10.1
  */
 public enum MicrosoftGraphDriveServiceExceptionCodes implements DisplayableOXExceptionCode {
+    /**
+     * <li>The folder does not exist.</li>
+     * <li>The folder with id '%1$s' was not found.</li>
+     */
+    FOLDER_NOT_FOUND("The folder with id '%1$s' was not found", MicrosoftGraphDriveServiceExceptionMessages.FOLDER_NOT_EXISTS, Category.CATEGORY_ERROR, 1),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>A JSON error occurred: %1$s</li>
+     */
+    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 2),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>A folder named '%1$s' already exists under the folder with id '%2$s</li>
+     */
+    FOLDER_ALREADY_EXISTS("A folder named '%1$s' already exists under the folder '%2$s' with id '%3$s'", Category.CATEGORY_ERROR, 3),
+
     ;
 
     private final String message;

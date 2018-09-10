@@ -61,7 +61,6 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.java.Strings;
@@ -69,13 +68,13 @@ import com.openexchange.microsoft.graph.api.MicrosoftGraphOneDriveAPI;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters.Builder;
 import com.openexchange.microsoft.graph.api.MicrosoftGraphQueryParameters.ParameterName;
-import com.openexchange.microsoft.graph.api.exception.ErrorCode;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFile;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
+import com.openexchange.microsoft.graph.onedrive.exception.MicrosoftGraphDriveServiceExceptionCodes;
 import com.openexchange.microsoft.graph.onedrive.parser.OneDriveFileParser;
 import com.openexchange.microsoft.graph.onedrive.parser.OneDriveFolderParser;
-import com.openexchange.rest.client.exception.RESTExceptionCodes;
 
 /**
  * {@link MicrosoftGraphDriveServiceImpl}
@@ -103,6 +102,8 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /**
      * Initialises a new {@link MicrosoftGraphDriveServiceImpl}.
+     * 
+     * @param api The {@link MicrosoftGraphOneDriveAPI}
      */
     public MicrosoftGraphDriveServiceImpl(MicrosoftGraphOneDriveAPI api) {
         super();
@@ -119,11 +120,10 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     @Override
     public boolean existsFolder(String accessToken, String folderId) throws OXException {
         try {
-            JSONObject response = api.getFolder(accessToken, folderId);
-            return !containsError(response, ErrorCode.itemNotFound);
+            api.getFolder(accessToken, folderId, new Builder().withParameter(ParameterName.SELECT, "id").build());
+            return true;
         } catch (OXException e) {
-            // FIXME: introduce own exception codes
-            if (RESTExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
+            if (MicrosoftGraphAPIExceptionCodes.ITEM_NOT_FOUND.equals(e)) {
                 return false;
             }
             throw e;
@@ -235,7 +235,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             body.put("name", newName);
             api.patchItem(accessToken, folderId, body);
         } catch (JSONException e) {
-            throw new OXException(666, "JSON error", e);
+            throw MicrosoftGraphDriveServiceExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -246,17 +246,8 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String moveFolder(String accessToken, String folderId, String parentId, String newName) throws OXException {
-        try {
-            JSONObject parentRef = new JSONObject();
-            parentRef.put("id", parentId);
-            JSONObject body = new JSONObject();
-            body.put("name", newName);
-            body.put("parentReference", parentRef);
-            JSONObject patchItem = api.patchItem(accessToken, folderId, body);
-            return patchItem.optString("id");
-        } catch (JSONException e) {
-            throw new OXException(666, "JSON error", e);
-        }
+        JSONObject patchItem = api.patchItem(accessToken, folderId, compileUpdateBody(parentId, newName));
+        return patchItem.optString("id");
     }
 
     /*
@@ -314,8 +305,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             try {
                 files.add(fileEntityParser.parseEntity(userId, api.getItem(accessToken, itemId)));
             } catch (OXException e) {
-                // FIXME: introduce own exception codes
-                if (RESTExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
+                if (MicrosoftGraphAPIExceptionCodes.ITEM_NOT_FOUND.equals(e)) {
                     LOG.debug("Item with id '{}' for user with id '{}' was not found in OneDrive", itemId, userId);
                     continue;
                 }
@@ -352,16 +342,12 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String updateFile(String accessToken, File file, List<Field> modifiedFields, String parentId) throws OXException {
-        try {
-            JSONObject body = compileUpdateBody(file, modifiedFields, parentId);
-            if (body.isEmpty()) {
-                return file.getId();
-            }
-            JSONObject response = api.patchItem(accessToken, file.getId(), body);
-            return response.optString("id");
-        } catch (JSONException e) {
-            throw new OXException(666, "JSON error", e);
+        JSONObject body = compileUpdateBody(file, modifiedFields, parentId);
+        if (body.isEmpty()) {
+            return file.getId();
         }
+        JSONObject response = api.patchItem(accessToken, file.getId(), body);
+        return response.optString("id");
     }
 
     /*
@@ -371,15 +357,11 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String copyFile(String accessToken, String itemId, File file, List<Field> modifiedFields, String parentId) throws OXException {
-        try {
-            if (ROOT_ID.equals(parentId)) {
-                JSONObject rootFolder = api.getRoot(accessToken);
-                parentId = rootFolder.optString("id");
-            }
-            return api.copyItem(accessToken, itemId, compileUpdateBody(file, modifiedFields, parentId));
-        } catch (JSONException e) {
-            throw new OXException(666, "JSON error", e);
+        if (ROOT_ID.equals(parentId)) {
+            JSONObject rootFolder = api.getRoot(accessToken);
+            parentId = rootFolder.optString("id");
         }
+        return api.copyItem(accessToken, itemId, compileUpdateBody(file, modifiedFields, parentId));
     }
 
     /*
@@ -389,19 +371,12 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String copyFile(String accessToken, String itemId, String parentId) throws OXException {
-        try {
-            if (ROOT_ID.equals(parentId)) {
-                JSONObject rootFolder = api.getRoot(accessToken);
-                parentId = rootFolder.optString("id");
-            }
-            JSONObject parentRef = new JSONObject();
-            parentRef.put("id", parentId);
-            JSONObject body = new JSONObject();
-            body.put("parentReference", parentRef);
-            return api.copyItem(accessToken, itemId, body);
-        } catch (JSONException e) {
-            throw new OXException(666, "JSON error", e);
+        if (ROOT_ID.equals(parentId)) {
+            JSONObject rootFolder = api.getRoot(accessToken);
+            parentId = rootFolder.optString("id");
         }
+
+        return api.copyItem(accessToken, itemId, compileUpdateBody(parentId));
     }
 
     /*
@@ -501,26 +476,17 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     //////////////////////////////////////// HELPERS /////////////////////////////////////
 
     /**
+     * Moves the item with the specified identifier under the parent folder with the specified identifier
      * 
-     * @param accessToken
-     * @param itemId
-     * @param parentId
-     * @return
-     * @throws OXException
+     * @param accessToken The oauth access token
+     * @param itemId The item's identifier
+     * @param parentId The new parent's identifier
+     * @return The new identifier of the item
+     * @throws OXException if an error is occurred
      */
     private String moveItem(String accessToken, String itemId, String parentId) throws OXException {
-        try {
-            JSONObject parentRef = new JSONObject();
-            parentRef.put("id", parentId);
-
-            JSONObject body = new JSONObject();
-            body.put("parentReference", parentRef);
-
-            JSONObject patchItem = api.patchItem(accessToken, itemId, body);
-            return patchItem.optString("id");
-        } catch (JSONException e) {
-            throw new OXException(666, "JSON error", e);
-        }
+        JSONObject patchItem = api.patchItem(accessToken, itemId, compileUpdateBody(parentId));
+        return patchItem.optString("id");
     }
 
     /**
@@ -549,8 +515,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
                 continue;
             }
             if (parentId.equals(parentRef.optString("id"))) {
-                // FIXME: introduce own exception codes
-                throw FileStorageExceptionCodes.DUPLICATE_FOLDER.create(folderName, parentRef.optString("name"));
+                throw MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.create(folderName, parentRef.optString("name"), parentId);
             }
         }
     }
@@ -589,7 +554,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * @param userId the user identifier
      * @param entities The {@link JSONArray} with the entities
      * @return A {@link List} with the {@link OneDriveFolder}s
-     * @throws OXException
+     * @throws OXException if an error is occurred
      */
     private List<OneDriveFolder> parseEntities(int userId, String accessToken, JSONArray entities) throws OXException {
         if (entities == null || entities.isEmpty()) {
@@ -631,45 +596,102 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     }
 
     /**
-     * Checks the specified response whether it contains the specified error code
+     * Compiles an update body with the specified parent identifier and the specified modified fields.
+     * The following fields are considered:
+     * <ul>
+     * <li>{@link Field#FILENAME}</li>
+     * <li>{@link Field#DESCRIPTION}</li>
+     * </ul>
      * 
-     * @param response The response
-     * @param errorCode The error code
-     * @return <code>true</code> if the specified error code is contained</code>;
-     *         <code>false</code> if the response is null or empty, or if the error code is not contained.
+     * @param file The {@link File} containing the item's metadata
+     * @param modifiedFields A {@link List} with the modified fields
+     * @param description The description of the new item
+     * @return The update body
+     * @throws OXException if a JSON error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_update">Update Item</a>
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_move">Move Item</a>
      */
-    private boolean containsError(JSONObject response, ErrorCode errorCode) {
-        if (response == null || response.isEmpty()) {
-            return true;
+    private JSONObject compileUpdateBody(File file, List<Field> modifiedFields, String parentId) throws OXException {
+        try {
+            JSONObject body = new JSONObject();
+            String newName = null;
+            if (modifiedFields == null || modifiedFields.contains(Field.FILENAME)) {
+                newName = file.getFileName();
+            }
+            String description = null;
+            if (modifiedFields == null || modifiedFields.contains(Field.DESCRIPTION)) {
+                description = file.getDescription();
+            }
+            if (parentId != null) {
+                JSONObject parentRef = new JSONObject();
+                parentRef.put("id", parentId);
+                body.put("parentReference", parentRef);
+            }
+            return compileUpdateBody(parentId, newName, description);
+        } catch (JSONException e) {
+            throw MicrosoftGraphDriveServiceExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-        if (!response.hasAndNotNull("error")) {
-            return false;
-        }
-        JSONObject error = response.optJSONObject("error");
-        return errorCode.name().equals(error.optString("code"));
     }
 
     /**
+     * Compiles an update body with the specified parent identifier. The parent identifier
+     * designates the destination folder in a move operation.
      * 
-     * @param file
-     * @param modifiedFields
-     * @param parentId
-     * @return
-     * @throws JSONException
+     * @param parentId The parent identifier
+     * @return The update body
+     * @throws OXException if a JSON error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_move">Move Item</a>
      */
-    private JSONObject compileUpdateBody(File file, List<Field> modifiedFields, String parentId) throws JSONException {
-        JSONObject body = new JSONObject();
-        if (modifiedFields == null || modifiedFields.contains(Field.FILENAME)) {
-            body.put("name", file.getFileName());
+    private JSONObject compileUpdateBody(String parentId) throws OXException {
+        return compileUpdateBody(parentId, null, null);
+    }
+
+    /**
+     * Compiles an update body with the specified parent identifier and the specified new name.
+     * The parent identifier designates the destination folder in a move operation. The new name
+     * designates the new name of the item (file or folder) in a rename and move operation.
+     * 
+     * @param parentId The parent identifier
+     * @param newName The new name of the folder
+     * @return The update body
+     * @throws OXException if a JSON error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_update">Update Item</a>
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_move">Move Item</a>
+     */
+    private JSONObject compileUpdateBody(String parentId, String newName) throws OXException {
+        return compileUpdateBody(parentId, newName, null);
+    }
+
+    /**
+     * Compiles an update body with the specified parent identifier and the specified new name.
+     * The parent identifier designates the destination folder in a move operation. The new name
+     * designates the new name of the item (file or folder) in a rename and move operation.
+     * 
+     * @param parentId The parent identifier
+     * @param newName The new name of the item
+     * @param description The description of the new item
+     * @return The update body
+     * @throws OXException if a JSON error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_update">Update Item</a>
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_move">Move Item</a>
+     */
+    private JSONObject compileUpdateBody(String parentId, String newName, String description) throws OXException {
+        try {
+            JSONObject body = new JSONObject();
+            if (parentId != null) {
+                JSONObject parentRef = new JSONObject();
+                parentRef.put("id", parentId);
+                body.put("parentReference", parentRef);
+            }
+            if (Strings.isNotEmpty(newName)) {
+                body.put("name", newName);
+            }
+            if (Strings.isNotEmpty(description)) {
+                body.put("description", description);
+            }
+            return body;
+        } catch (JSONException e) {
+            throw MicrosoftGraphDriveServiceExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-        if (modifiedFields == null || modifiedFields.contains(Field.DESCRIPTION)) {
-            body.put("description", file.getDescription());
-        }
-        if (parentId != null) {
-            JSONObject parentRef = new JSONObject();
-            parentRef.put("id", parentId);
-            body.put("parentReference", parentRef);
-        }
-        return body;
     }
 }
