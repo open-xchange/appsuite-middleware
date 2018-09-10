@@ -120,6 +120,10 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
                 if (responseBodyCandidate != null) {
                     // After type correction, explicitly set it as JSONObject.
                     restResponse.setResponseBody(responseBodyCandidate);
+                } else {
+                    // Response body other than JSONObject
+                    assertStatusCode(restResponse);
+                    return restResponse;
                 }
             } else if (responseBody instanceof JSONObject) {
                 checkForErrors((JSONObject) responseBody);
