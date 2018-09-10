@@ -75,6 +75,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.EventID;
@@ -108,7 +109,7 @@ public class PushCalendarHandler implements CalendarHandler {
         /*
          * construct push notifications from calendar event
          */
-        List<PushNotification> notifications = getNotifications(event.getContextId(), getAffectedFoldersPerUser(event), getNeedsActionPerUser(event));
+        List<PushNotification> notifications = getNotifications(event.getContextId(), getPushToken(event), getAffectedFoldersPerUser(event), getNeedsActionPerUser(event));
         if (notifications.isEmpty()) {
             return;
         }
@@ -122,21 +123,30 @@ public class PushCalendarHandler implements CalendarHandler {
         }
     }
 
-    private static List<PushNotification> getNotifications(int contextId, Map<Integer, List<String>> affectedFoldersPerUser, Map<Integer, List<EventID>> needsActionPerUser) {
+    private static List<PushNotification> getNotifications(int contextId, String pushToken, Map<Integer, List<String>> affectedFoldersPerUser, Map<Integer, List<EventID>> needsActionPerUser) {
         Set<Integer> userIds = new HashSet<Integer>(affectedFoldersPerUser.keySet());
         userIds.addAll(needsActionPerUser.keySet());
         List<PushNotification> notifications = new ArrayList<PushNotification>(userIds.size());
         for (Integer userId : userIds) {
             Map<String, Object> messageData = getMessageData(affectedFoldersPerUser.get(userId), needsActionPerUser.get(userId));
-            notifications.add(getNotification(contextId, i(userId), messageData));
+            notifications.add(getNotification(contextId, i(userId), pushToken, messageData));
         }
         return notifications;
     }
 
-    private static PushNotification getNotification(int contextId, int userId, Map<String, Object> messageData) {
-        return DefaultPushNotification.builder().contextId(contextId).userId(userId).topic("ox:calendar:updates")
+    private static PushNotification getNotification(int contextId, int userId, String pushToken, Map<String, Object> messageData) {
+        return DefaultPushNotification.builder()
+            .contextId(contextId)
+            .userId(userId)
+            .sourceToken(pushToken)
+            .topic("ox:calendar:updates")
             //.topic("ox:mail:new") to test
-            .messageData(messageData).build();
+            .messageData(messageData)
+        .build();
+    }
+
+    private static String getPushToken(CalendarEvent event) {
+        return null != event.getCalendarParameters() ? event.getCalendarParameters().get(CalendarParameters.PARAMETER_PUSH_TOKEN, String.class) : null;
     }
 
     /**

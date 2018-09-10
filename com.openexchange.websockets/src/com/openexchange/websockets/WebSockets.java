@@ -165,6 +165,17 @@ public class WebSockets {
     }
 
     /**
+     * Gets a value indicating whether a push source token matches a specific web socket.
+     * 
+     * @param webSocket The web socket to check
+     * @param sourceToken The source push token to check, or <code>null</code> if not specified
+     * @return <code>true</code> if both match, <code>false</code>, otherwise
+     */
+    public static boolean matchesToken(WebSocket webSocket, String sourceToken) {
+        return null != sourceToken && null != webSocket && null != webSocket.getConnectionId() && sourceToken.equals(webSocket.getConnectionId().getId());
+    }
+
+    /**
      * Validates the path filter expression.
      *
      * @param pathFilter The path filter expression to validate.

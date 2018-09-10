@@ -51,6 +51,7 @@ package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Map;
 import java.util.Set;
@@ -78,7 +79,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @OAuthAction(ChronosOAuthScope.OAUTH_WRITE_SCOPE)
 public class DeleteAction extends ChronosAction {
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS, PARAMETER_PUSH_TOKEN);
 
     @Override
     protected Set<String> getOptionalParameters() {

@@ -275,7 +275,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
                                                                         result.getDeletions(),
                                                                         session,
                                                                         null,
-                                                                        null));
+                                                                        parameters));
         return result;
     }
 
