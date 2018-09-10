@@ -235,7 +235,14 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public void renameFolder(String accessToken, String folderId, String newName) throws OXException {
-        api.patchItem(accessToken, resolveRootIfNecessary(accessToken, folderId), compileUpdateBody(null, newName));
+        try {
+            api.patchItem(accessToken, resolveRootIfNecessary(accessToken, folderId), compileUpdateBody(null, newName));
+        } catch (OXException e) {
+            if (MicrosoftGraphAPIExceptionCodes.NAME_ALREADY_EXISTS.equals(e)) {
+                throw MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.create(e, newName, folderId);
+            }
+            throw e;
+        }
     }
 
     /*
@@ -245,8 +252,15 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String moveFolder(String accessToken, String folderId, String parentId, String newName) throws OXException {
-        JSONObject patchItem = api.patchItem(accessToken, folderId, compileUpdateBody(resolveRootIfNecessary(accessToken, parentId), newName));
-        return patchItem.optString("id");
+        try {
+            JSONObject patchItem = api.patchItem(accessToken, folderId, compileUpdateBody(resolveRootIfNecessary(accessToken, parentId), newName));
+            return patchItem.optString("id");
+        } catch (OXException e) {
+            if (MicrosoftGraphAPIExceptionCodes.NAME_ALREADY_EXISTS.equals(e)) {
+                throw MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.create(e, newName, parentId);
+            }
+            throw e;
+        }
     }
 
     /*
@@ -256,7 +270,14 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String moveFolder(String accessToken, String folderId, String parentId) throws OXException {
-        return moveItem(accessToken, folderId, resolveRootIfNecessary(accessToken, parentId));
+        try {
+            return moveItem(accessToken, folderId, resolveRootIfNecessary(accessToken, parentId));
+        } catch (OXException e) {
+            if (MicrosoftGraphAPIExceptionCodes.NAME_ALREADY_EXISTS.equals(e)) {
+                throw MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.create(e, folderId, parentId);
+            }
+            throw e;
+        }
     }
 
     /////////////////////////////////////// FILES //////////////////////////////////////
@@ -502,7 +523,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
                 continue;
             }
             if (parentId.equals(parentRef.optString("id"))) {
-                throw MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.create(folderName, parentRef.optString("name"), parentId);
+                throw MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.create(folderName, parentId);
             }
         }
     }

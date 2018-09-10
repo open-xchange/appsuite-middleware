@@ -74,9 +74,9 @@ public enum MicrosoftGraphDriveServiceExceptionCodes implements DisplayableOXExc
     JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 2),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
-     * <li>A folder named '%1$s' already exists under the folder '%2$s' with id '%3$s'</li>
+     * <li>A folder named '%1$s' already exists under the folder with id '%2$s'</li>
      */
-    FOLDER_ALREADY_EXISTS("A folder named '%1$s' already exists under the folder '%2$s' with id '%3$s'", Category.CATEGORY_ERROR, 3),
+    FOLDER_ALREADY_EXISTS("A folder named '%1$s' already exists under the folder with id '%2$s'", Category.CATEGORY_ERROR, 3),
     /**
      * <li>You are not allowed to delete the root folder.</li>
      * <li>The root folder cannot be deleted</li>
