@@ -923,6 +923,13 @@ msgid ""
 "%1$s which is managed by you."
 msgstr ""
 
+#. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:308
+msgid ""
+"You have received an E-Mail containing a reply to an appointment that you "
+"didn't organize. Best ignore it."
+msgstr ""
+
 #. *
 #. * The event %s couldn't be deleted: %s
 #.
