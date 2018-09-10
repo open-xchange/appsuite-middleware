@@ -52,6 +52,7 @@ package com.openexchange.microsoft.graph.api;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -62,11 +63,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTClient;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRESTEndPoint;
 import com.openexchange.microsoft.graph.api.client.MicrosoftGraphRequest;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.policy.retry.LinearRetryPolicy;
 import com.openexchange.policy.retry.RetryPolicy;
 import com.openexchange.rest.client.exception.RESTExceptionCodes;
@@ -82,10 +86,18 @@ import com.openexchange.rest.client.v2.entity.JSONObjectEntity;
  */
 public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MicrosoftGraphOneDriveAPI.class);
+
     /**
      * The base API URL '/me/drive'
      */
     private static final String BASE_URL = "/me" + MicrosoftGraphRESTEndPoint.drive.getAbsolutePath();
+
+    /**
+     * The chunk size has to be a multiple of 320KiB (327.680 bytes). A multiplier
+     * can also be used with that base chunk size.
+     */
+    private static final int CHUNK_SIZE = 327680;
 
     /**
      * Initialises a new {@link MicrosoftGraphOneDriveAPI}.
@@ -132,7 +144,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     public JSONObject getRoot(String accessToken) throws OXException {
         return getResource(accessToken, BASE_URL + "/root");
     }
-    
+
     /**
      * Returns the metadata of the root folder for a user's default Drive
      * 
@@ -176,7 +188,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         }
         return getResource(accessToken, BASE_URL + "/items/" + folderId);
     }
-    
+
     /**
      * Returns the metadata of the folder with the specified identifier for a user's default Drive
      * 
@@ -294,45 +306,64 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         request.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         request.sethBodyEntity(new JSONObjectEntity(body));
         RESTResponse restResponse = client.execute(request);
-        if (restResponse.getStatusCode() != 202) {
-            throw new OXException(666, "Copy failed: " + restResponse.getStatusCode());
-        }
         String location = restResponse.getHeader(HttpHeaders.LOCATION);
+        if (Strings.isEmpty(location)) {
+            throw MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION.create("Cannot monitor the 'copy' status. Location header is absent.");
+        }
         RetryPolicy retryPolicy = new LinearRetryPolicy();
         do {
             JSONObject monitor = monitorAsyncTask(location);
             String status = monitor.optString("status");
             if ("failed".equals(status)) {
-                throw new OXException(666, "copy failed");
+                throw MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION.create("Copying item with id '" + itemId + "' has failed and that's all we know.");
             }
             double percentage = monitor.optDouble("percentageComplete");
             if (percentage == 100) {
                 return monitor.optString("resourceId");
             }
+            LOG.debug("Copying item with id '{}', completed '{}'", itemId, percentage + "%");
         } while (retryPolicy.isRetryAllowed());
-        throw new OXException(666, "Gave up after " + retryPolicy.getMaxTries() + " tries");
+        throw MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION.create("Copy failed. Gave up after " + retryPolicy.getMaxTries() + " tries.");
     }
 
     /**
+     * Retrieves the status report from the specified monitor URL
      * 
-     * @param accessToken
-     * @param location
-     * @return
-     * @throws OXException
+     * @param accessToken The oauth access token
+     * @param location The URL from which to retrieve the status report
+     * @return A {@link JSONObject} with the status report
+     * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/long_running_actions_overview#retrieve-a-completed-status-report-from-the-monitor-url">Retrieve a completed status report from the monitor URL</a>
      */
     public JSONObject monitorAsyncTask(String location) throws OXException {
         HttpRequestBase get = new HttpGet(location);
-        RESTResponse response = client.executeRequest(get);
-        if (APPLICATION_JSON.equals(response.getHeader(HttpHeaders.CONTENT_TYPE))) {
+        RESTResponse response = client.execute(get);
+        if (response.getResponseBody() instanceof JSONValue) {
             return ((JSONValue) response.getResponseBody()).toObject();
         }
-        throw new OXException(666, "Monitor failed: " + response.getStatusCode());
+        throw MicrosoftGraphAPIExceptionCodes.GENERAL_EXCEPTION.create("Unable to retrieve monitoring information from '" + location + "'");
     }
 
+    /**
+     * Retrieves the thumbnails' metadata of the item with the specified identifier
+     * 
+     * @param accessToken The oauth access token
+     * @param itemId The item's identifier
+     * @return A {@link JSONObject} with the thumbnails' metadata
+     * @throws OXException if an error is occurred
+     */
     public JSONObject getThumbnails(String accessToken, String itemId) throws OXException {
         return getResource(accessToken, BASE_URL + "/items/" + itemId + "/thumbnails");
     }
 
+    /**
+     * Retrieves the thumbnail content of the specified item
+     * 
+     * @param accessToken The oauth access token
+     * @param itemId The item's identifier
+     * @return An {@link InputStream} with the thumbnail's contents ready to be streamed to the client
+     * @throws OXException if an error is occurred
+     */
     public InputStream getThumbnailContent(String accessToken, String itemId) throws OXException {
         JSONObject thumbnails = getThumbnails(accessToken, itemId);
         JSONArray array = thumbnails.optJSONArray("value");
@@ -351,8 +382,10 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                 continue;
             }
             HttpRequestBase get = new HttpGet(location);
-            RESTResponse response = client.executeRequest(get);
-            return new ByteArrayInputStream((byte[]) response.getResponseBody()); //FIXME: asap!
+            RESTResponse response = client.execute(get);
+            if (response.getResponseBody() instanceof byte[]) {
+                return new ByteArrayInputStream(byte[].class.cast(response.getResponseBody()));
+            }
         }
         // No thumbnail available
         return null;
@@ -424,33 +457,17 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     }
 
     /**
-     * Uploads a new file to the specified folder
+     * Performs a resumable upload, i.e. a chunk-wise streaming of the data. This is a blocking operation.
      * 
      * @param accessToken The oauth access token
-     * @param folderId The folder identifier
-     * @param inputStream The binary content to upload
-     * @return The metadata of the new item
-     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_put_content">Upload a new File</a>
-     */
-    public JSONObject singleUploadNew(String accessToken, String folderId, String filename, String contentType, long contentLength, InputStream inputStream) throws OXException {
-        String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/content";
-        return putResource(accessToken, path, contentType, contentLength, inputStream);
-    }
-
-    public JSONObject singleUploadReplace(String accessToken, String itemId) {
-        return null;
-    }
-
-    /**
-     * 
-     * @param accessToken
-     * @param folderId
-     * @param filename
-     * @param contentType
-     * @param contentLength
-     * @param inputStream
-     * @return
-     * @throws OXException
+     * @param folderId The folder identifier of the parent folder (if empty or <code>null</code> the root folder will be used)
+     * @param filename The file's name
+     * @param contentType The content type of the file
+     * @param contentLength The file's size
+     * @param inputStream A stream with the actual data
+     * @return A {@link JSONObject} with the metadata of the newly uploaded file.
+     * @throws OXException if an error is occurred
+     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_createuploadsession">Resumable Upload</a>
      */
     public JSONObject streamingUpload(String accessToken, String folderId, String filename, String contentType, long contentLength, InputStream inputStream) throws OXException {
         String path = BASE_URL + (Strings.isEmpty(folderId) ? "/root" : "/items/" + folderId) + ":/" + filename + ":/createUploadSession";
@@ -464,30 +481,38 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                 throw new OXException(666, "Upload failed");
             }
 
-            int chunkSize = 1310720;
-            byte[] b = new byte[chunkSize];
             int read = 0;
             String range;
             int offset = 0;
-            int end = 0;
-            int length = chunkSize;
+            int length = CHUNK_SIZE;
             long remainingSize = contentLength;
+            long transferredBytes = 0;
+            byte[] b = new byte[CHUNK_SIZE];
+            String uploadId = UUID.randomUUID().toString();
             while ((read = inputStream.read(b, 0, length)) > 0) {
+                // Calculate current position
                 remainingSize -= read;
-                length = (int) (remainingSize > chunkSize ? chunkSize : remainingSize);
-                end = offset + read - 1;
-                range = "bytes " + offset + "-" + end + "/" + contentLength;
+                transferredBytes += read;
+                length = (int) (remainingSize > CHUNK_SIZE ? CHUNK_SIZE : remainingSize);
+                // The end index has to be calculated before the offset, otherwise it will mess up the range header.
+                range = "bytes " + offset + "-" + (offset + read - 1) + "/" + contentLength;
                 offset += read;
+
+                // Compile new put request
                 HttpEntityEnclosingRequestBase put = new HttpPut(uploadUrl);
                 put.setHeader(HttpHeaders.CONTENT_RANGE, range);
                 put.setEntity(new ByteArrayEntity(b, 0, read));
-                RESTResponse response = client.executeRequest(put);
+
+                // Upload
+                RESTResponse response = client.execute(put);
                 if (response.getStatusCode() < 200 || response.getStatusCode() > 203) {
                     throw new OXException(666, "Upload failed: " + response.getStatusCode() + " " + response.getResponseBody());
                 }
                 if (response.getStatusCode() == 201) {
+                    LOG.debug("Upload status for upload with id '{}': Successfully completed.", uploadId);
                     return ((JSONValue) response.getResponseBody()).toObject();
                 }
+                LOG.debug("Upload status for upload with id '{}': Completed: {}% ", uploadId, String.format("%1.2f", (((double) transferredBytes / contentLength * 100))));
             }
             throw new OXException(666, "Upload failed");
         } catch (JSONException e) {

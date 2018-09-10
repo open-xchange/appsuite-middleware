@@ -61,4 +61,8 @@ public class MicrosoftGraphDriveServiceExceptionMessages implements LocalizableS
 
     // The folder does not exist.
     public static final String FOLDER_NOT_EXISTS = "The folder does not exist.";
+    // A folder named '%1$s' already exists under the folder with name '%2$s
+    public static final String FOLDER_ALREADY_EXISTS = "A folder named '%1$s' already exists under the folder with name '%2$s";
+    // You are not allowed to delete the root folder.
+    public static final String CANNOT_DELETE_ROOT_FOLDER = "You are not allowed to delete the root folder.";
 }

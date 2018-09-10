@@ -52,6 +52,7 @@ package com.openexchange.microsoft.graph.api.client;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -92,14 +93,25 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     }
 
     /**
-     * Executes the request and examines the response body.
+     * Executes the specified {@link MicrosoftGraphRequest} and examines the response body.
      * 
      * @param request The {@link MicrosoftGraphRequest} to execute
      * @return The {@link RESTResponse}
      * @throws OXException if an error is occurred
      */
     public RESTResponse execute(MicrosoftGraphRequest request) throws OXException {
-        RESTResponse restResponse = executeRequest(prepareRequest(request));
+        return execute(prepareRequest(request));
+    }
+
+    /**
+     * Executes the specified {@link HttpRequest} and examines the response body.
+     * 
+     * @param request The {@link HttpRequest} to execute
+     * @return The {@link RESTResponse}
+     * @throws OXException if an error is occurred
+     */
+    public RESTResponse execute(HttpRequestBase httpRequest) throws OXException {
+        RESTResponse restResponse = executeRequest(httpRequest);
         Object responseBody = restResponse.getResponseBody();
         if (responseBody == null) {
             // Huh? OK, we assert the status code and act accordingly
@@ -126,6 +138,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
                     return restResponse;
                 }
             } else if (responseBody instanceof JSONObject) {
+                assertStatusCode(restResponse);
                 checkForErrors((JSONObject) responseBody);
                 return restResponse;
             } else if (responseBody instanceof JSONValue) {
@@ -143,6 +156,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
             return restResponse;
         }
         // Hooray, we made it! Check for errors and return the response
+        assertStatusCode(restResponse);
         checkForErrors(responseBodyCandidate.toObject());
         return restResponse;
     }
