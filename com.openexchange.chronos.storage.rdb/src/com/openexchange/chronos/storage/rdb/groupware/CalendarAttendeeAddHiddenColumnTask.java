@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,76 +47,54 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.storage.rdb.groupware;
+
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AttendeeField}
+ * {@link CalendarAttendeeAddHiddenColumnTask}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @since v7.10.1
  */
-public enum AttendeeField {
+public class CalendarAttendeeAddHiddenColumnTask extends UpdateTaskAdapter {
 
-    /**
-     * The calendar user address of the attendee.
-     */
-    URI,
-    /**
-     * The common name of the attendee.
-     */
-    CN,
-    /**
-     * The internal identifier of the attendee.
-     */
-    ENTITY,
-    /**
-     * The calendar user who is acting on behalf of the attendee.
-     */
-    SENT_BY,
-    /**
-     * The calendar user type of the attendee.
-     */
-    CU_TYPE,
-    /**
-     * The participation role of the attendee.
-     */
-    ROLE,
-    /**
-     * The participation status of the attendee.
-     */
-    PARTSTAT,
-    /**
-     * The attendee's comment.
-     */
-    COMMENT,
-    /**
-     * The RSVP expectation of the attendee.
-     */
-    RSVP,
-    /**
-     * The identifier of the folder where the event is located in for the attendee.
-     */
-    FOLDER_ID,
-    /**
-     * The <i>hidden</i> marker to exclude the event from the attendee's folder view.
-     */
-    HIDDEN,
-    /**
-     * The group- or list membership of the attendee.
-     */
-    MEMBER,
-    /**
-     * The e-mail address of the attendee.
-     */
-    EMAIL,
-    /**
-     * The attendee's time transparency of the event.
-     */
-    TRANSP,
-    /**
-     * Extended parameters of the attendee.
-     */
-    EXTENDED_PARAMETERS,
+    @Override
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask"
+        };
+    }
 
-    ;
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        boolean rollback = false;
+        try {
+            connection.setAutoCommit(false);
+            rollback = true;
+            Tools.checkAndAddColumns(connection, "calendar_attendee", new Column("hidden", "BOOLEAN DEFAULT NULL"));
+            Tools.checkAndAddColumns(connection, "calendar_attendee_tombstone", new Column("hidden", "BOOLEAN DEFAULT NULL"));
+            connection.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(connection);
+            }
+            autocommit(connection);
+        }
+    }
+
 }

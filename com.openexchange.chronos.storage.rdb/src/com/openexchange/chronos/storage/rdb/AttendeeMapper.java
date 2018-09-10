@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -197,6 +199,28 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
             @Override
             public void remove(Attendee attendee) {
                 attendee.removeFolderID();
+            }
+        });
+        mappings.put(AttendeeField.HIDDEN, new BooleanMapping<Attendee>("hidden", "Hidden") {
+
+            @Override
+            public void set(Attendee attendee, Boolean value) {
+                attendee.setHidden(null == value ? false : b(value));
+            }
+
+            @Override
+            public boolean isSet(Attendee attendee) {
+                return attendee.containsHidden();
+            }
+
+            @Override
+            public Boolean get(Attendee attendee) {
+                return B(attendee.isHidden());
+            }
+
+            @Override
+            public void remove(Attendee attendee) {
+                attendee.removeHidden();
             }
         });
         mappings.put(AttendeeField.CU_TYPE, new VarCharMapping<Attendee>("cuType", "Calendaruser Type") {

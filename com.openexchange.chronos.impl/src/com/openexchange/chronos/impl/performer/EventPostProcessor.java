@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
@@ -68,6 +69,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -234,6 +236,14 @@ public class EventPostProcessor {
             /*
              * excluded if classified as private for the session user
              */
+            return false;
+        }
+        Attendee attendee = find(event.getAttendees(), calendarUserId);
+        if (null != attendee && attendee.isHidden()) {
+            /*
+             * excluded if marked as hidden for the calendar user
+             */
+            //TODO: public folder?
             return false;
         }
         event.setFolderId(folderId);

@@ -806,6 +806,7 @@ public class EventUpdateProcessor implements EventUpdate {
             if (calendarUser.getEntity() != attendee.getEntity()) {
                 attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
                 attendee.setComment(null);
+                attendee.setHidden(false);
                 continue;
             }
         }

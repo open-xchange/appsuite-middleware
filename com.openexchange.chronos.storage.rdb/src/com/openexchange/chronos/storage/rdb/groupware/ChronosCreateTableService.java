@@ -210,6 +210,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "uri VARCHAR(512) COLLATE utf8mb4_bin NOT NULL," +
                 "cn VARCHAR(512) DEFAULT NULL," +
                 "folder VARCHAR(255) COLLATE utf8mb4_bin DEFAULT NULL," +
+                "hidden BOOLEAN DEFAULT NULL," +
                 "cuType VARCHAR(255) DEFAULT NULL," +
                 "role VARCHAR(255) DEFAULT NULL," +
                 "partStat VARCHAR(255) DEFAULT NULL," +
@@ -232,6 +233,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "uri VARCHAR(512) COLLATE utf8mb4_bin NOT NULL," +
                 "cn VARCHAR(512) DEFAULT NULL," +
                 "folder VARCHAR(255) COLLATE utf8mb4_bin DEFAULT NULL," +
+                "hidden BOOLEAN DEFAULT NULL," +
                 "cuType VARCHAR(255) DEFAULT NULL," +
                 "role VARCHAR(255) DEFAULT NULL," +
                 "partStat VARCHAR(255) DEFAULT NULL," +

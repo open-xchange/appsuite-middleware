@@ -118,36 +118,40 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
         final Set<Integer> resourceIds = new HashSet<Integer>();
 
-        List<Attendee> participants = update.getAttendees();
-        if (participants != null) {
-            for (final Attendee participant : participants) {
-                if (CalendarUtils.isInternalUser(participant)) {
-                    userIds.put(I(participant.getEntity()), participant);
-                } else if (CalendarUtils.isExternalUser(participant)) {
-                    String mail = CalendarUtils.extractEMailAddress(participant.getUri());
-                    if (!externalGuardian.contains(mail)) {
-                        externalParticipants.add(participant);
-                        externalGuardian.add(mail);
+        List<Attendee> attendees = update.getAttendees();
+        if (attendees != null) {
+            for (final Attendee attendee : attendees) {
+                if (!attendee.isHidden()) {
+                    if (CalendarUtils.isInternalUser(attendee)) {
+                        userIds.put(I(attendee.getEntity()), attendee);
+                    } else if (CalendarUtils.isExternalUser(attendee)) {
+                        String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
+                        if (!externalGuardian.contains(mail)) {
+                            externalParticipants.add(attendee);
+                            externalGuardian.add(mail);
+                        }
+                    } else if (CalendarUserType.RESOURCE.equals(attendee.getCuType())) {
+                        resourceIds.add(I(attendee.getEntity()));
                     }
-                } else if (CalendarUserType.RESOURCE.equals(participant.getCuType())) {
-                    resourceIds.add(I(participant.getEntity()));
                 }
             }
         }
 
         if (original != null) {
-            participants = original.getAttendees();
-            if (participants != null) {
-                for (Attendee participant : participants) {
-                    if (CalendarUtils.isInternalUser(participant)) {
-                        if (!userIds.containsKey(I(participant.getEntity()))) {
-                            userIds.put(I(participant.getEntity()), participant);
-                        }
-                    } else if (CalendarUtils.isExternalUser(participant)) {
-                        String mail = CalendarUtils.extractEMailAddress(participant.getUri());
-                        if (!externalGuardian.contains(mail)) {
-                            externalParticipants.add(participant);
-                            externalGuardian.add(mail);
+            attendees = original.getAttendees();
+            if (attendees != null) {
+                for (Attendee attendee : attendees) {
+                    if (!attendee.isHidden()) {
+                        if (CalendarUtils.isInternalUser(attendee)) {
+                            if (!userIds.containsKey(I(attendee.getEntity()))) {
+                                userIds.put(I(attendee.getEntity()), attendee);
+                            }
+                        } else if (CalendarUtils.isExternalUser(attendee)) {
+                            String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
+                            if (!externalGuardian.contains(mail)) {
+                                externalParticipants.add(attendee);
+                                externalGuardian.add(mail);
+                            }
                         }
                     }
                 }

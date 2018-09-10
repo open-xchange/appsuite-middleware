@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.handler;
 
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -59,6 +60,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -76,8 +79,10 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UpdateResult;
@@ -111,8 +116,19 @@ public class ITipHandler implements CalendarHandler {
      */
     private final static EventField[] EXCEPTION_DELETE = new EventField[] { EventField.DELETE_EXCEPTION_DATES };
 
+    private static final EnumSet<EventField> allButAttendee = EnumSet.allOf(EventField.class);
+    private static final EnumSet<AttendeeField> allButDeleted = EnumSet.allOf(AttendeeField.class);
+    static {
+        allButAttendee.remove(EventField.ATTENDEES);
+        allButAttendee.remove(EventField.LAST_MODIFIED);
+        allButAttendee.remove(EventField.MODIFIED_BY);
+        allButAttendee.remove(EventField.TIMESTAMP);
+        allButDeleted.remove(AttendeeField.HIDDEN);
+        allButDeleted.remove(AttendeeField.TRANSP);
+    }
+
     private NotificationMailGeneratorFactory generators;
-    private MailSenderService                sender;
+    private MailSenderService sender;
 
     public ITipHandler(NotificationMailGeneratorFactory generatorFactory, MailSenderService sender) {
         this.generators = generatorFactory;
@@ -175,6 +191,26 @@ public class ITipHandler implements CalendarHandler {
             }
         }
 
+        outer: for (UpdateResult updateResult : event.getUpdates()) {
+            if (updateResult.getUpdatedFields().stream().anyMatch(field -> allButAttendee.contains(field))) {
+                break outer;
+            }
+            CollectionUpdate<Attendee, AttendeeField> attendeeUpdates = updateResult.getAttendeeUpdates();
+            if (!attendeeUpdates.getAddedItems().isEmpty() || !attendeeUpdates.getRemovedItems().isEmpty()) {
+                break outer;
+            }
+            List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = attendeeUpdates.getUpdatedItems();
+            if (updatedItems.isEmpty()) {
+                break outer;
+            }
+            for (ItemUpdate<Attendee, AttendeeField> updatedItem : updatedItems) {
+                if (updatedItem.getUpdatedFields().stream().anyMatch(field -> allButDeleted.contains(field))) {
+                    break outer;
+                }
+            }
+            return false;
+        }
+
         return true;
     }
 
@@ -227,10 +263,7 @@ public class ITipHandler implements CalendarHandler {
             // Check for series update
             // Get all events of the series
             String seriesId = update.getUpdate().getSeriesId();
-            List<UpdateResult> eventGroup = updates.stream()
-                .filter(u -> !ignore.contains(u))
-                .filter(u -> seriesId.equals(u.getUpdate().getSeriesId()))
-                .collect(Collectors.toList());
+            List<UpdateResult> eventGroup = updates.stream().filter(u -> !ignore.contains(u)).filter(u -> seriesId.equals(u.getUpdate().getSeriesId())).collect(Collectors.toList());
 
             // Check if there is a group to handle
             if (eventGroup.size() > 1) {
@@ -270,10 +303,7 @@ public class ITipHandler implements CalendarHandler {
         if (delete.getOriginal().containsSeriesId()) {
             // Get all events of the series
             String seriesId = delete.getOriginal().getSeriesId();
-            List<DeleteResult> eventGroup = deletions.stream()
-                .filter(u -> !ignore.contains(u))
-                .filter(u -> seriesId.equals(u.getOriginal().getSeriesId()))
-                .collect(Collectors.toList());
+            List<DeleteResult> eventGroup = deletions.stream().filter(u -> !ignore.contains(u)).filter(u -> seriesId.equals(u.getOriginal().getSeriesId())).collect(Collectors.toList());
 
             // Check if there is a group to handle
             if (eventGroup.size() > 1) {
