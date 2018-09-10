@@ -58,9 +58,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPut;
-import org.json.JSONException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -78,7 +75,6 @@ import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
-import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Streams;
@@ -99,7 +95,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     private final OneDriveAccountAccess accountAccess;
     private final OneDriveFolderAccess folderAccess;
     final int userId;
-    private final MicrosoftGraphDriveService driveService;
 
     /**
      * Initializes a new {@link OneDriveFileAccess}.
@@ -114,7 +109,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         this.accountAccess = accountAccess;
         this.folderAccess = folderAccess;
         this.userId = session.getUserId();
-        this.driveService = Services.getService(MicrosoftGraphDriveService.class);
     }
 
     @Override
@@ -172,46 +166,46 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        return perform(new OneDriveClosure<IDTuple>() {
-
-            @Override
-            protected IDTuple doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpPut request = null;
-                try {
-                    if (FileStorageFileAccess.NEW == file.getId()) {
-                        /*
-                         * create new, empty file ("touch")
-                         */
-                        return saveDocument(file, Streams.EMPTY_INPUT_STREAM, sequenceNumber, modifiedFields);
-                    } else {
-                        return new IDTuple(file.getFolderId(), driveService.updateFile(getAccessToken(), file, modifiedFields, null));
-                        /*
-                         * rename / description change
-                         */
-                        //                        if (null != modifiedFields && false == modifiedFields.contains(Field.FILENAME) && false == modifiedFields.contains(Field.DESCRIPTION)) {
-                        //                            // no change
-                        //                            return new IDTuple(file.getFolderId(), file.getId());
-                        //                        }
-                        //                        request = new HttpPut(buildUri(file.getId(), initiateQueryString()));
-                        //                        JSONObject json = new JSONObject(2);
-                        //                        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-                        //                            json.put("name", file.getFileName());
-                        //                        }
-                        //                        if (null == modifiedFields || modifiedFields.contains(Field.DESCRIPTION)) {
-                        //                            json.put("description", file.getDescription());
-                        //                        }
-                        //                        request.setEntity(asHttpEntity(json));
-                        //                        JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
-                        //                        file.setId(jResponse.getString("id"));
-                        //                        return new IDTuple(file.getFolderId(), file.getId());
-                    }
-                    //                } catch (HttpResponseException e) {
-                    //                    throw handleHttpResponseError(file.getId(), account.getId(), e);
-                } finally {
-                    reset(request);
-                }
-            }
-        });
+        //        return perform(new OneDriveClosure<IDTuple>() {
+        //
+        //            @Override
+        //            protected IDTuple doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+        //                HttpPut request = null;
+        //                try {
+        if (FileStorageFileAccess.NEW == file.getId()) {
+            /*
+             * create new, empty file ("touch")
+             */
+            return saveDocument(file, Streams.EMPTY_INPUT_STREAM, sequenceNumber, modifiedFields);
+        } else {
+            return new IDTuple(file.getFolderId(), driveService.updateFile(getAccessToken(), file, modifiedFields, null));
+            /*
+             * rename / description change
+             */
+            //                        if (null != modifiedFields && false == modifiedFields.contains(Field.FILENAME) && false == modifiedFields.contains(Field.DESCRIPTION)) {
+            //                            // no change
+            //                            return new IDTuple(file.getFolderId(), file.getId());
+            //                        }
+            //                        request = new HttpPut(buildUri(file.getId(), initiateQueryString()));
+            //                        JSONObject json = new JSONObject(2);
+            //                        if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
+            //                            json.put("name", file.getFileName());
+            //                        }
+            //                        if (null == modifiedFields || modifiedFields.contains(Field.DESCRIPTION)) {
+            //                            json.put("description", file.getDescription());
+            //                        }
+            //                        request.setEntity(asHttpEntity(json));
+            //                        JSONObject jResponse = handleHttpResponse(execute(request, httpClient), JSONObject.class);
+            //                        file.setId(jResponse.getString("id"));
+            //                        return new IDTuple(file.getFolderId(), file.getId());
+        }
+        //                } catch (HttpResponseException e) {
+        //                    throw handleHttpResponseError(file.getId(), account.getId(), e);
+        //                } finally {
+        //                    reset(request);
+        //                }
+        //            }
+        //        });
     }
 
     @Override
@@ -221,7 +215,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(OneDriveConstants.ID);
         }
         if (update == null) {
-            return new IDTuple(destFolder, driveService.copyFile(getAccessToken(), source.getId(), destFolder));
+            return new IDTuple(destFolder, driveService.copyFile(getAccessToken(), source.getId(), toOneDriveFolderId(destFolder)));
         }
         //        IDTuple result = perform(new OneDriveClosure<IDTuple>() {
         //
@@ -275,7 +269,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     public IDTuple move(final IDTuple source, final String destFolder, long sequenceNumber, final File update, final List<File.Field> modifiedFields) throws OXException {
         // perform move operation
         if (update == null) {
-            return new IDTuple(destFolder, driveService.moveFile(getAccessToken(), source.getId(), destFolder));
+            return new IDTuple(destFolder, driveService.moveFile(getAccessToken(), source.getId(), toOneDriveFolderId(destFolder)));
         }
         //        IDTuple result = perform(new OneDriveClosure<IDTuple>() {
         //
@@ -454,7 +448,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public void removeDocument(final String folderId, long sequenceNumber) throws OXException {
-        driveService.clearFolder(getAccessToken(), folderId);
+        driveService.clearFolder(getAccessToken(), toOneDriveFolderId(folderId));
         //        perform(new OneDriveClosure<Void>() {
         //
         //            @Override
@@ -551,7 +545,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public TimedResult<File> getDocuments(final String folderId) throws OXException {
-        return new FileTimedResult(new LinkedList<>(driveService.getFiles(userId, getAccessToken(), folderId)));
+        return new FileTimedResult(new LinkedList<>(driveService.getFiles(userId, getAccessToken(), toOneDriveFolderId(folderId))));
         //        return perform(new OneDriveClosure<TimedResult<File>>() {
         //
         //            @Override
@@ -603,7 +597,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public TimedResult<File> getDocuments(final String folderId, List<Field> fields, final Field sort, final SortDirection order) throws OXException {
-        return new FileTimedResult(new LinkedList<>(driveService.getFiles(userId, getAccessToken(), folderId)));
+        return new FileTimedResult(new LinkedList<>(driveService.getFiles(userId, getAccessToken(), toOneDriveFolderId(folderId))));
         //        return perform(new OneDriveClosure<TimedResult<File>>() {
         //
         //            @Override

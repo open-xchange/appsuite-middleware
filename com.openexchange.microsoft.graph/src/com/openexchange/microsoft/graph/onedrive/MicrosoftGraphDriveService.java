@@ -65,6 +65,15 @@ import com.openexchange.file.storage.Quota;
 public interface MicrosoftGraphDriveService {
 
     /**
+     * Retrieves the identifier of the root folder
+     * 
+     * @param accessToken The oauth access token
+     * @return the identifier of the root folder
+     * @throws OXException if an error is occurred
+     */
+    String getRootFolderId(String accessToken) throws OXException;
+
+    /**
      * Checks whether the folder with the specified identifier exists.
      * 
      * @param accessToken The oauth access token

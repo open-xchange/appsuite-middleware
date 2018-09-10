@@ -86,12 +86,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     private static final Logger LOG = LoggerFactory.getLogger(MicrosoftGraphDriveServiceImpl.class);
     /**
-     * API limit for simple uploads, a.k.a. one shot uploads
-     * 
-     * @see <a href="https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/driveitem_put_content">Upload files</a>
-     */
-    private static final long ONE_SHOT_UPLOAD_LIMIT = 1024 * 1024 * 4;
-    /**
      * Infostore's root folder id
      */
     private static final String ROOT_ID = "";
@@ -115,12 +109,23 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getRootFolderId(java.lang.String)
+     */
+    @Override
+    public String getRootFolderId(String accessToken) throws OXException {
+        JSONObject root = api.getRoot(accessToken, new Builder().withParameter(ParameterName.SELECT, "id").build());
+        return root.optString("id");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#existsFolder(java.lang.String, java.lang.String)
      */
     @Override
     public boolean existsFolder(String accessToken, String folderId) throws OXException {
         try {
-            api.getFolder(accessToken, resolveRootIfNecessary(accessToken, folderId), new Builder().withParameter(ParameterName.SELECT, "id").build());
+            api.getFolder(accessToken, folderId, new Builder().withParameter(ParameterName.SELECT, "id").build());
             return true;
         } catch (OXException e) {
             if (MicrosoftGraphAPIExceptionCodes.ITEM_NOT_FOUND.equals(e)) {
@@ -147,7 +152,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public OneDriveFolder getFolder(int userId, String accessToken, String folderId) throws OXException {
-        folderId = resolveRootIfNecessary(accessToken, folderId);
         return folderEntityParser.parseEntity(userId, hasSubFolders(accessToken, folderId), api.getFolder(accessToken, folderId));
     }
 
@@ -165,7 +169,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             Builder paramBuilder = new Builder();
             paramBuilder.withParameter(ParameterName.TOP, Integer.toString(top)).withParameter(ParameterName.SKIPTOKEN, skipToken);
 
-            JSONObject response = api.getChildren(accessToken, resolveRootIfNecessary(accessToken, folderId), paramBuilder.build());
+            JSONObject response = api.getChildren(accessToken, folderId, paramBuilder.build());
             skipToken = extractSkipToken(response);
             list.addAll(parseEntities(userId, accessToken, response.optJSONArray("value")));
 
@@ -180,7 +184,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public OneDriveFolder createFolder(int userId, String accessToken, String folderName, String parentId, boolean autorename) throws OXException {
-        parentId = resolveRootIfNecessary(accessToken, parentId);
         if (autorename) {
             return folderEntityParser.parseEntity(userId, false, api.createFolder(accessToken, folderName, parentId, autorename));
         }
@@ -210,7 +213,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public void clearFolder(String accessToken, String folderId) throws OXException {
-        JSONObject ids = api.getChildren(accessToken, resolveRootIfNecessary(accessToken, folderId), new Builder().withParameter(ParameterName.SELECT, "id").build());
+        JSONObject ids = api.getChildren(accessToken, folderId, new Builder().withParameter(ParameterName.SELECT, "id").build());
         JSONArray idsArray = ids.optJSONArray("value");
         if (idsArray == null || idsArray.isEmpty()) {
             return;
@@ -236,7 +239,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     @Override
     public void renameFolder(String accessToken, String folderId, String newName) throws OXException {
         try {
-            api.patchItem(accessToken, resolveRootIfNecessary(accessToken, folderId), compileUpdateBody(null, newName));
+            api.patchItem(accessToken, folderId, compileUpdateBody(null, newName));
         } catch (OXException e) {
             if (MicrosoftGraphAPIExceptionCodes.NAME_ALREADY_EXISTS.equals(e)) {
                 throw MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.create(e, newName, folderId);
@@ -253,7 +256,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     @Override
     public String moveFolder(String accessToken, String folderId, String parentId, String newName) throws OXException {
         try {
-            JSONObject patchItem = api.patchItem(accessToken, folderId, compileUpdateBody(resolveRootIfNecessary(accessToken, parentId), newName));
+            JSONObject patchItem = api.patchItem(accessToken, folderId, compileUpdateBody(parentId, newName));
             return patchItem.optString("id");
         } catch (OXException e) {
             if (MicrosoftGraphAPIExceptionCodes.NAME_ALREADY_EXISTS.equals(e)) {
@@ -271,7 +274,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     @Override
     public String moveFolder(String accessToken, String folderId, String parentId) throws OXException {
         try {
-            return moveItem(accessToken, folderId, resolveRootIfNecessary(accessToken, parentId));
+            return moveItem(accessToken, folderId, parentId);
         } catch (OXException e) {
             if (MicrosoftGraphAPIExceptionCodes.NAME_ALREADY_EXISTS.equals(e)) {
                 throw MicrosoftGraphDriveServiceExceptionCodes.FOLDER_ALREADY_EXISTS.create(e, folderId, parentId);
@@ -296,7 +299,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
             MicrosoftGraphQueryParameters.Builder paramBuilder = new MicrosoftGraphQueryParameters.Builder();
             paramBuilder.withParameter(ParameterName.TOP, Integer.toString(offset)).withParameter(ParameterName.SKIPTOKEN, skipToken);
 
-            JSONObject response = api.getChildren(accessToken, resolveRootIfNecessary(accessToken, folderId), paramBuilder.build());
+            JSONObject response = api.getChildren(accessToken, folderId, paramBuilder.build());
             skipToken = extractSkipToken(response);
             list.addAll(fileEntityParser.parseEntities(userId, response.optJSONArray("value")));
         } while (Strings.isNotEmpty(skipToken));
@@ -352,7 +355,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String moveFile(String accessToken, String fileId, String parentId) throws OXException {
-        return moveItem(accessToken, fileId, resolveRootIfNecessary(accessToken, parentId));
+        return moveItem(accessToken, fileId, parentId);
     }
 
     /*
@@ -362,7 +365,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String updateFile(String accessToken, File file, List<Field> modifiedFields, String parentId) throws OXException {
-        JSONObject body = compileUpdateBody(file, modifiedFields, resolveRootIfNecessary(accessToken, parentId));
+        JSONObject body = compileUpdateBody(file, modifiedFields, parentId);
         if (body.isEmpty()) {
             return file.getId();
         }
@@ -377,7 +380,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String copyFile(String accessToken, String itemId, File file, List<Field> modifiedFields, String parentId) throws OXException {
-        return api.copyItem(accessToken, itemId, compileUpdateBody(file, modifiedFields, resolveRootIfNecessary(accessToken, parentId)));
+        return api.copyItem(accessToken, itemId, compileUpdateBody(file, modifiedFields, parentId));
     }
 
     /*
@@ -387,7 +390,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     @Override
     public String copyFile(String accessToken, String itemId, String parentId) throws OXException {
-        return api.copyItem(accessToken, itemId, compileUpdateBody(resolveRootIfNecessary(accessToken, parentId)));
+        return api.copyItem(accessToken, itemId, compileUpdateBody(parentId));
     }
 
     /*
@@ -492,7 +495,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * @throws OXException if an error is occurred
      */
     private String moveItem(String accessToken, String itemId, String parentId) throws OXException {
-        JSONObject patchItem = api.patchItem(accessToken, itemId, compileUpdateBody(resolveRootIfNecessary(accessToken, parentId)));
+        JSONObject patchItem = api.patchItem(accessToken, itemId, compileUpdateBody(parentId));
         return patchItem.optString("id");
     }
 
@@ -512,7 +515,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         if (namesArray == null || namesArray.isEmpty()) {
             return;
         }
-        parentId = resolveRootIfNecessary(accessToken, parentId);
         for (int index = 0; index < namesArray.length(); index++) {
             JSONObject candidate = namesArray.optJSONObject(index);
             if (candidate == null || candidate.isEmpty()) {
@@ -538,7 +540,6 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      */
     private boolean hasSubFolders(String accessToken, String folderId) throws OXException {
         MicrosoftGraphQueryParameters params = new Builder().withParameter(ParameterName.SELECT, "folder").build();
-        folderId = resolveRootIfNecessary(accessToken, folderId);
         JSONObject j = Strings.isEmpty(folderId) ? api.getRootChildren(accessToken, params) : api.getChildren(accessToken, folderId, params);
         JSONArray entities = j.optJSONArray("value");
         if (entities == null || entities.isEmpty()) {
@@ -702,22 +703,5 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         } catch (JSONException e) {
             throw MicrosoftGraphDriveServiceExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-    }
-
-    /**
-     * Checks if the parent identifier refers to the {@link #ROOT_ID} and resolves it to
-     * the real root id if necessary.
-     * 
-     * @param accessToken The oauth access token
-     * @param parentId The parent identifier
-     * @return The real parent identifier of the root folder if the specified <code>parentId</code> refers to the {@link #ROOT_ID}
-     * @throws OXException if an error is occurred
-     */
-    private String resolveRootIfNecessary(String accessToken, String parentId) throws OXException {
-        if (ROOT_ID.equals(parentId)) {
-            JSONObject rootFolder = api.getRoot(accessToken);
-            parentId = rootFolder.optString("id");
-        }
-        return parentId;
     }
 }

@@ -49,33 +49,14 @@
 
 package com.openexchange.file.storage.onedrive;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONValue;
 import org.slf4j.Logger;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -91,8 +72,9 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
+import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
+import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.session.Session;
 
 /**
@@ -243,6 +225,7 @@ public abstract class AbstractOneDriveResourceAccess {
     protected final Session session;
     protected final FileStorageAccount account;
     protected String rootFolderIdentifier;
+    protected final MicrosoftGraphDriveService driveService;
 
     /**
      * Initializes a new {@link AbstractOneDriveResourceAccess}.
@@ -252,213 +235,226 @@ public abstract class AbstractOneDriveResourceAccess {
         this.oneDriveAccess = oneDriveAccess;
         this.account = account;
         this.session = session;
+        this.driveService = Services.getService(MicrosoftGraphDriveService.class);
     }
 
-    /**
-     * Gets the root folder identifier
-     *
-     * @return The root folder identifier
-     * @throws OXException If root folder cannot be returned
-     */
-    public String getRootFolderId() throws OXException {
-        String rootFolderId = rootFolderIdentifier;
-        if (null == rootFolderId) {
-            String key = "com.openexchange.file.storage.onedrive.rootFolderId";
-            rootFolderId = (String) session.getParameter(key);
-            if (null == rootFolderId) {
-                HttpRequestBase request = null;
-                try {
-                    int keepOn = 1;
-                    while (keepOn > 0) {
-                        HttpClient httpClient = oneDriveAccess.<HttpClient> getClient().client;
-                        HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
-                        request = method;
-                        // HttpClients.setRequestTimeout(3500, method);
+    //    /**
+    //     * Gets the root folder identifier
+    //     *
+    //     * @return The root folder identifier
+    //     * @throws OXException If root folder cannot be returned
+    //     */
+    //    public String getRootFolderId() throws OXException {
+    //        String rootFolderId = rootFolderIdentifier;
+    //        if (null == rootFolderId) {
+    //            String key = "com.openexchange.file.storage.onedrive.rootFolderId";
+    //            rootFolderId = (String) session.getParameter(key);
+    //            if (null == rootFolderId) {
+    //                HttpRequestBase request = null;
+    //                try {
+    //                    int keepOn = 1;
+    //                    while (keepOn > 0) {
+    //                        HttpClient httpClient = oneDriveAccess.<HttpClient> getClient().client;
+    //                        HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
+    //                        request = method;
+    //                        // HttpClients.setRequestTimeout(3500, method);
+    //
+    //                        HttpResponse httpResponse = httpClient.execute(method);
+    //                        if (SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {
+    //                            if (keepOn > 1) {
+    //                                throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), OneDriveConstants.ID, httpResponse.getStatusLine());
+    //                            }
+    //
+    //                            reset(request);
+    //                            request = null;
+    //                            keepOn = 2;
+    //
+    //                            oneDriveAccess.initialize();
+    //                        } else {
+    //                            JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
+    //                            rootFolderId = jResponse.optString("id", null);
+    //                            keepOn = 0;
+    //                        }
+    //                    }
+    //                } catch (HttpResponseException e) {
+    //                    throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
+    //                } catch (IOException e) {
+    //                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+    //                } finally {
+    //                    reset(request);
+    //                }
+    //                session.setParameter(key, rootFolderId);
+    //            }
+    //            this.rootFolderIdentifier = rootFolderId;
+    //        }
+    //        return rootFolderId;
+    //    }
 
-                        HttpResponse httpResponse = httpClient.execute(method);
-                        if (SC_UNAUTHORIZED == httpResponse.getStatusLine().getStatusCode()) {
-                            if (keepOn > 1) {
-                                throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), OneDriveConstants.ID, httpResponse.getStatusLine());
-                            }
+    //    /**
+    //     * Executes specified HTTP method/request using given HTTP client instance.
+    //     *
+    //     * @param method The method/request to execute
+    //     * @param httpClient The HTTP client to use
+    //     * @return The HTTP response
+    //     * @throws ClientProtocolException If client protocol error occurs
+    //     * @throws IOException If an I/O error occurs
+    //     */
+    //    protected HttpResponse execute(HttpRequestBase method, HttpClient httpClient) throws ClientProtocolException, IOException {
+    //        //long st = System.currentTimeMillis();
+    //        HttpResponse httpResponse = httpClient.execute(method);
+    //        //long dur = System.currentTimeMillis() - st;
+    //        //System.out.println("----------------------------------------------");
+    //        //System.out.println("Executing " + method.getMethod() + " for " + method.getURI().getPath() + " took " + dur + "msec");
+    //        //new Throwable().printStackTrace(System.out);
+    //        //System.out.println("----------------------------------------------");
+    //        return httpResponse;
+    //    }
 
-                            reset(request);
-                            request = null;
-                            keepOn = 2;
+    //    /**
+    //     * Resets given HTTP request
+    //     *
+    //     * @param request The HTTP request
+    //     */
+    //    public static void reset(HttpRequestBase request) {
+    //        if (null != request) {
+    //            try {
+    //                request.reset();
+    //            } catch (Exception e) {
+    //                // Ignore
+    //            }
+    //        }
+    //    }
 
-                            oneDriveAccess.initialize();
-                        } else {
-                            JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
-                            rootFolderId = jResponse.optString("id", null);
-                            keepOn = 0;
-                        }
-                    }
-                } catch (HttpResponseException e) {
-                    throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
-                } catch (IOException e) {
-                    throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                } finally {
-                    reset(request);
-                }
-                session.setParameter(key, rootFolderId);
-            }
-            this.rootFolderIdentifier = rootFolderId;
-        }
-        return rootFolderId;
-    }
+    //    /**
+    //     * Closes the supplied HTTP request & response resources silently.
+    //     *
+    //     * @param request The HTTP request to reset
+    //     * @param response The HTTP response to consume and close
+    //     */
+    //    public static void close(HttpRequestBase request, HttpResponse response) {
+    //        if (null != response) {
+    //            HttpEntity entity = response.getEntity();
+    //            if (null != entity) {
+    //                try {
+    //                    EntityUtils.consume(entity);
+    //                } catch (Exception e) {
+    //                    // Ignore
+    //                }
+    //            }
+    //        }
+    //
+    //        if (null != request) {
+    //            try {
+    //                request.reset();
+    //            } catch (Exception e) {
+    //                // Ignore
+    //            }
+    //        }
+    //    }
 
-    /**
-     * Executes specified HTTP method/request using given HTTP client instance.
-     *
-     * @param method The method/request to execute
-     * @param httpClient The HTTP client to use
-     * @return The HTTP response
-     * @throws ClientProtocolException If client protocol error occurs
-     * @throws IOException If an I/O error occurs
-     */
-    protected HttpResponse execute(HttpRequestBase method, HttpClient httpClient) throws ClientProtocolException, IOException {
-        //long st = System.currentTimeMillis();
-        HttpResponse httpResponse = httpClient.execute(method);
-        //long dur = System.currentTimeMillis() - st;
-        //System.out.println("----------------------------------------------");
-        //System.out.println("Executing " + method.getMethod() + " for " + method.getURI().getPath() + " took " + dur + "msec");
-        //new Throwable().printStackTrace(System.out);
-        //System.out.println("----------------------------------------------");
-        return httpResponse;
-    }
+    //    /**
+    //     * Turns specified JSON value into an appropriate HTTP entity.
+    //     *
+    //     * @param jValue The JSON value
+    //     * @return The HTTP entity
+    //     * @throws JSONException If a JSON error occurs
+    //     * @throws IOException If an I/O error occurs
+    //     */
+    //    protected InputStreamEntity asHttpEntity(JSONValue jValue) throws JSONException, IOException {
+    //        if (null == jValue) {
+    //            return null;
+    //        }
+    //
+    //        ByteArrayOutputStream bStream = Streams.newByteArrayOutputStream(1024);
+    //        OutputStreamWriter osw = new OutputStreamWriter(bStream, Charsets.UTF_8);
+    //        jValue.write(osw);
+    //        osw.flush();
+    //        return new InputStreamEntity(Streams.asInputStream(bStream), bStream.size(), ContentType.APPLICATION_JSON);
+    //    }
 
-    /**
-     * Resets given HTTP request
-     *
-     * @param request The HTTP request
-     */
-    public static void reset(HttpRequestBase request) {
-        if (null != request) {
-            try {
-                request.reset();
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
-    }
+    //    /**
+    //     * Initiates the query string parameters
+    //     *
+    //     * @return The query string parameters
+    //     */
+    //    protected List<NameValuePair> initiateQueryString() {
+    //        List<NameValuePair> qparams = new LinkedList<NameValuePair>();
+    //        qparams.add(new BasicNameValuePair("access_token", oneDriveAccess.getOAuthAccount().getToken()));
+    //        return qparams;
+    //    }
 
-    /**
-     * Closes the supplied HTTP request & response resources silently.
-     *
-     * @param request The HTTP request to reset
-     * @param response The HTTP response to consume and close
-     */
-    public static void close(HttpRequestBase request, HttpResponse response) {
-        if (null != response) {
-            HttpEntity entity = response.getEntity();
-            if (null != entity) {
-                try {
-                    EntityUtils.consume(entity);
-                } catch (Exception e) {
-                    // Ignore
-                }
-            }
-        }
+    //    /**
+    //     * Builds the URI from given arguments
+    //     *
+    //     * @param resourceId The resource identifier
+    //     * @param queryString The query string parameters
+    //     * @return The built URI string
+    //     * @throws IllegalArgumentException If the given string violates RFC 2396
+    //     */
+    //    public static URI buildUri(String resourceId, List<NameValuePair> queryString) {
+    //        try {
+    //            return new URI("https", null, "apis.live.net", -1, "/v5.0/" + resourceId, null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"), null);
+    //        } catch (URISyntaxException x) {
+    //            IllegalArgumentException y = new IllegalArgumentException();
+    //            y.initCause(x);
+    //            throw y;
+    //        }
+    //    }
 
-        if (null != request) {
-            try {
-                request.reset();
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
-    }
+    //    /**
+    //     * Handles given HTTP response while expecting <code>200 (Ok)</code> status code.
+    //     *
+    //     * @param httpResponse The HTTP response
+    //     * @param clazz The class of the result object
+    //     * @return The result object
+    //     * @throws OXException If an Open-Xchange error occurs
+    //     * @throws ClientProtocolException If a client protocol error occurs
+    //     * @throws IOException If an I/O error occurs
+    //     */
+    //    public static <R> R handleHttpResponse(HttpResponse httpResponse, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
+    //        return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, clazz);
+    //    }
+    //
+    //    /**
+    //     * Handles given HTTP response while expecting given status code.
+    //     *
+    //     * @param httpResponse The HTTP response
+    //     * @param policy The status code policy to obey
+    //     * @param clazz The class of the result object
+    //     * @return The result object
+    //     * @throws OXException If an Open-Xchange error occurs
+    //     * @throws ClientProtocolException If a client protocol error occurs
+    //     * @throws IOException If an I/O error occurs
+    //     * @throws IllegalStateException If content stream cannot be created
+    //     */
+    //    protected static <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
+    //        policy.handleStatusCode(httpResponse);
+    //
+    //        // OK, continue
+    //        if (Void.class.equals(clazz)) {
+    //            return null;
+    //        }
+    //        if (JSONObject.class.equals(clazz)) {
+    //            try {
+    //                return (R) new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+    //            } catch (JSONException e) {
+    //                throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+    //            }
+    //        }
+    //        return parseIntoObject(httpResponse.getEntity().getContent(), clazz);
+    //    }
 
-    /**
-     * Turns specified JSON value into an appropriate HTTP entity.
-     *
-     * @param jValue The JSON value
-     * @return The HTTP entity
-     * @throws JSONException If a JSON error occurs
-     * @throws IOException If an I/O error occurs
-     */
-    protected InputStreamEntity asHttpEntity(JSONValue jValue) throws JSONException, IOException {
-        if (null == jValue) {
-            return null;
-        }
-
-        ByteArrayOutputStream bStream = Streams.newByteArrayOutputStream(1024);
-        OutputStreamWriter osw = new OutputStreamWriter(bStream, Charsets.UTF_8);
-        jValue.write(osw);
-        osw.flush();
-        return new InputStreamEntity(Streams.asInputStream(bStream), bStream.size(), ContentType.APPLICATION_JSON);
-    }
-
-    /**
-     * Initiates the query string parameters
-     *
-     * @return The query string parameters
-     */
-    protected List<NameValuePair> initiateQueryString() {
-        List<NameValuePair> qparams = new LinkedList<NameValuePair>();
-        qparams.add(new BasicNameValuePair("access_token", oneDriveAccess.getOAuthAccount().getToken()));
-        return qparams;
-    }
-
-    /**
-     * Builds the URI from given arguments
-     *
-     * @param resourceId The resource identifier
-     * @param queryString The query string parameters
-     * @return The built URI string
-     * @throws IllegalArgumentException If the given string violates RFC 2396
-     */
-    public static URI buildUri(String resourceId, List<NameValuePair> queryString) {
-        try {
-            return new URI("https", null, "apis.live.net", -1, "/v5.0/" + resourceId, null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"), null);
-        } catch (URISyntaxException x) {
-            IllegalArgumentException y = new IllegalArgumentException();
-            y.initCause(x);
-            throw y;
-        }
-    }
-
-    /**
-     * Handles given HTTP response while expecting <code>200 (Ok)</code> status code.
-     *
-     * @param httpResponse The HTTP response
-     * @param clazz The class of the result object
-     * @return The result object
-     * @throws OXException If an Open-Xchange error occurs
-     * @throws ClientProtocolException If a client protocol error occurs
-     * @throws IOException If an I/O error occurs
-     */
-    public static <R> R handleHttpResponse(HttpResponse httpResponse, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
-        return handleHttpResponse(httpResponse, STATUS_CODE_POLICY_DEFAULT, clazz);
-    }
-
-    /**
-     * Handles given HTTP response while expecting given status code.
-     *
-     * @param httpResponse The HTTP response
-     * @param policy The status code policy to obey
-     * @param clazz The class of the result object
-     * @return The result object
-     * @throws OXException If an Open-Xchange error occurs
-     * @throws ClientProtocolException If a client protocol error occurs
-     * @throws IOException If an I/O error occurs
-     * @throws IllegalStateException If content stream cannot be created
-     */
-    protected static <R> R handleHttpResponse(HttpResponse httpResponse, StatusCodePolicy policy, Class<R> clazz) throws OXException, ClientProtocolException, IOException {
-        policy.handleStatusCode(httpResponse);
-
-        // OK, continue
-        if (Void.class.equals(clazz)) {
-            return null;
-        }
-        if (JSONObject.class.equals(clazz)) {
-            try {
-                return (R) new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
-            } catch (JSONException e) {
-                throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-            }
-        }
-        return parseIntoObject(httpResponse.getEntity().getContent(), clazz);
-    }
+    //    /**
+    //     * Performs given closure.
+    //     *
+    //     * @param closure The closure to perform
+    //     * @param httpClient The client to use
+    //     * @return The return value
+    //     * @throws OXException If performing closure fails
+    //     */
+    //    protected <R> R perform(OneDriveClosure<R> closure) throws OXException {
+    //        return closure.perform(this, oneDriveAccess.<HttpClient> getClient().client, session);
+    //    }
 
     /**
      * Performs given closure.
@@ -469,8 +465,27 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws OXException If performing closure fails
      */
     protected <R> R perform(OneDriveClosure<R> closure) throws OXException {
-        return closure.perform(this, oneDriveAccess.<HttpClient> getClient().client, session);
+        return closure.perform(this, session);
     }
+
+    //    /**
+    //     * Handles authentication error.
+    //     *
+    //     * @param e The authentication error
+    //     * @param session The associated session
+    //     * @throws OXException If authentication error could not be handled
+    //     * @deprecated Use {@link #handleAuthError(OXException, Session)} instead.
+    //     */
+    //    protected void handleAuthError(HttpResponseException e, Session session) throws OXException {
+    //        try {
+    //            oneDriveAccess.initialize();
+    //        } catch (OXException oxe) {
+    //            Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractOneDriveResourceAccess.class);
+    //            logger.warn("Could not re-initialize Microsoft OneDrive access", oxe);
+    //
+    //            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, OneDriveConstants.ID, e.getMessage());
+    //        }
+    //    }
 
     /**
      * Handles authentication error.
@@ -479,39 +494,39 @@ public abstract class AbstractOneDriveResourceAccess {
      * @param session The associated session
      * @throws OXException If authentication error could not be handled
      */
-    protected void handleAuthError(HttpResponseException e, Session session) throws OXException {
+    protected void handleAuthError(OXException e, Session session) throws OXException {
         try {
             oneDriveAccess.initialize();
         } catch (OXException oxe) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractOneDriveResourceAccess.class);
-            logger.warn("Could not re-initialize Microsoft OneDrive access", oxe);
+            logger.warn("Could not re-initialize Microsoft Graph OneDrive access", oxe);
 
             throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, OneDriveConstants.ID, e.getMessage());
         }
     }
 
-    /** Status code (401) indicating that the request requires HTTP authentication. */
-    private static final int SC_UNAUTHORIZED = 401;
+    //    /** Status code (401) indicating that the request requires HTTP authentication. */
+    //    private static final int SC_UNAUTHORIZED = 401;
+    //
+    //    /** Status code (404) indicating that the requested resource is not available. */
+    //    private static final int SC_NOT_FOUND = 404;
 
-    /** Status code (404) indicating that the requested resource is not available. */
-    private static final int SC_NOT_FOUND = 404;
-
-    /**
-     * Handles given HTTP response error.
-     *
-     * @param identifier The optional identifier for associated Microsoft OneDrive resource
-     * @param e The HTTP error
-     * @return The resulting exception
-     */
-    protected OXException handleHttpResponseError(String identifier, String accountId, HttpResponseException e) {
-        if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
-            return FileStorageExceptionCodes.NOT_FOUND.create(e, OneDriveConstants.ID, identifier);
-        }
-        if (null != accountId && SC_UNAUTHORIZED == e.getStatusCode()) {
-            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(accountId, OneDriveConstants.ID, SC_UNAUTHORIZED);
-        }
-        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
-    }
+    //    /**
+    //     * Handles given HTTP response error.
+    //     *
+    //     * @param identifier The optional identifier for associated Microsoft OneDrive resource
+    //     * @param e The HTTP error
+    //     * @return The resulting exception
+    //     */
+    //    protected OXException handleHttpResponseError(String identifier, String accountId, HttpResponseException e) {
+    //        if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
+    //            return FileStorageExceptionCodes.NOT_FOUND.create(e, OneDriveConstants.ID, identifier);
+    //        }
+    //        if (null != accountId && SC_UNAUTHORIZED == e.getStatusCode()) {
+    //            return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(accountId, OneDriveConstants.ID, SC_UNAUTHORIZED);
+    //        }
+    //        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
+    //    }
 
     /**
      * Gets the OneDrive folder identifier from given file storage folder identifier
@@ -521,7 +536,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws OXException If operation fails
      */
     protected String toOneDriveFolderId(String folderId) throws OXException {
-        return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? getRootFolderId() : folderId;
+        return FileStorageFolder.ROOT_FULLNAME.equals(folderId) ? driveService.getRootFolderId(getAccessToken()) : folderId;
     }
 
     /**
@@ -532,9 +547,9 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws OXException If operation fails
      */
     protected String toFileStorageFolderId(String oneDriveId) throws OXException {
-        return getRootFolderId().equals(oneDriveId) ? FileStorageFolder.ROOT_FULLNAME : oneDriveId;
+        return driveService.getRootFolderId(getAccessToken()).equals(oneDriveId) ? FileStorageFolder.ROOT_FULLNAME : oneDriveId;
     }
-    
+
     /**
      * 
      * @return
@@ -542,5 +557,4 @@ public abstract class AbstractOneDriveResourceAccess {
     protected String getAccessToken() {
         return oneDriveAccess.getOAuthAccount().getToken();
     }
-
 }

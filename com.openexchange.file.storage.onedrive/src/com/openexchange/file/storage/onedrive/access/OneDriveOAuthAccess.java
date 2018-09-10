@@ -49,16 +49,10 @@
 
 package com.openexchange.file.storage.onedrive.access;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import javax.net.ssl.SSLHandshakeException;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
@@ -70,7 +64,6 @@ import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.onedrive.AbstractOneDriveResourceAccess;
 import com.openexchange.file.storage.onedrive.OneDriveClosure;
 import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.osgi.Services;
@@ -143,27 +136,36 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
     public boolean ping() throws OXException {
         OneDriveClosure<Boolean> closure = new OneDriveClosure<Boolean>() {
 
+            //            @Override
+            //            protected Boolean doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
+            //                HttpGet request = null;
+            //                try {
+            //                    List<NameValuePair> qparams = new LinkedList<NameValuePair>();
+            //                    qparams.add(new BasicNameValuePair("access_token", getOAuthAccount().getToken()));
+            //                    request = new HttpGet(AbstractOneDriveResourceAccess.buildUri("/me/skydrive", qparams));
+            //                    HttpResponse httpResponse = httpClient.execute(request);
+            //                    int statusCode = httpResponse.getStatusLine().getStatusCode();
+            //                    if (401 == statusCode || 403 == statusCode) {
+            //                        return Boolean.FALSE;
+            //                    }
+            //
+            //                    AbstractOneDriveResourceAccess.handleHttpResponse(httpResponse, JSONObject.class);
+            //                    return Boolean.TRUE;
+            //                } finally {
+            //                    AbstractOneDriveResourceAccess.reset(request);
+            //                }
+            //            }
+            
+            /* (non-Javadoc)
+             * @see com.openexchange.file.storage.onedrive.OneDriveClosure#doPerform()
+             */
             @Override
-            protected Boolean doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-                HttpGet request = null;
-                try {
-                    List<NameValuePair> qparams = new LinkedList<NameValuePair>();
-                    qparams.add(new BasicNameValuePair("access_token", getOAuthAccount().getToken()));
-                    request = new HttpGet(AbstractOneDriveResourceAccess.buildUri("/me/skydrive", qparams));
-                    HttpResponse httpResponse = httpClient.execute(request);
-                    int statusCode = httpResponse.getStatusLine().getStatusCode();
-                    if (401 == statusCode || 403 == statusCode) {
-                        return Boolean.FALSE;
-                    }
-
-                    AbstractOneDriveResourceAccess.handleHttpResponse(httpResponse, JSONObject.class);
-                    return Boolean.TRUE;
-                } finally {
-                    AbstractOneDriveResourceAccess.reset(request);
-                }
+            protected Boolean doPerform() throws OXException {
+                // TODO Auto-generated method stub
+                return null;
             }
         };
-        return closure.perform(null, this.<HttpClient> getClient().client, getSession()).booleanValue();
+        return closure.perform(null, getSession()).booleanValue();
     }
 
     @Override

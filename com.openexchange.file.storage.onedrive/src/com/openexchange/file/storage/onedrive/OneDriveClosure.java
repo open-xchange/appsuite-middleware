@@ -49,18 +49,17 @@
 
 package com.openexchange.file.storage.onedrive;
 
-import java.io.IOException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
-import org.json.JSONException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.microsoft.graph.api.exception.MicrosoftGraphAPIExceptionCodes;
 import com.openexchange.session.Session;
 
 /**
  * {@link OneDriveClosure}
  *
+ * @param <R> - The return type
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.6.1
  */
 public abstract class OneDriveClosure<R> {
@@ -80,8 +79,17 @@ public abstract class OneDriveClosure<R> {
      * @throws OXException If an Open-Xchange error occurred
      * @throws JSONException If a JSON error occurs
      * @throws IOException If an I/O error occurred
+     * @deprecated Use {@link #doPerform()} instead
      */
-    protected abstract R doPerform(HttpClient httpClient) throws OXException, JSONException, IOException;
+    //protected abstract R doPerform(HttpClient httpClient) throws OXException, JSONException, IOException;
+
+    /**
+     * Performs the actual operation.
+     * 
+     * @return The return value
+     * @throws OXException if an error is occurred
+     */
+    protected abstract R doPerform() throws OXException;
 
     /**
      * Performs this closure's operation.
@@ -91,28 +99,54 @@ public abstract class OneDriveClosure<R> {
      * @param session The associated session
      * @return The return value
      * @throws OXException If operation fails
+     * @deprecated Use {@link #perform(AbstractOneDriveResourceAccess, Session)} instead.
      */
-    public R perform(AbstractOneDriveResourceAccess resourceAccess, HttpClient httpClient, Session session) throws OXException {
-        return null == resourceAccess ? innerPerform(false, null, httpClient, session) : innerPerform(true, resourceAccess, httpClient, session);
-    }
+    //    public R perform(AbstractOneDriveResourceAccess resourceAccess, HttpClient httpClient, Session session) throws OXException {
+    //        return null == resourceAccess ? innerPerform(false, null, httpClient, session) : innerPerform(true, resourceAccess, httpClient, session);
+    //    }
 
-    private R innerPerform(boolean handleAuthError, AbstractOneDriveResourceAccess resourceAccess, HttpClient httpClient, Session session) throws OXException {
+    /**
+     * @deprecated
+     */
+    //    private R innerPerform(boolean handleAuthError, AbstractOneDriveResourceAccess resourceAccess, HttpClient httpClient, Session session) throws OXException {
+    //        try {
+    //            return doPerform(httpClient);
+    //        } catch (HttpResponseException e) {
+    //            if ((400 == e.getStatusCode() || 401 == e.getStatusCode()) && resourceAccess != null) {
+    //                // Authentication failed -- recreate token
+    //                if (!handleAuthError) {
+    //                    throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), OneDriveConstants.ID, e.getMessage());
+    //                }
+    //                resourceAccess.handleAuthError(e, session);
+    //                return innerPerform(false, resourceAccess, httpClient, session);
+    //            }
+    //            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
+    //        } catch (IOException e) {
+    //            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+    //        } catch (JSONException e) {
+    //            throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+    //        } catch (final RuntimeException e) {
+    //            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+    //        }
+    //    }
+
+    /**
+     * Performs the operation and handles any authentication errors
+     * 
+     * @param resourceAccess
+     * @param session
+     * @return
+     * @throws OXException
+     */
+    public R perform(AbstractOneDriveResourceAccess resourceAccess, Session session) throws OXException {
         try {
-            return doPerform(httpClient);
-        } catch (HttpResponseException e) {
-            if ((400 == e.getStatusCode() || 401 == e.getStatusCode()) && resourceAccess!=null) {
-                // Authentication failed -- recreate token
-                if (!handleAuthError) {
-                    throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), OneDriveConstants.ID, e.getMessage());
-                }
+            return doPerform();
+        } catch (OXException e) {
+            if (MicrosoftGraphAPIExceptionCodes.ACCESS_DENIED.equals(e) || MicrosoftGraphAPIExceptionCodes.UNAUTHENTICATED.equals(e)) {
                 resourceAccess.handleAuthError(e, session);
-                return innerPerform(false, resourceAccess, httpClient, session);
+                return perform(resourceAccess, session);
             }
-            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (JSONException e) {
-            throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            throw e;
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
