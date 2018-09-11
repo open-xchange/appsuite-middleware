@@ -72,63 +72,12 @@ public abstract class OneDriveClosure<R> {
     }
 
     /**
-     * Performs the actual operation
-     *
-     * @param httpClient The HTTP client to use
-     * @return The return value
-     * @throws OXException If an Open-Xchange error occurred
-     * @throws JSONException If a JSON error occurs
-     * @throws IOException If an I/O error occurred
-     * @deprecated Use {@link #doPerform()} instead
-     */
-    //protected abstract R doPerform(HttpClient httpClient) throws OXException, JSONException, IOException;
-
-    /**
      * Performs the actual operation.
      * 
      * @return The return value
      * @throws OXException if an error is occurred
      */
     protected abstract R doPerform() throws OXException;
-
-    /**
-     * Performs this closure's operation.
-     *
-     * @param resourceAccess The associated resource access
-     * @param httpClient The HTTP client to use
-     * @param session The associated session
-     * @return The return value
-     * @throws OXException If operation fails
-     * @deprecated Use {@link #perform(AbstractOneDriveResourceAccess, Session)} instead.
-     */
-    //    public R perform(AbstractOneDriveResourceAccess resourceAccess, HttpClient httpClient, Session session) throws OXException {
-    //        return null == resourceAccess ? innerPerform(false, null, httpClient, session) : innerPerform(true, resourceAccess, httpClient, session);
-    //    }
-
-    /**
-     * @deprecated
-     */
-    //    private R innerPerform(boolean handleAuthError, AbstractOneDriveResourceAccess resourceAccess, HttpClient httpClient, Session session) throws OXException {
-    //        try {
-    //            return doPerform(httpClient);
-    //        } catch (HttpResponseException e) {
-    //            if ((400 == e.getStatusCode() || 401 == e.getStatusCode()) && resourceAccess != null) {
-    //                // Authentication failed -- recreate token
-    //                if (!handleAuthError) {
-    //                    throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), OneDriveConstants.ID, e.getMessage());
-    //                }
-    //                resourceAccess.handleAuthError(e, session);
-    //                return innerPerform(false, resourceAccess, httpClient, session);
-    //            }
-    //            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()), e.getMessage());
-    //        } catch (IOException e) {
-    //            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-    //        } catch (JSONException e) {
-    //            throw FileStorageExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-    //        } catch (final RuntimeException e) {
-    //            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-    //        }
-    //    }
 
     /**
      * Performs the operation and handles any authentication errors
