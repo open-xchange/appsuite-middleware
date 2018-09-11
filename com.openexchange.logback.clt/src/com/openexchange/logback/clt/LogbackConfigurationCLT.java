@@ -135,35 +135,8 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         LogbackConfigurationRMIService logbackConfigService = getRmiStub(optRmiHostName, LogbackConfigurationRMIService.RMI_NAME);
-        try {
-            if (cmd.hasOption('s')) {
-                CommandLineExecutor.SESSION.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption('c') && !cmd.hasOption('u')) {
-                CommandLineExecutor.CONTEXT.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption('u')) {
-                CommandLineExecutor.USER.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption('l')) {
-                CommandLineExecutor.MODIFY.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("le")) {
-                CommandLineExecutor.LIST_CATEGORIES.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("lf")) {
-                CommandLineExecutor.LIST_FILTERS.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("ll")) {
-                CommandLineExecutor.LIST_LOGGERS.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("oec")) {
-                CommandLineExecutor.OVERRIDE_EXCEPTION_CATEGORIES.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("cf")) {
-                CommandLineExecutor.CLEAR_FILTERS.executeWith(cmd, logbackConfigService);
-            } else if (cmd.hasOption("la")) {
-                CommandLineExecutor.ROOT_APPENDER_STATS.executeWith(cmd, logbackConfigService);
-            } else {
-                printHelp(options);
-            }
-        } catch (IllegalArgumentException e) {
-            System.err.println(e.getMessage());
-            printHelp(options);
-        }
-
+        CommandLineExecutor executor = getCommandLineExecutor(options, cmd);
+        executor.executeWith(cmd, logbackConfigService);
         return null;
     }
 
@@ -315,6 +288,48 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
         while (i.hasNext()) {
             System.out.println(i.next());
         }
+    }
+
+    /**
+     * Retrieves the appropriate {@link CommandLineExecutor} according to the set {@link Options} in the {@link CommandLine} tool.
+     * If no valid {@link CommandLineExecutor} is found then the usage of this tool is printed and the JVM is terminated.
+     * 
+     * @param options The available {@link Options} of the command line tool
+     * @param cmd The {@link CommandLine}
+     * @return The {@link CommandLineExecutor}
+     */
+    private CommandLineExecutor getCommandLineExecutor(Options options, CommandLine cmd) {
+        try {
+            if (cmd.hasOption('s')) {
+                return CommandLineExecutor.SESSION;
+            } else if (cmd.hasOption('c') && !cmd.hasOption('u')) {
+                return CommandLineExecutor.CONTEXT;
+            } else if (cmd.hasOption('u')) {
+                return CommandLineExecutor.USER;
+            } else if (cmd.hasOption('l')) {
+                return CommandLineExecutor.MODIFY;
+            } else if (cmd.hasOption("le")) {
+                return CommandLineExecutor.LIST_CATEGORIES;
+            } else if (cmd.hasOption("lf")) {
+                return CommandLineExecutor.LIST_FILTERS;
+            } else if (cmd.hasOption("ll")) {
+                return CommandLineExecutor.LIST_LOGGERS;
+            } else if (cmd.hasOption("oec")) {
+                return CommandLineExecutor.OVERRIDE_EXCEPTION_CATEGORIES;
+            } else if (cmd.hasOption("cf")) {
+                return CommandLineExecutor.CLEAR_FILTERS;
+            } else if (cmd.hasOption("la")) {
+                return CommandLineExecutor.ROOT_APPENDER_STATS;
+            } else {
+                printHelp(options);
+                System.exit(0);
+            }
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            printHelp(options);
+            System.exit(1);
+        }
+        return null;
     }
 
     //////////////////////////////// NESTED /////////////////////////////////
