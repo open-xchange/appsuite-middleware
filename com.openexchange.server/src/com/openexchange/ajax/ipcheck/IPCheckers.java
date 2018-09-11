@@ -173,15 +173,20 @@ public class IPCheckers {
         }
 
         SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null != service) {
-            String oldIP = session.getLocalIp();
-            if (!current.equals(oldIP)) {
-                try {
-                    service.setLocalIp(session.getSessionID(), current);
-                } catch (OXException e) {
-                    LOG.info("Failed to update session's IP address. authID: {}, sessionID: {}, old IP address: {}, new IP address: {}", session.getAuthId(), session.getSessionID(), oldIP, current, e);
-                }
-            }
+        if (null == service) {
+            LOG.debug("The '{}' is absent. The session was not updated with the current IP '{}'", SessiondService.class.getSimpleName(), current);
+            return;
+        }
+        String oldIP = session.getLocalIp();
+        if (current.equals(oldIP)) {
+            LOG.debug("The session's IP '{}' is already up-to-date", current);
+            return;
+        }
+        try {
+            service.setLocalIp(session.getSessionID(), current);
+            LOG.debug("Successfully updated the session's IP address to '{}'", current);
+        } catch (OXException e) {
+            LOG.info("Failed to update session's IP address. authID: {}, sessionID: {}, old IP address: {}, new IP address: {}", session.getAuthId(), session.getSessionID(), oldIP, current, e);
         }
     }
 
