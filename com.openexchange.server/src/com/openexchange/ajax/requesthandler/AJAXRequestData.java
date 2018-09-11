@@ -1344,6 +1344,7 @@ public class AJAXRequestData {
                     if (UploadException.UploadCode.FAILED_STREAMED_UPLOAD.equals(e)) {
                         return (null != e.getArgument("__uploadEvent")) && !files.isEmpty();
                     }
+                    throw e;
                 }
                 StreamedUpload streamedUpload = this.streamedUpload;
                 hasStreamedUpload = Boolean.valueOf(streamedUpload != null && streamedUpload.hasAny());

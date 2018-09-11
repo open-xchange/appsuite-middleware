@@ -665,7 +665,7 @@ public class Strings {
             sb.append(replacement);
             prev = pos + sequence.length();
         }
-        
+
         if (prev > 0) {
             sb.append(s.substring(prev, s.length()));
         }
@@ -702,7 +702,7 @@ public class Strings {
             sb.append(replacement);
             prev = pos + sequence.length();
         }
-        
+
         if (prev > 0) {
             sb.append(s.substring(prev, s.length()));
         }
@@ -1519,7 +1519,7 @@ public class Strings {
     public static String trimStart(String string, char... trimChars) {
         if (null != string && null != trimChars && 0 < trimChars.length) {
             while (0 < string.length() && contains(string.charAt(0), trimChars)) {
-                string = string.substring(1, string.length() - 1);
+                string = string.substring(1, string.length());
             }
         }
         return string;
@@ -1758,6 +1758,24 @@ public class Strings {
         }
 
         return null == sb ? s : sb.toString();
+    }
+
+    private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+    /**
+     * Turns array of bytes into string representing each byte as unsigned hex number.
+     *
+     * @param hash Array of bytes to convert to hex-string
+     * @return Generated hex string
+     */
+    public static String asHex(final byte[] hash) {
+        final int length = hash.length;
+        final char[] buf = new char[length << 1];
+        for (int i = 0, x = 0; i < length; i++) {
+            buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
+            buf[x++] = HEX_CHARS[hash[i] & 0xf];
+        }
+        return new String(buf);
     }
 
 }

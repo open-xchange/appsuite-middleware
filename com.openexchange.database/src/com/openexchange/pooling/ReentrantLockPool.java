@@ -85,10 +85,10 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     private final long[] useTimes = new long[1000];
 
     protected final PoolImplData<T> data = new PoolImplData<T>();
-    
+
     protected final ReentrantLock lock = new ReentrantLock(true);
     protected final Condition idleAvailable = lock.newCondition();
-    
+
     private boolean running = true;
     private int useTimePointer;
     private final AtomicBoolean brokenCreate = new AtomicBoolean();
@@ -128,18 +128,23 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     protected PoolableLifecycle<T> getLifecycle() {
         return lifecycle;
     }
-    
+
     protected void setConfig(PoolConfig config) {
-        maxIdle = config.maxIdle;
-        maxIdleTime = config.maxIdleTime;
-        maxActive = config.maxActive;
-        maxWait = config.maxWait;
-        maxLifeTime = config.maxLifeTime;
-        exhaustedAction = config.exhaustedAction;
-        testOnActivate = config.testOnActivate;
-        testOnDeactivate = config.testOnDeactivate;
-        testOnIdle = config.testOnIdle;
-        testThreads = config.testThreads;
+        lock.lock();
+        try {
+            maxIdle = config.maxIdle;
+            maxIdleTime = config.maxIdleTime;
+            maxActive = config.maxActive;
+            maxWait = config.maxWait;
+            maxLifeTime = config.maxLifeTime;
+            exhaustedAction = config.exhaustedAction;
+            testOnActivate = config.testOnActivate;
+            testOnDeactivate = config.testOnDeactivate;
+            testOnIdle = config.testOnIdle;
+            testThreads = config.testThreads;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -171,7 +176,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             if (!poolable) {
                 numBroken++;
             }
-            poolable &= metaData.isDeprecated();
+            poolable &= !metaData.isDeprecated();
             poolable &= (maxLifeTime <= 0 || metaData.getLiveTime() < maxLifeTime);
         } else {
             poolable = false;
@@ -387,7 +392,12 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     }
 
     public boolean isStopped() {
-        return !running;
+        lock.lock();
+        try {
+            return !running;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override

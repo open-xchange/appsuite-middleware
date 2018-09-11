@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback;
 
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link FeedbackTypeRegistry} is a registry for {@link FeedbackType} implementations
@@ -56,6 +57,7 @@ package com.openexchange.userfeedback;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
+@SingletonService
 public interface FeedbackTypeRegistry {
 
     /**

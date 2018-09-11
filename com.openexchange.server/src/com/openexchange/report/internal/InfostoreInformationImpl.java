@@ -80,6 +80,10 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class InfostoreInformationImpl implements InfostoreInformationService {
 
+    private static final String TOTAL = "total";
+    private static final String COUNT = "count";
+    private static final String CREATED_BY = "created_by";
+
     /**
      * Initializes a new {@link InfostoreInformationImpl}.
      */
@@ -89,13 +93,13 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
 
     @Override
     public Map<String, Integer> getFileSizeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
-        Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, "created_by");
+        Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, CREATED_BY);
         for (Map.Entry<Integer, String> singleSchemaQuery : whereQueries.entrySet()) {
             String whereQuery = singleSchemaQuery.getValue();
             String query = "SELECT min(file_size), max(file_size), avg(file_size), sum(file_size), count(*) FROM infostore_document" + whereQuery + "AND version_number > 0;";
             whereQueries.put(singleSchemaQuery.getKey(), query);
         }
-        return this.getDataFromDB(whereQueries, "count", true, false, null, null);
+        return this.getDataFromDB(whereQueries, COUNT, true, false, null, null);
     }
 
     @Override
@@ -110,7 +114,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                 PreparedStatement stmt = null;
                 ResultSet sqlResult = null;
                 try {
-                    String whereQuery = buildWhereClause(usersInContext, "created_by");
+                    String whereQuery = buildWhereClause(usersInContext, CREATED_BY);
                     // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                     stmt = connection.prepareStatement("SELECT file_mimetype, count(file_mimetype) FROM infostore_document" + whereQuery + " AND version_number > 0 GROUP BY file_mimetype;");
                     sqlResult = stmt.executeQuery();
@@ -134,19 +138,19 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
 
     @Override
     public Map<String, Integer> getStorageUseMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
-        Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, "created_by");
+        Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, CREATED_BY);
         for (Map.Entry<Integer, String> singleSchemaQuery : whereQueries.entrySet()) {
             String whereQuery = singleSchemaQuery.getValue();
             // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             String query = "SELECT min(roundup.sum), max(roundup.sum), avg(roundup.sum), sum(roundup.sum), count(*) FROM " + "(SELECT cid, created_by, sum(file_size) AS sum FROM infostore_document" + whereQuery + "GROUP BY cid, created_by) AS roundup;";
             whereQueries.put(singleSchemaQuery.getKey(), query);
         }
-        return this.getDataFromDB(whereQueries, "count", true, false, null, null);
+        return this.getDataFromDB(whereQueries, COUNT, true, false, null, null);
     }
 
     @Override
     public Map<String, Integer> getFileCountMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
-        Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, "created_by");
+        Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, CREATED_BY);
         for (Map.Entry<Integer, String> singleSchemaQuery : whereQueries.entrySet()) {
             String whereQuery = singleSchemaQuery.getValue();
             // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
@@ -158,14 +162,14 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
 
     @Override
     public Map<String, Integer> getFileCountInTimeframeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash, Date start, Date end) throws SQLException, OXException {
-        Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, "created_by");
+        Map<Integer, String> whereQueries = buildMultipleWhereClause(dbContextToUserBash, CREATED_BY);
         for (Map.Entry<Integer, String> singleSchemaQuery : whereQueries.entrySet()) {
             String whereQuery = singleSchemaQuery.getValue();
             // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             String query = "SELECT min(roundup.count), max(roundup.count), avg(roundup.count), sum(roundup.count), count(*) FROM " + "(SELECT cid, created_by, count(version_number) AS count FROM infostore_document " + whereQuery + " AND creating_date > ? AND creating_date < ? AND version_number > 0 " + "GROUP BY cid, created_by) AS roundup;";
             whereQueries.put(singleSchemaQuery.getKey(), query);
         }
-        return this.getDataFromDB(whereQueries, "count", true, true, start, end);
+        return this.getDataFromDB(whereQueries, COUNT, true, true, start, end);
     }
 
     @Override
@@ -192,12 +196,12 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                 PreparedStatement stmt = null;
                 ResultSet sqlResult = null;
                 try {
-                    String whereQuery = buildWhereClause(usersInContext, "created_by");
+                    String whereQuery = buildWhereClause(usersInContext, CREATED_BY);
                     stmt = connection.prepareStatement("SELECT count(version_number) FROM infostore_document" + whereQuery + " AND version_number = 0;");
                     sqlResult = stmt.executeQuery();
                     Map<String, Integer> queryMap = new LinkedHashMap<>();
                     while (sqlResult.next()) {
-                        queryMap.put("total", sqlResult.getInt(1));
+                        queryMap.put(TOTAL, sqlResult.getInt(1));
                     }
                     calculateMinMaxAdds(resultMap, queryMap);
                 } catch (final SQLException e) {
@@ -223,8 +227,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         for (Map.Entry<Integer, List<Integer>> contexts : usersInContext.entrySet()) {
             for (Integer userId : contexts.getValue()) {
                 QuotaFileStorage userStorage = storageService.getQuotaFileStorage(userId, contexts.getKey(), Info.drive());
-                long quota = userStorage.getQuota();
-                Long percent = quota < 0 ? 0 : (quota == 0 ? 100 : userStorage.getUsage() * 100 / quota);
+                Long percent = calculateQuotaPercent(userStorage);
                 filestoreMap.put(userStorage.getUri().toString(), percent.intValue());
             }
         }
@@ -241,9 +244,22 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
             resultMap.put("sum", sum);
         }
 
-        resultMap.put("total", filestoreMap.size());
+        resultMap.put(TOTAL, filestoreMap.size());
 
         return resultMap;
+    }
+
+    private long calculateQuotaPercent(QuotaFileStorage userStorage) throws OXException {
+        long quota = userStorage.getQuota();
+        long result = 0l;
+        if (quota >= 0) {
+            if (quota == 0) {
+                result = 100l;
+            } else {
+                result = userStorage.getUsage() * 100 / quota;
+            }
+        }
+        return result;
     }
 
     //--------------------Private helper functions--------------------
@@ -404,7 +420,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                         queryMap.put("min", sqlResult.getInt(1));
                         queryMap.put("max", sqlResult.getInt(2));
                         queryMap.put("avg", sqlResult.getInt(3));
-                        queryMap.put("total", sqlResult.getInt(4));
+                        queryMap.put(TOTAL, sqlResult.getInt(4));
                         queryMap.put(counter, sqlResult.getInt(5));
                     }
                     calculateMinMaxAdds(resultMap, queryMap);
@@ -416,7 +432,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
             }
         }
         if (resultMap.get(counter) != 0) {
-            resultMap.put("avg", resultMap.get("total") / resultMap.get(counter));
+            resultMap.put("avg", resultMap.get(TOTAL) / resultMap.get(counter));
         }
         if (deleteCounter) {
             resultMap.remove(counter);

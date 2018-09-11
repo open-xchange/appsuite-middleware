@@ -51,6 +51,7 @@ package com.openexchange.userfeedback.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -61,13 +62,14 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userfeedback.FeedbackMode;
 import com.openexchange.userfeedback.FeedbackService;
-import com.openexchange.userfeedback.FeedbackTypeRegistry;
+import com.openexchange.userfeedback.FeedbackType;
 import com.openexchange.userfeedback.internal.FeedbackServiceImpl;
 import com.openexchange.userfeedback.internal.FeedbackTypeRegistryImpl;
 import com.openexchange.userfeedback.internal.UserFeedbackProperty;
@@ -89,9 +91,20 @@ public class Activator extends HousekeepingActivator{
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        registerService(FeedbackTypeRegistry.class, FeedbackTypeRegistryImpl.getInstance());
+        track(FeedbackType.class, new SimpleRegistryListener<FeedbackType>() {
+
+            @Override
+            public void added(ServiceReference<FeedbackType> ref, FeedbackType type) {
+                FeedbackTypeRegistryImpl.getInstance().registerType(type);
+            }
+
+            @Override
+            public void removed(ServiceReference<FeedbackType> ref, FeedbackType type) {
+                FeedbackTypeRegistryImpl.getInstance().unregisterType(type);
+            }});
+        openTrackers();
         registerService(FeedbackService.class, new FeedbackServiceImpl());
-        
+
         {
             final String sCapability = "feedback";
             Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
@@ -115,7 +128,7 @@ public class Activator extends HousekeepingActivator{
 
             getService(CapabilityService.class).declareCapability(sCapability);
         }
-        
+
         FeedbackMode feedbackMode = new FeedbackMode();
         registerService(PreferencesItemService.class, feedbackMode);
         registerService(ConfigTreeEquivalent.class, feedbackMode);

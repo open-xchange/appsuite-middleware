@@ -633,7 +633,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                         throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_UNAUTHORIZED);
                     }
                     if (QuotaFileStorageExceptionCodes.STORE_FULL.equals(x)) {
-                        throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, Protocol.SC_INSUFFICIENT_STORAGE);
+                        throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, Protocol.SC_INSUFFICIENT_STORAGE, x);
                     }
                     throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x, new Object[0]);
                 } catch (final Exception x) {
@@ -665,6 +665,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                             if (CATEGORY_PERMISSION_DENIED == iStoreException.getCategory()) {
                                 throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_UNAUTHORIZED);
                             }
+                        }
+                        if (QuotaFileStorageExceptionCodes.STORE_FULL.equals(iStoreException)) {
+                            throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, Protocol.SC_INSUFFICIENT_STORAGE, iStoreException);
                         }
                     }
                     throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, x);

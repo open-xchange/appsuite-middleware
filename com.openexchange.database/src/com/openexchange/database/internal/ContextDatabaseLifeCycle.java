@@ -86,7 +86,7 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private final Map<Integer, ConnectionPool> pools = new ConcurrentHashMap<Integer, ConnectionPool>();
 
-    private Properties jdbcProperties;
+    private final Properties jdbcProperties;
 
     public ContextDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer, ConnectionReloaderImpl reloader, final ConfigDatabaseService configDatabaseService) {
         super();
@@ -135,14 +135,14 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
     }
 
     private PoolConfig getConfig(final ConnectionData data) {
-        final PoolConfig retval = defaultPoolConfig.clone();
-        retval.maxActive = data.max;
+        final PoolConfig.Builder retval = PoolConfig.builder(defaultPoolConfig);
+        retval.withMaxActive(data.max);
         if (data.block) {
-            retval.exhaustedAction = ExhaustedActions.BLOCK;
+            retval.withExhaustedAction(ExhaustedActions.BLOCK);
         } else {
-            retval.exhaustedAction = ExhaustedActions.GROW;
+            retval.withExhaustedAction(ExhaustedActions.GROW);
         }
-        return retval;
+        return retval.build();
     }
 
     private void removeParameters(ConnectionData retval) {
@@ -190,8 +190,8 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
 
     private class ContextPoolAdapter extends AbstractConfigurationListener<ConnectionData> {
 
-        public ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toInfo, Function<ConnectionData, PoolConfig> toConfig) {
-            super(poolId, data, toURL, toInfo, toConfig);
+        ContextPoolAdapter(int poolId, ConnectionData data, Function<ConnectionData, String> toURL, Function<ConnectionData, Properties> toConnectionArguments, Function<ConnectionData, PoolConfig> toConfig) {
+            super(poolId, data, toURL, toConnectionArguments, toConfig);
         }
 
         @Override

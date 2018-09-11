@@ -2,16 +2,16 @@ Source: open-xchange-core
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: cdbs (>= 0.4.53), debhelper (>= 9), lsb-release, ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@)
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 9), lsb-release, ant (>= 1.7.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@), open-xchange-hazelcast-community (>= @OXVERSION@) | open-xchange-hazelcast
 Standards-Version: 3.9.6
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-core
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@), open-xchange-system (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@), open-xchange-system (>= @OXVERSION@), open-xchange-hazelcast-community (>= @OXVERSION@) | open-xchange-hazelcast
 Pre-Depends: dpkg (>= 1.15.7.2)
-Breaks: open-xchange-oauth (<< 7.8.3), open-xchange-freebusy (<< 7.10.0)
-Replaces: open-xchange-messaging (<< 7.2.1-0), open-xchange-oauth (<< 7.8.3), open-xchange-freebusy (<< 7.10.0)
+Breaks: open-xchange-oauth (<< 7.8.3), open-xchange-freebusy (<< 7.10.0), open-xchange-rest (<< 7.10.1)
+Replaces: open-xchange-messaging (<< 7.2.1-0), open-xchange-oauth (<< 7.8.3), open-xchange-freebusy (<< 7.10.0), open-xchange-rest (<< 7.10.1)
 Conflicts: open-xchange-messaging (<< 7.2.1-0)
 Description: The essential core of an Open-Xchange backend
  This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main

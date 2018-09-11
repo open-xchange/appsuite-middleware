@@ -53,7 +53,6 @@ package com.openexchange.authentication.ucs.impl;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
@@ -77,6 +76,7 @@ import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -109,7 +109,7 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
     private static final String LOGINATTR_OPTION = "com.openexchange.authentication.ucs.loginAttribute";
     private static final String LDAPPOOL_OPTION = "com.openexchange.authentication.ucs.useLdapPool";
 
-    private final class AuthenticatedImpl implements Authenticated {
+    private static final class AuthenticatedImpl implements Authenticated {
 
         private final String login;
         private final String contextIdOrName;
@@ -254,13 +254,9 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
         DirContext ctx = null;
         try {
-            if (loginInfo.getUsername()==null || loginInfo.getPassword()==null) {
-                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-            }
-
             final String loginString = loginInfo.getUsername();
             final String password = loginInfo.getPassword();
-            if ("".equals(loginString.trim()) || "".equals(password.trim())) {
+            if (Strings.isEmpty(loginString) || Strings.isEmpty(password)) {
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 
@@ -269,7 +265,7 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
             // Search LDAP server without any credentials to get the users dn to bind with
             Hashtable<String, String> ldapConfig = new Hashtable<String, String>(config.ldapConfigDefaults);
             boolean doBind = null != config.binddn && config.binddn.trim().length() > 0 && null != config.bindpw && config.bindpw .trim().length() > 0;
-            if ( doBind ) {
+            if (doBind) {
                 ldapConfig.put(Context.SECURITY_AUTHENTICATION, "simple");
                 ldapConfig.put(Context.SECURITY_PRINCIPAL, config.binddn);
                 ldapConfig.put(Context.SECURITY_CREDENTIALS, config.bindpw);
@@ -281,15 +277,12 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
 
             String user_dn = null;
             {
-
                 SearchControls sc = new SearchControls();
                 sc.setSearchScope(SearchControls.SUBTREE_SCOPE);
                 sc.setReturningAttributes(new String[]{"dn"});
 
-                final String search_pattern = config.searchFilter.replaceAll("%s", escapeString(loginString));
-
+                String search_pattern = Strings.replaceSequenceWith(config.searchFilter, "%s", escapeString(loginString));
                 LOG.debug("Now searching on server {} for DN of User {} with BASE: {} and pattern {}", config.ldapUrl, loginString, config.baseDn, search_pattern);
-
                 NamingEnumeration<SearchResult> result = ctx.search(config.baseDn, search_pattern, sc);
                 try {
                     if ( !result.hasMoreElements() ) {
@@ -298,7 +291,7 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
                     }
                     final SearchResult sr = result.next();
                     LOG.debug("User found : {}", sr.getName());
-                    user_dn = sr.getName() + "," + config.baseDn;
+                    user_dn = new StringBuilder(sr.getName()).append(',').append(config.baseDn).toString();
 
                     if (result.hasMoreElements()) {
                         LOG.error("More than one user for login string {} found in LDAP", loginString);
@@ -313,83 +306,86 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
                 }
             }
 
-            {
-                try {
-                    // unbind old context
-                    ctx.close();
-                } catch (NamingException e) {
-                    LOG.error("", e);
-                }
-                ctx = null;
+            // unbind old context
+            try {
+                ctx.close();
+            } catch (NamingException e) {
+                LOG.error("", e);
             }
+            ctx = null;
 
             // after we found the users dn, auth with this dn and given password
-            if( ! doBind ) {
+            if (false == doBind) {
                 ldapConfig.put(Context.SECURITY_AUTHENTICATION, "simple");
             }
             ldapConfig.put(Context.SECURITY_PRINCIPAL, user_dn);
             ldapConfig.put(Context.SECURITY_CREDENTIALS, password);
 
-            final String[] attribs;
-            if ( null != config.contextIdAttr ) {
-                attribs = new String[]{config.contextIdAttr, config.mailAttr, config.loginAttr, "shadowLastChange","shadowMax"};
+            boolean hasContextIdAttr = null != config.contextIdAttr;
+
+            String[] attribs;
+            if (hasContextIdAttr) {
+                attribs = new String[] { config.contextIdAttr, config.mailAttr, config.loginAttr, "shadowLastChange", "shadowMax" };
                 LOG.debug("Also fetching contextId attribute {}", config.contextIdAttr);
             } else {
-                attribs = new String[]{config.mailAttr, config.loginAttr, "shadowLastChange","shadowMax"};
+                attribs = new String[] { config.mailAttr, config.loginAttr, "shadowLastChange", "shadowMax" };
             }
 
             LOG.debug("trying to bind with DN: {}", user_dn);
             ctx = new InitialDirContext(ldapConfig);
 
-            final Attributes users_attr = ctx.getAttributes(user_dn,attribs);
+            Attributes users_attr = ctx.getAttributes(user_dn,attribs);
 
-            final String ldapCtxId;
-            if ( null != config.contextIdAttr && null != users_attr.get(config.contextIdAttr)) {
-                ldapCtxId = (String) users_attr.get(config.contextIdAttr).get(0);
-            } else {
-                ldapCtxId = null;
+            String ldapCtxId = null;
+            if (hasContextIdAttr) {
+                Attribute attr = users_attr.get(config.contextIdAttr);
+                if (null != attr) {
+                    ldapCtxId = (String) attr.get(0);
+                }
             }
 
-            final String login;
-            if ( null == users_attr.get(config.loginAttr)) {
-                LOG.error("unable to get ox login name from ldap attribute {}", config.loginAttr);
-                throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+            String login;
+            {
+                Attribute attr = users_attr.get(config.loginAttr);
+                if (null == attr) {
+                    LOG.error("unable to get ox login name from ldap attribute {}", config.loginAttr);
+                    throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                }
+                login = (String) attr.get(0);
             }
-            login = (String) users_attr.get(config.loginAttr).get(0);
 
             // ### Needed for password expired check against ldap ###
-            final Attribute shadowlastchange = users_attr.get("shadowLastChange");
-            final Attribute shadowmax = users_attr.get("shadowMax");
-            long shadowlastchange_days = 0;
-            long shadowmax_days = 0;
-            if (shadowlastchange != null && shadowmax != null) {
+            {
+                Attribute shadowlastchange = users_attr.get("shadowLastChange");
+                Attribute shadowmax = users_attr.get("shadowMax");
+                if (shadowlastchange != null && shadowmax != null) {
+                    try {
+                        long shadowlastchange_days = Long.parseLong(((String) shadowlastchange.get()));
+                        long shadowmax_days = Long.parseLong(((String) shadowmax.get()));
+                        LOG.debug("Found shadowlastchange ({}) and shadowmax({}) in ldap! NOW calculating!", shadowlastchange_days, shadowmax_days);
 
-                try {
-                    shadowlastchange_days = Long.parseLong(((String) shadowlastchange.get()));
-                    shadowmax_days = Long.parseLong(((String) shadowmax.get()));
-                    LOG.debug("Found shadowlastchange ({}) and shadowmax({}) in ldap! NOW calculating!", shadowlastchange_days, shadowmax_days);
-                } catch (final Exception exp) {
-                    LOG.error("LDAP Attributes shadowlastchange or/and shadowmax contain invalid values!", exp);
+                        /**
+                         * Bug #12593
+                         * Check if password is already expired.
+                         * This is done by calculating the sum of the both shadow attributes,
+                         * if the sum is lower than day count since 1.1.1970 then password is expired
+                         */
+                        long days_since_1970 = System.currentTimeMillis() / 86400000;
+                        long sum_up = shadowlastchange_days + shadowmax_days;
+                        if (sum_up < days_since_1970) {
+                            LOG.info("Password for account \"{}\" seems to be expired({}<{})!", login, sum_up, days_since_1970);
+                            throw LoginExceptionCodes.PASSWORD_EXPIRED.create(config.passwordChangeURL.toString());
+                        }
+                    } catch (Exception whatever) {
+                        LOG.error("LDAP Attributes shadowlastchange or/and shadowmax contain invalid values! Considering password for account \"{}\" as expired!", login, whatever);
+                        throw LoginExceptionCodes.PASSWORD_EXPIRED.create(config.passwordChangeURL.toString());
+                    }
+                } else {
+                    LOG.debug("LDAP Attributes shadowlastchange and shadowmax not found in LDAP, no password expiry calculation will be done!");
                 }
-
-                /**
-                 * Bug #12593
-                 * Check if password is already expired.
-                 * This is done by calculating the sum of the both shadow attributes,
-                 * if the sum is lower than day count since 1.1.1970 then password is expired
-                 */
-                final Calendar cal = Calendar.getInstance();
-                final long days_since_1970 = cal.getTimeInMillis() / 86400000;
-                final long sum_up = shadowlastchange_days + shadowmax_days;
-                if (sum_up < days_since_1970) {
-                    LOG.info("Password for account \"{}\" seems to be expired({}<{})!", login, sum_up, days_since_1970);
-                    throw LoginExceptionCodes.PASSWORD_EXPIRED.create(config.passwordChangeURL.toString());
-                }
-            } else {
-                LOG.debug("LDAP Attributes shadowlastchange and shadowmax not found in LDAP, no password expiry calculation will be done!");
             }
 
-            final String contextIdOrName;
+            String contextIdOrName;
             if (null != ldapCtxId) {
                 LOG.debug("Bind with DN successfull, using context id {} as found in ldap attribute {} as context", ldapCtxId, config.contextIdAttr);
                 contextIdOrName = ldapCtxId;
@@ -398,15 +394,22 @@ public class UCSAuthentication implements AuthenticationService,Reloadable {
                 LOG.debug("Bind with DN successfull, now parsing attribute {} to resolve context", config.mailAttr);
                 final Attribute emailattrib = users_attr.get(config.mailAttr);
 
-                if (emailattrib.size() != 1) {
-                    // more than one mailAttr value found, cannot resolve correct context
+                int numOfEmailAttribs = emailattrib.size();
+                if (numOfEmailAttribs != 1) {
+                    if (numOfEmailAttribs == 0) {
+                        // No mailAttr value found, cannot resolve correct context
+                        LOG.error("Fatal, no {} value found, cannot resolve correct context", config.mailAttr);
+                        throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
+                    }
+
+                    // Otherwise more than one mailAttr value found, cannot resolve correct context
                     LOG.error("Fatal, more than one {} value found, cannot resolv correct context", config.mailAttr);
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
 
-                String[] data = ((String) emailattrib.get()).split("@");
+                String[] data = Strings.splitBy((String) emailattrib.get(), '@', false);
                 if (data.length != 2) {
-                    LOG.error("Fatal, Email address {} could not be splitted correctly!!", emailattrib.get());
+                    LOG.error("Fatal, Email address {} could not be parsed!", emailattrib.get());
                     throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
                 }
 

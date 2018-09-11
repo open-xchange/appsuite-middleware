@@ -53,7 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -99,12 +98,7 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
                 List<Event> readEvents = readEvents(storage);
-                
-                EventField[] fields = getFields(cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
-                List<EventField> fieldList = new ArrayList<EventField>(Arrays.asList(fields));
-                fieldList.add(EventField.FOLDER_ID);
-                fields = fieldList.toArray(new EventField[fieldList.size()]);
-
+                EventField[] fields = getFields(cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.FOLDER_ID);
                 return storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), readEvents, fields);
             }
 
@@ -162,7 +156,7 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
                 searchTerm.addSearchTerm(orTerm);
             }
         }
-        EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
+        EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.FOLDER_ID);
         SearchOptions searchOptions = new SearchOptions(this.cachedCalendarAccess.getParameters());
         List<Event> events = calendarStorage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
         events = calendarStorage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);

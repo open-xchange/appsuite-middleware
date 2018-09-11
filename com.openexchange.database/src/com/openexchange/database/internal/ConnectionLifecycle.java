@@ -61,7 +61,6 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -121,39 +120,46 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         }
     }
 
+    private static class UrlAndConnectionArgs {
+
+        final String url;
+        final Properties connectionArguments;
+
+        UrlAndConnectionArgs(String url, Properties connectionArguments) {
+            super();
+            this.url = url;
+            this.connectionArguments = connectionArguments;
+        }
+    }
+
     // ----------------------------------------------------------------------------------------------
-
-    private ReentrantReadWriteLock lock;
-
-    public void lockForWrite() {
-        lock.writeLock().lock();
-    }
-
-    public void unlockForWrite() {
-        lock.writeLock().unlock();
-    }
-
-    private String url;
-
-    public void setURL(String url) {
-        this.url = url;
-    }
-
-    private Properties info;
-
-    public void setInfo(Properties info) {
-        this.info = info;
-    }
 
     /**
      * Time between checks if a connection still works.
      */
     private static final long DEFAULT_CHECK_TIME = 120000;
 
-    public ConnectionLifecycle(final String url, final Properties info) {
-        this.url = url;
-        this.info = info;
-        this.lock = new ReentrantReadWriteLock(true);
+    private final AtomicReference<UrlAndConnectionArgs> urlAndConnectionReference;
+
+    /**
+     * Initializes a new {@link ConnectionLifecycle}.
+     *
+     * @param url A database URL of the form <code> jdbc:<em>subprotocol</em>:<em>subname</em></code>
+     * @param connectionArguments A list of arbitrary string tag/value pairs as connection arguments; normally at least a "user" and "password" property should be included
+     */
+    public ConnectionLifecycle(final String url, final Properties connectionArguments) {
+        super();
+        urlAndConnectionReference = new AtomicReference<>(new UrlAndConnectionArgs(url, connectionArguments));
+    }
+
+    /**
+     * Sets the JDBC URL and connection arguments to use.
+     *
+     * @param url A database URL of the form <code> jdbc:<em>subprotocol</em>:<em>subname</em></code>
+     * @param connectionArguments A list of arbitrary string tag/value pairs as connection arguments; normally at least a "user" and "password" property should be included
+     */
+    public void setUrlAndConnectionArgs(String url, Properties connectionArguments) {
+        urlAndConnectionReference.set(new UrlAndConnectionArgs(url, connectionArguments));
     }
 
     @Override
@@ -183,30 +189,21 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     @Override
     public Connection create() throws SQLException {
-        lock.readLock().lock();
-        try {
-            return DriverManager.getConnection(url, info);
-        } finally {
-            lock.readLock().unlock();
-        }
+        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
+        return DriverManager.getConnection(urlAndConnectionArgs.url, urlAndConnectionArgs.connectionArguments);
     }
 
     public Connection createWithoutTimeout() throws SQLException {
-        final Properties withoutTimeout = new Properties();
-        lock.readLock().lock();
-        try {
-            withoutTimeout.putAll(info);
-            final Iterator<Object> iter = withoutTimeout.keySet().iterator();
-            while (iter.hasNext()) {
-                final Object test = iter.next();
-                if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
-                    iter.remove();
-                }
+        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
+        Properties withoutTimeout = new Properties();
+        withoutTimeout.putAll(urlAndConnectionArgs.connectionArguments);
+        for (Iterator<Object> iter = withoutTimeout.keySet().iterator(); iter.hasNext();) {
+            final Object test = iter.next();
+            if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
+                iter.remove();
             }
-            return DriverManager.getConnection(url, withoutTimeout);
-        } finally {
-            lock.readLock().unlock();
         }
+        return DriverManager.getConnection(urlAndConnectionArgs.url, withoutTimeout);
     }
 
     @Override

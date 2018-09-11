@@ -60,12 +60,11 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
-import com.openexchange.database.ConfigurationListener;
-import com.openexchange.database.ConfigurationListener.ConfigDBListener;
-import com.openexchange.database.DatabaseExceptionCodes;
+import com.openexchange.database.internal.ConfigurationListener.ConfigDBListener;
 import com.openexchange.database.internal.reloadable.ConnectionReloader;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentHashSet;
+import com.openexchange.java.ConfigAwareKeyStore;
 
 /**
  * {@link ConnectionReloaderImpl}
@@ -77,57 +76,42 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
 
     private static final String USE_SSL = "useSSL";
 
-    public static final String CLIENT_CERT_PATH_NAME     = "clientCertificateKeyStoreUrl";
-    public static final String CLIENT_CERT_PASSWORD_NAME = "clientCertificateKeyStorePassword";
-    public static final String CLIENT_CERT_TYPE          = "clientCertificateKeyStoreType";
+    private static final String CLIENT_CERT_PATH_NAME     = "clientCertificateKeyStoreUrl";
+    private static final String CLIENT_CERT_PASSWORD_NAME = "clientCertificateKeyStorePassword";
+    private static final String CLIENT_CERT_TYPE          = "clientCertificateKeyStoreType";
 
-    public static final String TRUST_CERT_PATH_NAME     = "trustCertificateKeyStoreUrl";
-    public static final String TRUST_CERT_PASSWORD_NAME = "trustCertificateKeyStorePassword";
-    public static final String TRUST_CERT_TYPE          = "trustCertificateKeyStoreType";
+    private static final String TRUST_CERT_PATH_NAME     = "trustCertificateKeyStoreUrl";
+    private static final String TRUST_CERT_PASSWORD_NAME = "trustCertificateKeyStorePassword";
+    private static final String TRUST_CERT_TYPE          = "trustCertificateKeyStoreType";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionReloaderImpl.class);
 
-    private ConcurrentHashSet<ConfigurationListener> listerners;
+    private final ConcurrentHashSet<ConfigurationListener> listerners;
 
-    private ConcurrentHashMap<String, ConfigAwareKeyStore> stores;
+    private final ConcurrentHashMap<String, ConfigAwareKeyStore> stores;
 
-    private Configuration configuration;
+    private volatile Configuration configuration;
 
     /**
      * Initializes a new {@link ConnectionReloaderImpl}.
-     * 
+     *
      * @param configuration The {@link Configuration} for connections
-     * @throws OXException In case key store can't be loaded
-     * 
      */
-    public ConnectionReloaderImpl(Configuration configuration) throws OXException {
+    public ConnectionReloaderImpl(Configuration configuration) {
         super();
         listerners = new ConcurrentHashSet<>(4);
         stores = new ConcurrentHashMap<>(4);
         this.configuration = configuration;
 
-        savePut("CAStore", TRUST_CERT_PATH_NAME, TRUST_CERT_PASSWORD_NAME, TRUST_CERT_TYPE);
-        savePut("ClientStore", CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, CLIENT_CERT_TYPE);
-
-        if (stores.isEmpty() && isSSL(configuration)) {
-            LOGGER.error("No keystores where added also 'useSSL' was set. SSL can't be used");
-            throw DatabaseExceptionCodes.SQL_ERROR.create("No SSL keystores where configured");
-        }
+        stores.put("CAStore", new ConfigAwareKeyStore(TRUST_CERT_PATH_NAME, TRUST_CERT_PASSWORD_NAME, TRUST_CERT_TYPE));
+        stores.put("ClientStore", new ConfigAwareKeyStore(CLIENT_CERT_PATH_NAME, CLIENT_CERT_PASSWORD_NAME, CLIENT_CERT_TYPE));
 
         // Ignore listeners on start up
         loadKeyStores(configuration);
     }
 
-    private void savePut(String key, String path, String password, String type) {
-        try {
-            stores.put(key, new ConfigAwareKeyStore(configuration, path, password, type));
-        } catch (OXException e) {
-            LOGGER.debug("Unable to initialize keystore for " + key, e);
-        }
-    }
-
     @Override
-    public boolean loadKeyStores(Configuration configuration) throws OXException {
+    public boolean loadKeyStores(Configuration configuration) {
         // Do we need to do something?
         if (false == isSSL(configuration)) {
             return false;
@@ -135,33 +119,29 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
 
         boolean retval = false;
         for (Entry<String, ConfigAwareKeyStore> entry : stores.entrySet()) {
-            retval |= entry.getValue().reloadStore(configuration);
+            try {
+                retval |= entry.getValue().reloadStore(configuration.getJdbcProps());
+            } catch (Exception e) {
+                LOGGER.error("Unable to load keystore!", e);
+            }
         }
 
         return retval;
     }
 
     private boolean isSSL(Configuration configuration) {
-        Boolean useSSL = Boolean.valueOf(configuration.getJdbcProps().getProperty(USE_SSL));
-        if (null != useSSL && useSSL.booleanValue()) {
-            return true;
-        }
-        return false;
+        return Boolean.parseBoolean(configuration.getJdbcProps().getProperty(USE_SSL));
     }
 
     @Override
     public boolean setConfigurationListener(ConfigurationListener listener) {
-        if (null != listener) {
-            return listerners.add(listener);
-        }
-        return false;
+        return null == listener ? false : listerners.add(listener);
     }
-    
+
     @Override
     public boolean removeConfigurationListener(int poolId) {
-        Iterator<ConfigurationListener> iterator = listerners.iterator();
-        while(iterator.hasNext()) {
-            if (poolId == iterator.next().getPoolId() ) {
+        for (Iterator<ConfigurationListener> iterator = listerners.iterator(); iterator.hasNext();) {
+            if (poolId == iterator.next().getPoolId()) {
                 iterator.remove();
                 return true;
             }
@@ -181,9 +161,8 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
                 this.configuration = configuration;
             }
         } catch (OXException e) {
-            LOGGER.error("Was not able to reload SSL configuration for SQL!", e);
+            LOGGER.error("Unable to reinitialze configuration!", e);
         }
-
     }
 
     @Override
@@ -193,14 +172,14 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
 
     /**
      * Notifies the {@link ConfigurationListener}. Looks up which properties has changed and notifies only relevant
-     * 
+     *
      * @param keyStoreUpdate <code>true</code> if a {@link KeyStore} was updated
      * @param configuration The new {@link Configuration}
      */
     private void notify(boolean keyStoreUpdate, Configuration configuration) {
         if (keyStoreUpdate || checkForChangedProperties(this.configuration.getJdbcProps(), configuration.getJdbcProps())) {
             listerners.stream().sorted().forEach(l -> l.notify(configuration));
-        } else if (checkForChangedProperties(this.configuration.getReadProps(), configuration.getReadProps()) || checkForChangedProperties(this.configuration.getWriteProps(), configuration.getWriteProps())) {
+        } else if (checkForChangedProperties(this.configuration.getConfigDbReadProps(), configuration.getConfigDbReadProps()) || checkForChangedProperties(this.configuration.getConfigDbWriteProps(), configuration.getConfigDbWriteProps())) {
             listerners.stream().filter(l -> ConfigDBListener.class.isAssignableFrom(l.getClass())).sorted().forEach(l -> l.notify(configuration));
         }
     }

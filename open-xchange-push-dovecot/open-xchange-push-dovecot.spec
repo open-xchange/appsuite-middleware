@@ -9,14 +9,13 @@ BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
 BuildRequires: open-xchange-imap
-BuildRequires: open-xchange-rest
 %if 0%{?suse_version}
 BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -27,7 +26,6 @@ Summary:       Open-Xchange Dovecot Push Bundle
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-imap >= @OXVERSION@
-Requires:      open-xchange-rest >= @OXVERSION@
 
 %description
 Open-Xchange Mail Push Bundle
@@ -60,6 +58,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Thu Sep 06 2018 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.10.1 release
 * Fri Jun 29 2018 Thorben Betten <thorben.betten@open-xchange.com>
 Fourth candidate for 7.10.0 release
 * Wed Jun 27 2018 Thorben Betten <thorben.betten@open-xchange.com>

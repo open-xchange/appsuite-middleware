@@ -57,6 +57,7 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.configuration.internal.AddNodeUtilCommandProvider;
 import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
 import com.openexchange.hazelcast.configuration.internal.HazelcastReloadable;
+import com.openexchange.hazelcast.configuration.internal.HazelcastSSLReloadable;
 import com.openexchange.hazelcast.configuration.internal.Services;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -72,7 +73,7 @@ public class HazelcastConfigurationActivator extends HousekeepingActivator {
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastConfigurationActivator.class);
 
     /**
-     * Initializes a new {@link HazelcastActivator}.
+     * Initializes a new {@link HazelcastConfigurationActivator}.
      */
     public HazelcastConfigurationActivator() {
         super();
@@ -89,6 +90,7 @@ public class HazelcastConfigurationActivator extends HousekeepingActivator {
         HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl();
         registerService(HazelcastConfigurationService.class, configService);
         registerService(Reloadable.class, new HazelcastReloadable(configService));
+        registerService(Reloadable.class, new HazelcastSSLReloadable(configService));
         registerService(CommandProvider.class, new AddNodeUtilCommandProvider(configService));
     }
 

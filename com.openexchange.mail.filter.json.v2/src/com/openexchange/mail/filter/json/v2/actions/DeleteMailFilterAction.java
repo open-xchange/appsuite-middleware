@@ -78,7 +78,7 @@ public class DeleteMailFilterAction extends AbstractMailFilterAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        final Credentials credentials = new Credentials(session);
+        final Credentials credentials = getCredentials(session, request);
         final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         final JSONObject json = getJSONBody(request.getData());
         final int uid = getUniqueId(json);

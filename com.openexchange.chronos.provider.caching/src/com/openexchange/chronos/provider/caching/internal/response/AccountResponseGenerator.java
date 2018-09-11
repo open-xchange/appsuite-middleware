@@ -50,18 +50,19 @@
 package com.openexchange.chronos.provider.caching.internal.response;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
+import static com.openexchange.chronos.common.CalendarUtils.isInRange;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -91,21 +92,20 @@ public class AccountResponseGenerator extends ResponseGenerator {
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
                 CalendarParameters parameters = cachedCalendarAccess.getParameters();
-                EventField[] fields = getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
-                List<EventField> fieldList = new ArrayList<EventField>(Arrays.asList(fields));
-                fieldList.add(EventField.FOLDER_ID);
-                fields = fieldList.toArray(new EventField[fieldList.size()]);
+                EventField[] fields = getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), EventField.FOLDER_ID);
                 List<Event> events = storage.getEventStorage().searchEvents(null, searchOptions, fields);
                 List<Event> enhancedEvents = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
                 List<Event> allEvents = new ArrayList<>();
                 for (Event event : enhancedEvents) {
-                    if (false == CalendarUtils.isInRange(event, from, until, timeZone)) {
-                        continue;
-                    }
                     event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
-                    if (CalendarUtils.isSeriesMaster(event) && isResolveOccurrences(parameters)) {
-                        allEvents.addAll(Lists.newArrayList(Services.getService(RecurrenceService.class).iterateEventOccurrences(event, from, until)));
-                    } else {
+                    if (isSeriesMaster(event)) {
+                        RecurrenceIterator<Event> iterator = Services.getService(RecurrenceService.class).iterateEventOccurrences(event, from, until);
+                        if (isResolveOccurrences(parameters)) {
+                            allEvents.addAll(Lists.newArrayList(iterator));
+                        } else if (iterator.hasNext()) {
+                            allEvents.add(event);
+                        }
+                    } else if (isInRange(event, from, until, timeZone)) {
                         allEvents.add(event);
                     }
                 }
@@ -113,4 +113,5 @@ public class AccountResponseGenerator extends ResponseGenerator {
             }
         }.executeQuery();
     }
+
 }

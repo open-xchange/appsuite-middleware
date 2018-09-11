@@ -50,8 +50,8 @@
 package com.openexchange.database.internal.reloadable;
 
 import java.security.KeyStore;
-import com.openexchange.database.ConfigurationListener;
 import com.openexchange.database.internal.Configuration;
+import com.openexchange.database.internal.ConfigurationListener;
 import com.openexchange.exception.OXException;
 
 /**

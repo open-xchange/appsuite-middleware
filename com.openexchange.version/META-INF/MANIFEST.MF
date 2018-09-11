@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Central version component
 Bundle-SymbolicName: com.openexchange.version
-Bundle-Version: 7.10.0
-OXVersion: 7.10.0
+Bundle-Version: 7.10.1
+OXVersion: 7.10.1
 OXBuildDate: release-7.10.0
-OXRevision: 10
+OXRevision: 0
 Bundle-Activator: com.openexchange.version.osgi.VersionActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

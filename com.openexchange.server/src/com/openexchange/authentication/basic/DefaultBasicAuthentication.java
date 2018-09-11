@@ -128,15 +128,15 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
      * {@inheritDoc}
      */
     @Override
-    public Authenticated handleLoginInfo(final LoginInfo loginInfo)
-        throws OXException {
-        final String password = loginInfo.getPassword();
+    public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
+        String password = loginInfo.getPassword();
         if (null == password || 0 == password.length()) {
             throw INVALID_CREDENTIALS.create();
         }
-        final String[] splitted = split(loginInfo.getUsername());
-        try {
-            final int ctxId;
+
+        String[] splitted = split(loginInfo.getUsername());
+        {
+            int ctxId;
             try {
                 ctxId = contextService.getContextId(splitted[0]);
             } catch (final OXException e) {
@@ -145,8 +145,9 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
             if (ContextStorage.NOT_FOUND == ctxId) {
                 throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(splitted[0]);
             }
-            final Context ctx = contextService.getContext(ctxId);
-            final int userId;
+            Context ctx = contextService.getContext(ctxId);
+
+            int userId;
             try {
                 userId = userService.getUserId(splitted[1], ctx);
             } catch (final OXException e) {
@@ -155,12 +156,10 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
                 }
                 throw e;
             }
-            final User user = userService.getUser(userId, ctx);
+            User user = userService.getUser(userId, ctx);
             if (!userService.authenticate(user, password)) {
                 throw INVALID_CREDENTIALS.create();
             }
-        } catch (final OXException e) {
-            throw e;
         }
         return new AuthenticatedImpl(splitted);
     }
@@ -172,28 +171,16 @@ public class DefaultBasicAuthentication implements BasicAuthenticationService {
 
     /**
      * Splits user name and context.
-     * @param loginInfo combined information separated by an @ sign.
-     * @return a string array with context and user name (in this order).
+     *
+     * @param loginInfo Combined information separated by an <code>'@'</code> sign
+     * @return A string array with context and user name (in this order)
+     * @throws OXException If no separator is found
      */
-    private String[] split(final String loginInfo) {
-        return split(loginInfo, '@');
-    }
-
-    /**
-     * Splits user name and context.
-     * @param loginInfo combined information separated by an @ sign.
-     * @param separator for splitting user name and context.
-     * @return a string array with context and user name (in this order).
-     * @throws OXException if no separator is found.
-     */
-    private String[] split(final String loginInfo, final char separator) {
-        final int pos = loginInfo.lastIndexOf(separator);
-        final String[] splitted;
-        if (-1 == pos) {
-            splitted = new String[] { "defaultcontext", loginInfo };
-        } else {
-            splitted = new String[] { loginInfo.substring(pos + 1), loginInfo.substring(0, pos) };
+    private static String[] split(final String loginInfo) {
+        int pos = loginInfo.lastIndexOf('@');
+        if (pos < 0) {
+            return new String[] { "defaultcontext", loginInfo };
         }
-        return splitted;
+        return new String[] { loginInfo.substring(pos + 1), loginInfo.substring(0, pos) };
     }
 }

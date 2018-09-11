@@ -1,0 +1,1 @@
+protocol=pop3remote; type=store; class=com.sun.mail.remote.POP3RemoteStore; vendor=Oracle;

@@ -53,7 +53,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -63,7 +65,7 @@ import com.openexchange.pooling.ExhaustedActions;
 import com.openexchange.pooling.PoolConfig;
 
 /**
- * Contains the settings to connect to the configuration database.
+ * Contains the settings to connect to the configuration database as well as generic JDBC properties to use.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -73,17 +75,17 @@ public final class Configuration {
 
     private static final String CONFIG_DB_FILENAME = "configdb.properties";
 
-    private Properties props;
+    private final AtomicReference<Properties> propsReference = new AtomicReference<Properties>();
 
     private static final String JDBC_CONFIG = "dbconnector.yaml";
 
-    private Properties jdbcProps;
+    private final AtomicReference<Properties> jdbcPropsReference = new AtomicReference<Properties>();
 
-    private final Properties readProps = new Properties();
+    private final Properties configDbReadProps = new Properties();
 
-    private final Properties writeProps = new Properties();
+    private final Properties configDbWriteProps = new Properties();
 
-    private final PoolConfig poolConfig = PoolConfig.DEFAULT_CONFIG.clone();
+    private final AtomicReference<PoolConfig> poolConfigReference = new AtomicReference<PoolConfig>(PoolConfig.DEFAULT_CONFIG);
 
     public Configuration() {
         super();
@@ -93,20 +95,20 @@ public final class Configuration {
         return getProperty(Property.READ_URL);
     }
 
-    Properties getReadProps() {
-        return readProps;
+    Properties getConfigDbReadProps() {
+        return configDbReadProps;
     }
 
     String getWriteUrl() {
         return getProperty(Property.WRITE_URL);
     }
 
-    Properties getWriteProps() {
-        return writeProps;
+    Properties getConfigDbWriteProps() {
+        return configDbWriteProps;
     }
 
     Properties getJdbcProps() {
-        return jdbcProps;
+        return jdbcPropsReference.get();
     }
 
     private String getProperty(final Property property) {
@@ -120,6 +122,7 @@ public final class Configuration {
 
     private <T> T getUniversal(final Property property, final T def, final Convert<T> converter) {
         final T retval;
+        Properties props = propsReference.get();
         if (props != null && props.containsKey(property.getPropertyName())) {
             retval = converter.convert(props.getProperty(property.getPropertyName()));
         } else {
@@ -169,6 +172,7 @@ public final class Configuration {
     }
 
     public void readConfiguration(final ConfigurationService service) throws OXException {
+        Properties props = propsReference.get();
         if (null != props) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(this.getClass().getName());
         }
@@ -176,6 +180,7 @@ public final class Configuration {
         if (props.isEmpty()) {
             throw DBPoolingExceptionCodes.MISSING_CONFIGURATION.create();
         }
+        propsReference.set(props);
         readJdbcProps(service);
         separateReadWrite();
         loadDrivers();
@@ -183,7 +188,7 @@ public final class Configuration {
     }
 
     private void readJdbcProps(ConfigurationService config) {
-        jdbcProps = new Properties();
+        Properties jdbcProps = new Properties();
 
         // Set defaults:
         jdbcProps.setProperty("useUnicode", "true");
@@ -198,6 +203,7 @@ public final class Configuration {
 
         // Apply config
         jdbcProps.putAll(parseJdbcYaml(config));
+        jdbcPropsReference.set(jdbcProps);
     }
 
     private Map<String, String> parseJdbcYaml(ConfigurationService config) {
@@ -229,8 +235,10 @@ public final class Configuration {
     }
 
     private void separateReadWrite() {
-        readProps.putAll(jdbcProps);
-        writeProps.putAll(jdbcProps);
+        Properties jdbcProps = jdbcPropsReference.get();
+        configDbReadProps.putAll(jdbcProps);
+        configDbWriteProps.putAll(jdbcProps);
+        Properties props = propsReference.get();
         for (final Object tmp : props.keySet()) {
             final String key = (String) tmp;
             if (key.startsWith("readProperty.")) {
@@ -238,13 +246,13 @@ public final class Configuration {
                 final int equalSignPos = value.indexOf('=');
                 final String readKey = value.substring(0, equalSignPos);
                 final String readValue = value.substring(equalSignPos + 1);
-                readProps.put(readKey, readValue);
+                configDbReadProps.put(readKey, readValue);
             } else if (key.startsWith("writeProperty.")) {
                 final String value = props.getProperty(key);
                 final int equalSignPos = value.indexOf('=');
                 final String readKey = value.substring(0, equalSignPos);
                 final String readValue = value.substring(equalSignPos + 1);
-                writeProps.put(readKey, readValue);
+                configDbWriteProps.put(readKey, readValue);
             }
         }
     }
@@ -274,26 +282,30 @@ public final class Configuration {
      * {@inheritDoc}
      */
     public void clear() {
-        props = null;
-        jdbcProps = null;
-        readProps.clear();
-        writeProps.clear();
+        propsReference.set(null);
+        jdbcPropsReference.set(null);
+        configDbReadProps.clear();
+        configDbWriteProps.clear();
     }
 
     /**
      * Reads the pooling configuration from the configdb.properties file.
      */
     private void initPoolConfig() {
-        poolConfig.maxIdle = getInt(Property.MAX_IDLE, poolConfig.maxIdle);
-        poolConfig.maxIdleTime = getLong(Property.MAX_IDLE_TIME, poolConfig.maxIdleTime);
-        poolConfig.maxActive = getInt(Property.MAX_ACTIVE, poolConfig.maxActive);
-        poolConfig.maxWait = getLong(Property.MAX_WAIT, poolConfig.maxWait);
-        poolConfig.maxLifeTime = getLong(Property.MAX_LIFE_TIME, poolConfig.maxLifeTime);
-        poolConfig.exhaustedAction = ExhaustedActions.valueOf(getProperty(Property.EXHAUSTED_ACTION, poolConfig.exhaustedAction.name()));
-        poolConfig.testOnActivate = getBoolean(Property.TEST_ON_ACTIVATE, poolConfig.testOnActivate);
-        poolConfig.testOnDeactivate = getBoolean(Property.TEST_ON_DEACTIVATE, poolConfig.testOnDeactivate);
-        poolConfig.testOnIdle = getBoolean(Property.TEST_ON_IDLE, poolConfig.testOnIdle);
-        poolConfig.testThreads = getBoolean(Property.TEST_THREADS, poolConfig.testThreads);
+        PoolConfig poolConfig = poolConfigReference.get();
+        PoolConfig.Builder poolConfigBuilder = PoolConfig.builder();
+        poolConfigBuilder.withMaxIdle(getInt(Property.MAX_IDLE, poolConfig.maxIdle));
+        poolConfigBuilder.withMaxIdleTime(getLong(Property.MAX_IDLE_TIME, poolConfig.maxIdleTime));
+        poolConfigBuilder.withMaxActive(getInt(Property.MAX_ACTIVE, poolConfig.maxActive));
+        poolConfigBuilder.withMaxWait(getLong(Property.MAX_WAIT, poolConfig.maxWait));
+        poolConfigBuilder.withMaxLifeTime(getLong(Property.MAX_LIFE_TIME, poolConfig.maxLifeTime));
+        poolConfigBuilder.withExhaustedAction(ExhaustedActions.valueOf(getProperty(Property.EXHAUSTED_ACTION, poolConfig.exhaustedAction.name())));
+        poolConfigBuilder.withTestOnActivate(getBoolean(Property.TEST_ON_ACTIVATE, poolConfig.testOnActivate));
+        poolConfigBuilder.withTestOnDeactivate(getBoolean(Property.TEST_ON_DEACTIVATE, poolConfig.testOnDeactivate));
+        poolConfigBuilder.withTestOnIdle(getBoolean(Property.TEST_ON_IDLE, poolConfig.testOnIdle));
+        poolConfigBuilder.withTestThreads(getBoolean(Property.TEST_THREADS, poolConfig.testThreads));
+        poolConfig = poolConfigBuilder.build();
+        poolConfigReference.set(poolConfig);
 
         List<Object> logArgs = new ArrayList<>(24);
         logArgs.add(Strings.getLineSeparator());
@@ -332,21 +344,24 @@ public final class Configuration {
          // @formatter:on
         );
     }
-    
+
 
     PoolConfig getPoolConfig() {
-        return poolConfig;
+        return poolConfigReference.get();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        Properties jdbcProps = jdbcPropsReference.get();
         result = prime * result + ((jdbcProps == null) ? 0 : jdbcProps.hashCode());
+        PoolConfig poolConfig = poolConfigReference.get();
         result = prime * result + ((poolConfig == null) ? 0 : poolConfig.hashCode());
+        Properties props = propsReference.get();
         result = prime * result + ((props == null) ? 0 : props.hashCode());
-        result = prime * result + ((readProps == null) ? 0 : readProps.hashCode());
-        result = prime * result + ((writeProps == null) ? 0 : writeProps.hashCode());
+        result = prime * result + ((configDbReadProps == null) ? 0 : configDbReadProps.hashCode());
+        result = prime * result + ((configDbWriteProps == null) ? 0 : configDbWriteProps.hashCode());
         return result;
     }
 
@@ -362,40 +377,75 @@ public final class Configuration {
             return false;
         }
         Configuration other = (Configuration) obj;
+        Properties jdbcProps = jdbcPropsReference.get();
+        Properties otherJdbcProps = other.jdbcPropsReference.get();
         if (jdbcProps == null) {
-            if (other.jdbcProps != null) {
+            if (otherJdbcProps != null) {
                 return false;
             }
-        } else if (!jdbcProps.equals(other.jdbcProps)) {
+        } else if (!jdbcProps.equals(otherJdbcProps)) {
             return false;
         }
+        PoolConfig poolConfig = poolConfigReference.get();
         if (poolConfig == null) {
-            if (other.poolConfig != null) {
+            if (other.poolConfigReference.get() != null) {
                 return false;
             }
-        } else if (!poolConfig.equals(other.poolConfig)) {
+        } else if (!poolConfig.equals(other.poolConfigReference.get())) {
             return false;
         }
+        Properties props = propsReference.get();
+        Properties otherProps = other.propsReference.get();
         if (props == null) {
-            if (other.props != null) {
+            if (otherProps != null) {
                 return false;
             }
-        } else if (!ConfigurationUtil.matches(props, other.props)) {
+        } else if (!matches(props, otherProps)) {
             return false;
         }
-        if (readProps == null) {
-            if (other.readProps != null) {
+        if (configDbReadProps == null) {
+            if (other.configDbReadProps != null) {
                 return false;
             }
-        } else if (!ConfigurationUtil.matches(readProps, other.readProps)) {
+        } else if (!matches(configDbReadProps, other.configDbReadProps)) {
             return false;
         }
-        if (writeProps == null) {
-            if (other.writeProps != null) {
+        if (configDbWriteProps == null) {
+            if (other.configDbWriteProps != null) {
                 return false;
             }
-        } else if (!ConfigurationUtil.matches(writeProps, other.writeProps)) {
+        } else if (!matches(configDbWriteProps, other.configDbWriteProps)) {
             return false;
+        }
+        return true;
+    }
+
+    /**
+     * Matches if two {@link Properties} can be considered equal
+     *
+     * @param p1 The first {@link Properties}
+     * @param p2 The second {@link Properties}
+     * @return <code>true</code> if both properties contain equal objects
+     *         <code>false</code> otherwise
+     */
+    private static boolean matches(Properties p1, Properties p2) {
+        if (p1.size() != p2.size()) {
+            return false;
+        }
+        for (Entry<Object, Object> f : p1.entrySet()) {
+            if (false == p2.contains(f.getKey())) {
+                return false;
+            }
+            Object p2Value = p2.get(f.getKey());
+            if (null == p2Value) {
+                if (null != f.getValue()) {
+                    return false;
+                }
+            } else {
+                if (false == p2Value.equals(f.getValue())) {
+                    return false;
+                }
+            }
         }
         return true;
     }

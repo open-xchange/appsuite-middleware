@@ -65,15 +65,15 @@ public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
         "cid INT4 UNSIGNED NOT NULL," +
         "user INT4 UNSIGNED NOT NULL," +
         "id INT4 UNSIGNED NOT NULL," +
-        "displayName VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        "accessToken TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        "accessSecret TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        "serviceId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        "scope VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        "identity VARCHAR(767) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL," +
+        "displayName VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
+        "accessToken TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
+        "accessSecret TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
+        "serviceId VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
+        "scope VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL," +
+        "identity VARCHAR(767) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL," +
         "PRIMARY KEY (cid, id)," +
         "KEY `identity` (cid,identity(191))" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
     public CreateOAuthAccountTable() {
         super();

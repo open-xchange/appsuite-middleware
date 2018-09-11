@@ -49,12 +49,14 @@
 
 package com.openexchange.database.internal.change.custom;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.Databases;
@@ -140,7 +142,7 @@ public class RemoveParametersFromPoolConnectionUrlCustomTaskChange implements Cu
             stmt = con.prepareStatement(SELECT);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                id2Url.put(rs.getInt("db_pool_id"), rs.getString("url"));
+                id2Url.put(I(rs.getInt("db_pool_id")), rs.getString("url"));
             }
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -148,23 +150,23 @@ public class RemoveParametersFromPoolConnectionUrlCustomTaskChange implements Cu
             rs = null;
         }
 
-        for (Integer db_pool_id : id2Url.keySet()) {
-            String url = id2Url.get(db_pool_id);
+        for (Entry<Integer, String> entry : id2Url.entrySet()) {
+            String url = id2Url.get(entry.getKey());
             int paramStart = url.indexOf('?');
             if (paramStart != -1) {
-                id2NewUrl.put(db_pool_id, url.substring(0, paramStart));
+                id2NewUrl.put(entry.getKey(), url.substring(0, paramStart));
             }
         }
 
         if (!id2NewUrl.isEmpty()) {
             try {
                 stmt = con.prepareStatement(UPDATE);
-                for (Integer db_pool_id : id2NewUrl.keySet()) {
-                    stmt.setString(1, id2NewUrl.get(db_pool_id));
-                    stmt.setInt(2, db_pool_id);
+                for (Entry<Integer, String> entry : id2Url.entrySet()) {
+                    stmt.setString(1, id2NewUrl.get(entry.getKey()));
+                    stmt.setInt(2, entry.getKey().intValue());
                     stmt.addBatch();
                     
-                    LOG.info("Changed url for db_pool_id {} from '{}' to '{}'", db_pool_id, id2Url.get(db_pool_id), id2NewUrl.get(db_pool_id));
+                    LOG.info("Changed url for db_pool_id {} from '{}' to '{}'", entry.getKey(), id2Url.get(entry.getKey()), id2NewUrl.get(entry.getKey()));
                 }
                 stmt.executeBatch();
             } finally {

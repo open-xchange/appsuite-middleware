@@ -52,44 +52,164 @@ package com.openexchange.pooling;
 /**
  * {@link PoolConfig}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a> 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - extracted
  * @since v7.10.1
  */
 public class PoolConfig implements Cloneable {
 
-    public int maxIdle;
+    /**
+     * Creates a new builder instance.
+     *
+     * @return A new builder instance
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
 
-    public long maxIdleTime;
+    /**
+     * Creates a new builder instance pre-filled with given pool configuration's values.
+     *
+     * @param source The source pool configuration
+     * @return A new builder instance
+     */
+    public static Builder builder(PoolConfig source) {
+        return new Builder(source);
+    }
 
-    public int maxActive;
+    /** The builder for an instance of <code>PoolConfig</code> */
+    public static class Builder {
 
-    public long maxWait;
+        private int maxIdle;
+        private long maxIdleTime;
+        private int maxActive;
+        private long maxWait;
+        private long maxLifeTime;
+        private ExhaustedActions exhaustedAction;
+        private boolean testOnActivate;
+        private boolean testOnDeactivate;
+        private boolean testOnIdle;
+        private boolean testThreads;
 
-    public long maxLifeTime;
+        Builder() {
+            super();
+            maxIdle = -1;
+            maxIdleTime = 60000;
+            maxActive = -1;
+            maxWait = 10000;
+            maxLifeTime = -1;
+            exhaustedAction = ExhaustedActions.GROW;
+            testOnActivate = true;
+            testOnDeactivate = true;
+            testOnIdle = false;
+            testThreads = false;
+        }
 
-    public ExhaustedActions exhaustedAction;
+        Builder(PoolConfig source) {
+            super();
+            maxIdle = source.maxIdle;
+            maxIdleTime = source.maxIdleTime;
+            maxActive = source.maxActive;
+            maxWait = source.maxWait;
+            maxLifeTime = source.maxLifeTime;
+            exhaustedAction = source.exhaustedAction;
+            testOnActivate = source.testOnActivate;
+            testOnDeactivate = source.testOnDeactivate;
+            testOnIdle = source.testOnIdle;
+            testThreads = source.testThreads;
+        }
 
-    public boolean testOnActivate;
+        public Builder withMaxIdle(int maxIdle) {
+            this.maxIdle = maxIdle;
+            return this;
+        }
 
-    public boolean testOnDeactivate;
+        public Builder withMaxIdleTime(long maxIdleTime) {
+            this.maxIdleTime = maxIdleTime;
+            return this;
+        }
 
-    public boolean testOnIdle;
+        public Builder withMaxActive(int maxActive) {
+            this.maxActive = maxActive;
+            return this;
+        }
 
-    public boolean testThreads;
+        public Builder withMaxWait(long maxWait) {
+            this.maxWait = maxWait;
+            return this;
+        }
 
-    public PoolConfig() {
+        public Builder withMaxLifeTime(long maxLifeTime) {
+            this.maxLifeTime = maxLifeTime;
+            return this;
+        }
+
+        public Builder withExhaustedAction(ExhaustedActions exhaustedAction) {
+            this.exhaustedAction = exhaustedAction;
+            return this;
+        }
+
+        public Builder withTestOnActivate(boolean testOnActivate) {
+            this.testOnActivate = testOnActivate;
+            return this;
+        }
+
+        public Builder withTestOnDeactivate(boolean testOnDeactivate) {
+            this.testOnDeactivate = testOnDeactivate;
+            return this;
+        }
+
+        public Builder withTestOnIdle(boolean testOnIdle) {
+            this.testOnIdle = testOnIdle;
+            return this;
+        }
+
+        public Builder withTestThreads(boolean testThreads) {
+            this.testThreads = testThreads;
+            return this;
+        }
+
+        public PoolConfig build() {
+            return new PoolConfig(maxIdle, maxIdleTime, maxActive, maxWait, maxLifeTime, exhaustedAction, testOnActivate, testOnDeactivate, testOnIdle, testThreads);
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    public final int maxIdle;
+
+    public final long maxIdleTime;
+
+    public final int maxActive;
+
+    public final long maxWait;
+
+    public final long maxLifeTime;
+
+    public final ExhaustedActions exhaustedAction;
+
+    public final boolean testOnActivate;
+
+    public final boolean testOnDeactivate;
+
+    public final boolean testOnIdle;
+
+    public final boolean testThreads;
+
+    private int hash = 0;
+
+    PoolConfig(int maxIdle, long maxIdleTime, int maxActive, long maxWait, long maxLifeTime, ExhaustedActions exhaustedAction, boolean testOnActivate, boolean testOnDeactivate, boolean testOnIdle, boolean testThreads) {
         super();
-        maxIdle = -1;
-        maxIdleTime = 60000;
-        maxActive = -1;
-        maxWait = 10000;
-        maxLifeTime = -1;
-        exhaustedAction = ExhaustedActions.GROW;
-        testOnActivate = true;
-        testOnDeactivate = true;
-        testOnIdle = false;
-        testThreads = false;
+        this.maxIdle = maxIdle;
+        this.maxIdleTime = maxIdleTime;
+        this.maxActive = maxActive;
+        this.maxWait = maxWait;
+        this.maxLifeTime = maxLifeTime;
+        this.exhaustedAction = exhaustedAction;
+        this.testOnActivate = testOnActivate;
+        this.testOnDeactivate = testOnDeactivate;
+        this.testOnIdle = testOnIdle;
+        this.testThreads = testThreads;
     }
 
     @Override
@@ -100,6 +220,72 @@ public class PoolConfig implements Cloneable {
             // Will not appear!
             throw new Error("Assertion failed!", e);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        int h = hash;
+        if (h == 0) {
+            int prime = 31;
+            h = 1;
+            h = prime * h + ((exhaustedAction == null) ? 0 : exhaustedAction.hashCode());
+            h = prime * h + maxActive;
+            h = prime * h + maxIdle;
+            h = prime * h + (int) (maxIdleTime ^ (maxIdleTime >>> 32));
+            h = prime * h + (int) (maxLifeTime ^ (maxLifeTime >>> 32));
+            h = prime * h + (int) (maxWait ^ (maxWait >>> 32));
+            h = prime * h + (testOnActivate ? 1231 : 1237);
+            h = prime * h + (testOnDeactivate ? 1231 : 1237);
+            h = prime * h + (testOnIdle ? 1231 : 1237);
+            h = prime * h + (testThreads ? 1231 : 1237);
+            hash = h;
+        }
+        return h;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof PoolConfig)) {
+            return false;
+        }
+        PoolConfig other = (PoolConfig) obj;
+        if (exhaustedAction != other.exhaustedAction) {
+            return false;
+        }
+        if (maxActive != other.maxActive) {
+            return false;
+        }
+        if (maxIdle != other.maxIdle) {
+            return false;
+        }
+        if (maxIdleTime != other.maxIdleTime) {
+            return false;
+        }
+        if (maxLifeTime != other.maxLifeTime) {
+            return false;
+        }
+        if (maxWait != other.maxWait) {
+            return false;
+        }
+        if (testOnActivate != other.testOnActivate) {
+            return false;
+        }
+        if (testOnDeactivate != other.testOnDeactivate) {
+            return false;
+        }
+        if (testOnIdle != other.testOnIdle) {
+            return false;
+        }
+        if (testThreads != other.testThreads) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -127,20 +313,19 @@ public class PoolConfig implements Cloneable {
         sb.append(testThreads);
         return sb.toString();
     }
-    
-    public static final PoolConfig DEFAULT_CONFIG;
 
-    static {
-        DEFAULT_CONFIG = new PoolConfig();
-        DEFAULT_CONFIG.maxIdle = -1;
-        DEFAULT_CONFIG.maxIdleTime = 60000;
-        DEFAULT_CONFIG.maxActive = -1;
-        DEFAULT_CONFIG.maxWait = 10000;
-        DEFAULT_CONFIG.maxLifeTime = -1;
-        DEFAULT_CONFIG.exhaustedAction = ExhaustedActions.BLOCK;
-        DEFAULT_CONFIG.testOnActivate = false;
-        DEFAULT_CONFIG.testOnDeactivate = true;
-        DEFAULT_CONFIG.testOnIdle = false;
-        DEFAULT_CONFIG.testThreads = false;
-    }
+    /** The default pool configuration */
+    public static final PoolConfig DEFAULT_CONFIG = builder()
+        .withMaxIdle(-1)
+        .withMaxIdleTime(60000)
+        .withMaxActive(-1)
+        .withMaxWait(10000)
+        .withMaxLifeTime(-1)
+        .withExhaustedAction(ExhaustedActions.BLOCK)
+        .withTestOnActivate(false)
+        .withTestOnDeactivate(true)
+        .withTestOnIdle(false)
+        .withTestThreads(false)
+        .build();
+
 }

@@ -51,20 +51,12 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
-import static com.openexchange.chronos.common.CalendarUtils.getFlags;
+import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
-import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
-import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
-import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
-import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
-import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -74,10 +66,10 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
+import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -116,32 +108,19 @@ public class ResolvePerformer extends AbstractQueryPerformer {
      */
     public Event resolveById(String eventId) throws OXException {
         /*
-         * load event data, check permissions & apply folder identifier
+         * load event data, check permissions & apply folder view based on current session user
          */
         Event event = storage.getEventStorage().loadEvent(eventId, null);
         if (null == event) {
             return null;
         }
-        int calendarUserId = session.getUserId();
-        event = storage.getUtilities().loadAdditionalEventData(calendarUserId, event, null);
-        String folderId = CalendarUtils.getFolderView(event, calendarUserId);
-        if (false == hasReadPermission(event)) {
-            CalendarFolder folder = getFolder(session, folderId);
-            if (false == matches(event.getCreatedBy(), session.getUserId())) {
-                requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-            } else {
-                requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-            }
-        }
-        event.setFolderId(folderId);
-        event.setFlags(getFlags(event, calendarUserId, session.getUserId()));
+        event = storage.getUtilities().loadAdditionalEventData(session.getUserId(), event, null);
+        CalendarFolder folder = getFolder(session, getFolderView(event, session.getUserId()), false);
+        Check.eventIsVisible(folder, event);
         /*
-         * return event, anonymized as needed
+         * return userized event
          */
-        if (isSeriesMaster(event)) {
-            event = applyExceptionDates(storage, event, calendarUserId);
-        }
-        return anonymizeIfNeeded(session, event);
+        return new EventPostProcessor(session, storage).process(event, folder).getFirstEvent();
     }
 
     /**

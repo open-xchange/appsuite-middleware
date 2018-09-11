@@ -317,7 +317,7 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
 
             @Override
             public boolean isSet(Attendee object) {
-                return object.containsPartStat();
+                return object.containsRsvp();
             }
 
             @Override

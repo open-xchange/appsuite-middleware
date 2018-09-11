@@ -54,7 +54,7 @@ import com.openexchange.database.internal.MysqlUtils;
 
 /**
  * This class stores data about a pooled object.
- * 
+ *
  * @param <T> type of object.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -86,11 +86,11 @@ public class PooledData<T> {
 
     private volatile StackTraceElement[] trace;
 
-    private boolean deprecated = false;
+    private volatile boolean deprecated = false;
 
     /**
      * Default constructor.
-     * 
+     *
      * @param pooled Pooled object.
      */
     PooledData(final T pooled) {
@@ -194,10 +194,10 @@ public class PooledData<T> {
 
     /**
      * Get a value indicating if the pooled object is deprecated. If so the object needs to be destroyed
-     * 
+     *
      * @return <code>true</code> if the pooled object is deprecated
-     *         <code>false</code>otherwise
-     * 
+     *         <code>false</code> otherwise
+     *
      */
     public boolean isDeprecated() {
         return deprecated;

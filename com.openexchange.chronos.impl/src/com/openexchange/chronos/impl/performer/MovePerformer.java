@@ -150,9 +150,11 @@ public class MovePerformer extends AbstractUpdatePerformer {
             throw new UnsupportedOperationException("Move not implemented from " + folder.getType() + " to " + targetFolder.getType());
         }
         /*
-         * track & return results
+         * rewrite any alarm triggers, track & return result
          */
         Event updatedEvent = loadEventData(originalEvent.getId());
+        storage.getAlarmTriggerStorage().deleteTriggers(objectId);
+        storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, storage.getAlarmStorage().loadAlarms(updatedEvent));
         resultTracker.trackUpdate(originalEvent, updatedEvent);
         return resultTracker.getResult();
     }
