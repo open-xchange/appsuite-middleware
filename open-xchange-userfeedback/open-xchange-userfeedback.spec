@@ -8,7 +8,6 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-BuildRequires: open-xchange-rest >= @OXVERSION@
 %if 0%{?suse_version}
 BuildRequires: java-1_8_0-openjdk-devel
 %else
@@ -25,7 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange user feedback service
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Requires:      open-xchange-rest >= @OXVERSION@
 
 %description
 This package provides user feedback bundles

@@ -17,7 +17,8 @@
       500:
         description: Internal server error that might have multiple reasons. Response contains error message.
         schema:
-          
+          type: string
+
     x-ox-examples:
       Example:
         description: Get node-health status
