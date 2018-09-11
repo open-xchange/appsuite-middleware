@@ -202,7 +202,7 @@ properties:
       packageName: open-xchange-filestore-s3
       tags: ["Filestore", "Metrics"]
       
-    - key: com.openexchange.filestore.s3.radosgw.sse.encryption
+    - key: com.openexchange.filestore.s3.[filestoreID].sse.encryption
       description: Enables server side encryption.
       defaultValue: false
       version: 7.10.1
