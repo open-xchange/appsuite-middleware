@@ -52,7 +52,7 @@ package com.openexchange.ratelimit;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link RateLimitFactory}
+ * {@link RateLimitFactory} is a factory for {@link RateLimiter}.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
@@ -60,14 +60,14 @@ import com.openexchange.exception.OXException;
 public interface RateLimitFactory {
 
     /**
-     * Creates a {@link RateLimiter} with the given ratePerSecond for the given user and context.
+     * Creates a {@link RateLimiter} with the given amount and timeframe for the given user and context.
      *
      * @param id The identifier of the {@link RateLimiter}
      * @param amount The amount of permits per time-frame
      * @param timeframe The time-frame in milliseconds
      * @param userId The user id
      * @param ctxId The context id
-     * @return
+     * @return The {@link RateLimiter}
      * @throws OXException
      */
     public RateLimiter createLimiter(String id, int amount, long timeframe, int userId, int ctxId) throws OXException;

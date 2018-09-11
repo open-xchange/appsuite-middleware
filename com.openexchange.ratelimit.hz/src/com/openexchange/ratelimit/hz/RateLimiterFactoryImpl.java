@@ -59,7 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link RateLimiterFactoryImpl}
+ * {@link RateLimiterFactoryImpl} is a {@link RateLimitFactory} which creates {@link RateLimiter} which uses hazelcast to provide rate limiting.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1

@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.ratelimit.RateLimiter;
 
 /**
- * {@link RateLimiterImpl}
+ * {@link RateLimiterImpl} is a {@link RateLimiter} which uses hazelcast to do a cluster wide rate limiting.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1

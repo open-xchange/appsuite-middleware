@@ -51,7 +51,10 @@ package com.openexchange.ratelimit;
 
 
 /**
- * {@link RateLimiter} provides methods to do rate limiting
+ * {@link RateLimiter} provides methods to do rate limiting. RateLimiter are created via a {@link RateLimitFactory}.
+ *
+ * Every RateLimiter provides a given number of permits for a specific user and context in a given timeframe. By calling {@link #acquire()} the number of permits are
+ * reduced by one and <code>true</code> is returned, unless the maximum amount of permits in the past timeframe is reached. In that case <code>false</code> is returned.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
@@ -61,7 +64,7 @@ public interface RateLimiter {
     /**
      * Tries to acquire a permit
      *
-     * @return true if allowed, false otherwise
+     * @return false in case the maximum amount of permits is reached, true otherwise
      */
     public boolean acquire();
 
