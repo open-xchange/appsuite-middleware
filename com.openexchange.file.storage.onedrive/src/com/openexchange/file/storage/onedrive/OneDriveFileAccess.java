@@ -170,25 +170,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 return driveService.getFile(userId, getAccessToken(), id);
             }
         });
-
-        //        return perform(new OneDriveClosure<File>() {
-        //
-        //            @Override
-        //            protected File doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
-        //                HttpGet request = null;
-        //                try {
-        //                    request = new HttpGet(buildUri(id, initiateQueryString()));
-        //                    RestFile restFile = handleHttpResponse(execute(request, httpClient), RestFile.class);
-        //                    OneDriveFile file = new OneDriveFile(folderId, id, userId, getRootFolderId()).parseOneDriveFile(restFile);
-        //                    if (false == file.getFolderId().equals(folderId)) {
-        //                        throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
-        //                    }
-        //                    return file;
-        //                } finally {
-        //                    reset(request);
-        //                }
-        //            }
-        //        });
     }
 
     /*
@@ -208,14 +189,14 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
      */
     @Override
     public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        if (FileStorageFileAccess.NEW == file.getId()) {
+            // create new, empty file ("touch")
+            return saveDocument(file, Streams.EMPTY_INPUT_STREAM, sequenceNumber, modifiedFields);
+        }
         return perform(new OneDriveClosure<IDTuple>() {
 
             @Override
             protected IDTuple doPerform() throws OXException {
-                if (FileStorageFileAccess.NEW == file.getId()) {
-                    // create new, empty file ("touch")
-                    return saveDocument(file, Streams.EMPTY_INPUT_STREAM, sequenceNumber, modifiedFields);
-                }
                 // rename / description change
                 return new IDTuple(file.getFolderId(), driveService.updateFile(getAccessToken(), file, modifiedFields, null));
             }
@@ -488,14 +469,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 if ((start != NOT_SET) && (end != NOT_SET)) {
                     final int size = files.size();
                     if ((start) > size) {
-                        /*
-                         * Return empty iterator if start is out of range
-                         */
+                        // Return empty iterator if start is out of range
                         return SearchIteratorAdapter.emptyIterator();
                     }
-                    /*
-                     * Reset end index if out of range
-                     */
+                    // Reset end index if out of range
                     int toIndex = end;
                     if (toIndex >= size) {
                         toIndex = size;
