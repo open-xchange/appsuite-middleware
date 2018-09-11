@@ -162,8 +162,10 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     }
 
     /**
-     * @param responseBody
-     * @return
+     * Try and parse the specified response body as a {@link JSONValue}
+     * 
+     * @param responseBody The response body to parse
+     * @return The response body as a {@link JSONValue} or <code>null</code> if the body could not be parsed
      */
     private JSONValue tryParseAsJSON(String responseBody) {
         try {
@@ -182,11 +184,11 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     }
 
     /**
-     * Prepares the request
+     * Prepares an {@link HttpRequestBase} from the specified {@link MicrosoftGraphRequest}
      * 
-     * @param request
-     * @return
-     * @throws OXException
+     * @param request The {@link MicrosoftGraphRequest} to prepare
+     * @return The prepared {@link HttpRequestBase} ready for execution
+     * @throws OXException if an invalid URI is specified
      */
     private HttpRequestBase prepareRequest(MicrosoftGraphRequest request) throws OXException {
         HttpRequestBase httpRequest = createRequest(request.getMethod());
