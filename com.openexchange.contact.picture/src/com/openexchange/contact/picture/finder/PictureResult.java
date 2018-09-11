@@ -70,7 +70,7 @@ public class PictureResult {
      * Initializes a new {@link PictureResult}.
      * 
      * @param found If the picture was found
-     * @param picuter The {@link ContactPicture} or <code>null</code>
+     * @param picture The {@link ContactPicture} or <code>null</code>
      * @param data New data that can be provided by the caller
      * 
      */

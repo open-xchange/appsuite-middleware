@@ -79,7 +79,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     protected final ContactService contactService;
 
-    private final static AtomicInteger childCount = new AtomicInteger(0);
+    private final static AtomicInteger childCount = new AtomicInteger(10);
 
     private final int child;
 
@@ -91,7 +91,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
     protected AbstractContactFinder(ContactService contactService) {
         super();
         this.contactService = contactService;
-        this.child = childCount.incrementAndGet();
+        this.child = childCount.decrementAndGet();
     }
 
     /**
@@ -130,25 +130,15 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         return getPicture(session, data, true);
     }
 
-    private static final ContactField[] ETAG_FIELDS = new ContactField[] { ContactField.OBJECT_ID,
-                                                                           ContactField.FOLDER_ID,
-                                                                           ContactField.LAST_MODIFIED };
-    private static final ContactField[] IMAGE_FIELDS = new ContactField[] { ContactField.OBJECT_ID,
-                                                                            ContactField.FOLDER_ID,
-                                                                            ContactField.LAST_MODIFIED,
-                                                                            ContactField.IMAGE1,
-                                                                            ContactField.IMAGE1_CONTENT_TYPE,
-                                                                            ContactField.IMAGE_LAST_MODIFIED};
-
-    private PictureResult getPicture(Session session, PictureSearchData data, boolean eTag) {
+    private PictureResult getPicture(Session session, PictureSearchData data, boolean onlyETag) {
         ContactPicture picture = null;
         PictureSearchData modified = null;
         if (isApplicable(session)) {
 
             try {
-                Contact contact = getContact(session, data, eTag ? ETAG_FIELDS : IMAGE_FIELDS);
-                if (eTag || ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
-                    picture = ContactPictureUtil.fromContact(contact, eTag);
+                Contact contact = getContact(session, data, ContactPictureUtil.contactFieldsFor(onlyETag));
+                if (onlyETag || ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
+                    picture = ContactPictureUtil.fromContact(contact, onlyETag);
                 } else {
                     if (null != contact) {
                         modified = modfiyResult(contact);
@@ -172,6 +162,6 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     @Override
     public int getRanking() {
-        return 20 + child;
+        return 500 + child;
     }
 }

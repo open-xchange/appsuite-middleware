@@ -59,9 +59,9 @@ import com.openexchange.session.Session;
  * {@link ContactPictureFinder} - Class that tries to lookup a contact picture in a specific service
  * 
  * Ranking of registered {@link ContactPictureFinder}:
- * <li>1 : UserPictureFinder</li>
- * <li>20 : ContactFinders (Children will register with 20 + continuous number)</li>
- * <li>50 : GAB</li>
+ * <li> 1000 : UserPictureFinder</li>
+ * <li> 500 : ContactFinders (Children will register with 20 + continuous number)</li>
+ * <li> 100 : GAB</li>
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1

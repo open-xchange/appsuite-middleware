@@ -98,9 +98,8 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
                 PictureResult pictureResult = next.getPicture(session, data);
                 if (pictureResult.wasFound()) {
                     return pictureResult.getPicture();
-                } else {
-                    data = mergeResult(data, pictureResult);
                 }
+                data = mergeResult(data, pictureResult);
             }
         } catch (OXException e) {
             LOGGER.debug("Unable to get contact picture. Using fallback instead.", e);
@@ -122,9 +121,8 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
                 PictureResult pictureResult = next.getETag(session, data);
                 if (pictureResult.wasFound()) {
                     return pictureResult.getPicture().getETag();
-                } else {
-                    data = mergeResult(data, pictureResult);
                 }
+                data = mergeResult(data, pictureResult);
             }
         } catch (OXException e) {
             LOGGER.debug("Unable to get ETag for contact picture. Using fallback instead.", e);

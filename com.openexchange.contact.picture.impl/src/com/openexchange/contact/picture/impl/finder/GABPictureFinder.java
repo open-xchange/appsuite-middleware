@@ -98,8 +98,8 @@ public class GABPictureFinder implements ContactPictureFinder {
     private PictureResult getPicture(Session session, PictureSearchData data, boolean onlyETag) throws OXException {
         ContactPicture picture = null;
         if (isApplicable(session, data)) {
-            Contact contact = ContactPictureUtil.findContactInGlobalAddressBookByMail(contactService, data.getEmails(), session);
-            if (ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
+            Contact contact = ContactPictureUtil.findContactInGlobalAddressBookByMail(contactService, data.getEmails(), session, ContactPictureUtil.contactFieldsFor(onlyETag));
+            if (onlyETag || ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
                 picture = ContactPictureUtil.fromContact(contact, onlyETag);
             }
         }
@@ -108,7 +108,6 @@ public class GABPictureFinder implements ContactPictureFinder {
 
     private boolean isApplicable(Session session, PictureSearchData data) {
         try {
-            // Use ID of the user requesting the picture
             return data.hasEmail() && ServerSessionAdapter.valueOf(session).getUserPermissionBits().isGlobalAddressBookEnabled();
         } catch (OXException e) {
             LOGGER.debug("Unable to check if GlobalAddressBook is enabled.", e);
@@ -118,7 +117,7 @@ public class GABPictureFinder implements ContactPictureFinder {
 
     @Override
     public int getRanking() {
-        return 50;
+        return 100;
     }
 
 }

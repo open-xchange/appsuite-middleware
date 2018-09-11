@@ -128,15 +128,17 @@ public class ContactPictureURLServiceImpl implements ContactPictureURLService {
             sb.append(OAuthConstants.OAUTH_SERVLET_SUBPREFIX);
         }
         sb.append(ContactPictureActionFactory.Module);
-        sb.append("?action=get");
+        
         builder.setPath(sb.toString());
+        builder.setParameter("action", "get");
+        
         if (contactId > -1 && folderId > -1) {
             builder.setParameter("contactId", String.valueOf(contactId));
             builder.setParameter("folderId", String.valueOf(folderId));
-
         } else {
             builder.setParameter("userId", String.valueOf(userId));
         }
+        
         try {
             return builder.build().toString();
         } catch (URISyntaxException e) {

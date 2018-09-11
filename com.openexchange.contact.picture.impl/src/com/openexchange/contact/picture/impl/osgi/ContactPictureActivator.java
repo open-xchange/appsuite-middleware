@@ -102,6 +102,9 @@ public final class ContactPictureActivator extends HousekeepingActivator {
         ContactService contactService = getServiceSafe(ContactService.class);
         UserService userService = getServiceSafe(UserService.class);
 
+        /*
+         * Register ContactPictureFinder
+         */
         registerService(ContactPictureFinder.class, new UserPictureFinder(userService));
         registerService(ContactPictureFinder.class, new ContactUserFinder(contactService));
         registerService(ContactPictureFinder.class, new ContactIDFinder(contactService));

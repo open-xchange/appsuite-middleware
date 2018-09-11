@@ -78,6 +78,30 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @since v7.10.1
  */
 public class ContactPictureUtil extends FinderUtil {
+    
+    private static final ContactField[] ETAG_FIELDS = new ContactField[] { ContactField.OBJECT_ID,
+        ContactField.FOLDER_ID,
+        ContactField.LAST_MODIFIED };
+    
+    private static final ContactField[] IMAGE_FIELDS = new ContactField[] { ContactField.OBJECT_ID,
+         ContactField.FOLDER_ID,
+         ContactField.LAST_MODIFIED,
+         ContactField.IMAGE1,
+         ContactField.IMAGE1_CONTENT_TYPE,
+         ContactField.IMAGE_LAST_MODIFIED};
+    
+    
+    /**
+     * Get the {@link ContactField}s
+     * 
+     * @param eTag <code>true</code> If ContactFields for an eTag search should be obtained
+     *            <code>false</code> if ContactFields for the whole picture should be obtained
+     * 
+     * @return An array of {@link ContactField}
+     */
+    public static ContactField[] contactFieldsFor(boolean eTag) {
+        return eTag ? ETAG_FIELDS : IMAGE_FIELDS;
+    }
 
     /**
      * Generates a {@link ContactPicture} based on the given bytes
@@ -87,7 +111,7 @@ public class ContactPictureUtil extends FinderUtil {
      * @return A {@link ContactPicture}
      */
     public static ContactPicture fromContact(Contact contact, boolean onlyETag) {
-        return new ContactPicture(generateETag(contact), onlyETag ? null : transformToFileHolder(contact), contact.getImageLastModified().getTime());
+        return null == contact ? null : new ContactPicture(generateETag(contact), onlyETag ? null : transformToFileHolder(contact), contact.getImageLastModified().getTime());
     }
 
     /**
@@ -102,7 +126,7 @@ public class ContactPictureUtil extends FinderUtil {
          * This is important for requests containing resizing. If the picture shall be delivered in a
          * different size the eTag must not be the same compared to the original size
          */
-        return null == contact ? null : new StringBuilder(512) // @formatter:off#
+        return null == contact ? null : new StringBuilder(512) // @formatter:off
             .append(contact.getParentFolderID())
             .append('/')
             .append(contact.getObjectID())
@@ -122,10 +146,6 @@ public class ContactPictureUtil extends FinderUtil {
         fileHolder.setName(new StringBuilder("contact-image-").append(contact.getObjectID()).toString());
         return fileHolder;
     }
-
-    public final static ContactField[] IMAGE_FIELD = new ContactField[] { ContactField.OBJECT_ID, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE, ContactField.IMAGE1_URL,
-        ContactField.IMAGE_LAST_MODIFIED, ContactField.LAST_MODIFIED };
-
 
     /**
      * Searches for a contact via its mail address in all folders but the global address book.
@@ -168,19 +188,11 @@ public class ContactPictureUtil extends FinderUtil {
     private static Contact findContactByMail(ContactService contactService, Set<String> emails, Session session, boolean useGAB, ContactField... fields) throws OXException {
 
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        SingleSearchTerm folderTerm = null;
-        if (useGAB) {
-            folderTerm = getFieldSearchTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
-        } else {
-            folderTerm = getFieldSearchTerm(ContactField.FOLDER_ID, SingleOperation.NOT_EQUALS, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID));
-        }
-
-        searchTerm.addSearchTerm(folderTerm);
-        searchTerm.addSearchTerm(getFieldSearchTerm(ContactField.NUMBER_OF_IMAGES, SingleOperation.GREATER_THAN, 0));
+        searchTerm.addSearchTerm(getFieldSearchTerm(ContactField.FOLDER_ID, useGAB ? SingleOperation.EQUALS : SingleOperation.NOT_EQUALS, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID)));
+        searchTerm.addSearchTerm(getFieldSearchTerm(ContactField.NUMBER_OF_IMAGES, SingleOperation.GREATER_THAN, Integer.valueOf(0)));
 
         CompositeSearchTerm mailOrTerm = new CompositeSearchTerm(CompositeOperation.OR);
         searchTerm.addSearchTerm(mailOrTerm);
-
 
         for (String mail : emails) {
             mailOrTerm.addSearchTerm(getMailTerm(mail));
