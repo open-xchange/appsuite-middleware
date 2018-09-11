@@ -79,18 +79,14 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class ContactPictureUtil extends FinderUtil {
     
-    private static final ContactField[] ETAG_FIELDS = new ContactField[] { ContactField.OBJECT_ID,
-        ContactField.FOLDER_ID,
-        ContactField.LAST_MODIFIED };
+    private static final ContactField[] ETAG_FIELDS = new ContactField[] {
+        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED
+    };
     
-    private static final ContactField[] IMAGE_FIELDS = new ContactField[] { ContactField.OBJECT_ID,
-         ContactField.FOLDER_ID,
-         ContactField.LAST_MODIFIED,
-         ContactField.IMAGE1,
-         ContactField.IMAGE1_CONTENT_TYPE,
-         ContactField.IMAGE_LAST_MODIFIED};
-    
-    
+    private static final ContactField[] IMAGE_FIELDS = new ContactField[] {
+        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE
+    };
+
     /**
      * Get the {@link ContactField}s
      * 
@@ -111,7 +107,7 @@ public class ContactPictureUtil extends FinderUtil {
      * @return A {@link ContactPicture}
      */
     public static ContactPicture fromContact(Contact contact, boolean onlyETag) {
-        return null == contact ? null : new ContactPicture(generateETag(contact), onlyETag ? null : transformToFileHolder(contact), contact.getImageLastModified().getTime());
+        return null == contact ? null : new ContactPicture(generateETag(contact), onlyETag ? null : transformToFileHolder(contact), contact.getLastModified().getTime());
     }
 
     /**
