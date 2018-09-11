@@ -61,6 +61,7 @@ import com.openexchange.cli.AbstractRmiCLI;
  * 
  * @param <R> - The return type
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.1
  */
 abstract class AbstractLogbackConfigurationAdministrativeCLI<R> extends AbstractRmiCLI<R> {
 
@@ -91,7 +92,6 @@ abstract class AbstractLogbackConfigurationAdministrativeCLI<R> extends Abstract
      * 
      * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
      */
-    @SuppressWarnings("unused")
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         try {
