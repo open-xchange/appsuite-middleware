@@ -108,7 +108,8 @@ public class OneDriveOAuthAccountAssociationProvider implements OAuthAccountAsso
         }
 
         Object accountId = configuration.get("account");
-        if (null == accountId) {return -1;
+        if (null == accountId) {
+            return -1;
         }
 
         if (accountId instanceof Integer) {
@@ -121,5 +122,4 @@ public class OneDriveOAuthAccountAssociationProvider implements OAuthAccountAsso
             throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
         }
     }
-
 }

@@ -52,7 +52,6 @@ package com.openexchange.file.storage.onedrive.access;
 import java.util.ArrayList;
 import java.util.List;
 import javax.net.ssl.SSLHandshakeException;
-import org.apache.http.client.HttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
@@ -82,7 +81,6 @@ import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.oauth.api.MicrosoftGraphApi;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
-import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 
 /**
@@ -111,10 +109,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
      */
     @Override
     public void dispose() {
-        OAuthClient<HttpClient> oAuthClient = this.<HttpClient> getOAuthClient();
-        if (null != oAuthClient) {
-            HttpClients.shutDown(oAuthClient.client);
-        }
+        // Nothing to dispose
         super.dispose();
     }
 
