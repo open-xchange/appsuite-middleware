@@ -578,7 +578,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
             Event nextTriggerEvent = AlarmUtils.getNextTriggerEvent(event, alarm, new Date(), tz, recurrenceService);
             Date triggerTime = nextTriggerEvent == null ? null : AlarmUtils.getTriggerTime(alarm.getTrigger(), nextTriggerEvent, tz);
-            if (triggerTime == null || triggerTime.before(new Date())) {
+            if (triggerTime == null) {
                 return null;
             }
             addRelatedDate(alarm, event, trigger);
@@ -586,7 +586,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             trigger.setTime(triggerTime.getTime());
         } else {
             Date triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz);
-            if (triggerTime == null || triggerTime.before(new Date()) || (alarm.containsAcknowledged() && !alarm.getAcknowledged().before(triggerTime))) {
+            if (triggerTime == null || (alarm.containsAcknowledged() && !alarm.getAcknowledged().before(triggerTime))) {
                 return null;
             }
             trigger.setTime(triggerTime.getTime());
