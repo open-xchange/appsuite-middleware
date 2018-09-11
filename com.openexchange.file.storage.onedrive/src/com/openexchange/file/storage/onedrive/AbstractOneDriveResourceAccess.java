@@ -68,7 +68,6 @@ public abstract class AbstractOneDriveResourceAccess {
 
     private final OneDriveOAuthAccess oneDriveAccess;
     private final Session session;
-    private final FileStorageAccount account;
     protected final MicrosoftGraphDriveService driveService;
 
     /**
@@ -77,7 +76,6 @@ public abstract class AbstractOneDriveResourceAccess {
     protected AbstractOneDriveResourceAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session) {
         super();
         this.oneDriveAccess = oneDriveAccess;
-        this.account = account;
         this.session = session;
         this.driveService = Services.getService(MicrosoftGraphDriveService.class);
     }

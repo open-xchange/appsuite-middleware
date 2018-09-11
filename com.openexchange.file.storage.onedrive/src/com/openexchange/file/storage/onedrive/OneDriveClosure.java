@@ -91,6 +91,9 @@ public abstract class OneDriveClosure<R> {
         try {
             return doPerform();
         } catch (OXException e) {
+            if (resourceAccess == null) {
+                throw e;
+            }
             if (MicrosoftGraphAPIExceptionCodes.ACCESS_DENIED.equals(e) || MicrosoftGraphAPIExceptionCodes.UNAUTHENTICATED.equals(e)) {
                 resourceAccess.handleAuthError(e, session);
                 return perform(resourceAccess, session);

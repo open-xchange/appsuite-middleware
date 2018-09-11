@@ -83,7 +83,7 @@ abstract class AbstractMicrosoftGraphAPI {
         super();
         this.client = client;
     }
-
+    
     //////////////////////////////// GET ///////////////////////////////////////
 
     /**
