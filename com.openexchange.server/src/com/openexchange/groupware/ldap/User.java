@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.Map;
 import com.openexchange.groupware.contexts.FileStorageInfo;
+import com.openexchange.java.Strings;
 
 /**
  * Interface for the user object.
@@ -215,4 +216,13 @@ public interface User extends FileStorageInfo, Serializable {
      * @return the login information of the user.
      */
     String getLoginInfo();
+    
+    /**
+     * Checks if this user is an anonymous guest user or not.
+     * 
+     * @return - true, if this user is an anonymous guest user, false otherwise
+     */
+    default boolean isAnonymousGuest() {
+        return this.isGuest() && Strings.isEmpty(this.getMail());
+    }
 }
