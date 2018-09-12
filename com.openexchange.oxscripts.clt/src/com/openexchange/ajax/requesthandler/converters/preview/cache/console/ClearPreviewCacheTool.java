@@ -47,25 +47,25 @@
  *
  */
 
-package com.openexchange.context.clt;
+package com.openexchange.ajax.requesthandler.converters.preview.cache.console;
 
 import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIService;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
-import com.openexchange.context.rmi.ContextRMIService;
 
 /**
- * {@link CheckLoginMappingsTool} - Serves <code>checkloginmappings</code> command-line tool.
+ * {@link ClearPreviewCacheTool} - Serves <code>clearpreviewcache</code> command-line tool.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class CheckLoginMappingsTool extends AbstractRmiCLI<Void> {
+public final class ClearPreviewCacheTool extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "checkloginmappings [[[-c <contextId>] | [-a]] [-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]]] | [-h]";
+    private static final String SYNTAX = "clearpreviewcache [[[-c <contextId>] | [-a]] [-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]]] | [-h]";
     private static final String FOOTER = "\n\nThe options -c/--context and -a/--all are mutually exclusive.";
 
     private Integer contextId;
@@ -73,7 +73,7 @@ public final class CheckLoginMappingsTool extends AbstractRmiCLI<Void> {
     /**
      * Prevent instantiation from outside.
      */
-    private CheckLoginMappingsTool() {
+    private ClearPreviewCacheTool() {
         super();
     }
 
@@ -83,7 +83,7 @@ public final class CheckLoginMappingsTool extends AbstractRmiCLI<Void> {
      * @param args program arguments
      */
     public static void main(String[] args) {
-        new CheckLoginMappingsTool().execute(args);
+        new ClearPreviewCacheTool().execute(args);
     }
 
     /*
@@ -122,12 +122,12 @@ public final class CheckLoginMappingsTool extends AbstractRmiCLI<Void> {
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         boolean error = true;
         try {
-            ContextRMIService contextRMI = getRmiStub(optRmiHostName, ContextRMIService.RMI_NAME);
+            ResourceCacheRMIService rmiService = getRmiStub(optRmiHostName, ResourceCacheRMIService.RMI_NAME);
             if (null == contextId) {
-                contextRMI.checkLogin2ContextMapping();
+                rmiService.clear();
                 System.out.println("All cache entries cleared.");
             } else {
-                contextRMI.checkLogin2ContextMapping(contextId.intValue());
+                rmiService.clearFor(contextId.intValue());
                 System.out.println("All cache entries cleared for context " + contextId.intValue());
             }
             error = false;

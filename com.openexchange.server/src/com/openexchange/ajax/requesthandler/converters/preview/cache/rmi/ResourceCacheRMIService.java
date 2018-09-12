@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,32 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache;
+package com.openexchange.ajax.requesthandler.converters.preview.cache.rmi;
 
-import javax.management.MBeanException;
-
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
- * {@link ResourceCacheMBean} - The Mbean for resource cache.
+ * {@link ResourceCacheRMIService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public interface ResourceCacheMBean {
+public interface ResourceCacheRMIService extends Remote {
+
+    public static final String RMI_NAME = "ResourceCacheRMIService";
 
     /**
      * Clears all cache entries.
      *
-     * @throws MBeanException If operation fails
+     * @throws RemoteException If operation fails
      */
-    void clear() throws MBeanException;
+    void clear() throws RemoteException;
 
     /**
      * Clears all cache entries for given context.
      *
      * @param contextId The context identifier
-     * @throws MBeanException If operation fails
+     * @throws RemoteException If operation fails
      */
-    void clearFor(int contextId) throws MBeanException;
+    void clearFor(int contextId) throws RemoteException;
 
     /**
      * Sanitizes broken/corrupt MIME types currently held in database for specified context.
@@ -80,7 +84,7 @@ public interface ResourceCacheMBean {
      * @param contextId The context identifier
      * @param invalids A comma-separated list of MIME types that should be considered as broken/corrupt
      * @return A result description
-     * @throws MBeanException If operation fails
+     * @throws RemoteException If operation fails
      */
-    String sanitizeMimeTypesInDatabaseFor(int contextId, String invalids) throws MBeanException;
+    String sanitizeMimeTypesInDatabaseFor(int contextId, String invalids) throws RemoteException;
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache;
+package com.openexchange.ajax.requesthandler.converters.preview.cache.rmi;
 
+import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,8 +61,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.management.MBeanException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
@@ -69,107 +68,108 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
-import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
-
 /**
- * {@link ResourceCacheMBeanImpl}
+ * {@link ResourceCacheRMIServiceImpl}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class ResourceCacheMBeanImpl extends StandardMBean implements ResourceCacheMBean {
+public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
+
+    private static Logger LOG = LoggerFactory.getLogger(ResourceCacheRMIServiceImpl.class);
 
     /** The cache reference */
-    public static final AtomicReference<ResourceCache> CACHE_REF = new AtomicReference<ResourceCache>();
+    public static AtomicReference<ResourceCache> CACHE_REF = new AtomicReference<ResourceCache>();
 
     /**
-     * Initializes a new {@link ResourceCacheMBeanImpl}.
-     *
-     * @throws NotCompliantMBeanException
+     * Initialises a new {@link ResourceCacheRMIServiceImpl}.
      */
-    public ResourceCacheMBeanImpl() throws NotCompliantMBeanException {
-        super(ResourceCacheMBean.class);
+    public ResourceCacheRMIServiceImpl() {
+        super();
     }
 
-    @Override
-    public void clear() throws MBeanException {
-        final ResourceCache resourceCache = CACHE_REF.get();
-        if (null != resourceCache) {
-            final Logger logger = LoggerFactory.getLogger(ResourceCacheMBeanImpl.class);
-            List<Integer> contextIds = null;
-            try {
-                contextIds = getContextIds();
-            } catch (OXException e) {
-                logger.error("", e);
-                final String message = e.getMessage();
-                throw new MBeanException(new Exception(message), message);
-            }
-
-            for (final Integer contextId : contextIds) {
-                try {
-                    resourceCache.clearFor(contextId.intValue());
-                } catch (final OXException e) {
-                    logger.error("", e);
-                    final String message = e.getMessage();
-                    throw new MBeanException(new Exception(message), message);
-                } catch (final RuntimeException e) {
-                    logger.error("", e);
-                    final String message = e.getMessage();
-                    throw new MBeanException(new Exception(message), message);
-                }
-            }
-        }
-    }
-
-    /**
-     * Gets available context identifier.
-     *
-     * @param optService The optional database service
-     * @return The context identifiers
-     * @throws OXException If identifiers cannot be loaded from configDB
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIService#clear()
      */
-    private List<Integer> getContextIds() throws OXException {
-        final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
-        if (null == contextService) {
-            throw ServiceExceptionCode.absentService(ContextService.class);
-        }
-        return contextService.getAllContextIds();
-    }
-
     @Override
-    public void clearFor(final int contextId) throws MBeanException {
-        final ResourceCache resourceCache = CACHE_REF.get();
-        if (null != resourceCache) {
-            try {
-                resourceCache.clearFor(contextId);
-            } catch (final Exception e) {
-                LoggerFactory.getLogger(ResourceCacheMBeanImpl.class).error("", e);
-                final String message = e.getMessage();
-                throw new MBeanException(new Exception(message), message);
-            }
+    public void clear() throws RemoteException {
+        ResourceCache resourceCache = CACHE_REF.get();
+        if (null == resourceCache) {
+            return;
         }
-    }
 
-    @Override
-    public String sanitizeMimeTypesInDatabaseFor(int contextId, String invalids) throws MBeanException {
-        final Logger logger = LoggerFactory.getLogger(ResourceCacheMBeanImpl.class);
+        List<Integer> contextIds = null;
         try {
-            final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+            contextIds = getContextIds();
+        } catch (OXException e) {
+            LOG.error("", e);
+            String message = e.getMessage();
+            throw new RemoteException(message, new Exception(message));
+        }
+
+        for (Integer contextId : contextIds) {
+            try {
+                resourceCache.clearFor(contextId.intValue());
+            } catch (OXException e) {
+                LOG.error("", e);
+                String message = e.getMessage();
+                throw new RemoteException(message, new Exception(message));
+            } catch (RuntimeException e) {
+                LOG.error("", e);
+                String message = e.getMessage();
+                throw new RemoteException(message, new Exception(message));
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIService#clearFor(int)
+     */
+    @Override
+    public void clearFor(int contextId) throws RemoteException {
+        ResourceCache resourceCache = CACHE_REF.get();
+        if (null == resourceCache) {
+            return;
+        }
+        try {
+            resourceCache.clearFor(contextId);
+        } catch (Exception e) {
+            LOG.error("", e);
+            String message = e.getMessage();
+            throw new RemoteException(message, new Exception(message));
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIService#sanitizeMimeTypesInDatabaseFor(int, java.lang.String)
+     */
+    @Override
+    public String sanitizeMimeTypesInDatabaseFor(int contextId, String invalids) throws RemoteException {
+        try {
+            DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
             if (null == databaseService) {
-                final String message = "Missing service: " + DatabaseService.class.getName();
+                String message = "Missing service: " + DatabaseService.class.getName();
                 throw new MBeanException(new Exception(message), message);
             }
 
-            final Set<String> invalidsSet = new HashSet<String>(Arrays.asList("application/force-download", "application/x-download", "application/$suffix"));
-            if (!com.openexchange.java.Strings.isEmpty(invalids)) {
-                for (final String invalid : invalids.split(" *, *")) {
-                    invalidsSet.add(com.openexchange.java.Strings.toLowerCase(invalid.trim()));
+            Set<String> invalidsSet = new HashSet<String>(Arrays.asList("application/force-download", "application/x-download", "application/$suffix"));
+            if (Strings.isNotEmpty(invalids)) {
+                for (String invalid : invalids.split(" *, *")) {
+                    invalidsSet.add(Strings.toLowerCase(invalid.trim()));
                 }
             }
 
@@ -178,7 +178,7 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
             }
 
             // Process all available contexts
-            final TIntSet contextIds;
+            TIntSet contextIds;
             {
                 Connection configDbCon = null;
                 PreparedStatement stmt = null;
@@ -208,40 +208,62 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
                 return "No contexts found";
             }
 
-            final String sep = System.getProperty("line.separator");
-            final StringBuilder responseBuilder = new StringBuilder(65536);
-            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
-            contextIds.forEach(new TIntProcedure() {
-
-                @Override
-                public boolean execute(final int cid) {
-                    if (responseBuilder.length() > 0) {
-                        responseBuilder.append(sep);
-                    }
-                    try {
-                        responseBuilder.append(processContext(cid, invalidsSet, databaseService));
-                    } catch (final Exception e) {
-                        logger.error("Context {} could not be processed", Integer.valueOf(cid), e);
-                        responseBuilder.append("Context ").append(cid).append(" could not be processed: >>>").append(e.getMessage()).append("<<<");
-                    }
-                    return true;
+            String sep = System.getProperty("line.separator");
+            StringBuilder responseBuilder = new StringBuilder(65536);
+            AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+            contextIds.forEach(cid -> {
+                if (responseBuilder.length() > 0) {
+                    responseBuilder.append(sep);
                 }
+                try {
+                    responseBuilder.append(processContext(cid, invalidsSet, databaseService));
+                } catch (Exception e) {
+                    LOG.error("Context {} could not be processed", Integer.valueOf(cid), e);
+                    responseBuilder.append("Context ").append(cid).append(" could not be processed: >>>").append(e.getMessage()).append("<<<");
+                }
+                return true;
             });
 
-            final Exception exc = errorRef.get();
+            Exception exc = errorRef.get();
             if (null != exc) {
                 throw exc;
             }
 
             return responseBuilder.toString();
-        } catch (final Exception e) {
-            logger.error("", e);
-            final String message = e.getMessage();
-            throw new MBeanException(new Exception(message), message);
+        } catch (Exception e) {
+            LOG.error("", e);
+            String message = e.getMessage();
+            throw new RemoteException(message, new Exception(message));
         }
     }
 
-    String processContext(final int contextId, final Set<String> invalidsSet, final DatabaseService databaseService) throws OXException, SQLException {
+    ////////////////////////////// HELPERS ///////////////////////////////
+
+    /**
+     * Gets available context identifier.
+     *
+     * @param optService The optional database service
+     * @return The context identifiers
+     * @throws OXException If identifiers cannot be loaded from configDB
+     */
+    private List<Integer> getContextIds() throws OXException {
+        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+        if (null == contextService) {
+            throw ServiceExceptionCode.absentService(ContextService.class);
+        }
+        return contextService.getAllContextIds();
+    }
+
+    /**
+     * 
+     * @param contextId
+     * @param invalidsSet
+     * @param databaseService
+     * @return
+     * @throws OXException
+     * @throws SQLException
+     */
+    private String processContext(int contextId, Set<String> invalidsSet, DatabaseService databaseService) throws OXException, SQLException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -272,15 +294,15 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
                 }
             }
 
-            final String defaultMimeType = MimeTypes.MIME_APPL_OCTET;
-            final List<Tuple> tuples = new LinkedList<Tuple>();
+            String defaultMimeType = MimeTypes.MIME_APPL_OCTET;
+            List<Tuple> tuples = new LinkedList<Tuple>();
             do {
                 String fileName = rs.getString(4);
-                if (!com.openexchange.java.Strings.isEmpty(fileName)) {
+                if (Strings.isNotEmpty(fileName)) {
                     String mimeType = rs.getString(3);
-                    if (!com.openexchange.java.Strings.isEmpty(mimeType)) {
-                        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-                        if (invalidsSet.contains(com.openexchange.java.Strings.toLowerCase(mimeType)) || (!defaultMimeType.equals(contentTypeByFileName) && !equalPrimaryTypes(mimeType, contentTypeByFileName))) {
+                    if (Strings.isNotEmpty(mimeType)) {
+                        String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                        if (invalidsSet.contains(Strings.toLowerCase(mimeType)) || (!defaultMimeType.equals(contentTypeByFileName) && !equalPrimaryTypes(mimeType, contentTypeByFileName))) {
                             tuples.add(new Tuple(contentTypeByFileName, rs));
                         }
                     }
@@ -297,14 +319,14 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
             stmt = con.prepareStatement("UPDATE infostore_document SET file_mimetype=? WHERE cid=? AND infostore_id=? AND version_number=?");
             stmt.setInt(2, contextId);
 
-            for (final Tuple tuple : tuples) {
+            for (Tuple tuple : tuples) {
                 stmt.setString(1, tuple.mimeType);
                 stmt.setInt(3, tuple.id);
                 stmt.setInt(4, tuple.version);
                 stmt.addBatch();
             }
 
-            final int[] result = stmt.executeBatch();
+            int[] result = stmt.executeBatch();
             afterReading = false;
 
             return "Fixed " + Integer.toString(result.length) + (result.length == 1 ? " document" : " documents") + " with a broken/corrupt MIME type in context " + contextId;
@@ -320,19 +342,19 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
         }
     }
 
-    private String getPrimaryType(final String contentType) {
-        if (com.openexchange.java.Strings.isEmpty(contentType)) {
+    private String getPrimaryType(String contentType) {
+        if (Strings.isEmpty(contentType)) {
             return contentType;
         }
-        final int pos = contentType.indexOf('/');
+        int pos = contentType.indexOf('/');
         return pos > 0 ? contentType.substring(0, pos) : contentType;
     }
 
-    private boolean equalPrimaryTypes(final String contentType1, final String contentType2) {
+    private boolean equalPrimaryTypes(String contentType1, String contentType2) {
         if (null == contentType1 || null == contentType2) {
             return false;
         }
-        return com.openexchange.java.Strings.toLowerCase(getPrimaryType(contentType1)).startsWith(com.openexchange.java.Strings.toLowerCase(getPrimaryType(contentType2)));
+        return Strings.toLowerCase(getPrimaryType(contentType1)).startsWith(Strings.toLowerCase(getPrimaryType(contentType2)));
     }
 
 }
