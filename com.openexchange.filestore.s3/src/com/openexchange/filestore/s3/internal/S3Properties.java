@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,44 +52,57 @@ package com.openexchange.filestore.s3.internal;
 import com.openexchange.config.lean.Property;
 
 /**
- * {@link S3FileStoreProperty}
+ * {@link S3Properties}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.1
  */
-public enum S3FileStoreProperty implements Property {
+public enum S3Properties implements Property {
+    ENDPOINT("endpoint", "s3.amazonaws.com"),
+    BUCKET_NAME("bucketName", null),
+    REGION("region", "us-west-2"),
+    PATH_STYLE_ACCESS("pathStyleAccess", true),
+    ACCESS_KEY("accessKey", null),
+    SECRET_KEY("secretKey", null),
+    ENCRYPTION("encryption", EncryptionType.NONE),
+    SIGNER_OVERRIDE("signerOverride", "S3SignerType"),
+    CHUNK_SIZE("chunkSize", "5 MB"),
+    RSA_KEYSTORE("encryption.rsa.keyStore", null),
+    RSA_PASSWORD("encryption.rsa.password", null),
+
+    METRIC_COLLECTION("com.openexchange.filestore.s3.", "metricCollection", false)
+    ;
+
+    public static final String OPTIONAL_NAME = "filestoreID";
+    private static final String PREFIX = "com.openexchange.filestore.s3.[" + OPTIONAL_NAME + "].";
+
+    private Object defaultValue;
+    private String propName;
+    private String prefix;
 
     /**
-     * Flag to enable metric collection.
-     * Defaults to <code>false</code>
+     * Initializes a new {@link S3Properties}.
      */
-    metricCollection(false);
-
-    private final Object defaultValue;
-
-    private static final String PREFIX = "com.openexchange.filestore.s3.";
-
-    /**
-     * Initializes a new {@link CassandraProperty}.
-     */
-    private S3FileStoreProperty(Object defaultValue) {
+    private S3Properties(String prefix, String propName, Object defaultValue) {
+        this.propName = propName;
         this.defaultValue = defaultValue;
+        this.prefix = prefix;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
+    /**
+     * Initializes a new {@link S3Properties}.
      */
+    private S3Properties(String propName, Object defaultValue) {
+        this.propName = propName;
+        this.defaultValue = defaultValue;
+        this.prefix = PREFIX;
+    }
+
     @Override
     public String getFQPropertyName() {
-        return PREFIX + name();
+        return prefix + propName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;
