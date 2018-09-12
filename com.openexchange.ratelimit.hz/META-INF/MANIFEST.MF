@@ -8,7 +8,6 @@ Automatic-Module-Name: com.openexchange.ratelimit.hz
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.ratelimit.hz.osgi.RateLimitActivator
 Import-Package: com.hazelcast.core,
- com.hazelcast.ringbuffer,
  com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.ratelimit,
