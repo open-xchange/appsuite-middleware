@@ -49,23 +49,16 @@
 
 package com.openexchange.context.osgi;
 
+import java.rmi.Remote;
 import java.util.Arrays;
 import java.util.Collection;
-import javax.management.ObjectName;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
-import com.openexchange.context.mbean.ContextMBean;
-import com.openexchange.context.mbean.ContextMBeanImpl;
+import com.openexchange.context.rmi.ContextRMIServiceImpl;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeCreateTable;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.management.ManagementService;
-import com.openexchange.management.Managements;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -81,20 +74,17 @@ public class ContextActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{DatabaseService.class};
+        return new Class[] { DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(ContextActivator.class);
+        DatabaseService dbase = getService(DatabaseService.class);
 
-        final DatabaseService dbase = getService(DatabaseService.class);
-
-        final ContextAttributeCreateTable createTable = new ContextAttributeCreateTable();
+        ContextAttributeCreateTable createTable = new ContextAttributeCreateTable();
         registerService(CreateTableService.class, createTable);
 
-        final ContextAttributeTableUpdateTask updateTask = new ContextAttributeTableUpdateTask(dbase);
-
+        ContextAttributeTableUpdateTask updateTask = new ContextAttributeTableUpdateTask(dbase);
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             @Override
@@ -104,42 +94,7 @@ public class ContextActivator extends HousekeepingActivator {
 
         });
 
-        final BundleContext context = this.context;
-        track(ManagementService.class, new ServiceTrackerCustomizer<ManagementService, ManagementService>() {
-
-            @Override
-            public ManagementService addingService(ServiceReference<ManagementService> reference) {
-                final ManagementService service = context.getService(reference);
-                try {
-                    final ObjectName objectName = Managements.getObjectName(ContextMBean.class.getName(), ContextMBean.DOMAIN);
-                    service.registerMBean(objectName, new ContextMBeanImpl());
-                    return service;
-                } catch (final Exception e) {
-                    logger.warn("Could not register MBean '{}'", ContextMBean.class.getName());
-                }
-                context.ungetService(reference);
-                return null;
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<ManagementService> reference, ManagementService service) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(ServiceReference<ManagementService> reference, ManagementService service) {
-                if (null != service) {
-                    try {
-                        service.unregisterMBean(Managements.getObjectName(ContextMBean.class.getName(), ContextMBean.DOMAIN));
-                    } catch (final Exception e) {
-                        logger.warn("Unregistering MBean '{}' failed.", ContextMBean.class.getName(), e);
-                    } finally {
-                        context.ungetService(reference);
-                    }
-                }
-            }
-        });
-
+        registerService(Remote.class, new ContextRMIServiceImpl());
         openTrackers();
     }
 

@@ -55,7 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.context.mbean.ContextMBeanImpl;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -115,7 +114,7 @@ public class ContextRMIServiceImpl implements ContextRMIService {
             }
 
             // Logger
-            Logger logger = org.slf4j.LoggerFactory.getLogger(ContextMBeanImpl.class);
+            Logger logger = org.slf4j.LoggerFactory.getLogger(ContextRMIServiceImpl.class);
 
             // Iterate context identifiers
             for (int contextId : contextIds.toArray()) {
@@ -189,7 +188,7 @@ public class ContextRMIServiceImpl implements ContextRMIService {
         try {
             contextStorage.invalidateContext(contextId);
         } catch (Exception e) {
-            Logger logger = org.slf4j.LoggerFactory.getLogger(ContextMBeanImpl.class);
+            Logger logger = org.slf4j.LoggerFactory.getLogger(ContextRMIServiceImpl.class);
             logger.warn("Error invalidating cached infos of context {} in context storage", contextId, e);
         }
     }
