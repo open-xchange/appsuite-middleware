@@ -56,7 +56,6 @@ import com.openexchange.contact.picture.impl.ContactPictureServiceImpl;
 import com.openexchange.contact.picture.impl.finder.ContactIDFinder;
 import com.openexchange.contact.picture.impl.finder.ContactMailFinder;
 import com.openexchange.contact.picture.impl.finder.ContactUserFinder;
-import com.openexchange.contact.picture.impl.finder.GABPictureFinder;
 import com.openexchange.contact.picture.impl.finder.UserPictureFinder;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -109,7 +108,6 @@ public final class ContactPictureActivator extends HousekeepingActivator {
         registerService(ContactPictureFinder.class, new ContactUserFinder(contactService));
         registerService(ContactPictureFinder.class, new ContactIDFinder(contactService));
         registerService(ContactPictureFinder.class, new ContactMailFinder(contactService));
-        registerService(ContactPictureFinder.class, new GABPictureFinder(contactService));
 
     }
 

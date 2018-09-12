@@ -47,85 +47,32 @@
  *
  */
 
-package com.openexchange.contact.picture.finder;
+package com.openexchange.contact.picture.impl.finder;
 
-import com.openexchange.contact.picture.ContactPicture;
-import com.openexchange.contact.picture.PictureSearchData;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link PictureResult}
+ * {@link SearchFields} - Wrapps {@link ContactField}s for single actions
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class PictureResult {
+enum SearchFields {
 
-    private final boolean found;
+    PICTURE(ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE),
 
-    private final PictureSearchData data;
+    ETAG(ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED),
 
-    private final ContactPicture picture;
+    LAST_MODIFIED(ContactField.LAST_MODIFIED);
 
-    /**
-     * Initializes a new {@link PictureResult} in a failed state.
-     * 
-     * @param data New data that can be provided by the caller
-     * 
-     */
-    public PictureResult(PictureSearchData data) {
-        this(false, null, data);
+    private final ContactField[] fields;
+
+    private SearchFields(ContactField... contactFields) {
+        this.fields = contactFields;
     }
 
-    /**
-     * Initializes a new {@link PictureResult} in a success state.
-     * 
-     * @param picture The {@link ContactPicture} or <code>null</code>
-     * 
-     */
-    public PictureResult(ContactPicture picture) {
-        this(true, picture, null);
-    }
-
-    /**
-     * Initializes a new {@link PictureResult}.
-     * 
-     * @param found If the picture was found
-     * @param picture The {@link ContactPicture} or <code>null</code>
-     * @param data New data that can be provided by the caller
-     * 
-     */
-    public PictureResult(boolean found, ContactPicture picture, PictureSearchData data) {
-        super();
-        this.found = found;
-        this.picture = picture;
-        this.data = data;
-    }
-
-    /**
-     * If the picture was found
-     * 
-     * @return <code>true</code> if the picture was found
-     */
-    public boolean wasFound() {
-        return found;
-    }
-
-    /**
-     * Get additional data to make next search more successful
-     * 
-     * @return Updated {@link PictureSearchData}
-     */
-    public PictureSearchData getData() {
-        return data;
-    }
-
-    /**
-     * The {@link ContactPicture}
-     * 
-     * @return The {@link ContactPicture}
-     */
-    public ContactPicture getPicture() {
-        return picture;
+    public ContactField[] getContactFields() {
+        return fields;
     }
 
 }

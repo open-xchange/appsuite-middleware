@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.finder.PictureResult;
+import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
@@ -64,6 +65,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link UserPictureFinder} - Checks if user exists and set the user information like contact id etc.
+ * <pre>Note: This finder is unable to find pictures itself it only provides additional data. </pre>
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
@@ -94,24 +96,32 @@ public class UserPictureFinder implements ContactPictureFinder {
         return provideUserData(session, data);
     }
 
+    @Override
+    public PictureResult getLastModified(Session session, PictureSearchData data) {
+        return provideUserData(session, data);
+    }
+
     private PictureResult provideUserData(Session session, PictureSearchData data) {
         if (data.hasUser()) {
             try {
                 User user = userService.getUser(i(data.getUserId()), session.getContextId());
                 if (null != user) {
-                    LinkedHashSet<String> set = new LinkedHashSet<>();
-                    set.add(user.getMail());
-                    for (String string : user.getAliases()) {
-                        set.add(string);
+                    LinkedHashSet<String> set = null;
+                    if (i(data.getUserId()) == session.getUserId() || ContactPictureUtil.hasGAB(session)) {
+                        set = new LinkedHashSet<>();
+                        set.add(user.getMail());
+                        for (String string : user.getAliases()) {
+                            set.add(string);
+                        }
                     }
-                    return new PictureResult(false, null, new PictureSearchData(null, null, I(user.getContactId()), set));
+                    return new PictureResult(new PictureSearchData(null, null, I(user.getContactId()), set));
                 }
             } catch (OXException e) {
                 LOGGER.debug("Unable to find user with identifier {} in context {}", data.getUserId(), I(session.getContextId()), e);
             }
         }
 
-        return new PictureResult(false, null, data);
+        return new PictureResult(data);
     }
 
     @Override

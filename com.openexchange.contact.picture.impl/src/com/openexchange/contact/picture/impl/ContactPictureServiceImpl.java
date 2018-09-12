@@ -50,6 +50,7 @@
 package com.openexchange.contact.picture.impl;
 
 import static com.openexchange.contact.picture.ContactPicture.FALLBACK_PICTURE;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import org.osgi.framework.BundleContext;
@@ -84,10 +85,39 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
         super(context, ContactPictureFinder.class);
     }
 
+    // ---------------------------------------------------------------------------------------------
+
     @Override
     public ContactPicture getPicture(Session session, PictureSearchData searchData) {
+        ContactPicture picture = get(session, searchData, (ContactPictureFinder f, Session s, PictureSearchData d) -> {
+            return f.getPicture(s, d);
+        });
+        return null == picture ? FALLBACK_PICTURE : picture;
+    }
+
+    @Override
+    public String getETag(Session session, PictureSearchData searchData) {
+        ContactPicture picture = get(session, searchData, (ContactPictureFinder f, Session s, PictureSearchData d) -> {
+            return f.getETag(s, d);
+        });
+        return null == picture ? FALLBACK_PICTURE.getETag() : picture.getETag();
+    }
+
+    @Override
+    public Long getLastModified(Session session, PictureSearchData searchData) {
+        ContactPicture picture = get(session, searchData, (ContactPictureFinder f, Session s, PictureSearchData d) -> {
+            return f.getLastModified(s, d);
+        });
+        return null == picture ? L(FALLBACK_PICTURE.getLastModified()) : L(picture.getLastModified());
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private ContactPicture get(Session session, PictureSearchData searchData, ResultWrapper f) {
         try {
-            checkSession(session);
+            if (null == session) {
+                throw ContactPictureExceptionCodes.MISSING_SESSION.create();
+            }
 
             PictureSearchData data = searchData;
             // Ask each finder if it contains the picture
@@ -95,7 +125,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
                 ContactPictureFinder next = iterator.next();
 
                 // Try to get contact picture
-                PictureResult pictureResult = next.getPicture(session, data);
+                PictureResult pictureResult = f.apply(next, session, data);
                 if (pictureResult.wasFound()) {
                     return pictureResult.getPicture();
                 }
@@ -104,30 +134,7 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
         } catch (OXException e) {
             LOGGER.debug("Unable to get contact picture. Using fallback instead.", e);
         }
-        return FALLBACK_PICTURE;
-    }
-
-    @Override
-    public String getETag(Session session, PictureSearchData searchData) {
-        try {
-            checkSession(session);
-
-            PictureSearchData data = searchData;
-            // Ask each finder if it contains the picture
-            for (Iterator<ContactPictureFinder> iterator = iterator(); iterator.hasNext();) {
-                ContactPictureFinder next = iterator.next();
-
-                // Try to get contact picture
-                PictureResult pictureResult = next.getETag(session, data);
-                if (pictureResult.wasFound()) {
-                    return pictureResult.getPicture().getETag();
-                }
-                data = mergeResult(data, pictureResult);
-            }
-        } catch (OXException e) {
-            LOGGER.debug("Unable to get ETag for contact picture. Using fallback instead.", e);
-        }
-        return FALLBACK_PICTURE.getETag();
+        return null;
     }
 
     private PictureSearchData mergeResult(PictureSearchData data, PictureResult pictureResult) {
@@ -144,9 +151,12 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
         return new PictureSearchData(userId, folderId, contactId, set);
     }
 
-    private void checkSession(Session session) throws OXException {
-        if (null == session) {
-            throw ContactPictureExceptionCodes.MISSING_SESSION.create();
-        }
+    // ---------------------------------------------------------------------------------------------
+
+    @FunctionalInterface
+    private interface ResultWrapper {
+
+        PictureResult apply(ContactPictureFinder finder, Session session, PictureSearchData data) throws OXException;
     }
+
 }

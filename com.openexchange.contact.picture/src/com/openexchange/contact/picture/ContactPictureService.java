@@ -79,4 +79,13 @@ public interface ContactPictureService {
      */
     String getETag(Session session, PictureSearchData data);
 
+    /**
+     * Get the timestamp of the last modification date for a picture
+     * 
+     * @param session The {@link Session}
+     * @param data The {@link PictureSearchData} to get the pictures last modified for
+     * @return A timestamp as {@link Long}. If not found {@link ContactPicture#UNMODIFIED} is returned
+     */
+    Long getLastModified(Session session, PictureSearchData data);
+
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.picture.finder;
 
-import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.Ranked;
@@ -60,7 +59,7 @@ import com.openexchange.session.Session;
  * 
  * Ranking of registered {@link ContactPictureFinder}:
  * <li> 1000 : UserPictureFinder</li>
- * <li> 500 : ContactFinders (Children will register with 20 + continuous number)</li>
+ * <li> 500 : ContactFinders (Children will register with 20 + continuous, decrementing number)</li>
  * <li> 100 : GAB</li>
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -73,7 +72,7 @@ public interface ContactPictureFinder extends Ranked {
      *
      * @param session The {@link Session}
      * @param data The {@link PictureSearchData}
-     * @return The {@link ContactPicture} or <code>null</code> if none could be found.
+     * @return A {@link PictureResult} an <b>never</b> null
      * @throws OXException If harmful picture was found
      */
     PictureResult getPicture(Session session, PictureSearchData data) throws OXException;
@@ -83,9 +82,19 @@ public interface ContactPictureFinder extends Ranked {
      *
      * @param session The {@link Session}
      * @param data The {@link PictureSearchData}
-     * @return The ETag or <code>null</code> if none could be found.
+     * @return A {@link PictureResult} an <b>never</b> null
      * @throws OXException On error
      */
     PictureResult getETag(Session session, PictureSearchData data) throws OXException;
+    
+    
+    /**
+     * Get the timestamp of the last modification date for a picture
+     * 
+     * @param session The {@link Session}
+     * @param data The {@link PictureSearchData} to get the pictures last modified for
+     * @return A {@link PictureResult} an <b>never</b> null
+     */
+    PictureResult getLastModified(Session session, PictureSearchData data);
 
 }

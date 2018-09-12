@@ -49,27 +49,13 @@
 
 package com.openexchange.contact.picture.impl;
 
-import java.util.Set;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
-import com.openexchange.contact.ContactFieldOperand;
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.SortOptions;
-import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.finder.FinderUtil;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.search.Order;
-import com.openexchange.java.Streams;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ContactPictureUtil}
@@ -78,26 +64,6 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @since v7.10.1
  */
 public class ContactPictureUtil extends FinderUtil {
-    
-    private static final ContactField[] ETAG_FIELDS = new ContactField[] {
-        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED
-    };
-    
-    private static final ContactField[] IMAGE_FIELDS = new ContactField[] {
-        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE
-    };
-
-    /**
-     * Get the {@link ContactField}s
-     * 
-     * @param eTag <code>true</code> If ContactFields for an eTag search should be obtained
-     *            <code>false</code> if ContactFields for the whole picture should be obtained
-     * 
-     * @return An array of {@link ContactField}
-     */
-    public static ContactField[] contactFieldsFor(boolean eTag) {
-        return eTag ? ETAG_FIELDS : IMAGE_FIELDS;
-    }
 
     /**
      * Generates a {@link ContactPicture} based on the given bytes
@@ -144,96 +110,19 @@ public class ContactPictureUtil extends FinderUtil {
     }
 
     /**
-     * Searches for a contact via its mail address in all folders but the global address book.
-     *
-     * @param contactService The {@link ContactService}
-     * @param emails The mail addresses
-     * @param session The {@link Session}
-     * @param fields The {@link ContactField}s that should be retrieved
-     * @return The {@link Contact} or <code>null</code>
-     * @throws OXException If the contact could not be found
+     * Get a value indicating if the current user has GAB capability
+     * 
+     * @param session The {@link Session} of the current user
+     * @return <code>true</code> if the current user is allowed to use GAB
+     *         <code>false</code> otherwise
      */
-    public static Contact findContactByMail(ContactService contactService, Set<String> emails, Session session, ContactField... fields) throws OXException {
-        return findContactByMail(contactService, emails, session, false, fields);
-    }
-
-    /**
-     * Searches for a contact via its mail address in the global address book.
-     *
-     * @param contactService The {@link ContactService}
-     * @param emails The mail addresses
-     * @param session The {@link Session}
-     * @param fields The {@link ContactField}s that should be retrieved
-     * @return The {@link Contact} or <code>null</code>
-     * @throws OXException If the contact could not be found
-     */
-    public static Contact findContactInGlobalAddressBookByMail(ContactService contactService, Set<String> emails, Session session, ContactField... fields) throws OXException {
-        return findContactByMail(contactService, emails, session, true, fields);
-    }
-
-    /**
-     * Searches for a contact via its mail address.
-     *
-     * @param contactService The {@link ContactService}
-     * @param emails The mail addresses
-     * @param session The {@link Session}
-     * @param useGAB <code>true</code> if a search in the global address book shall be performed, <code>false</code> if search shall be done in all other folders
-     * @return The {@link Contact} or <code>null</code>
-     * @throws OXException If the contact could not be found
-     */
-    private static Contact findContactByMail(ContactService contactService, Set<String> emails, Session session, boolean useGAB, ContactField... fields) throws OXException {
-
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        searchTerm.addSearchTerm(getFieldSearchTerm(ContactField.FOLDER_ID, useGAB ? SingleOperation.EQUALS : SingleOperation.NOT_EQUALS, String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID)));
-        searchTerm.addSearchTerm(getFieldSearchTerm(ContactField.NUMBER_OF_IMAGES, SingleOperation.GREATER_THAN, Integer.valueOf(0)));
-
-        CompositeSearchTerm mailOrTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        searchTerm.addSearchTerm(mailOrTerm);
-
-        for (String mail : emails) {
-            mailOrTerm.addSearchTerm(getMailTerm(mail));
-        }
-
-        SearchIterator<Contact> result = null;
+    public static boolean hasGAB(Session session) {
         try {
-
-            result = contactService.searchContacts( session,
-                                                    searchTerm,
-                                                    fields,
-                                                    new SortOptions(
-                                                        new SortOrder(ContactField.FOLDER_ID, Order.DESCENDING),
-                                                        new SortOrder(ContactField.OBJECT_ID, Order.DESCENDING)));
-
-            if (result == null) {
-                return null;
-            }
-
-            while (result.hasNext()) {
-                Contact contact = result.next();
-                if (null != contact.getImage1()) {
-                    return contact;
-                }
-            }
-        } finally {
-            Streams.close(result);
+            return ServerSessionAdapter.valueOf(session).getUserPermissionBits().isGlobalAddressBookEnabled();
+        } catch (OXException e) {
+            // Ignore
         }
-
-        return null;
-    }
-
-    private static CompositeSearchTerm getMailTerm(String mail) {
-        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        orTerm.addSearchTerm(getFieldSearchTerm(ContactField.EMAIL1, SingleOperation.EQUALS, mail));
-        orTerm.addSearchTerm(getFieldSearchTerm(ContactField.EMAIL2, SingleOperation.EQUALS, mail));
-        orTerm.addSearchTerm(getFieldSearchTerm(ContactField.EMAIL3, SingleOperation.EQUALS, mail));
-        return orTerm;
-    }
-
-    private static <T> SingleSearchTerm getFieldSearchTerm(ContactField field, SingleOperation operation, T constant) {
-        SingleSearchTerm term = new SingleSearchTerm(operation);
-        term.addOperand(new ContactFieldOperand(field));
-        term.addOperand(new ConstantOperand<T>(constant));
-        return term;
+        return false;
     }
 
 }

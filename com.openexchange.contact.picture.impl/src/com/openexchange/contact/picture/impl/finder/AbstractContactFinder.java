@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * {@link AbstractContactFinder} - Abstract class for all {@link ContactService} related searches for contact pictures.
  * <p>
- * <b>CAUTION</b>: This class uses a continuous integer to keep track of its children.
+ * <b>CAUTION</b>: This class uses a continuous, decrementing integer to keep track of its children.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
@@ -79,9 +79,11 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
 
     protected final ContactService contactService;
 
-    private final static AtomicInteger childCount = new AtomicInteger(10);
+    private final static AtomicInteger childCount = new AtomicInteger(20);
 
     private final int child;
+
+    // ---------------------------------------------------------------------------------------------
 
     /**
      * Initializes a new {@link AbstractContactFinder}.
@@ -93,6 +95,8 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         this.contactService = contactService;
         this.child = childCount.decrementAndGet();
     }
+
+    // ---------------------------------------------------------------------------------------------
 
     /**
      * Get the contact
@@ -120,35 +124,56 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
      */
     abstract void handleException(PictureSearchData data, OXException exception);
 
+    // ---------------------------------------------------------------------------------------------
+
     @Override
     public PictureResult getPicture(Session session, PictureSearchData data) throws OXException {
-        return getPicture(session, data, false);
+        Contact contact = getContact0(session, data, SearchFields.PICTURE);
+        if (null == contact) {
+            return new PictureResult(data);
+        } else if (false == ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
+            return new PictureResult(modfiyResult(contact));
+        }
+        return new PictureResult(ContactPictureUtil.fromContact(contact, false));
     }
 
     @Override
     public PictureResult getETag(Session session, PictureSearchData data) throws OXException {
-        return getPicture(session, data, true);
+        Contact contact = getContact0(session, data, SearchFields.ETAG);
+        if (null == contact) {
+            return new PictureResult(data);
+        }
+        return new PictureResult(ContactPictureUtil.fromContact(contact, true));
     }
 
-    private PictureResult getPicture(Session session, PictureSearchData data, boolean onlyETag) {
-        ContactPicture picture = null;
-        PictureSearchData modified = null;
-        if (isApplicable(session)) {
+    @Override
+    public PictureResult getLastModified(Session session, PictureSearchData data) {
+        Contact contact = getContact0(session, data, SearchFields.LAST_MODIFIED);
+        if (null == contact) {
+            return new PictureResult(data);
+        }
+        return new PictureResult(new ContactPicture(null, null, contact.getLastModified().getTime()));
+    }
 
+    // ---------------------------------------------------------------------------------------------
+
+    @Override
+    public int getRanking() {
+        return 500 + child;
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private Contact getContact0(Session session, PictureSearchData data, SearchFields fields) {
+        Contact contact = null;
+        if (isApplicable(session)) {
             try {
-                Contact contact = getContact(session, data, ContactPictureUtil.contactFieldsFor(onlyETag));
-                if (onlyETag || ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
-                    picture = ContactPictureUtil.fromContact(contact, onlyETag);
-                } else {
-                    if (null != contact) {
-                        modified = modfiyResult(contact);
-                    }
-                }
+                contact = getContact(session, data, fields.getContactFields());
             } catch (OXException e) {
                 handleException(data, e);
             }
         }
-        return new PictureResult(null != picture, picture, modified == null ? PictureSearchData.EMPTY_DATA : modified);
+        return contact;
     }
 
     private boolean isApplicable(Session session) {
@@ -156,12 +181,8 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
             return ServerSessionAdapter.valueOf(session).getUserPermissionBits().hasContact();
         } catch (OXException e) {
             LOGGER.trace("Unable to get user permissions. Therefore can't allow to access contacts.", e);
-            return false;
         }
+        return false;
     }
 
-    @Override
-    public int getRanking() {
-        return 500 + child;
-    }
 }

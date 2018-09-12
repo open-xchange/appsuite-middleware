@@ -55,7 +55,6 @@ import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.session.Session;
 
 /**
@@ -85,7 +84,7 @@ public class ContactUserFinder extends AbstractContactFinder {
 
     @Override
     public PictureSearchData modfiyResult(Contact contact) {
-        return new PictureSearchData(null, I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(contact.getObjectID()), null);
+        return new PictureSearchData(null, I(contact.getParentFolderID()), I(contact.getObjectID()), null);
     }
 
     @Override
