@@ -103,6 +103,7 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, getData(requestData));
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
         setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
+        result.setHeader("Last-Modified", String.valueOf(picture.getLastModified()));
         return result;
     }
 

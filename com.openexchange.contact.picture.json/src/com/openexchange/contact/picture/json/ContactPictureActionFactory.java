@@ -76,6 +76,7 @@ public class ContactPictureActionFactory implements AJAXActionServiceFactory {
     public ContactPictureActionFactory(ServiceLookup services) {
         ImmutableMap.Builder<String, AJAXActionService> builder = ImmutableMap.builder();
         builder.put("get", new GetAction(services));
+        builder.put("GET", new GetAction(services));
         actions = builder.build();
     }
 
