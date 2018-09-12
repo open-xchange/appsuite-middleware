@@ -21,4 +21,4 @@ Import-Package: com.openexchange.config.lean,
  org.json,
  org.osgi.framework,
  org.slf4j
-Bundle-Activator: com.openexchange.health.rest.osgi.NodeHealthCheckRestActivator
+Bundle-Activator: com.openexchange.health.rest.osgi.MWHealthCheckRestActivator

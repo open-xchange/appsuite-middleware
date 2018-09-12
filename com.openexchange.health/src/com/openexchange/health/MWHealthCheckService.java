@@ -1,4 +1,3 @@
-package com.openexchange.health;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -48,32 +47,38 @@ package com.openexchange.health;
  *
  */
 
-import java.util.Map;
+package com.openexchange.health;
+
+import java.util.List;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link NodeHealthCheckResponse}- The node health check response interface
+ * {@link MWHealthCheckService}- The health check service
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public interface NodeHealthCheckResponse {
+public interface MWHealthCheckService {
 
     /**
-     * Gets the name of the executed node health check
-     * @return The name
+     * Gets a map containing all registered health checks mapped by name
+     * @return The map
      */
-    String getName();
+    List<MWHealthCheck> getAllChecks();
 
     /**
-     * Gets additional data from node health check execution
-     * @return The map containing additional data
+     * Gets a single health check
+     * @param name The name
+     * @return The check
      */
-    Map<String, Object> getData();
+    MWHealthCheck getCheck(String name);
 
     /**
-     * Gets the node health state determined by node health check execution.
-     * @return NodeHealthState.UP in case of successful node health check execution, NodeHealthState.DOWN otherwise
+     * Executes all registered and not blacklisted health checks
+     * @return The health check responses mapped by health check's name
+     * @throws OXException On error
      */
-    NodeHealthState getState();
+    MWHealthCheckResult check() throws OXException;
 
 }

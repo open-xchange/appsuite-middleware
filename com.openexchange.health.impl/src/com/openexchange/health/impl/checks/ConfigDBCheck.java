@@ -53,14 +53,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.health.NodeHealthCheck;
-import com.openexchange.health.NodeHealthCheckResponse;
-import com.openexchange.health.impl.NodeHealthCheckResponseImpl;
+import com.openexchange.health.MWHealthCheck;
+import com.openexchange.health.MWHealthCheckResponse;
+import com.openexchange.health.impl.MWHealthCheckResponseImpl;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -70,9 +72,10 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class ConfigDBCheck implements NodeHealthCheck {
+public class ConfigDBCheck implements MWHealthCheck {
 
     private final static String NAME = "configDB";
+    private final static long TIMEOUT = 15000L;
 
     private final ServiceLookup services;
 
@@ -87,7 +90,12 @@ public class ConfigDBCheck implements NodeHealthCheck {
     }
 
     @Override
-    public NodeHealthCheckResponse call() {
+    public long getTimeout() {
+        return TIMEOUT;
+    }
+
+    @Override
+    public MWHealthCheckResponse call() {
         DatabaseService dbService = services.getService(DatabaseService.class);
         boolean status = true;
         Map<String, Object> data = new HashMap<>();
@@ -97,12 +105,12 @@ public class ConfigDBCheck implements NodeHealthCheck {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                long start = System.currentTimeMillis();
+                long start = System.nanoTime();
                 con = dbService.getReadOnly();
                 stmt = con.prepareStatement("SELECT 1");
                 rs = stmt.executeQuery();
-                long end = System.currentTimeMillis();
-                data.put("readConnectionRoundTripTime", end - start + "ms");
+                long end = System.nanoTime();
+                data.put("readConnectionRoundTripTime", formatDuration(start, end) + "ms");
             } catch (OXException | SQLException e) {
                 status = false;
                 data.put("readConnectionError", e.getMessage());
@@ -117,12 +125,12 @@ public class ConfigDBCheck implements NodeHealthCheck {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                long start = System.currentTimeMillis();
+                long start = System.nanoTime();
                 con = dbService.getWritable();
                 stmt = con.prepareStatement("SELECT 1");
                 rs = stmt.executeQuery();
-                long end = System.currentTimeMillis();
-                data.put("writeConnectionRoundTripTime", end - start + "ms");
+                long end = System.nanoTime();
+                data.put("writeConnectionRoundTripTime", formatDuration(start, end) + "ms");
             } catch (OXException | SQLException e) {
                 status = false;
                 data.put("writeConnectionError", e.getMessage());
@@ -132,7 +140,14 @@ public class ConfigDBCheck implements NodeHealthCheck {
             }
         }
 
-        return new NodeHealthCheckResponseImpl(NAME, data, status);
+        return new MWHealthCheckResponseImpl(NAME, data, status);
+    }
+
+    private String formatDuration(long start, long end) {
+        NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+        nf.setMaximumFractionDigits(3);
+        nf.setMinimumFractionDigits(3);
+        return nf.format((end - start) / 1000000F);
     }
 
 }

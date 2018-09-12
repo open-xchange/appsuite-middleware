@@ -47,43 +47,47 @@
  *
  */
 
-package com.openexchange.health;
+package com.openexchange.health.impl.osgi;
 
-import com.openexchange.config.lean.Property;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.health.MWHealthCheck;
+import com.openexchange.health.impl.MWHealthCheckServiceImpl;
 
 /**
- * {@link NodeHealthCheckProperty}
+ * {@link MWHealthCheckTracker}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public enum NodeHealthCheckProperty implements Property {
+public class MWHealthCheckTracker implements ServiceTrackerCustomizer<MWHealthCheck, MWHealthCheck> {
 
-    username(NodeHealthCheckProperty.PREFIX, NodeHealthCheckProperty.EMPTY),
-    password(NodeHealthCheckProperty.PREFIX, NodeHealthCheckProperty.EMPTY),
-    skip(NodeHealthCheckProperty.PREFIX, NodeHealthCheckProperty.EMPTY),
-    ignore(NodeHealthCheckProperty.PREFIX, NodeHealthCheckProperty.EMPTY)
-    ;
+    private final BundleContext context;
+    private final MWHealthCheckServiceImpl healthCheckService;
 
-    private static final String PREFIX = "com.openexchange.health.";
-    private static final String EMPTY = "";
-
-    private final String name;
-    private final String defaultValue;
-
-    private NodeHealthCheckProperty(String name, String value) {
-        this.name = name;
-        this.defaultValue = value;
+    public MWHealthCheckTracker(BundleContext context, MWHealthCheckServiceImpl healthCheckService) {
+        super();
+        this.context = context;
+        this.healthCheckService = healthCheckService;
     }
 
     @Override
-    public String getFQPropertyName() {
-        return name + name();
+    public MWHealthCheck addingService(ServiceReference<MWHealthCheck> reference) {
+        MWHealthCheck check = context.getService(reference);
+        healthCheckService.addCheck(check);
+        return check;
     }
 
     @Override
-    public Object getDefaultValue() {
-        return defaultValue;
+    public void modifiedService(ServiceReference<MWHealthCheck> reference, MWHealthCheck service) {
+        // nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<MWHealthCheck> reference, MWHealthCheck service) {
+        healthCheckService.removeCheck(service.getName());
+        context.ungetService(reference);
     }
 
 }

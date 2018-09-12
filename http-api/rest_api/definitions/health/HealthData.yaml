@@ -1,0 +1,26 @@
+type: object
+properties:
+  status:
+    type: string
+    description: The-health overall status
+    enum:
+      - UP
+      - DOWN
+  checks:
+    type: array
+    items:
+      $ref: '#/definitions/HealthCheckData'
+  service:
+    $ref: '#/definitions/ServiceData'
+  blacklist:
+    type: array
+    description: Blacklisted health checks
+    items:
+      type: string
+      description: health check identifier
+  ignorelist:
+    type: array
+    description: Ignored health checks
+    items:
+      type: string
+      description: health check identifier

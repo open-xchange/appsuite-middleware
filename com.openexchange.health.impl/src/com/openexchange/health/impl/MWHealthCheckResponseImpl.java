@@ -50,33 +50,33 @@
 package com.openexchange.health.impl;
 
 import java.util.Map;
-import com.openexchange.health.NodeHealthCheckResponse;
-import com.openexchange.health.NodeHealthState;
+import com.openexchange.health.MWHealthCheckResponse;
+import com.openexchange.health.MWHealthState;
 
 /**
- * {@link NodeHealthCheckResponseImpl}
+ * {@link MWHealthCheckResponseImpl}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class NodeHealthCheckResponseImpl implements NodeHealthCheckResponse {
+public class MWHealthCheckResponseImpl implements MWHealthCheckResponse {
 
     private final String name;
     private final Map<String, Object> data;
-    private final NodeHealthState state;
+    private final MWHealthState state;
 
-    public NodeHealthCheckResponseImpl(String name, Map<String, Object> data, NodeHealthState state) {
+    public MWHealthCheckResponseImpl(String name, Map<String, Object> data, MWHealthState state) {
         super();
         this.name = name;
         this.data = data;
         this.state = state;
     }
 
-    public NodeHealthCheckResponseImpl(String name, Map<String, Object> data, boolean state) {
+    public MWHealthCheckResponseImpl(String name, Map<String, Object> data, boolean state) {
         super();
         this.name = name;
         this.data = data;
-        this.state = state ? NodeHealthState.UP : NodeHealthState.DOWN;
+        this.state = state ? MWHealthState.UP : MWHealthState.DOWN;
     }
 
     @Override
@@ -90,7 +90,7 @@ public class NodeHealthCheckResponseImpl implements NodeHealthCheckResponse {
     }
 
     @Override
-    public NodeHealthState getState() {
+    public MWHealthState getState() {
         return state;
     }
 

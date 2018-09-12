@@ -3,23 +3,23 @@
     operationId: get
     tags:
       - Health
-    summary: Get node-health status
+    summary: Get health status
     produces:
       - application/json
     responses:
       200:
         description: |
-          A JSON object containing node health data
+          A JSON object containing health data
         schema:
           $ref: "#/definitions/HealthData"
       401:
         description: Not authorized  
       500:
-        description: Internal server error that might have multiple reasons. Response contains error message.
+        description: In case of "DOWN"-result or internal server error that might have multiple reasons. Response contains error message.
         schema:
           type: string
 
     x-ox-examples:
       Example:
-        description: Get node-health status
+        description: Get health status
         example: GET http://localhost:8009/health

@@ -2,7 +2,7 @@ feature_name: Health
 properties:
     - key: com.openexchange.health.username
       description: |
-        Username used to access the node-health-check REST interface. If com.openexchange.health.username
+        Username used to access the health-check REST interface. If com.openexchange.health.username
         and com.openexchange.health.password are empty, no authentication is neccessary. This is the default.
       defaultValue: 
       version: 7.10.1
@@ -14,7 +14,7 @@ properties:
       tags: ["Health", "Rest"]
     - key: com.openexchange.health.password
       description: |
-        Password used to access the node-health-check REST interface. If com.openexchange.health.username
+        Password used to access the health-check REST interface. If com.openexchange.health.username
         and com.openexchange.health.password are empty, no authentication is neccessary. This is the default.
       defaultValue: 
       version: 7.10.1
@@ -26,7 +26,7 @@ properties:
       tags: ["Health", "Rest"]
     - key: com.openexchange.health.skip
       description: |
-        Comma-separated list of node-health-checks which should not be executed.
+        Comma-separated list of health-checks which should not be executed.
       defaultValue: 
       version: 7.10.1
       reloadable: true
@@ -37,7 +37,7 @@ properties:
       tags: ["Health", "Rest"]
     - key: com.openexchange.health.ignore
       description: |
-        Comma-separated list of node-health-checks which should be executed, but their status is not considered when
+        Comma-separated list of health-checks which should be executed, but their status is not considered when
         evaluating the overall status.
       defaultValue: 
       version: 7.10.1
