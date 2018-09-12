@@ -49,21 +49,17 @@
 
 package com.openexchange.contact.picture.impl.finder;
 
-import com.openexchange.contact.ContactFieldOperand;
+import java.util.Iterator;
+import java.util.Set;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
-import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Streams;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -124,56 +120,34 @@ public class ContactMailFinder extends AbstractContactFinder {
             Arrays.add(fields, ContactField.FOLDER_ID);
         }
 
-        /*
-         * TODO
-         * Check if ContactSearchObject can be used instead (by enriching it). 
-         */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        if (data.hasFolder()) {
-            searchTerm.addSearchTerm(getFieldSearchTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, data.getFolderId()));
-        }
-        searchTerm.addSearchTerm(getFieldSearchTerm(ContactField.NUMBER_OF_IMAGES, SingleOperation.GREATER_THAN, Integer.valueOf(0)));
+        Set<String> emails = data.getEmails();
+        for (Iterator<String> iterator = emails.iterator(); iterator.hasNext();) {
+            String email = iterator.next();
 
-        CompositeSearchTerm mailOrTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        searchTerm.addSearchTerm(mailOrTerm);
+            ContactSearchObject cso = new ContactSearchObject();
+            cso.setEmail1(email);
+            cso.setEmail2(email);
+            cso.setEmail3(email);
+            cso.setOrSearch(true);
+            cso.setHasImage(true);
 
-        for (String mail : data.getEmails()) {
-            mailOrTerm.addSearchTerm(getMailTerm(mail));
-        }
+            SearchIterator<Contact> result = null;
+            try {
+                result = contactService.searchContacts(session, cso, fields, new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING));
+                if (result == null) {
+                    continue;
+                }
 
-        SearchIterator<Contact> result = null;
-        try {
-
-            result = contactService.searchContacts(session, searchTerm, fields, new SortOptions(new SortOrder(ContactField.FOLDER_ID, Order.DESCENDING), new SortOrder(ContactField.OBJECT_ID, Order.DESCENDING)));
-
-            if (result == null) {
-                return null;
+                while (result.hasNext()) {
+                    Contact contact = result.next();
+                    return contact;
+                }
+            } finally {
+                Streams.close(result);
             }
 
-            while (result.hasNext()) {
-                Contact contact = result.next();
-                return contact;
-            }
-        } finally {
-            Streams.close(result);
         }
-
         return null;
-    }
-
-    private static CompositeSearchTerm getMailTerm(String mail) {
-        CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        orTerm.addSearchTerm(getFieldSearchTerm(ContactField.EMAIL1, SingleOperation.EQUALS, mail));
-        orTerm.addSearchTerm(getFieldSearchTerm(ContactField.EMAIL2, SingleOperation.EQUALS, mail));
-        orTerm.addSearchTerm(getFieldSearchTerm(ContactField.EMAIL3, SingleOperation.EQUALS, mail));
-        return orTerm;
-    }
-
-    private static <T> SingleSearchTerm getFieldSearchTerm(ContactField field, SingleOperation operation, T constant) {
-        SingleSearchTerm term = new SingleSearchTerm(operation);
-        term.addOperand(new ContactFieldOperand(field));
-        term.addOperand(new ConstantOperand<T>(constant));
-        return term;
     }
 
 }
