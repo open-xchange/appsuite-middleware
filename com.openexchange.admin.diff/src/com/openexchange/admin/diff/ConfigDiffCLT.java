@@ -52,29 +52,21 @@ package com.openexchange.admin.diff;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
 import com.openexchange.admin.diff.result.DiffResult;
+import com.openexchange.cli.AbstractCLI;
 
 /**
  * CLT to execute the configuration diff tool.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@SuppressWarnings("static-access")
-public class ConfigDiffCLT {
+// Shouldn't it rather inherit from AbstractAdministrativeCLI?
+public class ConfigDiffCLT extends AbstractCLI<Void, Void> {
 
-    private static final Options options = new Options();
-
-    static {
-        options.addOption(OptionBuilder.withLongOpt("file").hasArgs(1).withDescription("Export diff to file").isRequired(false).create("f"));
-        options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Print usage").isRequired(false).create("h"));
-    }
+    private static final String SYNTAX = "listconfigdiff [-f <filename>] | [-h]";
+    private static final String FOOTER = "\n\nLists the differences between the default and the installed configuration";
 
     /**
      * Entry point
@@ -82,28 +74,65 @@ public class ConfigDiffCLT {
      * @param args
      */
     public static void main(String[] args) {
-        CommandLineParser parser = new PosixParser();
-        final String file;
-        try {
-            CommandLine cl = parser.parse(options, args);
+        new ConfigDiffCLT().execute(args);
+    }
 
-            if (cl.hasOption("h")) {
-                printUsage(0);
-            }
-            if (cl.hasOption("f")) {
-                file = cl.getOptionValue("f");
-            } else {
-                file = null;
-            }
+    /**
+     * Initialises a new {@link ConfigDiffCLT}.
+     */
+    public ConfigDiffCLT() {
+        super();
+    }
 
-            executeDiff(file);
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            printUsage(1);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            printUsage(1);
-        }
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.Object)
+     */
+    @Override
+    protected Void invoke(Options option, CommandLine cmd, Void context) throws Exception {
+        executeDiff(cmd.getOptionValue("f"));
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#addOptions(org.apache.commons.cli.Options)
+     */
+    @Override
+    protected void addOptions(Options options) {
+        options.addOption(createOption("f", "file", true, "Export diff to file", false));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
+     */
+    @Override
+    protected void checkOptions(CommandLine cmd) {
+        // no-op
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getFooter()
+     */
+    @Override
+    protected String getFooter() {
+        return FOOTER;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getName()
+     */
+    @Override
+    protected String getName() {
+        return SYNTAX;
     }
 
     /**
@@ -120,24 +149,11 @@ public class ConfigDiffCLT {
             System.out.println(diffResult.toString());
         } else {
             File output = new File(file);
-
             FileUtils.write(output, diffResult.toString());
         }
 
         if (diffResult.getProcessingErrors().size() > 0) {
             System.exit(1);
         }
-    }
-
-    /**
-     * Print usage
-     *
-     * @param exitCode
-     */
-    private static final void printUsage(int exitCode) {
-        HelpFormatter hf = new HelpFormatter();
-        hf.setWidth(80);
-        hf.printHelp("Help", options);
-        System.exit(exitCode);
     }
 }
