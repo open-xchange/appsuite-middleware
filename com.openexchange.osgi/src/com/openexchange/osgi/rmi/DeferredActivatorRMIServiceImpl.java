@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,77 @@
  *
  */
 
-package com.openexchange.osgi.osgi;
+package com.openexchange.osgi.rmi;
 
-import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.osgi.DeferredActivator;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.console.ServiceStateLookup;
-import com.openexchange.osgi.console.osgi.ConsoleActivator;
-import com.openexchange.osgi.rmi.DeferredActivatorRMIServiceImpl;
+import com.openexchange.osgi.console.ServiceState;
 
 /**
- * {@link OsgiActivator} - Activator for OSGi-Bundle
+ * {@link DeferredActivatorRMIServiceImpl}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class OsgiActivator extends HousekeepingActivator {
-
-    private volatile ConsoleActivator consoleActivator;
+public class DeferredActivatorRMIServiceImpl implements DeferredActivatorRMIService {
 
     /**
-     * Initializes a new {@link OsgiActivator}.
+     * Initialises a new {@link DeferredActivatorRMIServiceImpl}.
      */
-    public OsgiActivator() {
+    public DeferredActivatorRMIServiceImpl() {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.rmi.DeferredActivatorRMIService#listMissingServices(java.lang.String)
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public List<String> listMissingServices(String name) throws RemoteException {
+        ServiceState serviceState = DeferredActivator.getLookup().determineState(name);
+        return serviceState.getMissingServices();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.rmi.DeferredActivatorRMIService#listAllMissingServices()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OsgiActivator.class);
-        logger.info("starting bundle: com.openexchange.osgi");
-        try {
-            registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
-            registerService(Remote.class, new DeferredActivatorRMIServiceImpl());
-            openTrackers();
-            final ConsoleActivator consoleActivator = new ConsoleActivator();
-            consoleActivator.start(context);
-            this.consoleActivator = consoleActivator;
-        } catch (final Exception e) {
-            logger.error("OsgiActivator: start", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OsgiActivator.class);
-        logger.info("stopping bundle: com.openexchange.osgi");
-        try {
-            final ConsoleActivator consoleActivator = this.consoleActivator;
-            if (null != consoleActivator) {
-                consoleActivator.stop(context);
-                this.consoleActivator = null;
+    public Map<String, List<String>> listAllMissingServices() throws RemoteException {
+        Map<String, List<String>> res = new ConcurrentHashMap<String, List<String>>();
+        for (String bundleName : DeferredActivator.getLookup().getNames()) {
+            ServiceState serviceState = DeferredActivator.getLookup().determineState(bundleName);
+            List<String> list = serviceState.getMissingServices();
+            if (!list.isEmpty()) {
+                res.put(bundleName, list);
             }
-            cleanUp();
-        } catch (final Exception e) {
-            logger.error("OsgiActivator: stop", e);
-            throw e;
         }
+        return res;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.rmi.DeferredActivatorRMIService#isActive(java.lang.String)
+     */
+    @Override
+    public boolean isActive(String name) throws RemoteException {
+        ServiceState serviceState = DeferredActivator.getLookup().determineState(name);
+        return serviceState.getMissingServices().isEmpty();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.rmi.DeferredActivatorRMIService#listAvailableBundles()
+     */
+    @Override
+    public List<String> listAvailableBundles() throws RemoteException {
+        return DeferredActivator.getLookup().getNames();
     }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,50 @@
  *
  */
 
-package com.openexchange.osgi.osgi;
+package com.openexchange.osgi.rmi;
 
 import java.rmi.Remote;
-import com.openexchange.osgi.DeferredActivator;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.console.ServiceStateLookup;
-import com.openexchange.osgi.console.osgi.ConsoleActivator;
-import com.openexchange.osgi.rmi.DeferredActivatorRMIServiceImpl;
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
 
 /**
- * {@link OsgiActivator} - Activator for OSGi-Bundle
+ * {@link DeferredActivatorRMIService}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class OsgiActivator extends HousekeepingActivator {
+public interface DeferredActivatorRMIService extends Remote {
 
-    private volatile ConsoleActivator consoleActivator;
+    public static final String RMI_NAME = "DeferredActivatorRMIService";
 
     /**
-     * Initializes a new {@link OsgiActivator}.
+     * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available for specified bundle.
+     *
+     * @name The bundle name
+     * @return A list of canonical class names of missing services
      */
-    public OsgiActivator() {
-        super();
-    }
+    List<String> listMissingServices(String name) throws RemoteException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    /**
+     * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available.
+     *
+     * @return A canonical class names of missing services mapped to bundle
+     */
+    Map<String, List<String>> listAllMissingServices() throws RemoteException;
 
-    @Override
-    protected void startBundle() throws Exception {
-        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OsgiActivator.class);
-        logger.info("starting bundle: com.openexchange.osgi");
-        try {
-            registerService(ServiceStateLookup.class, DeferredActivator.getLookup());
-            registerService(Remote.class, new DeferredActivatorRMIServiceImpl());
-            openTrackers();
-            final ConsoleActivator consoleActivator = new ConsoleActivator();
-            consoleActivator.start(context);
-            this.consoleActivator = consoleActivator;
-        } catch (final Exception e) {
-            logger.error("OsgiActivator: start", e);
-            throw e;
-        }
-    }
+    /**
+     * Checks if activator for specified bundle is active; meaning all needed services are available.
+     *
+     * @name The bundle name
+     * @return <code>true</code> if active; otherwise <code>false</code>
+     */
+    boolean isActive(String name) throws RemoteException;
 
-    @Override
-    protected void stopBundle() throws Exception {
-        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OsgiActivator.class);
-        logger.info("stopping bundle: com.openexchange.osgi");
-        try {
-            final ConsoleActivator consoleActivator = this.consoleActivator;
-            if (null != consoleActivator) {
-                consoleActivator.stop(context);
-                this.consoleActivator = null;
-            }
-            cleanUp();
-        } catch (final Exception e) {
-            logger.error("OsgiActivator: stop", e);
-            throw e;
-        }
-    }
+    /**
+     * Lists all available bundles.
+     *
+     * @return All available bundles
+     */
+    List<String> listAvailableBundles() throws RemoteException;
 }
