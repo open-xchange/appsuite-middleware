@@ -47,47 +47,34 @@
  *
  */
 
-package com.openexchange.health.impl.osgi;
+package com.openexchange.health;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.health.NodeHealthCheck;
-import com.openexchange.health.NodeHealthCheckService;
 
 /**
- * {@link NodeHealthCheckTracker}
+ * {@link MWHealthCheck} - The health check interface
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class NodeHealthCheckTracker implements ServiceTrackerCustomizer<NodeHealthCheck, NodeHealthCheck> {
+public interface MWHealthCheck {
 
-    private final BundleContext context;
-    private final NodeHealthCheckService nodeHealthCheckService;
+    /**
+     * Gets the name of the health check
+     * @return The name
+     */
+    String getName();
 
-    public NodeHealthCheckTracker(BundleContext context, NodeHealthCheckService nodeHealthCheckService) {
-        super();
-        this.context = context;
-        this.nodeHealthCheckService = nodeHealthCheckService;
+    /**
+     * Gets the timeout for health check execution in milliseconds
+     * @return The timeout
+     */
+    default long getTimeout() {
+        return 30000L;
     }
-
-    @Override
-    public NodeHealthCheck addingService(ServiceReference<NodeHealthCheck> reference) {
-        NodeHealthCheck check = context.getService(reference);
-        nodeHealthCheckService.addCheck(check);
-        return check;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<NodeHealthCheck> reference, NodeHealthCheck service) {
-        // nothing to do
-    }
-
-    @Override
-    public void removedService(ServiceReference<NodeHealthCheck> reference, NodeHealthCheck service) {
-        nodeHealthCheckService.removeCheck(service);
-        context.ungetService(reference);
-    }
+    /**
+     * Executes the health check
+     * @return The health check response
+     */
+    MWHealthCheckResponse call();
 
 }

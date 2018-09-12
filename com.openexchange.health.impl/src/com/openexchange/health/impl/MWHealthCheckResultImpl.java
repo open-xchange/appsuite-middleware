@@ -47,65 +47,53 @@
  *
  */
 
-package com.openexchange.health.impl.osgi;
+package com.openexchange.health.impl;
 
-import org.eclipse.microprofile.health.HealthCheck;
-import org.eclipse.microprofile.health.HealthCheckResponse;
-import org.eclipse.microprofile.health.HealthCheckResponse.State;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.health.MWHealthCheck;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.health.MWHealthCheckResult;
 import com.openexchange.health.MWHealthCheckResponse;
-import com.openexchange.health.impl.MWHealthCheckResponseImpl;
-import com.openexchange.health.impl.MWHealthCheckServiceImpl;
+import com.openexchange.health.MWHealthState;
+
 
 /**
- * {@link HealthCheckTracker}
+ * {@link MWHealthCheckResultImpl}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class HealthCheckTracker implements ServiceTrackerCustomizer<HealthCheck, HealthCheck> {
+public class MWHealthCheckResultImpl implements MWHealthCheckResult {
 
-    private final BundleContext context;
-    private final MWHealthCheckServiceImpl healthCheckService;
+    private final MWHealthState overallState;
+    private final List<MWHealthCheckResponse> responses;
+    private final List<String> ignoredChecks;
+    private final List<String> skippedChecks;
 
-    public HealthCheckTracker(BundleContext context, MWHealthCheckServiceImpl healthCheckService) {
+    public MWHealthCheckResultImpl(MWHealthState overallState, List<MWHealthCheckResponse> responses, List<String> ignoredChecks, List<String> skippedChecks) {
         super();
-        this.context = context;
-        this.healthCheckService = healthCheckService;
+        this.overallState = overallState;
+        this.responses = responses;
+        this.ignoredChecks = ignoredChecks;
+        this.skippedChecks = skippedChecks;
+    }
+    @Override
+    public MWHealthState getStatus() {
+        return overallState;
     }
 
     @Override
-    public HealthCheck addingService(ServiceReference<HealthCheck> reference) {
-        HealthCheck check = context.getService(reference);
-        MWHealthCheck wrappingCheck = new MWHealthCheck() {
-
-            @Override
-            public String getName() {
-                return check.getClass().getName();
-            }
-
-            @Override
-            public MWHealthCheckResponse call() {
-                HealthCheckResponse response = check.call();
-                return new MWHealthCheckResponseImpl(getName(), response.getData().isPresent() ? response.getData().get() : null, State.UP.equals(response.getState()));
-            }
-        };
-        healthCheckService.addCheck(wrappingCheck);
-        return check;
+    public List<MWHealthCheckResponse> getChecks() {
+        return Collections.unmodifiableList(responses);
     }
 
     @Override
-    public void modifiedService(ServiceReference<HealthCheck> reference, HealthCheck service) {
-        // nothing to do
+    public List<String> getSkippedChecks() {
+        return Collections.unmodifiableList(skippedChecks);
     }
 
     @Override
-    public void removedService(ServiceReference<HealthCheck> reference, HealthCheck service) {
-        healthCheckService.removeCheck(service.getClass().getName());
-        context.ungetService(reference);
+    public List<String> getIgnoredResponses() {
+        return Collections.unmodifiableList(ignoredChecks);
     }
 
 }

@@ -53,6 +53,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -64,6 +65,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 import org.json.ImmutableJSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,10 +74,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.health.NodeHealthCheckProperty;
-import com.openexchange.health.NodeHealthCheckResponse;
-import com.openexchange.health.NodeHealthCheckService;
-import com.openexchange.health.NodeHealthState;
+import com.openexchange.health.MWHealthCheckResult;
+import com.openexchange.health.MWHealthCheckProperty;
+import com.openexchange.health.MWHealthCheckResponse;
+import com.openexchange.health.MWHealthCheckService;
+import com.openexchange.health.MWHealthState;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.rest.services.EndpointAuthenticator;
@@ -86,16 +89,16 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.version.Version;
 
 /**
- * {@link NodeHealthCheckRestEndpoint}
+ * {@link MWHealthCheckRestEndpoint}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
 @Path("/health")
 @RoleAllowed(Role.INDIVIDUAL_BASIC_AUTHENTICATED)
-public class NodeHealthCheckRestEndpoint implements EndpointAuthenticator {
+public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NodeHealthCheckRestEndpoint.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MWHealthCheckRestEndpoint.class);
 
     private static final JSONObject SIMPLE_UP_RESPONSE;
     static {
@@ -105,23 +108,30 @@ public class NodeHealthCheckRestEndpoint implements EndpointAuthenticator {
         SIMPLE_UP_RESPONSE = ImmutableJSONObject.immutableFor(simpleUpResponse);
     }
 
+    private static final JSONObject SIMPLE_DOWN_RESPONSE;
+    static {
+        JSONObject simpleUpResponse = new JSONObject(3);
+        simpleUpResponse.putSafe("status", "DOWN");
+        simpleUpResponse.putSafe("checks", JSONArray.EMPTY_ARRAY);
+        SIMPLE_DOWN_RESPONSE = ImmutableJSONObject.immutableFor(simpleUpResponse);
+    }
+
     private final ServiceLookup services;
 
-    public NodeHealthCheckRestEndpoint(ServiceLookup services) {
+    public MWHealthCheckRestEndpoint(ServiceLookup services) {
         super();
         this.services = services;
     }
 
     @GET
-    @Path("/")
     @Consumes(MediaType.WILDCARD)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getHealth() {
-        NodeHealthCheckService service = services.getService(NodeHealthCheckService.class);
-        Map<String, NodeHealthCheckResponse> result = null;
+        MWHealthCheckService service = services.getService(MWHealthCheckService.class);
+        MWHealthCheckResult result = null;
         try {
             if (null == service) {
-                throw ServiceExceptionCode.absentService(NodeHealthCheckService.class);
+                throw ServiceExceptionCode.absentService(MWHealthCheckService.class);
             }
             result = service.check();
         } catch (OXException e) {
@@ -129,21 +139,22 @@ public class NodeHealthCheckRestEndpoint implements EndpointAuthenticator {
             Response.serverError();
         }
 
-        if (null == result || result.size() == 0) {
+        if (null == result) {
             ResponseBuilder builder = Response.ok(SIMPLE_UP_RESPONSE, MediaType.APPLICATION_JSON);
             return builder.build();
         }
 
-        boolean overallStatus = true;
-        JSONObject jsonResponse = new JSONObject(2);
-        JSONArray responseArray = new JSONArray(result.size());
+        JSONObject jsonResponse = new JSONObject(4);
+        List<MWHealthCheckResponse> checkResponses = result.getChecks();
+        List<String> ignorelist = result.getIgnoredResponses();
+        List<String> blacklist = result.getSkippedChecks();
+        JSONArray responseArray = new JSONArray(checkResponses.size());
         try {
-            for (String healthCheckName : result.keySet()) {
-                NodeHealthCheckResponse response = result.get(healthCheckName);
-
+            jsonResponse.put("status", MWHealthState.UP.equals(result.getStatus()) ? "UP" : "DOWN");
+            for (MWHealthCheckResponse response : checkResponses) {
                 JSONObject health = new JSONObject(3);
-                boolean status = NodeHealthState.UP.equals(response.getState());
-                health.put("name", healthCheckName);
+                boolean status = MWHealthState.UP.equals(response.getState());
+                health.put("name", response.getName());
                 health.put("status", status ? "UP" : "DOWN");
                 Map<String, Object> data = response.getData();
                 if (null != data) {
@@ -153,19 +164,29 @@ public class NodeHealthCheckRestEndpoint implements EndpointAuthenticator {
                     }
                     health.put("data", obj);
                 }
-
-                if (!service.getIgnoreList().contains(healthCheckName)) {
-                    overallStatus &= status;
-                }
                 responseArray.put(health);
             }
-            jsonResponse.put("status", overallStatus ? "UP" : "DOWN");
             jsonResponse.put("checks", responseArray);
             jsonResponse.put("service", getServerInfo());
+            JSONArray ignoredChecks = new JSONArray(ignorelist.size());
+            for (String ignored : ignorelist) {
+                ignoredChecks.put(ignored);
+            }
+            jsonResponse.put("ignorelist", ignoredChecks);
+            JSONArray blacklistedChecks = new JSONArray(blacklist.size());
+            for (String blacklisted : blacklist) {
+                blacklistedChecks.put(blacklisted);
+            }
+            jsonResponse.put("blacklist", blacklist);
         } catch (JSONException e) {
             // will not happen
+        } catch (RuntimeException e) {
+            return Response.ok(SIMPLE_DOWN_RESPONSE, MediaType.APPLICATION_JSON).build();
         }
-        return Response.ok(jsonResponse, MediaType.APPLICATION_JSON).build();
+        if (MWHealthState.UP.equals(result.getStatus())) {
+            return Response.ok(jsonResponse, MediaType.APPLICATION_JSON).build();
+        }
+        return Response.status(Status.INTERNAL_SERVER_ERROR).entity(jsonResponse).type(MediaType.APPLICATION_JSON).build();
     }
 
     private JSONObject getServerInfo() throws JSONException {
@@ -213,8 +234,8 @@ public class NodeHealthCheckRestEndpoint implements EndpointAuthenticator {
         if (null == configurationService) {
             throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
         }
-        String username = configurationService.getProperty(NodeHealthCheckProperty.username);
-        String password = configurationService.getProperty(NodeHealthCheckProperty.password);
+        String username = configurationService.getProperty(MWHealthCheckProperty.username);
+        String password = configurationService.getProperty(MWHealthCheckProperty.password);
         return new Pair<String, String>(username, password);
     }
 

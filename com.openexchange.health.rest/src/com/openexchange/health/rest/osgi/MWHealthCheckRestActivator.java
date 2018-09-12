@@ -1,4 +1,3 @@
-package com.openexchange.health;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -48,33 +47,29 @@ package com.openexchange.health;
  *
  */
 
+package com.openexchange.health.rest.osgi;
+
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.health.MWHealthCheckService;
+import com.openexchange.health.rest.MWHealthCheckRestEndpoint;
+import com.openexchange.osgi.HousekeepingActivator;
+
 /**
- * {@link NodeHealthState}- The node health state enum
+ * {@link MWHealthCheckRestActivator}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public enum NodeHealthState {
+public class MWHealthCheckRestActivator extends HousekeepingActivator {
 
-    /**
-     * Node health state determining the node is running fine
-     */
-    UP("UP"),
-
-    /**
-     * Node health state determining the node is in trouble
-     */
-    DOWN("DOWN")
-    ;
-
-    private final String state;
-
-    private NodeHealthState(String state) {
-        this.state = state;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { MWHealthCheckService.class, LeanConfigurationService.class };
     }
 
-    public String getState() {
-        return state;
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(MWHealthCheckRestEndpoint.class, new MWHealthCheckRestEndpoint(this));
     }
 
 }

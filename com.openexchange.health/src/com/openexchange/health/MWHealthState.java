@@ -49,25 +49,33 @@
 
 package com.openexchange.health;
 
-
 /**
- * {@link NodeHealthCheck} - The node health check interface
+ * {@link MWHealthState}- The health state enum
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public interface NodeHealthCheck {
+public enum MWHealthState {
 
     /**
-     * Gets the name of the node health check
-     * @return The name
+     * Health state determining the middleware is running fine
      */
-    String getName();
+    UP("UP"),
 
     /**
-     * Executes the node health check
-     * @return The node health check response
+     * Health state determining the middleware is in trouble
      */
-    NodeHealthCheckResponse call();
+    DOWN("DOWN")
+    ;
+
+    private final String state;
+
+    private MWHealthState(String state) {
+        this.state = state;
+    }
+
+    public String getState() {
+        return state;
+    }
 
 }

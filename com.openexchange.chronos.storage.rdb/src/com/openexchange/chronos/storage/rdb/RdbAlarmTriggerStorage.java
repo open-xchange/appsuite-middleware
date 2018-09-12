@@ -275,6 +275,22 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
+    public void deleteTriggersById(List<Integer> alarmIds) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += deleteTriggersById(connection, alarmIds);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
     public void deleteTriggers(List<String> eventIds, int userId) throws OXException {
         int updated = 0;
         Connection connection = null;
@@ -382,6 +398,22 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             stmt.setInt(parameterIndex++, accountId);
             for (String id : ids) {
                 stmt.setString(parameterIndex++, id);
+            }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private int deleteTriggersById(Connection connection, List<Integer> alarmIds) throws SQLException {
+        if (null == alarmIds || 0 == alarmIds.size()) {
+            return 0;
+        }
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND alarm").append(getPlaceholders(alarmIds.size())).append(';');
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            for (Integer id : alarmIds) {
+                stmt.setInt(parameterIndex++, id);
             }
             return logExecuteUpdate(stmt);
         }
@@ -578,7 +610,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
             Event nextTriggerEvent = AlarmUtils.getNextTriggerEvent(event, alarm, new Date(), tz, recurrenceService);
             Date triggerTime = nextTriggerEvent == null ? null : AlarmUtils.getTriggerTime(alarm.getTrigger(), nextTriggerEvent, tz);
-            if (triggerTime == null) {
+            if (triggerTime == null || triggerTime.before(new Date())) {
                 return null;
             }
             addRelatedDate(alarm, event, trigger);
@@ -586,7 +618,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             trigger.setTime(triggerTime.getTime());
         } else {
             Date triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz);
-            if (triggerTime == null || (alarm.containsAcknowledged() && !alarm.getAcknowledged().before(triggerTime))) {
+            if (triggerTime == null || triggerTime.before(new Date()) || (alarm.containsAcknowledged() && !alarm.getAcknowledged().before(triggerTime))) {
                 return null;
             }
             trigger.setTime(triggerTime.getTime());

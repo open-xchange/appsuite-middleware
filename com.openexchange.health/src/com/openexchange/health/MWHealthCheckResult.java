@@ -47,55 +47,40 @@
  *
  */
 
-package com.openexchange.health.impl.osgi;
+package com.openexchange.health;
 
-import org.eclipse.microprofile.health.HealthCheck;
-import org.eclipse.microprofile.health.HealthCheckResponse;
-import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.health.NodeHealthCheck;
-import com.openexchange.health.NodeHealthCheckService;
-import com.openexchange.health.impl.HealthCheckResponseProviderImpl;
-import com.openexchange.health.impl.NodeHealthCheckServiceImpl;
-import com.openexchange.health.impl.checks.AllPluginsLoadedCheck;
-import com.openexchange.health.impl.checks.ConfigDBCheck;
-import com.openexchange.health.impl.checks.HazelcastCheck;
-import com.openexchange.health.impl.checks.JVMHeapCheck;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.pluginsloaded.PluginsLoadedService;
-import com.openexchange.threadpool.ThreadPoolService;
+import java.util.List;
 
 /**
- * {@link NodeHealthCheckActivator}
+ * {@link MWHealthCheckResult}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class NodeHealthCheckActivator extends HousekeepingActivator {
+public interface MWHealthCheckResult {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class, PluginsLoadedService.class, LeanConfigurationService.class,
-            DatabaseService.class };
-    }
+    /**
+     * The overall status of health checks
+     * @return The overall status
+     */
+    MWHealthState getStatus();
 
-    @Override
-    protected void startBundle() throws Exception {
-        NodeHealthCheckService service = new NodeHealthCheckServiceImpl(this);
-        registerService(NodeHealthCheckService.class, service);
+    /**
+     * Gets all responses of executed health checks
+     * @return The health check responses
+     */
+    List<MWHealthCheckResponse> getChecks();
 
-        registerService(NodeHealthCheck.class, new AllPluginsLoadedCheck(this));
-        registerService(NodeHealthCheck.class, new ConfigDBCheck(this));
-        registerService(NodeHealthCheck.class, new HazelcastCheck(this));
-        registerService(NodeHealthCheck.class, new JVMHeapCheck());
+    /**
+     * Gets a list of skipped checks
+     * @return The skipped checks
+     */
+    List<String> getSkippedChecks();
 
-        HealthCheckResponse.setResponseProvider(new HealthCheckResponseProviderImpl());
-
-        track(NodeHealthCheck.class, new NodeHealthCheckTracker(context, service));
-        track(HealthCheck.class, new HealthCheckTracker(context, service));
-        track(HazelcastInstance.class);
-        openTrackers();
-    }
+    /**
+     * Gets a list of ignored checks
+     * @return The ignored checks
+     */
+    List<String> getIgnoredResponses();
 
 }

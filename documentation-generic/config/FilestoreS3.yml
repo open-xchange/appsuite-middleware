@@ -108,11 +108,17 @@ properties:
 
     - key: com.openexchange.filestore.s3.[filestoreID].encryption
       description: |
-        Optionally specifies which client-side encryption should be used. Current
-        options include <code>none</code> for no encryption, or <code>rsa</code> for an RSA-based asymmetric
-        encryption.  
-        Please note that depending on the used key length and Java runtime, one
-        might need to replace the so-called "JCE Unlimited Strength Jurisdiction
+        Optionally specifies which encryption mechanism(s) should be used. Current 
+        options include:
+          - <code>none</code>: no encryption
+          - <code>rsa</code>: Client-Side Encryption with Client-Side Master Key based on RSA
+          - <code>sse-s3</code>: Server-Side Encryption with S3-Managed Keys (SSE-S3)
+        
+        One client-side and one server-side mechanism can be combined by specifying
+        both mechanisms separated by the "+" character. Example: "rsa+sse-s3".
+        
+        Please note that depending on the used key length and Java runtime, one 
+        might need to replace the so-called "JCE Unlimited Strength Jurisdiction 
         Policy Files" accordingly.
       defaultValue: none
       version: 
@@ -200,16 +206,4 @@ properties:
       related:
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
-      tags: ["Filestore", "Metrics"]
-      
-    - key: com.openexchange.filestore.s3.[filestoreID].sse.encryption
-      description: Enables server side encryption.
-      defaultValue: false
-      version: 7.10.1
-      reloadable: false
-      configcascadeAware: false
-      related:
-      file: filestore-s3.properties
-      packageName: open-xchange-filestore-s3
-      tags: ["Filestore", "Encryption"]
-      
+      tags: ["Filestore", "Metrics"]  
