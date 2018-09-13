@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 import java.rmi.RemoteException;
+import java.util.Collections;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,10 +90,20 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearContextSessionsGlobally(int)
+     */
+    @Override
+    public void clearContextSessionsGlobally(int contextId) throws RemoteException {
+        clearContextSessionsGlobally(Collections.singleton(contextId));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearContextSessionsGlobal(java.util.Set)
      */
     @Override
-    public void clearContextSessionsGlobal(Set<Integer> contextIds) throws RemoteException {
+    public void clearContextSessionsGlobally(Set<Integer> contextIds) throws RemoteException {
         SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
         try {
             sessiondService.removeContextSessionsGlobal(contextIds);

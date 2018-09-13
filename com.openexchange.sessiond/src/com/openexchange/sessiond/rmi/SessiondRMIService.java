@@ -92,11 +92,18 @@ public interface SessiondRMIService extends Remote {
     void clearContextSessions(int contextId) throws RemoteException;
 
     /**
+     * Clears all sessions belonging to given context.
+     *
+     * @param contextId The context identifier to remove sessions for
+     */
+    void clearContextSessionsGlobally(int contextId) throws RemoteException;
+
+    /**
      * Clears all sessions belonging to given contexts.
      *
      * @param contextId The context identifiers to remove sessions for
      */
-    void clearContextSessionsGlobal(Set<Integer> contextIds) throws RemoteException;
+    void clearContextSessionsGlobally(Set<Integer> contextIds) throws RemoteException;
 
     /**
      * Clear all sessions in central session storage. This does not affect the local short term session container.

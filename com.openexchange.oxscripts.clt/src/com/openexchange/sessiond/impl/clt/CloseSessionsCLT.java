@@ -62,14 +62,13 @@ import com.openexchange.sessiond.rmi.SessiondRMIService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-// TODO: Maybe enhance the command line tool over functionality that 
-//       clears global context sessions as well as clearing the session storage...
 public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "closesessions [-c <contextId>] [-u <userId>] [-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
+    private static final String SYNTAX = "closesessions [-c <contextId>] [-u <userId>] [-g] [-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
 
     private int contextId;
     private int userId;
+    private boolean global;
 
     /**
      * Entry point
@@ -101,12 +100,14 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
         if (cmd.hasOption('u')) {
             userId = parseInt('u', -1, cmd, options);
         }
+        global = cmd.hasOption('g');
     }
 
     @Override
     protected void addOptions(Options options) {
         options.addOption(createOption("c", "context", true, "A valid context identifier", true));
         options.addOption(createOption("u", "user", true, "A valid user identifier", false));
+        options.addOption(createOption("g", "global", false, "Switch instructing the tool to perform a global session clean-up ", false));
     }
 
     @Override
@@ -143,12 +144,22 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         SessiondRMIService rmiService = getRmiStub(optRmiHostName, SessiondRMIService.RMI_NAME);
         if (userId > 0) {
-            rmiService.clearUserSessions(Integer.valueOf(contextId), Integer.valueOf(userId));
-            System.out.println("Cleared sessions for user " + userId + " in context " + contextId);
+            if (global) {
+                rmiService.clearUserSessionsGlobally(Integer.valueOf(contextId), Integer.valueOf(userId));
+                System.out.println("Globally cleared sessions for user " + userId + " in context " + contextId);
+            } else {
+                rmiService.clearUserSessions(Integer.valueOf(contextId), Integer.valueOf(userId));
+                System.out.println("Locally cleared sessions for user " + userId + " in context " + contextId);
+            }
             return null;
         }
-        rmiService.clearContextSessions(Integer.valueOf(contextId));
-        System.out.println("Cleared sessions for context " + contextId);
+        if (global) {
+            rmiService.clearContextSessionsGlobally(Integer.valueOf(contextId));
+            System.out.println("Globally cleared sessions for context " + contextId);
+        } else {
+            rmiService.clearContextSessions(Integer.valueOf(contextId));
+            System.out.println("Locally cleared sessions for context " + contextId);
+        }
         return null;
     }
 }
