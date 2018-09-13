@@ -91,37 +91,22 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
     @Override
     protected void checkOptions(CommandLine cmd) {
-        // Parse context identifier
         if (false == cmd.hasOption('c')) {
             System.err.println("Missing context identifier.");
             printHelp(options);
             System.exit(1);
         }
-        String contextOptionValue = cmd.getOptionValue('c');
-        try {
-            contextId = Integer.parseInt(contextOptionValue.trim());
-        } catch (final NumberFormatException e) {
-            System.err.println("Context identifier parameter is not a number: " + contextOptionValue);
-            printHelp(options);
-            System.exit(1);
-        }
 
+        contextId = parseInt('c', -1, cmd, options);
         if (cmd.hasOption('u')) {
-            String userPptionValue = cmd.getOptionValue('u');
-            try {
-                userId = Integer.parseInt(userPptionValue);
-            } catch (Exception e) {
-                System.err.println("User identifier parameter is not a number: " + userPptionValue);
-                printHelp(options);
-                System.exit(1);
-            }
+            userId = parseInt('u', -1, cmd, options);
         }
     }
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption("c", "context", true, "A valid context identifier");
-        options.addOption("u", "user", true, "A valid user identifier");
+        options.addOption(createOption("c", "context", true, "A valid context identifier", true));
+        options.addOption(createOption("u", "user", true, "A valid user identifier", false));
     }
 
     @Override
