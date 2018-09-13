@@ -61,6 +61,7 @@ import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
 import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -88,12 +89,12 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { GeoLocationService.class, ManagementService.class, TimerService.class, MetricService.class };
+        return new Class<?>[] { GeoLocationService.class, ManagementService.class, TimerService.class, MetricService.class, SessiondService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        CountryCodeIpChecker service = new CountryCodeIpChecker(getServiceSafe(GeoLocationService.class), new IPCheckMetricCollector(getServiceSafe(MetricService.class)));
+        CountryCodeIpChecker service = new CountryCodeIpChecker(this, new IPCheckMetricCollector(getServiceSafe(MetricService.class)));
         registerService(IPChecker.class, service);
 
         ObjectName objectName = new ObjectName(IPCheckMBean.NAME);

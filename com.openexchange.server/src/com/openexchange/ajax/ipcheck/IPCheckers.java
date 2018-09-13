@@ -213,5 +213,4 @@ public class IPCheckers {
         LOG.info("Request to server denied (IP check activated) for session: {}. Client login IP changed from {} to {} and is not covered by IP white-list or netmask.", session.getSessionID(), session.getLocalIp(), (null == current ? "<missing>" : current));
         throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
     }
-
 }

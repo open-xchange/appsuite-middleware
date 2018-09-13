@@ -67,7 +67,9 @@ import com.openexchange.geolocation.GeoLocationExceptionCodes;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
 import com.openexchange.management.MetricAware;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link CountryCodeIpChecker}
@@ -80,17 +82,17 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CountryCodeIpChecker.class);
 
-    private final GeoLocationService service;
     private IPCheckMetricCollector metricCollector;
+    private ServiceLookup services;
 
     /**
      * Initializes a new {@link CountryCodeIpChecker}.
      *
      * @param metricCollector The {@link IPCheckMetricCollector}
      */
-    public CountryCodeIpChecker(GeoLocationService service, IPCheckMetricCollector metricCollector) {
+    public CountryCodeIpChecker(ServiceLookup services, IPCheckMetricCollector metricCollector) {
         super();
-        this.service = service;
+        this.services = services;
         this.metricCollector = metricCollector;
     }
 
@@ -114,8 +116,8 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             accept(current, previous, session, whiteListedClient, AcceptReason.WHITE_LISTED);
             return;
         }
-
         try {
+            GeoLocationService service = services.getServiceSafe(GeoLocationService.class);
             GeoInformation geoInformationCurrent = service.getGeoInformation(current);
             GeoInformation geoInformationPrevious = service.getGeoInformation(previous);
 
@@ -205,6 +207,20 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
      * @throws OXException To actually kick the session
      */
     private void deny(String current, String previous, Session session, DenyReason reason, Throwable t) throws OXException {
+        SessiondService service = services.getService(SessiondService.class);
+        if (null == service) {
+            // Kick anyway to ensure the proper exception is thrown
+            IPCheckers.kick(current, session);
+            return;
+        }
+
+        if (null == service.getSession(session.getSessionID())) {
+            // Kick anyway to ensure the proper exception is thrown
+            IPCheckers.kick(current, session);
+            return;
+        }
+
+        // Only increase metrics when the session was not previously kicked
         if (null == t) {
             LOGGER.debug("The IP change from '{}' to '{}' was denied. Reason: '{}'", previous, current, reason.getMessage());
         } else {
@@ -221,6 +237,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             default:
                 break;
         }
+
         metricCollector.incrementTotalIPChanges();
         metricCollector.incrementDeniedIPChanges();
         IPCheckers.kick(current, session);
