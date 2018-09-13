@@ -58,6 +58,7 @@ import org.junit.Test;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.file.storage.Quota;
+import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ConfigResponse;
 import com.openexchange.testing.httpclient.models.DriveAction;
@@ -165,7 +166,9 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
     @Test
     public void testSyncFiles_quotaRequested() throws ApiException {
         DriveSyncFilesBody body = new DriveSyncFilesBody();
-        DriveExtendedActionsResponse syncFiles = driveApi.syncFiles(apiClient.getSession(), infostoreFolder, null, body, null, 2, null, Boolean.TRUE, null, null, null);
+        DriveSubfoldersResponse synchronizableFolders = driveApi.getSynchronizableFolders(apiClient.getSession(), infostoreFolder);
+        String path = synchronizableFolders.getData().get(0).getPath();
+        DriveExtendedActionsResponse syncFiles = driveApi.syncFiles(apiClient.getSession(), infostoreFolder, path, body, null, 2, null, Boolean.TRUE, null, null, null);
 
         //        assertNotNull(syncFiles.getData().getQuota());
     }
@@ -197,5 +200,8 @@ public class QuotaForSyncTest extends AbstractAPIClientSession {
         }
         assertTrue(foundStorage);
         assertTrue(foundFile);
+
+        String manageLink = quotaResponse.getData().getManageLink();
+        assertTrue(Strings.isNotEmpty(manageLink));
     }
 }

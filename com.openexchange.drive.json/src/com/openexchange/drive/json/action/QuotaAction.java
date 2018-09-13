@@ -49,17 +49,17 @@
 
 package com.openexchange.drive.json.action;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.internal.DriveQuota2JsonHandler;
+import com.openexchange.drive.json.internal.DriveJSONUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-
 
 /**
  * {@link QuotaAction}
@@ -86,7 +86,11 @@ public class QuotaAction extends AbstractDriveAction {
          */
         try {
             JSONObject jsonObject = new JSONObject();
-            DriveQuota2JsonHandler.process(jsonObject, quota);
+            if (quota != null) {
+                JSONArray quotaAsJSON = DriveJSONUtils.serializeQuota(quota);
+                jsonObject.put("quota", quotaAsJSON);
+                jsonObject.put("manageLink", quota.getManageLink());
+            }
             return new AJAXRequestResult(jsonObject, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

@@ -50,6 +50,7 @@
 package com.openexchange.drive.json.action;
 
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -58,7 +59,7 @@ import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.internal.DriveQuota2JsonHandler;
+import com.openexchange.drive.json.internal.DriveJSONUtils;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonDirectoryVersion;
 import com.openexchange.drive.json.json.JsonDriveAction;
@@ -120,7 +121,8 @@ public class SyncFoldersAction extends AbstractDriveAction {
                     jsonObject.put("diagnostics", syncResult.getDiagnostics());
                 }
                 if (includeQuota) {
-                    DriveQuota2JsonHandler.process(jsonObject, syncResult.getQuota());
+                    JSONArray quotaAsJSON = DriveJSONUtils.serializeQuota(syncResult.getQuota());
+                    jsonObject.put("quota", quotaAsJSON);
                 }
                 jsonObject.put("actions", JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()));
                 return new AJAXRequestResult(jsonObject, "json");
