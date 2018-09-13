@@ -230,10 +230,11 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             IPCheckers.kick(current, session);
             return;
         }
-
-        synchronized (session) {
+        
+        String sessionId = session.getSessionID();
+        synchronized (sessionId) {
             // Only increase metrics when the session was not previously kicked
-            if (null != service.getSession(session.getSessionID())) {
+            if (null != service.getSession(sessionId)) {
                 metricCollector.incrementTotalIPChanges();
                 metricCollector.incrementDeniedIPChanges();
             }
