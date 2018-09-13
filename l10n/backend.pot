@@ -200,6 +200,7 @@ msgstr ""
 #.
 #. Reminder
 #: com.openexchange.chronos.alarm.mail/src/com/openexchange/chronos/alarm/mail/impl/MailAlarmMailStrings.java:63
+#: com.openexchange.chronos.alarm.sms/src/com/openexchange/chronos/alarm/sms/SMSAlarmStrings.java:63
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:87
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:636
 msgid "Reminder"
