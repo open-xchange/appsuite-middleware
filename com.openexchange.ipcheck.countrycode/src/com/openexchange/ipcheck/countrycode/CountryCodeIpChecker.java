@@ -207,20 +207,6 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
      * @throws OXException To actually kick the session
      */
     private void deny(String current, String previous, Session session, DenyReason reason, Throwable t) throws OXException {
-        SessiondService service = services.getService(SessiondService.class);
-        if (null == service) {
-            // Kick anyway to ensure the proper exception is thrown
-            IPCheckers.kick(current, session);
-            return;
-        }
-
-        if (null == service.getSession(session.getSessionID())) {
-            // Kick anyway to ensure the proper exception is thrown
-            IPCheckers.kick(current, session);
-            return;
-        }
-
-        // Only increase metrics when the session was not previously kicked
         if (null == t) {
             LOGGER.debug("The IP change from '{}' to '{}' was denied. Reason: '{}'", previous, current, reason.getMessage());
         } else {
@@ -238,8 +224,20 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
                 break;
         }
 
-        metricCollector.incrementTotalIPChanges();
-        metricCollector.incrementDeniedIPChanges();
+        SessiondService service = services.getService(SessiondService.class);
+        if (null == service) {
+            // Kick anyway to ensure the proper exception is thrown
+            IPCheckers.kick(current, session);
+            return;
+        }
+
+        synchronized (session) {
+            // Only increase metrics when the session was not previously kicked
+            if (null != service.getSession(session.getSessionID())) {
+                metricCollector.incrementTotalIPChanges();
+                metricCollector.incrementDeniedIPChanges();
+            }
+        }
         IPCheckers.kick(current, session);
     }
 
