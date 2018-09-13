@@ -47,12 +47,15 @@
  *
  */
 
-package com.openexchange.password.mechanism.impl;
+package com.openexchange.password.mechanism.impl.mech;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import com.openexchange.exception.OXException;
-import com.openexchange.password.mechanism.PasswordMechExceptionCode;
-import com.openexchange.password.mechanism.algorithm.SHACrypt;
+import com.openexchange.java.Strings;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
+import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
 
 /**
  * {@link SHAMech}
@@ -60,7 +63,7 @@ import com.openexchange.password.mechanism.algorithm.SHACrypt;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
  * @since v7.10.1
  */
-public class SHAMech extends AbstractPasswordMech {
+public class SHAMech extends ConfigAwarePasswordMech {
 
     private final SHACrypt crypt;
 
@@ -70,28 +73,49 @@ public class SHAMech extends AbstractPasswordMech {
      * @param crypt The {@link SHACrypt} to use
      */
     public SHAMech(SHACrypt crypt) {
-        super(crypt.getPasswordMech());
+        super(crypt.getIdentifier(), crypt.getAlternativeIdentifiers());
         this.crypt = crypt;
     }
 
     @Override
-    public String encode(String str) throws OXException {
+    public PasswordDetails encode(String str) throws OXException {
         try {
-            return crypt.makeSHAPasswd(str);
+            if (doSalt()) {
+                String salt = Base64.getUrlEncoder().withoutPadding().encodeToString(getSalt());
+                return new PasswordDetails(str, crypt.makeSHAPasswd(str, salt), getIdentifier(), salt);
+            }
+            return new PasswordDetails(str, crypt.makeSHAPasswd(str), getIdentifier(), null);
         } catch (NoSuchAlgorithmException e) {
             LOGGER.error("Error encrypting password according to SHA mechanism", e);
-            throw PasswordMechExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
     }
 
     @Override
-    public boolean checkPassword(String candidate, String encoded) throws OXException {
+    public boolean checkPassword(String candidate, String encoded, String salt) throws OXException {
         try {
-            return crypt.makeSHAPasswd(candidate).equals(encoded);
+            if (Strings.isEmpty(salt)) {
+                return crypt.makeSHAPasswd(candidate).equals(encoded);
+            }
+            return crypt.makeSHAPasswd(candidate, salt).equals(encoded);
         } catch (NoSuchAlgorithmException e) {
             LOGGER.error("Error checking password according to SHA mechanism", e);
-            throw PasswordMechExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * Returns not the full possible length as the following Base64 encoding will enhance the length
+     */
+    @Override
+    public int getHashLength() {
+        if (this.crypt == SHACrypt.SHA1) {
+            return 16;
+        } else if (this.crypt == SHACrypt.SHA256) {
+            return 32;
+        }
+        return 64;
+    }
 }

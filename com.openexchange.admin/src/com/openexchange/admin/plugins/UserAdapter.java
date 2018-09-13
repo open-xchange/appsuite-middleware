@@ -85,6 +85,11 @@ public class UserAdapter implements User {
     }
 
     @Override
+    public String getSalt() {
+        return delegate.getSalt();
+    }
+
+    @Override
     public int getId() {
         return delegate.getId();
     }

@@ -119,7 +119,8 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.password.mechanism.IPasswordMech;
-import com.openexchange.password.mechanism.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 
 /**
  * @author d7
@@ -1279,10 +1280,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             final String mech = cache.getAdminAuthMech(ctx);
             try {
-                PasswordMechFactory mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechFactory.class, true);
+                PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
                 IPasswordMech passwordMech = mechFactory.get(mech);
                 if (null != passwordMech) {
-                    cauth.setPassword(passwordMech.encode(usrdata.getPassword()));
+                    PasswordDetails passwordDetails = passwordMech.encode(usrdata.getPassword());
+                    cauth.setPassword(passwordDetails.getEncodedPassword());
+                    cauth.setSalt(passwordDetails.getSalt());
+                    cauth.setPasswordMech(passwordDetails.getPasswordMech());
                 } else {
                     IllegalStateException e = new IllegalStateException("There must be a useable password mechanism.");
                     LOGGER.error("Error encrypting password for credential cache.", e);

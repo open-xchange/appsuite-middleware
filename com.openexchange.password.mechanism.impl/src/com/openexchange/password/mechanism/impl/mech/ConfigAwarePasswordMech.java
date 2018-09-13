@@ -47,47 +47,39 @@
  *
  */
 
-package com.openexchange.password.mechanism.impl;
+package com.openexchange.password.mechanism.impl.mech;
 
-import java.io.UnsupportedEncodingException;
-import com.openexchange.exception.OXException;
-import com.openexchange.password.mechanism.PasswordMech;
-import com.openexchange.password.mechanism.PasswordMechExceptionCode;
-import com.openexchange.password.mechanism.algorithm.UnixCrypt;
+import java.util.List;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.password.mechanism.AbstractPasswordMech;
+import com.openexchange.password.mechanism.impl.osgi.Services;
 
 /**
- * {@link CryptMech}
+ * 
+ * {@link ConfigAwarePasswordMech}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public class CryptMech extends AbstractPasswordMech {
+public abstract class ConfigAwarePasswordMech extends AbstractPasswordMech {
 
-    /**
-     * Initializes a new {@link CryptMech}.
-     */
-    public CryptMech() {
-        super(PasswordMech.CRYPT);
+    //FIXME REMOVE THIS OPTION WHEN SALT IS DEFAULT
+    private static final String COM_OPENEXCHANGE_PASSWORD_MECHANISM_SALT_ENABLED = "com.openexchange.password.mechanism.salt.enabled";
+
+    public ConfigAwarePasswordMech(String mechIdentifier) {
+        super(mechIdentifier);
     }
 
-    @Override
-    public String encode(String str) throws OXException {
-        try {
-            return UnixCrypt.crypt(str);
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("Error encrypting password according to CRYPT mechanism", e);
-            throw PasswordMechExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+    public ConfigAwarePasswordMech(String mechIdentifier, List<String> alternativeIdentifiers) {
+        super(mechIdentifier, alternativeIdentifiers);
+    }
+
+    //FIXME REMOVE THIS OPTION WHEN SALT IS DEFAULT
+    protected boolean doSalt() {
+        ConfigurationService configService = Services.optService(ConfigurationService.class);
+        if (configService == null) {
+            return false;
         }
+        return configService.getBoolProperty(COM_OPENEXCHANGE_PASSWORD_MECHANISM_SALT_ENABLED, false);
     }
-
-    @Override
-    public boolean checkPassword(String candidate, String encoded) throws OXException {
-        try {
-            return UnixCrypt.matches(encoded, candidate);
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("Error checking password according to CRYPT mechanism", e);
-            throw PasswordMechExceptionCode.UNSUPPORTED_ENCODING.create(e, e.getMessage());
-        }
-    }
-
 }

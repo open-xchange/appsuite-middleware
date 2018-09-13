@@ -47,46 +47,52 @@
  *
  */
 
-package com.openexchange.password.mechanism.impl;
+package com.openexchange.password.mechanism.impl.mech;
 
-import static com.openexchange.password.mechanism.impl.PasswordMechUtil.adaptIdentifier;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
 import com.openexchange.password.mechanism.IPasswordMech;
-import com.openexchange.password.mechanism.PasswordMechFactory;
-import com.openexchange.password.mechanism.algorithm.SHACrypt;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
 
 /**
- * {@link PasswordMechFactoryImpl}
+ * {@link PasswordMechRegistryImpl}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class PasswordMechFactoryImpl implements PasswordMechFactory, Reloadable {
+public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadable {
 
-    private final Map<String, IPasswordMech> registeredPasswordMechs = new HashMap<String, IPasswordMech>();
+    private final static Logger LOG = LoggerFactory.getLogger(PasswordMechRegistryImpl.class);
+
+    private final Map<String, IPasswordMech> registeredPasswordMechs = new ConcurrentSkipListMap<String, IPasswordMech>(String.CASE_INSENSITIVE_ORDER);
+
+    private final Map<String, IPasswordMech> alternatives = new ConcurrentSkipListMap<String, IPasswordMech>(String.CASE_INSENSITIVE_ORDER);
 
     // -----------------------------------------------------------------------------------
 
     // Dirty hack to keep 'GenerateMasterPasswordCLT' working
 
-    private final static PasswordMechFactoryImpl INSTANCE = new PasswordMechFactoryImpl();
+    private final static PasswordMechRegistryImpl INSTANCE = new PasswordMechRegistryImpl();
 
-    public static PasswordMechFactory getInstance() {
+    public static PasswordMechRegistry getInstance() {
         return INSTANCE;
     }
 
-    private PasswordMechFactoryImpl() {
+    private PasswordMechRegistryImpl() {
         super();
         register(new SHAMech(SHACrypt.SHA1), defaultMech, new SHAMech(SHACrypt.SHA512), new BCryptMech(), new CryptMech());
     }
-
-    // -----------------------------------------------------------------------------------
 
     /**
      * {@inheritDoc}
@@ -96,6 +102,9 @@ public class PasswordMechFactoryImpl implements PasswordMechFactory, Reloadable 
         for (IPasswordMech mech : passwordMech) {
             String id = adaptIdentifier(mech.getIdentifier());
             registeredPasswordMechs.put(id, mech);
+            for (String alternativeIdentifier : mech.getAlternativeIdentifiers()) {
+                alternatives.put(alternativeIdentifier, mech);
+            }
         }
     }
 
@@ -105,10 +114,12 @@ public class PasswordMechFactoryImpl implements PasswordMechFactory, Reloadable 
     @Override
     public IPasswordMech get(String identifier) {
         String id = adaptIdentifier(identifier);
-        return registeredPasswordMechs.get(id);
+        IPasswordMech iPasswordMech = registeredPasswordMechs.get(id);
+        if (iPasswordMech == null) {
+            iPasswordMech = alternatives.get(id);
+        }
+        return iPasswordMech;
     }
-
-    // -----------------------------------------------------------------------------------
 
     private IPasswordMech defaultMech = new SHAMech(SHACrypt.SHA256);
 
@@ -117,18 +128,38 @@ public class PasswordMechFactoryImpl implements PasswordMechFactory, Reloadable 
         return defaultMech;
     }
 
-    public void setDefaultMech(String mechansimName) {
-        if (Strings.isNotEmpty(mechansimName)) {
-            String mech = adaptIdentifier(mechansimName);
+    public void setDefaultMech(String identifier) {
+        if (Strings.isNotEmpty(identifier)) {
+            String mech = adaptIdentifier(identifier);
             if (registeredPasswordMechs.containsKey(mech)) {
                 defaultMech = registeredPasswordMechs.get(mech);
+                return;
             }
         }
+        LOG.warn("Unable to find a registered implementation for the provided password mechanism '{}'. Will use the default {}. Available password mechanisms are: {}", identifier, defaultMech.getIdentifier(), String.join(",", getApplicableIdentifiers()));
+        defaultMech = new SHAMech(SHACrypt.SHA256);
+    }
+
+    /**
+     * Adapts the given identifier to the expected (internal) format.
+     *
+     * @param identifier The given identifier
+     * @return the expected identifier that looks like {UPPER_CASE_MECHANISM}
+     */
+    private static String adaptIdentifier(String identifier) {
+        String id = Strings.toUpperCase(identifier);
+        if (!id.startsWith("{")) {
+            id = new StringBuilder(id.length() + 1).append('{').append(id).toString();
+        }
+        if (!id.endsWith("}")) {
+            id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
+        }
+        return id;
     }
 
     // -----------------------------------------------------------------------------------
 
-    private final static String DEFAULT_MECH = "com.openexchange.password.mechanism.default";
+    private final static String DEFAULT_MECH = "DEFAULT_PASSWORD_MECHANISM";
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
@@ -140,4 +171,29 @@ public class PasswordMechFactoryImpl implements PasswordMechFactory, Reloadable 
         return Reloadables.interestsForProperties(DEFAULT_MECH);
     }
 
+    @Override
+    public List<IPasswordMech> getAll() {
+        return new ArrayList<IPasswordMech>(registeredPasswordMechs.values());
+    }
+
+    @Override
+    public List<String> getApplicableIdentifiers() {
+        List<String> knownIdentifiers = registeredPasswordMechs.keySet().stream().collect(Collectors.toList());
+        knownIdentifiers.addAll(alternatives.keySet().stream().collect(Collectors.toList()));
+        return knownIdentifiers;
+    }
+
+    @Override
+    public List<String> getIdentifiers() {
+        return registeredPasswordMechs.keySet().stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public void unregister(IPasswordMech passwordMech) {
+        String id = adaptIdentifier(passwordMech.getIdentifier());
+        registeredPasswordMechs.remove(id);
+        for (String alternativeIdentifier : passwordMech.getAlternativeIdentifiers()) {
+            alternatives.remove(alternativeIdentifier);
+        }
+    }
 }

@@ -118,11 +118,11 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
 
-    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, homeDirectory, loginShell, guestCreatedBy, filestore_id, filestore_owner, filestore_name, filestore_login, filestore_passwd, quota_max) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, homeDirectory, loginShell, guestCreatedBy, filestore_id, filestore_owner, filestore_name, filestore_login, filestore_passwd, quota_max, salt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
 
-    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ? WHERE cid = ? AND id = ?";
+    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ?, salt = ? WHERE cid = ? AND id = ?";
 
     /**
      * Default constructor.
@@ -251,6 +251,7 @@ public class RdbUserStorage extends UserStorage {
                 setStringOrNull(i++, stmt, null); // filestore_password
                 stmt.setLong(i++, 0); // quota_max
             }
+            setStringOrNull(i++, stmt, user.getSalt()); // salt
 
             stmt.executeUpdate();
 
@@ -518,7 +519,7 @@ public class RdbUserStorage extends UserStorage {
                 ResultSet result = null;
                 try {
                     final int[] currentUserIds = Arrays.extract(userIds, i, IN_LIMIT);
-                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain,shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy,filestore_id,filestore_owner,filestore_name,filestore_login,filestore_passwd,quota_max FROM user WHERE user.cid=? AND id IN (", currentUserIds.length));
+                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain,shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy,filestore_id,filestore_owner,filestore_name,filestore_login,filestore_passwd,quota_max,salt FROM user WHERE user.cid=? AND id IN (", currentUserIds.length));
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     for (final int userId : currentUserIds) {
@@ -561,6 +562,10 @@ public class RdbUserStorage extends UserStorage {
                                 quotaMax = -1L;
                             }
                             user.setFileStorageQuota(quotaMax);
+                        }
+                        {
+                            String salt = result.getString(pos++);
+                            user.setSalt(salt);
                         }
 
                         users.put(user.getId(), user);
@@ -920,20 +925,20 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updatePasswordInternal(Context context, int userId, IPasswordMech mech, String password) throws OXException {
+    private void updatePasswordInternal(Context context, int userId, IPasswordMech mech, String password, String salt) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
-            updatePasswordInternal(con, context, userId, mech, password);
+            updatePasswordInternal(con, context, userId, mech, password, salt);
         } finally {
             DBPool.closeWriterSilent(context, con);
         }
     }
 
     @Override
-    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException {
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password, String salt) throws OXException {
         if (connection == null) {
-            updatePasswordInternal(context, userId, mech, password);
+            updatePasswordInternal(context, userId, mech, password, salt);
             return;
         }
 
@@ -943,6 +948,7 @@ public class RdbUserStorage extends UserStorage {
             int pos = 1;
             stmt.setString(pos++, password);
             stmt.setString(pos++, mech != null ? mech.getIdentifier() : "");
+            stmt.setString(pos++, salt);
             stmt.setInt(pos++, context.getContextId());
             stmt.setInt(pos++, userId);
             stmt.execute();

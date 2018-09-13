@@ -47,46 +47,43 @@
  *
  */
 
-package com.openexchange.password.mechanism;
+package com.openexchange.password.mechanism.impl.mech;
+
+import com.damienmiller.BCrypt;
+import com.openexchange.password.mechanism.PasswordDetails;
 
 /**
- * Factory to register available {@link IPasswordMech} implementations that can be retrieved via com.openexchange.passwordmechs.PasswordMechFactory.get(String) by giving the crypt mechanism identifier.
+ * {@link BCryptMech}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
+ * @since v7.10.1
  */
-public interface PasswordMechFactory {
+public class BCryptMech extends ConfigAwarePasswordMech {
 
     /**
-     * Register additional {@link IPasswordMech} implementations that can be used for password validation after retrieving it via com.openexchange.passwordmechs.PasswordMechFactory.get(String)
-     *
-     * @param passwordMech The {@link IPasswordMech} to register
+     * Initializes a new {@link BCryptMech}.
      */
-    public void register(IPasswordMech... passwordMech);
-
-    /**
-     * Returns the password mechanism related to given identifier or <code>null</code> if no password mechanism is registered for the given identifier.
-     *
-     * @param identifier The identifier for the password mechanism
-     * @return {@link IPasswordMech} associated to given identifier or <code>null</code> if no password mechanism is registered for the given identifier
-     */
-    public IPasswordMech get(String identifier);
-
-    /**
-     * Returns the password mechanism related to given identifier or <code>null</code> if no password mechanism is registered for the given identifier.
-     *
-     * @param mech The password mechanism
-     * @return {@link IPasswordMech} associated to given identifier or <code>null</code> if no password mechanism is registered for the given identifier
-     */
-    default IPasswordMech get(PasswordMech mech) {
-        return get(mech.getIdentifier());
+    public BCryptMech() {
+        super("{BCRYPT}");
     }
-    
-    /**
-     * Returns the password mechanism that is configured to be the standard mechanism.
-     *
-     * @return {@link IPasswordMech} associated and never <code>null</code>.
-     */
-    public IPasswordMech getDefault();
 
+    @Override
+    public PasswordDetails encode(String str) {
+        if (doSalt()) {
+            String salt = BCrypt.gensalt();
+            return new PasswordDetails(str, BCrypt.hashpw(str, salt), this.getIdentifier(), salt);
+        }
+        return new PasswordDetails(str, BCrypt.hashpw(str, BCrypt.gensalt()), this.getIdentifier(), null);
+    }
+
+    @Override
+    public boolean checkPassword(String candidate, String encoded, String salt) {
+        return BCrypt.checkpw(candidate, encoded);
+    }
+
+    @Override
+    public int getHashLength() {
+        // won't be used as salt is handled by BCRYPT internally
+        return 64;
+    }
 }

@@ -47,84 +47,57 @@
  *
  */
 
-package com.openexchange.password.mechanism.algorithm;
+package com.openexchange.password.mechanism.impl.groupware;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import com.openexchange.password.mechanism.PasswordMech;
-import com.openexchange.tools.encoding.Base64;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * 
- * {@link SHACrypt}
+ * {@link AddUserSaltColumnTask} Adds the column <code>salt</code> to the <code>user</code> table
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved from global & update to new versions
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public final class SHACrypt {
+public class AddUserSaltColumnTask extends UpdateTaskAdapter {
 
-    // -------------------------------------------------------------------
+    private final static String USER_TABLE_NAME = "user";
+    private final static String DEL_USER_TABLE_NAME = "del_user";
 
-    /**
-     * SHA-1 algorithm.
-     * 
-     * @deprecated Use SHA256 to generate new password instead
-     */
-    @Deprecated
-    public static final SHACrypt SHA1 = new SHACrypt(PasswordMech.SHA, "SHA-1");
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
 
-    /**
-     * SHA-256 algorithm
-     */
-    public static final SHACrypt SHA256 = new SHACrypt(PasswordMech.SHA_256, "SHA-256");
+            Column saltColumn = new Column("salt", "VARCHAR(128) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL");
+            Tools.checkAndAddColumns(con, USER_TABLE_NAME, saltColumn);
+            Tools.checkAndAddColumns(con, DEL_USER_TABLE_NAME, saltColumn);
 
-    /**
-     * SHA-512 algorithm.
-     * Note: Might not run will all JVMs.
-     * 
-     * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/security/MessageDigest.html">MessageDigest</a>
-     * 
-     */
-    public static final SHACrypt SHA512 = new SHACrypt(PasswordMech.SHA_512, "SHA-512");
-
-    // -------------------------------------------------------------------
-
-    private final PasswordMech mech;
-
-    private final String algorithm;
-
-    private SHACrypt(PasswordMech mech, String algorithm) {
-        super();
-        this.mech = mech;
-        this.algorithm = algorithm;
-    }
-
-    // -------------------------------------------------------------------
-
-    public String makeSHAPasswd(String raw) throws NoSuchAlgorithmException {
-        return makeSHAPasswd(raw, null);
-    }
-
-    public String makeSHAPasswd(String raw, String salt) throws NoSuchAlgorithmException {
-        final MessageDigest sha = MessageDigest.getInstance(algorithm);
-
-        sha.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
-        if (null != salt) {
-            sha.update(salt.getBytes());
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
         }
-
-        final byte[] hash = sha.digest();
-
-        return Base64.encode(hash);
     }
 
-    // -------------------------------------------------------------------
-
-    public String getAlgorithm() {
-        return algorithm;
-    }
-
-    public PasswordMech getPasswordMech() {
-        return mech;
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
     }
 }

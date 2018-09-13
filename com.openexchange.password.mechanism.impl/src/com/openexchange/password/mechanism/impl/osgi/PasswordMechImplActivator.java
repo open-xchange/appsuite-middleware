@@ -47,64 +47,52 @@
  *
  */
 
-package com.openexchange.password.mechanism.groupware;
+package com.openexchange.password.mechanism.impl.osgi;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.password.mechanism.impl.groupware.AddUserSaltColumnTask;
+import com.openexchange.password.mechanism.impl.mech.PasswordMechRegistryImpl;
 
 /**
- * {@link AddUserSaltColumnTask} Adds the column <code>salt</code> to the <code>user</code> table
+ * {@link PasswordMechImplActivator}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved from c.o.global
  * @since v7.10.1
  */
-public class AddUserSaltColumnTask implements UpdateTaskV2 {
+public class PasswordMechImplActivator extends HousekeepingActivator {
 
-    private final static String TABLE_NAME = "user";
+    private ServiceRegistration<PasswordMechRegistry> pwMechRegistration;
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        boolean rollback = false;
-        try {
-            con.setAutoCommit(false);
-            rollback = true;
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class };
+    }
 
-            Column saltColumn = new Column("salt", "VARCHAR(128) COLLATE utf8_unicode_ci DEFAULT NULL");
-            Tools.checkAndAddColumns(con, TABLE_NAME, saltColumn);
+    @Override
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddUserSaltColumnTask()));
 
-            con.commit();
-            rollback = false;
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
+        PasswordMechRegistryImpl passwordMechFactoryImpl = (PasswordMechRegistryImpl) PasswordMechRegistryImpl.getInstance();
+        pwMechRegistration = context.registerService(PasswordMechRegistry.class, passwordMechFactoryImpl, null);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        ServiceRegistration<PasswordMechRegistry> pwMechRegistration = this.pwMechRegistration;
+        if (null != pwMechRegistration) {
+            this.pwMechRegistration = null;
+            pwMechRegistration.unregister();
         }
-    }
 
-    @Override
-    public String[] getDependencies() {
-        return new String[0];
-    }
+        Services.setServiceLookup(null);
 
-    @Override
-    public TaskAttributes getAttributes() {
-        // Blocking, schema wide
-        return new Attributes();
+        super.stopBundle();
     }
 
 }

@@ -47,34 +47,63 @@
  *
  */
 
-package com.openexchange.password.mechanism.impl;
+package com.openexchange.password.mechanism;
 
-import com.damienmiller.BCrypt;
-import com.openexchange.password.mechanism.PasswordMech;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
- * {@link BCryptMech}
+ * {@link PasswordDetails}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public class BCryptMech extends AbstractPasswordMech {
+public class PasswordDetails {
+    /**
+     * The plain password
+     */
+    private final String plainPassword;
 
     /**
-     * Initializes a new {@link BCryptMech}.
+     * The password mechanism identifier the password was encrypted with
      */
-    public BCryptMech() {
-        super(PasswordMech.BCRYPT);
+    private final String passwordMech;
+
+    /**
+     * The salt that was used while encrypting
+     */
+    private final String salt;
+
+    /*
+     * The encrypted password
+     */
+    private final String encodedPassword;
+
+    public PasswordDetails(String plainPassword, String encodedPassword, String passwordMech, String salt) {
+        this.plainPassword = plainPassword;
+        this.encodedPassword = encodedPassword;
+        this.passwordMech = passwordMech;
+        this.salt = salt;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public String getEncodedPassword() {
+        return encodedPassword;
+    }
+
+    public String getPlainPassword() {
+        return plainPassword;
+    }
+
+    public String getPasswordMech() {
+        return passwordMech;
     }
 
     @Override
-    public String encode(String str) {
-        return BCrypt.hashpw(str, BCrypt.gensalt());
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
-
-    @Override
-    public boolean checkPassword(String candidate, String encoded) {
-        return BCrypt.checkpw(candidate, encoded);
-    }
-
 }

@@ -56,8 +56,8 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.password.mechanism.IPasswordMech;
-import com.openexchange.password.mechanism.PasswordMech;
-import com.openexchange.password.mechanism.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
@@ -113,14 +113,17 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
     protected void prepareUserUpdate(PasswordChangeEvent event, User user, UserImpl updatedUser) throws OXException {
         if (Strings.isEmpty(event.getNewPassword())) {
             updatedUser.setUserPassword(null);
+            updatedUser.setSalt(null);
         } else {
-            PasswordMechFactory passwordMechFactory = ServerServiceRegistry.getInstance().getService(PasswordMechFactory.class);
-            IPasswordMech iPasswordMech = passwordMechFactory.get(PasswordMech.BCRYPT);
+            PasswordMechRegistry passwordMechFactory = ServerServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
+            IPasswordMech iPasswordMech = passwordMechFactory.getDefault();
             if (Strings.isNotEmpty(user.getPasswordMech())) {
                 iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
             }
-            updatedUser.setPasswordMech(iPasswordMech.getIdentifier());
-            updatedUser.setUserPassword(iPasswordMech.encode(event.getNewPassword()));
+            PasswordDetails passwordDetails = iPasswordMech.encode(event.getNewPassword());
+            updatedUser.setPasswordMech(passwordDetails.getPasswordMech());
+            updatedUser.setUserPassword(passwordDetails.getEncodedPassword());
+            updatedUser.setSalt(passwordDetails.getSalt());
         }
     }
 }

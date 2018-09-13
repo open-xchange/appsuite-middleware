@@ -49,6 +49,7 @@
 
 package com.openexchange.password.mechanism;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,20 +61,27 @@ import com.openexchange.exception.OXException;
 public interface IPasswordMech {
 
     /**
-     * Returns the string representation of the password mechanism identifier
+     * Returns the origin string representation of the password mechanism identifier
      *
      * @return The identifier
      */
-    public String getIdentifier();
+    String getIdentifier();
+
+    /**
+     * Returns alternative identifiers that might get used to identify the password mechanism
+     * 
+     * @return {@link List} with alternative identifiers
+     */
+    List<String> getAlternativeIdentifiers();
 
     /**
      * Encodes the given string according to this password mechanism and returns the encoded string.
      *
      * @param password The password to encode
-     * @return The encoded string
+     * @return {@link PasswordDetails} containing details about the generation result
      * @throws OXException
      */
-    public String encode(String password) throws OXException;
+    PasswordDetails encode(String password) throws OXException;
 
     /**
      * Decodes the given string according to its password mechanism and returns the decoded string.
@@ -82,15 +90,23 @@ public interface IPasswordMech {
      * @return The decoded string
      * @throws OXException
      */
-    public String decode(String encodedPassword) throws OXException;
+    String decode(String encodedPassword, String salt) throws OXException;
 
     /**
      * Checks if given password matches the encoded string according to this password mechanism.
      *
      * @param toCheck The password to check
      * @param encoded The encoded string to check against
+     * @param salt The salt used for encoding or <code>null</code> if no salt was used while encoding
      * @return <code>true</code> if string matches; otherwise <code>false</code>
      * @throws OXException
      */
-    public boolean check(String toCheck, String encoded) throws OXException;
+    boolean check(String toCheck, String encoded, String salt) throws OXException;
+
+    /**
+     * Character length of the resulting hash
+     * 
+     * @return int defining the length of the resulting password hash
+     */
+    int getHashLength();
 }

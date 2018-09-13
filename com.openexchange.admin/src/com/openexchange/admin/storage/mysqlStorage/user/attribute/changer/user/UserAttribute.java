@@ -100,6 +100,10 @@ public enum UserAttribute implements Attribute {
      */
     PASSWORD_MECH("password-mechanism", "passwordMech", String.class),
     /**
+     * The 'salt' column
+     */
+    SALT("salt", "salt", String.class),
+    /**
      * The quota column
      */
     QUOTA("user-maximum-quota", "quota_max", Long.class),

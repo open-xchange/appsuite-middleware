@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.password.mechanism;
+package com.openexchange.password.mechanism.exceptions;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -57,22 +57,29 @@ import com.openexchange.exception.OXExceptionStrings;
 
 /**
  *
- * {@link PasswordMechExceptionCode}
+ * {@link PasswordMechExceptionCodes}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public enum PasswordMechExceptionCode implements DisplayableOXExceptionCode {
+public enum PasswordMechExceptionCodes implements DisplayableOXExceptionCode {
+
+    UNEXPECTED_ERROR("Unexpected error: %1$s", null, Category.CATEGORY_ERROR, 1),
 
     /**
      * Encoding %s cannot be used.
      */
-    UNSUPPORTED_ENCODING("Encoding %s cannot be used.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 1),
+    UNSUPPORTED_ENCODING("Encoding %s cannot be used.", null, Category.CATEGORY_ERROR, 2),
 
     /**
-     * Encoding %s cannot be used.
+     * Decoding for password mech %s not supported.
      */
-    UNSUPPORTED_OPERATION("Decoding for password mech %s not supported.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 2),
+    UNSUPPORTED_OPERATION("Decoding for password mech %s not supported.", null, Category.CATEGORY_ERROR, 3),
+
+    /**
+     * No password mechanism available for identifier '%s' (user {} in context {}).
+     */
+    UNKNOWN_PASSWORD_MECHANISM("No password mechanism available for identifier '%s'.", PasswordMechMessages.UNKNOWN_PASSWORD_MECHANISM_MSG, Category.CATEGORY_ERROR, 4),
 
     ;
 
@@ -102,7 +109,7 @@ public enum PasswordMechExceptionCode implements DisplayableOXExceptionCode {
      * @param category category.
      * @param detailNumber detail number.
      */
-    private PasswordMechExceptionCode(final String message, final String displayMessage, final Category category, final int detailNumber) {
+    private PasswordMechExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
         this.category = category;

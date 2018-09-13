@@ -250,4 +250,20 @@
         <customChange class="com.openexchange.database.internal.change.utf8mb4.globaldb.GuestToUtf8mb4ChangeV2" />
     </changeSet>
 
+    <changeSet id="7.10.1:guest2context:addSalt" author="martin.schneider@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="guest2context" columnName="salt" />
+            </not>
+        </preConditions>
+        <comment>
+            Add column 'salt' to table guest2context.
+        </comment>
+        <sql>
+            ALTER TABLE guest2context ADD salt VARCHAR(128) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL;
+        </sql>
+        <rollback>
+            <dropColumn tableName="guest2context" columnName="salt" />
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

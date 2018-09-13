@@ -77,6 +77,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.exceptions.OXGenericException;
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
@@ -91,7 +92,8 @@ import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.password.mechanism.IPasswordMech;
-import com.openexchange.password.mechanism.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -635,7 +637,7 @@ public class AdminCache {
      * @return the encrypted password
      * @throws StorageException If encoding fails
      */
-    public String encryptPassword(PasswordMechObject user) throws StorageException {
+    public PasswordDetails encryptPassword(PasswordMechObject user) throws StorageException {
         IPasswordMech passwordMech = getPasswordMechanism(user);
         try {
             return passwordMech.encode(user.getPassword());
@@ -649,28 +651,28 @@ public class AdminCache {
      *
      * @param user The {@link PasswordMechObject}
      * @return The password mechanism. If the {@link PasswordMechObject} contains an unknown password mechanism, then
-     *         the {@link PasswordMechFactory#getDefault()} mechanism is returned.
+     *         the {@link PasswordMechRegistry#getDefault()} mechanism is returned.
      * @throws StorageException If password mechanism is unknown
      */
-    private IPasswordMech getPasswordMechanism(PasswordMechObject user) throws StorageException {
-        IPasswordMech pwmech;
+    public IPasswordMech getPasswordMechanism(PasswordMechObject user) throws StorageException {
+        String passwordMech = user.getPasswordMech();
+        if (Strings.isEmpty(passwordMech) || "null".equals(Strings.toLowerCase(passwordMech))) {
+            passwordMech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA256");
+        }
+
         try {
-            PasswordMechFactory mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechFactory.class, true);
-            String passwordMech = user.getPasswordMech();
-            if (Strings.isEmpty(passwordMech) || "null".equals(Strings.toLowerCase(passwordMech))) {
-                pwmech = mechFactory.getDefault();
-                user.setPasswordMech(pwmech.getIdentifier());
-            } else {
-                pwmech = mechFactory.get(passwordMech);
-                if (pwmech == null) {
-                    throw new StorageException("Unsupported password mechanism: " + passwordMech);
-                }
+            PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
+            IPasswordMech iPasswordMech = mechFactory.get(passwordMech);
+            if (iPasswordMech == null) {
+                iPasswordMech = mechFactory.getDefault();
+                log.warn("Unknown password mechanism defined: '{}'. Will use default: '{}'", passwordMech, iPasswordMech.getIdentifier());
             }
+            user.setPasswordMech(iPasswordMech.getIdentifier());
+            return iPasswordMech;
         } catch (OXException e) {
             log.error("Unable to get password mechanism.", e);
             throw new StorageException("Unable to get password mechanism.", e);
         }
-        return pwmech;
     }
 
     /**
@@ -727,11 +729,17 @@ public class AdminCache {
                 }
                 // Ok seems to be a line with user:pass entry
                 String[] user_pass_combination = line.split(":");
-                if (user_pass_combination.length != 3) {
+                if (user_pass_combination.length < 3) {
                     throw new OXGenericException("Invalid mpasswd format.");
                 }
                 Credentials masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[2]);
                 masterCredentials.setPasswordMech(user_pass_combination[1]);
+                if (user_pass_combination.length == 4) {
+                    String salt = user_pass_combination[3];
+                    if (Strings.isNotEmpty(salt)) {
+                        masterCredentials.setSalt(salt);
+                    }
+                }
                 return masterCredentials;
             }
         } catch (IOException e) {

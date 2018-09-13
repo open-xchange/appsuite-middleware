@@ -58,7 +58,7 @@ import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
  * @author choeger
  *
  */
-public class ResellerAdmin extends EnforceableDataObject implements PasswordMechObject,Cloneable {
+public class ResellerAdmin extends EnforceableDataObject implements PasswordMechObject, Cloneable {
 
     /**
      *
@@ -84,6 +84,10 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     private String passwordMech;
 
     private boolean passwordMechset = false;
+
+    private String salt;
+
+    private boolean saltSet = false;
 
     private String displayname;
 
@@ -116,9 +120,9 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         setName(name);
     }
 
-
     /**
      * Initializes a new {@link ResellerAdmin}.
+     * 
      * @param id
      * @param name
      */
@@ -153,7 +157,6 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return id;
     }
 
-
     /**
      * @return the name
      */
@@ -161,7 +164,9 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return name;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPassword()
      */
     @Override
@@ -169,12 +174,19 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return password;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPasswordMech()
      */
     @Override
     public String getPasswordMech() {
         return passwordMech;
+    }
+
+    @Override
+    public String getSalt() {
+        return salt;
     }
 
     /**
@@ -191,6 +203,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         this.password = null;
         this.displayname = null;
         this.passwordMech = null;
+        this.salt = null;
         this.restrictions = null;
     }
 
@@ -220,6 +233,13 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
      */
     public boolean isPasswordMechset() {
         return passwordMechset;
+    }
+
+    /**
+     * @return the saltSet
+     */
+    public boolean isSaltSet() {
+        return saltSet;
     }
 
     /**
@@ -268,13 +288,23 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         this.password = password;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#setPasswordMech(java.lang.String)
      */
     @Override
     public void setPasswordMech(final String passwordMech) {
         this.passwordMechset = true;
         this.passwordMech = passwordMech;
+    }
+
+    /**
+     * @param salt the salt to set
+     */
+    public void setSalt(final String salt) {
+        this.saltSet = true;
+        this.salt = salt;
     }
 
     /**
@@ -338,7 +368,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     @Override
     public String[] getMandatoryMembersCreate() {
-        return new String[]{ "displayname", "name" , "password"};
+        return new String[] { "displayname", "name", "password" };
     }
 
     @Override
@@ -351,7 +381,9 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -370,12 +402,16 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
         result = prime * result + (passwordMechset ? 1231 : 1237);
         result = prime * result + (passwordset ? 1231 : 1237);
+        result = prime * result + ((salt == null) ? 0 : salt.hashCode());
+        result = prime * result + (saltSet ? 1231 : 1237);
         result = prime * result + ((restrictions == null) ? 0 : Arrays.hashCode(restrictions));
         result = prime * result + (restrictionsset ? 1231 : 1237);
         return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -450,6 +486,16 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         if (passwordset != other.passwordset) {
             return false;
         }
+        if (salt == null) {
+            if (other.salt != null) {
+                return false;
+            }
+        } else if (!salt.equals(other.salt)) {
+            return false;
+        }
+        if (saltSet != other.saltSet) {
+            return false;
+        }
         if (restrictions == null) {
             if (other.restrictions != null) {
                 return false;
@@ -463,7 +509,9 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
         return true;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#clone()
      */
     @Override

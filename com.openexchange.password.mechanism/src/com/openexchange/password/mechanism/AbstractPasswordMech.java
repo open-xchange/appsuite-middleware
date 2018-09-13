@@ -47,15 +47,17 @@
  *
  */
 
-package com.openexchange.password.mechanism.impl;
+package com.openexchange.password.mechanism;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.password.mechanism.IPasswordMech;
-import com.openexchange.password.mechanism.PasswordMech;
-import com.openexchange.password.mechanism.PasswordMechExceptionCode;
+import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
 
 /**
  * {@link AbstractPasswordMech}
@@ -67,22 +69,33 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractPasswordMech.class);
 
-    private final PasswordMech mech;
+    private final String mechIdentifier;
+
+    private final List<String> alternativeIdentifiers;
 
     /**
      * Initializes a new {@link AbstractPasswordMech}.
      * 
-     * @param mech The algorithm
-     * 
+     * @param mechIdentifier The identifier of the algorithm
      */
-    public AbstractPasswordMech(PasswordMech mech) {
-        super();
-        this.mech = mech;
+    public AbstractPasswordMech(String mechIdentifier) {
+        this(mechIdentifier, Collections.emptyList());
+    }
 
+    /**
+     * Initializes a new {@link AbstractPasswordMech}.
+     * 
+     * @param mechIdentifier The identifier of the algorithm
+     * @param alternativeIdentifiers Alternative identifiers of this algorithm
+     */
+    public AbstractPasswordMech(String mechIdentifier, List<String> alternativeIdentifiers) {
+        super();
+        this.mechIdentifier = mechIdentifier;
+        this.alternativeIdentifiers = alternativeIdentifiers;
     }
 
     @Override
-    public boolean check(String toCheck, String encoded) throws OXException {
+    public boolean check(String toCheck, String encoded, String salt) throws OXException {
         if ((Strings.isEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
             return true;
         } else if ((Strings.isEmpty(toCheck)) && (Strings.isNotEmpty(encoded))) {
@@ -90,7 +103,7 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
         } else if ((Strings.isNotEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
             return false;
         }
-        return checkPassword(toCheck, encoded);
+        return checkPassword(toCheck, encoded, salt);
     }
 
     /**
@@ -101,16 +114,32 @@ public abstract class AbstractPasswordMech implements IPasswordMech {
      * @return <code>true</code> if the password match
      * @throws OXException In case of error
      */
-    abstract boolean checkPassword(String candidate, String encoded) throws OXException;
+    public abstract boolean checkPassword(String candidate, String encoded, String salt) throws OXException;
 
     @Override
-    public String decode(String encodedPassword) throws OXException {
-        throw PasswordMechExceptionCode.UNSUPPORTED_OPERATION.create(getIdentifier());
+    public String decode(String encodedPassword, String salt) throws OXException {
+        throw PasswordMechExceptionCodes.UNSUPPORTED_OPERATION.create(getIdentifier());
     }
 
     @Override
     public String getIdentifier() {
-        return mech.getIdentifier();
+        return mechIdentifier;
     }
 
+    @Override
+    public List<String> getAlternativeIdentifiers() {
+        return alternativeIdentifiers;
+    }
+
+    protected byte[] getSalt() throws OXException {
+        try {
+            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+            byte[] salt = new byte[getHashLength()];
+            sr.nextBytes(salt);
+            return salt;
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.error("Error retrieving SecureRandom instance", e);
+            throw PasswordMechExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
 }

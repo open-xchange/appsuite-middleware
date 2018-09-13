@@ -108,6 +108,8 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
 
     private String jmxPassword;
 
+    private String jmxPasswordHashAlgorithm;
+
     private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
 
     private JMXServiceURL jmxURL;
@@ -178,7 +180,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 //
                 final Map<String, Object> env = new HashMap<String, Object>(4);
                 if (jmxLogin != null && jmxPassword != null) {
-                    env.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword }));
+                    env.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword, jmxPasswordHashAlgorithm }));
                 }
                 // The port specified in "service:jmx:rmi://"+hostname+":"+port
                 // is the second port, where RMI connection objects will be exported.
@@ -290,7 +292,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                  *  Our URL service:jmx:rmi:///jndi/rmi://localhost:9999/server
                  */
                 final JMXServiceURL jmxServiceURL = jmxServiceUrlFor(ip, jmxServerPort, jmxPort);
-                jmxURL = addConnectorServer(jmxServiceURL, jmxLogin, jmxPassword);
+                jmxURL = addConnectorServer(jmxServiceURL, jmxLogin, jmxPassword, jmxPasswordHashAlgorithm);
             }
             LOG.info("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this URL: {}\n", jmxURL);
             running.set(true);
@@ -462,4 +464,12 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
         this.jmxPassword = jmxPassword;
     }
 
+    /**
+     * Sets the JMX password hash algorithm
+     *
+     * @param hashAlgorithm the JMX password hash algorithm
+     */
+    public void setJmxPasswordHashAlgorithm(final String hashAlgorithm) {
+        this.jmxPasswordHashAlgorithm = hashAlgorithm;
+    }
 }

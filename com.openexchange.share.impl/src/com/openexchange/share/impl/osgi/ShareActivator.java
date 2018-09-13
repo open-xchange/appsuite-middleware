@@ -75,7 +75,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
-import com.openexchange.password.mechanism.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.sessiond.SessiondService;
@@ -120,7 +120,12 @@ public class ShareActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class, DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class, ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class, QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class, DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechFactory.class, UserAliasStorage.class, SessiondService.class };
+        return new Class<?>[] {
+            UserService.class, ContextService.class, TemplateService.class, ConfigurationService.class,
+            DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
+            ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
+            QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
+            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class };
     }
 
     @Override
@@ -140,11 +145,12 @@ public class ShareActivator extends HousekeepingActivator {
 
             @Override
             public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
-                String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
+                ConfigurationService configurationService = getService(ConfigurationService.class);
+                String cryptKey = configurationService.getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
 
-                PasswordMechFactory passwordMechFactory = getService(PasswordMechFactory.class);
-                SharePasswordMech sharePasswordMech = new SharePasswordMech(service, cryptKey);
+                PasswordMechRegistry passwordMechFactory = getService(PasswordMechRegistry.class);
+                SharePasswordMech sharePasswordMech = new SharePasswordMech(configurationService, service, cryptKey);
                 passwordMechFactory.register(sharePasswordMech);
                 shareRegistration = context.registerService(ShareService.class, shareService, null);
                 return service;

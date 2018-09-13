@@ -61,8 +61,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMIServerSocketFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -83,10 +81,11 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXPrincipal;
 import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
-import org.apache.commons.codec.binary.Base64;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.management.ManagementExceptionCode;
+import com.openexchange.management.services.ManagementServiceRegistry;
+import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 
 /**
  * {@link AbstractAgent} - An abstract JMX agent
@@ -156,39 +155,30 @@ public abstract class AbstractAgent {
                 throw new SecurityException("Credentials should be String[]");
             }
             final String[] creds = (String[]) lCredentials;
-            if (creds.length != 2) {
-                throw new SecurityException("Credentials should have 2 elements");
+            if (creds.length < 2) {
+                throw new SecurityException("Credentials should at least have 2 elements");
             }
             /*
              * Perform authentication
              */
             final String username = creds[0];
             final String password = creds[1];
-            if ((this.credentials[0].equals(username)) && (this.credentials[1].equals(makeSHAPasswd(password)))) {
-                return new Subject(true, Collections.singleton(new JMXPrincipal(username)), Collections.EMPTY_SET, Collections.EMPTY_SET);
+            String hashAlgorithm = creds.length > 2 ? creds[2] : "SHA";
+
+            PasswordMechRegistry passwordMechFactory = ManagementServiceRegistry.getServiceRegistry().getService(PasswordMechRegistry.class);
+            IPasswordMech iPasswordMech = passwordMechFactory.get(hashAlgorithm);
+            if (iPasswordMech == null) {
+                throw new IllegalArgumentException("The identifier '" + hashAlgorithm + "' for the password hash mechanism is unknown.");
+            }
+            try {
+                if ((this.credentials[0].equals(username)) && iPasswordMech.check(password, this.credentials[1], null)) {
+                    return new Subject(true, Collections.singleton(new JMXPrincipal(username)), Collections.EMPTY_SET, Collections.EMPTY_SET);
+                }
+            } catch (OXException e) {
+                //Fall through and send SecurityException
             }
             throw new SecurityException("Invalid credentials");
-
         }
-
-        private static String makeSHAPasswd(final String raw) {
-            final MessageDigest md;
-            try {
-                md = MessageDigest.getInstance("SHA-1");
-            } catch (final NoSuchAlgorithmException e) {
-                LOG.error("", e);
-                return raw;
-            }
-
-            final byte[] salt = {};
-
-            md.reset();
-            md.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
-            md.update(salt);
-
-            return Charsets.toAsciiString(Base64.encodeBase64(md.digest()));
-        }
-
     }
 
     protected final AtomicBoolean initialized;
@@ -217,7 +207,6 @@ public abstract class AbstractAgent {
         threadMXBean = ManagementFactory.getThreadMXBean();
         mbs = ManagementFactory.getPlatformMBeanServer();
     }
-
 
     /**
      * Gets the {@link ThreadMXBean} instance.
@@ -397,12 +386,13 @@ public abstract class AbstractAgent {
      * @param urlstr The JMX URL as a string
      * @param jmxLogin The JMX login or <code>null</code> to use no authentication for connecting to specified JMX URL
      * @param jmxPassword The JMX password (only needed if previous parameter is not <code>null</code>)
+     * @param jmxPasswordHashAlgorithm The JMX password hash algorithm (only needed if previous parameter is not <code>null</code>)
      * @return The {@link JMXServiceURL} to which the connector is bound
      * @throws OXException If connector cannot be added
      */
-    protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin, final String jmxPassword) throws OXException {
+    protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin, final String jmxPassword, String jmxPasswordHashAlgorithm) throws OXException {
         try {
-            return addConnectorServer(new JMXServiceURL(urlstr), jmxLogin, jmxPassword);
+            return addConnectorServer(new JMXServiceURL(urlstr), jmxLogin, jmxPassword, jmxPasswordHashAlgorithm);
         } catch (final MalformedURLException e) {
             throw ManagementExceptionCode.MALFORMED_URL.create(e, urlstr);
         }
@@ -414,10 +404,11 @@ public abstract class AbstractAgent {
      * @param url The JMX URL
      * @param jmxLogin The JMX login or <code>null</code> to use no authentication for connecting to specified JMX URL
      * @param jmxPassword The JMX password (only needed if previous parameter is not <code>null</code>)
+     * @param jmxPasswordHashAlgorithm The JMX password hash algorithm (only needed if jmxLogin is not <code>null</code>)
      * @return The {@link JMXServiceURL} to which the connector is bound
      * @throws OXException If connector cannot be added
      */
-    protected final JMXServiceURL addConnectorServer(final JMXServiceURL url, final String jmxLogin, final String jmxPassword) throws OXException {
+    protected final JMXServiceURL addConnectorServer(final JMXServiceURL url, final String jmxLogin, final String jmxPassword, String jmxPasswordHashAlgorithm) throws OXException {
         if (connectors.containsKey(url)) {
             throw ManagementExceptionCode.JMX_URL_ALREADY_BOUND.create(url);
         }
@@ -431,7 +422,7 @@ public abstract class AbstractAgent {
                 environment = null;
             } else {
                 environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword }));
+                environment.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword, jmxPasswordHashAlgorithm }));
             }
             final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, environment, mbs);
             cs.start();

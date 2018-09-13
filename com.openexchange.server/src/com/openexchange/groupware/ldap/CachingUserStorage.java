@@ -652,7 +652,7 @@ public class CachingUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException {
-        delegate.updatePasswordInternal(connection, context, userId, mech, password);
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password, String salt) throws OXException {
+        delegate.updatePasswordInternal(connection, context, userId, mech, password, salt);
     }
 }

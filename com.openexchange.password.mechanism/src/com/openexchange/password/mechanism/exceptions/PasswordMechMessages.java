@@ -47,48 +47,22 @@
  *
  */
 
-package com.openexchange.password.mechanism.osgi;
+package com.openexchange.password.mechanism.exceptions;
 
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.password.mechanism.PasswordMechFactory;
-import com.openexchange.password.mechanism.groupware.AddUserSaltColumnTask;
-import com.openexchange.password.mechanism.impl.PasswordMechFactoryImpl;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link PasswordMechActivator}
+ * 
+ * {@link PasswordMechMessages}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved from c.o.global
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.1
  */
-public class PasswordMechActivator extends HousekeepingActivator {
+public class PasswordMechMessages implements LocalizableStrings {
 
-    private ServiceRegistration<PasswordMechFactory> pwMechRegistration;
+    public static final String UNKNOWN_PASSWORD_MECHANISM_MSG = "No password mechanism available for identifier '%s'. Cannot handle password.";
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[0];
+    private PasswordMechMessages() {
+        super();
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        // Register UpdateTask
-        registerService(UpdateTaskV2.class, new AddUserSaltColumnTask());
-
-        // Register PasswordMEchFactory
-        PasswordMechFactoryImpl passwordMechFactoryImpl = (PasswordMechFactoryImpl) PasswordMechFactoryImpl.getInstance();
-        pwMechRegistration = context.registerService(PasswordMechFactory.class, passwordMechFactoryImpl, null);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        ServiceRegistration<PasswordMechFactory> pwMechRegistration = this.pwMechRegistration;
-        if (null != pwMechRegistration) {
-            this.pwMechRegistration = null;
-            pwMechRegistration.unregister();
-        }
-        super.stopBundle();
-    }
-
 }

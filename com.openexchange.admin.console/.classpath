@@ -5,8 +5,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.server"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console.common"/>y
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>y
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.console.common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.global"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.password.mechanism"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.password.mechanism.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.plugin.hosting"/>

@@ -71,7 +71,7 @@ import com.openexchange.guest.impl.storage.GuestStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.password.mechanism.IPasswordMech;
-import com.openexchange.password.mechanism.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.user.UserService;
 
 /**
@@ -92,7 +92,7 @@ public class DefaultGuestService implements GuestService {
 
     private final ConfigViewFactory configViewFactory;
 
-    private final PasswordMechFactory passwordMechFactory;
+    private final PasswordMechRegistry passwordMechFactory;
 
     /**
      * Initializes a new {@link DefaultGuestService}.
@@ -103,7 +103,7 @@ public class DefaultGuestService implements GuestService {
      * @param configViewFactory
      * @param passwordMechFactory
      */
-    public DefaultGuestService(UserService userService, ContextService contextService, ContactUserStorage contactUserStorage, ConfigViewFactory configViewFactory, PasswordMechFactory passwordMechFactory) {
+    public DefaultGuestService(UserService userService, ContextService contextService, ContactUserStorage contactUserStorage, ConfigViewFactory configViewFactory, PasswordMechRegistry passwordMechFactory) {
         this.userService = userService;
         this.contextService = contextService;
         this.contactUserStorage = contactUserStorage;
@@ -128,7 +128,7 @@ public class DefaultGuestService implements GuestService {
             User alignedUser = alignUserWithGuest(user, contextId);
 
             IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
-            return iPasswordMech.check(password, alignedUser.getUserPassword());
+            return iPasswordMech.check(password, alignedUser.getUserPassword(), alignedUser.getSalt());
         }
         return false;
     }
@@ -157,6 +157,7 @@ public class DefaultGuestService implements GuestService {
 
             updatedUser.setUserPassword(assignment.getPassword());
             updatedUser.setPasswordMech(assignment.getPasswordMech());
+            updatedUser.setSalt(assignment.getSalt());
 
             connectionHelper.commit();
         } finally {
@@ -169,7 +170,7 @@ public class DefaultGuestService implements GuestService {
      * {@inheritDoc}
      */
     @Override
-    public void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech) throws OXException {
+    public void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech, String salt) throws OXException {
         check(mailAddress);
 
         GlobalDBConnectionHelper connectionHelper = new GlobalDBConnectionHelper(GuestStorageServiceLookup.get(), true, contextId);
@@ -184,7 +185,7 @@ public class DefaultGuestService implements GuestService {
             }
 
             if (guestId != GuestStorage.NOT_FOUND) { // already existing, only add assignment
-                GuestStorage.getInstance().addGuestAssignment(new GuestAssignment(guestId, contextId, userId, password, passwordMech), connectionHelper.getConnection());
+                GuestStorage.getInstance().addGuestAssignment(new GuestAssignment(guestId, contextId, userId, password, passwordMech, salt), connectionHelper.getConnection());
                 connectionHelper.commit();
                 return;
             }
@@ -193,7 +194,7 @@ public class DefaultGuestService implements GuestService {
             if (newGuest == GuestStorage.NOT_FOUND) {
                 throw GuestExceptionCodes.GUEST_CREATION_ERROR.create();
             }
-            GuestStorage.getInstance().addGuestAssignment(new GuestAssignment(newGuest, contextId, userId, password, passwordMech), connectionHelper.getConnection());
+            GuestStorage.getInstance().addGuestAssignment(new GuestAssignment(newGuest, contextId, userId, password, passwordMech, salt), connectionHelper.getConnection());
 
             connectionHelper.commit();
         } finally {
@@ -361,6 +362,9 @@ public class DefaultGuestService implements GuestService {
         if (user.getPasswordMech() != null) {
             userToUpdate.setPasswordMech(user.getPasswordMech());
         }
+        if (user.getSalt() != null) {
+            userToUpdate.setSalt(user.getSalt());
+        }
         if (user.getPreferredLanguage() != null) {
             userToUpdate.setPreferredLanguage(user.getPreferredLanguage());
         }
@@ -390,7 +394,7 @@ public class DefaultGuestService implements GuestService {
             connectionHelper.start();
 
             for (GuestAssignment guestAssignment : guestAssignments) {
-                GuestAssignment newAssignment = new GuestAssignment(guestAssignment.getGuestId(), guestAssignment.getContextId(), guestAssignment.getUserId(), user.getUserPassword(), user.getPasswordMech());
+                GuestAssignment newAssignment = new GuestAssignment(guestAssignment.getGuestId(), guestAssignment.getContextId(), guestAssignment.getUserId(), user.getUserPassword(), user.getPasswordMech(), user.getSalt());
 
                 GuestStorage.getInstance().updateGuestAssignment(newAssignment, connectionHelper.getConnection());
             }
@@ -498,6 +502,7 @@ public class DefaultGuestService implements GuestService {
             user.setLoginInfo(existingUser.getMail());
             user.setPasswordMech(existingUser.getPasswordMech());
             user.setUserPassword(existingUser.getUserPassword());
+            user.setSalt(existingUser.getSalt());
             user.setTimeZone(existingUser.getTimeZone());
             user.setAliases(existingUser.getAliases());
             user.setPreferredLanguage(existingUser.getPreferredLanguage());

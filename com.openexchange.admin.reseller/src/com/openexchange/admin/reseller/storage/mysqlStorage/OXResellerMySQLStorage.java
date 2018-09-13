@@ -82,6 +82,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.password.mechanism.PasswordDetails;
 
 /**
  * @author choeger
@@ -164,10 +165,12 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             final String password = adm.getPassword();
             if (password != null) {
-                prep = oxcon.prepareStatement("UPDATE subadmin SET password=?, passwordMech=? WHERE sid=?");
-                prep.setString(1, cache.encryptPassword(adm));
-                prep.setString(2, adm.getPasswordMech());
-                prep.setInt(3, sid);
+                prep = oxcon.prepareStatement("UPDATE subadmin SET password=?, passwordMech=?, salt=? WHERE sid=?");
+                PasswordDetails passwordDetails = cache.encryptPassword(adm);
+                prep.setString(1, passwordDetails.getEncodedPassword());
+                prep.setString(2, passwordDetails.getPasswordMech());
+                prep.setString(3, passwordDetails.getSalt());
+                prep.setInt(4, sid);
                 prep.executeUpdate();
                 prep.close();
             }
@@ -230,13 +233,15 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             final int adm_id = IDGenerator.getId(oxcon);
 
-            prep = oxcon.prepareStatement("INSERT INTO subadmin (sid,pid,name,displayName,password,passwordMech) VALUES (?,?,?,?,?,?)");
+            prep = oxcon.prepareStatement("INSERT INTO subadmin (sid,pid,name,displayName,password,passwordMech,salt) VALUES (?,?,?,?,?,?,?)");
             prep.setInt(1, adm_id);
             prep.setInt(2, adm.getParentId());
             prep.setString(3, adm.getName());
             prep.setString(4, adm.getDisplayname());
-            prep.setString(5, cache.encryptPassword(adm));
-            prep.setString(6, adm.getPasswordMech());
+            PasswordDetails encryptPassword = cache.encryptPassword(adm);
+            prep.setString(5, encryptPassword.getEncodedPassword());
+            prep.setString(6, encryptPassword.getPasswordMech());
+            prep.setString(7, encryptPassword.getSalt());
 
             prep.executeUpdate();
             prep.close();
@@ -359,6 +364,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 adm.setPassword(rs.getString("password"));
                 adm.setPasswordMech(rs.getString("passwordMech"));
                 adm.setParentId(rs.getInt("pid"));
+                adm.setSalt(rs.getString("salt"));
                 adm = getRestrictionDataForAdmin(adm, con);
                 ret.add(adm);
             }
@@ -462,6 +468,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 newadm.setDisplayname(rs.getString("displayName"));
                 newadm.setPassword(rs.getString("password"));
                 newadm.setPasswordMech(rs.getString("passwordMech"));
+                newadm.setSalt(rs.getString("salt"));
 
                 rs.close();
                 prep.close();

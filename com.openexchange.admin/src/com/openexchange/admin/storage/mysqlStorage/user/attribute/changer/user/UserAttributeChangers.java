@@ -64,6 +64,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChanger;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.java.Strings;
+import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 
@@ -202,7 +203,11 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                     return false;
                 }
                 try {
-                    return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.USER_PASSWORD, adminCache.encryptPassword(userData)), connection);
+                    PasswordDetails passwordDetails = adminCache.encryptPassword(userData);
+                    boolean passwordSet = setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.USER_PASSWORD, passwordDetails.getEncodedPassword()), connection);
+                    setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.SALT, passwordDetails.getSalt()), connection);
+                    setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.PASSWORD_MECH, passwordDetails.getPasswordMech()), connection);
+                    return passwordSet;
                 } catch (StorageException e) {
                     // TODO: throw storage exception?
                 }

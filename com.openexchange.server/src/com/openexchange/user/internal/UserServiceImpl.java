@@ -67,7 +67,8 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.password.mechanism.IPasswordMech;
-import com.openexchange.password.mechanism.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -83,12 +84,12 @@ public final class UserServiceImpl implements UserService {
 
     private final UserServiceInterceptorRegistry interceptorRegistry;
 
-    private final PasswordMechFactory passwordMechFactory;
+    private final PasswordMechRegistry passwordMechFactory;
 
     /**
      * Initializes a new {@link UserServiceImpl}
      */
-    public UserServiceImpl(UserServiceInterceptorRegistry interceptorRegistry, PasswordMechFactory factory) {
+    public UserServiceImpl(UserServiceInterceptorRegistry interceptorRegistry, PasswordMechRegistry factory) {
         super();
         this.interceptorRegistry = interceptorRegistry;
         this.passwordMechFactory = factory;
@@ -299,7 +300,10 @@ public final class UserServiceImpl implements UserService {
     @Override
     public boolean authenticate(final User user, final String password) throws OXException {
         IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
-        return iPasswordMech.check(password, user.getUserPassword());
+        if (iPasswordMech == null) {
+            throw PasswordMechExceptionCodes.UNKNOWN_PASSWORD_MECHANISM.create(user.getPasswordMech(), user.getId());
+        }
+        return iPasswordMech.check(password, user.getUserPassword(), user.getSalt());
     }
 
     private void beforeCreate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
@@ -421,7 +425,7 @@ public final class UserServiceImpl implements UserService {
     @Override
     public void updatePassword(User user, Context context) throws OXException {
         IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
-        UserStorage.getInstance().updatePassword(null, context, user.getId(), iPasswordMech, user.getUserPassword());
+        UserStorage.getInstance().updatePassword(null, context, user.getId(), iPasswordMech, user.getUserPassword(), user.getSalt());
     }
 
     /**
@@ -430,6 +434,6 @@ public final class UserServiceImpl implements UserService {
     @Override
     public void updatePassword(Connection connection, User user, Context context) throws OXException {
         IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
-        UserStorage.getInstance().updatePassword(connection, context, user.getId(), iPasswordMech, user.getUserPassword());
+        UserStorage.getInstance().updatePassword(connection, context, user.getId(), iPasswordMech, user.getUserPassword(), user.getSalt());
     }
 }

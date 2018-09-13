@@ -49,10 +49,14 @@
 
 package com.openexchange.share.impl;
 
+import java.util.Base64;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.crypto.EncryptedData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.password.mechanism.IPasswordMech;
+import com.openexchange.password.mechanism.AbstractPasswordMech;
+import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.share.core.ShareConstants;
 
 /**
@@ -61,35 +65,44 @@ import com.openexchange.share.core.ShareConstants;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class SharePasswordMech implements IPasswordMech {
+public class SharePasswordMech extends AbstractPasswordMech {
 
     private final CryptoService cryptoService;
     private final String cryptKey;
+    private final ConfigurationService configurationService;
 
     /**
      * Initializes a new {@link SharePasswordMech}.
-     *
+     * 
+     * @param configurationService The configuration service
      * @param cryptoService The underlying crypto service
      * @param cryptKey The key use to encrypt / decrypt data
      */
-    public SharePasswordMech(CryptoService cryptoService, String cryptKey) {
-        super();
+    public SharePasswordMech(ConfigurationService configurationService, CryptoService cryptoService, String cryptKey) {
+        super(ShareConstants.PASSWORD_MECH_ID);
+        this.configurationService = configurationService;
         this.cryptoService = cryptoService;
         this.cryptKey = cryptKey;
     }
 
     @Override
-    public String getIdentifier() {
-        return ShareConstants.PASSWORD_MECH_ID;
+    public PasswordDetails encode(String str) throws OXException {
+        if (doSalt()) {
+            EncryptedData encryptedData = cryptoService.encrypt(str, cryptKey, getSalt());
+            return new PasswordDetails(str, encryptedData.getData(), getIdentifier(), Base64.getUrlEncoder().withoutPadding().encodeToString(encryptedData.getSalt()));
+        }
+        return new PasswordDetails(str, cryptoService.encrypt(str, cryptKey), getIdentifier(), null);
+    }
+
+    //FIXME REMOVE THIS OPTION WHEN SALT IS DEFAULT
+    private static final String COM_OPENEXCHANGE_PASSWORD_MECHANISM_SALT_ENABLED = "com.openexchange.password.mechanism.salt.enabled";
+
+    protected boolean doSalt() {
+        return configurationService.getBoolProperty(COM_OPENEXCHANGE_PASSWORD_MECHANISM_SALT_ENABLED, false);
     }
 
     @Override
-    public String encode(String str) throws OXException {
-        return cryptoService.encrypt(str, cryptKey);
-    }
-
-    @Override
-    public boolean check(String toCheck, String encoded) throws OXException {
+    public boolean checkPassword(String toCheck, String encoded, String salt) throws OXException {
         if ((Strings.isEmpty(toCheck)) && (Strings.isEmpty(encoded))) {
             return true;
         } else if ((Strings.isEmpty(toCheck)) && (Strings.isNotEmpty(encoded))) {
@@ -98,7 +111,7 @@ public class SharePasswordMech implements IPasswordMech {
             return false;
         }
 
-        String decoded = decode(encoded);
+        String decoded = decode(encoded, salt);
         if (toCheck.equals(decoded)) {
             return true;
         }
@@ -106,7 +119,15 @@ public class SharePasswordMech implements IPasswordMech {
     }
 
     @Override
-    public String decode(String encodedPassword) throws OXException {
-        return cryptoService.decrypt(encodedPassword, cryptKey);
+    public String decode(String encodedPassword, String salt) throws OXException {
+        if (Strings.isEmpty(salt) ) {
+            return cryptoService.decrypt(encodedPassword, cryptKey);
+        }
+        return cryptoService.decrypt(new EncryptedData(cryptKey, salt.getBytes()), encodedPassword, true);
+    }
+
+    @Override
+    public int getHashLength() {
+        return 16;
     }
 }

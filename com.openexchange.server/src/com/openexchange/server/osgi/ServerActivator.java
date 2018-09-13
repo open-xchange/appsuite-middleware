@@ -58,11 +58,10 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import javax.activation.MailcapCommandMap;
-import javax.management.ObjectName;
 import javax.servlet.ServletException;
+import org.json.FileBackedJSONStringProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.json.FileBackedJSONStringProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -221,7 +220,6 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
-import com.openexchange.management.Managements;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
@@ -234,9 +232,8 @@ import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.osgi.Tools;
-import com.openexchange.password.mechanism.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.preview.PreviewService;
@@ -328,7 +325,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechFactory.class, LeanConfigurationService.class, SegmentedUpdateService.class };
+        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, SegmentedUpdateService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -643,7 +640,7 @@ public final class ServerActivator extends HousekeepingActivator {
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
 
-        UserService userService = new UserServiceImpl(interceptorRegistry, getService(PasswordMechFactory.class));
+        UserService userService = new UserServiceImpl(interceptorRegistry, getService(PasswordMechRegistry.class));
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));

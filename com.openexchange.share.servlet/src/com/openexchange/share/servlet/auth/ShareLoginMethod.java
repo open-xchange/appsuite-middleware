@@ -65,7 +65,7 @@ import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginResultImpl;
-import com.openexchange.password.mechanism.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.share.core.ShareConstants;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
@@ -91,7 +91,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
         public boolean authenticate(Credentials credentials, User user, int contextId) throws OXException {
             // In case of anonymous guest user, only the password is relevant
             String password = credentials.getPassword();
-            return (Strings.isNotEmpty(password) && password.equals(decrypt(user.getUserPassword())));
+            return (Strings.isNotEmpty(password) && password.equals(decrypt(user.getUserPassword(), user.getSalt())));
         }
     };
 
@@ -228,11 +228,12 @@ public class ShareLoginMethod implements LoginMethodClosure {
      * Decrypts specified string value using {@link ShareConstants.PASSWORD_MECH_ID} via PasswordMechFactory.
      *
      * @param value The value to decrypt
+     * @param salt The salt to use for decryption
      * @return The decrypted value
      * @throws OXException If decryption fails
      */
-    public static String decrypt(String value) throws OXException {
-        return ShareServiceLookup.getService(PasswordMechFactory.class, true).get(ShareConstants.PASSWORD_MECH_ID).decode(value);
+    public static String decrypt(String value, String salt) throws OXException {
+        return ShareServiceLookup.getService(PasswordMechRegistry.class, true).get(ShareConstants.PASSWORD_MECH_ID).decode(value, salt);
     }
 
     /**
@@ -265,5 +266,4 @@ public class ShareLoginMethod implements LoginMethodClosure {
         }
         return null;
     }
-
 }

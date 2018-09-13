@@ -164,7 +164,7 @@ import com.openexchange.net.ssl.config.impl.internal.TrustAllSSLConfigurationSer
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.ServiceListings;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
-import com.openexchange.password.mechanism.impl.PasswordMechFactoryImpl;
+import com.openexchange.password.mechanism.impl.mech.PasswordMechRegistryImpl;
 import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
@@ -612,7 +612,7 @@ public final class Init {
                 public synchronized List<UserServiceInterceptor> getInterceptors() {
                     return Collections.emptyList();
                 }
-            }, PasswordMechFactoryImpl.getInstance());
+            }, PasswordMechRegistryImpl.getInstance());
             services.put(UserService.class, us);
             TestServiceRegistry.getInstance().addService(UserService.class, us);
         }

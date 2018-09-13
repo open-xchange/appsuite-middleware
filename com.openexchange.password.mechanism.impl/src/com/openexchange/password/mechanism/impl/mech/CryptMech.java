@@ -47,54 +47,56 @@
  *
  */
 
-package com.openexchange.password.mechanism.impl;
+package com.openexchange.password.mechanism.impl.mech;
 
-import com.openexchange.java.Strings;
-import com.openexchange.password.mechanism.PasswordMech;
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
+import com.openexchange.exception.OXException;
+import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
+import com.openexchange.password.mechanism.impl.algorithm.UnixCrypt;
 
 /**
- * {@link PasswordMechUtil}
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - moved
+ * {@link CryptMech}
+ *
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
  * @since v7.10.1
  */
-public class PasswordMechUtil {
+public class CryptMech extends ConfigAwarePasswordMech {
 
     /**
-     * Adapts the given identifier to the expected format.
-     *
-     * @param identifier The given identifier
-     * @return the expected identifier that looks like {UPPER_CASE_MECHANISM}
+     * Initializes a new {@link CryptMech}.
      */
-    public static String adaptIdentifier(String identifier) {
-        String id = Strings.toUpperCase(identifier);
-        if (!id.startsWith("{")) {
-            id = new StringBuilder(id.length() + 1).append('{').append(id).toString();
-        }
-        if (!id.endsWith("}")) {
-            id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
-        }
-        return id;
+    public CryptMech() {
+        super("{CRYPT}");
     }
 
-    /**
-     * get the {@link PasswordMech} for given identifier
-     * 
-     * @param toMatch The identifier of the password mechanism
-     * @return The {@link PasswordMech} or <code>null</code>
-     */
-    public static PasswordMech getMatching(String toMatch) {
-        if (Strings.isEmpty(toMatch)) {
-            return null;
-        }
-        String id = adaptIdentifier(toMatch);
-        for (PasswordMech passwordMech : PasswordMech.values()) {
-            if (passwordMech.getIdentifier().equals(id)) {
-                return passwordMech;
+    @Override
+    public PasswordDetails encode(String str) throws OXException {
+        try {
+            if (doSalt()) {
+                String salt = Base64.getUrlEncoder().withoutPadding().encodeToString(getSalt());
+                return new PasswordDetails(str, UnixCrypt.crypt(salt, str), getIdentifier(), salt);
             }
+            return new PasswordDetails(str, UnixCrypt.crypt(str), getIdentifier(), null);
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("Error encrypting password according to CRYPT mechanism", e);
+            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
         }
-        return null;
     }
 
+    @Override
+    public boolean checkPassword(String candidate, String encoded, String salt) throws OXException {
+        try {
+            return UnixCrypt.matches(encoded, candidate);
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("Error checking password according to CRYPT mechanism", e);
+            throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public int getHashLength() {
+        return 32;
+    }
 }

@@ -99,9 +99,10 @@ public interface GuestService {
      * @param userId - user id of the guest to add in the given context
      * @param password - password of the user to handle as guest
      * @param passwordMech - mechanism the password has been encrypted with
+     * @param salt - the salt used for the password
      * @throws OXException
      */
-    void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech) throws OXException;
+    void addGuest(String mailAddress, String groupId, int contextId, int userId, String password, String passwordMech, String salt) throws OXException;
 
     /**
      * Remove an existing guest. If the last assignment for a guest was removed even the complete guest will be removed.

@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.tools;
 
+import java.util.List;
 import javax.mail.internet.AddressException;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -57,7 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.password.mechanism.IPasswordMech;
-import com.openexchange.password.mechanism.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 
 /**
  * @author choeger
@@ -140,8 +141,18 @@ public class GenericChecks {
         if (mech == null) {
             return;
         }
-        if (!mech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH) && !mech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
-            throw new InvalidDataException("Invalid PasswordMech: " + mech + ", Valid Mechs: " + PasswordMechObject.CRYPT_MECH + ":" + PasswordMechObject.SHA_MECH);
+
+        try {
+            PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
+            List<String> knownIdentifiers = mechFactory.getApplicableIdentifiers();
+            for (String identifier : knownIdentifiers) {
+                if (identifier.equalsIgnoreCase(mech)) {
+                    return;
+                }
+            }
+            throw new InvalidDataException("Invalid PasswordMech: " + mech + ". Use one of the following: " + String.join(",", mechFactory.getIdentifiers()));
+        } catch (OXException e) {
+            throw new InvalidDataException("PasswordMechFactory not availble. Did the server start properly?");
         }
     }
 
@@ -152,17 +163,18 @@ public class GenericChecks {
      * @param crypted The encrypted password
      * @param clear The password in clear text
      * @param mech The password mechanism to use
+     * @param salt The salt used for encoding
      * @return <code>true</code> if authentication succeeds and false if it fails
      */
-    public final static boolean authByMech(String crypted, String clear, String mech) {
+    public final static boolean authByMech(String crypted, String clear, String mech, String salt) {
         if (Strings.isEmpty(mech)) {
             return false;
         }
         try {
-            PasswordMechFactory mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechFactory.class, true);
+            PasswordMechRegistry mechFactory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class, true);
             IPasswordMech passwordMech = mechFactory.get(mech);
             if (null != passwordMech) {
-                return passwordMech.check(clear, crypted);
+                return passwordMech.check(clear, crypted, salt);
             }
         } catch (OXException e) {
             // Ignore

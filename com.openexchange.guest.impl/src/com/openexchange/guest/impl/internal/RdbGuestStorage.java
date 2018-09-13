@@ -103,14 +103,14 @@ public class RdbGuestStorage extends GuestStorage {
     /**
      * SQL statement for getting password and password mechanism for a user (resolved by guest id, context and user id)
      */
-    protected static final String RESOLVE_GUEST_ASSIGNMENT_PASSWORD = "SELECT password, passwordMech FROM guest2context WHERE cid=? AND uid=? AND guest_id=?";
+    protected static final String RESOLVE_GUEST_ASSIGNMENT_PASSWORD = "SELECT password, passwordMech, salt FROM guest2context WHERE cid=? AND uid=? AND guest_id=?";
 
     /**
      * SQL statement for getting assignments made for a user based on the mail address<br>
      * <br>
      * Checks if the given user has assignments.
      */
-    protected static final String RESOLVE_GUEST_ASSIGNMENTS = "SELECT cid,uid,password,passwordMech FROM guest2context WHERE guest_id=?";
+    protected static final String RESOLVE_GUEST_ASSIGNMENTS = "SELECT cid,uid,password,passwordMech,salt FROM guest2context WHERE guest_id=?";
 
     /**
      * SQL statement to count assignments that currently exist.
@@ -120,12 +120,12 @@ public class RdbGuestStorage extends GuestStorage {
     /**
      * SQL statement to update password and passwordMech for the given user
      */
-    protected static final String UPDATE_GUEST_PASSWORD = "UPDATE guest2context SET password=?, passwordMech=? WHERE cid=? AND uid=? AND guest_id=?";
+    protected static final String UPDATE_GUEST_PASSWORD = "UPDATE guest2context SET password=?, passwordMech=?, salt=? WHERE cid=? AND uid=? AND guest_id=?";
 
     /**
      * SQL statement to insert a new assignment for an existing guest
      */
-    protected static final String INSERT_GUEST_ASSIGNMENT = "INSERT INTO guest2context (guest_id, cid, uid, password, passwordMech) VALUES (?, ?, ?, ?, ?)";
+    protected static final String INSERT_GUEST_ASSIGNMENT = "INSERT INTO guest2context (guest_id, cid, uid, password, passwordMech, salt) VALUES (?, ?, ?, ?, ?, ?)";
 
     /**
      * SQL statement to insert a new guest for an unknown mail address
@@ -210,6 +210,7 @@ public class RdbGuestStorage extends GuestStorage {
             statement.setInt(3, assignment.getUserId());
             statement.setString(4, assignment.getPassword());
             statement.setString(5, assignment.getPasswordMech());
+            statement.setString(6, assignment.getSalt());
 
             long affectedRows = statement.executeUpdate();
 
@@ -538,8 +539,9 @@ public class RdbGuestStorage extends GuestStorage {
                 int cid = result.getInt(1);
                 int uid = result.getInt(2);
                 String password = result.getString(3);
-                String passwordMech = result.getString(3);
-                guestAssignments.add(new GuestAssignment(guestId, cid, uid, password, passwordMech));
+                String passwordMech = result.getString(4);
+                String salt = result.getString(5);
+                guestAssignments.add(new GuestAssignment(guestId, cid, uid, password, passwordMech, salt));
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -569,7 +571,8 @@ public class RdbGuestStorage extends GuestStorage {
             while (result.next()) {
                 String password = result.getString(1);
                 String passwordMech = result.getString(2);
-                return new GuestAssignment(guestId, contextId, userId, password, passwordMech);
+                String salt = result.getString(3);
+                return new GuestAssignment(guestId, contextId, userId, password, passwordMech, salt);
             }
 
         } catch (final SQLException e) {
@@ -594,9 +597,10 @@ public class RdbGuestStorage extends GuestStorage {
             statement = connection.prepareStatement(UPDATE_GUEST_PASSWORD);
             statement.setString(1, assignment.getPassword());
             statement.setString(2, assignment.getPasswordMech());
-            statement.setInt(3, assignment.getContextId());
-            statement.setInt(4, assignment.getUserId());
-            statement.setLong(5, assignment.getGuestId());
+            statement.setString(3, assignment.getSalt());
+            statement.setInt(4, assignment.getContextId());
+            statement.setInt(5, assignment.getUserId());
+            statement.setLong(6, assignment.getGuestId());
 
             final int affectedRows = statement.executeUpdate();
 

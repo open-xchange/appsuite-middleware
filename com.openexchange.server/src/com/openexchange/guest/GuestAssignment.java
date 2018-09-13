@@ -87,18 +87,24 @@ public class GuestAssignment implements Serializable {
     private final String passwordMech;
 
     /**
+     * The salt used for the password
+     */
+    private final String salt;
+
+    /**
      * Initializes a new {@link GuestAssignment}.
      *
      * @param guestId - internal guest id of the user
      * @param contextId - context id the user is in
      * @param userId - user id in the context
      */
-    public GuestAssignment(long guestId, int contextId, int userId, String password, String passwordMech) {
+    public GuestAssignment(long guestId, int contextId, int userId, String password, String passwordMech, String salt) {
         this.guestId = guestId;
         this.contextId = contextId;
         this.userId = userId;
         this.password = password;
         this.passwordMech = passwordMech;
+        this.salt = salt;
     }
 
     /**
@@ -144,5 +150,14 @@ public class GuestAssignment implements Serializable {
      */
     public String getPasswordMech() {
         return passwordMech;
+    }
+
+    /**
+     * Gets the salt
+     *
+     * @return The salt
+     */
+    public String getSalt() {
+        return salt;
     }
 }

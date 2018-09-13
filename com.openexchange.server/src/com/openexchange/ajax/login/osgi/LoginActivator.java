@@ -73,7 +73,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.osgi.Tools;
-import com.openexchange.password.mechanism.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.reservation.Enhancer;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -133,7 +133,7 @@ public class LoginActivator extends HousekeepingActivator {
             }
         }
         track(ShareService.class, new ServerServiceRegistryTracker<ShareService>(ShareService.class));
-        track(PasswordMechFactory.class, new ServerServiceRegistryTracker<PasswordMechFactory>(PasswordMechFactory.class));
+        track(PasswordMechRegistry.class, new ServerServiceRegistryTracker<PasswordMechRegistry>(PasswordMechRegistry.class));
         track(ModuleSupport.class, new ServerServiceRegistryTracker<ModuleSupport>(ModuleSupport.class));
 
         ServiceSet<LoginRampUpService> rampUp = new ServiceSet<LoginRampUpService>();

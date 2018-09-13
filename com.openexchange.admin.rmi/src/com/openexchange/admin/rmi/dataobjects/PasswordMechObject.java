@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi.dataobjects;
 
 /**
@@ -55,10 +56,6 @@ package com.openexchange.admin.rmi.dataobjects;
  *
  */
 public interface PasswordMechObject {
-
-    public static final String CRYPT_MECH = "{CRYPT}".intern();
-    public static final String SHA_MECH = "{SHA}".intern();
-    public static final String BCRYPT_MECH = "{BCRYPT}".intern();
 
     /**
      * @return the passwordMech
@@ -71,7 +68,7 @@ public interface PasswordMechObject {
      * see {@link User.CRYPT_MECH} and {@link User.SHA_MECH}.
      *
      * @param passwordMech
-     *                the passwordMech to set
+     *            the passwordMech to set
      */
     void setPasswordMech(final String passwordMech);
 
@@ -81,4 +78,11 @@ public interface PasswordMechObject {
      * @return A {@link String} containing the password
      */
     String getPassword();
+
+    /**
+     * Return the salt of this user object.
+     *
+     * @return A {@link String} containing the salt
+     */
+    String getSalt();
 }
