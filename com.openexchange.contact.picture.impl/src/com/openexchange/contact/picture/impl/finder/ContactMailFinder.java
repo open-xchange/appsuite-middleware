@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -133,7 +134,8 @@ public class ContactMailFinder extends AbstractContactFinder {
 
             SearchIterator<Contact> result = null;
             try {
-                result = contactService.searchContacts(session, cso, fields, new SortOptions(ContactField.LAST_MODIFIED, Order.DESCENDING));
+                // Search from system folder (e.g. GAB, if accessible) to private folders, by oldest contacts first
+                result = contactService.searchContacts(session, cso, fields, new SortOptions(new SortOrder(ContactField.FOLDER_ID, Order.ASCENDING), new SortOrder(ContactField.OBJECT_ID, Order.ASCENDING)));
                 if (result == null) {
                     continue;
                 }

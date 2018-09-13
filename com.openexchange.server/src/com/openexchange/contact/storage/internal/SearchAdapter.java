@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONException;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.exception.OXException;
@@ -365,7 +366,7 @@ public class SearchAdapter {
     static {
         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
         term.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_IMAGES));
-        term.addOperand(new ConstantOperand<Integer>(1));
+        term.addOperand(new ConstantOperand<Integer>(I(0)));
         HAS_IMG_TERM = term;
     }
 
