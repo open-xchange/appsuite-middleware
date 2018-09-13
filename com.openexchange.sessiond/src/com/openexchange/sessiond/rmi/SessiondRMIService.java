@@ -51,10 +51,12 @@ package com.openexchange.sessiond.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Set;
+import javax.management.MBeanException;
 import com.openexchange.session.Session;
 
 /**
- * {@link SessiondRMIService} - The RMI service for {@link Session} operation
+ * {@link SessiondRMIService} - The RMI service for {@link Session} operations.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
@@ -64,9 +66,40 @@ public interface SessiondRMIService extends Remote {
     public static final String RMI_NAME = "SessiondRMIService";
 
     /**
+     * Clears all sessions belonging to the user identified by given user ID in specified context
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
+     */
+    int clearUserSessions(int userId, int contextId) throws RemoteException;
+
+    /**
+     * Clears all sessions from cluster belonging to the user identified by given user ID in specified context
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
+     * @throws MBeanException If operation fails
+     */
+    void clearUserSessionsGlobally(int userId, int contextId) throws RemoteException;
+
+    /**
      * Clears all sessions belonging to specified context
      *
      * @param contextId The context identifier
      */
     void clearContextSessions(int contextId) throws RemoteException;
+
+    /**
+     * Clears all sessions belonging to given contexts.
+     *
+     * @param contextId The context identifiers to remove sessions for
+     */
+    void clearContextSessionsGlobal(Set<Integer> contextIds) throws RemoteException;
+
+    /**
+     * Clear all sessions in central session storage. This does not affect the local short term session container.
+     */
+    void clearSessionStorage() throws RemoteException;
 }

@@ -50,7 +50,14 @@
 package com.openexchange.sessiond.impl;
 
 import java.rmi.RemoteException;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessiond.rmi.SessiondRMIService;
+import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * {@link SessiondRMIServiceImpl}
@@ -59,6 +66,8 @@ import com.openexchange.sessiond.rmi.SessiondRMIService;
  * @since v7.10.1
  */
 public class SessiondRMIServiceImpl implements SessiondRMIService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SessiondRMIServiceImpl.class);
 
     /**
      * Initialises a new {@link SessiondRMIServiceImpl}.
@@ -75,5 +84,61 @@ public class SessiondRMIServiceImpl implements SessiondRMIService {
     @Override
     public void clearContextSessions(int contextId) throws RemoteException {
         SessionHandler.removeContextSessions(contextId);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearContextSessionsGlobal(java.util.Set)
+     */
+    @Override
+    public void clearContextSessionsGlobal(Set<Integer> contextIds) throws RemoteException {
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        try {
+            sessiondService.removeContextSessionsGlobal(contextIds);
+        } catch (OXException e) {
+            throw new RemoteException(e.getMessage(), e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearUserSessions(int, int)
+     */
+    @Override
+    public int clearUserSessions(int userId, int contextId) throws RemoteException {
+        return SessionHandler.removeUserSessions(userId, contextId).length;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearUserSessionsGlobally(int, int)
+     */
+    @Override
+    public void clearUserSessionsGlobally(int userId, int contextId) throws RemoteException {
+        try {
+            SessionHandler.removeUserSessionsGlobal(userId, contextId);
+        } catch (Exception e) {
+            LOG.error("", e);
+            String message = e.getMessage();
+            throw new RemoteException(message, new Exception(message));
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.sessiond.rmi.SessiondRMIService#clearSessionStorage()
+     */
+    @Override
+    public void clearSessionStorage() throws RemoteException {
+        SessionStorageService storageService = Services.getService(SessionStorageService.class);
+        try {
+            storageService.cleanUp();
+        } catch (OXException e) {
+            throw new RemoteException(e.getMessage(), e);
+        }
     }
 }
