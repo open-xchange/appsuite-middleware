@@ -62,9 +62,14 @@ import com.openexchange.sessiond.rmi.SessiondRMIService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+// TODO: Maybe enhance the command line tool over functionality that 
+//       clears global context sessions as well as clearing the session storage...
 public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "closesessions [-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
+    private static final String SYNTAX = "closesessions [-c <contextId>] [-u <userId>] [-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
+
+    private int contextId;
+    private int userId;
 
     /**
      * Entry point
@@ -86,12 +91,37 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
     @Override
     protected void checkOptions(CommandLine cmd) {
-        // No more options to check
+        // Parse context identifier
+        if (false == cmd.hasOption('c')) {
+            System.err.println("Missing context identifier.");
+            printHelp(options);
+            System.exit(1);
+        }
+        String contextOptionValue = cmd.getOptionValue('c');
+        try {
+            contextId = Integer.parseInt(contextOptionValue.trim());
+        } catch (final NumberFormatException e) {
+            System.err.println("Context identifier parameter is not a number: " + contextOptionValue);
+            printHelp(options);
+            System.exit(1);
+        }
+
+        if (cmd.hasOption('u')) {
+            String userPptionValue = cmd.getOptionValue('u');
+            try {
+                userId = Integer.parseInt(userPptionValue);
+            } catch (Exception e) {
+                System.err.println("User identifier parameter is not a number: " + userPptionValue);
+                printHelp(options);
+                System.exit(1);
+            }
+        }
     }
 
     @Override
     protected void addOptions(Options options) {
         options.addOption("c", "context", true, "A valid context identifier");
+        options.addOption("u", "user", true, "A valid user identifier");
     }
 
     @Override
@@ -126,31 +156,14 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        // Parse context identifier
-        if (false == cmd.hasOption('c')) {
-            System.err.println("Missing context identifier.");
-            printHelp(options);
-            System.exit(1);
+        SessiondRMIService rmiService = getRmiStub(optRmiHostName, SessiondRMIService.RMI_NAME);
+        if (userId > 0) {
+            rmiService.clearUserSessions(Integer.valueOf(contextId), Integer.valueOf(userId));
+            System.out.println("Cleared sessions for user " + userId + " in context " + contextId);
             return null;
         }
-        int contextId;
-        {
-            String optionValue = cmd.getOptionValue('c');
-            try {
-                contextId = Integer.parseInt(optionValue.trim());
-            } catch (final NumberFormatException e) {
-                System.err.println("Context identifier parameter is not a number: " + optionValue);
-                printHelp(options);
-                System.exit(1);
-                return null;
-            }
-        }
-
-        // Invoke RMI method
-        SessiondRMIService rmiService = getRmiStub(optRmiHostName, SessiondRMIService.RMI_NAME);
         rmiService.clearContextSessions(Integer.valueOf(contextId));
         System.out.println("Cleared sessions for context " + contextId);
         return null;
     }
-
 }
