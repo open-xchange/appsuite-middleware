@@ -49,8 +49,8 @@
 
 package com.openexchange.contact.picture.json;
 
-import static com.openexchange.java.Autoboxing.l;
 import java.util.Collections;
+import java.util.Date;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -104,7 +104,7 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
         ContactPicture picture = services.getServiceSafe(ContactPictureService.class).getPicture(session, getData(requestData));
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
         setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
-        result.setHeader("Last-Modified", String.valueOf(picture.getLastModified()));
+        result.setHeader("Last-Modified", Tools.formatHeaderDate(picture.getLastModified()));
         return result;
     }
 
@@ -145,7 +145,7 @@ public class GetAction implements ETagAwareAJAXActionService, LastModifiedAwareA
 
     @Override
     public boolean checkLastModified(long clientLastModified, AJAXRequestData request, ServerSession session) throws OXException {
-        Long lastModified = services.getServiceSafe(ContactPictureService.class).getLastModified(session, getData(request));
-        return l(lastModified) == clientLastModified;
+        Date lastModified = services.getServiceSafe(ContactPictureService.class).getLastModified(session, getData(request));
+        return lastModified.getTime() == clientLastModified;
     }
 }

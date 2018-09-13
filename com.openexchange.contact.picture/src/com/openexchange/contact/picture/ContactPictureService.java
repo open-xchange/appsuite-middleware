@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.picture;
 
+import java.util.Date;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
@@ -84,8 +85,8 @@ public interface ContactPictureService {
      * 
      * @param session The {@link Session}
      * @param data The {@link PictureSearchData} to get the pictures last modified for
-     * @return A timestamp as {@link Long}. If not found {@link ContactPicture#UNMODIFIED} is returned
+     * @return A timestamp as {@link Date}. If not found {@link ContactPicture#UNMODIFIED} is returned
      */
-    Long getLastModified(Session session, PictureSearchData data);
+    Date getLastModified(Session session, PictureSearchData data);
 
 }

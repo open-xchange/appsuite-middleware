@@ -54,7 +54,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.PictureSearchData;
 import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.contact.picture.finder.PictureResult;
@@ -134,7 +133,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         } else if (false == ContactPictureUtil.hasValidImage(I(session.getContextId()), contact, data)) {
             return new PictureResult(modfiyResult(contact));
         }
-        return new PictureResult(ContactPictureUtil.fromContact(contact, false));
+        return new PictureResult(ContactPictureUtil.fromContact(contact));
     }
 
     @Override
@@ -143,7 +142,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         if (null == contact) {
             return new PictureResult(data);
         }
-        return new PictureResult(ContactPictureUtil.fromContact(contact, true));
+        return new PictureResult(ContactPictureUtil.fromContact(contact));
     }
 
     @Override
@@ -152,7 +151,7 @@ public abstract class AbstractContactFinder implements ContactPictureFinder {
         if (null == contact) {
             return new PictureResult(data);
         }
-        return new PictureResult(new ContactPicture(null, null, contact.getLastModified().getTime()));
+        return new PictureResult(ContactPictureUtil.fromContact(contact));
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -50,7 +50,7 @@
 package com.openexchange.contact.picture.impl;
 
 import static com.openexchange.contact.picture.ContactPicture.FALLBACK_PICTURE;
-import static com.openexchange.java.Autoboxing.L;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import org.osgi.framework.BundleContext;
@@ -104,11 +104,11 @@ public class ContactPictureServiceImpl extends RankingAwareNearRegistryServiceTr
     }
 
     @Override
-    public Long getLastModified(Session session, PictureSearchData searchData) {
+    public Date getLastModified(Session session, PictureSearchData searchData) {
         ContactPicture picture = get(session, searchData, (ContactPictureFinder f, Session s, PictureSearchData d) -> {
             return f.getLastModified(s, d);
         });
-        return null == picture ? L(FALLBACK_PICTURE.getLastModified()) : L(picture.getLastModified());
+        return null == picture ? FALLBACK_PICTURE.getLastModified() : picture.getLastModified();
     }
 
     // ---------------------------------------------------------------------------------------------

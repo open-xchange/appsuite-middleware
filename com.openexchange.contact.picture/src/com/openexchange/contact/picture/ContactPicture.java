@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.picture;
 
+import java.util.Date;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.java.Strings;
@@ -64,7 +65,7 @@ import com.openexchange.java.Strings;
  */
 public class ContactPicture {
 
-    public static final long UNMODIFIED = 0l;
+    public static final Date UNMODIFIED = new Date(0);
 
     public static final ContactPicture FALLBACK_PICTURE;
 
@@ -83,7 +84,7 @@ public class ContactPicture {
 
     private final IFileHolder fileHolder;
 
-    private final long lastModified;
+    private final Date lastModified;
 
     /**
      * Initializes a new {@link ContactPicture}.
@@ -92,7 +93,7 @@ public class ContactPicture {
      * @param fileHolder The file holder
      * @param lastModified The time the file was last modified
      */
-    public ContactPicture(String eTag, IFileHolder fileHolder, long lastModified) {
+    public ContactPicture(String eTag, IFileHolder fileHolder, Date lastModified) {
         this.eTag = eTag;
         this.fileHolder = fileHolder;
         this.lastModified = lastModified;
@@ -119,91 +120,10 @@ public class ContactPicture {
     /**
      * Get the time the picture was last modified
      * 
-     * @return The time the picture was last modified or {@value #UNMODIFIED}
+     * @return The {@link Date} the picture was last modified or {@value #UNMODIFIED}
      */
-    public long getLastModified() {
+    public Date getLastModified() {
         return lastModified;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Long.valueOf(lastModified).intValue();
-        result = prime * result + ((eTag == null) ? 0 : eTag.hashCode());
-        if (fileHolder == null) {
-            result = prime * result;
-        } else {
-            result = prime * result + Long.valueOf(fileHolder.getLength()).intValue();
-            result = prime * result + ((fileHolder.getContentType() == null) ? 0 : fileHolder.getContentType().hashCode());
-            result = prime * result + ((fileHolder.getDisposition() == null) ? 0 : fileHolder.getDisposition().hashCode());
-            result = prime * result + ((fileHolder.getDelivery() == null) ? 0 : fileHolder.getDelivery().hashCode());
-            result = prime * result + ((fileHolder.getName() == null) ? 0 : fileHolder.getName().hashCode());
-        }
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        ContactPicture other = (ContactPicture) obj;
-        if (lastModified != other.lastModified) {
-            return false;
-        }
-        if (eTag == null) {
-            if (other.eTag != null) {
-                return false;
-            }
-        } else if (!eTag.equals(other.eTag)) {
-            return false;
-        }
-        if (fileHolder == null) {
-            if (other.fileHolder != null) {
-                return false;
-            }
-        } else if (other.fileHolder == null) {
-            return false;
-        }
-        if (fileHolder.getLength() != other.fileHolder.getLength()) {
-            return false;
-        }
-        if (fileHolder.getContentType() == null) {
-            if (other.fileHolder.getContentType() != null) {
-                return false;
-            }
-        } else if (!fileHolder.getContentType().equals(other.fileHolder.getContentType())) {
-            return false;
-        }
-        if (fileHolder.getDisposition() == null) {
-            if (other.fileHolder.getDisposition() != null) {
-                return false;
-            }
-        } else if (!fileHolder.getDisposition().equals(other.fileHolder.getDisposition())) {
-            return false;
-        }
-        if (fileHolder.getDelivery() == null) {
-            if (other.fileHolder.getDelivery() != null) {
-                return false;
-            }
-        } else if (!fileHolder.getDelivery().equals(other.fileHolder.getDelivery())) {
-            return false;
-        }
-        if (fileHolder.getName() == null) {
-            if (other.fileHolder.getName() != null) {
-                return false;
-            }
-        } else if (!fileHolder.getName().equals(other.fileHolder.getName())) {
-            return false;
-        }
-        return true;
     }
 
     @Override

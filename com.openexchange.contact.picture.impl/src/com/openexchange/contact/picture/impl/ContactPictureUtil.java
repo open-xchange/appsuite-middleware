@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.picture.impl;
 
+import java.util.Date;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.contact.picture.finder.FinderUtil;
 import com.openexchange.exception.OXException;
@@ -69,11 +71,10 @@ public class ContactPictureUtil extends FinderUtil {
      * Generates a {@link ContactPicture} based on the given bytes
      *
      * @param contact The {@link Contact}
-     * @param onlyETag <code>true</code> if only eTag should be set
      * @return A {@link ContactPicture}
      */
-    public static ContactPicture fromContact(Contact contact, boolean onlyETag) {
-        return null == contact ? null : new ContactPicture(generateETag(contact), onlyETag ? null : transformToFileHolder(contact), contact.getLastModified().getTime());
+    public static ContactPicture fromContact(@NonNull final Contact contact) {
+        return new ContactPicture(generateETag(contact), transformToFileHolder(contact), getContactLastModified(contact));
     }
 
     /**
@@ -88,12 +89,12 @@ public class ContactPictureUtil extends FinderUtil {
          * This is important for requests containing resizing. If the picture shall be delivered in a
          * different size the eTag must not be the same compared to the original size
          */
-        return null == contact ? null : new StringBuilder(512) // @formatter:off
+        return new StringBuilder(512) // @formatter:off
             .append(contact.getParentFolderID())
             .append('/')
             .append(contact.getObjectID())
             .append('/')
-            .append(contact.getLastModified().getTime()).toString(); // @formatter:on
+            .append(getContactLastModified(contact)).toString(); // @formatter:on
     }
 
     /**
@@ -103,10 +104,23 @@ public class ContactPictureUtil extends FinderUtil {
      * @return The IFileHolder
      */
     private static ByteArrayFileHolder transformToFileHolder(Contact contact) {
+        if (null == contact.getImage1()) {
+            return null;
+        }
         ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(contact.getImage1());
         fileHolder.setContentType(contact.getImageContentType());
         fileHolder.setName(new StringBuilder("contact-image-").append(contact.getObjectID()).toString());
         return fileHolder;
+    }
+
+    /**
+     * Get the last modified value for the contact
+     * 
+     * @param contact The contact to get the modification date from
+     * @return The last modification date of the date or {@link ContactPicture#UNMODIFIED}
+     */
+    private static Date getContactLastModified(Contact contact) {
+        return null == contact.getLastModified() ? ContactPicture.UNMODIFIED : contact.getLastModified();
     }
 
     /**
