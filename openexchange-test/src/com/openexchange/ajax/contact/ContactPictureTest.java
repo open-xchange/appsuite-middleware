@@ -49,19 +49,23 @@
 
 package com.openexchange.ajax.contact;
 
-import java.util.Arrays;
-import java.util.UUID;
+import static com.openexchange.java.Autoboxing.L;
+import java.util.Collections;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.openexchange.dav.carddav.Photos;
+import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ContactData;
+import com.openexchange.testing.httpclient.models.ContactListElement;
 
 /**
  *
  * {@link ContactPictureTest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
 public class ContactPictureTest extends AbstractApiClientContactTest {
@@ -70,56 +74,185 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
 
     private final static byte IMAGE[] = Photos.PNG_100x100;
 
+    private ContactData contactObj;
+
+    // ---------------------------------------------------------------------------------------------
+
     @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
+        contactObj = createContactObject("ContactPictureTest");
+        setImage(contactObj);
+    }
 
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    public void testUserFallbackPicture() throws Exception {
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), apiClient.getUserId().toString(), null, contactFolderId, null);
+        assertImage(contactPicture, Photos.FALLBACK_PICTURE);
     }
 
     @Test
     public void testFallbackContactPicture() throws Exception {
-        final ContactData contactObj = new ContactData();
-
-        contactObj.setLastName("Fallback");
-        contactObj.setFirstName("Picture");
-        contactObj.setCountryBusiness("Deutschland");
-        contactObj.setEmail1(UUID.randomUUID() + "@open-xchange.com");
-        contactObj.setFolderId(contactFolderId);
-        contactObj.setMarkAsDistributionlist(false);
-        contactObj.setDistributionList(null);
-
+        removeImage();
         final String contactId = createContact(contactObj);
 
         byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
-
-        Assert.assertNotNull("Response should not be null.", contactPicture);
-        Assert.assertEquals(Photos.FALLBACK_PICTURE.length, contactPicture.length);
-        Assert.assertTrue("Wrong image", Arrays.equals(contactPicture, Photos.FALLBACK_PICTURE));
+        assertImage(contactPicture, Photos.FALLBACK_PICTURE);
     }
 
     @Test
     public void testGetContactPicture() throws Exception {
-        final ContactData contactObj = createContactObject("testGetContactPicture");
-        contactObj.setImage1(Base64.encodeBase64String(IMAGE));
-        contactObj.setImage1ContentType(IMAGE_TYPE);
         final String contactId = createContact(contactObj);
+
         byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
-        Assert.assertNotNull("Response should not be null.", contactPicture);
-        Assert.assertEquals(IMAGE.length, contactPicture.length);
-        Assert.assertArrayEquals(IMAGE, contactPicture);
+        assertImage(contactPicture);
     }
 
     @Test
     public void testGetContactPictureByMail() throws Exception {
         String mail = "picture@example.org";
-        final ContactData contactObj = createContactObject("testGetContactPictureByMail");
-        contactObj.setImage1(Base64.encodeBase64String(IMAGE));
-        contactObj.setImage1ContentType(IMAGE_TYPE);
         contactObj.setEmail1(mail);
         createContact(contactObj);
         byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail);
-        Assert.assertNotNull("Response should not be null.", contactPicture);
-        Assert.assertEquals(IMAGE.length, contactPicture.length);
-        Assert.assertArrayEquals(IMAGE, contactPicture);
+        assertImage(contactPicture);
+    }
+
+    @Test
+    public void testUpdateContact() throws Exception {
+        final String contactId = createContact(contactObj);
+
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        assertImage(contactPicture);
+
+        contactObj.setId(contactId);
+
+        contactObj.setTelephoneBusiness2("+48112233445566");
+        updateContact(contactObj, contactFolderId);
+
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        assertImage(contactPicture);
+
+    }
+
+    @Test
+    public void testUpdateContactMail() throws Exception {
+        String mail = "testUpdateContactMail@example.org";
+        contactObj.setEmail1(mail);
+        String contactId = createContact(contactObj);
+
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail);
+        assertImage(contactPicture);
+
+        mail = "testUpdateContactMail2@example.org";
+        contactObj.setEmail1(mail);
+        contactObj.setId(contactId);
+        updateContact(contactObj, contactFolderId);
+
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail);
+        assertImage(contactPicture);
+    }
+
+    @Test
+    public void testAddContactMail() throws Exception {
+        String mail = "testUpdateContactMail@example.org";
+        contactObj.setEmail1(mail);
+        String contactId = createContact(contactObj);
+
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail);
+        assertImage(contactPicture);
+
+        String mail2 = "testUpdateContactMail2@example.org";
+        contactObj.setEmail2(mail2);
+        contactObj.setId(contactId);
+        updateContact(contactObj, contactFolderId);
+
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail2);
+        assertImage(contactPicture);
+    }
+
+    @Test
+    public void testUpdateContactPicture() throws Exception {
+        final String contactId = createContact(contactObj);
+
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        assertImage(contactPicture);
+
+        contactObj.setId(contactId);
+
+        setImage(contactObj, Photos.PNG_200x200);
+        updateContact(contactObj, contactFolderId);
+
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        assertImage(contactPicture, Photos.PNG_200x200);
+    }
+
+    @Test
+    public void testDeleteContactPicture() throws Exception {
+        final String contactId = createContact(contactObj);
+
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        assertImage(contactPicture);
+
+        contactObj.setId(contactId);
+
+        removeImage();
+        updateContact(contactObj, contactFolderId);
+
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        assertImage(contactPicture, Photos.FALLBACK_PICTURE);
+    }
+
+    @Test
+    public void testDeleteContact() throws Exception {
+        final String contactId = createContact(contactObj);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        assertImage(contactPicture);
+
+        deleteContact(contactId);
+
+        // Even if the contact is not found the FALLBACK_IMAGE should be returned
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        assertImage(contactPicture, Photos.FALLBACK_PICTURE);
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private void setImage(final ContactData contactObj) {
+        setImage(contactObj, IMAGE);
+    }
+
+    private void setImage(final ContactData contactObj, byte[] image) {
+        contactObj.setImage1(Base64.encodeBase64String(image));
+        contactObj.setImage1ContentType(IMAGE_TYPE);
+    }
+
+    /**
+     * Delete contact picture.
+     * <code>null</code> will not be sent by API client, so we must set it to an empty string
+     */
+    private void removeImage() {
+        contactObj.setImage1("");
+        contactObj.setImage1Url("");
+        contactObj.setImage1ContentType("");
+    }
+
+    private void assertImage(byte[] actual) {
+        assertImage(actual, IMAGE);
+    }
+
+    private void assertImage(byte[] actual, byte[] expected) {
+        Assert.assertNotNull("Response should not be null.", actual);
+        Assert.assertEquals(expected.length, actual.length);
+        Assert.assertArrayEquals(expected, actual);
+    }
+
+    private void deleteContact(final String contactId) throws ApiException {
+        ContactListElement element = new ContactListElement();
+        element.setFolder(contactFolderId);
+        element.setId(contactId);
+        contactsApi.deleteContacts(getSessionId(), L(Long.MAX_VALUE), Collections.singletonList(element));
     }
 }
