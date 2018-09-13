@@ -96,8 +96,6 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
     @Override
     public void handleChangedIp(String current, String previous, Session session, IPCheckConfiguration configuration) throws OXException {
-        metricCollector.incrementTotalIPChanges();
-
         boolean whiteListedClient = IPCheckers.isWhitelistedClient(session, configuration);
         // ACCEPT: If session-associated client is white-listed
         if (whiteListedClient) {
@@ -168,8 +166,10 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
      * @param acceptReason The accept reason
      */
     private void accept(String current, String previous, Session session, boolean whiteListedClient, AcceptReason acceptReason) {
+        if (false == IPCheckers.updateIPAddress(current, session, whiteListedClient)) {
+            return;
+        }
         LOGGER.debug("The IP change from '{}' to '{}' was accepted. Reason: '{}'", previous, current, acceptReason.getMessage());
-        IPCheckers.updateIPAddress(current, session, whiteListedClient);
         switch (acceptReason) {
             case PRIVATE_IPV4:
                 metricCollector.incrementAcceptedPrivateIP();
@@ -182,6 +182,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
                 metricCollector.incrementAcceptedEligibleIPChange();
         }
         metricCollector.incrementAcceptedIPChanges();
+        metricCollector.incrementTotalIPChanges();
     }
 
     /**
@@ -220,6 +221,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             default:
                 break;
         }
+        metricCollector.incrementTotalIPChanges();
         metricCollector.incrementDeniedIPChanges();
         IPCheckers.kick(current, session);
     }
