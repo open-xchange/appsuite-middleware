@@ -49,21 +49,28 @@
 
 package com.openexchange.sessiond.impl.clt;
 
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
+import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.sessiond.mbean.SessiondMBean;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
+import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.sessiond.rmi.SessiondRMIService;
 
 /**
  * {@link CloseSessionsCLT} - Command-Line access clear all sessions belonging to a given context.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class CloseSessionsCLT extends AbstractMBeanCLI<Void> {
+public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
+    private static final String SYNTAX = "closesessions [-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
+
+    /**
+     * Entry point
+     * 
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         new CloseSessionsCLT().execute(args);
     }
@@ -88,17 +95,47 @@ public final class CloseSessionsCLT extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected Void invoke(Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+    protected boolean requiresAdministrativePermission() {
+        return true;
+    }
+
+    @Override
+    protected String getFooter() {
+        return null;
+    }
+
+    @Override
+    protected String getName() {
+        return SYNTAX;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
+     */
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
+        authenticator.doAuthentication(login, password);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
+     */
+    @Override
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         // Parse context identifier
-        if (!cmd.hasOption('c')) {
+        if (false == cmd.hasOption('c')) {
             System.err.println("Missing context identifier.");
             printHelp(options);
             System.exit(1);
             return null;
         }
-        final int contextId;
+        int contextId;
         {
-            final String optionValue = cmd.getOptionValue('c');
+            String optionValue = cmd.getOptionValue('c');
             try {
                 contextId = Integer.parseInt(optionValue.trim());
             } catch (final NumberFormatException e) {
@@ -109,32 +146,11 @@ public final class CloseSessionsCLT extends AbstractMBeanCLI<Void> {
             }
         }
 
-        // Invoke MBean method
-        final String[] signature = new String[] { int.class.getName() };
-        final Object[] params = new Object[] { Integer.valueOf(contextId) };
-        mbsc.invoke(getObjectName("SessionD Toolkit", SessiondMBean.SESSIOND_DOMAIN), "clearContextSessions", params, signature);
+        // Invoke RMI method
+        SessiondRMIService rmiService = getRmiStub(optRmiHostName, SessiondRMIService.RMI_NAME);
+        rmiService.clearContextSessions(Integer.valueOf(contextId));
         System.out.println("Cleared sessions for context " + contextId);
         return null;
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
-    }
-
-    @Override
-    protected String getFooter() {
-        return null;
-    }
-
-    @Override
-    protected String getName() {
-        return "closesessions";
     }
 
 }

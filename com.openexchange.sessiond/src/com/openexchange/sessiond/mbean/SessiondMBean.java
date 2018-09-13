@@ -52,6 +52,7 @@ package com.openexchange.sessiond.mbean;
 import java.util.Set;
 import javax.management.MBeanException;
 import com.openexchange.management.MBeanMethodAnnotation;
+import com.openexchange.sessiond.rmi.SessiondRMIService;
 
 /**
  * {@link SessiondMBean} - The MBean for sessiond
@@ -98,6 +99,7 @@ public interface SessiondMBean {
      * Clears all sessions belonging to specified context
      *
      * @param contextId The context ID
+     * @deprecated Use {@link SessiondRMIService#clearContextSessions(int)} instead. 
      */
     @MBeanMethodAnnotation (description="Clears all sessions belonging to specified context", parameters={"contextId"}, parameterDescriptions={"The context identifier"})
     void clearContextSessions(int contextId);

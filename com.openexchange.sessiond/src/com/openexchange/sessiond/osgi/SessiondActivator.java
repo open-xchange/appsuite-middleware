@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.osgi;
 
+import java.rmi.Remote;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -86,6 +87,7 @@ import com.openexchange.sessiond.event.SessiondEventHandler;
 import com.openexchange.sessiond.impl.HazelcastInstanceNotActiveExceptionHandler;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessiondInit;
+import com.openexchange.sessiond.impl.SessiondRMIServiceImpl;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
 import com.openexchange.sessiond.impl.TokenSessionContainer;
@@ -306,7 +308,8 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
 
             registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
             registerService(CustomPortableFactory.class, new PortableSessionFilterApplierFactory());
-
+            registerService(Remote.class, new SessiondRMIServiceImpl());
+            
             track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
             track(ManagementService.class, new ManagementRegisterer(context));
             track(ThreadPoolService.class, new ThreadPoolTracker(context));
