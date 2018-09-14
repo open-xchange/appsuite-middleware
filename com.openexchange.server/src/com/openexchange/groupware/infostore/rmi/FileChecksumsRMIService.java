@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,20 +47,22 @@
  *
  */
 
-package com.openexchange.groupware.infostore.mbean;
+package com.openexchange.groupware.infostore.rmi;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.List;
-import javax.management.MBeanException;
 
 /**
- * {@link FileChecksumsMBean}
+ * {@link FileChecksumsRMIService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public interface FileChecksumsMBean {
+public interface FileChecksumsRMIService extends Remote {
 
-    static final String DOMAIN = "com.openexchange.file.storage";
+    public static final String RMI_NAME = FileChecksumsRMIService.class.getSimpleName();
 
     /**
      * Provides a listing of all files in a context with a missing checksum property.
@@ -68,7 +70,7 @@ public interface FileChecksumsMBean {
      * @param contextId The identifier of the context to list the files for
      * @return A listing of all files in the context with a missing checksum property
      */
-    List<String> listFilesWithoutChecksumInContext(int contextId) throws MBeanException;
+    List<String> listFilesWithoutChecksumInContext(int contextId) throws RemoteException;
 
     /**
      * Provides a listing of all files in a database with a missing checksum property.
@@ -76,14 +78,14 @@ public interface FileChecksumsMBean {
      * @param databaseId The read- or write-pool identifier of the database to list the files for
      * @return A listing of all files in the database with a missing checksum property
      */
-    List<String> listFilesWithoutChecksumInDatabase(int databaseId) throws MBeanException;
+    List<String> listFilesWithoutChecksumInDatabase(int databaseId) throws RemoteException;
 
     /**
      * Provides a listing of all files in all contexts with a missing checksum property.
      *
      * @return A listing of all files with a missing checksum property
      */
-    List<String> listAllFilesWithoutChecksum() throws MBeanException;
+    List<String> listAllFilesWithoutChecksum() throws RemoteException;
 
     /**
      * Calculates and stores missing checksums for all files of a specific context.
@@ -91,7 +93,7 @@ public interface FileChecksumsMBean {
      * @param contextId The identifier of the context to calculate the missing checksums for
      * @return A listing of all files in the context where the missing checksum was calculated for
      */
-    List<String> calculateMissingChecksumsInContext(int contextId) throws MBeanException;
+    List<String> calculateMissingChecksumsInContext(int contextId) throws RemoteException;
 
     /**
      * Calculates and stores missing checksums for all files of a database.
@@ -99,13 +101,12 @@ public interface FileChecksumsMBean {
      * @param databaseId The read- or write-pool identifier of the database to calculate the missing checksums for
      * @return A listing of all files in the database where the missing checksum was calculated for
      */
-    List<String> calculateMissingChecksumsInDatabase(int databaseId) throws MBeanException;
+    List<String> calculateMissingChecksumsInDatabase(int databaseId) throws RemoteException;
 
     /**
      * Calculates and stores missing checksums for all files in all contexts.
      *
      * @return A listing of all files where the missing checksum was calculated for
      */
-    List<String> calculateAllMissingChecksums() throws MBeanException;
-
+    List<String> calculateAllMissingChecksums() throws RemoteException;
 }

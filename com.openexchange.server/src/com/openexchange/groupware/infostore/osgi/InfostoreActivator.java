@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.osgi;
 
+import java.rmi.Remote;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -77,6 +78,7 @@ import com.openexchange.groupware.infostore.database.InfostoreFilestoreLocationU
 import com.openexchange.groupware.infostore.database.impl.InfostoreFilenameReservationsCreateTableTask;
 import com.openexchange.groupware.infostore.database.impl.InfostoreReservedPathsConvertUtf8ToUtf8mb4UpdateTask;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.rmi.FileChecksumsRMIServiceImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
@@ -84,7 +86,6 @@ import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.management.ManagementService;
 import com.openexchange.server.services.SharedInfostoreJSlob;
 
 /**
@@ -105,7 +106,6 @@ public class InfostoreActivator implements BundleActivator {
     private volatile ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker;
     private volatile ServiceTracker<ConfigurationService, ConfigurationService> configTracker;
     private volatile ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
-    private volatile ServiceTracker<ManagementService, ManagementService> mgmtTracker;
 
     @Override
     public void start(final BundleContext context) throws Exception {
@@ -213,11 +213,8 @@ public class InfostoreActivator implements BundleActivator {
             };
             this.qfsTracker = qfsTracker;
             qfsTracker.open();
-
-            ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementTracker(context));
-            this.mgmtTracker = mgmtTracker;
-            mgmtTracker.open();
-
+            
+            context.registerService(Remote.class, new FileChecksumsRMIServiceImpl(), null);
         } catch (final Exception e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(InfostoreActivator.class);
             logger.error("Starting InfostoreActivator failed.", e);
@@ -228,12 +225,6 @@ public class InfostoreActivator implements BundleActivator {
     @Override
     public void stop(final BundleContext context) throws Exception {
         try {
-            ServiceTracker<ManagementService, ManagementService> mgmtTracker = this.mgmtTracker;
-            if (null != mgmtTracker) {
-                mgmtTracker.close();
-                this.mgmtTracker = null;
-            }
-
             ServiceTracker<FileStorageServiceRegistry, FileStorageServiceRegistry> tracker = this.tracker;
             if (null != tracker) {
                 tracker.close();
