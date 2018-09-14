@@ -535,6 +535,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getId(), originalEvent.getId(), attachmentUpdates.getRemovedItems());
         }
         if (0 < attachmentUpdates.getAddedItems().size()) {
+            Check.attachmentsAreVisible(session, storage, attachmentUpdates.getAddedItems());
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), originalEvent.getId(), attachmentUpdates.getAddedItems());
         }
         return true;
