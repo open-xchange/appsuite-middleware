@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,50 +49,59 @@
 
 package com.openexchange.filestore.s3.internal;
 
-import com.openexchange.config.lean.Property;
-
 /**
- * {@link S3FileStoreProperty}
+ * All available and supported {@link EncryptionType}s.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.1
  */
-public enum S3FileStoreProperty implements Property {
+public enum EncryptionType {
+    NONE("none", true),
+    RSA("rsa", true),
+    SSE_S3("sse-s3", false);
+
+    private String name;
+    private boolean clientSideEncryption;
 
     /**
-     * Flag to enable metric collection.
-     * Defaults to <code>false</code>
+     * Initializes a new {@link EncryptionType}.
      */
-    metricCollection(false);
-
-    private final Object defaultValue;
-
-    private static final String PREFIX = "com.openexchange.filestore.s3.";
+    private EncryptionType(String name, boolean clientSide) {
+        this.name = name;
+        this.clientSideEncryption = clientSide;
+    }
 
     /**
-     * Initializes a new {@link CassandraProperty}.
+     * Gets the name
+     *
+     * @return The name
      */
-    private S3FileStoreProperty(Object defaultValue) {
-        this.defaultValue = defaultValue;
+    public String getName() {
+        return name;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
+    /**
+     * Gets the clientSideEncryption
+     *
+     * @return The clientSideEncryption
      */
-    @Override
-    public String getFQPropertyName() {
-        return PREFIX + name();
+    public boolean isClientSideEncryption() {
+        return clientSideEncryption;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Returns the {@link EncryptionType} or null if no {@link EncryptionType} with this name exists.
      * 
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
+     * @param name The name of the {@link EncryptionType}
+     * @return The {@link EncryptionType} or null
      */
-    @Override
-    public Object getDefaultValue() {
-        return defaultValue;
+    public static EncryptionType getTypeByName(String name) {
+        for (EncryptionType type : values()) {
+            if (type.getName().equals(name)) {
+                return type;
+            }
+        }
+        return null;
     }
 
 }

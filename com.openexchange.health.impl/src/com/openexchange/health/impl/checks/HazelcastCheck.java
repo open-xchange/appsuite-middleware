@@ -54,9 +54,9 @@ import java.util.Map;
 import com.hazelcast.cluster.ClusterState;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.health.NodeHealthCheck;
-import com.openexchange.health.NodeHealthCheckResponse;
-import com.openexchange.health.impl.NodeHealthCheckResponseImpl;
+import com.openexchange.health.MWHealthCheck;
+import com.openexchange.health.MWHealthCheckResponse;
+import com.openexchange.health.impl.MWHealthCheckResponseImpl;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -66,9 +66,10 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class HazelcastCheck implements NodeHealthCheck {
+public class HazelcastCheck implements MWHealthCheck {
 
     private final static String NAME = "hazelcast";
+    private final static long TIMEOUT = 15000L;
 
     private final ServiceLookup services;
 
@@ -83,10 +84,15 @@ public class HazelcastCheck implements NodeHealthCheck {
     }
 
     @Override
-    public NodeHealthCheckResponse call() {
+    public long getTimeout() {
+        return TIMEOUT;
+    }
+
+    @Override
+    public MWHealthCheckResponse call() {
         HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
         if (null == hzInstance) {
-            return new NodeHealthCheckResponseImpl(NAME, null, true);
+            return new MWHealthCheckResponseImpl(NAME, null, true);
         }
         boolean status = true;
         Map<String, Object> data = new HashMap<>(5);
@@ -103,7 +109,7 @@ public class HazelcastCheck implements NodeHealthCheck {
             data.put("isLiteMember", String.valueOf(cluster.getLocalMember().isLiteMember()));
         }
 
-        return new NodeHealthCheckResponseImpl(NAME, data, status);
+        return new MWHealthCheckResponseImpl(NAME, data, status);
     }
 
 }

@@ -71,11 +71,18 @@ public class HealthCheckResponseProviderImpl implements HealthCheckResponseProvi
         return new HealthCheckResponseBuilderImpl();
     }
 
-    class HealthCheckResponseBuilderImpl extends HealthCheckResponseBuilder {
+    private static class HealthCheckResponseBuilderImpl extends HealthCheckResponseBuilder {
 
         private String name = "unknown";
         private State state = State.UP;
         private Map<String, Object> data;
+
+        /**
+         * Initializes a new {@link HealthCheckResponseBuilderImpl}.
+         */
+        HealthCheckResponseBuilderImpl() {
+            super();
+        }
 
         @Override
         public HealthCheckResponseBuilder name(String name) {

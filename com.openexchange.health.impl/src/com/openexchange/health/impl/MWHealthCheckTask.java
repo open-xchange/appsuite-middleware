@@ -49,21 +49,21 @@
 
 package com.openexchange.health.impl;
 
-import com.openexchange.health.NodeHealthCheck;
-import com.openexchange.health.NodeHealthCheckResponse;
+import com.openexchange.health.MWHealthCheck;
+import com.openexchange.health.MWHealthCheckResponse;
 import com.openexchange.threadpool.AbstractTask;
 
 /**
- * {@link NodeHealthCheckTask}
+ * {@link MWHealthCheckTask}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public final class NodeHealthCheckTask extends AbstractTask<NodeHealthCheckResponse> {
+public final class MWHealthCheckTask extends AbstractTask<MWHealthCheckResponse> {
 
-    private final NodeHealthCheck check;
+    private final MWHealthCheck check;
 
-    public NodeHealthCheckTask(NodeHealthCheck check) {
+    public MWHealthCheckTask(MWHealthCheck check) {
         super();
         this.check = check;
     }
@@ -73,8 +73,12 @@ public final class NodeHealthCheckTask extends AbstractTask<NodeHealthCheckRespo
     }
 
     @Override
-    public NodeHealthCheckResponse call() throws Exception {
+    public MWHealthCheckResponse call() throws Exception {
         return check.call();
+    }
+
+    public long getTimeout() {
+        return check.getTimeout();
     }
 
 }

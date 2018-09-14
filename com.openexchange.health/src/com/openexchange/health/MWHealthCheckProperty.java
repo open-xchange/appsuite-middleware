@@ -47,29 +47,43 @@
  *
  */
 
-package com.openexchange.health.rest.osgi;
+package com.openexchange.health;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.health.NodeHealthCheckService;
-import com.openexchange.health.rest.NodeHealthCheckRestEndpoint;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link NodeHealthCheckRestActivator}
+ * {@link MWHealthCheckProperty}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class NodeHealthCheckRestActivator extends HousekeepingActivator {
+public enum MWHealthCheckProperty implements Property {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { NodeHealthCheckService.class, LeanConfigurationService.class };
+    username(MWHealthCheckProperty.PREFIX, MWHealthCheckProperty.EMPTY),
+    password(MWHealthCheckProperty.PREFIX, MWHealthCheckProperty.EMPTY),
+    skip(MWHealthCheckProperty.PREFIX, MWHealthCheckProperty.EMPTY),
+    ignore(MWHealthCheckProperty.PREFIX, MWHealthCheckProperty.EMPTY)
+    ;
+
+    private static final String PREFIX = "com.openexchange.health.";
+    private static final String EMPTY = "";
+
+    private final String name;
+    private final String defaultValue;
+
+    private MWHealthCheckProperty(String name, String value) {
+        this.name = name;
+        this.defaultValue = value;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(NodeHealthCheckRestEndpoint.class, new NodeHealthCheckRestEndpoint(this));
+    public String getFQPropertyName() {
+        return name + name();
+    }
+
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
 }

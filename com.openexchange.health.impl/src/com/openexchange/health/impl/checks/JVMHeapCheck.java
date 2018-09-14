@@ -57,9 +57,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.ExceptionUtils;
-import com.openexchange.health.NodeHealthCheck;
-import com.openexchange.health.NodeHealthCheckResponse;
-import com.openexchange.health.impl.NodeHealthCheckResponseImpl;
+import com.openexchange.health.MWHealthCheck;
+import com.openexchange.health.MWHealthCheckResponse;
+import com.openexchange.health.impl.MWHealthCheckResponseImpl;
 
 
 /**
@@ -68,9 +68,10 @@ import com.openexchange.health.impl.NodeHealthCheckResponseImpl;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class JVMHeapCheck implements NodeHealthCheck {
+public class JVMHeapCheck implements MWHealthCheck {
 
     private static final String NAME = "jvmHeap";
+    private static final long TIMEOUT = 5000L;
 
     public JVMHeapCheck() {
         super();
@@ -82,7 +83,12 @@ public class JVMHeapCheck implements NodeHealthCheck {
     }
 
     @Override
-    public NodeHealthCheckResponse call() {
+    public long getTimeout() {
+        return TIMEOUT;
+    }
+
+    @Override
+    public MWHealthCheckResponse call() {
         MemoryMXBean bean = ManagementFactory.getMemoryMXBean();
         MemoryUsage usage = bean.getHeapMemoryUsage();
         boolean status = true;
@@ -99,7 +105,7 @@ public class JVMHeapCheck implements NodeHealthCheck {
             data.put("lastOOM", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss,SSSZ").format(lastOOM));
         }
 
-        return new NodeHealthCheckResponseImpl(NAME, data, status);
+        return new MWHealthCheckResponseImpl(NAME, data, status);
     }
 
 }
