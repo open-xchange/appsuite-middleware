@@ -47,41 +47,45 @@
  *
  */
 
-package com.openexchange.push.impl.mbean;
+package com.openexchange.push.impl.rmi;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
 import org.slf4j.Logger;
 import com.openexchange.push.PushUserClient;
 import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.impl.PushManagerRegistry;
-import com.openexchange.push.mbean.PushMBean;
-
+import com.openexchange.push.rmi.PushRMIService;
 
 /**
- * {@link PushMBeanImpl} - The MBean implementation.
+ * {@link PushRMIServiceImpl} - The MBean implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class PushMBeanImpl extends StandardMBean implements PushMBean {
+public class PushRMIServiceImpl implements PushRMIService {
 
     /**
-     * Initializes a new {@link PushMBeanImpl}.
+     * Initializes a new {@link PushRMIServiceImpl}.
      *
      * @throws NotCompliantMBeanException If initialization fails
      */
-    public PushMBeanImpl() throws NotCompliantMBeanException {
-        super(PushMBean.class);
+    public PushRMIServiceImpl() {
+        super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.push.rmi.PushRMIService#listPushUsers()
+     */
     @Override
-    public List<List<String>> listPushUsers() throws MBeanException {
+    public List<List<String>> listPushUsers() throws RemoteException {
         try {
             List<PushUserInfo> pushUsers = PushManagerRegistry.getInstance().listPushUsers();
             Collections.sort(pushUsers);
@@ -97,15 +101,20 @@ public class PushMBeanImpl extends StandardMBean implements PushMBean {
 
             return list;
         } catch (Exception e) {
-            Logger logger = org.slf4j.LoggerFactory.getLogger(PushMBeanImpl.class);
+            Logger logger = org.slf4j.LoggerFactory.getLogger(PushRMIServiceImpl.class);
             logger.error("", e);
             String message = e.getMessage();
-            throw new MBeanException(new Exception(message), message);
+            throw new RemoteException(message, new Exception(message));
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.push.rmi.PushRMIService#listRegisteredPushUsers()
+     */
     @Override
-    public List<List<String>> listRegisteredPushUsers() throws MBeanException {
+    public List<List<String>> listRegisteredPushUsers() throws RemoteException {
         try {
             List<PushUserClient> pushClients = PushManagerRegistry.getInstance().listRegisteredPushUsers();
 
@@ -120,23 +129,27 @@ public class PushMBeanImpl extends StandardMBean implements PushMBean {
 
             return list;
         } catch (Exception e) {
-            Logger logger = org.slf4j.LoggerFactory.getLogger(PushMBeanImpl.class);
+            Logger logger = org.slf4j.LoggerFactory.getLogger(PushRMIServiceImpl.class);
             logger.error("", e);
             String message = e.getMessage();
-            throw new MBeanException(new Exception(message), message);
+            throw new RemoteException(message, new Exception(message));
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.push.rmi.PushRMIService#unregisterPermanentListenerFor(int, int, java.lang.String)
+     */
     @Override
-    public boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws MBeanException {
+    public boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws RemoteException {
         try {
             return PushManagerRegistry.getInstance().unregisterPermanentListenerFor(userId, contextId, clientId);
         } catch (Exception e) {
-            Logger logger = org.slf4j.LoggerFactory.getLogger(PushMBeanImpl.class);
+            Logger logger = org.slf4j.LoggerFactory.getLogger(PushRMIServiceImpl.class);
             logger.error("", e);
             String message = e.getMessage();
-            throw new MBeanException(new Exception(message), message);
+            throw new RemoteException(message, new Exception(message));
         }
     }
-
 }

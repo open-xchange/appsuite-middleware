@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,38 @@
  *
  */
 
-package com.openexchange.push.mbean;
+package com.openexchange.push.rmi;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.List;
-import javax.management.MBeanException;
-import com.openexchange.exception.OXException;
-
 
 /**
- * {@link PushMBean} - The MBean for mail push.
+ * {@link PushRMIService} - The RMI service for mail push
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public interface PushMBean {
+public interface PushRMIService extends Remote {
 
-    /** The MBean's domain */
-    public static final String DOMAIN = "com.openexchange.push";
+    public static final String RMI_NAME = PushRMIService.class.getSimpleName();
 
     /**
      * Lists push users running on this node
      *
      * @return The push users running on this node
-     * @throws MBeanException If push users cannot be returned
+     * @throws RemoteException If push users cannot be returned
      */
-    List<List<String>> listPushUsers() throws MBeanException;
+    List<List<String>> listPushUsers() throws RemoteException;
 
     /**
      * Lists registered push users running on this node
      *
      * @return The registered push users running on this node
-     * @throws MBeanException If push users cannot be returned
+     * @throws RemoteException If push users cannot be returned
      */
-    List<List<String>> listRegisteredPushUsers() throws MBeanException;
+    List<List<String>> listRegisteredPushUsers() throws RemoteException;
 
     /**
      * Unregisters the permanent listener for specified push user
@@ -87,9 +86,8 @@ public interface PushMBean {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param clientId The client identifier
-     * @return <code>true</code> on successful unregistration; otherwise <code>false</code>
-     * @throws OXException If unregistration fails
+     * @return <code>true</code> on successful un-registration; otherwise <code>false</code>
+     * @throws RemoteException If un-registration fails
      */
-    boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws MBeanException;
-
+    boolean unregisterPermanentListenerFor(int userId, int contextId, String clientId) throws RemoteException;
 }
