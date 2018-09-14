@@ -50,7 +50,7 @@
 package com.openexchange.database.migration.mbean;
 
 import javax.management.MBeanException;
-
+import com.openexchange.database.migration.rmi.DBMigrationRMIService;
 
 /**
  * MBean to manage configdb migration tasks
@@ -58,6 +58,7 @@ import javax.management.MBeanException;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.1
+ * @deprecated Use {@link DBMigrationRMIService} instead.
  */
 public interface DBMigrationMBean {
 
