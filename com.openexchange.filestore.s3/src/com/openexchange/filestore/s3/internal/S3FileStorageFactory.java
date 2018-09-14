@@ -582,7 +582,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.10.1
      */
-    private class S3EncryptionConfig {
+    private static class S3EncryptionConfig {
 
         private final EncryptionType clientEncryption;
         private final EncryptionType serverSideEncryption;
@@ -590,14 +590,14 @@ public class S3FileStorageFactory implements FileStorageProvider {
         /**
          * Initializes a new {@link S3FileStorageFactory.S3EncryptionConfig}.
          *
-         * @throws OXException in case the config is invalid
+         * @throws OXException In case the configuration is invalid
          */
-        public S3EncryptionConfig(String config) throws OXException {
-            if(Strings.isEmpty(config)) {
+        S3EncryptionConfig(String config) throws OXException {
+            if (Strings.isEmpty(config)) {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("An empty encryption type is invalid");
             }
             int index = config.indexOf("+");
-            if(index > 0) {
+            if (index > 0) {
                 List<String> splitAndTrim = Strings.splitAndTrim(config, "+");
                 if (splitAndTrim.size() != 2) {
                     throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("It's only allowed to combine one client side encryption type and one server side encryption type.");
@@ -640,18 +640,18 @@ public class S3FileStorageFactory implements FileStorageProvider {
         }
 
         /**
-         * Gets the clientEncryption
+         * Gets the client encryption
          *
-         * @return The clientEncryption
+         * @return The client encryption
          */
         public EncryptionType getClientEncryption() {
             return clientEncryption;
         }
 
         /**
-         * Gets the serverSideEncryption
+         * Gets the server-side encryption
          *
-         * @return The serverSideEncryption
+         * @return The server-side encryption
          */
         public EncryptionType getServerSideEncryption() {
             return serverSideEncryption;
