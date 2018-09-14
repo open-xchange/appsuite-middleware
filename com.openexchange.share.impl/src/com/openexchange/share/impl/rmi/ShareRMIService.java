@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,30 @@
  *
  */
 
-package com.openexchange.share.impl.mbean;
+package com.openexchange.share.impl.rmi;
 
-import com.openexchange.exception.OXException;
-
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
- * {@link ShareMBean}
- *
+ * {@link ShareRMIService}
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public interface ShareMBean {
+public interface ShareRMIService extends Remote {
 
-    public final static String DOMAIN = "com.openexchange.share";
+    public static final String RMI_NAME = ShareRMIService.class.getSimpleName();
 
     /**
      * Lists all shares in supplied context.
      *
      * @param contextId The contextId
      * @return The shares
-     * @throws OXException On error
+     * @throws RemoteException On error
      */
-    String listShares(int contextId) throws OXException;
+    String listShares(int contextId) throws RemoteException;
 
     /**
      * Lists all shares in supplied context for the supplied guest user id.
@@ -77,51 +78,52 @@ public interface ShareMBean {
      * @param contextId The contextId
      * @param guestId The guest user id
      * @return The shares
-     * @throws OXException On error
+     * @throws RemoteException On error
      */
-    String listShares(int contextId, int guestId) throws OXException;
+    String listShares(int contextId, int guestId) throws RemoteException;
 
     /**
      * List share identified by supplied token
      *
      * @param token The token
      * @return The share
-     * @throws OXException On error
+     * @throws RemoteException On error
      */
-    String listShares(String token) throws OXException;
+    String listShares(String token) throws RemoteException;
 
     /**
      * Removes all targets identified by supplied token.
+     * 
      * @param token The token
      * @param path The share path
-     * @throws OXException
+     * @throws RemoteException
      */
-    int removeShare(String token, String path) throws OXException;
+    int removeShare(String token, String path) throws RemoteException;
 
     /**
      * Removes all targets in supplied context identified by supplied token.
+     * 
      * @param shareToken The token
      * @param targetPath The share path
      * @param contextId The contextId
-     * @throws OXException
+     * @throws RemoteException
      */
-    int removeShare(String shareToken, String targetPath, int contextId) throws OXException;
+    int removeShare(String shareToken, String targetPath, int contextId) throws RemoteException;
 
     /**
      * Remove all shares from supplied context.
      *
      * @param contextId The contextId
-     * @throws OXException On error
+     * @throws RemoteException On error
      */
-    int removeShares(int contextId) throws OXException;
+    int removeShares(int contextId) throws RemoteException;
 
     /**
      * Removes all shares in supplied context for the supplied guest user.
      *
      * @param contextId The contextId
      * @param guestId The guest user id
-     * @throws OXException On error
+     * @throws RemoteException On error
      */
-    int removeShares(int contextId, int guestId) throws OXException;
-
+    int removeShares(int contextId, int guestId) throws RemoteException;
 }

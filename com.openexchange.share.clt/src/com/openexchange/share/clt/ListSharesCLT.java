@@ -62,7 +62,6 @@ import org.apache.http.ParseException;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
 import com.openexchange.java.Strings;
-import com.openexchange.share.impl.mbean.ShareMBean;
 
 /**
  * {@link ListSharesCLT}

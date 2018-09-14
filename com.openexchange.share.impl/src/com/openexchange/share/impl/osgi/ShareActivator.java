@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.osgi;
 
+import java.rmi.Remote;
 import java.util.concurrent.ExecutorService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -72,7 +73,6 @@ import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.passwordmechs.PasswordMechFactory;
@@ -86,6 +86,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.SharePasswordMech;
+import com.openexchange.share.impl.ShareRMIServiceImpl;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.groupware.FileStorageHandler;
 import com.openexchange.share.impl.groupware.MailModuleAdjuster;
@@ -191,9 +192,9 @@ public class ShareActivator extends HousekeepingActivator {
         registerService(ModuleSupport.class, new ModuleSupportImpl(this, folderHandlerRegistry, accessibleModulesTracker, handlerRegistry, adjusterRegistry));
         registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
         registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
+        registerService(Remote.class, new ShareRMIServiceImpl(shareService));
 
         trackService(ModuleSupport.class);
-        track(ManagementService.class, new ManagementServiceTracker(context, shareService));
         trackService(IDBasedFileAccessFactory.class);
         trackService(FolderService.class);
         trackService(TranslatorFactory.class);
