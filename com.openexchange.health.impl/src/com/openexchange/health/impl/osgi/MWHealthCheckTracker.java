@@ -86,7 +86,7 @@ public class MWHealthCheckTracker implements ServiceTrackerCustomizer<MWHealthCh
 
     @Override
     public void removedService(ServiceReference<MWHealthCheck> reference, MWHealthCheck service) {
-        healthCheckService.removeCheck(service.getName());
+        healthCheckService.removeCheck(service);
         context.ungetService(reference);
     }
 

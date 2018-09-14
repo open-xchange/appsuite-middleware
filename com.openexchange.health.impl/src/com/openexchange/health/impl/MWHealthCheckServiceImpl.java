@@ -117,13 +117,8 @@ public class MWHealthCheckServiceImpl implements MWHealthCheckService {
         return checks.add(check);
     }
 
-    public boolean removeCheck(String name) {
-        for (MWHealthCheck check : checks) {
-            if (check.getName().equals(name)) {
-                return checks.remove(check);
-            }
-        }
-        return false;
+    public boolean removeCheck(MWHealthCheck check) {
+        return checks.remove(check);
     }
 
     @Override
