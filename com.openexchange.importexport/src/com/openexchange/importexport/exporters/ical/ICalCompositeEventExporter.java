@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.google.common.collect.Lists;
@@ -109,14 +108,13 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
         calendarAccess = getCalendarAccess(session);
         calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, EXPORTED_FIELDS);
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-        for (Iterator<List<EventID>> iterator = Lists.partition(eventIDs, 100).iterator(); iterator.hasNext();) {
-            for (Iterator<Event> events = calendarAccess.getEvents(iterator.next()).iterator(); events.hasNext();) {
-                // Prepare for export & remove immediately after saving the data to the export calendar 
-                calendarExport.add(prepareForExport(events.next()));
-                events.remove();
+        for (List<EventID> chunk : Lists.partition(eventIDs, 100)) {
+            for (Event event : calendarAccess.getEvents(chunk)) {
+                if (null != event) {
+                    calendarExport.add(prepareForExport(event));
+                }
             }
         }
-        eventIDs.clear();
         /*
          * serialize calendar
          */

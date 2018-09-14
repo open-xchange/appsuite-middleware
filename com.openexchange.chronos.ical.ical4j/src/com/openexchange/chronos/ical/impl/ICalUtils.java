@@ -277,15 +277,22 @@ public class ICalUtils {
         exportCalendar(calendar, fileHolder.asOutputStream());
         return fileHolder;
     }
-    
-    static void exportCalendar(VCalendar vCalendar, OutputStream outputStream) throws OXException {
-        exportCalendar(vCalendar.getCalendar(), outputStream);
-    }
 
     static void exportCalendar(Calendar calendar, OutputStream outputStream) throws OXException {
         CalendarOutputter outputter = new CalendarOutputter(false);
         try {
             outputter.output(calendar, outputStream);
+        } catch (IOException e) {
+            throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (ValidationException e) {
+            throw asOXException(e);
+        }
+    }
+
+    static void exportCalendar(VCalendar vCalendar, OutputStream outputStream) throws OXException {
+        CalendarOutputter outputter = new CalendarOutputter(false);
+        try {
+            outputter.output(vCalendar.getCalendar(), outputStream);
         } catch (IOException e) {
             throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (ValidationException e) {
