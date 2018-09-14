@@ -54,8 +54,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -131,8 +133,8 @@ public class MWHealthCheckServiceImpl implements MWHealthCheckService {
             throw ServiceExceptionCode.absentService(ThreadPoolService.class);
         }
 
-        List<String> blacklist = getSkipBlacklist();
-        List<String> ignorelist = getIgnoreList();
+        Set<String> blacklist = getSkipBlacklist();
+        Set<String> ignorelist = getIgnoreList();
         boolean overallState = true;
         List<MWHealthCheckTask> tasks = new ArrayList<>(checks.size());
         for (MWHealthCheck check : checks) {
@@ -147,23 +149,23 @@ public class MWHealthCheckServiceImpl implements MWHealthCheckService {
         }
 
         for (Map.Entry<Future<MWHealthCheckResponse>, MWHealthCheckTask> futureAndTask : futures.entrySet()) {
+            MWHealthCheckTask task = futureAndTask.getValue();
+
             MWHealthCheckResponse response = null;
             try {
-                response = futureAndTask.getKey().get(futureAndTask.getValue().getTimeout(), TimeUnit.MILLISECONDS);
+                long timeout = task.getTimeout();
+                response = timeout > 0 ? futureAndTask.getKey().get(timeout, TimeUnit.MILLISECONDS) : futureAndTask.getKey().get();
                 if (!ignorelist.contains(response.getName())) {
                     overallState &= MWHealthState.UP.equals(response.getState());
                 }
             } catch (InterruptedException e) {
                 // Keep interrupted status
                 Thread.currentThread().interrupt();
-                MWHealthCheckTask task = futureAndTask.getValue();
                 LOG.warn("Interrupted while obtaining health check response from task {}: {}", task.getName(), task.getClass().getName(), e);
             } catch (TimeoutException e) {
-                MWHealthCheckTask task = futureAndTask.getValue();
                 LOG.warn("Timed out while obtaining health check response from task {}: {}", task.getName(), task.getClass().getName(), e);
                 response = createDownResponse(task, true, e);
             } catch (ExecutionException e) {
-                MWHealthCheckTask task = futureAndTask.getValue();
                 Throwable cause = e.getCause();
                 if (null == cause) {
                     // Huh...? ExecutionException w/o a cause
@@ -182,29 +184,32 @@ public class MWHealthCheckServiceImpl implements MWHealthCheckService {
             }
 
         }
-        return new MWHealthCheckResultImpl(overallState ? MWHealthState.UP : MWHealthState.DOWN, responses, ignorelist, blacklist);
+        return new MWHealthCheckResultImpl(overallState ? MWHealthState.UP : MWHealthState.DOWN, responses, asList(ignorelist), asList(blacklist));
     }
 
-    private List<String> getIgnoreList() {
+    private List<String> asList(Set<String> set) {
+        return set.isEmpty() ? Collections.emptyList() : new ArrayList<String>(set);
+    }
+
+    private Set<String> getIgnoreList() {
         LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
         String ignoreProperty = configService.getProperty(MWHealthCheckProperty.ignore);
-        List<String> ignoreList = Collections.emptyList();
         if (Strings.isNotEmpty(ignoreProperty)) {
-            ignoreList = Arrays.asList(Strings.splitByComma(ignoreProperty));
+            return new LinkedHashSet<String>(Arrays.asList(Strings.splitByComma(ignoreProperty)));
         }
-        return ignoreList;
+        return Collections.emptySet();
     }
 
-    private List<String> getSkipBlacklist() throws OXException {
+    private Set<String> getSkipBlacklist() throws OXException {
         LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
         if (null == configService) {
             throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
         }
         String skipProperty = configService.getProperty(MWHealthCheckProperty.skip);
         if (Strings.isNotEmpty(skipProperty)) {
-            return Arrays.asList(Strings.splitByComma(skipProperty));
+            return new LinkedHashSet<String>(Arrays.asList(Strings.splitByComma(skipProperty)));
         }
-        return Collections.emptyList();
+        return Collections.emptySet();
     }
 
     private MWHealthCheckResponse createDownResponse(MWHealthCheckTask task, boolean timeout, Throwable e) {

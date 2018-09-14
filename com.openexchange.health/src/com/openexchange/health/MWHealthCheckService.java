@@ -51,6 +51,7 @@ package com.openexchange.health;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
@@ -59,6 +60,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
+@SingletonService
 public interface MWHealthCheckService {
 
     /**
