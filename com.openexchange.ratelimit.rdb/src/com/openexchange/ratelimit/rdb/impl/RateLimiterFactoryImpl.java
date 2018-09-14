@@ -47,68 +47,39 @@
  *
  */
 
-package com.openexchange.ratelimit.hz;
+package com.openexchange.ratelimit.rdb.impl;
 
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.MultiMap;
+import com.openexchange.context.ContextService;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.ratelimit.RateLimiterFactory;
 import com.openexchange.ratelimit.RateLimiter;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link RateLimiterImpl} is a {@link RateLimiter} which uses hazelcast to do a cluster wide rate limiting.
+ * {@link RateLimiterFactoryImpl} is a {@link RateLimiterFactory} which creates {@link RateLimiter} which uses the database to provide rate limiting.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class RateLimiterImpl implements RateLimiter {
+public class RateLimiterFactoryImpl implements RateLimiterFactory{
 
-    private static final String MAP_ID = "com.openexchange.ratelimit.hz.map";
-
-    private final HazelcastInstance hz;
-    private final String key;
-    private final long timeframe;
-    private final int amount;
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link RateLimiterImpl}.
+     * Initializes a new {@link RateLimiterFactoryImpl}.
      */
-    public RateLimiterImpl(String id, int user, int ctx, int amount, long timeframe, HazelcastInstance hz) {
-        this.hz = hz;
-        this.amount = amount;
-        this.timeframe = timeframe;
-        this.key = id + "_" + ctx + "_" + user;
+    public RateLimiterFactoryImpl(ServiceLookup services) {
+        this.services = services;
     }
 
     @Override
-    public boolean acquire() {
-        MultiMap<String, Long> map = hz.getMultiMap(MAP_ID);
-        boolean result = checkLimitAndRemoveOldEntries(map);
-        if (result == false) {
-            return result;
-        }
-        map.put(key, Long.valueOf(System.currentTimeMillis()));
-        return true;
-    }
-
-    /**
-     * Checks the for rate limit and removes old entries
-     *
-     * @param map The hazelcast multimap containing the most recent timestamps
-     * @throws OXException
-     */
-    private boolean checkLimitAndRemoveOldEntries(MultiMap<String, Long> map) {
-        long start = System.currentTimeMillis() - timeframe;
-        if (map.containsKey(key)) {
-            for (Long stamp : map.get(key)) {
-                if (stamp < start) {
-                    map.remove(key, stamp);
-                }
-            }
-            if (map.size() >= amount) {
-                return false;
-            }
-        }
-        return true;
+    public RateLimiter createLimiter(String id, int amount, long timeframe, int userId, int ctxId) throws OXException {
+        ContextService contextService = services.getServiceSafe(ContextService.class);
+        Context context = contextService.getContext(ctxId);
+        DBProvider dbProvider = services.getServiceSafe(DBProvider.class);
+        return new RateLimiterImpl(id, userId, context, amount, timeframe, dbProvider);
     }
 
 }

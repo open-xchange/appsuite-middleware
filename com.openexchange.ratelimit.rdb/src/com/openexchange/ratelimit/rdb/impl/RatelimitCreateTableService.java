@@ -47,35 +47,40 @@
  *
  */
 
-package com.openexchange.ratelimit;
+package com.openexchange.ratelimit.rdb.impl;
 
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link RateLimiter} provides methods to do rate limiting. RateLimiter are created via a {@link RateLimiterFactory}.
- *
- * Every RateLimiter provides a given number of permits for a specific user and context in a given time-frame. By calling {@link #acquire()} or {@link #acquire(long)} it is tried to reduce this number of permits
- * by one or by the given number. If it is successful the amount is reduced and the method returns <code>true</code>. If the operation would reduce the amount of permits to a value equal to or smaller than 0 then
- * the amount is not reduced and false is returned instead.
- *
- * The caller is then responsible to handle it appropriately. E.g. by throwing an error or by waiting a specified amount of time and try again.
+ * {@link RatelimitCreateTableService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public interface RateLimiter {
+public class RatelimitCreateTableService extends AbstractCreateTableImpl {
 
-    /**
-     * Tries to acquire a single permit. E.g. for to send a single message via a transport service like sms.
-     *
-     * @return false in case the maximum amount of permits is reached, true otherwise
-     */
-    public boolean acquire();
+    private static String TABLE_NAME = "ratelimit";
 
-    /**
-     * Tries to acquire x permits. E.g. the number of bytes for a download limit.
-     *
-     * @return false in case the maximum amount of permits is reached, true otherwise
-     */
-    public boolean acquire(long size);
+    @Override
+    public String[] requiredTables() {
+        return new String[0];
+    }
+
+    @Override
+    public String[] tablesToCreate() {
+        return new String[] { TABLE_NAME };
+    }
+
+    @Override
+    protected String[] getCreateStatements() {
+        return new String[] {   "CREATE TABLE ratelimit (" +
+                                    "cid INT4 UNSIGNED NOT NULL," +
+                                    "userId INT4 UNSIGNED NOT NULL," +
+                                    "id VARCHAR(128) COLLATE utf8mb4_bin NOT NULL," +
+                                    "timestamp BIGINT(20) NOT NULL," +
+                                    "permits BIGINT(20) NOT NULL," +
+                                    "PRIMARY KEY (cid,userId,id,timestamp)" +
+                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"};
+    }
 
 }

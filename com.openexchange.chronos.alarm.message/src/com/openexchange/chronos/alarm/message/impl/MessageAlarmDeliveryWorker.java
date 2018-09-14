@@ -86,7 +86,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.java.util.Pair;
-import com.openexchange.ratelimit.RateLimitFactory;
+import com.openexchange.ratelimit.RateLimiterFactory;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -120,7 +120,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
         private AlarmNotificationServiceRegistry registry;
         private CalendarProviderRegistry calendarProviderRegistry;
         private AdministrativeCalendarAccountService administrativeCalendarAccountService;
-        private RateLimitFactory rateLimitFactory;
+        private RateLimiterFactory rateLimitFactory;
         private int lookAhead;
         private int overdueWaitTime;
 
@@ -179,7 +179,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
             return this;
         }
 
-        public Builder setRateLimitFactory(RateLimitFactory rateLimitFactory) {
+        public Builder setRateLimitFactory(RateLimiterFactory rateLimitFactory) {
             this.rateLimitFactory = rateLimitFactory;
             return this;
         }
@@ -215,7 +215,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
     private final AlarmNotificationServiceRegistry registry;
     private final CalendarProviderRegistry calendarProviderRegistry;
     private final AdministrativeCalendarAccountService administrativeCalendarAccountService;
-    private final RateLimitFactory rateLimitFactory;
+    private final RateLimiterFactory rateLimitFactory;
     private final int lookAhead;
     private final int overdueWaitTime;
 
@@ -244,7 +244,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                                     AlarmNotificationServiceRegistry registry,
                                     CalendarProviderRegistry calProviderRegistry,
                                     AdministrativeCalendarAccountService administrativeCalendarAccountService,
-                                    RateLimitFactory rateLimitFactory,
+                                    RateLimiterFactory rateLimitFactory,
                                     int lookAhead,
                                     int overdueWaitTime) throws OXException {
         this.storage = storage;

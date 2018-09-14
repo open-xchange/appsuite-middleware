@@ -79,7 +79,7 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.util.Pair;
-import com.openexchange.ratelimit.RateLimitFactory;
+import com.openexchange.ratelimit.RateLimiterFactory;
 
 /**
  *
@@ -104,7 +104,7 @@ class SingleMessageDeliveryTask implements Runnable {
         private AlarmNotificationService alarmNotificationService;
         private CalendarProviderRegistry calendarProviderRegistry;
         private AdministrativeCalendarAccountService administrativeCalendarAccountService;
-        private RateLimitFactory rateLimitFactory;
+        private RateLimiterFactory rateLimitFactory;
 
         public Builder setCtx(Context ctx) {
             this.ctx = ctx;
@@ -171,7 +171,7 @@ class SingleMessageDeliveryTask implements Runnable {
             return this;
         }
 
-        public Builder setRateLimitFactory(RateLimitFactory rateLimitFactory) {
+        public Builder setRateLimitFactory(RateLimiterFactory rateLimitFactory) {
             this.rateLimitFactory = rateLimitFactory;
             return this;
         }
@@ -209,7 +209,7 @@ class SingleMessageDeliveryTask implements Runnable {
     private final AlarmNotificationService notificationService;
     private final CalendarProviderRegistry calendarProviderRegistry;
     private final AdministrativeCalendarAccountService administrativeCalendarAccountService;
-    private final RateLimitFactory rateLimitFactory;
+    private final RateLimiterFactory rateLimitFactory;
 
     /**
      * Initializes a new {@link SingleMessageDeliveryTask}.
@@ -235,7 +235,7 @@ class SingleMessageDeliveryTask implements Runnable {
                                         CalendarUtilities calUtil,
                                         CalendarProviderRegistry calendarProviderRegistry,
                                         AdministrativeCalendarAccountService administrativeCalendarAccountService,
-                                        RateLimitFactory rateLimitFactory,
+                                        RateLimiterFactory rateLimitFactory,
                                         Context ctx,
                                         int account,
                                         Alarm alarm,

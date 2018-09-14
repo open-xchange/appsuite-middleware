@@ -47,55 +47,29 @@
  *
  */
 
-package com.openexchange.ratelimit.hz;
+package com.openexchange.ratelimit;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
-import com.openexchange.ratelimit.RateLimitFactory;
-import com.openexchange.ratelimit.RateLimiter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * {@link RateLimiterFactoryImpl} is a {@link RateLimitFactory} which creates {@link RateLimiter} which uses hazelcast to provide rate limiting.
+ * {@link RateLimiterFactory} is a factory for {@link RateLimiter}.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class RateLimiterFactoryImpl implements RateLimitFactory{
-
-    private static final Logger LOG = LoggerFactory.getLogger(RateLimiterFactoryImpl.class);
-    private final ServiceLookup services;
+public interface RateLimiterFactory {
 
     /**
-     * Initializes a new {@link RateLimiterFactoryImpl}.
-     */
-    public RateLimiterFactoryImpl(ServiceLookup services) {
-        this.services = services;
-    }
-
-    @Override
-    public RateLimiter createLimiter(String id, int amount, long timeframe, int userId, int ctxId) throws OXException {
-        HazelcastInstance hazelcastInstance = getHazelcastInstance();
-        return new RateLimiterImpl(id, userId, ctxId, amount, timeframe, hazelcastInstance);
-    }
-
-    /**
-     * Returns the {@link HazelcastInstance}. If the instance cannot be returned (i.e. due its absence)
-     * then an {@link OXException} will be thrown
+     * Creates a {@link RateLimiter} with the given amount and timeframe for the given user and context.
      *
-     * @return The {@link HazelcastInstance}
-     * @throws OXException if the {@link HazelcastInstance} is absent
+     * @param id The identifier of the {@link RateLimiter}
+     * @param amount The amount of permits per time-frame
+     * @param timeframe The time-frame in milliseconds
+     * @param userId The user id
+     * @param ctxId The context id
+     * @return The {@link RateLimiter}
+     * @throws OXException
      */
-    private HazelcastInstance getHazelcastInstance() throws OXException {
-        HazelcastInstance hazelcastInstance = services.getOptionalService(HazelcastInstance.class);
-        if (hazelcastInstance == null) {
-            LOG.warn("The Hazelcast service is not available on this node.");
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-        }
-        return hazelcastInstance;
-    }
+    public RateLimiter createLimiter(String id, int amount, long timeframe, int userId, int ctxId) throws OXException;
 
 }

@@ -47,29 +47,75 @@
  *
  */
 
-package com.openexchange.ratelimit;
+package com.openexchange.ratelimit.rdb.impl;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.tableExists;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import org.slf4j.LoggerFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
- * {@link RateLimitFactory} is a factory for {@link RateLimiter}.
+ * {@link CreateTableUpdateTask}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public interface RateLimitFactory {
+public class CreateTableUpdateTask extends UpdateTaskAdapter {
+
+    private final RatelimitCreateTableService service;
 
     /**
-     * Creates a {@link RateLimiter} with the given amount and timeframe for the given user and context.
-     *
-     * @param id The identifier of the {@link RateLimiter}
-     * @param amount The amount of permits per time-frame
-     * @param timeframe The time-frame in milliseconds
-     * @param userId The user id
-     * @param ctxId The context id
-     * @return The {@link RateLimiter}
-     * @throws OXException
+     * Initializes a new {@link CreateTableUpdateTask}.
      */
-    public RateLimiter createLimiter(String id, int amount, long timeframe, int userId, int ctxId) throws OXException;
+    public CreateTableUpdateTask(RatelimitCreateTableService createTableService) {
+        super();
+        this.service = createTableService;
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[0];
+    }
+
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        boolean rollback = false;
+        try {
+            connection.setAutoCommit(false);
+            rollback = true;
+            createTable(connection, service.tablesToCreate()[0], service.getCreateStatements()[0]);
+            connection.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
+            Databases.autocommit(connection);
+        }
+    }
+
+    private static void createTable(Connection connection, String tableName, String createStatement) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            if (tableExists(connection, tableName)) {
+                LoggerFactory.getLogger(CreateTableUpdateTask.class).debug("Table {} already exists, skipping.", tableName);
+                return;
+            }
+            stmt = connection.prepareStatement(createStatement);
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
 
 }

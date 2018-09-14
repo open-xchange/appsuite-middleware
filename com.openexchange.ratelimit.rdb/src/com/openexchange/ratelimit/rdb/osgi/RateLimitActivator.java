@@ -47,12 +47,18 @@
  *
  */
 
-package com.openexchange.ratelimit.hz.osgi;
+package com.openexchange.ratelimit.rdb.osgi;
 
-import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.context.ContextService;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.database.provider.DBProvider;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.ratelimit.RateLimitFactory;
-import com.openexchange.ratelimit.hz.RateLimiterFactoryImpl;
+import com.openexchange.ratelimit.RateLimiterFactory;
+import com.openexchange.ratelimit.rdb.impl.CreateTableUpdateTask;
+import com.openexchange.ratelimit.rdb.impl.RateLimiterFactoryImpl;
+import com.openexchange.ratelimit.rdb.impl.RatelimitCreateTableService;
 
 /**
  * {@link RateLimitActivator}
@@ -64,12 +70,15 @@ public class RateLimitActivator extends HousekeepingActivator{
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {HazelcastInstance.class};
+        return new Class[] {DBProvider.class, ContextService.class};
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(RateLimitFactory.class, new RateLimiterFactoryImpl(this));
+        RatelimitCreateTableService ratelimitCreateTableService = new RatelimitCreateTableService();
+        registerService(CreateTableService.class, ratelimitCreateTableService);
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CreateTableUpdateTask(ratelimitCreateTableService)));
+        registerService(RateLimiterFactory.class, new RateLimiterFactoryImpl(this));
     }
 
 }
