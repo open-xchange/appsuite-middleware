@@ -49,7 +49,7 @@
 
 package com.openexchange.health;
 
-import java.util.List;
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -64,21 +64,24 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface MWHealthCheckService {
 
     /**
-     * Gets a map containing all registered health checks mapped by name
-     * @return The map
+     * Gets a collection containing all registered health checks.
+     *
+     * @return The collection of health checks
      */
-    List<MWHealthCheck> getAllChecks();
+    Collection<MWHealthCheck> getAllChecks();
 
     /**
-     * Gets a single health check
+     * Gets a single health check by its name
+     *
      * @param name The name
-     * @return The check
+     * @return The denoted check or <code>null</code>
      */
     MWHealthCheck getCheck(String name);
 
     /**
-     * Executes all registered and not blacklisted health checks
-     * @return The health check responses mapped by health check's name
+     * Executes all registered and not blacklisted health checks.
+     *
+     * @return The health check result
      * @throws OXException On error
      */
     MWHealthCheckResult check() throws OXException;
