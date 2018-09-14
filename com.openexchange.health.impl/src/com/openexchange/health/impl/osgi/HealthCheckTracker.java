@@ -93,8 +93,12 @@ public class HealthCheckTracker implements ServiceTrackerCustomizer<HealthCheck,
                 return new MWHealthCheckResponseImpl(getName(), response.getData().isPresent() ? response.getData().get() : null, State.UP.equals(response.getState()));
             }
         };
-        healthCheckService.addCheck(wrappingCheck);
-        return check;
+        if (healthCheckService.addCheck(wrappingCheck)) {
+            return check;
+        }
+
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
