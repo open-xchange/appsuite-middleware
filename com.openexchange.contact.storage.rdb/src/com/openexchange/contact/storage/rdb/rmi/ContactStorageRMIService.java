@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,32 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mbean;
+package com.openexchange.contact.storage.rdb.rmi;
 
-import java.util.Collection;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import com.openexchange.contact.storage.rdb.internal.Deduplicator;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Autoboxing;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
- * {@link ContactStorageMBeanImpl}
+ * {@link ContactStorageRMIService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class ContactStorageMBeanImpl extends StandardMBean implements ContactStorageMBean {
+public interface ContactStorageRMIService extends Remote {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactStorageMBeanImpl.class);
+    public static final String RMI_NAME = ContactStorageRMIService.class.getSimpleName();
 
     /**
-     * Initializes a new {@link ContactStorageMBeanImpl}.
+     * De-duplicates contacts in a folder.
+     *
+     * @param contextID The context ID
+     * @param folderID The folder ID
+     * @param limit The maximum number of contacts to process, or <code>0</code> for no limits
+     * @param dryRun <code>true</code> to analyse the folder for duplicates only, without actually performing the de-duplication,
+     *            <code>false</code>, otherwise
+     * @return The identifiers of the contacts identified (and deleted in case <code>dryRun</code> is <code>false</code>) as duplicates
+     * @throws RemoteException
      */
-    public ContactStorageMBeanImpl() throws NotCompliantMBeanException {
-        super(ContactStorageMBean.class);
-    }
-
-    @Override
-    public int[] deduplicateContacts(int contextID, int folderID, long limit, boolean dryRun) {
-        Collection<Integer> objectIDs = null;
-        try {
-            objectIDs = Deduplicator.deduplicateContacts(contextID, folderID, limit, dryRun);
-        } catch (OXException e) {
-            LOG.error("Error de-duplicating contacts in folder {} of context {}{}: {}",
-                folderID, contextID, dryRun ? " [dry-run]" : "", e.getMessage(), e);
-        }
-        return null != objectIDs ? Autoboxing.I2i(objectIDs) : null;
-    }
-
+    int[] deduplicateContacts(int contextID, int folderID, long limit, boolean dryRun) throws RemoteException;
 }

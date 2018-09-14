@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,46 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.mbean;
+package com.openexchange.contact.storage.rdb.rmi;
 
+import java.rmi.RemoteException;
+import java.util.Collection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.contact.storage.rdb.internal.Deduplicator;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 
 /**
- * {@link ContactStorageMBean}
+ * {@link ContactStorageRMIServiceImpl}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public interface ContactStorageMBean {
+public class ContactStorageRMIServiceImpl implements ContactStorageRMIService {
 
-    static final String DOMAIN = "com.openexchange.contact";
-    static final String NAME = "RDB Contact Storage Toolkit";
+    private static Logger LOG = LoggerFactory.getLogger(ContactStorageRMIServiceImpl.class);
 
     /**
-     * De-duplicates contacts in a folder.
-     *
-     * @param contextID The context ID
-     * @param folderID The folder ID
-     * @param limit The maximum number of contacts to process, or <code>0</code> for no limits
-     * @param dryRun <code>true</code> to analyze the folder for duplicates only, without actually performing the deduplication,
-     *               <code>false</code>, otherwise
-     * @return The identifiers of the contacts identified (and deleted in case <code>dryRun</code> is <code>false</code>) as duplicates
-     * @throws OXException
+     * Initialises a new {@link ContactStorageRMIServiceImpl}.
      */
-    int[] deduplicateContacts(int contextID, int folderID, long limit, boolean dryRun);
+    public ContactStorageRMIServiceImpl() {
+        super();
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.contact.storage.rdb.rmi.ContactStorageRMIService#deduplicateContacts(int, int, long, boolean)
+     */
+    @Override
+    public int[] deduplicateContacts(int contextID, int folderID, long limit, boolean dryRun) throws RemoteException {
+        Collection<Integer> objectIDs = null;
+        try {
+            objectIDs = Deduplicator.deduplicateContacts(contextID, folderID, limit, dryRun);
+        } catch (OXException e) {
+            LOG.error("Error de-duplicating contacts in folder {} of context {}{}: {}", folderID, contextID, dryRun ? " [dry-run]" : "", e.getMessage(), e);
+        }
+        return null != objectIDs ? Autoboxing.I2i(objectIDs) : null;
+    }
 }
