@@ -71,7 +71,7 @@ import com.openexchange.share.impl.rmi.ShareRMIService;
  */
 public class SharesCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "shares";
+    private static final String SYNTAX = "shares [-c <contextId> -i <userId> -T <tokenId>] [-r [-f]] [-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
     private static final String FOOTER = "Command line tool to list and delete shares";
 
     /**
@@ -127,21 +127,6 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
-     */
-    @Override
-    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        if (remove) {
-            removeShares(optRmiHostName);
-        } else {
-            listShares(optRmiHostName);
-        }
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
      */
     @Override
@@ -172,6 +157,16 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
+     */
+    @Override
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+        return remove ? removeShares(optRmiHostName) : listShares(optRmiHostName);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.cli.AbstractCLI#getFooter()
      */
     @Override
@@ -191,7 +186,7 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
 
     //////////////////////////// HELPERS ///////////////////////////
 
-    private int removeShares(String optRmiHostName) throws MalformedURLException, RemoteException, NotBoundException, MissingOptionException, OXException {
+    private Void removeShares(String optRmiHostName) throws MalformedURLException, RemoteException, NotBoundException, MissingOptionException, OXException {
         ShareRMIService rmiService = getRmiStub(optRmiHostName, ShareRMIService.RMI_NAME);
         int result = 0;
         if (null != token && !token.isEmpty()) {
@@ -217,10 +212,10 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
             }
         }
         System.out.println(result + (result == 1 ? " share " : " shares ") + "removed.");
-        return -1;
+        return null;
     }
 
-    private int listShares(String optRmiHostName) throws MalformedURLException, RemoteException, NotBoundException {
+    private Void listShares(String optRmiHostName) throws MalformedURLException, RemoteException, NotBoundException {
         ShareRMIService rmiService = getRmiStub(optRmiHostName, ShareRMIService.RMI_NAME);
         String result;
         if (contextId < 0) {
@@ -236,7 +231,7 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
             }
         }
         System.out.println(result);
-        return -1;
+        return null;
     }
 
     private Pair<String, String> parseToken(String token) throws OXException {
