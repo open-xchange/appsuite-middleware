@@ -47,37 +47,38 @@
  *
  */
 
-package com.openexchange.consistency.solver;
+package com.openexchange.consistency.internal.solver;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
-import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.consistency.Entity;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link DeleteBrokenPreviewReferencesSolver}
+ * {@link RecordSolver}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class DeleteBrokenPreviewReferencesSolver implements ProblemSolver {
+public class RecordSolver implements ProblemSolver {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteBrokenPreviewReferencesSolver.class);
+    public RecordSolver() {
+        super();
+    }
+
+    private final List<String> memory = new ArrayList<String>();
 
     @Override
-    public void solve(Entity entity, Set<String> problems) throws OXException {
-        if (problems.size() <= 0) {
-            return;
-        }
-
-        ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
-        metadataStore.removeByRefId(entity.getContext().getContextId(), problems);
-        LOG.info("Deleted {} broken preview cache references.", problems.size());
+    public void solve(final Entity entity, final Set<String> problems) {
+        memory.addAll(problems);
     }
 
     @Override
     public String description() {
-        return "delete broken preview references";
+        return "Remember in List";
     }
 
+    public List<String> getProblems() {
+        return memory;
+    }
 }

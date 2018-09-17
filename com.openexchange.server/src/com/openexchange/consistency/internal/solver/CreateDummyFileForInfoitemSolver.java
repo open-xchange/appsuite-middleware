@@ -47,32 +47,44 @@
  *
  */
 
-package com.openexchange.consistency.solver;
+package com.openexchange.consistency.internal.solver;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
-import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link CreateDummyFileForSnippetSolver}
+ * {@link CreateDummyFileForInfostoreItemSolver}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class CreateDummyFileForSnippetSolver extends CreateDummyFileSolver implements ProblemSolver {
+public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver implements ProblemSolver {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreateDummyFileForSnippetSolver.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreateDummyFileForInfoitemSolver.class);
 
-    public CreateDummyFileForSnippetSolver(final FileStorage storage) {
+    private final DatabaseImpl database;
+
+    private final User admin;
+
+    /**
+     * Initialises a new {@link CreateDummyFileForInfoitemSolver}.
+     *
+     * @param database The database
+     * @param storage
+     * @param admin
+     */
+    public CreateDummyFileForInfoitemSolver(final DatabaseImpl database, final FileStorage storage, User admin) {
         super(storage);
+        this.database = database;
+        this.admin = admin;
     }
 
     @Override
@@ -80,42 +92,45 @@ public class CreateDummyFileForSnippetSolver extends CreateDummyFileSolver imple
         /*
          * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
          */
-        final int size = problems.size();
-        final Iterator<String> it = problems.iterator();
-        for (int k = 0; k < size; k++) {
-            Connection con = null;
-            PreparedStatement stmt = null;
+        for (final String old_identifier : problems) {
             try {
-                con = Database.get(entity.getContext(), true);
-                final String old_identifier = it.next();
-                // Not recoverable
-                if (DBUtils.tableExists(con, "snippet")) {
-                    stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
-                    int pos = 0;
-                    stmt.setInt(++pos, entity.getContext().getContextId());
-                    stmt.setString(++pos, old_identifier);
-                    stmt.executeUpdate();
-                    Databases.closeSQLStuff(stmt);
-                    stmt = null;
+                Context context = entity.getContext();
+                int fsOwner = database.getDocumentHolderFor(old_identifier, context);
+
+                if (fsOwner < 0) {
+                    LOG.warn("No document holder found for identifier {} in context {}. Assigning to context admin.", old_identifier, context.getContextId());
+                    fsOwner = admin.getId();
                 }
-                // Partly recoverable
-                if (DBUtils.tableExists(con, "snippetAttachment")) {
-                    final String identifier = createDummyFile(storage);
-                    stmt = con.prepareStatement("UPDATE snippetAttachment SET referenceId=? WHERE cid=? AND referenceId=?");
-                    int pos = 0;
-                    stmt.setString(++pos, identifier);
-                    stmt.setInt(++pos, entity.getContext().getContextId());
-                    stmt.setString(++pos, old_identifier);
-                    stmt.executeUpdate();
-                    Databases.closeSQLStuff(stmt);
-                    stmt = null;
+
+                QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId(), Info.drive());
+                String identifier = createDummyFile(storage);
+                database.startTransaction();
+                int changed = database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", context);
+                database.commit();
+                if (changed == 1) {
+                    LOG.info("Modified entry for identifier {} in context {} to new dummy identifier {}", old_identifier, context.getContextId(), identifier);
                 }
-            } catch (SQLException | OXException | RuntimeException e) {
+            } catch (final OXException e) {
                 LOG.error("{}", e.getMessage(), e);
+                try {
+                    database.rollback();
+                    return;
+                } catch (final OXException e1) {
+                    LOG.debug("{}", e1.getMessage(), e1);
+                }
+            } catch (final RuntimeException e) {
+                LOG.error("{}", e.getMessage(), e);
+                try {
+                    database.rollback();
+                    return;
+                } catch (final OXException e1) {
+                    LOG.debug("{}", e1.getMessage(), e1);
+                }
             } finally {
-                Databases.closeSQLStuff(stmt);
-                if (null != con) {
-                    Database.back(entity.getContext(), true, con);
+                try {
+                    database.finish();
+                } catch (final OXException e) {
+                    LOG.debug("{}", e.getMessage(), e);
                 }
             }
         }
@@ -123,7 +138,6 @@ public class CreateDummyFileForSnippetSolver extends CreateDummyFileSolver imple
 
     @Override
     public String description() {
-        return "Create dummy file for snippet";
+        return "Create dummy file for infoitem";
     }
-
 }

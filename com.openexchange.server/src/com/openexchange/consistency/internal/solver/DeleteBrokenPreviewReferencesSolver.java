@@ -47,74 +47,37 @@
  *
  */
 
-package com.openexchange.consistency.solver;
+package com.openexchange.consistency.internal.solver;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.Set;
+import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.consistency.Entity;
-import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link DeleteSnippetSolver}
+ * {@link DeleteBrokenPreviewReferencesSolver}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class DeleteSnippetSolver implements ProblemSolver {
+public class DeleteBrokenPreviewReferencesSolver implements ProblemSolver {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteSnippetSolver.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteBrokenPreviewReferencesSolver.class);
 
     @Override
-    public void solve(final Entity entity, final Set<String> problems) {
-        // Now we go through the set an delete each superfluous entry:
-        for (Iterator<String> it = problems.iterator(); it.hasNext();) {
-            String old_identifier = it.next();
-
-            Connection con = null;
-            PreparedStatement stmt = null;
-            boolean rollback = false;
-            try {
-                con = Database.get(entity.getContext(), true);
-                con.setAutoCommit(false);
-                rollback = true;
-
-                int contextId = entity.getContext().getContextId();
-                // Not recoverable
-                if (DBUtils.tableExists(con, "snippet")) {
-                    stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
-                    int pos = 0;
-                    stmt.setInt(++pos, contextId);
-                    stmt.setString(++pos, old_identifier);
-                    stmt.executeUpdate();
-                    Databases.closeSQLStuff(stmt);
-                    stmt = null;
-                }
-
-                con.commit();
-                rollback = false;
-            } catch (SQLException | OXException | RuntimeException e) {
-                LOG.error("{}", e.getMessage(), e);
-            } finally {
-                if (rollback) {
-                    Databases.rollback(con);
-                }
-                Databases.closeSQLStuff(stmt);
-                if (null != con) {
-                    Databases.autocommit(con);
-                    Database.back(entity.getContext(), true, con);
-                }
-            }
+    public void solve(Entity entity, Set<String> problems) throws OXException {
+        if (problems.size() <= 0) {
+            return;
         }
+
+        ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
+        metadataStore.removeByRefId(entity.getContext().getContextId(), problems);
+        LOG.info("Deleted {} broken preview cache references.", problems.size());
     }
 
     @Override
     public String description() {
-        return "delete snippet";
+        return "delete broken preview references";
     }
+
 }

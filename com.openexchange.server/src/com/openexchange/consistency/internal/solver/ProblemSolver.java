@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,31 @@
  *
  */
 
-package com.openexchange.consistency.rmi;
+package com.openexchange.consistency.internal.solver;
 
-import java.util.Iterator;
-import java.util.SortedSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Set;
+import com.openexchange.consistency.Entity;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ConsistencyUtil}
+ * {@link ProblemSolver}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.1
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-final class ConsistencyUtil {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ConsistencyUtil.class);
-    
-    /**
-     * Makes the difference set between two set, the first one is changed
-     */
-    static boolean diffSet(SortedSet<String> first, SortedSet<String> second, String name, String name2) {
-        first.removeAll(second);
-        if (first.isEmpty()) {
-            return false;
-        }
-        output("Inconsistencies found in " + name + ", the following files aren't in " + name2 + ':');
-        outputSet(first);
-        return true;
-    }
+public interface ProblemSolver {
 
     /**
-     * Logs a message with log level INFO
      *
-     * @param text the message to log
+     * @param entity
+     * @param problems
+     * @throws OXException
      */
-    static void output(String text) {
-        LOG.info(text);
-    }
+    public void solve(Entity entity, Set<String> problems) throws OXException;
 
     /**
-     * Logs the specified set with log level INFO
      *
-     * @param set the set to log
+     * @return
      */
-    static void outputSet(SortedSet<String> set) {
-        Iterator<String> itstr = set.iterator();
-        StringBuilder sb = new StringBuilder();
-        while (itstr.hasNext()) {
-            sb.append(itstr.next()).append('\n');
-        }
-        output(sb.toString());
-    }
+    String description();
 }

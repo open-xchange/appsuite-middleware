@@ -47,30 +47,39 @@
  *
  */
 
-package com.openexchange.consistency.solver;
+package com.openexchange.consistency.internal.solver;
 
-import java.util.Set;
-import com.openexchange.consistency.Entity;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 
 /**
- * {@link DoNothingSolver}
+ * {@link CreateDummyFileSolver}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class DoNothingSolver implements ProblemSolver {
+public abstract class CreateDummyFileSolver {
 
-    public DoNothingSolver() {
+    /** The associated file storage */
+    protected final FileStorage storage;
+
+    protected CreateDummyFileSolver(final FileStorage storage) {
         super();
+        this.storage = storage;
     }
 
-    @Override
-    public void solve(final Entity entity, final Set<String> problems) {
-        // Ignore
-    }
+    /**
+     * This method create a dummy file a returns its name
+     *
+     * @return The name of the dummy file
+     * @throws OXException
+     */
+    protected String createDummyFile(FileStorage storage) throws OXException {
+        final String filetext = "This is just a dummy file";
+        final InputStream input = new ByteArrayInputStream(filetext.getBytes());
 
-    @Override
-    public String description() {
-        return "Do Nothing";
+        return storage.saveNewFile(input);
     }
 }

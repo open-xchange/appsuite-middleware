@@ -47,39 +47,30 @@
  *
  */
 
-package com.openexchange.consistency.solver;
+package com.openexchange.consistency.internal.solver;
 
 import java.util.Set;
 import com.openexchange.consistency.Entity;
-import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
-import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link DeleteBrokenVCardReferencesSolver}
+ * {@link DoNothingSolver}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class DeleteBrokenVCardReferencesSolver implements ProblemSolver {
+public class DoNothingSolver implements ProblemSolver {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteBrokenVCardReferencesSolver.class);
+    public DoNothingSolver() {
+        super();
+    }
 
     @Override
-    public void solve(Entity entity, Set<String> problems) throws OXException {
-        VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
-        if (vCardStorageMetadataStore == null) {
-            LOG.warn("Required service VCardStorageMetadataStore absent. Unable to solve VCard related consistency issues on storage.");
-            return;
-        }
-        if (problems.size() > 0) {
-            vCardStorageMetadataStore.removeByRefId(entity.getContext().getContextId(), problems);
-            LOG.info("Deleted {} broken VCard references.", problems.size());
-        }
+    public void solve(final Entity entity, final Set<String> problems) {
+        // Ignore
     }
 
     @Override
     public String description() {
-        return "delete broken VCard references";
+        return "Do Nothing";
     }
 }

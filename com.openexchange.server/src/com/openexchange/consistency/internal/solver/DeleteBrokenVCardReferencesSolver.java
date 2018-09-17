@@ -47,39 +47,39 @@
  *
  */
 
-package com.openexchange.consistency.solver;
+package com.openexchange.consistency.internal.solver;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.util.Set;
+import com.openexchange.consistency.Entity;
+import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
+import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage;
 
 /**
- * {@link CreateDummyFileSolver}
+ * {@link DeleteBrokenVCardReferencesSolver}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public abstract class CreateDummyFileSolver {
+public class DeleteBrokenVCardReferencesSolver implements ProblemSolver {
 
-    /** The associated file storage */
-    protected final FileStorage storage;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteBrokenVCardReferencesSolver.class);
 
-    protected CreateDummyFileSolver(final FileStorage storage) {
-        super();
-        this.storage = storage;
+    @Override
+    public void solve(Entity entity, Set<String> problems) throws OXException {
+        VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
+        if (vCardStorageMetadataStore == null) {
+            LOG.warn("Required service VCardStorageMetadataStore absent. Unable to solve VCard related consistency issues on storage.");
+            return;
+        }
+        if (problems.size() > 0) {
+            vCardStorageMetadataStore.removeByRefId(entity.getContext().getContextId(), problems);
+            LOG.info("Deleted {} broken VCard references.", problems.size());
+        }
     }
 
-    /**
-     * This method create a dummy file a returns its name
-     *
-     * @return The name of the dummy file
-     * @throws OXException
-     */
-    protected String createDummyFile(FileStorage storage) throws OXException {
-        final String filetext = "This is just a dummy file";
-        final InputStream input = new ByteArrayInputStream(filetext.getBytes());
-
-        return storage.saveNewFile(input);
+    @Override
+    public String description() {
+        return "delete broken VCard references";
     }
 }

@@ -73,7 +73,13 @@ public enum ConsistencyExceptionCodes implements DisplayableOXExceptionCode {
     UNREGISTRATION_FAILED(ConsistencyExceptionCodes.UNREGISTRATION_FAILED_MSG, CATEGORY_CONFIGURATION, 3),
 
     /** User entered malformed policy string. */
-    MALFORMED_POLICY(ConsistencyExceptionCodes.MALFORMED_POLICY_MSG, CATEGORY_USER_INPUT, 4, MALFORMED_POLICY_MSG_DISPLAY);
+    MALFORMED_POLICY(ConsistencyExceptionCodes.MALFORMED_POLICY_MSG, CATEGORY_USER_INPUT, 4, MALFORMED_POLICY_MSG_DISPLAY),
+
+    /**
+     * <li>An SQL error occurred: %1$s</li>
+     */
+    SQL_ERROR("An SQL error occurred: %1$s", Category.CATEGORY_ERROR, 5),
+    ;
 
     private static final String MALFORMED_POLICY_MSG = "Malformed policy. Policies are formed like \"condition:action\"";
 

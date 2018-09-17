@@ -47,38 +47,53 @@
  *
  */
 
-package com.openexchange.consistency.solver;
+package com.openexchange.consistency.internal.solver;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 
 /**
- * {@link RecordSolver}
+ * {@link RemoveFileSolver}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class RecordSolver implements ProblemSolver {
+public class RemoveFileSolver implements ProblemSolver {
 
-    public RecordSolver() {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RemoveFileSolver.class);
+
+    private final FileStorage storage;
+
+    public RemoveFileSolver(final FileStorage storage) {
         super();
+        this.storage = storage;
     }
-
-    private final List<String> memory = new ArrayList<String>();
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        memory.addAll(problems);
+        try {
+            for (final String identifier : problems) {
+                try {
+                    if (storage.deleteFile(identifier)) {
+                        LOG.info("Deleted identifier: {}", identifier);
+                    }
+                } catch (Exception e) {
+                    LOG.debug("{}", e.getMessage(), e);
+                }
+            }
+            /*
+             * Afterwards we recreate the state file because it could happen that that now new free file slots are available.
+             */
+            storage.recreateStateFile();
+        } catch (final OXException e) {
+            LOG.error("{}", e.getMessage(), e);
+        }
     }
 
     @Override
     public String description() {
-        return "Remember in List";
-    }
-
-    public List<String> getProblems() {
-        return memory;
+        return "delete file";
     }
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.consistency.solver;
+package com.openexchange.consistency.internal.solver;
 
 import java.text.MessageFormat;
 import java.util.Iterator;

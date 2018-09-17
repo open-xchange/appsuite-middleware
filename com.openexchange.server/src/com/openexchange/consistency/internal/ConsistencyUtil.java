@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,56 @@
  *
  */
 
-package com.openexchange.consistency.osgi;
+package com.openexchange.consistency.internal;
 
-import java.rmi.Remote;
+import java.util.Iterator;
+import java.util.SortedSet;
 import org.slf4j.Logger;
-import com.openexchange.consistency.ConsistencyService;
-import com.openexchange.consistency.internal.ConsistencyServiceImpl;
-import com.openexchange.consistency.rmi.ConsistencyRMIServiceImpl;
-import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
+import org.slf4j.LoggerFactory;
 
 /**
- * {@link ConsistencyActivator}
+ * {@link ConsistencyUtil}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class ConsistencyActivator extends HousekeepingActivator {
+final class ConsistencyUtil {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyActivator.class);
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    private static final Logger LOG = LoggerFactory.getLogger(ConsistencyUtil.class);
+    
+    /**
+     * Makes the difference set between two set, the first one is changed
+     */
+    static boolean diffSet(SortedSet<String> first, SortedSet<String> second, String name, String name2) {
+        first.removeAll(second);
+        if (first.isEmpty()) {
+            return false;
+        }
+        output("Inconsistencies found in " + name + ", the following files aren't in " + name2 + ':');
+        outputSet(first);
+        return true;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.consistency");
-        ConsistencyServiceLookup.set(this);
-        registerService(ConsistencyService.class, new ConsistencyServiceImpl());
-        registerService(Remote.class, new ConsistencyRMIServiceImpl());
-
-        track(ManagementService.class, new MBeanRegisterer(context));
-        trackService(VCardStorageMetadataStore.class);
-        trackService(DatabaseService.class);
-
-        openTrackers();
+    /**
+     * Logs a message with log level INFO
+     *
+     * @param text the message to log
+     */
+    static void output(String text) {
+        LOG.info(text);
     }
 
-    @Override
-    public void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.consistency");
-        ConsistencyServiceLookup.set(null);
-
-        closeTrackers();
-        super.stopBundle();
+    /**
+     * Logs the specified set with log level INFO
+     *
+     * @param set the set to log
+     */
+    static void outputSet(SortedSet<String> set) {
+        Iterator<String> itstr = set.iterator();
+        StringBuilder sb = new StringBuilder();
+        while (itstr.hasNext()) {
+            sb.append(itstr.next()).append('\n');
+        }
+        output(sb.toString());
     }
 }

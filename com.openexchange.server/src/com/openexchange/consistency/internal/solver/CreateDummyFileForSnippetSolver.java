@@ -47,53 +47,83 @@
  *
  */
 
-package com.openexchange.consistency.solver;
+package com.openexchange.consistency.internal.solver;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
+import com.openexchange.database.Databases;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link RemoveFileSolver}
+ * {@link CreateDummyFileForSnippetSolver}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class RemoveFileSolver implements ProblemSolver {
+public class CreateDummyFileForSnippetSolver extends CreateDummyFileSolver implements ProblemSolver {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RemoveFileSolver.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreateDummyFileForSnippetSolver.class);
 
-    private final FileStorage storage;
-
-    public RemoveFileSolver(final FileStorage storage) {
-        super();
-        this.storage = storage;
+    public CreateDummyFileForSnippetSolver(final FileStorage storage) {
+        super(storage);
     }
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        try {
-            for (final String identifier : problems) {
-                try {
-                    if (storage.deleteFile(identifier)) {
-                        LOG.info("Deleted identifier: {}", identifier);
-                    }
-                } catch (Exception e) {
-                    LOG.debug("{}", e.getMessage(), e);
+        /*
+         * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
+         */
+        final int size = problems.size();
+        final Iterator<String> it = problems.iterator();
+        for (int k = 0; k < size; k++) {
+            Connection con = null;
+            PreparedStatement stmt = null;
+            try {
+                con = Database.get(entity.getContext(), true);
+                final String old_identifier = it.next();
+                // Not recoverable
+                if (DBUtils.tableExists(con, "snippet")) {
+                    stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
+                    int pos = 0;
+                    stmt.setInt(++pos, entity.getContext().getContextId());
+                    stmt.setString(++pos, old_identifier);
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+                // Partly recoverable
+                if (DBUtils.tableExists(con, "snippetAttachment")) {
+                    final String identifier = createDummyFile(storage);
+                    stmt = con.prepareStatement("UPDATE snippetAttachment SET referenceId=? WHERE cid=? AND referenceId=?");
+                    int pos = 0;
+                    stmt.setString(++pos, identifier);
+                    stmt.setInt(++pos, entity.getContext().getContextId());
+                    stmt.setString(++pos, old_identifier);
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+            } catch (SQLException | OXException | RuntimeException e) {
+                LOG.error("{}", e.getMessage(), e);
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                if (null != con) {
+                    Database.back(entity.getContext(), true, con);
                 }
             }
-            /*
-             * Afterwards we recreate the state file because it could happen that that now new free file slots are available.
-             */
-            storage.recreateStateFile();
-        } catch (final OXException e) {
-            LOG.error("{}", e.getMessage(), e);
         }
     }
 
     @Override
     public String description() {
-        return "delete file";
+        return "Create dummy file for snippet";
     }
+
 }
