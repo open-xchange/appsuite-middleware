@@ -142,7 +142,7 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
                             try {
                                 byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
                                 "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                                "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                                "jcs.region."+regionName+".cacheattributes.MaxObjects=50000\n" +
                                 "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
                                 "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
                                 "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleSeconds+"\n" +

@@ -67,8 +67,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.amazonaws.AmazonClientException;
@@ -125,7 +123,6 @@ public class S3FileStorageFactory implements FileStorageProvider {
      */
     private static final int RANKING = 5634;
 
-    private final ConcurrentMap<URI, S3FileStorage> storages;
     private final ConfigurationService configService;
 
     /**
@@ -136,35 +133,26 @@ public class S3FileStorageFactory implements FileStorageProvider {
     public S3FileStorageFactory(ConfigurationService configService) {
         super();
         this.configService = configService;
-        this.storages = new ConcurrentHashMap<URI, S3FileStorage>();
     }
 
     @Override
     public S3FileStorage getFileStorage(URI uri) throws OXException {
         try {
-            S3FileStorage storage = storages.get(uri);
-            if (null == storage) {
-                LOG.debug("Initializing S3 client for {}", uri);
-                /*
-                 * extract filestore ID from authority part of URI
-                 */
-                String filestoreID = extractFilestoreID(uri);
-                LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
-                /*
-                 * create client
-                 */
-                PropertyNameBuilder nameBuilder = new PropertyNameBuilder("com.openexchange.filestore.s3.");
-                AmazonS3ClientInfo clientInfo = initClient(filestoreID, nameBuilder);
-                AmazonS3Client client = clientInfo.client;
-                String bucketName = initBucket(client, filestoreID, nameBuilder);
-                LOG.debug("Using \"{}\" as bucket name.", bucketName);
-                S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
-                storage = storages.putIfAbsent(uri, newStorage);
-                if (null == storage) {
-                    storage = newStorage;
-                }
-            }
-            return storage;
+            LOG.debug("Initializing S3 client for {}", uri);
+            /*
+             * extract filestore ID from authority part of URI
+             */
+            String filestoreID = extractFilestoreID(uri);
+            LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
+            /*
+             * create client
+             */
+            PropertyNameBuilder nameBuilder = new PropertyNameBuilder("com.openexchange.filestore.s3.");
+            AmazonS3ClientInfo clientInfo = initClient(filestoreID, nameBuilder);
+            AmazonS3Client client = clientInfo.client;
+            String bucketName = initBucket(client, filestoreID, nameBuilder);
+            LOG.debug("Using \"{}\" as bucket name.", bucketName);
+            return new S3FileStorage(client, clientInfo.encrypted, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
         } catch (OXException ex) {
             if (ex.getCause() instanceof AmazonS3Exception && ((AmazonS3Exception) ex.getCause()).getStatusCode() == 400) {
                 // throw a simple OXException here to be able to forward this exception to rmi clients (Bug #42102)
