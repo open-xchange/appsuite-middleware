@@ -1044,7 +1044,7 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 } else if ("missing_entry_for_file".equals(condition)) {
                     if ("create_admin_infoitem".equals(action)) {
-                        filesolver = new CreateInfoitemSolver(database, storage, consistency.getAdmin(context));
+                        filesolver = new CreateInfoitemSolver(database, consistency.getAdmin(context));
                     } else if ("delete".equals(action)) {
                         filesolver = new RemoveFileSolver(storage);
                     } else {

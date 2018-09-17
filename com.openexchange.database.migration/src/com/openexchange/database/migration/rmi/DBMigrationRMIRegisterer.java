@@ -62,8 +62,7 @@ import com.openexchange.database.migration.DBMigration;
 public class DBMigrationRMIRegisterer {
 
     private final Set<DBMigration> migrations;
-    
-    
+
     /**
      * Initialises a new {@link DBMigrationRMIRegisterer}.
      */

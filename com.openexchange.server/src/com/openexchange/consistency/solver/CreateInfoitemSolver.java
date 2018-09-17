@@ -53,7 +53,6 @@ import java.text.MessageFormat;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
@@ -85,14 +84,11 @@ public class CreateInfoitemSolver implements ProblemSolver {
 
     private final DatabaseImpl database;
 
-    private final FileStorage storage;
-
     private final User admin;
 
-    public CreateInfoitemSolver(final DatabaseImpl database, final FileStorage storage, final User admin) {
+    public CreateInfoitemSolver(final DatabaseImpl database, final User admin) {
         super();
         this.database = database;
-        this.storage = storage;
         this.admin = admin;
     }
 

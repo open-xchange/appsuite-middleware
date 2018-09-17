@@ -100,19 +100,19 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 
 /**
- * {@link ConsistencyCheckRMIServiceImpl}
+ * {@link ConsistencyRMIServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public abstract class ConsistencyCheckRMIServiceImpl implements ConsistencyCheckRMIService {
+public abstract class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ConsistencyCheckRMIServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConsistencyRMIServiceImpl.class);
 
     /**
-     * Initialises a new {@link ConsistencyCheckRMIServiceImpl}.
+     * Initialises a new {@link ConsistencyRMIServiceImpl}.
      */
-    public ConsistencyCheckRMIServiceImpl() {
+    public ConsistencyRMIServiceImpl() {
         super();
     }
 
@@ -1010,7 +1010,7 @@ public abstract class ConsistencyCheckRMIServiceImpl implements ConsistencyCheck
             this.vCardSolver = vCardSolver;
         }
 
-        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final FileStorage storage, final ConsistencyCheckRMIServiceImpl consistency, final Context context) throws OXException {
+        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final FileStorage storage, final ConsistencyRMIServiceImpl consistency, final Context context) throws OXException {
             final String[] options = list.split("\\s*,\\s*");
             ProblemSolver dbsolver = new DoNothingSolver();
             ProblemSolver attachmentsolver = new DoNothingSolver();
@@ -1058,7 +1058,7 @@ public abstract class ConsistencyCheckRMIServiceImpl implements ConsistencyCheck
                     }
                 } else if ("missing_entry_for_file".equals(condition)) {
                     if ("create_admin_infoitem".equals(action)) {
-                        filesolver = new CreateInfoitemSolver(database, storage, consistency.getAdmin(context));
+                        filesolver = new CreateInfoitemSolver(database, consistency.getAdmin(context));
                     } else if ("delete".equals(action)) {
                         filesolver = new RemoveFileSolver(storage);
                     } else {

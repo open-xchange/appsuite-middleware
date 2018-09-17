@@ -55,15 +55,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link ConsistencyCheckRMIService}
+ * {@link ConsistencyRMIService}
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public interface ConsistencyCheckRMIService extends Remote {
+public interface ConsistencyRMIService extends Remote {
 
-    public static final String RMI_NAME = ConsistencyCheckRMIService.class.getSimpleName();
+    public static final String RMI_NAME = ConsistencyRMIService.class.getSimpleName();
 
     /**
      * Checks and/or repairs the configuration database
@@ -74,10 +74,6 @@ public interface ConsistencyCheckRMIService extends Remote {
      */
     List<String> checkOrRepairConfigDB(boolean repair) throws RemoteException;
 
-    // List
-
-    // Missing
-
     /**
      * Lists all missing files in the specified context
      * 
@@ -87,13 +83,31 @@ public interface ConsistencyCheckRMIService extends Remote {
      */
     List<String> listMissingFilesInContext(int contextId) throws RemoteException;
 
+    /**
+     * Lists all missing files in the specified filestore
+     * 
+     * @param filestoreId the filestore identifier
+     * @return A {@link List} with all missing files
+     * @throws RemoteException if an error is occurred
+     */
     Map<ConsistencyEntity, List<String>> listMissingFilesInFilestore(int filestoreId) throws RemoteException;
 
+    /**
+     * Lists all missing files in the specified database
+     * 
+     * @param databaseId the database identifier
+     * @return A {@link List} with all missing files
+     * @throws RemoteException if an error is occurred
+     */
     Map<ConsistencyEntity, List<String>> listMissingFilesInDatabase(int databaseId) throws RemoteException;
 
+    /**
+     * Lists all missing files
+     * 
+     * @return A {@link List} with all missing files
+     * @throws RemoteException if an error is occurred
+     */
     Map<ConsistencyEntity, List<String>> listAllMissingFiles() throws RemoteException;
-
-    // Unassigned
 
     /**
      * Lists all unassigned files in the specified context
@@ -104,20 +118,64 @@ public interface ConsistencyCheckRMIService extends Remote {
      */
     List<String> listUnassignedFilesInContext(int contextId) throws RemoteException;
 
+    /**
+     * Lists all unassigned files in the specified filestore
+     * 
+     * @param filestoreId The filestore identifier
+     * @return A {@link List} with all unassigned files
+     * @throws RemoteException if an error is occurred
+     */
     Map<ConsistencyEntity, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws RemoteException;
 
+    /**
+     * Lists all unassigned files in the specified database
+     * 
+     * @param databaseId The database identifier
+     * @return A {@link List} with all unassigned files
+     * @throws RemoteException if an error is occurred
+     */
     Map<ConsistencyEntity, List<String>> listUnassignedFilesInDatabase(int databaseId) throws RemoteException;
 
+    /**
+     * Lists all unassigned files
+     * 
+     * @return A {@link List} with all unassigned files
+     * @throws RemoteException if an error is occurred
+     */
     Map<ConsistencyEntity, List<String>> listAllUnassignedFiles() throws RemoteException;
 
-    // Repair
-
+    /**
+     * Repairs all files in the specified context by using the specified resolver policy
+     * 
+     * @param contextId The context identifier
+     * @param resolverPolicy The name of the resolver policy
+     * @throws RemoteException if an error is occurred
+     */
     void repairFilesInContext(int contextId, String resolverPolicy) throws RemoteException;
 
+    /**
+     * Repairs all files in the specified filestore by using the specified resolver policy
+     * 
+     * @param filestoreId The filestore identifier
+     * @param resolverPolicy The name of the resolver policy
+     * @throws RemoteException if an error is occurred
+     */
     void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws RemoteException;
 
+    /**
+     * Repairs all files in the specified database by using the specified resolver policy
+     * 
+     * @param databaseId The database identifier
+     * @param resolverPolicy The name of the resolver policy
+     * @throws RemoteException if an error is occurred
+     */
     void repairFilesInDatabase(int databaseId, String resolverPolicy) throws RemoteException;
 
+    /**
+     * Repairs all files by using the specified resolver policy
+     * 
+     * @param resolverPolicy The name of the resolver policy
+     * @throws RemoteException if an error is occurred
+     */
     void repairAllFiles(String resolverPolicy) throws RemoteException;
-
 }
