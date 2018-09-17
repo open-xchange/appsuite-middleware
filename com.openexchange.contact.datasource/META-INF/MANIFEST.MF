@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Contact image datasource
 Bundle-SymbolicName: com.openexchange.contact.datasource
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.contact.datasource
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
