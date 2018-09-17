@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.database.migration.internal;
 
 import static com.openexchange.database.migration.internal.LiquibaseHelper.LIQUIBASE_NO_DEFINED_CONTEXT;
@@ -56,7 +57,11 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import com.openexchange.database.migration.DBMigration;
 import com.openexchange.database.migration.DBMigrationCallback;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
@@ -82,6 +87,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     private final DBMigrationExecutor executor;
     private MBeanRegisterer registerer;
+    private final Map<Class<? extends Exception>, Function<Exception, OXException>> exceptionSpawners;
 
     /**
      * Initializes a new {@link DBMigrationExecutorServiceImpl}.
@@ -89,6 +95,22 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
     public DBMigrationExecutorServiceImpl() {
         super();
         executor = new DBMigrationExecutor();
+        exceptionSpawners = initialiseExceptionSpawners();
+    }
+
+    /**
+     * Initialises the {@link OXException} spawners
+     * 
+     * @return An unmodifiable {@link Map} with {@link OXException} spawners
+     */
+    private Map<Class<? extends Exception>, Function<Exception, OXException>> initialiseExceptionSpawners() {
+        Map<Class<? extends Exception>, Function<Exception, OXException>> m = new HashMap<>(8);
+        m.put(OXException.class, (x) -> DBMigrationExceptionCodes.DB_MIGRATION_ERROR.create(x));
+        m.put(SQLException.class, (x) -> DBMigrationExceptionCodes.SQL_ERROR.create(x));
+        m.put(LockException.class, (x) -> DBMigrationExceptionCodes.READING_LOCK_ERROR.create(x));
+        m.put(LiquibaseException.class, (x) -> DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(x));
+        m.put(ValidationFailedException.class, (x) -> DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR.create(x));
+        return Collections.unmodifiableMap(m);
     }
 
     /**
@@ -135,19 +157,11 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
             liquibase = LiquibaseHelper.prepareLiquibase(connection, migration);
             return new ArrayList<ChangeSet>(liquibase.listUnrunChangeSets(LIQUIBASE_NO_DEFINED_CONTEXT));
         } catch (Exception exception) {
-            if (exception instanceof OXException) {
-                throw DBMigrationExceptionCodes.DB_MIGRATION_ERROR.create(exception);
-            } else if (exception instanceof ValidationFailedException) {
-                throw DBMigrationExceptionCodes.VALIDATION_FAILED_ERROR.create(exception);
-            } else if (exception instanceof LiquibaseException) {
-                throw DBMigrationExceptionCodes.LIQUIBASE_ERROR.create(exception);
-            } else if (exception instanceof SQLException) {
-                throw DBMigrationExceptionCodes.SQL_ERROR.create(exception);
-            } else if (exception instanceof LockException) {
-                throw DBMigrationExceptionCodes.READING_LOCK_ERROR.create(exception);
-            } else {
+            Function<Exception, OXException> x = exceptionSpawners.get(exception.getClass());
+            if (x == null) {
                 throw DBMigrationExceptionCodes.UNEXPECTED_ERROR.create(exception);
             }
+            throw x.apply(exception);
         } finally {
             LiquibaseHelper.cleanUpLiquibase(liquibase);
             if (null != connection) {
