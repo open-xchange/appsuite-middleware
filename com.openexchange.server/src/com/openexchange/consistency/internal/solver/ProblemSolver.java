@@ -57,21 +57,24 @@ import com.openexchange.exception.OXException;
  * {@link ProblemSolver}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.8.0
  */
 public interface ProblemSolver {
 
     /**
-     *
-     * @param entity
-     * @param problems
-     * @throws OXException
+     * Performs the solve operation for the specified {@link Entity}.
+     * 
+     * @param entity The entity to perform the solve operation for
+     * @param problems A set with troublesome object identifiers for which the solve operation should apply
+     * @throws OXException if an error is occurred
      */
     public void solve(Entity entity, Set<String> problems) throws OXException;
 
     /**
-     *
-     * @return
+     * Returns a brief description of the solver
+     * 
+     * @return a brief description of the solver
      */
     String description();
 }
