@@ -71,6 +71,7 @@ import com.openexchange.consistency.ConsistencyExceptionCodes;
 import com.openexchange.consistency.ConsistencyService;
 import com.openexchange.consistency.Entity;
 import com.openexchange.consistency.Entity.EntityType;
+import com.openexchange.consistency.EntityImpl;
 import com.openexchange.consistency.internal.solver.CreateDummyFileForAttachmentSolver;
 import com.openexchange.consistency.internal.solver.CreateDummyFileForInfoitemSolver;
 import com.openexchange.consistency.internal.solver.CreateDummyFileForSnippetSolver;
@@ -84,7 +85,6 @@ import com.openexchange.consistency.internal.solver.DoNothingSolver;
 import com.openexchange.consistency.internal.solver.ProblemSolver;
 import com.openexchange.consistency.internal.solver.RecordSolver;
 import com.openexchange.consistency.internal.solver.RemoveFileSolver;
-import com.openexchange.consistency.EntityImpl;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -573,7 +573,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @return a map with {@link Context} and {@link User} objects that are using the file storage with the specified identifier
      * @throws OXException
      */
-    private Map<Context, List<User>> getUsersForFilestore(final int filestoreId) throws OXException {
+    private Map<Context, List<User>> getUsersForFilestore(int filestoreId) throws OXException {
         Map<Integer, List<Integer>> users = FileStorages.getFileStorage2EntitiesResolver().getIdsOfUsersUsing(filestoreId);
         return loadUsers(users);
     }
@@ -739,7 +739,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
                 Databases.closeSQLStuff(rs, stmt);
                 stmt = null;
             }
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -819,7 +819,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @param schema The schema name
      * @throws SQLException if an SQL error is occurred
      */
-    private void deleteSchemaFromConfigDB(final Connection configCon, final String schema) throws SQLException {
+    private void deleteSchemaFromConfigDB(Connection configCon, String schema) throws SQLException {
         PreparedStatement stmt = null;
         try {
             LOG.debug("Deleting context_server2db_pool mapping for schema {}", schema);
@@ -851,7 +851,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             // tell pool, that database has been removed
             try {
                 com.openexchange.databaseold.Database.reset(contextId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 LOG.error("", e);
             }
 
@@ -887,7 +887,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @param fileStorage The file storage for that entity
      * @throws OXException if an error is occurred
      */
-    private void checkOneEntity(final Entity entity, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage fileStorage) throws OXException {
+    private void checkOneEntity(Entity entity, ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver snippetSolver, ProblemSolver previewSolver, ProblemSolver fileSolver, ProblemSolver vCardSolver, DatabaseImpl database, AttachmentBase attach, FileStorage fileStorage) throws OXException {
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
         LOG.info("Checking entity {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {}", entity, dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description());
@@ -947,7 +947,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             LOG.info("Found {} previews", previewset.size());
             LOG.info("Found {} vCards", vcardset.size());
 
-            final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
+            SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
             joineddbfileset.addAll(attachmentset);
             joineddbfileset.addAll(snippetset);
             joineddbfileset.addAll(previewset);
@@ -963,7 +963,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             }
 
             // Build the difference set of the attachment database set, so that the
-            // final attachmentset contains all the members that aren't in the
+            // attachmentset contains all the members that aren't in the
             // filestoreset
             if (ConsistencyUtil.diffSet(attachmentset, filestoreset, "database list of attachment files", "filestore list")) {
                 // implement the solver for deleted dbfiles here
@@ -971,7 +971,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             }
 
             // Build the difference set of the attachment database set, so that the
-            // final attachmentset contains all the members that aren't in the
+            // attachmentset contains all the members that aren't in the
             // filestoreset
             if (ConsistencyUtil.diffSet(snippetset, filestoreset, "database list of snippet files", "filestore list")) {
                 // implement the solver for deleted dbfiles here
@@ -1005,13 +1005,13 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @param policy The policy to use
      * @throws OXException
      */
-    private void repair(final List<Entity> entities, final String policy) throws OXException {
-        final DatabaseImpl database = getDatabase();
-        final AttachmentBase attachments = getAttachments();
-        for (final Entity entity : entities) {
+    private void repair(List<Entity> entities, String policy) throws OXException {
+        DatabaseImpl database = getDatabase();
+        AttachmentBase attachments = getAttachments();
+        for (Entity entity : entities) {
             FileStorage storage = getFileStorage(entity);
 
-            final ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storage, this, entity.getContext());
+            ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storage, this, entity.getContext());
             checkOneEntity(entity, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferencesSolver(), resolvers.filesolver, resolvers.vCardSolver, database, attachments, storage);
 
             /*
@@ -1055,7 +1055,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @param storage The {@link FileStorage}
      * @param filesToIgnore The files to ignore
      */
-    private void recalculateUsage(final FileStorage storage, final Set<String> filesToIgnore) {
+    private void recalculateUsage(FileStorage storage, Set<String> filesToIgnore) {
         try {
             if (storage instanceof QuotaFileStorage) {
                 ConsistencyUtil.output("Recalculating usage...");
@@ -1077,7 +1077,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         Map<Entity, List<String>> retval = new HashMap<Entity, List<String>>();
         DoNothingSolver doNothing = new DoNothingSolver();
         for (Entity entity : entities) {
-            final RecordSolver recorder = new RecordSolver();
+            RecordSolver recorder = new RecordSolver();
             checkOneEntity(entity, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(entity));
             retval.put(entity, recorder.getProblems());
         }
@@ -1092,10 +1092,10 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @throws OXException if an error is occurred
      */
     private Map<Entity, List<String>> listUnassigned(List<Entity> entities) throws OXException {
-        final Map<Entity, List<String>> retval = new HashMap<Entity, List<String>>();
-        final DoNothingSolver doNothing = new DoNothingSolver();
-        for (final Entity entity : entities) {
-            final RecordSolver recorder = new RecordSolver();
+        Map<Entity, List<String>> retval = new HashMap<Entity, List<String>>();
+        DoNothingSolver doNothing = new DoNothingSolver();
+        for (Entity entity : entities) {
+            RecordSolver recorder = new RecordSolver();
             checkOneEntity(entity, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(entity));
             retval.put(entity, recorder.getProblems());
         }
@@ -1108,19 +1108,15 @@ public class ConsistencyServiceImpl implements ConsistencyService {
     /**
      * {@link ResolverPolicy}
      */
-    private static final class ResolverPolicy {
+    private static class ResolverPolicy {
 
         final ProblemSolver dbsolver;
-
         final ProblemSolver attachmentsolver;
-
         final ProblemSolver snippetsolver;
-
         final ProblemSolver filesolver;
-
         final ProblemSolver vCardSolver;
 
-        public ResolverPolicy(final ProblemSolver dbsolver, final ProblemSolver attachmentsolver, final ProblemSolver snippetsolver, final ProblemSolver filesolver, final ProblemSolver vCardSolver) {
+        public ResolverPolicy(ProblemSolver dbsolver, ProblemSolver attachmentsolver, ProblemSolver snippetsolver, ProblemSolver filesolver, ProblemSolver vCardSolver) {
             this.dbsolver = dbsolver;
             this.attachmentsolver = attachmentsolver;
             this.snippetsolver = snippetsolver;
@@ -1128,21 +1124,21 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             this.vCardSolver = vCardSolver;
         }
 
-        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final FileStorage storage, final ConsistencyServiceImpl consistency, final Context context) throws OXException {
-            final String[] options = list.split("\\s*,\\s*");
+        public static ResolverPolicy parse(String list, DatabaseImpl database, AttachmentBase attach, FileStorage storage, ConsistencyServiceImpl consistency, Context context) throws OXException {
+            String[] options = list.split("\\s*,\\s*");
             ProblemSolver dbsolver = new DoNothingSolver();
             ProblemSolver attachmentsolver = new DoNothingSolver();
             ProblemSolver snippetsolver = new DoNothingSolver();
             ProblemSolver filesolver = new DoNothingSolver();
             ProblemSolver vCardSolver = new DoNothingSolver();
 
-            for (final String option : options) {
-                final String[] tuple = option.split("\\s*:\\s*");
+            for (String option : options) {
+                String[] tuple = option.split("\\s*:\\s*");
                 if (tuple.length != 2) {
                     throw ConsistencyExceptionCodes.MALFORMED_POLICY.create();
                 }
-                final String condition = tuple[0];
-                final String action = tuple[1];
+                String condition = tuple[0];
+                String action = tuple[1];
                 if ("missing_file_for_infoitem".equals(condition)) {
                     if ("create_dummy".equals(action)) {
                         dbsolver = new CreateDummyFileForInfoitemSolver(database, storage, consistency.getAdmin(context));
