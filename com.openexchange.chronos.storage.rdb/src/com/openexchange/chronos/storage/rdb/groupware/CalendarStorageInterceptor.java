@@ -105,7 +105,7 @@ public class CalendarStorageInterceptor extends AbstractUserServiceInterceptor {
     @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         if (false == requiresAddressCheck(context, user)) {
-            LOG.debug("Skipping address checks in context {} for user {}.", I(context.getContextId()), I(user.getId()));
+            LOG.debug("Skipping address checks in context {} for user {}.", I(context.getContextId()), I(null == user ? -1 : user.getId()));
             return;
         }
         /*
