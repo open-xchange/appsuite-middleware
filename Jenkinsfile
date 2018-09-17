@@ -32,6 +32,14 @@ spec:
     securityContext:
       runAsUser: 1000
       allowPrivilegeEscalation: false
+  - name: ant
+    image: frekele/ant:1.9.11-jdk8
+    command:
+    - cat
+    tty: true
+    securityContext:
+      runAsUser: 1000
+      allowPrivilegeEscalation: false
   imagePullSecrets:
   - name: gitlab
 """
@@ -43,13 +51,12 @@ spec:
         timestamps()
     }
     triggers {
-        cron('develop' == env.BRANCH_NAME ? 'H H(20-23) * * 1-5' : '')
+        cron('develop' == env.BRANCH_NAME ? 'H H(20-23) * * 1-5' : '@midnight')
     }
     stages {
         stage('POT') {
             when {
-                // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.BRANCH_INDEXING) }
+                triggeredBy 'SCMTrigger'
             }
             tools {
                 ant 'ant'
@@ -214,12 +221,75 @@ spec:
                 }
             }
         }
+        stage('Logback extensions') {
+            steps {
+                dir('backend/com.openexchange.bundles') {
+                    container('ant') {
+                        sh 'ant -f java-commons.xml'
+                    }
+                }
+            }
+        }
+        stage('Prepare') {
+            steps {
+                dir('backend') {
+                    container('gradle') {
+                        sh 'gradle buildEnvironment'
+                    }
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                dir('backend') {
+                    container('gradle') {
+                        sh 'gradle testClasses'
+                    }
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                dir('backend') {
+                    container('gradle') {
+                        sh 'gradle build'
+                    }
+                }
+            }
+        }
+        stage('Install') {
+            steps {
+                container('gradle') {
+                    script {
+                        workspace = pwd()
+                        dir('backend') {
+                            sh 'gradle install -PinstallDir=' + workspace + '/tmp/testox'
+                        }
+                    }
+                }
+            }
+        }
+        stage('Packages') {
+            steps {
+                dir('backend') {
+                    container('gradle') {
+                        sh 'gradle open-xchange-system:upload open-xchange-osgi:upload open-xchange-xerces:upload open-xchange-hazelcast-community:upload open-xchange-core:upload open-xchange:upload open-xchange-admin:upload open-xchange-appsuite-backend:upload open-xchange-authentication-database:upload open-xchange-authorization-standard:upload open-xchange-drive:upload open-xchange-grizzly:upload open-xchange-halo:upload open-xchange-imap:upload open-xchange-l10n:upload open-xchange-oauth:upload open-xchange-smtp:upload'
+                    }
+                }
+            }
+        }
+        stage('Archive') {
+            steps {
+                junit 'backend/*/build/test-results/*/TEST-*.xml'
+            }
+        }
     }
     post {
         failure {
             emailext attachLog: true,
                 body: "${env.BUILD_URL} failed.\n\nFull log at: ${env.BUILD_URL}console\n\n",
                 subject: "${env.JOB_NAME} (#${env.BUILD_NUMBER}) - ${currentBuild.result}",
+                recipientProviders: [[$class: 'RequesterRecipientProvider'], [$class: 'UpstreamComitterRecipientProvider'], [$class: 'DevelopersRecipientProvider']],
                 to: 'backend@open-xchange.com'
         }
     }
