@@ -593,6 +593,9 @@ public class CalendarUtils {
      * @return The maximum timestamp as {@link Date}, or <code>null</code> if the supplied collection was <code>null</code> or empty
      */
     public static Date getMaximumTimestamp(Collection<Event> events) {
+        if (null == events || events.isEmpty()) {
+            return null;
+        }
         long maximumTimestamp = Integer.MIN_VALUE;
         for (Event event : events) {
             if (null != event) {

@@ -47,29 +47,34 @@
  *
  */
 
-package com.openexchange.health.rest.osgi;
+package com.openexchange.health;
 
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.health.NodeHealthCheckService;
-import com.openexchange.health.rest.NodeHealthCheckRestEndpoint;
-import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link NodeHealthCheckRestActivator}
+ * {@link MWHealthCheck} - The health check interface
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class NodeHealthCheckRestActivator extends HousekeepingActivator {
+public interface MWHealthCheck {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { NodeHealthCheckService.class, LeanConfigurationService.class };
-    }
+    /**
+     * Gets the name of the health check
+     * @return The name
+     */
+    String getName();
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(NodeHealthCheckRestEndpoint.class, new NodeHealthCheckRestEndpoint(this));
+    /**
+     * Gets the timeout for health check execution in milliseconds
+     * @return The timeout
+     */
+    default long getTimeout() {
+        return 30000L;
     }
+    /**
+     * Executes the health check
+     * @return The health check response
+     */
+    MWHealthCheckResponse call();
 
 }

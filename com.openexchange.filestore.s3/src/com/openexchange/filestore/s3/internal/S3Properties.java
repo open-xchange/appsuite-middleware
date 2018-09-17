@@ -47,51 +47,65 @@
  *
  */
 
-package com.openexchange.health.impl;
+package com.openexchange.filestore.s3.internal;
 
-import java.util.Map;
-import com.openexchange.health.NodeHealthCheckResponse;
-import com.openexchange.health.NodeHealthState;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link NodeHealthCheckResponseImpl}
+ * {@link S3Properties}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public class NodeHealthCheckResponseImpl implements NodeHealthCheckResponse {
+public enum S3Properties implements Property {
+    ENDPOINT("endpoint", "s3.amazonaws.com"),
+    BUCKET_NAME("bucketName", null),
+    REGION("region", "us-west-2"),
+    PATH_STYLE_ACCESS("pathStyleAccess", true),
+    ACCESS_KEY("accessKey", null),
+    SECRET_KEY("secretKey", null),
+    ENCRYPTION("encryption", EncryptionType.NONE),
+    SIGNER_OVERRIDE("signerOverride", "S3SignerType"),
+    CHUNK_SIZE("chunkSize", "5 MB"),
+    RSA_KEYSTORE("encryption.rsa.keyStore", null),
+    RSA_PASSWORD("encryption.rsa.password", null),
 
-    private final String name;
-    private final Map<String, Object> data;
-    private final NodeHealthState state;
+    METRIC_COLLECTION("com.openexchange.filestore.s3.", "metricCollection", false)
+    ;
 
-    public NodeHealthCheckResponseImpl(String name, Map<String, Object> data, NodeHealthState state) {
-        super();
-        this.name = name;
-        this.data = data;
-        this.state = state;
+    public static final String OPTIONAL_NAME = "filestoreID";
+    private static final String PREFIX = "com.openexchange.filestore.s3.[" + OPTIONAL_NAME + "].";
+
+    private Object defaultValue;
+    private String propName;
+    private String prefix;
+
+    /**
+     * Initializes a new {@link S3Properties}.
+     */
+    private S3Properties(String prefix, String propName, Object defaultValue) {
+        this.propName = propName;
+        this.defaultValue = defaultValue;
+        this.prefix = prefix;
     }
 
-    public NodeHealthCheckResponseImpl(String name, Map<String, Object> data, boolean state) {
-        super();
-        this.name = name;
-        this.data = data;
-        this.state = state ? NodeHealthState.UP : NodeHealthState.DOWN;
+    /**
+     * Initializes a new {@link S3Properties}.
+     */
+    private S3Properties(String propName, Object defaultValue) {
+        this.propName = propName;
+        this.defaultValue = defaultValue;
+        this.prefix = PREFIX;
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getFQPropertyName() {
+        return prefix + propName;
     }
 
     @Override
-    public Map<String, Object> getData() {
-        return data;
-    }
-
-    @Override
-    public NodeHealthState getState() {
-        return state;
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
 }

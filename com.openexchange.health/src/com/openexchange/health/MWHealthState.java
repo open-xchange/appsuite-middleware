@@ -1,4 +1,3 @@
-package com.openexchange.health;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -48,28 +47,30 @@ package com.openexchange.health;
  *
  */
 
+package com.openexchange.health;
+
 /**
- * {@link NodeHealthState}- The node health state enum
+ * {@link MWHealthState}- The health state enum
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public enum NodeHealthState {
+public enum MWHealthState {
 
     /**
-     * Node health state determining the node is running fine
+     * Health state determining the middleware is running fine
      */
     UP("UP"),
 
     /**
-     * Node health state determining the node is in trouble
+     * Health state determining the middleware is in trouble
      */
     DOWN("DOWN")
     ;
 
     private final String state;
 
-    private NodeHealthState(String state) {
+    private MWHealthState(String state) {
         this.state = state;
     }
 

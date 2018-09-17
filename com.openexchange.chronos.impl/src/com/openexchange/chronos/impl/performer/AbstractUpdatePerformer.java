@@ -80,6 +80,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -471,12 +472,18 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             return false;
         }
         requireWritePermissions(event, Collections.singletonList(session.getEntityResolver().prepareUserAttendee(userId)));
+        List<Integer> toDelete = new ArrayList<>(updatedAlarms.size());
+        List<Integer> toAdd = new ArrayList<>(updatedAlarms.size());
         /*
          * delete removed alarms
          */
         List<Alarm> removedItems = alarmUpdates.getRemovedItems();
         if (0 < removedItems.size()) {
-            storage.getAlarmStorage().deleteAlarms(event.getId(), userId, getAlarmIDs(removedItems));
+            int[] alarmIDs = getAlarmIDs(removedItems);
+            storage.getAlarmStorage().deleteAlarms(event.getId(), userId, alarmIDs);
+            for(int i: alarmIDs) {
+                toDelete.add(i);
+            }
         }
         /*
          * save updated alarms
@@ -490,6 +497,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 alarm.setId(itemUpdate.getOriginal().getId());
                 alarm.setUid(itemUpdate.getOriginal().getUid());
                 alarms.add(Check.alarmIsValid(alarm, itemUpdate.getUpdatedFields().toArray(new AlarmField[itemUpdate.getUpdatedFields().size()])));
+                toDelete.add(alarm.getId());
+                toAdd.add(alarm.getId());
             }
             final String folderView = getFolderView(event, userId);
             if (false == folderView.equals(event.getFolderId())) {
@@ -513,9 +522,19 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * insert new alarms
          */
-        insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
+        List<Alarm> addedItems = alarmUpdates.getAddedItems();
+        for(Alarm alarm: addedItems) {
+            toAdd.add(alarm.getId());
+        }
+        insertAlarms(event, userId, addedItems, false);
         Map<Integer, List<Alarm>> loadAlarms = storage.getAlarmStorage().loadAlarms(event);
-        storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
+        storage.getAlarmTriggerStorage().deleteTriggersById(toDelete);
+        Iterator<Alarm> iterator = loadAlarms.get(userId).iterator();
+        while(iterator.hasNext()) {
+            if(!toAdd.contains(iterator.next().getId())) {
+                iterator.remove();
+            }
+        }
         storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
 
         return true;

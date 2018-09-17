@@ -49,25 +49,41 @@
 
 package com.openexchange.health;
 
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link NodeHealthCheck} - The node health check interface
+ * {@link MWHealthCheckProperty}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public interface NodeHealthCheck {
+public enum MWHealthCheckProperty implements Property {
 
-    /**
-     * Gets the name of the node health check
-     * @return The name
-     */
-    String getName();
+    username(MWHealthCheckProperty.PREFIX, MWHealthCheckProperty.EMPTY),
+    password(MWHealthCheckProperty.PREFIX, MWHealthCheckProperty.EMPTY),
+    skip(MWHealthCheckProperty.PREFIX, MWHealthCheckProperty.EMPTY),
+    ignore(MWHealthCheckProperty.PREFIX, MWHealthCheckProperty.EMPTY)
+    ;
 
-    /**
-     * Executes the node health check
-     * @return The node health check response
-     */
-    NodeHealthCheckResponse call();
+    private static final String PREFIX = "com.openexchange.health.";
+    private static final String EMPTY = "";
+
+    private final String name;
+    private final String defaultValue;
+
+    private MWHealthCheckProperty(String name, String value) {
+        this.name = name;
+        this.defaultValue = value;
+    }
+
+    @Override
+    public String getFQPropertyName() {
+        return name + name();
+    }
+
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
 
 }

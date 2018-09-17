@@ -47,69 +47,34 @@
  *
  */
 
-package com.openexchange.health.impl.osgi;
+package com.openexchange.health;
 
-import org.eclipse.microprofile.health.HealthCheck;
-import org.eclipse.microprofile.health.HealthCheckResponse;
-import org.eclipse.microprofile.health.HealthCheckResponse.State;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.health.MWHealthCheck;
-import com.openexchange.health.MWHealthCheckResponse;
-import com.openexchange.health.impl.MWHealthCheckResponseImpl;
-import com.openexchange.health.impl.MWHealthCheckServiceImpl;
+import java.util.Map;
 
 /**
- * {@link HealthCheckTracker}
+ * {@link MWHealthCheckResponse}- The health check response interface
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class HealthCheckTracker implements ServiceTrackerCustomizer<HealthCheck, HealthCheck> {
+public interface MWHealthCheckResponse {
 
-    private final BundleContext context;
-    private final MWHealthCheckServiceImpl healthCheckService;
+    /**
+     * Gets the name of the executed health check
+     * @return The name
+     */
+    String getName();
 
-    public HealthCheckTracker(BundleContext context, MWHealthCheckServiceImpl healthCheckService) {
-        super();
-        this.context = context;
-        this.healthCheckService = healthCheckService;
-    }
+    /**
+     * Gets additional data from health check execution
+     * @return The map containing additional data
+     */
+    Map<String, Object> getData();
 
-    @Override
-    public HealthCheck addingService(ServiceReference<HealthCheck> reference) {
-        HealthCheck check = context.getService(reference);
-        MWHealthCheck wrappingCheck = new MWHealthCheck() {
-
-            @Override
-            public String getName() {
-                return check.getClass().getName();
-            }
-
-            @Override
-            public MWHealthCheckResponse call() {
-                HealthCheckResponse response = check.call();
-                return new MWHealthCheckResponseImpl(getName(), response.getData().isPresent() ? response.getData().get() : null, State.UP.equals(response.getState()));
-            }
-        };
-        if (healthCheckService.addCheck(wrappingCheck)) {
-            return check;
-        }
-
-        context.ungetService(reference);
-        return null;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<HealthCheck> reference, HealthCheck service) {
-        // nothing to do
-    }
-
-    @Override
-    public void removedService(ServiceReference<HealthCheck> reference, HealthCheck service) {
-        healthCheckService.removeCheck(service.getClass().getName());
-        context.ungetService(reference);
-    }
+    /**
+     * Gets the health state determined by health check execution.
+     * @return MWHealthState.UP in case of successful health check execution, MWHealthState.DOWN otherwise
+     */
+    MWHealthState getState();
 
 }

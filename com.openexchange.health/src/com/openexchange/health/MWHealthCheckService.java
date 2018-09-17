@@ -47,47 +47,43 @@
  *
  */
 
-package com.openexchange.health.impl.osgi;
+package com.openexchange.health;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.health.NodeHealthCheck;
-import com.openexchange.health.NodeHealthCheckService;
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
+
 
 /**
- * {@link NodeHealthCheckTracker}
+ * {@link MWHealthCheckService}- The health check service
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class NodeHealthCheckTracker implements ServiceTrackerCustomizer<NodeHealthCheck, NodeHealthCheck> {
+@SingletonService
+public interface MWHealthCheckService {
 
-    private final BundleContext context;
-    private final NodeHealthCheckService nodeHealthCheckService;
+    /**
+     * Gets a collection containing all registered health checks.
+     *
+     * @return The collection of health checks
+     */
+    Collection<MWHealthCheck> getAllChecks();
 
-    public NodeHealthCheckTracker(BundleContext context, NodeHealthCheckService nodeHealthCheckService) {
-        super();
-        this.context = context;
-        this.nodeHealthCheckService = nodeHealthCheckService;
-    }
+    /**
+     * Gets a single health check by its name
+     *
+     * @param name The name
+     * @return The denoted check or <code>null</code>
+     */
+    MWHealthCheck getCheck(String name);
 
-    @Override
-    public NodeHealthCheck addingService(ServiceReference<NodeHealthCheck> reference) {
-        NodeHealthCheck check = context.getService(reference);
-        nodeHealthCheckService.addCheck(check);
-        return check;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<NodeHealthCheck> reference, NodeHealthCheck service) {
-        // nothing to do
-    }
-
-    @Override
-    public void removedService(ServiceReference<NodeHealthCheck> reference, NodeHealthCheck service) {
-        nodeHealthCheckService.removeCheck(service);
-        context.ungetService(reference);
-    }
+    /**
+     * Executes all registered and not blacklisted health checks.
+     *
+     * @return The health check result
+     * @throws OXException On error
+     */
+    MWHealthCheckResult check() throws OXException;
 
 }

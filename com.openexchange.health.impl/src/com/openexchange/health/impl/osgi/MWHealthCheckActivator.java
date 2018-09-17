@@ -47,68 +47,55 @@
  *
  */
 
-package com.openexchange.health;
+package com.openexchange.health.impl.osgi;
 
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-
+import org.eclipse.microprofile.health.HealthCheck;
+import org.eclipse.microprofile.health.HealthCheckResponse;
+import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.health.MWHealthCheck;
+import com.openexchange.health.MWHealthCheckService;
+import com.openexchange.health.impl.HealthCheckResponseProviderImpl;
+import com.openexchange.health.impl.MWHealthCheckServiceImpl;
+import com.openexchange.health.impl.checks.AllPluginsLoadedCheck;
+import com.openexchange.health.impl.checks.ConfigDBCheck;
+import com.openexchange.health.impl.checks.HazelcastCheck;
+import com.openexchange.health.impl.checks.JVMHeapCheck;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pluginsloaded.PluginsLoadedService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
- * {@link NodeHealthCheckService}- The node health check service
+ * {@link MWHealthCheckActivator}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public interface NodeHealthCheckService {
+public class MWHealthCheckActivator extends HousekeepingActivator {
 
-    /**
-     * Gets a map containing all registered node health checks mapped by name
-     * @return The map
-     */
-    Map<String, NodeHealthCheck> getAllChecks();
-
-    /**
-     * Gets a single node health check
-     * @param name The name
-     * @return The check
-     */
-    NodeHealthCheck getCheck(String name);
-
-    /**
-     * Adds a single node health check to service
-     * @param check The check
-     * @return The check
-     */
-    NodeHealthCheck addCheck(NodeHealthCheck check);
-
-    /**
-     * Removes a single node health check from service, identified by name
-     * @param name The name
-     * @return The removed node health check
-     */
-    NodeHealthCheck removeCheck(String name);
-
-    /**
-     * Removes a single node health check from service
-     * @param name The check
-     * @return The removed node health check
-     */
-    default NodeHealthCheck removeCheck(NodeHealthCheck check) {
-        return removeCheck(check.getName());
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ThreadPoolService.class, PluginsLoadedService.class, LeanConfigurationService.class,
+            DatabaseService.class };
     }
 
-    /**
-     * Gets a list of node health check names to be ignored when calculating overall health status
-     * @return The list
-     */
-    public List<String> getIgnoreList();
+    @Override
+    protected void startBundle() throws Exception {
+        MWHealthCheckServiceImpl service = new MWHealthCheckServiceImpl(this);
+        registerService(MWHealthCheckService.class, service);
 
-    /**
-     * Executes all registered and not blacklisted node health checks
-     * @return The node health check responses mapped by node health check's name
-     * @throws OXException On error
-     */
-    Map<String, NodeHealthCheckResponse> check() throws OXException;
+        registerService(MWHealthCheck.class, new AllPluginsLoadedCheck(this));
+        registerService(MWHealthCheck.class, new ConfigDBCheck(this));
+        registerService(MWHealthCheck.class, new HazelcastCheck(this));
+        registerService(MWHealthCheck.class, new JVMHeapCheck());
+
+        HealthCheckResponse.setResponseProvider(new HealthCheckResponseProviderImpl());
+
+        track(MWHealthCheck.class, new MWHealthCheckTracker(context, service));
+        track(HealthCheck.class, new HealthCheckTracker(context, service));
+        track(HazelcastInstance.class);
+        openTrackers();
+    }
 
 }

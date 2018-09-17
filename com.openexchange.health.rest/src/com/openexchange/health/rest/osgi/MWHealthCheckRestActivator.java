@@ -1,4 +1,3 @@
-package com.openexchange.health;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -48,32 +47,29 @@ package com.openexchange.health;
  *
  */
 
-import java.util.Map;
+package com.openexchange.health.rest.osgi;
+
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.health.MWHealthCheckService;
+import com.openexchange.health.rest.MWHealthCheckRestEndpoint;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link NodeHealthCheckResponse}- The node health check response interface
+ * {@link MWHealthCheckRestActivator}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public interface NodeHealthCheckResponse {
+public class MWHealthCheckRestActivator extends HousekeepingActivator {
 
-    /**
-     * Gets the name of the executed node health check
-     * @return The name
-     */
-    String getName();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { MWHealthCheckService.class, LeanConfigurationService.class };
+    }
 
-    /**
-     * Gets additional data from node health check execution
-     * @return The map containing additional data
-     */
-    Map<String, Object> getData();
-
-    /**
-     * Gets the node health state determined by node health check execution.
-     * @return NodeHealthState.UP in case of successful node health check execution, NodeHealthState.DOWN otherwise
-     */
-    NodeHealthState getState();
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(MWHealthCheckRestEndpoint.class, new MWHealthCheckRestEndpoint(this));
+    }
 
 }

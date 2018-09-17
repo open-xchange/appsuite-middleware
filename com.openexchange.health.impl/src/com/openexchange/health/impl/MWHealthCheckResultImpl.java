@@ -47,73 +47,53 @@
  *
  */
 
-package com.openexchange.filestore.s3.osgi;
+package com.openexchange.health.impl;
 
-import org.osgi.framework.ServiceReference;
-import com.amazonaws.metrics.AwsSdkMetrics;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.filestore.FileStorageProvider;
-import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
-import com.openexchange.filestore.s3.internal.S3Properties;
-import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.health.MWHealthCheckResult;
+import com.openexchange.health.MWHealthCheckResponse;
+import com.openexchange.health.MWHealthState;
+
 
 /**
- * {@link S3Activator}
+ * {@link MWHealthCheckResultImpl}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.10.1
  */
-public class S3Activator extends HousekeepingActivator {
+public class MWHealthCheckResultImpl implements MWHealthCheckResult {
 
-    /**
-     * Initializes a new {@link S3Activator}.
-     */
-    public S3Activator() {
+    private final MWHealthState overallState;
+    private final List<MWHealthCheckResponse> responses;
+    private final List<String> ignoredChecks;
+    private final List<String> skippedChecks;
+
+    public MWHealthCheckResultImpl(MWHealthState overallState, List<MWHealthCheckResponse> responses, List<String> ignoredChecks, List<String> skippedChecks) {
         super();
+        this.overallState = overallState;
+        this.responses = responses;
+        this.ignoredChecks = ignoredChecks;
+        this.skippedChecks = skippedChecks;
+    }
+    @Override
+    public MWHealthState getStatus() {
+        return overallState;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class };
+    public List<MWHealthCheckResponse> getChecks() {
+        return Collections.unmodifiableList(responses);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
-        logger.info("Starting bundle: com.openexchange.filestore.s3");
-
-        final LeanConfigurationService config = getService(LeanConfigurationService.class);
-        track(MetricService.class, new SimpleRegistryListener<MetricService>() {
-            @Override
-            public void added(ServiceReference<MetricService> ref, MetricService service) {
-                // Check for metric collection
-                boolean metricCollection = config.getBooleanProperty(S3Properties.METRIC_COLLECTION);
-                if (metricCollection) {
-                    // Enable metric collection by overriding the default metrics
-                    AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(service, config));
-                }
-            }
-
-            @Override
-            public void removed(ServiceReference<MetricService> ref, MetricService service) {
-                AwsSdkMetrics.setMetricCollector(null);
-            }
-        });
-        openTrackers();
-
-        S3FileStorageFactory factory = new S3FileStorageFactory(this);
-        registerService(FileStorageProvider.class, factory);
+    public List<String> getSkippedChecks() {
+        return Collections.unmodifiableList(skippedChecks);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
-        logger.info("Stopping bundle: com.openexchange.filestore.s3");
-
-        AwsSdkMetrics.setMetricCollector(null);
-
-        super.stopBundle();
+    public List<String> getIgnoredResponses() {
+        return Collections.unmodifiableList(ignoredChecks);
     }
+
 }

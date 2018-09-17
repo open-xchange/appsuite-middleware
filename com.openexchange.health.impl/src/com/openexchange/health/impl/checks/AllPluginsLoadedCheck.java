@@ -50,9 +50,9 @@
 package com.openexchange.health.impl.checks;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.health.NodeHealthCheck;
-import com.openexchange.health.NodeHealthCheckResponse;
-import com.openexchange.health.impl.NodeHealthCheckResponseImpl;
+import com.openexchange.health.MWHealthCheck;
+import com.openexchange.health.MWHealthCheckResponse;
+import com.openexchange.health.impl.MWHealthCheckResponseImpl;
 import com.openexchange.pluginsloaded.PluginsLoadedService;
 import com.openexchange.server.ServiceLookup;
 
@@ -63,9 +63,10 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.1
  */
-public class AllPluginsLoadedCheck implements NodeHealthCheck {
+public class AllPluginsLoadedCheck implements MWHealthCheck {
 
     private final static String NAME = "allPluginsLoaded";
+    private final static long TIMEOUT = 10000L;
 
     private final ServiceLookup services;
 
@@ -80,12 +81,17 @@ public class AllPluginsLoadedCheck implements NodeHealthCheck {
     }
 
     @Override
-    public NodeHealthCheckResponse call() {
+    public long getTimeout() {
+        return TIMEOUT;
+    }
+
+    @Override
+    public MWHealthCheckResponse call() {
         PluginsLoadedService service = services.getService(PluginsLoadedService.class);
         try {
-            return new NodeHealthCheckResponseImpl(NAME, null, service.allPluginsloaded());
+            return new MWHealthCheckResponseImpl(NAME, null, service.allPluginsloaded());
         } catch (OXException e) {
-            return new NodeHealthCheckResponseImpl(NAME, null, false);
+            return new MWHealthCheckResponseImpl(NAME, null, false);
         }
     }
 
