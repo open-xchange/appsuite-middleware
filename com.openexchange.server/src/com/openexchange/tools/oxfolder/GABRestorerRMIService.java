@@ -49,39 +49,26 @@
 
 package com.openexchange.tools.oxfolder;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import javax.management.MBeanException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
-import com.openexchange.exception.OXException;
-
 
 /**
- * {@link GABRestorerMBeanImpl}
+ * {@link GABRestorerRMIService} - The RMI service for restoring default permissions on global address book folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class GABRestorerMBeanImpl extends StandardMBean implements GABRestorerMBean {
+public interface GABRestorerRMIService extends Remote {
+
+    public static final String RMI_NAME = GABRestorerRMIService.class.getSimpleName();
 
     /**
-     * Initializes a new {@link GABRestorerMBeanImpl}.
+     * Restores default permissions on global address book folder.
      *
-     * @throws NotCompliantMBeanException
+     * @param cid The context ID
+     * @param enable Whether to enable or disable global address book access for each user
+     * @throws MBeanException If invocation fails
      */
-    public GABRestorerMBeanImpl() throws NotCompliantMBeanException {
-        super(GABRestorerMBean.class);
-    }
-
-    @Override
-    public void restoreDefaultPermissions(final int cid) throws MBeanException {
-        try {
-            new OXFolderAdminHelper().restoreDefaultGlobalAddressBookPermissions(cid, OXFolderProperties.isEnableInternalUsersEdit());
-        } catch (final OXException e) {
-            final String message = e.getMessage();
-            org.slf4j.LoggerFactory.getLogger(GABRestorerMBeanImpl.class).error(message, e);
-            final Exception wrapMe = new Exception(message);
-            wrapMe.setStackTrace(e.getStackTrace());
-            throw new MBeanException(wrapMe, message);
-        }
-    }
-
+    void restoreDefaultPermissions(int cid) throws RemoteException;
 }

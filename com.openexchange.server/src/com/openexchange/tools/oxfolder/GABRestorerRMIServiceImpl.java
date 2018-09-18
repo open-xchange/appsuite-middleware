@@ -49,24 +49,34 @@
 
 package com.openexchange.tools.oxfolder;
 
-import javax.management.MBeanException;
+import java.rmi.RemoteException;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link GABRestorerMBean} - The MBean restore default permissions on global address book folder.
+ * {@link GABRestorerRMIServiceImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface GABRestorerMBean {
-
-    public static final String GAB_DOMAIN = "com.openexchange.globaladdressbook";
+public final class GABRestorerRMIServiceImpl implements GABRestorerRMIService {
 
     /**
-     * Restores default permissions on global address book folder.
-     *
-     * @param cid The context ID
-     * @param enable Whether to enable or disable global address book access for each user
-     * @throws MBeanException If invocation fails
+     * Initializes a new {@link GABRestorerRMIServiceImpl}.
      */
-    public void restoreDefaultPermissions(int cid) throws MBeanException;
+    public GABRestorerRMIServiceImpl() {
+        super();
+    }
 
+    @Override
+    public void restoreDefaultPermissions(final int cid) throws RemoteException {
+        try {
+            new OXFolderAdminHelper().restoreDefaultGlobalAddressBookPermissions(cid, OXFolderProperties.isEnableInternalUsersEdit());
+        } catch (final OXException e) {
+            final String message = e.getMessage();
+            org.slf4j.LoggerFactory.getLogger(GABRestorerRMIServiceImpl.class).error(message, e);
+            final Exception wrapMe = new Exception(message);
+            wrapMe.setStackTrace(e.getStackTrace());
+            throw new RemoteException(message, wrapMe);
+        }
+    }
 }
