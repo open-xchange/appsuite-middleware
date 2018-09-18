@@ -67,8 +67,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.amazonaws.AmazonClientException;
@@ -140,7 +138,6 @@ public class S3FileStorageFactory implements FileStorageProvider {
      */
     private static final int RANKING = 5634;
 
-    private final ConcurrentMap<URI, S3FileStorage> storages;
     private final ServiceLookup services;
 
     /**
@@ -151,14 +148,11 @@ public class S3FileStorageFactory implements FileStorageProvider {
     public S3FileStorageFactory(ServiceLookup services) {
         super();
         this.services = services;
-        this.storages = new ConcurrentHashMap<URI, S3FileStorage>();
     }
 
     @Override
     public S3FileStorage getFileStorage(URI uri) throws OXException {
         try {
-            S3FileStorage storage = storages.get(uri);
-            if (null == storage) {
                 LOG.debug("Initializing S3 client for {}", uri);
                 /*
                  * extract filestore ID from authority part of URI
@@ -176,13 +170,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
                 AmazonS3Client client = clientInfo.client;
                 String bucketName = initBucket(client, filestoreID, configService, s3EncryptionConfig);
                 LOG.debug("Using \"{}\" as bucket name.", bucketName);
-                S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, s3EncryptionConfig.getServerSideEncryption() != null, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
-                storage = storages.putIfAbsent(uri, newStorage);
-                if (null == storage) {
-                    storage = newStorage;
-                }
-            }
-            return storage;
+                return new S3FileStorage(client, clientInfo.encrypted, s3EncryptionConfig.getServerSideEncryption() != null, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
         } catch (OXException ex) {
             Throwable cause = ex.getCause();
             if (cause instanceof AmazonS3Exception) {
@@ -582,7 +570,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.10.1
      */
-    private class S3EncryptionConfig {
+    private static class S3EncryptionConfig {
 
         private final EncryptionType clientEncryption;
         private final EncryptionType serverSideEncryption;
@@ -590,14 +578,14 @@ public class S3FileStorageFactory implements FileStorageProvider {
         /**
          * Initializes a new {@link S3FileStorageFactory.S3EncryptionConfig}.
          *
-         * @throws OXException in case the config is invalid
+         * @throws OXException In case the configuration is invalid
          */
-        public S3EncryptionConfig(String config) throws OXException {
-            if(Strings.isEmpty(config)) {
+        S3EncryptionConfig(String config) throws OXException {
+            if (Strings.isEmpty(config)) {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("An empty encryption type is invalid");
             }
             int index = config.indexOf("+");
-            if(index > 0) {
+            if (index > 0) {
                 List<String> splitAndTrim = Strings.splitAndTrim(config, "+");
                 if (splitAndTrim.size() != 2) {
                     throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("It's only allowed to combine one client side encryption type and one server side encryption type.");
@@ -640,18 +628,18 @@ public class S3FileStorageFactory implements FileStorageProvider {
         }
 
         /**
-         * Gets the clientEncryption
+         * Gets the client encryption
          *
-         * @return The clientEncryption
+         * @return The client encryption
          */
         public EncryptionType getClientEncryption() {
             return clientEncryption;
         }
 
         /**
-         * Gets the serverSideEncryption
+         * Gets the server-side encryption
          *
-         * @return The serverSideEncryption
+         * @return The server-side encryption
          */
         public EncryptionType getServerSideEncryption() {
             return serverSideEncryption;

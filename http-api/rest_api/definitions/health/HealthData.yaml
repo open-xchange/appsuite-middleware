@@ -2,7 +2,7 @@ type: object
 properties:
   status:
     type: string
-    description: The-health overall status
+    description: The health overall status
     enum:
       - UP
       - DOWN

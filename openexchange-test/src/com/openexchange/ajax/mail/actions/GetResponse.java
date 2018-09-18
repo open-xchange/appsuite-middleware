@@ -201,7 +201,7 @@ public class GetResponse extends AbstractAJAXResponse {
                         /*
                          * Any other value
                          */
-                        mail.setDispositionNotification(null);
+                        mail.removeDispositionNotification();
                     } else {
                         /*
                          * Valid email address
@@ -276,7 +276,7 @@ public class GetResponse extends AbstractAJAXResponse {
     }
 
     private static InternetAddress getEmailAddress(final String addrStr) {
-        if (addrStr == null || addrStr.length() == 0) {
+        if (com.openexchange.java.Strings.isEmpty(addrStr) || "false".equalsIgnoreCase(addrStr)) {
             return null;
         }
         try {

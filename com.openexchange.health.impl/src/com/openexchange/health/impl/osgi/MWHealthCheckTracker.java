@@ -75,8 +75,12 @@ public class MWHealthCheckTracker implements ServiceTrackerCustomizer<MWHealthCh
     @Override
     public MWHealthCheck addingService(ServiceReference<MWHealthCheck> reference) {
         MWHealthCheck check = context.getService(reference);
-        healthCheckService.addCheck(check);
-        return check;
+        if (healthCheckService.addCheck(check)) {
+            return check;
+        }
+
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
