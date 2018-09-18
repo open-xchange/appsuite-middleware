@@ -49,19 +49,16 @@
 
 package com.openexchange.database.migration.clt;
 
-import java.util.Set;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
-import javax.management.MBeanServerInvocationHandler;
-import javax.management.ObjectName;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.database.migration.mbean.DBMigrationMBean;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
+import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.database.migration.rmi.DBMigrationRMIService;
 import com.openexchange.java.Strings;
 
 /**
@@ -69,9 +66,10 @@ import com.openexchange.java.Strings;
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.6.1
  */
-public class DBMigrationCLT extends AbstractMBeanCLI<Void> {
+public class DBMigrationCLT extends AbstractRmiCLI<Void> {
 
     private static final String OPT_SCHEMA_NAME_SHORT = "n";
     private static final String OPT_SCHEMA_NAME_LONG = "name";
@@ -111,11 +109,13 @@ public class DBMigrationCLT extends AbstractMBeanCLI<Void> {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
      */
     @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         authenticator.doAuthentication(login, password);
     }
 
@@ -152,47 +152,37 @@ public class DBMigrationCLT extends AbstractMBeanCLI<Void> {
         options.addOptionGroup(ops);
     }
 
-    /**
-     * {@inheritDoc}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
      */
     @Override
-    protected Void invoke(Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         String schemaName = cmd.getOptionValue(OPT_SCHEMA_NAME_SHORT);
         if (Strings.isEmpty(schemaName)) {
             throw new MissingOptionException("Database schema name missing");
         }
-        /*
-         * search matching migration MBean
-         */
-        Set<ObjectName> objectNames = mbsc.queryNames(new ObjectName(DBMigrationMBean.DOMAIN + ":*,name=" + schemaName), null);
-        if (null == objectNames || 0 == objectNames.size()) {
+
+        DBMigrationRMIService rmiService;
+        try {
+            rmiService = getRmiStub(optRmiHostName, DBMigrationRMIService.RMI_NAME);
+        } catch (NotBoundException e) {
             System.err.println("No migration MBean found for schema name \"" + schemaName + "\"");
             System.exit(1);
             return null;
         }
-        if (1 < objectNames.size()) {
-            System.err.println("More than one matching migration MBeans found for schema name \"" + schemaName + "\":");
-            for (ObjectName objectName : objectNames) {
-                System.err.println(" - " + objectName);
-            }
-            System.exit(1);
-            return null;
-        }
-        /*
-         * instantiate proxy & invoke requested operation
-         */
-        ObjectName objectName = objectNames.iterator().next();
-        DBMigrationMBean migrationMBean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, DBMigrationMBean.class, false);
+
         if (cmd.hasOption(OPT_RUN_SHORT)) {
-            migrationMBean.forceMigration();
-            System.out.println("Done.\nCurrent status: " + migrationMBean.getMigrationStatus());
+            rmiService.forceMigration(schemaName);
+            System.out.println("Done.\nCurrent status: " + rmiService.getLockStatus(schemaName));
         } else if (cmd.hasOption(OPT_LIST_LOCKS_SHORT)) {
-            System.out.println(migrationMBean.getLockStatus());
+            System.out.println(rmiService.getLockStatus(schemaName));
         } else if (cmd.hasOption(OPT_UNLOCK_SHORT)) {
-            migrationMBean.releaseLocks();
-            System.out.println("Done.\n" + migrationMBean.getLockStatus());
+            rmiService.releaseLocks(schemaName);
+            System.out.println("Done.\n" + rmiService.getLockStatus(schemaName));
         } else {
-            System.out.println(migrationMBean.getMigrationStatus());
+            System.out.println(rmiService.getMigrationStatus(schemaName));
         }
 
         return null;

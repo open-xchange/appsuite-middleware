@@ -53,6 +53,8 @@ import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
@@ -75,7 +77,7 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
     private static final Logger LOG = LoggerFactory.getLogger(DBMigrationRMIServiceImpl.class);
 
     private final DBMigrationExecutorServiceImpl dbMigrationExecutorService;
-    private final DBMigration migration;
+    private final ConcurrentMap<String, DBMigration> registeredMigrations;
 
     /**
      * Initialises a new {@link DBMigrationRMIServiceImpl}.
@@ -83,12 +85,11 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
      * @param dbMigrationExecutorService A reference to the DB migration service
      * @param migration The DB migration
      */
-    public DBMigrationRMIServiceImpl(DBMigrationExecutorServiceImpl dbMigrationExecutorService, DBMigration migration) {
+    public DBMigrationRMIServiceImpl(DBMigrationExecutorServiceImpl dbMigrationExecutorService) {
         super();
         Validate.notNull(dbMigrationExecutorService, "DBMigrationExecuterService must not be null!");
-        Validate.notNull(migration, "DBMigration must not be null!");
         this.dbMigrationExecutorService = dbMigrationExecutorService;
-        this.migration = migration;
+        this.registeredMigrations = new ConcurrentHashMap<>(4);
     }
 
     /*
@@ -97,9 +98,9 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
      * @see com.openexchange.database.migration.rmi.DBMigrationRMIService#forceMigration()
      */
     @Override
-    public void forceMigration() throws RemoteException {
+    public void forceMigration(String schemaName) throws RemoteException {
         try {
-            dbMigrationExecutorService.scheduleDBMigration(migration).awaitCompletion();
+            dbMigrationExecutorService.scheduleDBMigration(getMigration(schemaName)).awaitCompletion();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RemoteException(e.getMessage(), e);
@@ -115,9 +116,9 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
      * @see com.openexchange.database.migration.rmi.DBMigrationRMIService#rollbackMigration(java.lang.String)
      */
     @Override
-    public void rollbackMigration(String changeSetTag) throws RemoteException {
+    public void rollbackMigration(String schemaName, String changeSetTag) throws RemoteException {
         try {
-            dbMigrationExecutorService.scheduleDBRollback(migration, changeSetTag).awaitCompletion();
+            dbMigrationExecutorService.scheduleDBRollback(getMigration(schemaName), changeSetTag).awaitCompletion();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RemoteException(e.getMessage(), e);
@@ -132,7 +133,8 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
      * @see com.openexchange.database.migration.rmi.DBMigrationRMIService#releaseLocks()
      */
     @Override
-    public void releaseLocks() throws RemoteException {
+    public void releaseLocks(String schemaName) throws RemoteException {
+        DBMigration migration = getMigration(schemaName);
         DBMigrationConnectionProvider connectionProvider = migration.getConnectionProvider();
         Connection connection = null;
         PreparedStatement stmt = null;
@@ -164,9 +166,9 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
      * @see com.openexchange.database.migration.rmi.DBMigrationRMIService#getMigrationStatus()
      */
     @Override
-    public String getMigrationStatus() throws RemoteException {
+    public String getMigrationStatus(String schemaName) throws RemoteException {
         try {
-            return dbMigrationExecutorService.getDBStatus(migration);
+            return dbMigrationExecutorService.getDBStatus(getMigration(schemaName));
         } catch (OXException e) {
             throw new RemoteException(e.getMessage(), e);
         }
@@ -178,11 +180,33 @@ public class DBMigrationRMIServiceImpl implements DBMigrationRMIService {
      * @see com.openexchange.database.migration.rmi.DBMigrationRMIService#getLockStatus()
      */
     @Override
-    public String getLockStatus() throws RemoteException {
+    public String getLockStatus(String schemaName) throws RemoteException {
         try {
-            return dbMigrationExecutorService.listDBLocks(migration);
+            return dbMigrationExecutorService.listDBLocks(getMigration(schemaName));
         } catch (OXException e) {
             throw new RemoteException(e.getMessage(), e);
         }
+    }
+
+    private DBMigration getMigration(String schemaName) {
+        DBMigration migration = registeredMigrations.get(schemaName);
+        Validate.notNull(migration, "Could not find any DBMigration registered for schema with name  '" + schemaName + "'");
+        return migration;
+    }
+
+    /**
+     * Registers and hooks up the specified migration with a new {@link DBMigrationRMIService}
+     * 
+     * @param migration The {@link DBMigration} to register
+     * @return <code>true</code> if the migration was successfully registered;
+     *         <code>false</code> if another migration already exists
+     */
+    public boolean register(DBMigration migration) {
+        Validate.notNull(migration, "DBMigration must not be null!");
+        if (null == registeredMigrations.putIfAbsent(migration.getSchemaName(), migration)) {
+            return true;
+        }
+        LOG.error("DBMigration {} already registered.", migration);
+        return false;
     }
 }

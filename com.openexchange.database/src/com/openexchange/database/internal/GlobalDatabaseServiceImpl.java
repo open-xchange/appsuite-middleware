@@ -114,7 +114,8 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
     }
 
     /**
-     * Returns the up to date configuration for global databases from the globaldb.yml file. To apply the returned configuration you have to call com.openexchange.database.internal.GlobalDatabaseServiceImpl.setGlobalDbConfigs(Map<String, GlobalDbConfig>)
+     * Returns the up to date configuration for global databases from the globaldb.yml file. To apply the returned configuration you have to call com.openexchange.database.internal.GlobalDatabaseServiceImpl.setGlobalDbConfigs(Map<String,
+     * GlobalDbConfig>)
      *
      * @param configurationService
      * @throws OXException
@@ -229,7 +230,7 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
              * register utility MBean and schedule migration
              */
             DBMigration migration = new DBMigration(connectionProvider, GLOBALDB_CHANGE_LOG, localResourceAccessor, assignment.getSchema());
-            migrationService.registerMBean(migration);
+            migrationService.register(migration);
             migrationStates.add(migrationService.scheduleDBMigration(migration, migrationCallback));
         }
         return migrationStates;

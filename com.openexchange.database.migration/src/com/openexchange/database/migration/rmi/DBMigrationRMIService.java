@@ -69,7 +69,7 @@ public interface DBMigrationRMIService extends Remote {
      *
      * @throws RemoteException
      */
-    void forceMigration() throws RemoteException;
+    void forceMigration(String schemaName) throws RemoteException;
 
     /**
      * Rollback to the given tag of a changeset of the core changelog
@@ -77,14 +77,14 @@ public interface DBMigrationRMIService extends Remote {
      * @param changeSetTag
      * @throws RemoteException
      */
-    void rollbackMigration(String changeSetTag) throws RemoteException;
+    void rollbackMigration(String schemaName, String changeSetTag) throws RemoteException;
 
     /**
      * Releases all configdb migration locks. Use this in case no lock can be acquired by liquibase.
      *
      * @throws RemoteException
      */
-    void releaseLocks() throws RemoteException;
+    void releaseLocks(String schemaName) throws RemoteException;
 
     /**
      * Gets a human-readable migration status string for the configdb.
@@ -92,7 +92,7 @@ public interface DBMigrationRMIService extends Remote {
      * @return The status
      * @throws RemoteException
      */
-    String getMigrationStatus() throws RemoteException;
+    String getMigrationStatus(String schemaName) throws RemoteException;
 
     /**
      * Gets a human-readable lock status string for the configdb.
@@ -100,5 +100,5 @@ public interface DBMigrationRMIService extends Remote {
      * @return The status
      * @throws RemoteException
      */
-    String getLockStatus() throws RemoteException;
+    String getLockStatus(String schemaName) throws RemoteException;
 }

@@ -68,7 +68,7 @@ import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationState;
-import com.openexchange.database.migration.mbean.MBeanRegisterer;
+import com.openexchange.database.migration.rmi.DBMigrationRMIServiceImpl;
 import com.openexchange.exception.OXException;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
@@ -86,7 +86,7 @@ import liquibase.exception.ValidationFailedException;
 public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorService {
 
     private final DBMigrationExecutor executor;
-    private MBeanRegisterer registerer;
+    private DBMigrationRMIServiceImpl rmiService;
     private final Map<Class<? extends Exception>, Function<Exception, OXException>> exceptionSpawners;
 
     /**
@@ -114,12 +114,12 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
     }
 
     /**
-     * Sets the MBean registerer instance to use.
+     * Sets the DBMigrationRMIRegisterer instance to use.
      *
-     * @param registerer The MBean registerer
+     * @param registerer The {@link DBMigrationRMIRegisterer}
      */
-    public void setRegisterer(MBeanRegisterer registerer) {
-        this.registerer = registerer;
+    public void setRegisterer(DBMigrationRMIServiceImpl rmiService) {
+        this.rmiService = rmiService;
     }
 
     @Override
@@ -133,8 +133,8 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
     }
 
     @Override
-    public boolean registerMBean(DBMigration migration) {
-        return null != registerer && registerer.register(migration);
+    public boolean register(DBMigration migration) {
+        return null != rmiService && rmiService.register(migration);
     }
 
     @Override
