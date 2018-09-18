@@ -144,35 +144,38 @@ public interface ConsistencyService {
      * Repairs all files in the specified context by using the specified resolver policy
      * 
      * @param contextId The context identifier
-     * @param resolverPolicy The name of the resolver policy
+     * @param repairPolicy The repair policy
+     * @param repairAction The repair action
      * @throws OXException if an error is occurred
      */
-    void repairFilesInContext(int contextId, String resolverPolicy) throws OXException;
+    void repairFilesInContext(int contextId, RepairPolicy repairPolicy, RepairAction repairAction) throws OXException;
 
     /**
      * Repairs all files in the specified filestore by using the specified resolver policy
      * 
      * @param filestoreId The filestore identifier
-     * @param resolverPolicy The name of the resolver policy
+     * @param repairPolicy The repair policy
+     * @param repairAction The repair action
      * @throws OXException if an error is occurred
      */
-    void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws OXException;
+    void repairFilesInFilestore(int filestoreId, RepairPolicy repairPolicy, RepairAction repairAction) throws OXException;
 
     /**
      * Repairs all files in the specified database by using the specified resolver policy
      * 
      * @param databaseId The database identifier
-     * @param resolverPolicy The name of the resolver policy
+     * @param repairPolicy The repair policy
+     * @param repairAction The repair action
      * @throws OXException if an error is occurred
      */
-    void repairFilesInDatabase(int databaseId, String resolverPolicy) throws OXException;
-    
+    void repairFilesInDatabase(int databaseId, RepairPolicy repairPolicy, RepairAction repairAction) throws OXException;
 
     /**
      * Repairs all files by using the specified resolver policy
      * 
-     * @param resolverPolicy The name of the resolver policy
+     * @param repairPolicy The repair policy
+     * @param repairAction The repair action
      * @throws OXException if an error is occurred
      */
-    void repairAllFiles(String resolverPolicy) throws OXException;
+    void repairAllFiles(RepairPolicy repairPolicy, RepairAction repairAction) throws OXException;
 }

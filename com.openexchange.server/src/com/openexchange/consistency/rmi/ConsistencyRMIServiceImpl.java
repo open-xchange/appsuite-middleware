@@ -57,6 +57,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.consistency.ConsistencyService;
 import com.openexchange.consistency.Entity;
+import com.openexchange.consistency.RepairAction;
+import com.openexchange.consistency.RepairPolicy;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.exception.OXException;
 
@@ -296,14 +298,14 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#repairFilesInContext(int, java.lang.String)
+     * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairFilesInContext(int, java.lang.String, java.lang.String)
      */
     @Override
-    public void repairFilesInContext(int contextId, String resolverPolicy) throws RemoteException {
+    public void repairFilesInContext(int contextId, String repairPolicy, String repairAction) throws RemoteException {
         try {
-            LOG.info("RMI invocation for: Repair files in context {} with resolve policy {}", contextId, resolverPolicy);
+            LOG.info("RMI invocation for: Repair files in context {} with repair policy {} and repair action {}", contextId, repairPolicy, repairAction);
             ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
-            service.repairFilesInContext(contextId, resolverPolicy);
+            service.repairFilesInContext(contextId, RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
         } catch (OXException e) {
             LOG.error("", e);
             Exception wrapMe = new Exception(e.getMessage());
@@ -320,14 +322,14 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#repairFilesInFilestore(int, java.lang.String)
+     * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairFilesInFilestore(int, java.lang.String, java.lang.String)
      */
     @Override
-    public void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws RemoteException {
+    public void repairFilesInFilestore(int filestoreId, String repairPolicy, String repairAction) throws RemoteException {
         try {
-            LOG.info("RMI invocation for: Repair files in filestore {} with resolve policy {}", filestoreId, resolverPolicy);
+            LOG.info("RMI invocation for: Repair files in filestore {} with repair policy {} and repair action {}", filestoreId, repairPolicy, repairAction);
             ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
-            service.repairFilesInFilestore(filestoreId, resolverPolicy);
+            service.repairFilesInFilestore(filestoreId, RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
         } catch (final OXException e) {
             LOG.error("", e);
             Exception wrapMe = new Exception(e.getMessage());
@@ -344,14 +346,14 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#repairFilesInDatabase(int, java.lang.String)
+     * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairFilesInDatabase(int, java.lang.String, java.lang.String)
      */
     @Override
-    public void repairFilesInDatabase(int databaseId, String resolverPolicy) throws RemoteException {
+    public void repairFilesInDatabase(int databaseId, String repairPolicy, String repairAction) throws RemoteException {
         try {
-            LOG.info("RMI invocation for: Repair files in database {} with resolve policy {}", databaseId, resolverPolicy);
+            LOG.info("RMI invocation for: Repair files in database {} with repair policy {} and repair action {}", databaseId, repairPolicy, repairAction);
             ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
-            service.repairFilesInDatabase(databaseId, resolverPolicy);
+            service.repairFilesInDatabase(databaseId, RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
         } catch (final OXException e) {
             LOG.error("", e);
             Exception wrapMe = new Exception(e.getMessage());
@@ -368,14 +370,14 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#repairAllFiles(java.lang.String)
+     * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairAllFiles(java.lang.String, java.lang.String)
      */
     @Override
-    public void repairAllFiles(String resolverPolicy) throws RemoteException {
+    public void repairAllFiles(String repairPolicy, String repairAction) throws RemoteException {
         try {
-            LOG.info("RMI invocation for: Repair files with resolve policy {}", resolverPolicy);
+            LOG.info("RMI invocation for: Repair files with repair policy {} and repair action {}", repairPolicy, repairAction);
             ConsistencyService service = ConsistencyServiceLookup.getService(ConsistencyService.class);
-            service.repairAllFiles(resolverPolicy);
+            service.repairAllFiles(RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());

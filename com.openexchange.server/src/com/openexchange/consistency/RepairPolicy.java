@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,22 +49,32 @@
 
 package com.openexchange.consistency;
 
-import com.openexchange.i18n.LocalizableStrings;
-
 /**
- * {@link ConsistencyExceptionMessages}
+ * {@link RepairPolicy}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class ConsistencyExceptionMessages implements LocalizableStrings {
+public enum RepairPolicy {
 
-    // The policy you have entered is malformed. It should look like \"condition:action\"
-    public static final String MALFORMED_POLICY_MSG_DISPLAY = "The policy you have entered is malformed. It should look like \"condition:action\"";
-
-    // The policy '%s' you have specified is unknonw/unsupported.
-    public static final String UNKNOWN_POLICY_MSG_DISPLAY = "The policy '%s' you have specified is unknonw/unsupported.";
-
-    private ConsistencyExceptionMessages() {
-        super();
-    }
+    /**
+     * It will handle any missing Drive entries for a file
+     */
+    MISSING_ENTRY_FOR_FILE,
+    /**
+     * It will handle any missing attachments
+     */
+    MISSING_FILE_FOR_ATTACHMENT,
+    /**
+     * It will handle any missing infoitems
+     */
+    MISSING_FILE_FOR_INFOITEM,
+    /**
+     * It will handle any missing snippets
+     */
+    MISSING_FILE_FOR_SNIPPET,
+    /**
+     * It will handle any missing vcards
+     */
+    MISSING_FILE_FOR_VCARD;
 }

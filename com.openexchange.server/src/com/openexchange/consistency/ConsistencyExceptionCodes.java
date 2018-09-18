@@ -50,6 +50,7 @@
 package com.openexchange.consistency;
 
 import static com.openexchange.consistency.ConsistencyExceptionMessages.MALFORMED_POLICY_MSG_DISPLAY;
+import static com.openexchange.consistency.ConsistencyExceptionMessages.UNKNOWN_POLICY_MSG_DISPLAY;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -75,6 +76,9 @@ public enum ConsistencyExceptionCodes implements DisplayableOXExceptionCode {
     /** User entered malformed policy string. */
     MALFORMED_POLICY(ConsistencyExceptionCodes.MALFORMED_POLICY_MSG, CATEGORY_USER_INPUT, 4, MALFORMED_POLICY_MSG_DISPLAY),
 
+    /** Unknown/Unsupported policy */
+    UNKNOWN_POLICY(ConsistencyExceptionCodes.UNKNOWN_POLICY_MSG, CATEGORY_USER_INPUT, 5, UNKNOWN_POLICY_MSG_DISPLAY),
+
     /**
      * <li>An SQL error occurred: %1$s</li>
      */
@@ -82,6 +86,8 @@ public enum ConsistencyExceptionCodes implements DisplayableOXExceptionCode {
     ;
 
     private static final String MALFORMED_POLICY_MSG = "Malformed policy. Policies are formed like \"condition:action\"";
+
+    private static final String UNKNOWN_POLICY_MSG = "Unknown policy %s.";
 
     private static final String COMMUNICATION_PROBLEM_MSG = "Error communicating with mbean in server: %s";
 

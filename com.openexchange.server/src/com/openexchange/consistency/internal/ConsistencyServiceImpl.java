@@ -72,19 +72,13 @@ import com.openexchange.consistency.ConsistencyService;
 import com.openexchange.consistency.Entity;
 import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.consistency.EntityImpl;
-import com.openexchange.consistency.internal.solver.CreateDummyFileForAttachmentSolver;
-import com.openexchange.consistency.internal.solver.CreateDummyFileForInfoitemSolver;
-import com.openexchange.consistency.internal.solver.CreateDummyFileForSnippetSolver;
-import com.openexchange.consistency.internal.solver.CreateInfoitemSolver;
-import com.openexchange.consistency.internal.solver.DeleteAttachmentSolver;
+import com.openexchange.consistency.RepairAction;
+import com.openexchange.consistency.RepairPolicy;
 import com.openexchange.consistency.internal.solver.DeleteBrokenPreviewReferencesSolver;
-import com.openexchange.consistency.internal.solver.DeleteBrokenVCardReferencesSolver;
-import com.openexchange.consistency.internal.solver.DeleteInfoitemSolver;
-import com.openexchange.consistency.internal.solver.DeleteSnippetSolver;
 import com.openexchange.consistency.internal.solver.DoNothingSolver;
+import com.openexchange.consistency.internal.solver.PolicyResolver;
 import com.openexchange.consistency.internal.solver.ProblemSolver;
 import com.openexchange.consistency.internal.solver.RecordSolver;
-import com.openexchange.consistency.internal.solver.RemoveFileSolver;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -338,47 +332,47 @@ public class ConsistencyServiceImpl implements ConsistencyService {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.consistency.ConsistencyService#repairFilesInContext(int, java.lang.String)
+     * @see com.openexchange.consistency.ConsistencyService#repairFilesInContext(int, com.openexchange.consistency.RepairPolicy, com.openexchange.consistency.RepairAction)
      */
     @Override
-    public void repairFilesInContext(int contextId, String resolverPolicy) throws OXException {
-        LOG.info("Repair all files in context {} with resolve policy {}", contextId, resolverPolicy);
+    public void repairFilesInContext(int contextId, RepairPolicy repairPolicy, RepairAction repairAction) throws OXException {
+        LOG.info("Repair all files in context {} with repair policy {} and repair action {}", contextId, repairPolicy, repairAction);
         List<Context> repairMe = new ArrayList<Context>();
         repairMe.add(getContext(contextId));
-        repair(toEntities(repairMe), resolverPolicy);
+        repair(toEntities(repairMe), repairPolicy, repairAction);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.consistency.ConsistencyService#repairFilesInFilestore(int, java.lang.String)
+     * @see com.openexchange.consistency.ConsistencyService#repairFilesInFilestore(int, com.openexchange.consistency.RepairPolicy, com.openexchange.consistency.RepairAction)
      */
     @Override
-    public void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws OXException {
-        LOG.info("Repair all files in filestore {} with resolve policy {}", filestoreId, resolverPolicy);
-        repair(getEntitiesForFilestore(filestoreId), resolverPolicy);
+    public void repairFilesInFilestore(int filestoreId, RepairPolicy repairPolicy, RepairAction repairAction) throws OXException {
+        LOG.info("Repair all files in filestore {} with repair policy {} and repair action {}", filestoreId, repairPolicy, repairAction);
+        repair(getEntitiesForFilestore(filestoreId), repairPolicy, repairAction);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.consistency.ConsistencyService#repairFilesInDatabase(int, java.lang.String)
+     * @see com.openexchange.consistency.ConsistencyService#repairFilesInDatabase(int, com.openexchange.consistency.RepairPolicy, com.openexchange.consistency.RepairAction)
      */
     @Override
-    public void repairFilesInDatabase(int databaseId, String resolverPolicy) throws OXException {
-        LOG.info("Repair all files in database {} with resolve policy {}", databaseId, resolverPolicy);
-        repair(toEntities(getContextsForDatabase(databaseId)), resolverPolicy);
+    public void repairFilesInDatabase(int databaseId, RepairPolicy repairPolicy, RepairAction repairAction) throws OXException {
+        LOG.info("Repair all files in database {} with repair policy {} and repair action {}", databaseId, repairPolicy, repairAction);
+        repair(toEntities(getContextsForDatabase(databaseId)), repairPolicy, repairAction);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.consistency.ConsistencyService#repairAllFiles(java.lang.String)
+     * @see com.openexchange.consistency.ConsistencyService#repairAllFiles(com.openexchange.consistency.RepairPolicy, com.openexchange.consistency.RepairAction)
      */
     @Override
-    public void repairAllFiles(String resolverPolicy) throws OXException {
-        LOG.info("Repair all files with resolve policy {}", resolverPolicy);
-        repair(toEntities(getAllContexts()), resolverPolicy);
+    public void repairAllFiles(RepairPolicy repairPolicy, RepairAction repairAction) throws OXException {
+        LOG.info("Repair all files with repair policy {} and repair action {}", repairPolicy, repairAction);
+        repair(toEntities(getAllContexts()), repairPolicy, repairAction);
     }
 
     ////////////////////////////////////////// HELPERS ///////////////////////////////////////
@@ -1005,14 +999,14 @@ public class ConsistencyServiceImpl implements ConsistencyService {
      * @param policy The policy to use
      * @throws OXException
      */
-    private void repair(List<Entity> entities, String policy) throws OXException {
+    private void repair(List<Entity> entities, RepairPolicy repairPolicy, RepairAction repairAction) throws OXException {
         DatabaseImpl database = getDatabase();
         AttachmentBase attachments = getAttachments();
         for (Entity entity : entities) {
             FileStorage storage = getFileStorage(entity);
 
-            ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storage, this, entity.getContext());
-            checkOneEntity(entity, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferencesSolver(), resolvers.filesolver, resolvers.vCardSolver, database, attachments, storage);
+            PolicyResolver resolvers = PolicyResolver.build(repairPolicy, repairAction, database, attachments, storage, getAdmin(entity.getContext()));
+            checkOneEntity(entity, resolvers.getDbSolver(), resolvers.getAttachmentSolver(), resolvers.getSnippetSolver(), new DeleteBrokenPreviewReferencesSolver(), resolvers.getFileSolver(), resolvers.getvCardSolver(), database, attachments, storage);
 
             /*
              * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
@@ -1101,89 +1095,4 @@ public class ConsistencyServiceImpl implements ConsistencyService {
         }
         return retval;
     }
-
-    ///////////////////////////////////////////// NESTED //////////////////////////////////////
-    //// TODO: out-source and refactor structure....
-
-    /**
-     * {@link ResolverPolicy}
-     */
-    private static class ResolverPolicy {
-
-        final ProblemSolver dbsolver;
-        final ProblemSolver attachmentsolver;
-        final ProblemSolver snippetsolver;
-        final ProblemSolver filesolver;
-        final ProblemSolver vCardSolver;
-
-        public ResolverPolicy(ProblemSolver dbsolver, ProblemSolver attachmentsolver, ProblemSolver snippetsolver, ProblemSolver filesolver, ProblemSolver vCardSolver) {
-            this.dbsolver = dbsolver;
-            this.attachmentsolver = attachmentsolver;
-            this.snippetsolver = snippetsolver;
-            this.filesolver = filesolver;
-            this.vCardSolver = vCardSolver;
-        }
-
-        public static ResolverPolicy parse(String list, DatabaseImpl database, AttachmentBase attach, FileStorage storage, ConsistencyServiceImpl consistency, Context context) throws OXException {
-            String[] options = list.split("\\s*,\\s*");
-            ProblemSolver dbsolver = new DoNothingSolver();
-            ProblemSolver attachmentsolver = new DoNothingSolver();
-            ProblemSolver snippetsolver = new DoNothingSolver();
-            ProblemSolver filesolver = new DoNothingSolver();
-            ProblemSolver vCardSolver = new DoNothingSolver();
-
-            for (String option : options) {
-                String[] tuple = option.split("\\s*:\\s*");
-                if (tuple.length != 2) {
-                    throw ConsistencyExceptionCodes.MALFORMED_POLICY.create();
-                }
-                String condition = tuple[0];
-                String action = tuple[1];
-                if ("missing_file_for_infoitem".equals(condition)) {
-                    if ("create_dummy".equals(action)) {
-                        dbsolver = new CreateDummyFileForInfoitemSolver(database, storage, consistency.getAdmin(context));
-                    } else if ("delete".equals(action)) {
-                        dbsolver = new DeleteInfoitemSolver(database);
-                    } else {
-                        dbsolver = new DoNothingSolver();
-                    }
-                } else if ("missing_file_for_attachment".equals(condition)) {
-                    if ("create_dummy".equals(action)) {
-                        attachmentsolver = new CreateDummyFileForAttachmentSolver(attach, storage);
-                    } else if ("delete".equals(action)) {
-                        attachmentsolver = new DeleteAttachmentSolver(attach);
-                    } else {
-                        attachmentsolver = new DoNothingSolver();
-                    }
-                } else if ("missing_file_for_snippet".equals(condition)) {
-                    if ("create_dummy".equals(action)) {
-                        snippetsolver = new CreateDummyFileForSnippetSolver(storage);
-                    } else if ("delete".equals(action)) {
-                        snippetsolver = new DeleteSnippetSolver();
-                    } else {
-                        snippetsolver = new DoNothingSolver();
-                    }
-                } else if ("missing_file_for_vcard".equals(condition)) {
-                    if ("delete".equals(action)) {
-                        //TODO hat er alle geloescht?
-                        vCardSolver = new DeleteBrokenVCardReferencesSolver();
-                    } else {
-                        vCardSolver = new DoNothingSolver();
-                    }
-                } else if ("missing_entry_for_file".equals(condition)) {
-                    if ("create_admin_infoitem".equals(action)) {
-                        filesolver = new CreateInfoitemSolver(database, consistency.getAdmin(context));
-                    } else if ("delete".equals(action)) {
-                        filesolver = new RemoveFileSolver(storage);
-                    } else {
-                        filesolver = new DoNothingSolver();
-                    }
-                }
-            }
-
-            return new ResolverPolicy(dbsolver, attachmentsolver, snippetsolver, filesolver, vCardSolver);
-        }
-
-    }
-
 }

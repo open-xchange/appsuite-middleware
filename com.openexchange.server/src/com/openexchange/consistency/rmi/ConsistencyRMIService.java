@@ -151,7 +151,7 @@ public interface ConsistencyRMIService extends Remote {
      * @param resolverPolicy The name of the resolver policy
      * @throws RemoteException if an error is occurred
      */
-    void repairFilesInContext(int contextId, String resolverPolicy) throws RemoteException;
+    void repairFilesInContext(int contextId, String repairPolicy, String repairAction) throws RemoteException;
 
     /**
      * Repairs all files in the specified filestore by using the specified resolver policy
@@ -160,7 +160,7 @@ public interface ConsistencyRMIService extends Remote {
      * @param resolverPolicy The name of the resolver policy
      * @throws RemoteException if an error is occurred
      */
-    void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws RemoteException;
+    void repairFilesInFilestore(int filestoreId, String repairPolicy, String repairAction) throws RemoteException;
 
     /**
      * Repairs all files in the specified database by using the specified resolver policy
@@ -169,7 +169,7 @@ public interface ConsistencyRMIService extends Remote {
      * @param resolverPolicy The name of the resolver policy
      * @throws RemoteException if an error is occurred
      */
-    void repairFilesInDatabase(int databaseId, String resolverPolicy) throws RemoteException;
+    void repairFilesInDatabase(int databaseId, String repairPolicy, String repairAction) throws RemoteException;
 
     /**
      * Repairs all files by using the specified resolver policy
@@ -177,5 +177,5 @@ public interface ConsistencyRMIService extends Remote {
      * @param resolverPolicy The name of the resolver policy
      * @throws RemoteException if an error is occurred
      */
-    void repairAllFiles(String resolverPolicy) throws RemoteException;
+    void repairAllFiles(String repairPolicy, String repairAction) throws RemoteException;
 }

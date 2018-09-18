@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,22 +49,24 @@
 
 package com.openexchange.consistency;
 
-import com.openexchange.i18n.LocalizableStrings;
-
 /**
- * {@link ConsistencyExceptionMessages}
+ * {@link RepairAction}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public final class ConsistencyExceptionMessages implements LocalizableStrings {
+public enum RepairAction {
 
-    // The policy you have entered is malformed. It should look like \"condition:action\"
-    public static final String MALFORMED_POLICY_MSG_DISPLAY = "The policy you have entered is malformed. It should look like \"condition:action\"";
-
-    // The policy '%s' you have specified is unknonw/unsupported.
-    public static final String UNKNOWN_POLICY_MSG_DISPLAY = "The policy '%s' you have specified is unknonw/unsupported.";
-
-    private ConsistencyExceptionMessages() {
-        super();
-    }
+    /**
+     * Creates a dummy file in storage and associates it with the Drive item
+     */
+    CREATE_DUMMY,
+    /**
+     * Creates a dummy Drive entry named 'Restoredfile' and associates it with the file
+     */
+    CREATE_ADMIN_INFOITEM,
+    /**
+     * Simply deletes the Drive item pointing to a non-existing file
+     */
+    DELETE;
 }
