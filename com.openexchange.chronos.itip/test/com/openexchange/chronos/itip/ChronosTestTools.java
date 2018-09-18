@@ -295,7 +295,7 @@ public final class ChronosTestTools {
     public static MockUser convertToUser(CalendarUser calendarUser) {
         MockUser user = new MockUser(calendarUser.getEntity());
         user.setMail(calendarUser.getEMail());
-        user.setTimeZone(new String());
+        user.setTimeZone("");
         user.setLocale(Locale.CANADA_FRENCH);
         if (Strings.isNotEmpty(calendarUser.getUri()) && calendarUser.getUri().toLowerCase().startsWith("mailto:")) {
             user.setAliases(new String[] { CalendarUtils.extractEMailAddress(calendarUser.getUri()) });

@@ -223,4 +223,12 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         return storageFactory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session.getEntityResolver());
     }
 
+    @Override
+    public boolean isActingOnBehalfOf(Event event, Session session) {
+        if (null != event && null != session && null != event.getOrganizer() && null != event.getOrganizer().getSentBy()) {
+            return event.getOrganizer().getSentBy().getEntity() == session.getUserId();
+        }
+        return false;
+    }
+
 }

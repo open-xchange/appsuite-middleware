@@ -1,3 +1,9 @@
+open-xchange-pop3 (7.10.0-15) stable; urgency=medium
+
+  * Build for patch 2018-09-17 (4882)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 10 Sep 2018 15:22:33 +0200
+
 open-xchange-pop3 (7.10.0-14) stable; urgency=medium
 
   * Build for patch 2018-09-03 (4870)

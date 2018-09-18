@@ -51,6 +51,7 @@ package com.openexchange.chronos.itip;
 
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
@@ -85,5 +86,16 @@ public interface ITipIntegrationUtility {
     Event loadEvent(Event event, CalendarSession session) throws OXException;
 
     String getFolderIdForUser(Session session, String eventId, int userId) throws OXException;
+
+    /**
+     * Looks up if the current user is acting on behalf of the organizer of the event
+     * 
+     * @param event The {@link Event} to extract the organizer from
+     * @param session The {@link Session} to get the current user from
+     * @return <code>true</code> only if the organizers {@link CalendarUser#getSentBy()} field is set
+     *         and if it matches the currents users ID
+     *         <code>false</code> otherwise
+     */
+    boolean isActingOnBehalfOf(Event event, Session session);
 
 }
