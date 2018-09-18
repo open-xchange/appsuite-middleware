@@ -64,7 +64,7 @@ public enum S3Properties implements Property {
     PATH_STYLE_ACCESS("pathStyleAccess", true),
     ACCESS_KEY("accessKey", null),
     SECRET_KEY("secretKey", null),
-    ENCRYPTION("encryption", EncryptionType.NONE),
+    ENCRYPTION("encryption", EncryptionType.NONE.getName()),
     SIGNER_OVERRIDE("signerOverride", "S3SignerType"),
     CHUNK_SIZE("chunkSize", "5 MB"),
     RSA_KEYSTORE("encryption.rsa.keyStore", null),
