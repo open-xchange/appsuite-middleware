@@ -64,6 +64,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalUtilities;
 import com.openexchange.chronos.ical.ical4j.VCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
@@ -93,21 +94,24 @@ public class CalendarExportImpl implements CalendarExport {
     private final ICalParameters parameters;
     private final VCalendar vCalendar;
     private final Set<String> timezoneIDs;
-
+    private final IcalExportWriter exportWriter;
+    
     /**
      * Initializes a new {@link CalendarExportImpl}.
-     *
+     * 
+     * @param iCalUtilities The {@link ICalUtilities} 
      * @param mapper The iCal mapper to use
      * @param parameters The iCal parameters
      * @param warnings The warnings
      */
-    public CalendarExportImpl(ICalMapper mapper, ICalParameters parameters, List<OXException> warnings) {
+    public CalendarExportImpl(ICalUtilities iCalUtilities, ICalMapper mapper, ICalParameters parameters, List<OXException> warnings) {
         super();
         this.mapper = mapper;
         this.parameters = parameters;
         this.warnings = warnings;
         this.timezoneIDs = new HashSet<String>();
         this.vCalendar = initCalendar();
+        this.exportWriter = new IcalExportWriter(iCalUtilities);
     }
 
     @Override
@@ -171,11 +175,6 @@ public class CalendarExportImpl implements CalendarExport {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.ical.CalendarExport#add(com.openexchange.chronos.CalendarAvailability)
-     */
     @Override
     public CalendarExport add(Availability calendarAvailability) throws OXException {
         vCalendar.add(exportAvailability(calendarAvailability));
@@ -213,6 +212,19 @@ public class CalendarExportImpl implements CalendarExport {
          * export calendar
          */
         ICalUtils.exportCalendar(vCalendar, outputStream);
+    }
+    
+    
+    @Override
+    public void writeEventChunk(OutputStream outputStream, List<Event> events) throws OXException {
+        if (null != events && events.size() > 0) {
+            exportWriter.writeEventChunk(outputStream, vCalendar, timezoneIDs, parameters, events);
+        }
+    }
+
+    @Override
+    public void finishEventChunk() throws OXException {
+        exportWriter.build();
     }
 
     @Override
@@ -302,6 +314,15 @@ public class CalendarExportImpl implements CalendarExport {
                     added |= trackTimezones(dateTime.getTimeZone().getID());
                 }
             }
+        }
+        return added;
+    }
+    
+    @Override
+    public boolean trackTimeZones(Event event) {
+        boolean added = false;
+        if (false == CalendarUtils.isFloating(event)) {
+            added |= trackTimezones(event.getStartDate(), event.getEndDate());
         }
         return added;
     }
