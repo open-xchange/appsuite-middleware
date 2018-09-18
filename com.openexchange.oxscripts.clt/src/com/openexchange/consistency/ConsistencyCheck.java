@@ -49,38 +49,37 @@
 
 package com.openexchange.consistency;
 
-import java.lang.reflect.Method;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
+import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.consistency.rmi.ConsistencyEntity;
+import com.openexchange.consistency.rmi.ConsistencyRMIService;
 
 /**
  * {@link ConsistencyCheck}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
+public class ConsistencyCheck extends AbstractRmiCLI<Void> {
 
     /**
      * Defines the actions of the CLT
      */
     private enum Action {
-        list_unassigned("listUnassignedFiles", "Lists names of orphaned files held in file storage"),
-        list_missing("listMissingFiles", "Lists names of files that are still referenced, but do no more exist in actual file storage"),
-        repair("repairFiles", "Repairs either orphaned files or references to non-existing files according to specified \"--policy\" and associated \"--policy-action\""),
-        repair_configdb("checkOrRepairConfigDB", "Deletes artefacts of non-existing contexts from config database. Requires no further options."),
-        check_configdb("checkOrRepairConfigDB", "Checks for artefacts of non-existing contexts in config database. Requires no further options.");
+    list_unassigned("listUnassignedFiles", "Lists names of orphaned files held in file storage"),
+    list_missing("listMissingFiles", "Lists names of files that are still referenced, but do no more exist in actual file storage"),
+    repair("repairFiles", "Repairs either orphaned files or references to non-existing files according to specified \"--policy\" and associated \"--policy-action\""),
+    repair_configdb("checkOrRepairConfigDB", "Deletes artefacts of non-existing contexts from config database. Requires no further options."),
+    check_configdb("checkOrRepairConfigDB", "Checks for artefacts of non-existing contexts in config database. Requires no further options.");
 
         private final String methodName;
         private final String description;
@@ -156,137 +155,25 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.cli.AbstractMBeanCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.mbean.AuthenticatorMBean)
-     */
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        //no-op, we only support JMX authentication for this tool
-    }
-
-    /*
-     * (non-Javadoc)
-     *
      * @see com.openexchange.cli.AbstractMBeanCLI#addOptions(org.apache.commons.cli.Options)
      */
     @Override
     protected void addOptions(Options options) {
         options.addOption("a", "action", true, "Defines the action\nAccepted values are: " + prettyPrintEnum(Action.class));
-        options.addOption("o", "source", true, "Defines the source that is going to be used\nOnly considered if \"--action\" option specifies either \""+Action.list_missing.name()+"\", \""+Action.list_unassigned.name()+"\" or \""+Action.repair.name()+"\"\nAccepted values are: " + prettyPrintEnum(Source.class));
-        options.addOption("r", "policy", true, "Defines the 'repair' policy\nOnly considered if \"--action\" option specifies \""+Action.repair.name()+"\"\nAvailable repair policies are: " + prettyPrintEnum(Policy.class));
+        options.addOption("o", "source", true, "Defines the source that is going to be used\nOnly considered if \"--action\" option specifies either \"" + Action.list_missing.name() + "\", \"" + Action.list_unassigned.name() + "\" or \"" + Action.repair.name() + "\"\nAccepted values are: " + prettyPrintEnum(Source.class));
+        options.addOption("r", "policy", true, "Defines the 'repair' policy\nOnly considered if \"--action\" option specifies \"" + Action.repair.name() + "\"\nAvailable repair policies are: " + prettyPrintEnum(Policy.class));
         options.addOption("y", "policy-action", true, "Defines an action for the desired repair policy\nOnly considered if \"--policy\" option is specified");
         options.addOption("i", "source-id", true, "Defines the source identifier.\nOnly considered if \"--source\" option is specified\nIf \"--source\" is set to \"all\" then this option is simply ignored");
     }
 
     /*
      * (non-Javadoc)
-     *
-     * @see com.openexchange.cli.AbstractMBeanCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, javax.management.MBeanServerConnection)
+     * 
+     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
      */
-    @SuppressWarnings("unchecked")
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        String operationName = getOperationName();
-        String policyString = getPolicyString();
-        List<Object> params = new ArrayList<Object>();
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("Executing '").append(action).append("'");
-        if (sourceId > 0) {
-            builder.append(" in '").append(source).append("' source");
-            builder.append(" with sourceId: ").append(sourceId);
-        }
-
-        switch (action) {
-            case check_configdb:
-                params.add(false);
-                operationName = action.methodName;
-                break;
-            case repair_configdb:
-                params.add(true);
-                operationName = action.methodName;
-                break;
-            case list_missing:
-                if (source.equals(Source.all)) {
-                    operationName = "listAllMissingFiles";
-                } else {
-                    params.add(sourceId);
-                }
-                break;
-            case list_unassigned:
-                if (source.equals(Source.all)) {
-                    operationName = "listAllUnassignedFiles";
-                } else {
-                    params.add(sourceId);
-                }
-                break;
-            case repair:
-                if (source.equals(Source.all)) {
-                    operationName = "repairAllFiles";
-                } else {
-                    params.add(sourceId);
-                }
-                params.add(policyString);
-                builder.append(" with repair policy '").append(policyString).append("'");
-                break;
-            default:
-                // Should never happen
-                System.err.println("Invalid action '" + action + "'");
-                printHelp();
-                System.exit(-1);
-        }
-
-        System.out.println(builder.toString());
-        Object resultObject = mbsc.invoke(MBeanNamer.getName(), operationName, params.toArray(new Object[params.size()]), getSignatureOf(ConsistencyMBean.class, operationName));
-
-        if (action.equals(Action.check_configdb) || action.equals(Action.repair_configdb)) {
-            printList((List<String>) resultObject);
-            if (action.equals(Action.check_configdb)) {
-                System.out.println("Now run 'checkconsistency' tool again with the 'repair_configdb' option to remove these inconsistent contexts from the 'configdb'.");
-            }
-        } else {
-            printResult(resultObject);
-        }
-        return null;
-    }
-
-    /**
-     * Get the operation name
-     *
-     * @return
-     */
-    private String getOperationName() {
-        return (source != null) ? action.methodName + "In" + source.name().substring(0, 1).toUpperCase() + source.name().substring(1) : action.methodName;
-    }
-
-    /**
-     * Get the policy string
-     *
-     * @return
-     */
-    private String getPolicyString() {
-        return (policy != null) ? policy.name() + ":" + policyAction.name() : "";
-    }
-
-    /**
-     * Prints the result
-     *
-     * @param result
-     */
-    @SuppressWarnings("unchecked")
-    private void printResult(Object result) {
-        if (result == null) {
-            System.out.println("Operation complete.");
-        } else {
-            if (result != null && result instanceof List) {
-                Map<MBeanEntity, List<String>> results = new HashMap<MBeanEntity, List<String>>();
-                results.put(new MBeanEntity(Integer.valueOf(sourceId)), (List<String>) result);
-                printMap(results);
-            } else if (result != null && result instanceof Map) {
-                printMap((Map<MBeanEntity, List<String>>) result);
-            } else {
-                System.out.println("Cannot print result object. Here's the stringified version: \n" + result.toString());
-            }
-        }
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
+        authenticator.doAuthentication(login, password);
     }
 
     /*
@@ -297,18 +184,85 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
     @Override
     protected void checkOptions(CommandLine cmd) {
         action = checkAndSetOption(Action.class, cmd, 'a');
-        if (!action.equals(Action.check_configdb) && !action.equals(Action.repair_configdb)) {
-            source = checkAndSetOption(Source.class, cmd, 'o');
-            if (!source.equals(Source.all)) {
-                if (cmd.hasOption('i')) {
-                    sourceId = Integer.parseInt(cmd.getOptionValue('i'));
-                }
-            }
-            if (!action.equals(Action.list_missing) && !action.equals(Action.list_unassigned)) {
-                policy = checkAndSetOption(Policy.class, cmd, 'r');
-                policyAction = checkAndSetOption(PolicyAction.class, cmd, 'y');
+        if (Action.check_configdb.equals(action) || Action.repair_configdb.equals(action)) {
+            return;
+        }
+        source = checkAndSetOption(Source.class, cmd, 'o');
+        if (false == Source.all.equals(source)) {
+            if (cmd.hasOption('i')) {
+                sourceId = Integer.parseInt(cmd.getOptionValue('i'));
             }
         }
+
+        if (false == action.equals(Action.list_missing) && false == action.equals(Action.list_unassigned)) {
+            policy = checkAndSetOption(Policy.class, cmd, 'r');
+            policyAction = checkAndSetOption(PolicyAction.class, cmd, 'y');
+        }
+
+        //        if (!action.equals(Action.check_configdb) && !action.equals(Action.repair_configdb)) {
+        //            source = checkAndSetOption(Source.class, cmd, 'o');
+        //            if (!source.equals(Source.all)) {
+        //                if (cmd.hasOption('i')) {
+        //                    sourceId = Integer.parseInt(cmd.getOptionValue('i'));
+        //                }
+        //            }
+        //            if (!action.equals(Action.list_missing) && !action.equals(Action.list_unassigned)) {
+        //                policy = checkAndSetOption(Policy.class, cmd, 'r');
+        //                policyAction = checkAndSetOption(PolicyAction.class, cmd, 'y');
+        //            }
+        //        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
+     */
+    @Override
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+        String policyString = getPolicyString();
+        List<Object> params = new ArrayList<Object>();
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Executing '").append(action).append("'");
+        if (sourceId > 0) {
+            builder.append(" in '").append(source).append("' source");
+            builder.append(" with sourceId: ").append(sourceId);
+        }
+        if (Action.repair.equals(action)) {
+            builder.append(" with repair policy '").append(policyString).append("'");
+        }
+        System.out.println(builder.toString());
+
+        ConsistencyRMIService rmiService = getRmiStub(optRmiHostName, ConsistencyRMIService.RMI_NAME);
+        switch (action) {
+            case check_configdb:
+                params.add(false);
+                printList(rmiService.checkOrRepairConfigDB(false));
+                System.out.println("Now run 'checkconsistency' tool again with the 'repair_configdb' option to remove these inconsistent contexts from the 'configdb'.");
+                break;
+            case repair_configdb:
+                params.add(true);
+                printList(rmiService.checkOrRepairConfigDB(true));
+                break;
+            case list_missing:
+                listMissing(rmiService);
+                break;
+            case list_unassigned:
+                listUnassigned(rmiService);
+                break;
+            case repair:
+                repair(rmiService);
+                break;
+            default:
+                // Should never happen
+                System.err.println("Invalid action '" + action + "'");
+                printHelp();
+                System.exit(-1);
+        }
+
+        System.out.println("Operation complete.");
+        return null;
     }
 
     /*
@@ -377,10 +331,98 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected String getName() {
-        return "checkconsistency -a <action> -o <source> [-i <sourceId>] [-r <policy> -y <policyAction>] [-l <jmxUser>] [-s <jmxPassword>] [-t <jmxHost>] [-p <jmxPort>] [--responsetimeout <responseTimeout>]";
+        return "checkconsistency -a <action> -o <source> [-i <sourceId>] [-r <policy> -y <policyAction>] [-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] [--responsetimeout <responseTimeout>] | [-h]";
     }
 
     ///////////////////////////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////////////////
+
+    /**
+     * 
+     * @param rmiService
+     * @throws RemoteException
+     */
+    private void listMissing(ConsistencyRMIService rmiService) throws RemoteException {
+        switch (source) {
+            case all:
+                printMap(rmiService.listAllMissingFiles());
+                break;
+            case context:
+                printList(rmiService.listMissingFilesInContext(sourceId));
+                break;
+            case database:
+                printMap(rmiService.listMissingFilesInDatabase(sourceId));
+                break;
+            case filestore:
+                printMap(rmiService.listMissingFilesInFilestore(sourceId));
+                break;
+            default:
+                System.err.println("Invalid source '" + source + "'");
+                printHelp();
+                System.exit(-1);
+        }
+    }
+
+    /**
+     * 
+     * @param rmiService
+     * @throws RemoteException
+     */
+    private void listUnassigned(ConsistencyRMIService rmiService) throws RemoteException {
+        switch (source) {
+            case all:
+                printMap(rmiService.listAllUnassignedFiles());
+                break;
+            case context:
+                printList(rmiService.listUnassignedFilesInContext(sourceId));
+                break;
+            case database:
+                printMap(rmiService.listUnassignedFilesInDatabase(sourceId));
+                break;
+            case filestore:
+                printMap(rmiService.listUnassignedFilesInFilestore(sourceId));
+                break;
+            default:
+                System.err.println("Invalid source '" + source + "'");
+                printHelp();
+                System.exit(-1);
+        }
+
+    }
+
+    /**
+     * 
+     * @param rmiService
+     * @throws RemoteException
+     */
+    private void repair(ConsistencyRMIService rmiService) throws RemoteException {
+        switch (source) {
+            case all:
+                rmiService.repairAllFiles(policy.name(), policyAction.name());
+                break;
+            case context:
+                rmiService.repairFilesInContext(sourceId, policy.name(), policyAction.name());
+                break;
+            case database:
+                rmiService.repairFilesInDatabase(sourceId, policy.name(), policyAction.name());
+                break;
+            case filestore:
+                rmiService.repairFilesInFilestore(sourceId, policy.name(), policyAction.name());
+                break;
+            default:
+                System.err.println("Invalid source '" + source + "'");
+                printHelp();
+                System.exit(-1);
+        }
+    }
+
+    /**
+     * Get the policy string
+     *
+     * @return
+     */
+    private String getPolicyString() {
+        return (policy != null) ? policy.name() + ":" + policyAction.name() : "";
+    }
 
     /**
      * Check and set the specified option
@@ -424,44 +466,11 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
     }
 
     /**
-     * Get the signature of the specified method as an array of Strings
-     *
-     * @param clazz The class from which to get the signature
-     * @param methodName The method name
-     * @return
-     */
-    private final String[] getSignatureOf(Class<?> clazz, String methodName) {
-        String[] signature = null;
-        Class<?>[] types = null;
-        for (Method m : clazz.getMethods()) {
-            if (m.getName().equals(methodName)) {
-                types = m.getParameterTypes();
-                break;
-            }
-        }
-
-        if (types != null) {
-            signature = new String[types.length];
-            int s = 0;
-            for (Class<?> c : types) {
-                signature[s++] = c.getName();
-            }
-            return signature;
-        }
-
-        System.err.println("Invalid operation '" + methodName + "'");
-        printHelp();
-        System.exit(-1);
-
-        return null;
-    }
-
-    /**
      * Print the result
      *
      * @param result The result to print
      */
-    private void printMap(final Map<MBeanEntity, List<String>> result) {
+    private void printMap(final Map<ConsistencyEntity, List<String>> result) {
         if (null == result) {
             System.out.println("No problems found.");
             return;
@@ -492,9 +501,9 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
             dashBuilder.append("--+");
         }
 
-        for (final Map.Entry<MBeanEntity, List<String>> entry : result.entrySet()) {
+        for (final Map.Entry<ConsistencyEntity, List<String>> entry : result.entrySet()) {
             final List<String> brokenFiles = entry.getValue();
-            MBeanEntity entity = entry.getKey();
+            ConsistencyEntity entity = entry.getKey();
 
             System.out.format("+--" + dashBuilder.toString() + "%n");
             System.out.format(formatter, entity.toString());
@@ -522,9 +531,9 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
      * @param keySet
      * @return
      */
-    private List<String> compileListOfEntities(Set<MBeanEntity> keySet) {
+    private List<String> compileListOfEntities(Set<ConsistencyEntity> keySet) {
         List<String> entities = new ArrayList<String>(keySet.size());
-        for (MBeanEntity entity : keySet) {
+        for (ConsistencyEntity entity : keySet) {
             entities.add(entity.toString());
         }
         return entities;
@@ -564,4 +573,5 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
         }
         return widestURL;
     }
+
 }

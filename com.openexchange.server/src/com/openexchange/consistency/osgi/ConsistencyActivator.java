@@ -56,7 +56,6 @@ import com.openexchange.consistency.internal.ConsistencyServiceImpl;
 import com.openexchange.consistency.rmi.ConsistencyRMIServiceImpl;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -80,9 +79,9 @@ public final class ConsistencyActivator extends HousekeepingActivator {
         registerService(ConsistencyService.class, new ConsistencyServiceImpl());
         registerService(Remote.class, new ConsistencyRMIServiceImpl());
 
-        track(ManagementService.class, new MBeanRegisterer(context));
         trackService(VCardStorageMetadataStore.class);
         trackService(DatabaseService.class);
+        trackService(ConsistencyService.class);
 
         openTrackers();
     }
