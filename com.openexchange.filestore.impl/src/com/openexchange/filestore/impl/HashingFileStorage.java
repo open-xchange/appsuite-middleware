@@ -58,6 +58,7 @@ import java.io.OutputStream;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.Streams;
@@ -110,6 +111,8 @@ public class HashingFileStorage extends DefaultFileStorage {
 
     @Override
     public String saveNewFile(final InputStream file) throws OXException {
+        File filePath = null;
+        boolean success = false;
         OutputStream out = null;
         try {
             final String[] filestorePath = generateName();
@@ -118,13 +121,11 @@ public class HashingFileStorage extends DefaultFileStorage {
                 throw FileStorageCodes.CREATE_DIR_FAILED.create(path.toString());
             }
 
-            {
-                final File filePath = new File(path, filestorePath[1]);
-                try {
-                    out = new FileOutputStream(filePath);
-                } catch (final FileNotFoundException e) {
-                    throw FileStorageCodes.FILE_NOT_FOUND.create(e, filePath.toString());
-                }
+            filePath = new File(path, filestorePath[1]);
+            try {
+                out = new FileOutputStream(filePath);
+            } catch (final FileNotFoundException e) {
+                throw FileStorageCodes.FILE_NOT_FOUND.create(e, filePath.toString());
             }
 
             final int buflen = 65536;
@@ -134,11 +135,20 @@ public class HashingFileStorage extends DefaultFileStorage {
             }
             out.flush();
 
-            return new StringBuilder(filestorePath[0]).append('/').append(filestorePath[1]).toString();
+            String identifier = new StringBuilder(filestorePath[0]).append('/').append(filestorePath[1]).toString();
+            success = true;
+            return identifier;
         } catch (final IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             Streams.close(file, out);
+            if (false == success && null != filePath && filePath.exists()) {
+                try {
+                    filePath.delete();
+                } catch (Exception e) {
+                    LoggerFactory.getLogger(HashingFileStorage.class).warn("Error cleaning up after failed save. Consider running the consistency tool.", e);
+                }
+            }
         }
     }
 

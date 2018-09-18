@@ -370,6 +370,12 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                 if (null != infoSupport && infoSupport.isInfoSupported()) {
                     List<MailFolderInfo> folderInfos = infoSupport.getAllFolderInfos(false);
                     /*
+                     * Filter against possible POP3 storage folders
+                     */
+                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
+                        filterPOP3StorageFolderInfos(folderInfos, session);
+                    }
+                    /*
                      * Sort by name
                      */
                     final boolean translate = !StorageParametersUtility.getBoolParameter("ignoreTranslation", storageParameters);
@@ -444,6 +450,12 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
              * Start recursive iteration
              */
             addSubfolders(MailFolder.DEFAULT_FOLDER_ID, folders, mailAccess.getFolderStorage());
+            /*
+             * Filter against possible POP3 storage folders
+             */
+            if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders(storageParameters.getUserId(), storageParameters.getContextId())) {
+                filterPOP3StorageFolders(folders, session);
+            }
             /*
              * Sort by name
              */

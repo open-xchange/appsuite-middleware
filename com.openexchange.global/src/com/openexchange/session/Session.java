@@ -217,6 +217,14 @@ public interface Session {
      * @type <code>java.lang.String</code>
      */
     public static final String PARAM_OAUTH_REFRESH_TOKEN = "__session.oauth.refresh".intern();
+    
+    /**
+     * The parameter that holds when the Oauth token expires.
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE = "__session.oauth.access.expiry".intern();
+
 
     /**
      * The parameter for optional host name associated with a session.

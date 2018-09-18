@@ -1,0 +1,11 @@
+open-xchange-oidc (7.8.4-1) stable; urgency=medium
+
+  * Build for patch 2018-09-17 (4881)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 10 Sep 2018 15:21:25 +0200
+
+open-xchange-oidc (7.8.4-0) unstable; urgency=medium
+
+  * Backport to 7.8.4
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 04 Sep 2018 15:26:00 +0200
