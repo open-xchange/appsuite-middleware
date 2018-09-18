@@ -76,8 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 public class ICalCompositeEventExporter extends AbstractICalEventExporter {
 
     /** The event fields used for the export */
-    private static final EventField[] EXPORTED_FIELDS = com.openexchange.tools.arrays.Arrays.remove(
-        EventField.values(), EventField.ALARMS, EventField.ATTACHMENTS, EventField.FLAGS);
+    private static final EventField[] EXPORTED_FIELDS = com.openexchange.tools.arrays.Arrays.remove(EventField.values(), EventField.ALARMS, EventField.ATTACHMENTS, EventField.FLAGS);
 
     public ICalCompositeEventExporter(String folderId, Map<String, List<String>> batchIds) {
         super(folderId, batchIds);
@@ -95,13 +94,13 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
          * get identifiers of all events in exported folder
          */
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(session);
-        calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.FOLDER_ID, EventField.ID });
+        calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, new EventField[] { EventField.FOLDER_ID, EventField.ID, EventField.START_DATE, EventField.END_DATE });
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
         int limit = getExportLimit(session);
         if (-1 < limit) {
             calendarAccess.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(limit));
         }
-        List<EventID> eventIDs = getEventIDs(calendarAccess.getEventsInFolder(getFolderId()));
+        List<EventID> eventIDs = getEventIDs(calendarExport, calendarAccess.getEventsInFolder(getFolderId()));
         /*
          * load full event data in chunks & add to export
          */
@@ -109,22 +108,19 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
         calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, EXPORTED_FIELDS);
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
         for (List<EventID> chunk : Lists.partition(eventIDs, 100)) {
-            for (Event event : calendarAccess.getEvents(chunk)) {
-                if (null != event) {
-                    calendarExport.add(prepareForExport(event));
-                }
-            }
+            /*
+             * serialize calendar
+             */
+            calendarExport.writeEventChunk(out, prepareForExport(calendarAccess.getEvents(chunk)));
         }
-        /*
-         * serialize calendar
-         */
-        return write(calendarExport, out);
+        calendarExport.finishEventChunk();
+        return null;
     }
 
     @Override
     protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException {
         List<EventID> eventIds = convertBatchDataToEventIds();
-        if(eventIds.size() == 1) {
+        if (eventIds.size() == 1) {
             return exportChronosEvents(Collections.singletonList(getCalendarAccess(session).getEvent(eventIds.get(0))), out, session);
         } else {
             return exportChronosEvents(getCalendarAccess(session).getEvents(eventIds), out, session);
@@ -134,20 +130,22 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
     private IDBasedCalendarAccess getCalendarAccess(ServerSession session) throws OXException {
         return ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
     }
-    
+
     /**
      * Gets the full identifiers for the supplied events holding the folder and file identifiers.
-     *
+     * 
+     * @param calendarExport The export that tracks the timezones
      * @param events The events to get the full identifiers for
      * @return The full identifiers for the events
      */
-    private static List<EventID> getEventIDs(List<Event> events) {
+    private static List<EventID> getEventIDs(CalendarExport calendarExport, List<Event> events) {
         if (null == events) {
             return Collections.emptyList();
         }
         List<EventID> eventIDs = new ArrayList<EventID>(events.size());
         for (Event event : events) {
             eventIDs.add(new EventID(event.getFolderId(), event.getId()));
+            calendarExport.trackTimeZones(event);
         }
         return eventIDs;
     }

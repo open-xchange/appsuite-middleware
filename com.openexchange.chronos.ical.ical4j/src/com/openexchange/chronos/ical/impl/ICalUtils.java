@@ -325,13 +325,19 @@ public class ICalUtils {
         FoldingWriter writer = null;
         try {
             writer = new FoldingWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8), FoldingWriter.REDUCED_FOLD_LENGTH);
+            exportComponents(writer, components);
+        } finally {
+            Streams.close(writer);
+        }
+    }
+
+    public static void exportComponents(FoldingWriter writer, ComponentList components) throws OXException {
+        try {
             for (Iterator<?> componentIiterator = components.iterator(); componentIiterator.hasNext();) {
                 writer.write(((Component) componentIiterator.next()).toString());
             }
         } catch (IOException e) {
             throw new OXException(e);
-        } finally {
-            Streams.close(writer);
         }
     }
 
