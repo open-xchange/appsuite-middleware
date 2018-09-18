@@ -198,19 +198,6 @@ public class ConsistencyCheck extends AbstractRmiCLI<Void> {
             policy = checkAndSetOption(Policy.class, cmd, 'r');
             policyAction = checkAndSetOption(PolicyAction.class, cmd, 'y');
         }
-
-        //        if (!action.equals(Action.check_configdb) && !action.equals(Action.repair_configdb)) {
-        //            source = checkAndSetOption(Source.class, cmd, 'o');
-        //            if (!source.equals(Source.all)) {
-        //                if (cmd.hasOption('i')) {
-        //                    sourceId = Integer.parseInt(cmd.getOptionValue('i'));
-        //                }
-        //            }
-        //            if (!action.equals(Action.list_missing) && !action.equals(Action.list_unassigned)) {
-        //                policy = checkAndSetOption(Policy.class, cmd, 'r');
-        //                policyAction = checkAndSetOption(PolicyAction.class, cmd, 'y');
-        //            }
-        //        }
     }
 
     /*
@@ -272,7 +259,7 @@ public class ConsistencyCheck extends AbstractRmiCLI<Void> {
      */
     @Override
     protected boolean requiresAdministrativePermission() {
-        return false;
+        return true;
     }
 
     /*
