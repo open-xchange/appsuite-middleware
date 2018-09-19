@@ -63,7 +63,6 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -100,17 +99,17 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             options.addOption("h", "help", false, "Prints a help text");
 
             // Option for JMX connect & authentication
-            options.addOption(createOption("H", "host", "jmxHost", true, "The optional JMX host (default:localhost)", false));
-            options.addOption(createOption("p", "port", "jmxPort", true, "The optional JMX port (default:9999)", false));
-            options.addOption(createOption(null, "responsetimeout", "timeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)", false));
-            options.addOption(createOption("l", "login", "jmxLogin", true, "The optional JMX login (if JMX authentication is enabled)", false));
-            options.addOption(createOption("s", "password", "jmxPassword", true, "The optional JMX password (if JMX authentication is enabled)", false));
+            options.addOption(createArgumentOption("H", "host", "jmxHost", "The optional JMX host (default:localhost)", false));
+            options.addOption(createArgumentOption("p", "port", "jmxPort", "The optional JMX port (default:9999)", false));
+            options.addOption(createArgumentOption(null, "responsetimeout", "timeout", "The optional response timeout in seconds when reading data from server (default: 0s; infinite)", false));
+            options.addOption(createArgumentOption("l", "login", "jmxLogin", "The optional JMX login (if JMX authentication is enabled)", false));
+            options.addOption(createArgumentOption("s", "password", "jmxPassword", "The optional JMX password (if JMX authentication is enabled)", false));
 
             // Check if administrative permission is required
             final boolean requiresAdministrativePermission = requiresAdministrativePermission();
             if (requiresAdministrativePermission) {
-                options.addOption(createOption("A", "adminuser", "masterAdmin", true, "Admin username", true));
-                options.addOption(createOption("P", "adminpass", "masterPassword", true, "Admin password", true));
+                options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Admin username", true));
+                options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Admin password", true));
             }
 
             // Add other options

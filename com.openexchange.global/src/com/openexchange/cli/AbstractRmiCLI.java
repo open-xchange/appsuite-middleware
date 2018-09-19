@@ -60,7 +60,6 @@ import java.rmi.RemoteException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -136,15 +135,15 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             options.addOption("h", "help", false, "Prints a help text");
 
             // Option for RMI connect
-            options.addOption(createOption("s", "server", "rmiHost", true, "The optional RMI server (default: localhost)", false));
-            options.addOption(createOption("p", "port", "rmiPort", true, "The optional RMI port (default:1099)", false));
-            options.addOption(createOption(null, "responsetimeout", "timeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)", false));
+            options.addOption(createArgumentOption("s", "server", "rmiHost", "The optional RMI server (default: localhost)", false));
+            options.addOption(createArgumentOption("p", "port", "rmiPort", "The optional RMI port (default:1099)", false));
+            options.addOption(createArgumentOption(null, "responsetimeout", "timeout", "The optional response timeout in seconds when reading data from server (default: 0s; infinite)", false));
 
             // Check if administrative permission is required
             final boolean requiresAdministrativePermission = requiresAdministrativePermission();
             if (requiresAdministrativePermission) {
-                options.addOption(createOption("A", "adminuser", "masterAdmin", true, "Admin username", true));
-                options.addOption(createOption("P", "adminpass", "masterPassword", true, "Admin password", true));
+                options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Admin username", true));
+                options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Admin password", true));
             }
 
             // Add other options

@@ -104,7 +104,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             // Option for help
             options.addOption("h", "help", false, "Prints a help text");
             if (requiresAdministrativePermission()) {
-                options.addOption(createOption(USER_SHORT, USER_LONG, "user:password", true, "Username and password to use for API authentication (user:password).", true));
+                options.addOption(createArgumentOption(USER_SHORT, USER_LONG, "user:password", "Username and password to use for API authentication (user:password).", true));
             }
 
             // Add other options
