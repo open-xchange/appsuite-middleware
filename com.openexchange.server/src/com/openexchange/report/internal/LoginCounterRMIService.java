@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,42 +49,30 @@
 
 package com.openexchange.report.internal;
 
-import java.util.Date;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.List;
-import java.util.Map;
 import javax.management.MBeanException;
-import com.openexchange.exception.OXException;
-
 
 /**
- * {@link LoginCounter}
+ * {@link LoginCounterRMIService}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class LoginCounter implements LoginCounterMBean {
-    
-    private final LoginCounterImpl counter;
+public interface LoginCounterRMIService extends Remote {
 
-    public LoginCounter(LoginCounterImpl counter) {
-        this.counter = counter;
-    }
-    
-    @Override
-    public Map<String, Integer> getNumberOfLogins(Date startDate, Date endDate, boolean aggregate, String regex) throws MBeanException {
-        try {
-            return counter.getNumberOfLogins(startDate, endDate, aggregate, regex);
-        } catch (OXException e) {
-            throw new MBeanException(e);
-        }
-    }
-
-    @Override
-    public List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws MBeanException {
-        try {
-            return counter.getLastLoginTimeStamp(userId, contextId, client);
-        } catch (OXException e) {
-            throw new MBeanException(e);
-        }
-    }
-
+    /**
+     * Gets the time stamp of last login for specified user for given client.
+     * <p>
+     * The number of milliseconds since January 1, 1970, 00:00:00 GMT.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param client The client identifier
+     * @return The time stamp of last login as UTC <code>long</code><br>
+     *         (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
+     * @throws MBeanException If retrieval fails
+     */
+    List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws RemoteException;
 }

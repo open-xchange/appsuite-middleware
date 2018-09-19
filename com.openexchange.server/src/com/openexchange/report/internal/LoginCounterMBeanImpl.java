@@ -49,48 +49,31 @@
 
 package com.openexchange.report.internal;
 
+import java.util.Date;
+import java.util.Map;
+import javax.management.MBeanException;
 import com.openexchange.exception.OXException;
-import com.openexchange.management.ManagementService;
-import com.openexchange.report.Constants;
-import com.openexchange.server.Initialization;
+
 
 /**
- * {@link ReportingInit}
+ * {@link LoginCounterMBeanImpl}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ReportingInit implements Initialization {
+public class LoginCounterMBeanImpl implements LoginCounterMBean {
+    
+    private final LoginCounterImpl counter;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReportingInit.class);
-
-    private final ManagementService managementService;
-
-    /**
-     * Default constructor.
-     * @param managementService
-     */
-    public ReportingInit(ManagementService managementService) {
-        super();
-        this.managementService = managementService;
+    public LoginCounterMBeanImpl(LoginCounterImpl counter) {
+        this.counter = counter;
     }
-
+    
     @Override
-    public void start() {
+    public Map<String, Integer> getNumberOfLogins(Date startDate, Date endDate, boolean aggregate, String regex) throws MBeanException {
         try {
-            managementService.registerMBean(Constants.REPORTING_NAME, new ReportingMBean());
-            managementService.registerMBean(Constants.LOGIN_COUNTER_NAME, new LoginCounterMBeanImpl(new LoginCounterImpl()));
+            return counter.getNumberOfLogins(startDate, endDate, aggregate, regex);
         } catch (OXException e) {
-            LOG.error("", e);
-        }
-    }
-
-    @Override
-    public void stop() {
-        try {
-            managementService.unregisterMBean(Constants.REPORTING_NAME);
-            managementService.unregisterMBean(Constants.LOGIN_COUNTER_NAME);
-        } catch (OXException e) {
-            LOG.error("", e);
+            throw new MBeanException(e);
         }
     }
 }

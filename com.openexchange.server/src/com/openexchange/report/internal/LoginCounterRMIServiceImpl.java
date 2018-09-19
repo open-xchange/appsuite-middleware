@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,48 +49,40 @@
 
 package com.openexchange.report.internal;
 
+import java.rmi.RemoteException;
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.management.ManagementService;
-import com.openexchange.report.Constants;
-import com.openexchange.server.Initialization;
+import com.openexchange.report.LoginCounterService;
 
 /**
- * {@link ReportingInit}
+ * {@link LoginCounterRMIServiceImpl}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.1
  */
-public class ReportingInit implements Initialization {
+public class LoginCounterRMIServiceImpl implements LoginCounterRMIService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReportingInit.class);
-
-    private final ManagementService managementService;
+    private LoginCounterService counterService;
 
     /**
-     * Default constructor.
-     * @param managementService
+     * Initialises a new {@link LoginCounterRMIServiceImpl}.
      */
-    public ReportingInit(ManagementService managementService) {
+    public LoginCounterRMIServiceImpl(LoginCounterService counterService) {
         super();
-        this.managementService = managementService;
+        this.counterService = counterService;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.report.internal.LoginCounterRMIService#getLastLoginTimeStamp(int, int, java.lang.String)
+     */
     @Override
-    public void start() {
+    public List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws RemoteException {
         try {
-            managementService.registerMBean(Constants.REPORTING_NAME, new ReportingMBean());
-            managementService.registerMBean(Constants.LOGIN_COUNTER_NAME, new LoginCounterMBeanImpl(new LoginCounterImpl()));
+            return counterService.getLastLoginTimeStamp(userId, contextId, client);
         } catch (OXException e) {
-            LOG.error("", e);
-        }
-    }
-
-    @Override
-    public void stop() {
-        try {
-            managementService.unregisterMBean(Constants.REPORTING_NAME);
-            managementService.unregisterMBean(Constants.LOGIN_COUNTER_NAME);
-        } catch (OXException e) {
-            LOG.error("", e);
+            throw new RemoteException(e.getMessage(), e);
         }
     }
 }

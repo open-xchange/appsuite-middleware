@@ -96,8 +96,7 @@ public class LastLoginRecorder implements LoginHandlerService {
             whiteList.add(iface.toString());
         }
 
-        String[] knownClients = {
-            Client.OX6_UI.getClientId(),                   // OX6 frontend
+        String[] knownClients = { Client.OX6_UI.getClientId(),                   // OX6 frontend
             Client.APPSUITE_UI.getClientId(),              // AppSuite frontend
             Client.MOBILE_APP.getClientId(),               // Mobile Web Interface
             Client.OUTLOOK_OXTENDER2_ADDIN.getClientId(),  // Outlook OXtender2 AddIn
