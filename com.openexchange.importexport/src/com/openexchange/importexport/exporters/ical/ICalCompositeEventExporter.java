@@ -59,7 +59,7 @@ import com.google.common.collect.Lists;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.ical.CalendarExport;
+import com.openexchange.chronos.ical.StreamingExporter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
@@ -85,12 +85,6 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
     @Override
     protected ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
         /*
-         * prepare export
-         */
-        CalendarExport calendarExport = ImportExportServices.getICalService().exportICal(null);
-        calendarExport.setMethod("PUBLISH");
-        calendarExport.setName(extractName(session, getFolderId()));
-        /*
          * get identifiers of all events in exported folder
          */
         IDBasedCalendarAccess calendarAccess = getCalendarAccess(session);
@@ -100,20 +94,27 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
         if (-1 < limit) {
             calendarAccess.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(limit));
         }
-        List<EventID> eventIDs = getEventIDs(calendarExport, calendarAccess.getEventsInFolder(getFolderId()));
+        List<Event> eventsInFolder = calendarAccess.getEventsInFolder(getFolderId());
+        /*
+         * prepare export
+         */
+        StreamingExporter streamedExport = ImportExportServices.getICalService().getStreamedExport(null, eventsInFolder);
+        streamedExport.prepare("PUBLISH", extractName(session, getFolderId()));
+        streamedExport.start(out);
         /*
          * load full event data in chunks & add to export
          */
         calendarAccess = getCalendarAccess(session);
         calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, EXPORTED_FIELDS);
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-        for (List<EventID> chunk : Lists.partition(eventIDs, 100)) {
+
+        for (List<EventID> chunk : Lists.partition(getEventIDs(eventsInFolder), 100)) {
             /*
              * serialize calendar
              */
-            calendarExport.writeEventChunk(out, prepareForExport(calendarAccess.getEvents(chunk)));
+            streamedExport.streamChunk(prepareForExport(calendarAccess.getEvents(chunk)));
         }
-        calendarExport.finishEventChunk();
+        streamedExport.finish();
         return null;
     }
 
@@ -134,18 +135,16 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
     /**
      * Gets the full identifiers for the supplied events holding the folder and file identifiers.
      * 
-     * @param calendarExport The export that tracks the timezones
      * @param events The events to get the full identifiers for
      * @return The full identifiers for the events
      */
-    private static List<EventID> getEventIDs(CalendarExport calendarExport, List<Event> events) {
+    private static List<EventID> getEventIDs(List<Event> events) {
         if (null == events) {
             return Collections.emptyList();
         }
         List<EventID> eventIDs = new ArrayList<EventID>(events.size());
         for (Event event : events) {
             eventIDs.add(new EventID(event.getFolderId(), event.getId()));
-            calendarExport.trackTimeZones(event);
         }
         return eventIDs;
     }

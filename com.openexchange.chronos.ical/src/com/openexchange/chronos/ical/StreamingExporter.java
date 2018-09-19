@@ -49,59 +49,48 @@
 
 package com.openexchange.chronos.ical;
 
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link ICalService}
+ * {@link StreamingExporter} - Exports an calendar by streaming an iCal file.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.1
  */
-@SingletonService
-public interface ICalService {
+public interface StreamingExporter {
 
     /**
-     * Imports an iCalendar file.
-     *
-     * @param inputStream The input stream carrying the iCalendar data to import
-     * @param parameters Further parameters for the iCalendar import, or <code>null</code> to stick with the defaults
-     * @return A calendar import providing access to the imported data
-     * @throws OXException If importing the iCalendar data fails; non-fatal conversion warnings are accessible within each imported component
-     */
-    ImportedCalendar importICal(InputStream inputStream, ICalParameters parameters) throws OXException;
-
-    /**
-     * Initializes a new {@link CalendarExport} for adding events or other iCalendar components to the export.
-     *
-     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
-     * @return The calendar export
-     */
-    CalendarExport exportICal(ICalParameters parameters);
-
-    /**
-     * Initializes a new {@link ICalParameters} instance for use with the iCal service.
-     *
-     * @return The parameters
-     */
-    ICalParameters initParameters();
-
-    /**
-     * Provides access to additional iCal utilities.
-     *
-     * @return The iCal utilities
-     */
-    ICalUtilities getUtilities();
-
-    /**
-     * Initializes a {@link StreamingExporter}.
+     * Prepares the export
      * 
-     * @param parameters The {@link ICalParameters}
-     * @param events A {@link List} of {@link Event}s. If <b>not</b> set, timezone definitions are parsed and written at runtime, resulting in an unsorted iCal file
-     * @return A {@link StreamingExporter}
+     * @param methodName The method name to use on the generated iCal file
+     * @param calendarName The name of the calendar
      */
-    StreamingExporter getStreamedExport(ICalParameters parameters, List<Event> events);
+    void prepare(String methodName, String calendarName);
+
+    /**
+     * Starts the streaming on the given {@link OutputStream}
+     * 
+     * @param outputStream The {@link OutputStream} to write on
+     * @throws OXException In case writing fails
+     */
+    void start(OutputStream outputStream) throws OXException;
+
+    /**
+     * Streams a chunk of {@link Event}s to the output stream
+     * 
+     * @param events The {@link List} of {@link Event}s to stream
+     * @throws OXException In case writing fails
+     */
+    void streamChunk(List<Event> events) throws OXException;
+
+    /**
+     * Finish writing to the output stream
+     * 
+     * @throws OXException In case writing fails
+     */
+    void finish() throws OXException;
+
 }

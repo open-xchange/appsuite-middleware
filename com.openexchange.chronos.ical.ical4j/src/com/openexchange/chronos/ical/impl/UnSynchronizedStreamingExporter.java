@@ -47,61 +47,69 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.impl;
 
-import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalUtilities;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import net.fortuna.ical4j.model.component.VTimeZone;
 
 /**
- * {@link ICalService}
+ * {@link UnSynchronizedStreamingExporter} - Unsynchronized iCal export. Timezone definitions will be written on runtime. This means the
+ * timezone definitions are <b>unsorted</b> and will appear <b>between</b> the <code>VEVENT</code> definitions
+ * 
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.1
  */
-@SingletonService
-public interface ICalService {
+public class UnSynchronizedStreamingExporter extends AbstractStreamingExporter {
+
+    private final Set<VTimeZone> timeZones;
 
     /**
-     * Imports an iCalendar file.
-     *
-     * @param inputStream The input stream carrying the iCalendar data to import
-     * @param parameters Further parameters for the iCalendar import, or <code>null</code> to stick with the defaults
-     * @return A calendar import providing access to the imported data
-     * @throws OXException If importing the iCalendar data fails; non-fatal conversion warnings are accessible within each imported component
-     */
-    ImportedCalendar importICal(InputStream inputStream, ICalParameters parameters) throws OXException;
-
-    /**
-     * Initializes a new {@link CalendarExport} for adding events or other iCalendar components to the export.
-     *
-     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
-     * @return The calendar export
-     */
-    CalendarExport exportICal(ICalParameters parameters);
-
-    /**
-     * Initializes a new {@link ICalParameters} instance for use with the iCal service.
-     *
-     * @return The parameters
-     */
-    ICalParameters initParameters();
-
-    /**
-     * Provides access to additional iCal utilities.
-     *
-     * @return The iCal utilities
-     */
-    ICalUtilities getUtilities();
-
-    /**
-     * Initializes a {@link StreamingExporter}.
+     * Initializes a new {@link UnSynchronizedStreamingExporter}.
      * 
+     * @param iCalUtilities The {@link ICalUtilities}
      * @param parameters The {@link ICalParameters}
-     * @param events A {@link List} of {@link Event}s. If <b>not</b> set, timezone definitions are parsed and written at runtime, resulting in an unsorted iCal file
-     * @return A {@link StreamingExporter}
      */
-    StreamingExporter getStreamedExport(ICalParameters parameters, List<Event> events);
+    public UnSynchronizedStreamingExporter(ICalUtilities iCalUtilities, ICalParameters parameters) {
+        super(iCalUtilities, parameters);
+        this.timeZones = new HashSet<>();
+    }
+
+    @Override
+    public void streamChunk(List<Event> events) throws OXException {
+        Set<VTimeZone> timeZones = new HashSet<>(3);
+        for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
+            getTimeZones(iterator.next(), timeZones);
+            writeMissingTimeZones(timeZones);
+            timeZones.clear();
+        }
+
+        super.streamChunk(events);
+    }
+
+    /**
+     * Adds all missing timezone definitions to the stream. Will write the timezone between different section, <b>unsorted</b>
+     * 
+     * @param timeZones The timezones to add
+     * @throws OXException If writing fails
+     */
+    private void writeMissingTimeZones(Set<VTimeZone> timeZones) throws OXException {
+        if (false == this.timeZones.containsAll(timeZones)) {
+            for (Iterator<VTimeZone> iteratror = timeZones.iterator(); iteratror.hasNext();) {
+                VTimeZone zone = iteratror.next();
+                if (false == this.timeZones.contains(zone)) {
+                    write(zone.toString());
+                    timeZones.add(zone);
+                }
+            }
+        }
+    }
+
 }

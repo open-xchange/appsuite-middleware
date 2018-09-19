@@ -53,11 +53,13 @@ import static com.openexchange.chronos.ical.impl.ICalUtils.getParametersOrDefaul
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ICalUtilities;
 import com.openexchange.chronos.ical.ImportedCalendar;
+import com.openexchange.chronos.ical.StreamingExporter;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
 
@@ -70,6 +72,7 @@ import com.openexchange.exception.OXException;
 public class ICalServiceImpl implements ICalService {
 
     private final ICalMapper mapper;
+
     private final ICalUtilities iCalUtilities;
 
     /**
@@ -85,9 +88,9 @@ public class ICalServiceImpl implements ICalService {
     public CalendarExport exportICal(ICalParameters parameters) {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
         List<OXException> warnings = new ArrayList<OXException>();
-        return new CalendarExportImpl(iCalUtilities, mapper, iCalParameters, warnings);
+        return new CalendarExportImpl(mapper, iCalParameters, warnings);
     }
-    
+
     @Override
     public ImportedCalendar importICal(InputStream iCalFile, ICalParameters parameters) throws OXException {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
@@ -103,6 +106,12 @@ public class ICalServiceImpl implements ICalService {
     @Override
     public ICalUtilities getUtilities() {
         return iCalUtilities;
+    }
+
+    @Override
+    public StreamingExporter getStreamedExport(ICalParameters parameters, List<Event> events) {
+        ICalParameters iCalParameters = getParametersOrDefault(parameters);
+        return null == events || events.isEmpty() ? new UnSynchronizedStreamingExporter(iCalUtilities, iCalParameters) : new SynchronizedStreamingExporter(iCalUtilities, iCalParameters, events);
     }
 
 }
