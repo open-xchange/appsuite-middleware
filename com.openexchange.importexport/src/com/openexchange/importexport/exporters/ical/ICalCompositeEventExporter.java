@@ -100,7 +100,6 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
          */
         StreamingExporter streamedExport = ImportExportServices.getICalService().getStreamedExport(null, eventsInFolder);
         streamedExport.prepare("PUBLISH", extractName(session, getFolderId()));
-        streamedExport.start(out);
         /*
          * load full event data in chunks & add to export
          */
@@ -108,6 +107,7 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
         calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, EXPORTED_FIELDS);
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
 
+        streamedExport.start(out);
         for (List<EventID> chunk : Lists.partition(getEventIDs(eventsInFolder), 100)) {
             /*
              * serialize calendar

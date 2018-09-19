@@ -245,7 +245,7 @@ public abstract class AbstractStreamingExporter implements StreamingExporter {
         }
     }
 
-    protected boolean getTimeZones(Event event, Set<VTimeZone> timeZones) {
+    protected boolean setTimeZones(Event event, Set<VTimeZone> timeZones) {
         boolean added = false;
         if (false == CalendarUtils.isFloating(event)) {
             added |= setTimeZone(timeZones, event.getStartDate());

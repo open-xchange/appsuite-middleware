@@ -86,7 +86,7 @@ public class UnSynchronizedStreamingExporter extends AbstractStreamingExporter {
     public void streamChunk(List<Event> events) throws OXException {
         Set<VTimeZone> timeZones = new HashSet<>(3);
         for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
-            getTimeZones(iterator.next(), timeZones);
+            setTimeZones(iterator.next(), timeZones);
             writeMissingTimeZones(timeZones);
             timeZones.clear();
         }
