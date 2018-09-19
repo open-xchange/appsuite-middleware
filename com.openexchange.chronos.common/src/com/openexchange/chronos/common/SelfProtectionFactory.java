@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
@@ -84,7 +85,7 @@ public class SelfProtectionFactory {
         super();
     }
 
-    public static SelfProtection createSelfProtection(LeanConfigurationService leanConfigurationService) throws OXException{
+    public static SelfProtection createSelfProtection(LeanConfigurationService leanConfigurationService) {
         return new SelfProtection(leanConfigurationService);
     }
 
@@ -96,9 +97,9 @@ public class SelfProtectionFactory {
 
         /**
          * Initializes a new {@link SelfProtectionFactory.SelfProtection}.
-         * @throws OXException
+         * @param leanConfigurationService The {@link LeanConfigurationService}
          */
-        public SelfProtection(LeanConfigurationService leanConfigurationService) throws OXException {
+        public SelfProtection(LeanConfigurationService leanConfigurationService) {
             super();
             if(leanConfigurationService == null){
                 // Log warning and use defaults
@@ -109,13 +110,13 @@ public class SelfProtectionFactory {
                 return;
             }
 
-            Property prop = DefaultProperty.valueOf(PROPERTY_EVENT_LIMIT, 1000);
+            Property prop = DefaultProperty.valueOf(PROPERTY_EVENT_LIMIT, I(1000));
             eventLimit = leanConfigurationService.getIntProperty(prop);
 
-            prop = DefaultProperty.valueOf(PROPERTY_ATTENDEE_LIMIT, 1000);
+            prop = DefaultProperty.valueOf(PROPERTY_ATTENDEE_LIMIT, I(1000));
             attendeeLimit = leanConfigurationService.getIntProperty(prop);
 
-            prop = DefaultProperty.valueOf(PROPERTY_ALARM_LIMIT, 100);
+            prop = DefaultProperty.valueOf(PROPERTY_ALARM_LIMIT, I(100));
             alarmLimit = leanConfigurationService.getIntProperty(prop);
         }
 
@@ -175,7 +176,7 @@ public class SelfProtectionFactory {
         /**
          * Checks if a {@link Collection} of {@link Attendee}s contains too many elements.
          *
-         * @param event The {@link Collection} to check
+         * @param attendees The {@link Collection} to check
          * @throws OXException if the {@link Collection} contains too many {@link Attendee}s
          */
         public void checkAttendeeCollection(Collection<Attendee> attendees) throws OXException {
@@ -201,7 +202,7 @@ public class SelfProtectionFactory {
 
     }
 
-    private static int countEventsResults(Map<?, ? extends EventsResult> eventsResults) {
+    static int countEventsResults(Map<?, ? extends EventsResult> eventsResults) {
         int count = 0;
         if (null != eventsResults) {
             for (EventsResult value : eventsResults.values()) {
