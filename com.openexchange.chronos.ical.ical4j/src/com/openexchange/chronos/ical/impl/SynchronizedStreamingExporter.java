@@ -82,7 +82,7 @@ public class SynchronizedStreamingExporter extends AbstractStreamingExporter {
         super(iCalUtilities, parameters);
         timeZones = new HashSet<>();
         for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
-            getTimeZones(iterator.next(), timeZones);
+            setTimeZones(iterator.next(), timeZones);
         }
     }
 
