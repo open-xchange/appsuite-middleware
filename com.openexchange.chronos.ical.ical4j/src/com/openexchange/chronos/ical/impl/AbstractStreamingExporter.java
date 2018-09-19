@@ -56,63 +56,92 @@ import static net.fortuna.ical4j.util.Strings.LINE_SEPARATOR;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalUtilities;
-import com.openexchange.chronos.ical.ical4j.VCalendar;
+import com.openexchange.chronos.ical.StreamingExporter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import net.fortuna.ical4j.data.FoldingWriter;
+import net.fortuna.ical4j.extensions.property.WrCalName;
+import net.fortuna.ical4j.model.PropertyFactoryImpl;
+import net.fortuna.ical4j.model.TimeZoneRegistry;
+import net.fortuna.ical4j.model.component.VTimeZone;
+import net.fortuna.ical4j.model.property.Method;
+import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.Version;
 
 /**
- * {@link IcalExportWriter} - Streams events to export directly on the {@link OutputStream}
+ * {@link AbstractStreamingExporter}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class IcalExportWriter {
+public abstract class AbstractStreamingExporter implements StreamingExporter {
+
+    private final static List<Method> METHODS = ImmutableList.of(Method.ADD, Method.CANCEL, Method.COUNTER, Method.DECLINE_COUNTER, Method.PUBLISH, Method.REFRESH, Method.REPLY, Method.REQUEST);
+
+    // ------------------------------------------------------------------------------------------------
+
+    protected FoldingWriter writer;
+
+    protected ICalParameters parameters;
+
+    // ------------------------------------------------------------------------------------------------
 
     private final ICalUtilities iCalUtilities;
 
-    private FoldingWriter writer;
+    private Method method;
 
-    private boolean initialized = false;
+    private WrCalName calendarName;
 
     // ------------------------------------------------------------------------------------------------
 
     /**
-     * Initializes a new {@link IcalExportWriter}.
+     * Initializes a new {@link AbstractStreamingExporter}.
      * 
      * @param iCalUtilities The {@link ICalUtilities}
+     * @param parameters The {@link ICalParameters}
      * 
      */
-    public IcalExportWriter(ICalUtilities iCalUtilities) {
+    public AbstractStreamingExporter(ICalUtilities iCalUtilities, ICalParameters parameters) {
         super();
         this.iCalUtilities = iCalUtilities;
+        this.parameters = parameters;
     }
 
     // ------------------------------------------------------------------------------------------------
 
-    public void writeEventChunk(OutputStream outputStream, VCalendar vCalendar, Set<String> timezoneIDs, ICalParameters parameters, List<Event> events) throws OXException {
-        if (false == initialized) {
-            initialized = true;
-            writer = new FoldingWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8), FoldingWriter.MAX_FOLD_LENGTH);
-            write(getStart());
-            write(getProperties(vCalendar));
-            iCalUtilities.exportTimeZones(writer, new ArrayList<>(timezoneIDs), parameters);
-        }
+    @Override
+    public void prepare(String methodName, String calendarName) {
+        this.method = getMethod(methodName);
+        WrCalName calName = new WrCalName(PropertyFactoryImpl.getInstance());
+        calName.setValue(calendarName);
+        this.calendarName = calName;
+    }
+
+    @Override
+    public void start(OutputStream outputStream) throws OXException {
+        writer = new FoldingWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8), FoldingWriter.MAX_FOLD_LENGTH);
+        write(getStart());
+        write(getProperties());
+    }
+
+    @Override
+    public void streamChunk(List<Event> events) throws OXException {
         iCalUtilities.exportEvent(writer, events, parameters);
     }
 
-    public void build() throws OXException {
-        if (false == initialized) {
-            return;
-        }
+    @Override
+    public void finish() throws OXException {
         try {
             write(getEnd());
         } finally {
@@ -146,7 +175,7 @@ public class IcalExportWriter {
      */
     private String getEnd() {
         // End calendar
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append(END);
         sb.append(':');
         sb.append(VCALENDAR);
@@ -159,24 +188,78 @@ public class IcalExportWriter {
      * <p/>
      * Note that the generated data will only contain property components, e.g. the (<code>VERSION:2.0</code>),
      * <a href="https://tools.ietf.org/html/rfc5545#section-3.4">RFC 5545, section 3.4</a>.
-     * 
-     * @param vCalendar The {@link VCalendar} holding the properties
      */
-
-    @SuppressWarnings("unchecked")
-    private String getProperties(VCalendar vCalendar) {
-        final StringBuilder sb = new StringBuilder();
-        vCalendar.getProperties().stream().forEach(p -> sb.append(p));
+    private String getProperties() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Version.VERSION_2_0);
+        sb.append(getProdID());
+        sb.append(method);
+        sb.append(calendarName);
         return sb.toString();
+    }
+
+    private ProdId getProdID() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("-//").append(com.openexchange.version.Version.NAME).append("//");
+        String versionString = com.openexchange.version.Version.getInstance().optVersionString();
+        if (Strings.isEmpty(versionString)) {
+            sb.append("<unknown version>");
+        } else {
+            sb.append(versionString);
+        }
+        sb.append("//EN");
+        return new ProdId(sb.toString());
+    }
+
+    /**
+     * Get the method for exporting
+     * 
+     * @param toMatch The method name or <code>null</code>
+     * @return The {@link Method} or {@link Method#PUBLISH} as default
+     */
+    private Method getMethod(String toMatch) {
+        if (Strings.isNotEmpty(toMatch)) {
+            for (Iterator<Method> iterator = METHODS.iterator(); iterator.hasNext();) {
+                Method method = iterator.next();
+                if (method.getValue().equals(toMatch)) {
+                    return method;
+                }
+            }
+        }
+        return Method.PUBLISH;
     }
 
     // ------------------------------------------------------------------------------------------------
 
-    private void write(String str) throws OXException {
+    protected void write(String str) throws OXException {
+        boolean error = false;
         try {
             writer.write(str);
         } catch (IOException e) {
+            error = true;
             throw ICalExceptionCodes.IO_ERROR.create(e);
+        } finally {
+            if (error) {
+                Streams.close(writer);
+            }
         }
+    }
+
+    protected boolean getTimeZones(Event event, Set<VTimeZone> timeZones) {
+        boolean added = false;
+        if (false == CalendarUtils.isFloating(event)) {
+            added |= setTimeZone(timeZones, event.getStartDate());
+            added |= setTimeZone(timeZones, event.getEndDate());
+        }
+        return added;
+    }
+
+    protected boolean setTimeZone(Set<VTimeZone> timeZones, org.dmfs.rfc5545.DateTime dateTime) {
+        if (null != dateTime && false == dateTime.isFloating() && null != dateTime.getTimeZone() && false == "UTC".equals(dateTime.getTimeZone().getID())) {
+            TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
+            net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(dateTime.getTimeZone().getID());
+            return timeZones.add(timeZone.getVTimeZone());
+        }
+        return false;
     }
 }

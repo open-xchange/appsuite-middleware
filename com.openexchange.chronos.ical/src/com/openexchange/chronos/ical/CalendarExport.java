@@ -170,25 +170,4 @@ public interface CalendarExport {
      */
     boolean trackTimeZones(Event event);
 
-    /**
-     * Exports events chunk-wise to the given output stream
-     * </p>
-     * <b>Note</b>: Don't forget to call {@link #finishEventChunk()} to generate a valid iCAL file!!
-     * </p>
-     * 
-     * @param outputStream The {@link OutputStream} to write to
-     * @param events The events to write
-     * @throws OXException In case the events can't be written
-     */
-    public void writeEventChunk(OutputStream outputStream, List<Event> events) throws OXException;
-
-    /**
-     * Finish writing to the {@link OutputStream}.
-     * </p>
-     * Note: Only has effect if {@link #writeEventChunk(OutputStream, List)} was called before
-     * 
-     * @throws OXException In case writing fails
-     */
-    public void finishEventChunk() throws OXException;
-
 }

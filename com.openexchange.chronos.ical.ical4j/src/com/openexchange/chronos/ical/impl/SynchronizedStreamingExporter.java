@@ -47,61 +47,52 @@
  *
  */
 
-package com.openexchange.chronos.ical;
+package com.openexchange.chronos.ical.impl;
 
-import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ICalUtilities;
+import com.openexchange.chronos.ical.StreamingExporter;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import net.fortuna.ical4j.model.component.VTimeZone;
 
 /**
- * {@link ICalService}
+ * {@link SynchronizedStreamingExporter} - Synchronized {@link StreamingExporter} for iCal files. Timezone definitions will be written on top of the events.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.10.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.1
  */
-@SingletonService
-public interface ICalService {
+public class SynchronizedStreamingExporter extends AbstractStreamingExporter {
+
+    private final Set<VTimeZone> timeZones;
 
     /**
-     * Imports an iCalendar file.
-     *
-     * @param inputStream The input stream carrying the iCalendar data to import
-     * @param parameters Further parameters for the iCalendar import, or <code>null</code> to stick with the defaults
-     * @return A calendar import providing access to the imported data
-     * @throws OXException If importing the iCalendar data fails; non-fatal conversion warnings are accessible within each imported component
-     */
-    ImportedCalendar importICal(InputStream inputStream, ICalParameters parameters) throws OXException;
-
-    /**
-     * Initializes a new {@link CalendarExport} for adding events or other iCalendar components to the export.
-     *
-     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
-     * @return The calendar export
-     */
-    CalendarExport exportICal(ICalParameters parameters);
-
-    /**
-     * Initializes a new {@link ICalParameters} instance for use with the iCal service.
-     *
-     * @return The parameters
-     */
-    ICalParameters initParameters();
-
-    /**
-     * Provides access to additional iCal utilities.
-     *
-     * @return The iCal utilities
-     */
-    ICalUtilities getUtilities();
-
-    /**
-     * Initializes a {@link StreamingExporter}.
+     * Initializes a new {@link SynchronizedStreamingExporter}.
      * 
+     * @param iCalUtilities The {@link ICalUtilities}
      * @param parameters The {@link ICalParameters}
-     * @param events A {@link List} of {@link Event}s. If <b>not</b> set, timezone definitions are parsed and written at runtime, resulting in an unsorted iCal file
-     * @return A {@link StreamingExporter}
+     * @param events The events to get the timezone information from
      */
-    StreamingExporter getStreamedExport(ICalParameters parameters, List<Event> events);
+    public SynchronizedStreamingExporter(ICalUtilities iCalUtilities, ICalParameters parameters, List<Event> events) {
+        super(iCalUtilities, parameters);
+        timeZones = new HashSet<>();
+        for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
+            getTimeZones(iterator.next(), timeZones);
+        }
+    }
+
+    @Override
+    public void start(OutputStream outputStream) throws OXException {
+        super.start(outputStream);
+        for (Iterator<VTimeZone> iterator = timeZones.iterator(); iterator.hasNext();) {
+            write(iterator.next().toString());
+        }
+        timeZones.clear();
+    }
+
 }
