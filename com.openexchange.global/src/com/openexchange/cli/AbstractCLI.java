@@ -352,8 +352,23 @@ public abstract class AbstractCLI<R, C> {
      * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
      */
     protected Option createOption(String shortName, String longName, boolean hasArgs, String description, boolean mandatory) {
+        return createOption(shortName, longName, "arg", hasArgs, description, mandatory);
+    }
+
+    /**
+     * Create an {@link Option} with the {@link OptionBuilder}
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param argName The argument's name
+     * @param hasArgs boolean flag to indicate whether or not the option has arguments
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     */
+    protected Option createOption(String shortName, String longName, String argName, boolean hasArgs, String description, boolean mandatory) {
         OptionBuilder.withLongOpt(longName);
         OptionBuilder.hasArg(hasArgs);
+        OptionBuilder.withArgName(argName);
         OptionBuilder.withDescription(description);
         OptionBuilder.isRequired(mandatory);
         return OptionBuilder.create(shortName);

@@ -100,17 +100,17 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             options.addOption("h", "help", false, "Prints a help text");
 
             // Option for JMX connect & authentication
-            options.addOption("H", "host", true, "The optional JMX host (default:localhost)");
-            options.addOption("p", "port", true, "The optional JMX port (default:9999)");
-            options.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
-            options.addOption("l", "login", true, "The optional JMX login (if JMX authentication is enabled)");
-            options.addOption("s", "password", true, "The optional JMX password (if JMX authentication is enabled)");
+            options.addOption(createOption("H", "host", "jmxHost", true, "The optional JMX host (default:localhost)", false));
+            options.addOption(createOption("p", "port", "jmxPort", true, "The optional JMX port (default:9999)", false));
+            options.addOption(createOption(null, "responsetimeout", "timeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)", false));
+            options.addOption(createOption("l", "login", "jmxLogin", true, "The optional JMX login (if JMX authentication is enabled)", false));
+            options.addOption(createOption("s", "password", "jmxPassword", true, "The optional JMX password (if JMX authentication is enabled)", false));
 
             // Check if administrative permission is required
             final boolean requiresAdministrativePermission = requiresAdministrativePermission();
             if (requiresAdministrativePermission) {
-                options.addOption("A", "adminuser", true, "Admin username");
-                options.addOption("P", "adminpass", true, "Admin password");
+                options.addOption(createOption("A", "adminuser", "masterAdmin", true, "Admin username", true));
+                options.addOption(createOption("P", "adminpass", "masterPassword", true, "Admin password", true));
             }
 
             // Add other options

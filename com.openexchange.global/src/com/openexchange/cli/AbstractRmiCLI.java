@@ -136,15 +136,15 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             options.addOption("h", "help", false, "Prints a help text");
 
             // Option for RMI connect
-            options.addOption("s", "server", true, "The optional RMI server (default: localhost)");
-            options.addOption("p", "port", true, "The optional RMI port (default:1099)");
-            options.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
+            options.addOption(createOption("s", "server", "rmiHost", true, "The optional RMI server (default: localhost)", false));
+            options.addOption(createOption("p", "port", "rmiPort", true, "The optional RMI port (default:1099)", false));
+            options.addOption(createOption(null, "responsetimeout", "timeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)", false));
 
             // Check if administrative permission is required
             final boolean requiresAdministrativePermission = requiresAdministrativePermission();
             if (requiresAdministrativePermission) {
-                options.addOption("A", "adminuser", true, "Admin username");
-                options.addOption("P", "adminpass", true, "Admin password");
+                options.addOption(createOption("A", "adminuser", "masterAdmin", true, "Admin username", true));
+                options.addOption(createOption("P", "adminpass", "masterPassword", true, "Admin password", true));
             }
 
             // Add other options

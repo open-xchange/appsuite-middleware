@@ -57,7 +57,6 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -105,9 +104,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             // Option for help
             options.addOption("h", "help", false, "Prints a help text");
             if (requiresAdministrativePermission()) {
-                Option user = new Option(USER_SHORT, USER_LONG, true, "Username and password to use for API authentication (user:password).");
-                user.setRequired(true);
-                options.addOption(user);
+                options.addOption(createOption(USER_SHORT, USER_LONG, "user:password", true, "Username and password to use for API authentication (user:password).", true));
             }
 
             // Add other options
