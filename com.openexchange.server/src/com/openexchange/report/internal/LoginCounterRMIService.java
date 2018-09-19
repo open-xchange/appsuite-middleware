@@ -62,6 +62,8 @@ import javax.management.MBeanException;
  */
 public interface LoginCounterRMIService extends Remote {
 
+    public static final String RMI_NAME = LoginCounterRMIService.class.getSimpleName();
+
     /**
      * Gets the time stamp of last login for specified user for given client.
      * <p>
