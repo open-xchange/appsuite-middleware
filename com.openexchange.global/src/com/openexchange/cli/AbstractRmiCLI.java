@@ -75,14 +75,14 @@ import com.openexchange.java.Strings;
  */
 public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, String> {
 
-    protected static final AtomicReference<String> RMI_HOSTNAME = new AtomicReference<String>("rmi://localhost:1099/");
+    protected final static AtomicReference<String> RMI_HOSTNAME = new AtomicReference<String>("rmi://localhost:1099/");
 
     /**
      * Sets the RMI host name
      *
      * @param rmiHostName The RMI host name
      */
-    protected static void setRMI_HOSTNAME(final String rmiHostName) {
+    protected static void setRMI_HOSTNAME(String rmiHostName) {
         String host = rmiHostName;
         if (!host.startsWith("rmi://")) {
             host = "rmi://" + host;
@@ -104,9 +104,9 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
         setEnvConfigOption("RMI_HOSTNAME");
     }
 
-    private final void setEnvConfigOption(String opt) {
-        final String property = System.getProperties().getProperty(opt);
-        final String env = System.getenv(opt);
+    private void setEnvConfigOption(String opt) {
+        String property = System.getProperties().getProperty(opt);
+        String env = System.getenv(opt);
         String setOpt = null;
         if (null != env && env.trim().length() > 0) {
             setOpt = env;
@@ -127,7 +127,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
      * @return The return value
      */
     @Override
-    public R execute(final String[] args) {
+    public R execute(String[] args) {
         Options options = newOptions();
         boolean error = true;
         try {
@@ -140,7 +140,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             options.addOption(createArgumentOption(null, "responsetimeout", "timeout", "The optional response timeout in seconds when reading data from server (default: 0s; infinite)", false));
 
             // Check if administrative permission is required
-            final boolean requiresAdministrativePermission = requiresAdministrativePermission();
+            boolean requiresAdministrativePermission = requiresAdministrativePermission();
             if (requiresAdministrativePermission) {
                 options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Admin username", true));
                 options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Admin password", true));
@@ -150,8 +150,8 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             addOptions(options);
 
             // Initialize command-line parser & parse arguments
-            final CommandLineParser parser = new PosixParser();
-            final CommandLine cmd = parser.parse(options, args);
+            CommandLineParser parser = new PosixParser();
+            CommandLine cmd = parser.parse(options, args);
 
             // Check if help output is requested
             if (cmd.hasOption('h')) {
@@ -232,30 +232,30 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
 
             error = false;
             return retval;
-        } catch (final ExecutionFault e) {
-            final Throwable t = e.getCause();
-            final String message = t.getMessage();
+        } catch (ExecutionFault e) {
+            Throwable t = e.getCause();
+            String message = t.getMessage();
             System.err.println(null == message ? "An error occurred." : message);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);
-        } catch (final NotBoundException e) {
+        } catch (NotBoundException e) {
             System.err.println("Remote stub not found: " + e.getMessage());
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
-        } catch (final ConnectException e) {
+        } catch (ConnectException e) {
             System.err.println("Unable to connect to server");
-        } catch (final IOException e) {
+        } catch (IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Error e) {
+        } catch (Error e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             String message = t.getMessage();
             String clazzName = t.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));

@@ -62,7 +62,7 @@ import org.apache.commons.cli.PosixParser;
  * {@link AbstractCLI} - The basic super class for command-line tools.
  * 
  * @param <R> - The return type
- * @param <C> - The context type
+ * @param <C> - The execution context type
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractCLI<R, C> {
@@ -83,7 +83,7 @@ public abstract class AbstractCLI<R, C> {
      * @param args The arguments
      * @return The return value
      */
-    public R execute(final String[] args) {
+    public R execute(String[] args) {
         Options options = newOptions();
         boolean error = true;
         try {
@@ -94,8 +94,8 @@ public abstract class AbstractCLI<R, C> {
             addOptions(options);
 
             // Initialize command-line parser & parse arguments
-            final CommandLineParser parser = new PosixParser();
-            final CommandLine cmd = parser.parse(options, args);
+            CommandLineParser parser = new PosixParser();
+            CommandLine cmd = parser.parse(options, args);
 
             // Check if help output is requested
             if (cmd.hasOption('h')) {
@@ -117,18 +117,18 @@ public abstract class AbstractCLI<R, C> {
 
             error = false;
             return retval;
-        } catch (final ExecutionFault e) {
-            final Throwable t = e.getCause();
-            final String message = t.getMessage();
+        } catch (ExecutionFault e) {
+            Throwable t = e.getCause();
+            String message = t.getMessage();
             System.err.println(null == message ? "An error occurred." : message);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             String message = t.getMessage();
             String clazzName = t.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
@@ -145,7 +145,7 @@ public abstract class AbstractCLI<R, C> {
      *
      * @param option The options
      * @param cmd The command line providing parameters/options
-     * @param context The execution context; always <code>null</code>
+     * @param context The execution context
      * @return The return value
      * @throws Exception If invocation fails
      */
@@ -207,7 +207,7 @@ public abstract class AbstractCLI<R, C> {
      *
      * @param options The help output
      */
-    protected void printHelp(final Options options) {
+    protected void printHelp(Options options) {
         printHelp(options, HelpFormatter.DEFAULT_WIDTH);
     }
 
@@ -218,7 +218,7 @@ public abstract class AbstractCLI<R, C> {
      * @param width The width of the help screen
      */
     protected void printHelp(Options options, int width) {
-        final HelpFormatter helpFormatter = new HelpFormatter();
+        HelpFormatter helpFormatter = new HelpFormatter();
         helpFormatter.printHelp(width, getName(), getHeader(), options, getFooter(), false);
     }
 
@@ -267,18 +267,20 @@ public abstract class AbstractCLI<R, C> {
      * @param options The options
      * @return The port value
      */
-    protected int parsePort(final char opt, final int defaultValue, final CommandLine cmd, final Options options) {
+    protected int parsePort(char opt, int defaultValue, CommandLine cmd, Options options) {
         int port = defaultValue;
         // Check option & parse if present
-        final String sPort = cmd.getOptionValue(opt);
-        if (null != sPort) {
-            try {
-                port = Integer.parseInt(sPort.trim());
-            } catch (final NumberFormatException e) {
-                System.err.println("Port parameter is not a number: " + sPort);
-                printHelp(options);
-                System.exit(1);
-            }
+        String sPort = cmd.getOptionValue(opt);
+        if (null == sPort) {
+            return port;
+        }
+
+        try {
+            port = Integer.parseInt(sPort.trim());
+        } catch (NumberFormatException e) {
+            System.err.println("Port parameter is not a number: " + sPort);
+            printHelp(options);
+            System.exit(1);
         }
         if (port < 1 || port > 65535) {
             System.err.println("Port argument '-" + opt + "' is out of range: " + sPort + ". Valid range is from 1 to 65535.");
@@ -299,14 +301,14 @@ public abstract class AbstractCLI<R, C> {
      * @param options The options
      * @return The <code>int</code> value
      */
-    protected int parseInt(final char opt, final int defaultValue, final CommandLine cmd, final Options options) {
+    protected int parseInt(char opt, int defaultValue, CommandLine cmd, Options options) {
         int i = defaultValue;
         // Check option & parse if present
-        final String sInt = cmd.getOptionValue(opt);
+        String sInt = cmd.getOptionValue(opt);
         if (null != sInt) {
             try {
                 i = Integer.parseInt(sInt.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 System.err.println("Integer option '-" + opt + "' is not a number: " + sInt);
                 printHelp(options);
                 System.exit(1);
@@ -326,14 +328,14 @@ public abstract class AbstractCLI<R, C> {
      * @param options The options
      * @return The <code>int</code> value
      */
-    protected int parseInt(final String longOpt, final int defaultValue, final CommandLine cmd, final Options options) {
+    protected int parseInt(String longOpt, int defaultValue, CommandLine cmd, Options options) {
         int i = defaultValue;
         // Check option & parse if present
-        final String sInt = cmd.getOptionValue(longOpt);
+        String sInt = cmd.getOptionValue(longOpt);
         if (null != sInt) {
             try {
                 i = Integer.parseInt(sInt.trim());
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 System.err.println("Integer option '--" + longOpt + "' is not a number: " + sInt);
                 printHelp(options);
                 System.exit(1);

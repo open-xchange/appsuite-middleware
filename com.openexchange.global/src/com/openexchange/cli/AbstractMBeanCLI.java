@@ -91,8 +91,8 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
      * @return The return value
      */
     @Override
-    public R execute(final String[] args) {
-        final Options options = newOptions();
+    public R execute(String[] args) {
+        Options options = newOptions();
         boolean error = true;
         try {
             // Option for help
@@ -106,7 +106,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             options.addOption(createArgumentOption("s", "password", "jmxPassword", "The optional JMX password (if JMX authentication is enabled)", false));
 
             // Check if administrative permission is required
-            final boolean requiresAdministrativePermission = requiresAdministrativePermission();
+            boolean requiresAdministrativePermission = requiresAdministrativePermission();
             if (requiresAdministrativePermission) {
                 options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Admin username", true));
                 options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Admin password", true));
@@ -116,8 +116,8 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             addOptions(options);
 
             // Initialize command-line parser & parse arguments
-            final CommandLineParser parser = new PosixParser();
-            final CommandLine cmd = parser.parse(options, args);
+            CommandLineParser parser = new PosixParser();
+            CommandLine cmd = parser.parse(options, args);
 
             // Check if help output is requested
             if (cmd.hasOption('h')) {
@@ -127,10 +127,10 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             }
 
             // Check for JMX host
-            final String host = cmd.getOptionValue('H', "localhost");
+            String host = cmd.getOptionValue('H', "localhost");
 
             // Check for JMX port
-            final int port = parsePort('p', 9999, cmd, options);
+            int port = parsePort('p', 9999, cmd, options);
 
             // Check for JMX login/password
             String jmxLogin = null;
@@ -164,7 +164,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             checkOptions(cmd, options);
 
             // Build JMX environment
-            final Map<String, Object> environment;
+            Map<String, Object> environment;
             if (jmxLogin == null || jmxPassword == null) {
                 environment = null;
             } else {
@@ -174,8 +174,8 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             }
 
             // Invoke MBean
-            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
-            final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
+            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
 
             R retval = null;
             try {
@@ -207,40 +207,40 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
                         }
                     }
                     retval = invoke(options, cmd, mbsc);
-                } catch (final Exception e) {
-                    final Throwable t = e.getCause();
+                } catch (Exception e) {
+                    Throwable t = e.getCause();
                     throw new ExecutionFault(null == t ? e : t);
                 }
             } finally {
                 try {
                     jmxConnector.close();
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     // Ignore
                 }
             }
 
             error = false;
             return retval;
-        } catch (final ExecutionFault e) {
-            final Throwable t = e.getCause();
-            final String message = t.getMessage();
+        } catch (ExecutionFault e) {
+            Throwable t = e.getCause();
+            String message = t.getMessage();
             System.err.println(null == message ? "An error occurred." : message);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Error e) {
+        } catch (Error e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             String message = t.getMessage();
             String clazzName = t.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
@@ -259,7 +259,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
      * @return The {@link AuthenticatorMBean} instance
      * @throws MalformedObjectNameException If generating object name fails
      */
-    protected AuthenticatorMBean authenticatorMBean(final MBeanServerConnection mbsc) throws MalformedObjectNameException {
+    protected AuthenticatorMBean authenticatorMBean(MBeanServerConnection mbsc) throws MalformedObjectNameException {
         return getMBean(mbsc, AuthenticatorMBean.class, AuthenticatorMBean.DOMAIN);
     }
 
@@ -329,7 +329,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
      * @throws MalformedObjectNameException If generating object name fails
      * @see #getObjectName(String, String)
      */
-    protected static <MBean> MBean getMBean(final MBeanServerConnection mbsc, final Class<? extends MBean> clazz, final String domain) throws MalformedObjectNameException {
+    protected static <MBean> MBean getMBean(MBeanServerConnection mbsc, Class<? extends MBean> clazz, String domain) throws MalformedObjectNameException {
         return MBeanServerInvocationHandler.newProxyInstance(mbsc, getObjectName(clazz.getName(), domain), clazz, false);
     }
 
@@ -341,8 +341,8 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
      * @return An appropriate instance of {@link ObjectName}
      * @throws MalformedObjectNameException If instantiation of {@link ObjectName} fails
      */
-    protected static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
-        final int pos = className.lastIndexOf('.');
+    protected static ObjectName getObjectName(String className, String domain) throws MalformedObjectNameException {
+        int pos = className.lastIndexOf('.');
         return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
     }
 }

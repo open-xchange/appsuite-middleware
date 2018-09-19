@@ -97,8 +97,8 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
      * @return The return value
      */
     @Override
-    public R execute(final String[] args) {
-        final Options options = newOptions();
+    public R execute(String[] args) {
+        Options options = newOptions();
         boolean error = true;
         try {
             // Option for help
@@ -118,8 +118,8 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             }
 
             // Initialize command-line parser & parse arguments
-            final CommandLineParser parser = new PosixParser();
-            final CommandLine cmd = parser.parse(options, args);
+            CommandLineParser parser = new PosixParser();
+            CommandLine cmd = parser.parse(options, args);
 
             checkArguments(cmd);
 
@@ -140,32 +140,32 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             R retval = invoke(options, cmd, request);
             error = false;
             return retval;
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);
-        } catch (final MalformedURLException e) {
+        } catch (MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
-        } catch (final IOException e) {
+        } catch (IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
-        } catch (final javax.ws.rs.NotAuthorizedException e) {
+        } catch (javax.ws.rs.NotAuthorizedException e) {
             System.err.println("Authorization not possible. Please check the provided credentials.");
-        } catch (final javax.ws.rs.ProcessingException e) {
+        } catch (javax.ws.rs.ProcessingException e) {
             System.err.println("Unable to reach provided endpoint: " + e.getMessage());
-        } catch (final javax.ws.rs.InternalServerErrorException e) {
+        } catch (javax.ws.rs.InternalServerErrorException e) {
             System.err.println("An error occurred on endpoint side. Please check the server logs.");
-        } catch (final javax.ws.rs.BadRequestException e) {
+        } catch (javax.ws.rs.BadRequestException e) {
             System.err.println(printClientException(e, "The provided request parameters seem to be invalid. Please check them and additionally the server logs for further information."));
-        } catch (final javax.ws.rs.NotFoundException e) {
+        } catch (javax.ws.rs.NotFoundException e) {
             System.err.println(printClientException(e, "The requested resource cannot be found. Please check the provided parameters and additionally the server logs for further information."));
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Error e) {
+        } catch (Error e) {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             String message = t.getMessage();
             String clazzName = t.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
