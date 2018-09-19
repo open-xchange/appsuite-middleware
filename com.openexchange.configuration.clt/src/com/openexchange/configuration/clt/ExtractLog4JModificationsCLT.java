@@ -160,8 +160,8 @@ public class ExtractLog4JModificationsCLT extends AbstractCLI<Integer, Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("i", "in", true, "XML document is read from this file. If omitted the input will be read from STDIN.", false));
-        options.addOption(createOption("o", "out", true, "JUL properties configuration file is written to this file. If this option is omitted the output will be written to STDOUT.", false));
+        options.addOption(createArgumentOption("i", "in", "input", "XML document is read from this file. If omitted the input will be read from STDIN.", false));
+        options.addOption(createArgumentOption("o", "out", "output", "JUL properties configuration file is written to this file. If this option is omitted the output will be written to STDOUT.", false));
     }
 
     /*

@@ -64,7 +64,7 @@ import com.openexchange.sessiond.rmi.SessiondRMIService;
  */
 public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "closesessions [-c <contextId>] [-u <userId>] [-g] [-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
+    private static final String SYNTAX = "closesessions -c <contextId> [-u <userId>] [-g] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
 
     private int contextId;
     private int userId;
@@ -105,9 +105,9 @@ public final class CloseSessionsCLT extends AbstractRmiCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("c", "context", true, "A valid context identifier", true));
-        options.addOption(createOption("u", "user", true, "A valid user identifier", false));
-        options.addOption(createOption("g", "global", false, "Switch instructing the tool to perform a global session clean-up ", false));
+        options.addOption(createArgumentOption("c", "context", "contextId", "A valid context identifier", true));
+        options.addOption(createArgumentOption("u", "user", "userId", "A valid user identifier", false));
+        options.addOption(createSwitch("g", "global", "Switch instructing the tool to perform a global session clean-up ", false));
     }
 
     @Override

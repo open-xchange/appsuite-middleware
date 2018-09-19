@@ -102,7 +102,7 @@ public class ConfigDiffCLT extends AbstractCLI<Void, Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("f", "file", true, "Export diff to file", false));
+        options.addOption(createArgumentOption("f", "file", "filename", "Export diff to file", false));
     }
 
     /*

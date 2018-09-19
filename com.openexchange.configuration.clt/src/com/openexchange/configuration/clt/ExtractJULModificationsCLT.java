@@ -145,8 +145,8 @@ public class ExtractJULModificationsCLT extends AbstractCLI<Integer, Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("i", "in", true, "Java Util logging properties configuration file to read. If omitted this will be read vom STDIN.", false));
-        options.addOption(createOption("o", "out", true, "Added JUL logger will be written as properties configuration to this file. If this option is omitted the output will be written to STDOUT.", false));
+        options.addOption(createArgumentOption("i", "in", "input", "Java Util logging properties configuration file to read. If omitted this will be read vom STDIN.", false));
+        options.addOption(createArgumentOption("o", "out", "output", "Added JUL logger will be written as properties configuration to this file. If this option is omitted the output will be written to STDOUT.", false));
     }
 
     /*

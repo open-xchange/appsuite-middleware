@@ -71,7 +71,7 @@ import com.openexchange.share.impl.rmi.ShareRMIService;
  */
 public class SharesCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "shares [-c <contextId> -i <userId> -T <tokenId>] [-r [-f]] [-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
+    private static final String SYNTAX = "shares [-c <contextId> -i <userId> -T <tokenId>] [-r [-f]] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
     private static final String FOOTER = "Command line tool to list and delete shares";
 
     /**
@@ -117,11 +117,11 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption("c", "context", true, "The context id.");
-        options.addOption("i", "userid", true, "The guest user id.");
-        options.addOption("T", "token", true, "Token or URL.");
-        options.addOption("r", "remove", false, "Remove the token.");
-        options.addOption("f", "force", false, "Force removal of token.");
+        options.addOption(createArgumentOption("c", "context", "contextId", "The context id.", false));
+        options.addOption(createArgumentOption("i", "userid", "userId", "The guest user id.", false));
+        options.addOption(createArgumentOption("T", "token", "token", "Token or URL.", false));
+        options.addOption(createSwitch("r", "remove", "Remove the token.", false));
+        options.addOption(createSwitch("f", "force", "Force removal of token.", false));
     }
 
     /*
@@ -197,7 +197,7 @@ public class SharesCLT extends AbstractRmiCLI<Void> {
             String shareToken = tokenAndPath.getFirst();
             String targetPath = tokenAndPath.getSecond();
             if ((null == targetPath || "".equals(targetPath)) && !iKnowWhatIamDoing) {
-                throw new MissingOptionException("Seems like you supplied a token without a share path. If you want to remove" + " all shares identified by this token use option -f/--force");
+                throw new MissingOptionException("Seems like you supplied a token without a share path. If you want to remove all shares identified by this token use option -f/--force");
             }
             if (contextId > 0) {
                 result = rmiService.removeShare(shareToken, targetPath, contextId);

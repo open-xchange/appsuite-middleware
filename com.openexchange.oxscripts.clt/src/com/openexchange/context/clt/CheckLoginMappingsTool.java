@@ -65,7 +65,7 @@ import com.openexchange.context.rmi.ContextRMIService;
  */
 public final class CheckLoginMappingsTool extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "checkloginmappings [[[-c <contextId>] | [-a]] [-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]]] | [-h]";
+    private static final String SYNTAX = "checkloginmappings [[[-c <contextId>] | [-a]] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
     private static final String FOOTER = "\n\nThe options -c/--context and -a/--all are mutually exclusive.";
 
     private Integer contextId;
@@ -108,8 +108,8 @@ public final class CheckLoginMappingsTool extends AbstractRmiCLI<Void> {
     @Override
     protected void addOptions(Options options) {
         OptionGroup group = new OptionGroup();
-        group.addOption(createOption("c", "context", true, "Required. The context identifier", true));
-        group.addOption(createOption("a", "all", false, "Required. The flag to signal that contexts shall be processed. Hence option -c/--context is then obsolete.", true));
+        group.addOption(createArgumentOption("c", "context", "contextId", "Required. The context identifier", true));
+        group.addOption(createSwitch("a", "all", "Required. The flag to signal that contexts shall be processed. Hence option -c/--context is then obsolete.", true));
         options.addOptionGroup(group);
     }
 

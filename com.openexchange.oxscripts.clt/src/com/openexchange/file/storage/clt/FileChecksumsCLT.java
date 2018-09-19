@@ -66,7 +66,7 @@ import com.openexchange.groupware.infostore.rmi.FileChecksumsRMIService;
  */
 public class FileChecksumsCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "calculatefilechecksums [-d <databaseId> | -c <contextId>] [-C] [-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
+    private static final String SYNTAX = "calculatefilechecksums [-d <databaseId> | -c <contextId>] [-C] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
     private static final String FOOTER = "Command-line tool to calculate missing file checksums";
 
     public static void main(String[] args) {
@@ -82,9 +82,9 @@ public class FileChecksumsCLT extends AbstractRmiCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption("c", "context", true, "The identifier of the context to determine/calculate missing checksums in");
-        options.addOption("d", "database", true, "The database pool identifier to determine/calculate missing checksums in");
-        options.addOption("C", "calculate", false, "Calculate and store missing checksums (if not specified, files with missing checksums are printed out only)");
+        options.addOption(createArgumentOption("c", "context", "contextId", "The identifier of the context to determine/calculate missing checksums in", false));
+        options.addOption(createArgumentOption("d", "database", "databaseId", "The database pool identifier to determine/calculate missing checksums in", false));
+        options.addOption(createSwitch("C", "calculate", "Calculate and store missing checksums (if not specified, files with missing checksums are printed out only)", false));
     }
 
     @Override

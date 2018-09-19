@@ -70,7 +70,7 @@ import com.openexchange.osgi.rmi.DeferredActivatorRMIService;
  */
 public class DeferredActivatorCLT extends AbstractRmiCLI<Void> {
 
-    private static String SYNTAX = "servicestate [[[-n <bundleName>] [-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]]]] | [-h]";
+    private static String SYNTAX = "servicestate [-n <bundleName>] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
     private static String FOOTER = "";
 
     private boolean testAll;
@@ -109,7 +109,7 @@ public class DeferredActivatorCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption("n", "name", true, "The optional bundle's symbolic name");
+        options.addOption(createArgumentOption("n", "name", "bundleName", "The optional bundle's symbolic name", false));
     }
 
     /*

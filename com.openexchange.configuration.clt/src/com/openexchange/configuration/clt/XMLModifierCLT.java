@@ -216,15 +216,15 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("i", "in", true, "XML document is read from this file.", false));
-        options.addOption(createOption("o", "out", true, "Modified XML document is written to this file.", false));
-        options.addOption(createOption("x", "xpath", true, "XPath to the elements that should be modified.", false));
-        options.addOption(createOption("a", "add", true, "XML file that should add the elements denoted by the XPath. - can be used to read from STDIN.", false));
-        options.addOption(createOption("r", "replace", true, "XML file that should replace the elements denoted by the XPath. - can be used to read from STDIN.", false));
-        options.addOption(createOption("m", "remove", true, "XML file that should remove the elements denoted by the XPath. - can be used to read from STDIN.", false));
-        options.addOption(createOption("d", "id", true, "Defines the identifying attribute as XPath (relative to \"-x\") to determine if an element should be replaced (-r). If omitted all matches will be replaced.", false));
-        options.addOption(createOption("z", "zap", false, "Defines if duplicate matching elements should be removed(zapped) instead of only being replaced (-r).", false));
-        options.addOption(createOption("s", "scr", true, "Specifies which scr should be executed on the xml document selected via -i", false));
+        options.addOption(createArgumentOption("i", "in", "input", "XML document is read from this file.", false));
+        options.addOption(createArgumentOption("o", "out", "output", "Modified XML document is written to this file.", false));
+        options.addOption(createArgumentOption("x", "xpath", "xpath", "XPath to the elements that should be modified.", false));
+        options.addOption(createArgumentOption("a", "add", "filename", "XML file that should add the elements denoted by the XPath. - can be used to read from STDIN.", false));
+        options.addOption(createArgumentOption("r", "replace", "filename", "XML file that should replace the elements denoted by the XPath. - can be used to read from STDIN.", false));
+        options.addOption(createArgumentOption("m", "remove", "filename", "XML file that should remove the elements denoted by the XPath. - can be used to read from STDIN.", false));
+        options.addOption(createArgumentOption("d", "id", "attribute", "Defines the identifying attribute as XPath (relative to \"-x\") to determine if an element should be replaced (-r). If omitted all matches will be replaced.", false));
+        options.addOption(createSwitch("z", "zap", "Defines if duplicate matching elements should be removed(zapped) instead of only being replaced (-r).", false));
+        options.addOption(createArgumentOption("s", "scr", "scr", "Specifies which scr should be executed on the xml document selected via -i", false));
     }
 
     /*

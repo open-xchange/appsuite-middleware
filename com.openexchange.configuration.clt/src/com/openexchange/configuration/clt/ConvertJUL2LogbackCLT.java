@@ -166,11 +166,13 @@ public class ConvertJUL2LogbackCLT extends AbstractCLI<Integer, Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("i", "in", true, "Java Util logging properties configuration file to read. If omitted this will be read vom STDIN.", false));
-        options.addOption(createOption("o", "out", true, "File for writing the Logback XML configuration fragment. If omitted this will be written to STDOUT.", false));
+        options.addOption(createArgumentOption("i", "in", "input", "Java Util logging properties configuration file to read. If omitted this will be read vom STDIN.", false));
+        options.addOption(createArgumentOption("o", "out", "output", "File for writing the Logback XML configuration fragment. If omitted this will be written to STDOUT.", false));
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.cli.AbstractCLI#getHeader()
      */
     @Override

@@ -64,7 +64,7 @@ import com.openexchange.tools.oxfolder.GABRestorerRMIService;
  */
 public class GABRestorerCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "restoregabdefaults -c [-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]]  | -h";
+    private static final String SYNTAX = "restoregabdefaults -c -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | -h";
     private static final String FOOTER = "\n\nRestores the default permissions for the global address book (GAB).";
 
     /**
@@ -102,7 +102,7 @@ public class GABRestorerCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("c", "context", true, "A valid context identifier contained in target schema", true));
+        options.addOption(createArgumentOption("c", "context", "contextId", "A valid context identifier contained in target schema", true));
     }
 
     /*

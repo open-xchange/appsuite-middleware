@@ -68,7 +68,7 @@ import com.openexchange.push.rmi.PushRMIService;
  */
 public class PushUsersCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "pushusers [-r | [-u -c <contextId> -u <userId> -i <client>] ] [-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
+    private static final String SYNTAX = "pushusers [-r | [ -d -c <contextId> -u <userId> -i <client>] ] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
     private static final String FOOTER = "Command-line tool for unregistering and listing (registered) push users";
 
     private int contextId;
@@ -86,7 +86,7 @@ public class PushUsersCLT extends AbstractRmiCLI<Void> {
     /**
      * Entry point
      * 
-     * @param args the command line argumnets
+     * @param args the command line arguments
      */
     public static void main(String[] args) {
         new PushUsersCLT().execute(args);
@@ -116,11 +116,11 @@ public class PushUsersCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("r", "registered", false, "Flag to only list registered push users", false));
-        options.addOption(createOption("d", "unregister", false, "Flag to unregister a push user", false));
-        options.addOption(createOption("c", "context", true, "A valid context identifier", false));
-        options.addOption(createOption("u", "user", true, "A valid user identifier", false));
-        options.addOption(createOption("i", "client", true, "The client identifier", false));
+        options.addOption(createSwitch("r", "registered", "Flag to only list registered push users", false));
+        options.addOption(createSwitch("d", "unregister", "Flag to unregister a push user", false));
+        options.addOption(createArgumentOption("c", "context", "contextId", "A valid context identifier", false));
+        options.addOption(createArgumentOption("u", "user", "userId", "A valid user identifier", false));
+        options.addOption(createArgumentOption("i", "client", "clientId", "The client identifier", false));
     }
 
     /*

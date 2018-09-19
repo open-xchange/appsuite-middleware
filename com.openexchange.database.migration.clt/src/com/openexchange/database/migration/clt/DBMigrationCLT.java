@@ -53,7 +53,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.MissingOptionException;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
@@ -70,6 +69,9 @@ import com.openexchange.java.Strings;
  * @since 7.6.1
  */
 public class DBMigrationCLT extends AbstractRmiCLI<Void> {
+
+    private static final String FOOTER = "Prints the current migration status if no option is set.";
+    private static final String SYNTAX = "dbmigrations -n <schemaName> [[-f] | [-ll] [-u]] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
 
     private static final String OPT_SCHEMA_NAME_SHORT = "n";
     private static final String OPT_SCHEMA_NAME_LONG = "name";
@@ -91,6 +93,23 @@ public class DBMigrationCLT extends AbstractRmiCLI<Void> {
      */
     private DBMigrationCLT() {
         super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void addOptions(Options options) {
+        OptionGroup requiredOptions = new OptionGroup();
+        requiredOptions.setRequired(true);
+        requiredOptions.addOption(createArgumentOption(OPT_SCHEMA_NAME_SHORT, OPT_SCHEMA_NAME_LONG, "schemaName", "The database schema name to use", true));
+        options.addOptionGroup(requiredOptions);
+        OptionGroup ops = new OptionGroup();
+        ops.setRequired(false);
+        ops.addOption(createSwitch(OPT_RUN_SHORT, OPT_RUN_LONG, "Forces a run of the current core changelog.", false));
+        ops.addOption(createSwitch(OPT_LIST_LOCKS_SHORT, OPT_LIST_LOCKS_LONG, "Lists all currently acquired locks.", false));
+        ops.addOption(createSwitch(OPT_UNLOCK_SHORT, OPT_UNLOCK_LONG, "Forces a release of all locks.", false));
+        options.addOptionGroup(ops);
     }
 
     /**
@@ -124,7 +143,7 @@ public class DBMigrationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected String getFooter() {
-        return "Prints the current migration status if no option is set.";
+        return FOOTER;
     }
 
     /**
@@ -132,24 +151,7 @@ public class DBMigrationCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected String getName() {
-        return "dbmigrations";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void addOptions(Options options) {
-        OptionGroup requiredOptions = new OptionGroup();
-        requiredOptions.setRequired(true);
-        requiredOptions.addOption(new Option(OPT_SCHEMA_NAME_SHORT, OPT_SCHEMA_NAME_LONG, true, "The database schema name to use"));
-        options.addOptionGroup(requiredOptions);
-        OptionGroup ops = new OptionGroup();
-        ops.setRequired(false);
-        ops.addOption(new Option(OPT_RUN_SHORT, OPT_RUN_LONG, false, "Forces a run of the current core changelog."));
-        ops.addOption(new Option(OPT_LIST_LOCKS_SHORT, OPT_LIST_LOCKS_LONG, false, "Lists all currently acquired locks."));
-        ops.addOption(new Option(OPT_UNLOCK_SHORT, OPT_UNLOCK_LONG, false, "Forces a release of all locks."));
-        options.addOptionGroup(ops);
+        return SYNTAX;
     }
 
     /*

@@ -109,11 +109,10 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
     @Override
     protected void addOptions(Options options) {
         OptionGroup group = new OptionGroup();
-        group.addOption(createOption("c", "context", true, "Required. The context identifier", true));
-        group.addOption(createOption("a", "all", false, "Required. The flag to signal that contexts shall be processed. Hence option -c/--context is then obsolete.", true));
+        group.addOption(createArgumentOption("c", "context", "contextId", "Required. The context identifier", true));
+        group.addOption(createSwitch("a", "all", "Required. The flag to signal that contexts shall be processed. Hence option -c/--context is then obsolete.", true));
         options.addOptionGroup(group);
-
-        options.addOption("i", "invalids", true, "An optional comma-separated list of those MIME types that should be considered as broken/corrupt. Default is \"application/force-download, application/x-download, application/$suffix\"");
+        options.addOption(createArgumentOption("i", "invalids", "mimetype_1,mimetype_2,...,mimetype_n", "An optional comma-separated list of those MIME types that should be considered as broken/corrupt. Default is \"application/force-download, application/x-download, application/$suffix\"", false));
     }
 
     /*

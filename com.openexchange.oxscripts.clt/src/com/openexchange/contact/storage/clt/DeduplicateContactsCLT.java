@@ -66,7 +66,7 @@ import com.openexchange.contact.storage.rdb.rmi.ContactStorageRMIService;
 public class DeduplicateContactsCLT extends AbstractRmiCLI<Void> {
 
     private static final String FOOTER = "Handle with care and review the found duplicates before executing the de-duplication. Detected duplicates are deleted permanently, with no recovery option.";
-    private static final String SYNTAX = "deduplicatecontacts [-c <contextId> -f <folderId> [-m <maxNumber>] [-e]] [-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-h]";
+    private static final String SYNTAX = "deduplicatecontacts -c <contextId> -f <folderId> [-m <maxNumber>] [-e] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
 
     /**
      * Entry point
@@ -107,10 +107,10 @@ public class DeduplicateContactsCLT extends AbstractRmiCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createOption("c", "context", true, "A valid context identifier", true));
-        options.addOption(createOption("f", "folder", true, "A valid contact folder identifier", true));
-        options.addOption(createOption("m", "max", true, "The maximum number of contacts to process, or 0 for no limit, defaults to 1000000", false));
-        options.addOption(createOption("e", "execute", false, "Actually performs the de-duplication of contacts - by default, identifiers of duplicated contacts are printed out only.", false));
+        options.addOption(createArgumentOption("c", "context", "contextId", "A valid context identifier", true));
+        options.addOption(createArgumentOption("f", "folder", "folderId", "A valid contact folder identifier", true));
+        options.addOption(createArgumentOption("m", "max", "maxNumber", "The maximum number of contacts to process, or 0 for no limit, defaults to 1000000", false));
+        options.addOption(createSwitch("e", "execute", "Actually performs the de-duplication of contacts - by default, identifiers of duplicated contacts are printed out only.", false));
     }
 
     @Override

@@ -95,6 +95,10 @@ public class ConsistencyCheck extends AbstractRmiCLI<Void> {
         String getDescription() {
             return description;
         }
+
+        String getMethodName() {
+            return methodName;
+        }
     }
 
     /**
@@ -159,11 +163,11 @@ public class ConsistencyCheck extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption("a", "action", true, "Defines the action\nAccepted values are: " + prettyPrintEnum(Action.class));
-        options.addOption("o", "source", true, "Defines the source that is going to be used\nOnly considered if \"--action\" option specifies either \"" + Action.list_missing.name() + "\", \"" + Action.list_unassigned.name() + "\" or \"" + Action.repair.name() + "\"\nAccepted values are: " + prettyPrintEnum(Source.class));
-        options.addOption("r", "policy", true, "Defines the 'repair' policy\nOnly considered if \"--action\" option specifies \"" + Action.repair.name() + "\"\nAvailable repair policies are: " + prettyPrintEnum(Policy.class));
-        options.addOption("y", "policy-action", true, "Defines an action for the desired repair policy\nOnly considered if \"--policy\" option is specified");
-        options.addOption("i", "source-id", true, "Defines the source identifier.\nOnly considered if \"--source\" option is specified\nIf \"--source\" is set to \"all\" then this option is simply ignored");
+        options.addOption(createArgumentOption("a", "action", "action", "Defines the action\nAccepted values are: " + prettyPrintEnum(Action.class), false));
+        options.addOption(createArgumentOption("o", "source", "source", "Defines the source that is going to be used\nOnly considered if \"--action\" option specifies either \"" + Action.list_missing.name() + "\", \"" + Action.list_unassigned.name() + "\" or \"" + Action.repair.name() + "\"\nAccepted values are: " + prettyPrintEnum(Source.class), false));
+        options.addOption(createArgumentOption("r", "policy", "policy", "Defines the 'repair' policy\nOnly considered if \"--action\" option specifies \"" + Action.repair.name() + "\"\nAvailable repair policies are: " + prettyPrintEnum(Policy.class), false));
+        options.addOption(createArgumentOption("y", "policy-action", "policyAction", "Defines an action for the desired repair policy\nOnly considered if \"--policy\" option is specified", false));
+        options.addOption(createArgumentOption("i", "source-id", "sourceId", "Defines the source identifier.\nOnly considered if \"--source\" option is specified\nIf \"--source\" is set to \"all\" then this option is simply ignored", false));
     }
 
     /*
@@ -318,7 +322,7 @@ public class ConsistencyCheck extends AbstractRmiCLI<Void> {
      */
     @Override
     protected String getName() {
-        return "checkconsistency -a <action> -o <source> [-i <sourceId>] [-r <policy> -y <policyAction>] [-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] [--responsetimeout <responseTimeout>] | [-h]";
+        return "checkconsistency -a <action> -o <source> [-i <sourceId>] [-r <policy> -y <policyAction>] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] [--responsetimeout <responseTimeout>] | [-h]";
     }
 
     ///////////////////////////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////////////////

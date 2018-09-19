@@ -53,7 +53,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import com.openexchange.logging.rmi.LogbackConfigurationRMIService;
 
 /**
@@ -63,21 +62,22 @@ import com.openexchange.logging.rmi.LogbackConfigurationRMIService;
  */
 public class IncludeStackTraceCLT extends AbstractLogbackConfigurationAdministrativeCLI<Void> {
 
+    private static final String SYNTAX = "includestacktrace [-e | -d] [-u <userid>] [-c <contextid>] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static final String FOOTER = "\n\nThe flags -e and -d are mutually exclusive.";
+
     /**
-     * @param args
-     * @throws ParseException
+     * Entry point
+     * 
+     * @param args The command line arguments
      */
     public static void main(String[] args) {
         new IncludeStackTraceCLT().execute(args);
     }
 
-    private static final String SYNTAX = "includestacktrace [-e | -d] [-u <userid>] [-c <contextid>] [-h]";
-    private static final String FOOTER = "\n\nThe flags -e and -d are mutually exclusive.";
-
     /**
      * Initialises a new {@link IncludeStackTraceCLT}.
      */
-    public IncludeStackTraceCLT() {
+    private IncludeStackTraceCLT() {
         super(SYNTAX, FOOTER);
     }
 
@@ -88,10 +88,10 @@ public class IncludeStackTraceCLT extends AbstractLogbackConfigurationAdministra
      */
     @Override
     protected void addOptions(Options options) {
-        Option enable = createOption("e", "enable", false, "Flag to enable to include stack traces in HTTP-API JSON responses", true);
-        Option disbale = createOption("d", "disable", false, "Flag to disable to include stack traces in HTTP-API JSON responses", true);
-        options.addOption(createOption("u", "user", true, "The user identifier", true));
-        options.addOption(createOption("c", "context", true, "The context identifier", true));
+        Option enable = createSwitch("e", "enable", "Flag to enable to include stack traces in HTTP-API JSON responses", true);
+        Option disbale = createSwitch("d", "disable", "Flag to disable to include stack traces in HTTP-API JSON responses", true);
+        options.addOption(createArgumentOption("c", "context", "contextId", "The context identifier", true));
+        options.addOption(createArgumentOption("u", "user", "userId", "The user identifier", true));
 
         OptionGroup og = new OptionGroup();
         og.addOption(enable).addOption(disbale);
@@ -127,20 +127,6 @@ public class IncludeStackTraceCLT extends AbstractLogbackConfigurationAdministra
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
-        if (!cmd.hasOption("c")) {
-            System.out.println("Missing option -c/--context");
-            printHelp();
-            System.exit(-1);
-        }
-        if (!cmd.hasOption("u")) {
-            System.out.println("Missing option -u/--user");
-            printHelp();
-            System.exit(-1);
-        }
-        if (!cmd.hasOption("e") && !cmd.hasOption("d")) {
-            System.out.println("Missing option -e/--enable or -d/--disable");
-            printHelp();
-            System.exit(-1);
-        }
+        // nothing to check
     }
 }

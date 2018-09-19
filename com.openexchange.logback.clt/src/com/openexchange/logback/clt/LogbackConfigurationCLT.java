@@ -86,7 +86,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
     }
 
     private static final String validLogLevels = "{OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}";
-    private static final String SYNTAX = "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level> ...] [-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]";
+    private static final String SYNTAX = "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level> ...] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]";
     private static final String FOOTER = "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories();
 
     /**
@@ -103,27 +103,27 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
      */
     @Override
     protected void addOptions(Options options) {
-        Option add = createOption("a", "add", false, "Flag to add the filter", true);
-        Option del = createOption("d", "delete", false, "Flag to delete the filter", true);
+        Option add = createSwitch("a", "add", "Flag to add the filter", true);
+        Option del = createSwitch("d", "delete", "Flag to delete the filter", true);
 
         OptionGroup og = new OptionGroup();
         og.addOption(add).addOption(del);
         options.addOptionGroup(og);
 
-        options.addOption(createOption("u", "user", true, "The user id for which to enable logging", false));
-        options.addOption(createOption("c", "context", true, "The context id for which to enable logging", false));
-        options.addOption(createOption("oec", "override-exception-categories", true, "Override the exception categories to be suppressed", false));
-        options.addOption(createOption("s", "session", true, "The session id for which to enable logging", false));
+        options.addOption(createArgumentOption("u", "user", "userId", "The user id for which to enable logging", false));
+        options.addOption(createArgumentOption("c", "context", "contextId", "The context id for which to enable logging", false));
+        options.addOption(createArgumentOption("oec", "override-exception-categories", "exceptionCategories", "Override the exception categories to be suppressed", false));
+        options.addOption(createArgumentOption("s", "session", "sessionId", "The session id for which to enable logging", false));
 
         Option o = createOption("l", "level", false, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG). When the -d flag is present the arguments of this switch should be supplied without the level (e.g. -d -l com.openexchange.appsuite)", false);
         o.setArgs(Short.MAX_VALUE);
         options.addOption(o);
 
-        options.addOption(createOption("ll", "list-loggers", false, "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
-        options.addOption(createOption("lf", "list-filters", false, "Get a list with all logging filters of the system", false));
-        options.addOption(createOption("cf", "clear-filters", false, "Clear all logging filters", false));
-        options.addOption(createOption("le", "list-exception-category", false, "Get a list with all supressed exception categories", false));
-        options.addOption(createOption("la", "list-appenders", false, "Lists all root appenders and any available statistics", false));
+        options.addOption(createSwitch("ll", "list-loggers", "Get a list with all loggers of the system\nCan optionally have a list with loggers as arguments, i.e. -ll <logger1> <logger2> OR the keyword 'dynamic' that instructs the command line tool to fetch all dynamically modified loggers. Any other keyword is then ignored, and a full list will be retrieved.", false));
+        options.addOption(createSwitch("lf", "list-filters", "Get a list with all logging filters of the system", false));
+        options.addOption(createSwitch("cf", "clear-filters", "Clear all logging filters", false));
+        options.addOption(createSwitch("le", "list-exception-category", "Get a list with all supressed exception categories", false));
+        options.addOption(createSwitch("la", "list-appenders", "Lists all root appenders and any available statistics", false));
 
     }
 
