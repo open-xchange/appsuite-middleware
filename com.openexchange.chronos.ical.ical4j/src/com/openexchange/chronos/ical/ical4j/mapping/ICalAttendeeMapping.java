@@ -214,7 +214,7 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
     }
 
     private static Attendee importAttendee(net.fortuna.ical4j.model.property.Attendee property) {
-        Attendee attendee = new Attendee();
+        Attendee attendee = prepareAttendee();
         if (null != property.getCalAddress()) {
             attendee.setUri(property.getCalAddress().toString());
         } else if (Strings.isNotEmpty(property.getValue())) {
@@ -317,6 +317,27 @@ public abstract class ICalAttendeeMapping<T extends CalendarComponent, U> extend
             addressList.add(new URI(uri));
         }
         return addressList;
+    }
+
+    /**
+     * Prepares a new, empty attendee, with all properties considered during iCal serialization being explicitly <i>set</i> to its neutral
+     * value.
+     * 
+     * @return A new & prepared attendee instance
+     */
+    private static Attendee prepareAttendee() {
+        Attendee attendee = new Attendee();
+        attendee.setCn(null);
+        attendee.setCuType(null);
+        attendee.setEMail(null);
+        attendee.setExtendedParameters(null);
+        attendee.setMember(null);
+        attendee.setPartStat(null);
+        attendee.setRole(null);
+        attendee.setRsvp(null);
+        attendee.setSentBy(null);
+        attendee.setUri(null);
+        return attendee;
     }
 
 }
