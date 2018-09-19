@@ -94,4 +94,20 @@ public class MWHealthCheckResponseImpl implements MWHealthCheckResponse {
         return state;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(name).append(": ").append(MWHealthState.UP.equals(state) ? "UP" : "DOWN");
+        // Don't include detailed data for now
+        //        if (null != data && data.size() > 0) {
+        //            sb.append(", ").append("data: [");
+        //            for (Map.Entry<String, Object> entry : data.entrySet()) {
+        //                sb.append(entry.getKey()).append("=").append(entry.getValue()).append(",");
+        //            }
+        //            sb.deleteCharAt(sb.length() - 1);
+        //            sb.append("]");
+        //        }
+        return sb.toString();
+    }
+
 }
