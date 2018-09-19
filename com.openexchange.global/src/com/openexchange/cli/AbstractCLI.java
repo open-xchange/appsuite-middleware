@@ -60,7 +60,9 @@ import org.apache.commons.cli.PosixParser;
 
 /**
  * {@link AbstractCLI} - The basic super class for command-line tools.
- *
+ * 
+ * @param <R> - The return type
+ * @param <C> - The context type
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractCLI<R, C> {
