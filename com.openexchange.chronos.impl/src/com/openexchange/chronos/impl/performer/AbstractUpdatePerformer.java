@@ -472,8 +472,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             return false;
         }
         requireWritePermissions(event, Collections.singletonList(session.getEntityResolver().prepareUserAttendee(userId)));
-        List<Integer> toDelete = new ArrayList<>(updatedAlarms.size());
-        List<Integer> toAdd = new ArrayList<>(updatedAlarms.size());
+        int size = updatedAlarms == null ? 0 : updatedAlarms.size();
+        List<Integer> toDelete = new ArrayList<>(size);
+        List<Integer> toAdd = new ArrayList<>(size);
         /*
          * delete removed alarms
          */
@@ -522,20 +523,22 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * insert new alarms
          */
-        List<Alarm> addedItems = alarmUpdates.getAddedItems();
-        for(Alarm alarm: addedItems) {
+        List<Alarm> insertAlarms = insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
+        for(Alarm alarm: insertAlarms) {
             toAdd.add(alarm.getId());
         }
-        insertAlarms(event, userId, addedItems, false);
         Map<Integer, List<Alarm>> loadAlarms = storage.getAlarmStorage().loadAlarms(event);
         storage.getAlarmTriggerStorage().deleteTriggersById(toDelete);
-        Iterator<Alarm> iterator = loadAlarms.get(userId).iterator();
-        while(iterator.hasNext()) {
-            if(!toAdd.contains(iterator.next().getId())) {
-                iterator.remove();
+        if (loadAlarms.containsKey(userId)) {
+            Iterator<Alarm> iterator = loadAlarms.get(userId).iterator();
+            while (iterator.hasNext()) {
+                if (!toAdd.contains(iterator.next().getId())) {
+                    iterator.remove();
+                }
             }
         }
-        storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
+        // only insert the filtered alarms of the current user
+        storage.getAlarmTriggerStorage().insertTriggers(event, Collections.singletonMap(userId, loadAlarms.get(userId)));
 
         return true;
     }
