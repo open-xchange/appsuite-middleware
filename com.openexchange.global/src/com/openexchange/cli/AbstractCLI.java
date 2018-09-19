@@ -343,6 +343,33 @@ public abstract class AbstractCLI<R, C> {
     }
 
     /**
+     * Creates a switch {@link Option} with no arguments
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     * @return the new {@link Option}
+     */
+    protected Option createSwitch(String shortName, String longName, String description, boolean mandatory) {
+        return createOption(shortName, longName, false, description, mandatory);
+    }
+
+    /**
+     * Creates an {@link Option} with arguments
+     * 
+     * @param shortName The short name of the {@link Option}
+     * @param longName The long name of the {@link Option}
+     * @param argName The argument's name
+     * @param description The description of the {@link Option}
+     * @param mandatory boolean flag to indicate whether the {@link Option} is mandatory
+     * @return the new {@link Option}
+     */
+    protected Option createArgumentOption(String shortName, String longName, String argumentName, String description, boolean mandatory) {
+        return createOption(shortName, longName, argumentName, true, description, mandatory);
+    }
+
+    /**
      * Create an {@link Option} with the {@link OptionBuilder}
      * 
      * @param shortName The short name of the {@link Option}
