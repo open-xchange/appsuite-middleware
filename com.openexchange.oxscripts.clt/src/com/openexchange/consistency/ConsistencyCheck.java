@@ -75,29 +75,23 @@ public class ConsistencyCheck extends AbstractRmiCLI<Void> {
      * Defines the actions of the CLT
      */
     private enum Action {
-    list_unassigned("listUnassignedFiles", "Lists names of orphaned files held in file storage"),
-    list_missing("listMissingFiles", "Lists names of files that are still referenced, but do no more exist in actual file storage"),
-    repair("repairFiles", "Repairs either orphaned files or references to non-existing files according to specified \"--policy\" and associated \"--policy-action\""),
-    repair_configdb("checkOrRepairConfigDB", "Deletes artefacts of non-existing contexts from config database. Requires no further options."),
-    check_configdb("checkOrRepairConfigDB", "Checks for artefacts of non-existing contexts in config database. Requires no further options.");
+    list_unassigned("Lists names of orphaned files held in file storage"),
+    list_missing("Lists names of files that are still referenced, but do no more exist in actual file storage"),
+    repair("Repairs either orphaned files or references to non-existing files according to specified \"--policy\" and associated \"--policy-action\""),
+    repair_configdb("Deletes artefacts of non-existing contexts from config database. Requires no further options."),
+    check_configdb("Checks for artefacts of non-existing contexts in config database. Requires no further options.");
 
-        private final String methodName;
         private final String description;
 
         /**
          * Initializes a new {@link ConsistencyCheck.Action}.
          */
-        private Action(String methodName, String description) {
-            this.methodName = methodName;
+        private Action(String description) {
             this.description = description;
         }
 
         String getDescription() {
             return description;
-        }
-
-        String getMethodName() {
-            return methodName;
         }
     }
 
@@ -275,11 +269,11 @@ public class ConsistencyCheck extends AbstractRmiCLI<Void> {
     protected String getFooter() {
         StringBuilder sb = new StringBuilder(1024);
         sb.append("Choose options following:\n");
-        sb.append(".\n");
+        sb.append("\n");
         sb.append("1. -a,--action:\n");
         sb.append("====================================\n");
         for (Action action : Action.values()) {
-            sb.append("\n- \"-a ").append(action.name()).append("\"\n").append(action.getDescription());
+            sb.append("\n      - \"-a ").append(action.name()).append("\"\n  ").append(action.getDescription());
         }
 
         sb.append("\n");

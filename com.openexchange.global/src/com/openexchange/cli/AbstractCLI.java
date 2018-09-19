@@ -332,14 +332,16 @@ public abstract class AbstractCLI<R, C> {
         int i = defaultValue;
         // Check option & parse if present
         String sInt = cmd.getOptionValue(longOpt);
-        if (null != sInt) {
-            try {
-                i = Integer.parseInt(sInt.trim());
-            } catch (NumberFormatException e) {
-                System.err.println("Integer option '--" + longOpt + "' is not a number: " + sInt);
-                printHelp(options);
-                System.exit(1);
-            }
+        if (null == sInt) {
+            return i;
+        }
+
+        try {
+            i = Integer.parseInt(sInt.trim());
+        } catch (NumberFormatException e) {
+            System.err.println("Integer option '--" + longOpt + "' is not a number: " + sInt);
+            printHelp(options);
+            System.exit(1);
         }
         return i;
     }
