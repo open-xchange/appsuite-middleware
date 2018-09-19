@@ -273,7 +273,7 @@ public class ConsistencyCheck extends AbstractRmiCLI<Void> {
         sb.append("1. -a,--action:\n");
         sb.append("====================================\n");
         for (Action action : Action.values()) {
-            sb.append("\n      - \"-a ").append(action.name()).append("\"\n  ").append(action.getDescription());
+            sb.append("\n- \"-a ").append(action.name()).append("\"\n").append(action.getDescription());
         }
 
         sb.append("\n");
