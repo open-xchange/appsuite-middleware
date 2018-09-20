@@ -63,23 +63,23 @@ import com.openexchange.exception.OXException;
 import com.openexchange.osgi.rmi.DeferredActivatorRMIService;
 
 /**
- * {@link DeferredActivatorCLT} - Servces the <code>getmissingservices</code> command line tool
+ * {@link GetMissingServicesCLT} - Serves the <code>getmissingservices</code> command line tool
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DeferredActivatorCLT extends AbstractRmiCLI<Void> {
+public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
 
-    private static String SYNTAX = "servicestate [-n <bundleName>] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static String SYNTAX = "getmissingservices [-n <bundleName>] -A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
     private static String FOOTER = "";
 
     private boolean testAll;
     private String bundleName;
 
     /**
-     * Initializes a new {@link DeferredActivatorCLT}.
+     * Initializes a new {@link GetMissingServicesCLT}.
      */
-    public DeferredActivatorCLT() {
+    public GetMissingServicesCLT() {
         super();
     }
 
@@ -89,7 +89,7 @@ public class DeferredActivatorCLT extends AbstractRmiCLI<Void> {
      * @param args
      */
     public static void main(String[] args) {
-        new DeferredActivatorCLT().execute(args);
+        new GetMissingServicesCLT().execute(args);
     }
 
     /*
