@@ -253,7 +253,7 @@ public class EventPostProcessor {
             }
             return events.add(event);
         }
-        if (false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
+        if (null != event.getStartDate() && false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
             /*
              * excluded if not in requested range
              */
