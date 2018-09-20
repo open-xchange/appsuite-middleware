@@ -65,11 +65,11 @@ import com.openexchange.consistency.rmi.ConsistencyEntity;
 import com.openexchange.consistency.rmi.ConsistencyRMIService;
 
 /**
- * {@link ConsistencyCheck}
+ * {@link CheckConsistency}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ConsistencyCheck extends AbstractRmiCLI<Void> {
+public class CheckConsistency extends AbstractRmiCLI<Void> {
 
     /**
      * Defines the actions of the CLT
@@ -84,7 +84,7 @@ public class ConsistencyCheck extends AbstractRmiCLI<Void> {
         private final String description;
 
         /**
-         * Initializes a new {@link ConsistencyCheck.Action}.
+         * Initializes a new {@link CheckConsistency.Action}.
          */
         private Action(String description) {
             this.description = description;
@@ -147,7 +147,7 @@ public class ConsistencyCheck extends AbstractRmiCLI<Void> {
      * @param args
      */
     public static void main(String[] args) {
-        new ConsistencyCheck().execute(args);
+        new CheckConsistency().execute(args);
     }
 
     /*
