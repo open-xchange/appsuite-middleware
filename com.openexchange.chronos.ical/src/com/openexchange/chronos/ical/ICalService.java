@@ -50,8 +50,7 @@
 package com.openexchange.chronos.ical;
 
 import java.io.InputStream;
-import java.util.List;
-import com.openexchange.chronos.Event;
+import java.io.OutputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -97,11 +96,11 @@ public interface ICalService {
     ICalUtilities getUtilities();
 
     /**
-     * Initializes a {@link StreamingExporter}.
+     * Initializes a {@link StreamedCalendarExport}.
      * 
+     * @param outputStream The {@link OutputStream} to write on
      * @param parameters The {@link ICalParameters}
-     * @param events A {@link List} of {@link Event}s. If <b>not</b> set, timezone definitions are parsed and written at runtime, resulting in an unsorted iCal file
-     * @return A {@link StreamingExporter}
+     * @return A {@link StreamedCalendarExport}
      */
-    StreamingExporter getStreamedExport(ICalParameters parameters, List<Event> events);
+    StreamedCalendarExport getStreamedExport(OutputStream outputStream, ICalParameters parameters);
 }

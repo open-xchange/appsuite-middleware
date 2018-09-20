@@ -49,42 +49,62 @@
 
 package com.openexchange.chronos.ical;
 
-import java.io.OutputStream;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link StreamingExporter} - Exports an calendar by streaming an iCal file.
+ * {@link StreamedCalendarExport} - Exports an calendar by streaming an iCal file.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public interface StreamingExporter {
+public interface StreamedCalendarExport {
 
     /**
-     * Prepares the export
-     * 
-     * @param methodName The method name to use on the generated iCal file
-     * @param calendarName The name of the calendar
+     * Sets the method to be declared in the <code>VCALENDAR</code> component.
+     *
+     * @param method The method, or <code>null</code> to remove
      */
-    void prepare(String methodName, String calendarName);
+    void streamMethod(String method);
 
     /**
-     * Starts the streaming on the given {@link OutputStream}
-     * 
-     * @param outputStream The {@link OutputStream} to write on
-     * @throws OXException In case writing fails
+     * Sets the exported calendar's name using the <code>X-WR-CALNAME</code> property in the <code><code>VCALENDAR</code></code> component.
+     *
+     * @param name The calendar name, or <code>null</code> to remove
      */
-    void start(OutputStream outputStream) throws OXException;
+    void streamCalendarName(String name);
 
     /**
      * Streams a chunk of {@link Event}s to the output stream
      * 
      * @param events The {@link List} of {@link Event}s to stream
-     * @throws OXException In case writing fails
      */
-    void streamChunk(List<Event> events) throws OXException;
+    void streamEvents(List<Event> events);
+
+    /**
+     * Streams a chunk of {@link FreeBusyData} to the output stream
+     *
+     * @param freeBusyData The {@link List} of {@link FreeBusyData} to write
+     */
+    void streamFreeBusy(List<FreeBusyData> freeBusyData);
+
+    /**
+     * Explicitly adds a timezone identifier to this <code>VCALENDAR</code>.
+     *
+     * @param timeZoneIDs The time zone identifiers to stream
+     */
+    void streamTimeZones(Set<String> timeZoneIDs);
+
+    /**
+     * Adds extended properties to the exported calendar.
+     *
+     * @param property The {@link List} of {@link ExtendedProperty} to stream
+     */
+    void streamProperties(List<ExtendedProperty> property);
 
     /**
      * Finish writing to the output stream
@@ -92,5 +112,12 @@ public interface StreamingExporter {
      * @throws OXException In case writing fails
      */
     void finish() throws OXException;
+
+    /**
+     * Gets a list of conversion warnings.
+     *
+     * @return The warnings
+     */
+    List<OXException> getWarnings();
 
 }

@@ -49,67 +49,66 @@
 
 package com.openexchange.chronos.ical.impl;
 
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalUtilities;
-import com.openexchange.exception.OXException;
-import net.fortuna.ical4j.model.component.VTimeZone;
 
 /**
- * {@link UnSynchronizedStreamingExporter} - Unsynchronized iCal export. Timezone definitions will be written on runtime. This means the
+ * {@link UnSynchronizedStreamedCalendarExport} - Unsynchronized iCal export. Timezone definitions will be written on runtime. This means the
  * timezone definitions are <b>unsorted</b> and will appear <b>between</b> the <code>VEVENT</code> definitions
  * 
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class UnSynchronizedStreamingExporter extends AbstractStreamingExporter {
+public class UnSynchronizedStreamedCalendarExport extends SynchronizedStreamedCalendarExport {
 
-    private final Set<VTimeZone> timeZones;
+    private final Set<TimeZone> timeZones;
 
     /**
-     * Initializes a new {@link UnSynchronizedStreamingExporter}.
+     * Initializes a new {@link UnSynchronizedStreamedCalendarExport}.
      * 
      * @param iCalUtilities The {@link ICalUtilities}
      * @param parameters The {@link ICalParameters}
+     * @param outputStream The {@link OutputStream} to write to
      */
-    public UnSynchronizedStreamingExporter(ICalUtilities iCalUtilities, ICalParameters parameters) {
-        super(iCalUtilities, parameters);
+    public UnSynchronizedStreamedCalendarExport(ICalUtilities iCalUtilities, ICalParameters parameters, OutputStream outputStream) {
+        super(iCalUtilities, parameters, outputStream);
         this.timeZones = new HashSet<>();
     }
 
     @Override
-    public void streamChunk(List<Event> events) throws OXException {
-        Set<VTimeZone> timeZones = new HashSet<>(3);
+    public void streamEvents(List<Event> events) {
         for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
-            setTimeZones(iterator.next(), timeZones);
-            writeMissingTimeZones(timeZones);
-            timeZones.clear();
+            writeMissingTimeZones(iterator.next());
         }
 
-        super.streamChunk(events);
+        super.streamEvents(events);
     }
 
     /**
      * Adds all missing timezone definitions to the stream. Will write the timezone between different section, <b>unsorted</b>
      * 
-     * @param timeZones The timezones to add
-     * @throws OXException If writing fails
+     * @param event The event to get the timezone from
      */
-    private void writeMissingTimeZones(Set<VTimeZone> timeZones) throws OXException {
-        if (false == this.timeZones.containsAll(timeZones)) {
-            for (Iterator<VTimeZone> iteratror = timeZones.iterator(); iteratror.hasNext();) {
-                VTimeZone zone = iteratror.next();
-                if (false == this.timeZones.contains(zone)) {
-                    write(zone.toString());
-                    timeZones.add(zone);
-                }
-            }
-        }
+    private void writeMissingTimeZones(Event event) {
+        checkTimeZone(event.getStartDate());
+        checkTimeZone(event.getEndDate());
     }
 
+    private void checkTimeZone(DateTime dateTime) {
+        if (null != dateTime && null != dateTime.getTimeZone() && false == this.timeZones.contains(dateTime.getTimeZone())) {
+            HashSet<String> set = new HashSet<>(2);
+            set.add(dateTime.getTimeZone().getID());
+            streamTimeZones(set);
+            timeZones.add(dateTime.getTimeZone());
+        }
+    }
 }

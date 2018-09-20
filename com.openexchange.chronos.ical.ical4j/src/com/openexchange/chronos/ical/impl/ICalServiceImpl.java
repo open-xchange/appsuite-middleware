@@ -51,15 +51,15 @@ package com.openexchange.chronos.ical.impl;
 
 import static com.openexchange.chronos.ical.impl.ICalUtils.getParametersOrDefault;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ICalUtilities;
 import com.openexchange.chronos.ical.ImportedCalendar;
-import com.openexchange.chronos.ical.StreamingExporter;
+import com.openexchange.chronos.ical.StreamedCalendarExport;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
 
@@ -109,9 +109,9 @@ public class ICalServiceImpl implements ICalService {
     }
 
     @Override
-    public StreamingExporter getStreamedExport(ICalParameters parameters, List<Event> events) {
+    public StreamedCalendarExport getStreamedExport(OutputStream outputStream, ICalParameters parameters) {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
-        return null == events || events.isEmpty() ? new UnSynchronizedStreamingExporter(iCalUtilities, iCalParameters) : new SynchronizedStreamingExporter(iCalUtilities, iCalParameters, events);
+        return new SynchronizedStreamedCalendarExport(iCalUtilities, iCalParameters, outputStream);
     }
 
 }

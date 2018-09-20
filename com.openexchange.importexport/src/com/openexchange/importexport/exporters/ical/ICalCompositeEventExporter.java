@@ -53,13 +53,16 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.google.common.collect.Lists;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.ical.StreamingExporter;
+import com.openexchange.chronos.ical.StreamedCalendarExport;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
@@ -98,21 +101,21 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
         /*
          * prepare export
          */
-        StreamingExporter streamedExport = ImportExportServices.getICalService().getStreamedExport(null, eventsInFolder);
-        streamedExport.prepare("PUBLISH", extractName(session, getFolderId()));
-        /*
-         * load full event data in chunks & add to export
-         */
         calendarAccess = getCalendarAccess(session);
         calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, EXPORTED_FIELDS);
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-
-        streamedExport.start(out);
+        /*
+         * load full event data in chunks & add to export
+         */
+        StreamedCalendarExport streamedExport = ImportExportServices.getICalService().getStreamedExport(out, null);
+        streamedExport.streamMethod("PUBLISH");
+        streamedExport.streamCalendarName(extractName(session, getFolderId()));
+        streamedExport.streamTimeZones(getTimeZoneIDs(eventsInFolder));
         for (List<EventID> chunk : Lists.partition(getEventIDs(eventsInFolder), 100)) {
             /*
              * serialize calendar
              */
-            streamedExport.streamChunk(prepareForExport(calendarAccess.getEvents(chunk)));
+            streamedExport.streamEvents(prepareForExport(calendarAccess.getEvents(chunk)));
         }
         streamedExport.finish();
         return null;
@@ -147,6 +150,23 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
             eventIDs.add(new EventID(event.getFolderId(), event.getId()));
         }
         return eventIDs;
+    }
+
+    private static Set<String> getTimeZoneIDs(List<Event> events) {
+        HashSet<String> set = new HashSet<>();
+        for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
+            Event next = iterator.next();
+            setTimeZone(set, next.getStartDate());
+            setTimeZone(set, next.getEndDate());
+        }
+        return set;
+    }
+
+    private static boolean setTimeZone(Set<String> timeZones, org.dmfs.rfc5545.DateTime dateTime) {
+        if (null != dateTime && false == dateTime.isFloating() && null != dateTime.getTimeZone() && false == "UTC".equals(dateTime.getTimeZone().getID())) {
+            return timeZones.add(dateTime.getTimeZone().getID());
+        }
+        return false;
     }
 
 }
