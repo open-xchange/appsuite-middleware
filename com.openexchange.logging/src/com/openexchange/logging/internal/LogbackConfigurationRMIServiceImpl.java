@@ -67,7 +67,6 @@ import com.openexchange.logging.filter.ExceptionCategoryFilter;
 import com.openexchange.logging.filter.ExtendedMDCFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.filter.TurboFilterCache;
-import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.rmi.LogbackConfigurationRMIService;
 import com.openexchange.logging.rmi.LogbackRemoteResponse;
 import com.openexchange.logging.rmi.LogbackRemoteResponse.MessageType;

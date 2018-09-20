@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.logging.mbean;
+package com.openexchange.logging.internal;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
