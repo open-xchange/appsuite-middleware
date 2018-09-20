@@ -54,7 +54,9 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.data.FoldingWriter;
 
@@ -173,6 +175,63 @@ public interface ICalUtilities {
      * @throws OXException If exporting fails
      */
     void exportEvent(FoldingWriter writer, List<Event> events, ICalParameters parameters) throws OXException;
+
+    /**
+     * Exports one or more free/busy data to <code>VFREEBUSY</code> components and writes them to the supplied output stream.
+     * <p/>
+     * Note that the generated data will just contain <code>VFREEBUSY</code> components (<code>BEGIN:VFREEBUSY...END:VFREEBUSY</code>),
+     * i.e. syntactically the <i>freebusy</i> elements as per
+     * <a href="https://tools.ietf.org/html/rfc5545#section-3.6.4">RFC 5545, section 3.6.4</a>.
+     *
+     * @param outputStream The output stream to write to
+     * @param freeBusyData The {@link FreeBusyData}
+     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
+     * @throws OXException If exporting fails
+     */
+    void exportFreeBusy(OutputStream outputStream, List<FreeBusyData> freeBusyData, ICalParameters parameters) throws OXException;
+
+    /**
+     * Exports one or more free/busy data to <code>VFREEBUSY</code> components and writes them to the supplied output stream.
+     * <p/>
+     * Note that the generated data will just contain <code>VFREEBUSY</code> components (<code>BEGIN:VFREEBUSY...END:VFREEBUSY</code>),
+     * i.e. syntactically the <i>freebusy</i> elements as per
+     * <a href="https://tools.ietf.org/html/rfc5545#section-3.6.4">RFC 5545, section 3.6.4</a>.
+     *
+     * @param writer The {@link FoldingWriter} to write to
+     * @param freeBusyData The {@link FreeBusyData}
+     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
+     * @throws OXException If exporting fails
+     */
+    void exportFreeBusy(FoldingWriter writer, List<FreeBusyData> freeBusyData, ICalParameters parameters) throws OXException;
+
+    
+    /**
+     * Exports one or more availability to <code>VAVAILABILITY</code> components and writes them to the supplied output stream.
+     * <p/>
+     * Note that the generated data will just contain <code>VAVAILABILITY</code> components (<code>BEGIN:VAVAILABILITY...END:VAVAILABILITY</code>),
+     * i.e. syntactically the <i>availability</i> elements as per
+     * <a href="https://tools.ietf.org/html/rfc7953#section-3.1">RFC 7953, section 3.1</a>.
+     *
+     * @param outputStream The output stream to write to
+     * @param availibilities The {@link Availability}
+     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
+     * @throws OXException If exporting fails
+     */
+    void exportAvailability(OutputStream outputStream, List<Availability> availibilities, ICalParameters parameters) throws OXException;
+
+    /**
+     * Exports one or more availability to <code>VAVAILABILITY</code> components and writes them to the supplied output stream.
+     * <p/>
+     * Note that the generated data will just contain <code>VAVAILABILITY</code> components (<code>BEGIN:VAVAILABILITY...END:VAVAILABILITY</code>),
+     * i.e. syntactically the <i>availability</i> elements as per
+     * <a href="https://tools.ietf.org/html/rfc7953#section-3.1">RFC 7953, section 3.1</a>.
+     *
+     * @param writer The {@link FoldingWriter} to write to
+     * @param availibilities The {@link Availability}
+     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
+     * @throws OXException If exporting fails
+     */
+    void exportAvailability(FoldingWriter writer, List<Availability> availibilities, ICalParameters parameters) throws OXException;
 
     List<TimeZone> importTimeZones(InputStream inputStream, ICalParameters parameters) throws OXException;
 
