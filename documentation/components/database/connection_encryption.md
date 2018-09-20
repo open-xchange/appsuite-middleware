@@ -177,10 +177,10 @@ com.mysql.jdbc:
     requireSSL: true
     verifyServerCertificate: true
     # Deactivate if you just want a server authentication
-    clientCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/keystore
+    clientCertificateKeyStoreUrl: file:/opt/open-xchange/etc/ssl/database/keystore
     clientCertificateKeyStorePassword: changeit
     clientCertificateKeyStoreType: JKS
-    trustCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/truststore
+    trustCertificateKeyStoreUrl: file:/opt/open-xchange/etc/ssl/database/truststore
     trustCertificateKeyStorePassword: changeit
     trustCertificateKeyStoreType: JKS
 ```
