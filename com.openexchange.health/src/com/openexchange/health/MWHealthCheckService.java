@@ -50,7 +50,8 @@
 package com.openexchange.health;
 
 import java.util.Collection;
-import com.openexchange.exception.OXException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.osgi.annotation.SingletonService;
 
 
@@ -62,6 +63,8 @@ import com.openexchange.osgi.annotation.SingletonService;
  */
 @SingletonService
 public interface MWHealthCheckService {
+
+    static final Logger LOG = LoggerFactory.getLogger(MWHealthCheckService.class);
 
     /**
      * Gets a collection containing all registered health checks.
@@ -82,8 +85,7 @@ public interface MWHealthCheckService {
      * Executes all registered and not blacklisted health checks.
      *
      * @return The health check result
-     * @throws OXException On error
      */
-    MWHealthCheckResult check() throws OXException;
+    MWHealthCheckResult check();
 
 }

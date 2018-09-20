@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.DAVAction;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -89,7 +90,7 @@ public class CalDAVIfScheduleTagMatchAction extends DAVAction {
             if (null != resource && resource.exists() && EventResource.class.isInstance(resource)) {
                 String scheduleTag = ((EventResource) resource).getScheduleTag();
                 if (false == Objects.equals(expectedScheduleTag, scheduleTag)) {
-                    throw DAVProtocol.protocolException(request.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+                    throw DAVProtocol.protocolException(request.getUrl(), OXException.conflict(), HttpServletResponse.SC_PRECONDITION_FAILED);
                 }
             }
         }

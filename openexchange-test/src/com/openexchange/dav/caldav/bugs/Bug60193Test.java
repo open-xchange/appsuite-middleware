@@ -52,6 +52,7 @@ package com.openexchange.dav.caldav.bugs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.util.Collections;
 import java.util.Date;
 import org.junit.Test;
@@ -225,7 +226,7 @@ public class Bug60193Test extends CalDAVTest {
         userAttendee = iCalResource.getVEvent().getAttendee(getClient().getValues().getDefaultAddress());
         assertNotNull("attendee not found in ical", userAttendee);
         assertEquals("PARTSTAT wrong in user attendee", "ACCEPTED", userAttendee.getAttribute("PARTSTAT"));
-        assertNotEquals("RSVP wrong in user attendee", "TRUE", userAttendee.getAttribute("RSVP"));
+        assertNull("RSVP wrong in user attendee", userAttendee.getAttribute("RSVP"));
     }
 
     @Test
@@ -298,6 +299,80 @@ public class Bug60193Test extends CalDAVTest {
         assertNotNull("attendee not found in ical", userAttendee);
         assertEquals("PARTSTAT wrong in user attendee", "ACCEPTED", userAttendee.getAttribute("PARTSTAT"));
         assertNotEquals("RSVP wrong in user attendee", "TRUE", userAttendee.getAttribute("RSVP"));
+    }
+
+    @Test
+    public void testRSVPAfterAcceptingAcceptedOnClient() throws Exception {
+        /*
+         * as user b, "import" appointment via caldav & set rsvp flag for user a (already accepted)
+         */
+        String uid = randomUID();
+        Date start = TimeTools.D("next monday at 11:30");
+        Date end = TimeTools.D("next monday at 12:15");
+        String iCal = // @formatter:off
+            "BEGIN:VCALENDAR\r\n" +
+            "VERSION:2.0\r\n" +
+            "PRODID:-//Apple Inc.//Mac OS X 10.8.5//EN\r\n" +
+            "CALSCALE:GREGORIAN\r\n" +
+            "BEGIN:VTIMEZONE\r\n" +
+            "TZID:Europe/Berlin\r\n" +
+            "BEGIN:DAYLIGHT\r\n" +
+            "TZOFFSETFROM:+0100\r\n" +
+            "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n" +
+            "DTSTART:19810329T020000\r\n" +
+            "TZNAME:MESZ\r\n" +
+            "TZOFFSETTO:+0200\r\n" +
+            "END:DAYLIGHT\r\n" +
+            "BEGIN:STANDARD\r\n" +
+            "TZOFFSETFROM:+0200\r\n" +
+            "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n" +
+            "DTSTART:19961027T030000\r\n" +
+            "TZNAME:MEZ\r\n" +
+            "TZOFFSETTO:+0100\r\n" +
+            "END:STANDARD\r\n" +
+            "END:VTIMEZONE\r\n" +
+            "BEGIN:VEVENT\r\n" +
+            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
+            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
+            "TRANSP:OPAQUE\r\n" +
+            "UID:" + uid + "\r\n" +
+            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
+            "CLASS:PUBLIC\r\n" +
+            "SUMMARY:Test\r\n" +
+            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
+            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
+            "ORGANIZER:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
+            "ATTENDEE;PARTSTAT=ACCEPTED:mailto:" + getClient2().getValues().getDefaultAddress() + "\r\n" +
+            "ATTENDEE;PARTSTAT=ACCEPTED;RSVP=TRUE:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
+            "END:VEVENT\r\n" +
+            "END:VCALENDAR\r\n"
+        ; // @formatter:on
+        WebDAVClient webDAVClient2 = new WebDAVClient(testUser2, getDefaultUserAgent(), null);
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICal(webDAVClient2, String.valueOf(getClient2().getValues().getPrivateAppointmentFolder()), uid, iCal, Collections.emptyMap()));
+        /*
+         * as user a, check appointment on client
+         */
+        ICalResource iCalResource = get(uid);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        Property userAttendee = iCalResource.getVEvent().getAttendee(getClient().getValues().getDefaultAddress());
+        assertNotNull("attendee not found in ical", userAttendee);
+        assertEquals("RSVP wrong in user attendee", "TRUE", userAttendee.getAttribute("RSVP"));
+        assertEquals("PARTSTAT wrong in user attendee", "ACCEPTED", userAttendee.getAttribute("PARTSTAT"));
+        /*
+         * as user a, accept appointment on client
+         */
+        userAttendee.getAttributes().put("PARTSTAT", "ACCEPTED");
+        userAttendee.getAttributes().remove("RSVP");
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
+        /*
+         * as user a, check appointment on client
+         */
+        iCalResource = get(uid);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        userAttendee = iCalResource.getVEvent().getAttendee(getClient().getValues().getDefaultAddress());
+        assertNotNull("attendee not found in ical", userAttendee);
+        assertEquals("PARTSTAT wrong in user attendee", "ACCEPTED", userAttendee.getAttribute("PARTSTAT"));
+        assertNull("RSVP wrong in user attendee", userAttendee.getAttribute("RSVP"));
     }
 
 }
