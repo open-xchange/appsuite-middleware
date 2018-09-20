@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.ical;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import com.openexchange.exception.OXException;
@@ -101,6 +102,7 @@ public interface ICalService {
      * @param outputStream The {@link OutputStream} to write on
      * @param parameters The {@link ICalParameters}
      * @return A {@link StreamedCalendarExport}
+     * @throws IOException If writing to the output stream fails
      */
-    StreamedCalendarExport getStreamedExport(OutputStream outputStream, ICalParameters parameters);
+    StreamedCalendarExport getStreamedExport(OutputStream outputStream, ICalParameters parameters) throws IOException;
 }

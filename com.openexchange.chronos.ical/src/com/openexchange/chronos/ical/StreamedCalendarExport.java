@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.ical;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.Event;
@@ -62,62 +64,68 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public interface StreamedCalendarExport {
+public interface StreamedCalendarExport extends Closeable {
 
     /**
      * Sets the method to be declared in the <code>VCALENDAR</code> component.
      *
      * @param method The method, or <code>null</code> to remove
+     * 
+     * @throws IOException In case writing fails
+     * @throws OXException On other errors
      */
-    void streamMethod(String method);
+    void writeMethod(String method) throws IOException, OXException;
 
     /**
      * Sets the exported calendar's name using the <code>X-WR-CALNAME</code> property in the <code><code>VCALENDAR</code></code> component.
      *
      * @param name The calendar name, or <code>null</code> to remove
+     * @throws IOException In case writing fails
+     * @throws OXException On other errors
      */
-    void streamCalendarName(String name);
+    void writeCalendarName(String name) throws IOException, OXException;
 
     /**
      * Streams a chunk of {@link Event}s to the output stream
      * 
      * @param events The {@link List} of {@link Event}s to stream
+     * @throws IOException In case writing fails
+     * @throws OXException On other errors
      */
-    void streamEvents(List<Event> events);
+    void writeEvents(List<Event> events) throws IOException, OXException;
 
     /**
      * Streams a chunk of {@link FreeBusyData} to the output stream
      *
      * @param freeBusyData The {@link List} of {@link FreeBusyData} to write
+     * @throws IOException In case writing fails
+     * @throws OXException On other errors
      */
-    void streamFreeBusy(List<FreeBusyData> freeBusyData);
+    void writeFreeBusy(List<FreeBusyData> freeBusyData) throws IOException, OXException;
 
     /**
      * Explicitly adds a timezone identifier to this <code>VCALENDAR</code>.
      *
      * @param timeZoneIDs The time zone identifiers to stream
+     * @throws IOException In case writing fails
+     * @throws OXException On other errors
      */
-    void streamTimeZones(Set<String> timeZoneIDs);
+    void writeTimeZones(Set<String> timeZoneIDs) throws IOException, OXException;
 
     /**
      * Adds extended properties to the exported calendar.
      *
      * @param property The {@link List} of {@link ExtendedProperty} to stream
+     * @throws IOException In case writing fails
+     * @throws OXException On other errors
      */
-    void streamProperties(List<ExtendedProperty> property);
+    void writeProperties(List<ExtendedProperty> property) throws IOException, OXException;
 
     /**
      * Finish writing to the output stream
      * 
-     * @throws OXException In case writing fails
+     * @throws IOException In case writing fails
      */
-    void finish() throws OXException;
-
-    /**
-     * Gets a list of conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    void finish() throws IOException;
 
 }
