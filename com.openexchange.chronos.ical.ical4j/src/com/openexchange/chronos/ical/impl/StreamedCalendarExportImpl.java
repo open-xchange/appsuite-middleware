@@ -65,7 +65,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalUtilities;
 import com.openexchange.chronos.ical.StreamedCalendarExport;
@@ -83,43 +82,41 @@ import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Version;
 
 /**
- * {@link SynchronizedStreamedCalendarExport} -Synchronized {@link StreamedCalendarExport} for iCal files. Timezone definitions will be written on top of the events.
+ * {@link StreamedCalendarExportImpl} -Synchronized {@link StreamedCalendarExport} for iCal files. Timezone definitions will be written on top of the events.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.1
  */
-public class SynchronizedStreamedCalendarExport implements StreamedCalendarExport {
+public class StreamedCalendarExportImpl implements StreamedCalendarExport {
 
     private final static List<Method> METHODS = ImmutableList.of(Method.ADD, Method.CANCEL, Method.COUNTER, Method.DECLINE_COUNTER, Method.PUBLISH, Method.REFRESH, Method.REPLY, Method.REQUEST);
 
     // ------------------------------------------------------------------------------------------------
 
-    protected FoldingWriter writer;
+    protected final FoldingWriter writer;
 
-    protected ICalParameters parameters;
+    protected final ICalParameters parameters;
 
     // ------------------------------------------------------------------------------------------------
 
-    private final ICalUtilities iCalUtilities;
-
-    private final List<OXException> warninigs;
+    private final ICalUtilitiesImpl iCalUtilities;
 
     // ------------------------------------------------------------------------------------------------
 
     /**
-     * Initializes a new {@link SynchronizedStreamedCalendarExport}.
+     * Initializes a new {@link StreamedCalendarExportImpl}.
      * 
      * @param iCalUtilities The {@link ICalUtilities}
      * @param parameters The {@link ICalParameters}
      * @param outputStream The {@link OutputStream}
-     * 
+     * @throws IOException If writing fails
      */
-    public SynchronizedStreamedCalendarExport(ICalUtilities iCalUtilities, ICalParameters parameters, OutputStream outputStream) {
+    public StreamedCalendarExportImpl(ICalUtilitiesImpl iCalUtilities, ICalParameters parameters, OutputStream outputStream) throws IOException {
         super();
         this.iCalUtilities = iCalUtilities;
-        this.warninigs = new ArrayList<>();
+        this.parameters = parameters;
 
-        writer = new FoldingWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8), FoldingWriter.MAX_FOLD_LENGTH);
+        writer = new FoldingWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8), FoldingWriter.REDUCED_FOLD_LENGTH);
         write(getStart());
         write(Version.VERSION_2_0);
         write(getProdID());
@@ -128,47 +125,46 @@ public class SynchronizedStreamedCalendarExport implements StreamedCalendarExpor
     // ------------------------------------------------------------------------------------------------
 
     @Override
-    public void streamMethod(String method) {
+    public void writeMethod(String method) throws IOException {
         write(getMethod(method));
     }
 
     @Override
-    public void streamCalendarName(String name) {
+    public void writeCalendarName(String name) throws IOException, OXException {
         WrCalName calName = new WrCalName(PropertyFactoryImpl.getInstance());
         calName.setValue(name);
         write(calName);
     }
 
     @Override
-    public void streamEvents(List<Event> events) {
+    public void writeEvents(List<Event> events) throws IOException, OXException {
         try {
             iCalUtilities.exportEvent(writer, events, parameters);
         } catch (OXException e) {
-            addWarning(e);
+            unfoldIOException(e);
         }
     }
 
     @Override
-    public void streamFreeBusy(List<FreeBusyData> freeBusyData) {
+    public void writeFreeBusy(List<FreeBusyData> freeBusyData) throws IOException, OXException {
         try {
             iCalUtilities.exportFreeBusy(writer, freeBusyData, parameters);
         } catch (OXException e) {
-            addWarning(e);
+            unfoldIOException(e);
         }
-
     }
 
     @Override
-    public void streamTimeZones(Set<String> timeZoneIDs) {
+    public void writeTimeZones(Set<String> timeZoneIDs) throws IOException, OXException {
         try {
             iCalUtilities.exportTimeZones(writer, new ArrayList<>(timeZoneIDs), parameters);
         } catch (OXException e) {
-            addWarning(e);
+            unfoldIOException(e);
         }
     }
 
     @Override
-    public void streamProperties(List<ExtendedProperty> property) {
+    public void writeProperties(List<ExtendedProperty> property) throws IOException, OXException {
         if (null == property || property.isEmpty()) {
             return;
         }
@@ -178,7 +174,7 @@ public class SynchronizedStreamedCalendarExport implements StreamedCalendarExpor
     }
 
     @Override
-    public void finish() throws OXException {
+    public void finish() throws IOException {
         try {
             write(getEnd());
         } finally {
@@ -187,8 +183,8 @@ public class SynchronizedStreamedCalendarExport implements StreamedCalendarExpor
     }
 
     @Override
-    public List<OXException> getWarnings() {
-        return warninigs;
+    public void close() throws IOException {
+        Streams.close(writer);
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -256,30 +252,24 @@ public class SynchronizedStreamedCalendarExport implements StreamedCalendarExpor
         return Method.PUBLISH;
     }
 
+    private void unfoldIOException(OXException e) throws IOException, OXException {
+        if (null != e.getCause() && IOException.class.isAssignableFrom(e.getCause().getClass())) {
+            // Throw nested IOException prior wrapping it into an OXExcpetion
+            throw (IOException) e.getCause();
+        }
+        throw e;
+    }
+
     // ------------------------------------------------------------------------------------------------
 
-    protected void write(Object o) {
+    protected void write(Object o) throws IOException {
         if (null != o) {
             write(o.toString());
         }
     }
 
-    protected void write(String str) {
-        boolean error = false;
-        try {
-            writer.write(str);
-        } catch (IOException e) {
-            error = true;
-            addWarning(e);
-        } finally {
-            if (error) {
-                Streams.close(writer);
-            }
-        }
-    }
-
-    protected void addWarning(Throwable t) {
-        warninigs.add(ICalExceptionCodes.IO_ERROR.create(t));
+    protected void write(String str) throws IOException {
+        writer.write(str);
     }
 
     protected boolean setTimeZones(Event event, Set<VTimeZone> timeZones) {

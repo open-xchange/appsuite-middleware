@@ -58,7 +58,6 @@ import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.exception.OXException;
-import net.fortuna.ical4j.data.FoldingWriter;
 
 /**
  * {@link ICalUtilities}
@@ -107,20 +106,6 @@ public interface ICalUtilities {
     void exportAlarms(OutputStream outputStream, List<Alarm> alarms, ICalParameters parameters) throws OXException;
 
     /**
-     * Exports one or more alarms to <code>VALARM</code> components and writes them to the supplied output stream.
-     * <p/>
-     * Note that the generated data will just contain <code>VALARM</code> components (<code>BEGIN:VALARM...END:VALARM</code>), i.e.
-     * syntactically the <i>alarmc</i> elements as per
-     * <a href="https://tools.ietf.org/html/rfc5545#section-3.6.6">RFC 5545, section 3.6.6</a>.
-     *
-     * @param writer The {@link FoldingWriter} to write to
-     * @param alarms The alarms to export
-     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
-     * @throws OXException If exporting fails
-     */
-    void exportAlarms(FoldingWriter writer, List<Alarm> alarms, ICalParameters parameters) throws OXException;
-
-    /**
      * Exports one or more time zones to <code>VTIMEZONE</code> components and writes them to the supplied output stream.
      * <p/>
      * Note that the generated data will just contain <code>VTIMEZONE</code> components (<code>BEGIN:VTIMEZONE...END:VTIMEZONE</code>),
@@ -133,20 +118,6 @@ public interface ICalUtilities {
      * @throws OXException If exporting fails
      */
     void exportTimeZones(OutputStream outputStream, List<String> timeZoneIDs, ICalParameters parameters) throws OXException;
-
-    /**
-     * Exports one or more time zones to <code>VTIMEZONE</code> components and writes them to the supplied output stream.
-     * <p/>
-     * Note that the generated data will just contain <code>VTIMEZONE</code> components (<code>BEGIN:VTIMEZONE...END:VTIMEZONE</code>),
-     * i.e. syntactically the <i>timezonec</i> elements as per
-     * <a href="https://tools.ietf.org/html/rfc5545#section-3.6.5">RFC 5545, section 3.6.5</a>.
-     *
-     * @param writer The {@link FoldingWriter} to write to
-     * @param timeZoneIDs The identifiers of the time zones to export
-     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
-     * @throws OXException If exporting fails
-     */
-    void exportTimeZones(FoldingWriter writer, List<String> timeZoneIDs, ICalParameters parameters) throws OXException;
 
     /**
      * Exports one or more events to <code>VTEVENT</code> components and writes them to the supplied output stream.
@@ -163,20 +134,6 @@ public interface ICalUtilities {
     void exportEvent(OutputStream outputStream, List<Event> events, ICalParameters parameters) throws OXException;
 
     /**
-     * Exports one or more events to <code>VTEVENT</code> components and writes them to the supplied output stream.
-     * <p/>
-     * Note that the generated data will just contain <code>VEVENT</code> components (<code>BEGIN:VEVENT...END:VEVENT</code>),
-     * i.e. syntactically the <i>event</i> elements as per
-     * <a href="https://tools.ietf.org/html/rfc5545#section-3.6.1">RFC 5545, section 3.6.1</a>.
-     *
-     * @param writer The {@link FoldingWriter} to write to
-     * @param events The events to export
-     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
-     * @throws OXException If exporting fails
-     */
-    void exportEvent(FoldingWriter writer, List<Event> events, ICalParameters parameters) throws OXException;
-
-    /**
      * Exports one or more free/busy data to <code>VFREEBUSY</code> components and writes them to the supplied output stream.
      * <p/>
      * Note that the generated data will just contain <code>VFREEBUSY</code> components (<code>BEGIN:VFREEBUSY...END:VFREEBUSY</code>),
@@ -191,21 +148,6 @@ public interface ICalUtilities {
     void exportFreeBusy(OutputStream outputStream, List<FreeBusyData> freeBusyData, ICalParameters parameters) throws OXException;
 
     /**
-     * Exports one or more free/busy data to <code>VFREEBUSY</code> components and writes them to the supplied output stream.
-     * <p/>
-     * Note that the generated data will just contain <code>VFREEBUSY</code> components (<code>BEGIN:VFREEBUSY...END:VFREEBUSY</code>),
-     * i.e. syntactically the <i>freebusy</i> elements as per
-     * <a href="https://tools.ietf.org/html/rfc5545#section-3.6.4">RFC 5545, section 3.6.4</a>.
-     *
-     * @param writer The {@link FoldingWriter} to write to
-     * @param freeBusyData The {@link FreeBusyData}
-     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
-     * @throws OXException If exporting fails
-     */
-    void exportFreeBusy(FoldingWriter writer, List<FreeBusyData> freeBusyData, ICalParameters parameters) throws OXException;
-
-    
-    /**
      * Exports one or more availability to <code>VAVAILABILITY</code> components and writes them to the supplied output stream.
      * <p/>
      * Note that the generated data will just contain <code>VAVAILABILITY</code> components (<code>BEGIN:VAVAILABILITY...END:VAVAILABILITY</code>),
@@ -218,20 +160,6 @@ public interface ICalUtilities {
      * @throws OXException If exporting fails
      */
     void exportAvailability(OutputStream outputStream, List<Availability> availibilities, ICalParameters parameters) throws OXException;
-
-    /**
-     * Exports one or more availability to <code>VAVAILABILITY</code> components and writes them to the supplied output stream.
-     * <p/>
-     * Note that the generated data will just contain <code>VAVAILABILITY</code> components (<code>BEGIN:VAVAILABILITY...END:VAVAILABILITY</code>),
-     * i.e. syntactically the <i>availability</i> elements as per
-     * <a href="https://tools.ietf.org/html/rfc7953#section-3.1">RFC 7953, section 3.1</a>.
-     *
-     * @param writer The {@link FoldingWriter} to write to
-     * @param availibilities The {@link Availability}
-     * @param parameters Further parameters for the iCalendar export, or <code>null</code> to stick with the defaults
-     * @throws OXException If exporting fails
-     */
-    void exportAvailability(FoldingWriter writer, List<Availability> availibilities, ICalParameters parameters) throws OXException;
 
     List<TimeZone> importTimeZones(InputStream inputStream, ICalParameters parameters) throws OXException;
 

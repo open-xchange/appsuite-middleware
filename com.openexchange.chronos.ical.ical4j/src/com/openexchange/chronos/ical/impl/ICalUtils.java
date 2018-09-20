@@ -337,7 +337,7 @@ public class ICalUtils {
                 writer.write(((Component) componentIiterator.next()).toString());
             }
         } catch (IOException e) {
-            throw new OXException(e);
+            throw ICalExceptionCodes.IO_ERROR.create(e);
         }
     }
 

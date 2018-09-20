@@ -50,11 +50,11 @@
 package com.openexchange.importexport.exporters.ical;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,7 +67,9 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
+import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -97,28 +99,32 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
         if (-1 < limit) {
             calendarAccess.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(limit));
         }
-        List<Event> eventsInFolder = calendarAccess.getEventsInFolder(getFolderId());
+
+        List<EventID> eventIDs = new LinkedList<>();
+        Set<String> timezoneIDs = new HashSet<>();
+        parseEvents(calendarAccess.getEventsInFolder(getFolderId()), eventIDs, timezoneIDs);
+
         /*
          * prepare export
          */
         calendarAccess = getCalendarAccess(session);
         calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, EXPORTED_FIELDS);
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-        /*
-         * load full event data in chunks & add to export
-         */
-        StreamedCalendarExport streamedExport = ImportExportServices.getICalService().getStreamedExport(out, null);
-        streamedExport.streamMethod("PUBLISH");
-        streamedExport.streamCalendarName(extractName(session, getFolderId()));
-        streamedExport.streamTimeZones(getTimeZoneIDs(eventsInFolder));
-        for (List<EventID> chunk : Lists.partition(getEventIDs(eventsInFolder), 100)) {
-            /*
-             * serialize calendar
-             */
-            streamedExport.streamEvents(prepareForExport(calendarAccess.getEvents(chunk)));
+
+        if (null != out) {
+            stream(session, out, calendarAccess, eventIDs, timezoneIDs);
+            return null;
         }
-        streamedExport.finish();
-        return null;
+        
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        try {
+            stream(session, sink.asOutputStream(), calendarAccess, eventIDs, timezoneIDs);
+            return sink;
+        } catch (Throwable t) {
+            // Close stream on error
+            Streams.close(sink);
+            throw t;
+        }
     }
 
     @Override
@@ -135,34 +141,46 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
         return ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
     }
 
+    private void stream(ServerSession session, OutputStream out, IDBasedCalendarAccess calendarAccess, List<EventID> eventIDs, Set<String> timezoneIDs) throws OXException {
+        /*
+         * load full event data in chunks & add to export
+         */
+        try (StreamedCalendarExport streamedExport = ImportExportServices.getICalService().getStreamedExport(out, null)) {
+            streamedExport.writeMethod("PUBLISH");
+            streamedExport.writeCalendarName(extractName(session, getFolderId()));
+            streamedExport.writeTimeZones(timezoneIDs);
+            for (List<EventID> chunk : Lists.partition(eventIDs, 100)) {
+                /*
+                 * serialize calendar
+                 */
+                streamedExport.writeEvents(prepareForExport(calendarAccess.getEvents(chunk)));
+            }
+            streamedExport.finish();
+        } catch (IOException e) {
+            throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
+        }
+    }
+    
     /**
-     * Gets the full identifiers for the supplied events holding the folder and file identifiers.
+     * Gets the full identifiers for the supplied events holding the folder and file identifiers
+     * and get all used timezones
      * 
-     * @param events The events to get the full identifiers for
-     * @return The full identifiers for the events
+     * @param eventsInFolder The events to get the full identifiers for
+     * @param eventIDs A {@link List} to write the {@link EventID}s to
+     * @param timezoneIDs A {@link Set} to write the timezones to
      */
-    private static List<EventID> getEventIDs(List<Event> events) {
-        if (null == events) {
-            return Collections.emptyList();
+    private static void parseEvents(List<Event> eventsInFolder, List<EventID> eventIDs, Set<String> timezoneIDs) {
+        if (null == eventsInFolder) {
+            return;
         }
-        List<EventID> eventIDs = new ArrayList<EventID>(events.size());
-        for (Event event : events) {
+        for (Event event : eventsInFolder) {
             eventIDs.add(new EventID(event.getFolderId(), event.getId()));
+            addTimeZone(timezoneIDs, event.getStartDate());
+            addTimeZone(timezoneIDs, event.getEndDate());
         }
-        return eventIDs;
     }
 
-    private static Set<String> getTimeZoneIDs(List<Event> events) {
-        HashSet<String> set = new HashSet<>();
-        for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
-            Event next = iterator.next();
-            setTimeZone(set, next.getStartDate());
-            setTimeZone(set, next.getEndDate());
-        }
-        return set;
-    }
-
-    private static boolean setTimeZone(Set<String> timeZones, org.dmfs.rfc5545.DateTime dateTime) {
+    private static boolean addTimeZone(Set<String> timeZones, org.dmfs.rfc5545.DateTime dateTime) {
         if (null != dateTime && false == dateTime.isFloating() && null != dateTime.getTimeZone() && false == "UTC".equals(dateTime.getTimeZone().getID())) {
             return timeZones.add(dateTime.getTimeZone().getID());
         }
