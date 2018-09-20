@@ -9,7 +9,7 @@ default:
     productName: 'OX App Suite'
     productNameMail: 'OX Mail'
 
-    contact: 'Open-Xchange AG, Rollnerstr. 14, D-90408 Nürnberg, E-Mail: info@open-xchange.com'
+    contact: 'Open-Xchange AG, Hohenzollernring 72, D-50672 Cologne, E-Mail: info@open-xchange.com'
 
     forgotPassword: false
 
