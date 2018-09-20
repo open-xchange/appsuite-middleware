@@ -68,20 +68,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
-import com.openexchange.exception.OXException;
-import com.openexchange.health.MWHealthCheckResult;
 import com.openexchange.health.MWHealthCheck;
 import com.openexchange.health.MWHealthCheckProperty;
 import com.openexchange.health.MWHealthCheckResponse;
+import com.openexchange.health.MWHealthCheckResult;
 import com.openexchange.health.MWHealthCheckService;
 import com.openexchange.health.MWHealthState;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -93,8 +89,6 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @since v7.10.1
  */
 public class MWHealthCheckServiceImpl implements MWHealthCheckService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MWHealthCheckServiceImpl.class);
 
     private final ConcurrentMap<String, MWHealthCheck> checks;
     private final ServiceLookup services;
@@ -153,15 +147,18 @@ public class MWHealthCheckServiceImpl implements MWHealthCheckService {
     }
 
     @Override
-    public MWHealthCheckResult check() throws OXException {
+    public MWHealthCheckResult check() {
         ThreadPoolService threadPoolService = services.getService(ThreadPoolService.class);
         if (null == threadPoolService) {
-            throw ServiceExceptionCode.absentService(ThreadPoolService.class);
+            throw new IllegalStateException("ThreadPoolService is unavailable");
         }
 
         // Obtain black-list and ignore-list
         Set<String> blacklist = getSkipBlacklist();
         Set<String> ignorelist = getIgnoreList();
+
+        List<String> resultBlacklist = new ArrayList<>(blacklist.size());
+        List<String> resultIgnorelist = new ArrayList<>(ignorelist.size());
 
         // Filter tasks by black-list
         List<MWHealthCheckTask> tasks = new LinkedList<>();
@@ -170,11 +167,13 @@ public class MWHealthCheckServiceImpl implements MWHealthCheckService {
             if (!blacklist.contains(check.getName())) {
                 tasks.add(new MWHealthCheckTask(check));
                 numOfTasks++;
+            } else {
+                resultBlacklist.add(check.getName());
             }
         }
         if (numOfTasks == 0) {
             // No tasks left for execution
-            return new MWHealthCheckResultImpl(MWHealthState.UP, Collections.emptyList(), asList(ignorelist), asList(blacklist));
+            return new MWHealthCheckResultImpl(MWHealthState.UP, Collections.emptyList(), Collections.emptyList(), resultBlacklist);
         }
 
         // Schedule tasks for concurrent execution
@@ -189,57 +188,57 @@ public class MWHealthCheckServiceImpl implements MWHealthCheckService {
         for (Map.Entry<Future<MWHealthCheckResponse>, MWHealthCheckTask> futureAndTask : futures.entrySet()) {
             MWHealthCheckTask task = futureAndTask.getValue();
 
-            MWHealthCheckResponse response;
+            MWHealthCheckResponse response = null;
             try {
                 long timeout = task.getTimeout();
                 response = timeout > 0 ? futureAndTask.getKey().get(timeout, TimeUnit.MILLISECONDS) : futureAndTask.getKey().get();
             } catch (InterruptedException e) {
                 // Fail, but keep interrupted status
                 Thread.currentThread().interrupt();
-                LOG.warn("Interrupted while obtaining health check response from task {}: {}", task.getName(), task.getClass().getName(), e);
-                throw OXException.general("Interrupted while obtaining health check response", e);
+                LOG.warn("Interrupted while obtaining health check response from task {}", task.getName(), e);
+                return new MWHealthCheckResultImpl(MWHealthState.DOWN, Collections.emptyList(), Collections.emptyList(), resultBlacklist);
             } catch (TimeoutException e) {
-                LOG.warn("Timed out while obtaining health check response from task {}: {}", task.getName(), task.getClass().getName(), e);
+                LOG.warn("Timed out while obtaining health check response from task {}", task.getName(), e);
                 response = createDownResponse(task, true, e);
             } catch (ExecutionException e) {
                 Throwable cause = e.getCause();
                 if (null == cause) {
                     // Huh...? ExecutionException w/o a cause
                     response = createDownResponse(task, false, e);
-                    LOG.error("Failed to obtain health check response from task {}: {}", task.getName(), task.getClass().getName(), e);
+                    LOG.error("Failed to obtain health check response from task {}", task.getName(), e);
                 } else {
                     response = createDownResponse(task, false, cause);
-                    LOG.error("Failed to obtain health check response from task {}: {}", task.getName(), task.getClass().getName(), cause);
+                    LOG.error("Failed to obtain health check response from task {}", task.getName(), cause);
                 }
             }
 
             // Adapt overall state (if task shall not be ignored) & add response
             if (!ignorelist.contains(response.getName())) {
                 overallState &= MWHealthState.UP.equals(response.getState());
+            } else {
+                resultIgnorelist.add(response.getName());
             }
             responses.add(response);
         }
 
+        LOG.debug("Health Status: " + (overallState ? "UP" : "DOWN") + " (Checks: {})", formatChecksForDebug(responses));
+
         Collections.sort(responses, responseComparator);
-        return new MWHealthCheckResultImpl(overallState ? MWHealthState.UP : MWHealthState.DOWN, responses, asList(ignorelist), asList(blacklist));
+        return new MWHealthCheckResultImpl(overallState ? MWHealthState.UP : MWHealthState.DOWN, responses, resultIgnorelist, resultBlacklist);
     }
 
-    private List<String> asList(Set<String> set) {
-        return set.isEmpty() ? Collections.emptyList() : new ArrayList<String>(set);
-    }
-
-    private Set<String> getIgnoreList() throws OXException {
+    private Set<String> getIgnoreList() {
         return getSetForProperty(MWHealthCheckProperty.ignore);
     }
 
-    private Set<String> getSkipBlacklist() throws OXException {
+    private Set<String> getSkipBlacklist() {
         return getSetForProperty(MWHealthCheckProperty.skip);
     }
 
-    private Set<String> getSetForProperty(Property property) throws OXException {
+    private Set<String> getSetForProperty(Property property) {
         LeanConfigurationService configService = services.getOptionalService(LeanConfigurationService.class);
         if (null == configService) {
-            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
+            throw new IllegalStateException("LeanConfigurationService is unavailable");
         }
 
         String value = configService.getProperty(property);
@@ -255,6 +254,16 @@ public class MWHealthCheckServiceImpl implements MWHealthCheckService {
             data = Collections.singletonMap("error", null == message ? "Unknown reason" : message);
         }
         return new MWHealthCheckResponseImpl(task.getName(), data, MWHealthState.DOWN);
+    }
+
+    private String formatChecksForDebug(List<MWHealthCheckResponse> responses) {
+        StringBuilder sb = new StringBuilder();
+        for (MWHealthCheckResponse response : responses) {
+            sb.append(response.toString()).append(", ");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
     }
 
 }

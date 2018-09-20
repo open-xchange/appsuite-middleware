@@ -70,13 +70,11 @@ import org.json.ImmutableJSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.health.MWHealthCheckResult;
 import com.openexchange.health.MWHealthCheckProperty;
 import com.openexchange.health.MWHealthCheckResponse;
+import com.openexchange.health.MWHealthCheckResult;
 import com.openexchange.health.MWHealthCheckService;
 import com.openexchange.health.MWHealthState;
 import com.openexchange.java.Strings;
@@ -97,8 +95,6 @@ import com.openexchange.version.Version;
 @Path("/health")
 @RoleAllowed(Role.INDIVIDUAL_BASIC_AUTHENTICATED)
 public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MWHealthCheckRestEndpoint.class);
 
     private static final JSONObject SIMPLE_UP_RESPONSE;
     static {
@@ -129,14 +125,16 @@ public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
     public Response getHealth() {
         MWHealthCheckService service = services.getService(MWHealthCheckService.class);
         MWHealthCheckResult result = null;
+        if (null == service) {
+            MWHealthCheckService.LOG.error("Health Status: DOWN (MWHealthCheckService is unavailable)");
+            return Response.status(Status.SERVICE_UNAVAILABLE).build();
+        }
+
         try {
-            if (null == service) {
-                throw ServiceExceptionCode.absentService(MWHealthCheckService.class);
-            }
             result = service.check();
-        } catch (OXException e) {
-            LOG.error(e.getLogMessage());
-            Response.serverError();
+        } catch (RuntimeException e) {
+            MWHealthCheckService.LOG.error("Health Status: DOWN ({})", e.getMessage());
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
 
         if (null == result) {
@@ -146,8 +144,6 @@ public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
 
         JSONObject jsonResponse = new JSONObject(4);
         List<MWHealthCheckResponse> checkResponses = result.getChecks();
-        List<String> ignorelist = result.getIgnoredResponses();
-        List<String> blacklist = result.getSkippedChecks();
         JSONArray responseArray = new JSONArray(checkResponses.size());
         try {
             jsonResponse.put("status", MWHealthState.UP.equals(result.getStatus()) ? "UP" : "DOWN");
@@ -168,25 +164,15 @@ public class MWHealthCheckRestEndpoint implements EndpointAuthenticator {
             }
             jsonResponse.put("checks", responseArray);
             jsonResponse.put("service", getServerInfo());
-            JSONArray ignoredChecks = new JSONArray(ignorelist.size());
-            for (String ignored : ignorelist) {
-                ignoredChecks.put(ignored);
-            }
-            jsonResponse.put("ignorelist", ignoredChecks);
-            JSONArray blacklistedChecks = new JSONArray(blacklist.size());
-            for (String blacklisted : blacklist) {
-                blacklistedChecks.put(blacklisted);
-            }
-            jsonResponse.put("blacklist", blacklist);
         } catch (JSONException e) {
             // will not happen
         } catch (RuntimeException e) {
-            return Response.ok(SIMPLE_DOWN_RESPONSE, MediaType.APPLICATION_JSON).build();
+            return Response.status(Status.SERVICE_UNAVAILABLE).entity(SIMPLE_DOWN_RESPONSE).type(MediaType.APPLICATION_JSON).build();
         }
         if (MWHealthState.UP.equals(result.getStatus())) {
             return Response.ok(jsonResponse, MediaType.APPLICATION_JSON).build();
         }
-        return Response.status(Status.INTERNAL_SERVER_ERROR).entity(jsonResponse).type(MediaType.APPLICATION_JSON).build();
+        return Response.status(Status.SERVICE_UNAVAILABLE).entity(jsonResponse).type(MediaType.APPLICATION_JSON).build();
     }
 
     private JSONObject getServerInfo() throws JSONException {
