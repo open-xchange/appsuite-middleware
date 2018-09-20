@@ -301,7 +301,6 @@ public class CalendarExportImpl implements CalendarExport {
         return added;
     }
     
-    @Override
     public boolean trackTimeZones(Event event) {
         boolean added = false;
         if (false == CalendarUtils.isFloating(event)) {

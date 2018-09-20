@@ -161,13 +161,4 @@ public interface CalendarExport {
      */
     byte[] toByteArray() throws OXException;
 
-    /**
-     * Tracks the timezones of each event
-     * 
-     * @param event The {@link Event}
-     * @return <code>true</code> if a timezone was added
-     *         <code>false</code> if no timezone was added
-     */
-    boolean trackTimeZones(Event event);
-
 }
