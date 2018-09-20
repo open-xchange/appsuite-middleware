@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.mbean;
 
+import java.util.Set;
 import javax.management.MBeanException;
 import com.openexchange.management.MBeanMethodAnnotation;
 
@@ -62,6 +63,27 @@ public interface SessiondMBean {
     public static final String SESSIOND_DOMAIN = "com.openexchange.sessiond";
 
     /**
+     * Clears all sessions belonging to the user identified by given user ID in specified context
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
+     */
+    @MBeanMethodAnnotation(description = "Clears all sessions on running node belonging to the user identified by given user ID in specified context", parameters = { "userId", "contextId" }, parameterDescriptions = { "The user identifier", "The context identifier" })
+    int clearUserSessions(int userId, int contextId);
+
+    /**
+     * Clears all sessions from cluster belonging to the user identified by given user ID in specified context
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
+     * @throws MBeanException If operation fails
+     */
+    @MBeanMethodAnnotation(description = "Clears all sessions from cluster on running node belonging to the user identified by given user ID in specified context", parameters = { "userId", "contextId" }, parameterDescriptions = { "The user identifier", "The context identifier" })
+    void clearUserSessionsGlobally(int userId, int contextId) throws MBeanException;
+
+    /**
      * Gets the number of short-term sessions associated with specified user.
      *
      * @param userId The user identifier
@@ -71,6 +93,22 @@ public interface SessiondMBean {
      */
     @MBeanMethodAnnotation(description = "Gets the number of short-term sessions associated with specified user", parameters = { "userId", "contextId" }, parameterDescriptions = { "The user identifier", "The context identifier" })
     int getNumberOfUserSessons(int userId, int contextId) throws MBeanException;
+
+    /**
+     * Clears all sessions belonging to specified context
+     *
+     * @param contextId The context ID
+     */
+    @MBeanMethodAnnotation(description = "Clears all sessions belonging to specified context", parameters = { "contextId" }, parameterDescriptions = { "The context identifier" })
+    void clearContextSessions(int contextId);
+
+    /**
+     * Clears all sessions belonging to given contexts.
+     *
+     * @param contextId The context identifiers to remove sessions for
+     */
+    @MBeanMethodAnnotation(description = "Clears all sessions in whole cluster belonging to specified context identifiers", parameters = { "contextIds" }, parameterDescriptions = { "The context identifiers" })
+    void clearContextSessionsGlobal(Set<Integer> contextIds) throws MBeanException;
 
     /**
      * Gets the number of short-term sessions.
@@ -87,4 +125,10 @@ public interface SessiondMBean {
      */
     @MBeanMethodAnnotation(description = "Gets the number of long-term sessions.", parameters = {}, parameterDescriptions = {})
     int[] getNumberOfLongTermSessions();
+
+    /**
+     * Clear all sessions in central session storage. This does not affect the local short term session container.
+     */
+    @MBeanMethodAnnotation(description = "Clear all sessions in central session storage. This does not affect the local short term session container.", parameters = {}, parameterDescriptions = {})
+    void clearSessionStorage() throws MBeanException;
 }
