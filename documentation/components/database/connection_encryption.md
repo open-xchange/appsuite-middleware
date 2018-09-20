@@ -177,10 +177,10 @@ com.mysql.jdbc:
     requireSSL: true
     verifyServerCertificate: true
     # Deactivate if you just want a server authentication
-    clientCertificateKeyStoreUrl: file:/opt/open-xchange/etc/ssl/keystore
+    clientCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/keystore
     clientCertificateKeyStorePassword: changeit
     clientCertificateKeyStoreType: JKS
-    trustCertificateKeyStoreUrl: file:/opt/open-xchange/etc/ssl/truststore
+    trustCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/truststore
     trustCertificateKeyStorePassword: changeit
     trustCertificateKeyStoreType: JKS
 ```
@@ -188,7 +188,7 @@ com.mysql.jdbc:
 In the step above we have created an PKCS#12 key store. This can be used instead of the JKS store, too:
 
 ```
- clientCertificateKeyStoreUrl: file:/opt/open-xchange/etc/ssl/client-keystore.p12
+ clientCertificateKeyStoreUrl: file:/opt/openexchange/etc/ssl/database/client-keystore.p12
 clientCertificateKeyStorePassword: changeit
 clientCertificateKeyStoreType: PKCS12
 ```
