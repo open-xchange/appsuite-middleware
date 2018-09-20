@@ -8,6 +8,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: com.openexchange.health
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.health
-Import-Package: com.openexchange.config.lean,
+Import-Package: ch.qos.logback.classic,
+ com.openexchange.config.lean,
  com.openexchange.exception,
- com.openexchange.osgi.annotation
+ com.openexchange.osgi.annotation,
+ org.slf4j
