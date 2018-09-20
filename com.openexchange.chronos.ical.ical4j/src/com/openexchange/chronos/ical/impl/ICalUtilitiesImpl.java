@@ -60,7 +60,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalUtilities;
@@ -72,8 +74,6 @@ import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
-import net.fortuna.ical4j.model.component.VAlarm;
-import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VTimeZone;
 
 /**
@@ -114,7 +114,9 @@ public class ICalUtilitiesImpl implements ICalUtilities {
 
     @Override
     public void exportAlarms(OutputStream outputStream, List<Alarm> alarms, ICalParameters parameters) throws OXException {
-        ComponentList alarmComponents = exportAlarms(alarms, parameters, new ArrayList<OXException>());
+        ComponentList alarmComponents = exportList((Alarm data, ICalParameters p, List<OXException> w) -> {
+            return mapper.exportAlarm(data, p, w);
+        }, alarms, parameters);
         if (null != alarmComponents) {
             exportComponents(outputStream, alarmComponents);
         }
@@ -122,7 +124,9 @@ public class ICalUtilitiesImpl implements ICalUtilities {
 
     @Override
     public void exportAlarms(FoldingWriter writer, List<Alarm> alarms, ICalParameters parameters) throws OXException {
-        ComponentList alarmComponents = exportAlarms(alarms, parameters, new ArrayList<OXException>());
+        ComponentList alarmComponents = exportList((Alarm data, ICalParameters p, List<OXException> w) -> {
+            return mapper.exportAlarm(data, p, w);
+        }, alarms, parameters);
         if (null != alarmComponents) {
             exportComponents(writer, alarmComponents);
         }
@@ -136,66 +140,24 @@ public class ICalUtilitiesImpl implements ICalUtilities {
 
     @Override
     public void exportTimeZones(OutputStream outputStream, List<String> timeZoneIDs, ICalParameters parameters) throws OXException {
-        ComponentList timeZoneComponents = exportTimeZones(timeZoneIDs, parameters, new ArrayList<OXException>());
+        ComponentList timeZoneComponents =  exportList((String data, ICalParameters p, List<OXException> w) -> {
+            return exportTimeZone(data, p, w);
+        }, timeZoneIDs, parameters);
         if (null != timeZoneComponents) {
             exportComponents(outputStream, timeZoneComponents);
         }
     }
-    
+
     @Override
     public void exportTimeZones(FoldingWriter writer, List<String> timeZoneIDs, ICalParameters parameters) throws OXException {
-        ComponentList timeZoneComponents = exportTimeZones(timeZoneIDs, parameters, new ArrayList<OXException>());
+        ComponentList timeZoneComponents =  exportList((String data, ICalParameters p, List<OXException> w) -> {
+            return exportTimeZone(data, p, w);
+        }, timeZoneIDs, parameters);
         if (null != timeZoneComponents) {
             exportComponents(writer, timeZoneComponents);
         }
     }
-
-    @Override
-    public void exportEvent(OutputStream outputStream, List<Event> events, ICalParameters parameters) throws OXException {
-        ComponentList eventComponents = exportEvents(events, parameters, new ArrayList<OXException>());
-        if (null != eventComponents) {
-            exportComponents(outputStream, eventComponents);
-        }
-    }
-
-    @Override
-    public void exportEvent(FoldingWriter writer, List<Event> events, ICalParameters parameters) throws OXException {
-        ComponentList eventComponents = exportEvents(events, parameters, new ArrayList<OXException>());
-        if (null != eventComponents) {
-            exportComponents(writer, eventComponents);
-        }
-    }
-
-    private ComponentList exportAlarms(List<Alarm> alarms, ICalParameters parameters, List<OXException> warnings) {
-        if (null == alarms || 0 == alarms.size()) {
-            return null;
-        }
-        parameters = getParametersOrDefault(parameters);
-        ComponentList components = new ComponentList();
-        for (Alarm alarm : alarms) {
-            components.add(exportAlarm(alarm, parameters, warnings));
-        }
-        return components;
-    }
-
-    private VAlarm exportAlarm(Alarm alarm, ICalParameters parameters, List<OXException> warnings) {
-        VAlarm vAlarm = mapper.exportAlarm(alarm, parameters, warnings);
-        ICalUtils.removeProperties(vAlarm, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
-        return vAlarm;
-    }
-
-    private ComponentList exportTimeZones(List<String> timeZoneIDs, ICalParameters parameters, List<OXException> warnings) {
-        if (null == timeZoneIDs || 0 == timeZoneIDs.size()) {
-            return null;
-        }
-        parameters = getParametersOrDefault(parameters);
-        ComponentList components = new ComponentList();
-        for (String timeZoneID : timeZoneIDs) {
-            components.add(exportTimeZone(timeZoneID, parameters, warnings));
-        }
-        return components;
-    }
-
+    
     private VTimeZone exportTimeZone(String timeZoneID, ICalParameters parameters, List<OXException> warnings) {
         TimeZoneRegistry timeZoneRegistry = parameters.get(ICalParametersImpl.TIMEZONE_REGISTRY, TimeZoneRegistry.class);
         net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timeZoneID);
@@ -207,22 +169,85 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         return null;
     }
 
-    private ComponentList exportEvents(List<Event> events, ICalParameters parameters, List<OXException> warnings) {
-        if (null == events || 0 == events.size()) {
+    @Override
+    public void exportEvent(OutputStream outputStream, List<Event> events, ICalParameters parameters) throws OXException {
+        ComponentList eventComponents =  exportList((Event data, ICalParameters p, List<OXException> w) -> {
+            return mapper.exportEvent(data, p, w);
+        }, events, parameters);
+        if (null != eventComponents) {
+            exportComponents(outputStream, eventComponents);
+        }
+    }
+
+    @Override
+    public void exportEvent(FoldingWriter writer, List<Event> events, ICalParameters parameters) throws OXException {
+        ComponentList eventComponents =  exportList((Event data, ICalParameters p, List<OXException> w) -> {
+            return mapper.exportEvent(data, p, w);
+        }, events, parameters);
+        if (null != eventComponents) {
+            exportComponents(writer, eventComponents);
+        }
+    }
+
+    @Override
+    public void exportFreeBusy(OutputStream outputStream, List<FreeBusyData> freeBusyData, ICalParameters parameters) throws OXException {
+        ComponentList eventComponents =  exportList((FreeBusyData data, ICalParameters p, List<OXException> w) -> {
+            return  mapper.exportFreeBusy(data, p, w);
+        }, freeBusyData, parameters);
+        if (null != eventComponents) {
+            exportComponents(outputStream, eventComponents);
+        }
+    }
+
+    @Override
+    public void exportFreeBusy(FoldingWriter writer, List<FreeBusyData> freeBusyData, ICalParameters parameters) throws OXException {
+        ComponentList eventComponents =  exportList((FreeBusyData data, ICalParameters p, List<OXException> w) -> {
+            return  mapper.exportFreeBusy(data, p, w);
+        }, freeBusyData, parameters);
+        if (null != eventComponents) {
+            exportComponents(writer, eventComponents);
+        }
+    }
+
+    @Override
+    public void exportAvailability(OutputStream outputStream, List<Availability> availabilities, ICalParameters parameters) throws OXException {
+        ComponentList eventComponents =  exportList((Availability data, ICalParameters p, List<OXException> w) -> {
+            return mapper.exportAvailability(data, p, w);
+        }, availabilities, parameters);
+        if (null != eventComponents) {
+            exportComponents(outputStream, eventComponents);
+        }
+    }
+
+    @Override
+    public void exportAvailability(FoldingWriter writer, List<Availability> availabilities, ICalParameters parameters) throws OXException {
+        ComponentList eventComponents = exportList((Availability data, ICalParameters p, List<OXException> w) -> {
+            return mapper.exportAvailability(data, p, w);
+        }, availabilities, parameters);
+        if (null != eventComponents) {
+            exportComponents(writer, eventComponents);
+        }
+    }
+
+    private <T> ComponentList exportList(ComponentExporter<T> exporter, List<T> data, ICalParameters parameters) {
+        if (null == data || 0 == data.size()) {
             return null;
         }
         parameters = getParametersOrDefault(parameters);
         ComponentList components = new ComponentList();
-        for (Event event : events) {
-            components.add(exportEvent(event, parameters, warnings));
+        ArrayList<OXException> warnings = new ArrayList<OXException>();
+        for (T d : data) {
+            Component component = exporter.export(d, parameters, warnings);
+            ICalUtils.removeProperties(component, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+            components.add(component);
         }
         return components;
     }
 
-    private VEvent exportEvent(Event event, ICalParameters parameters, List<OXException> warnings) {
-        VEvent vEvent = mapper.exportEvent(event, parameters, warnings);
-        ICalUtils.removeProperties(vEvent, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
-        return vEvent;
+    @FunctionalInterface
+    private interface ComponentExporter<T> {
+
+        Component export(T data, ICalParameters parameters, List<OXException> warnings);
     }
 
 }
