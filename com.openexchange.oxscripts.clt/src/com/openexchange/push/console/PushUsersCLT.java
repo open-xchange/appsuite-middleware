@@ -68,7 +68,7 @@ import com.openexchange.push.rmi.PushRMIService;
  */
 public class PushUsersCLT extends AbstractRmiCLI<Void> {
 
-    private static final String SYNTAX = "pushusers [-r | [ -d -c <contextId> -u <userId> -i <client>] ] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
+    private static final String SYNTAX = "pushusers [-l | [ -r -c <contextId> -u <userId> -i <client>] ] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] | [-h]";
     private static final String FOOTER = "Command-line tool for unregistering and listing (registered) push users";
 
     private int contextId;
@@ -116,8 +116,8 @@ public class PushUsersCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createSwitch("r", "registered", "Flag to only list registered push users", false));
-        options.addOption(createSwitch("d", "unregister", "Flag to unregister a push user", false));
+        options.addOption(createSwitch("l", "list-registered", "Flag to only list registered push users", false));
+        options.addOption(createSwitch("r", "unregister", "Flag to unregister a push user", false));
         options.addOption(createArgumentOption("c", "context", "contextId", "A valid context identifier", false));
         options.addOption(createArgumentOption("u", "user", "userId", "A valid user identifier", false));
         options.addOption(createArgumentOption("i", "client", "clientId", "The client identifier", false));
@@ -165,16 +165,16 @@ public class PushUsersCLT extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void checkOptions(CommandLine cmd) {
-        if (cmd.hasOption('r') && cmd.hasOption('d')) {
-            System.err.println("The options -r and -d are mutually exclusive.");
+        if (cmd.hasOption('l') && cmd.hasOption('r')) {
+            System.err.println("The options -l and -r are mutually exclusive.");
             printHelp(options, 120);
             System.exit(1);
         }
-        if (cmd.hasOption('r')) {
+        if (cmd.hasOption('l')) {
             mode = Mode.LIST_REGISTERED;
             return;
         }
-        if (cmd.hasOption('d')) {
+        if (cmd.hasOption('r')) {
             mode = Mode.UNREGISTER;
             contextId = parseInt('c', -1, cmd, options);
             userId = parseInt('u', -1, cmd, options);
