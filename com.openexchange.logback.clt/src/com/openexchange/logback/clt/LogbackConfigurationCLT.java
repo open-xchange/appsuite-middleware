@@ -86,7 +86,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
     }
 
     private static final String validLogLevels = "{OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL}";
-    private static final String SYNTAX = "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -s <sessionid>] [-l <logger_name>=<logger_level> ...] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]";
+    private static final String SYNTAX = "logconf [[-a | -d] [-c <contextid> [-u <userid>] | -e <sessionid>] [-l <logger_name>=<logger_level> ...] -A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server]] | [-oec <category_1>,...] | [-cf] | [-lf] | [-ll [<logger_1> ...] | [dynamic]] | [-le] | [-h]";
     private static final String FOOTER = "\n\nThe flags -a and -d are mutually exclusive.\n\n\nValid log levels: " + validLogLevels + "\nValid categories: " + getValidCategories();
 
     /**
@@ -113,7 +113,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
         options.addOption(createArgumentOption("u", "user", "userId", "The user id for which to enable logging", false));
         options.addOption(createArgumentOption("c", "context", "contextId", "The context id for which to enable logging", false));
         options.addOption(createArgumentOption("oec", "override-exception-categories", "exceptionCategories", "Override the exception categories to be suppressed", false));
-        options.addOption(createArgumentOption("s", "session", "sessionId", "The session id for which to enable logging", false));
+        options.addOption(createArgumentOption("e", "session", "sessionId", "The session id for which to enable logging", false));
 
         Option o = createOption("l", "level", false, "Define the log level (e.g. -l com.openexchange.appsuite=DEBUG). When the -d flag is present the arguments of this switch should be supplied without the level (e.g. -d -l com.openexchange.appsuite)", false);
         o.setArgs(Short.MAX_VALUE);
@@ -152,8 +152,8 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
             printHelp();
         }
 
-        if (cmd.hasOption('s') && (cmd.hasOption('u') || cmd.hasOption('c'))) {
-            System.err.println("The '-s' and -u,-c options are mutually exclusive.");
+        if (cmd.hasOption('e') && (cmd.hasOption('u') || cmd.hasOption('c'))) {
+            System.err.println("The '-e' and -u,-c options are mutually exclusive.");
             printHelp();
         }
     }
@@ -300,7 +300,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
      */
     private CommandLineExecutor getCommandLineExecutor(Options options, CommandLine cmd) {
         try {
-            if (cmd.hasOption('s')) {
+            if (cmd.hasOption('e')) {
                 return CommandLineExecutor.SESSION;
             } else if (cmd.hasOption('c') && !cmd.hasOption('u')) {
                 return CommandLineExecutor.CONTEXT;
@@ -375,7 +375,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
             @Override
             void executeWith(CommandLine commandLine, LogbackConfigurationRMIService logbackConfigService) throws RemoteException {
-                String sessionId = commandLine.getOptionValue('s');
+                String sessionId = commandLine.getOptionValue('e');
                 LogbackRemoteResponse response = null;
                 if (commandLine.hasOption('a')) {
                     response = logbackConfigService.filterSession(sessionId, getLoggerMap(commandLine.getOptionValues('l')));
