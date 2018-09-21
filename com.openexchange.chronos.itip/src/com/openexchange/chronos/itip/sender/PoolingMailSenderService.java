@@ -88,7 +88,7 @@ public class PoolingMailSenderService implements MailSenderService {
 
             // Direct send reply messages to external organizers.
             if (mail.isAboutActorsStateChangeOnly() && !CalendarUtils.isInternal(mail.getOriginal().getOrganizer(), CalendarUserType.INDIVIDUAL)) {
-                poolAwareDirectSend(mail, session, principal);
+                poolAwareDirectSend(mail, session, principal, comment);
                 return;
             }
 
@@ -121,7 +121,7 @@ public class PoolingMailSenderService implements MailSenderService {
 
     /**
      * Sends the mail directly, but makes the aware of this to avoid duplicate Mails.
-     * 
+     *
      * @param mail The {@link NotificationMail} to send
      * @param session The {@link Session}
      * @throws OXException In case sending fails
