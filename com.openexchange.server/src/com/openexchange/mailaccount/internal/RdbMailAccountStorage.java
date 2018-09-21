@@ -254,7 +254,15 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 return Collections.emptySet();
             }
 
+            String firstPop3Path = rs.getString(1);
+            if (!rs.next()) {
+                // Only one "pop3.path" entry available
+                return Collections.singleton(firstPop3Path);
+            }
+
+            // More than one "pop3.path" entry available
             Set<String> set = new HashSet<>(4);
+            set.add(firstPop3Path);
             do {
                 set.add(rs.getString(1));
             } while (rs.next());
