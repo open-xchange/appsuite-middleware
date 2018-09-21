@@ -52,22 +52,24 @@ package com.openexchange.report.internal;
 import java.util.Date;
 import java.util.Map;
 import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
-
 
 /**
  * {@link LoginCounterMBeanImpl}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LoginCounterMBeanImpl implements LoginCounterMBean {
-    
+public class LoginCounterMBeanImpl extends StandardMBean implements LoginCounterMBean {
+
     private final LoginCounterImpl counter;
 
-    public LoginCounterMBeanImpl(LoginCounterImpl counter) {
+    public LoginCounterMBeanImpl(LoginCounterImpl counter) throws NotCompliantMBeanException {
+        super(LoginCounterMBean.class);
         this.counter = counter;
     }
-    
+
     @Override
     public Map<String, Integer> getNumberOfLogins(Date startDate, Date endDate, boolean aggregate, String regex) throws MBeanException {
         try {

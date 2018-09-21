@@ -49,6 +49,7 @@
 
 package com.openexchange.report.internal;
 
+import javax.management.NotCompliantMBeanException;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.report.Constants;
@@ -79,7 +80,7 @@ public class ReportingInit implements Initialization {
         try {
             managementService.registerMBean(Constants.REPORTING_NAME, new ReportingMBean());
             managementService.registerMBean(Constants.LOGIN_COUNTER_NAME, new LoginCounterMBeanImpl(new LoginCounterImpl()));
-        } catch (OXException e) {
+        } catch (NotCompliantMBeanException | OXException e) {
             LOG.error("", e);
         }
     }
