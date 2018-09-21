@@ -915,7 +915,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             SortedSet<String> vcardset;
             switch (entity.getType()) {
                 case Context:
-                    dbfileset = database.getDocumentFileStoreLocationsperContext(entity.getContext());
+                    dbfileset = database.getDocumentFileStoreLocationsPerContext(entity.getContext());
 
                     attachmentset = attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
                     snippetset = getSnippetFileStoreLocationsPerContext(entity.getContext());
