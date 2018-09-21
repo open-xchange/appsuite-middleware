@@ -7,7 +7,6 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Export-Package: com.openexchange.metrics,
- com.openexchange.metrics.exceptions,
  com.openexchange.metrics.jmx,
  com.openexchange.metrics.jmx.beans,
  com.openexchange.metrics.types
