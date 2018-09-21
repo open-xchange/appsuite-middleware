@@ -90,7 +90,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
 
     @Test
     public void testUserFallbackPicture() throws Exception {
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), apiClient.getUserId().toString(), null, contactFolderId, null);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), apiClient.getUserId().toString(), null, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture, Photos.FALLBACK_PICTURE);
     }
 
@@ -99,7 +99,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         removeImage();
         final String contactId = createContact(contactObj);
 
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture, Photos.FALLBACK_PICTURE);
     }
 
@@ -107,7 +107,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
     public void testGetContactPicture() throws Exception {
         final String contactId = createContact(contactObj);
 
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
     }
 
@@ -116,7 +116,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         String mail = "picture@example.org";
         contactObj.setEmail1(mail);
         createContact(contactObj);
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
     }
 
@@ -124,7 +124,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
     public void testUpdateContact() throws Exception {
         final String contactId = createContact(contactObj);
 
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
 
         contactObj.setId(contactId);
@@ -132,7 +132,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         contactObj.setTelephoneBusiness2("+48112233445566");
         updateContact(contactObj, contactFolderId);
 
-        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
 
     }
@@ -143,7 +143,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         contactObj.setEmail1(mail);
         String contactId = createContact(contactObj);
 
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
 
         mail = "testUpdateContactMail2@example.org";
@@ -151,7 +151,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         contactObj.setId(contactId);
         updateContact(contactObj, contactFolderId);
 
-        contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail);
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
     }
 
@@ -161,7 +161,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         contactObj.setEmail1(mail);
         String contactId = createContact(contactObj);
 
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
 
         String mail2 = "testUpdateContactMail2@example.org";
@@ -169,7 +169,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         contactObj.setId(contactId);
         updateContact(contactObj, contactFolderId);
 
-        contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail2);
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, null, null, mail2, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
     }
 
@@ -177,7 +177,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
     public void testUpdateContactPicture() throws Exception {
         final String contactId = createContact(contactObj);
 
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
 
         contactObj.setId(contactId);
@@ -185,7 +185,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         setImage(contactObj, Photos.PNG_200x200);
         updateContact(contactObj, contactFolderId);
 
-        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture, Photos.PNG_200x200);
     }
 
@@ -193,7 +193,7 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
     public void testDeleteContactPicture() throws Exception {
         final String contactId = createContact(contactObj);
 
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
 
         contactObj.setId(contactId);
@@ -201,20 +201,20 @@ public class ContactPictureTest extends AbstractApiClientContactTest {
         removeImage();
         updateContact(contactObj, contactFolderId);
 
-        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture, Photos.FALLBACK_PICTURE);
     }
 
     @Test
     public void testDeleteContact() throws Exception {
         final String contactId = createContact(contactObj);
-        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        byte[] contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture);
 
         deleteContact(contactId);
 
         // Even if the contact is not found the FALLBACK_IMAGE should be returned
-        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null);
+        contactPicture = contactsApi.getContactPicture(getSessionId(), null, contactId, contactFolderId, null, null, null, null, null, null, null, null, null, null);
         assertImage(contactPicture, Photos.FALLBACK_PICTURE);
     }
 
