@@ -548,6 +548,21 @@ EOF
     if [ "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\", \"open-xchange-mobile-api-facade*\"" = "${VALUE}" ]; then
         ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
     fi
+
+    # SoftwareChange_Request-240
+    pfile=/opt/open-xchange/etc/contact.properties
+    image_k=com.openexchange.contact.scaleVCardImages
+    width_k=com.openexchange.contact.image.maxWidth
+    height_k=com.openexchange.contact.image.maxHeight
+    image_v=$(ox_read_property ${image_k} ${pfile})
+    width_v=$(ox_read_property ${width_k} ${pfile})
+    height_v=$(ox_read_property ${height_k} ${pfile})
+    if [ "200x200" == "${image_v}" ] && [ "250" == "${width_v}" ] && [ "250" == "${height_v}" ]
+    then
+      ox_set_property ${image_k} "600x800" ${pfile}
+      ox_set_property ${width_k} "600" ${pfile}
+      ox_set_property ${height_k} "800" ${pfile}
+    fi
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
