@@ -314,7 +314,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             registerService(Remote.class, new SessiondRMIServiceImpl());
             
             track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
-            track(ManagementService.class, new HousekeepingManagementTracker(context, "SessionD Toolkit", SessiondMBean.SESSIOND_DOMAIN, new SessiondMBeanImpl()));
+            track(ManagementService.class, new HousekeepingManagementTracker(context, SessiondMBean.MBEAN_NAME, SessiondMBean.SESSIOND_DOMAIN, new SessiondMBeanImpl()));
             track(ThreadPoolService.class, new ThreadPoolTracker(context));
             track(TimerService.class, new TimerServiceTracker(context));
             track(SessionStorageService.class, new SessionStorageServiceTracker(this, context));
