@@ -58,30 +58,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link AbstractManagementTracker} - Abstraction helper class for tracking the {@link ManagementService}
+ * {@link HousekeepingManagementTracker} - Helper class for tracking the {@link ManagementService}
  * and registering an MBean
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.1
  */
-public abstract class AbstractManagementTracker implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
+public class HousekeepingManagementTracker implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractManagementTracker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HousekeepingManagementTracker.class);
 
     private final BundleContext context;
-    private final String className;
+    private final String mbeanName;
     private final String domainName;
     private final StandardMBean mbean;
 
     /**
-     * Initialises a new {@link AbstractManagementTracker}.
+     * Initialises a new {@link HousekeepingManagementTracker}.
      * 
      * @param context The bundle context
+     * @param mbeaName The name of the MBean
+     * @param domainName The name of the domain
+     * @param mbean The mbean instance
      */
-    public AbstractManagementTracker(BundleContext context, String className, String domainName, StandardMBean mbean) {
+    public HousekeepingManagementTracker(BundleContext context, String mbeanName, String domainName, StandardMBean mbean) {
         super();
         this.context = context;
-        this.className = className;
+        this.mbeanName = mbeanName;
         this.domainName = domainName;
         this.mbean = mbean;
     }
@@ -95,12 +98,12 @@ public abstract class AbstractManagementTracker implements ServiceTrackerCustomi
     public ManagementService addingService(ServiceReference<ManagementService> reference) {
         ManagementService managementService = context.getService(reference);
         try {
-            ObjectName objectName = Managements.getObjectName(className, domainName);
+            ObjectName objectName = Managements.getObjectName(mbeanName, domainName);
             managementService.registerMBean(objectName, mbean);
-            LOG.info("Registered MBean {}", className);
+            LOG.info("Registered MBean {}", mbeanName);
             return managementService;
         } catch (Exception e) {
-            LOG.warn("Could not register MBean {}", className, e);
+            LOG.warn("Could not register MBean {}", mbeanName, e);
         }
         context.ungetService(reference);
         return null;
@@ -127,8 +130,8 @@ public abstract class AbstractManagementTracker implements ServiceTrackerCustomi
             return;
         }
         try {
-            managementService.unregisterMBean(Managements.getObjectName(className, domainName));
-            LOG.info("Unregistered MBean {}", className);
+            managementService.unregisterMBean(Managements.getObjectName(mbeanName, domainName));
+            LOG.info("Unregistered MBean {}", mbeanName);
         } catch (Exception e) {
             LOG.warn("Could not un-register MBean {}", domainName, e);
         }
