@@ -232,7 +232,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 /*
                  * update for existing change exception
                  */
-                Event originalExceptionEvent = loadExceptionData(originalEvent.getId(), recurrenceId);
+                Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
@@ -307,6 +307,12 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             switch (field) {
                 case FOLDER_ID:
                     checkFolderUpdate(originalEvent, originalAttendee, attendeeUpdate.getFolderId());
+                    break;
+                case PARTSTAT:
+                    /*
+                     * ensure to reset RSVP expectation along with change of participation status
+                     */
+                    attendeeUpdate.setRsvp(null);
                     break;
                 case CU_TYPE:
                 case ENTITY:

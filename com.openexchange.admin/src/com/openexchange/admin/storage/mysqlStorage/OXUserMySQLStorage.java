@@ -82,6 +82,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -224,7 +225,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     /**
      * Initialises the {@link AttributeChangers}
-     * 
+     *
      * @return An unmodifiable {@link List} with the initialised {@link AttributeChangers}
      */
     private List<AttributeChangers> initialiseAttributeChangers() {
@@ -610,8 +611,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // Change attributes
             Set<String> changedAttributes = new HashSet<>();
+            Collection<Runnable> pendingInvocations = new LinkedList<>();
             for (AttributeChangers attributeChangers : attributeChangers) {
-                changedAttributes.addAll(attributeChangers.change(usrdata, userId, contextId, con));
+                changedAttributes.addAll(attributeChangers.change(usrdata, userId, contextId, con, pendingInvocations));
             }
 
             // Hint for the cache when updating display name
@@ -639,6 +641,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // Update JCS Caches
             updateJCSCaches(ctx, usrdata, con, quotaAffectedUserIDs, displayNameUpdate);
+            for (Runnable pendingInvocation : pendingInvocations) {
+                executeSafe(pendingInvocation);
+            }
 
             LOG.info("User {} in context {} changed! Changed attributes: {}", Integer.valueOf(userId), Integer.valueOf(contextId), toString(changedAttributes));
         } catch (final DataTruncation dt) {
@@ -664,9 +669,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
+    private void executeSafe(Runnable pendingInvocation) {
+        try {
+            pendingInvocation.run();
+        } catch (Exception e) {
+            LOG.error("Failed to execute pending invocation after user change: {}", pendingInvocation.getClass().getName(), e);
+        }
+    }
+
     /**
      * If the quota was changed for a user owned filestore then get all affected user ids
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier (the filestore owner)
      * @param connection The {@link Connection}
@@ -707,7 +720,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * <li>OXFolderCache</li>
      * <li>GlobalFolderCache</li>
      * </ul>
-     * 
+     *
      * @param ctx The {@link Context}
      * @param usrdata The {@link User} data
      * @param connection the {@link Connection}
@@ -2886,7 +2899,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     /**
      * Toggles the user status between active/inactive
-     * 
+     *
      * @param userId the user identifier
      * @param ctx The {@link Context}
      * @param flag The value of the flag
@@ -2914,7 +2927,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * <li>Capabilities</li>
      * <li>QuotaFileStorages</li>
      * </ul>
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param cacheService the {@link CacheService}

@@ -1,3 +1,9 @@
+open-xchange-datamining (7.10.1-0) unstable; urgency=medium
+
+  * prepare for 7.10.1 release
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Thu, 06 Sep 2018 12:29:08 +0200
+
 open-xchange-datamining (7.10.0-9) stable; urgency=medium
 
   * Fourth candidate for 7.10.0 release

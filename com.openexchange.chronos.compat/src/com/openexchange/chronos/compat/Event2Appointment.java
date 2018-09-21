@@ -332,7 +332,7 @@ public class Event2Appointment {
                 break;
             }
         }
-        throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), recurrenceData.getRecurrenceRule());
+        throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), recurrenceData);
     }
 
     /**

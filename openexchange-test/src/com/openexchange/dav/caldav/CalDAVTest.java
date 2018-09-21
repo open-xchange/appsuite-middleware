@@ -88,6 +88,7 @@ import com.openexchange.dav.Headers;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
+import com.openexchange.dav.WebDAVClient;
 import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
 import com.openexchange.dav.caldav.methods.MkCalendarMethod;
@@ -214,6 +215,10 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     protected int putICal(String folderID, String resourceName, String iCal, Map<String, String> headers) throws Exception {
+        return putICal(getWebDAVClient(), folderID, resourceName, iCal, headers);
+    }
+
+    protected static int putICal(WebDAVClient client, String folderID, String resourceName, String iCal, Map<String, String> headers) throws Exception {
         PutMethod put = null;
         try {
             String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
@@ -222,7 +227,7 @@ public abstract class CalDAVTest extends WebDAVTest {
                 put.addRequestHeader(key, headers.get(key));
             }
             put.setRequestEntity(new StringRequestEntity(iCal, "text/calendar", null));
-            return getWebDAVClient().executeMethod(put);
+            return client.executeMethod(put);
         } finally {
             release(put);
         }

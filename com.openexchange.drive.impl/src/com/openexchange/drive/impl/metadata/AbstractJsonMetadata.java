@@ -81,35 +81,6 @@ public abstract class AbstractJsonMetadata  {
         this.session = session;
     }
 
-    /**
-     * Puts a user-, guest- or group entity into the supplied JSON object.
-     *
-     * @param jsonObject The JSON object to put the entity into
-     * @param entity The entity identifier
-     * @param group <code>true</code> if the entity points to a group, <code>false</code>, otherwise
-     * @return The JSON object
-     */
-//    protected JSONObject putEntity(JSONObject jsonObject, int entity, boolean group) throws OXException, JSONException {
-//        jsonObject.put("entity", entity);
-//        if (group) {
-//            Group resolvedGroup = session.getPermissionResolver().getGroup(entity);
-//            jsonObject.put("display_name", resolvedGroup.getDisplayName());
-//            jsonObject.put("type", "group");
-//        } else {
-//            User user = session.getPermissionResolver().getUser(entity);
-//            jsonObject.put("display_name", user.getDisplayName());
-//            if (false == Strings.isEmpty(user.getMail())) {
-//                jsonObject.put("email_address", user.getMail());
-//            }
-//            if (user.isGuest()) {
-//                jsonObject.put("type", ShareTool.isAnonymousGuest(user) ? "anonymous" : "guest");
-//            } else {
-//                jsonObject.put("type", "user");
-//            }
-//        }
-//        return jsonObject;
-//    }
-
     protected void addGroupInfo(JSONObject jsonObject, Group group) throws JSONException {
         if (null != group) {
             jsonObject.put(ContactFields.DISPLAY_NAME, group.getDisplayName());

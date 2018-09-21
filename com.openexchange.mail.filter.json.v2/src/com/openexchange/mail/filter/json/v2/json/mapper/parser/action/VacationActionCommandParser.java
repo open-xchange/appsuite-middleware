@@ -145,7 +145,7 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
                 }
             }
 
-            if (!Strings.isEmpty(from)) {
+            if (Strings.isNotEmpty(from)) {
                 arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.from));
                 arrayList.add(CommandParserJSONUtil.stringToList(from));
             }

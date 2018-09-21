@@ -390,7 +390,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
                     try {
                         ResourceId resourceId = ResourceId.parse(specificPart.substring(5));
-                        if (ctx.getContextId() == resourceId.getContextID()) {
+                        if (null != resourceId && ctx.getContextId() == resourceId.getContextID()) {
                             if (CalendarUserType.GROUP.equals(resourceId.getCalendarUserType())) {
                                 GroupService groupService = GROUP_SERVICE_REFERENCE.get();
                                 if (null == groupService) {
@@ -429,7 +429,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 }
             } else if (null != uri) {
                 String specificPart = uri.getSchemeSpecificPart();
-                if (false == Strings.isEmpty(specificPart)) {
+                if (Strings.isNotEmpty(specificPart)) {
                     String mail = null;
                     if ("mailto".equalsIgnoreCase(uri.getScheme())) {
                         /*
@@ -449,7 +449,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     /*
                      * add iCal participant if parsed successfully
                      */
-                    if (false == Strings.isEmpty(mail)) {
+                    if (Strings.isNotEmpty(mail)) {
                         addMail(index, mail, mails, attendee, comment, warnings);
                     }
                 }
@@ -632,7 +632,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
                 try {
                     ResourceId resourceId = ResourceId.parse(specificPart.substring(5));
-                    if (context.getContextId() == resourceId.getContextID() && CalendarUserType.RESOURCE.equals(resourceId.getCalendarUserType())) {
+                    if (null != resourceId && context.getContextId() == resourceId.getContextID() && CalendarUserType.RESOURCE.equals(resourceId.getCalendarUserType())) {
                         return resourceResolver.load(resourceId.getEntity(), context);
                     }
                 } catch (IllegalArgumentException | OXException e) {
@@ -680,7 +680,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
                 try {
                     ResourceId resourceId = ResourceId.parse(specificPart.substring(5));
-                    if (context.getContextId() == resourceId.getContextID() && CalendarUserType.GROUP.equals(resourceId.getCalendarUserType())) {
+                    if (null != resourceId && context.getContextId() == resourceId.getContextID() && CalendarUserType.GROUP.equals(resourceId.getCalendarUserType())) {
                         return groupService.getGroup(context, resourceId.getEntity());
                     }
                 } catch (IllegalArgumentException | OXException e) {

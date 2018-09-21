@@ -130,7 +130,7 @@ public class AllRequest extends AbstractAllRequest<AllResponse> {
             params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
             params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
         }
-        if (!Strings.isEmpty(categoryId)) {
+        if (Strings.isNotEmpty(categoryId)) {
             params.add(new Parameter("categoryid", categoryId));
         }
         if (additionalParams != null) {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Importexport
 Bundle-SymbolicName: com.openexchange.importexport
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Activator: com.openexchange.importexport.osgi.ImportExportActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -14,6 +14,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.google.common.collect,
  com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
@@ -44,6 +45,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.calendar.contentType,
  com.openexchange.folderstorage.database.contentType,
+ com.openexchange.folderstorage.type,
  com.openexchange.groupware,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.contact.helpers,
@@ -71,6 +73,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.server.impl,
  com.openexchange.session,
  com.openexchange.tools,
+ com.openexchange.tools.arrays,
  com.openexchange.tools.encoding,
  com.openexchange.tools.exceptions,
  com.openexchange.tools.io,

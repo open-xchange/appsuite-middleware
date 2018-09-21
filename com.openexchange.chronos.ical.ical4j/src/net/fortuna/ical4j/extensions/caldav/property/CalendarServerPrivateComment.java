@@ -31,6 +31,7 @@
  */
 package net.fortuna.ical4j.extensions.caldav.property;
 
+import net.fortuna.ical4j.model.Escapable;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyFactory;
@@ -45,7 +46,7 @@ import net.fortuna.ical4j.model.ValidationException;
  * @author probert
  *
  */
-public class CalendarServerPrivateComment extends Property {
+public class CalendarServerPrivateComment extends Property implements Escapable {
 
   private static final long serialVersionUID = 2182103734645261668L;
   
@@ -87,10 +88,12 @@ public class CalendarServerPrivateComment extends Property {
 
     private static final long serialVersionUID = 2099427445505899578L;
 
+    @Override
     public Property createProperty(String name) {
       return new CalendarServerPrivateComment(this);
     }
 
+    @Override
     public Property createProperty(String name, ParameterList parameters, String value) {
       CalendarServerPrivateComment property = null;
       property = new CalendarServerPrivateComment(parameters, this, value);

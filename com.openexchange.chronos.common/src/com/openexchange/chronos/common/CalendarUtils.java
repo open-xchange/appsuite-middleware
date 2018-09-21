@@ -51,6 +51,7 @@ package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.net.URI;
@@ -79,6 +80,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
@@ -591,6 +593,9 @@ public class CalendarUtils {
      * @return The maximum timestamp as {@link Date}, or <code>null</code> if the supplied collection was <code>null</code> or empty
      */
     public static Date getMaximumTimestamp(Collection<Event> events) {
+        if (null == events || events.isEmpty()) {
+            return null;
+        }
         long maximumTimestamp = Integer.MIN_VALUE;
         for (Event event : events) {
             if (null != event) {
@@ -686,6 +691,60 @@ public class CalendarUtils {
         } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
             throw CalendarExceptionCodes.INVALID_RRULE.create(e, rrule);
         }
+    }
+
+    /**
+     * Gets a value indicating whether an updated recurrence rule would produce further, additional occurrences compared to the original
+     * rule.
+     *
+     * @param originalRRule The original recurrence rule, or <code>null</code> if there was none
+     * @param updatedRRule The original recurrence rule, or <code>null</code> if there is none
+     * @return <code>true</code> if the updated rule yields further occurrences or unsure, <code>false</code>, otherwise
+     */
+    public static boolean hasFurtherOccurrences(String originalRRule, String updatedRRule) throws OXException {
+        if (null == originalRRule) {
+            return null != updatedRRule;
+        }
+        if (null == updatedRRule) {
+            return false;
+        }
+        RecurrenceRule originalRule = initRecurrenceRule(originalRRule);
+        RecurrenceRule updatedRule = initRecurrenceRule(updatedRRule);
+        /*
+         * check if only UNTIL was changed
+         */
+        RecurrenceRule checkedRule = initRecurrenceRule(updatedRule.toString());
+        checkedRule.setUntil(originalRule.getUntil());
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            return 1 == CalendarUtils.compare(originalRule.getUntil(), updatedRule.getUntil(), null);
+        }
+        /*
+         * check if only COUNT was changed
+         */
+        checkedRule = initRecurrenceRule(updatedRule.toString());
+        if (null == originalRule.getCount()) {
+            checkedRule.setUntil(null);
+        } else {
+            checkedRule.setCount(i(originalRule.getCount()));
+        }
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            int originalCount = null == originalRule.getCount() ? Integer.MAX_VALUE : i(originalRule.getCount());
+            int updatedCount = null == updatedRule.getCount() ? Integer.MAX_VALUE : i(updatedRule.getCount());
+            return updatedCount > originalCount;
+        }
+        /*
+         * check if only the INTERVAL was extended
+         */
+        checkedRule = initRecurrenceRule(updatedRule.toString());
+        checkedRule.setInterval(originalRule.getInterval());
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            return 0 != updatedRule.getInterval() % originalRule.getInterval();
+        }
+        /*
+         * check if each BY... part is equally or more restrictive
+         */
+        //TODO
+        return true;
     }
 
     /**
@@ -785,10 +844,13 @@ public class CalendarUtils {
      * @param from The lower inclusive limit of the range, i.e. the event should start on or after this date, or <code>null</code> for no limit
      * @param until The upper exclusive limit of the range, i.e. the event should end before this date, or <code>null</code> for no limit
      * @param timeZone The timezone to consider if the event has <i>floating</i> dates
-     * @return <code>true</code> if the event falls into the time range, <code>false</code>, otherwise
+     * @return <code>true</code> if the event falls into the time range or has no start-date set, <code>false</code>, otherwise
      * @see <a href="https://tools.ietf.org/html/rfc4791#section-9.9">RFC 4791, section 9.9</a>
      */
     public static boolean isInRange(Event event, Date from, Date until, TimeZone timeZone) {
+        if (null == event.getStartDate()) {
+            return true;
+        }
         /*
          * determine effective timestamps for check
          */
@@ -1599,6 +1661,30 @@ public class CalendarUtils {
      */
     public static ExtendedProperty optExtendedProperty(Event event, String name) {
         return optExtendedProperty(event.getExtendedProperties(), name);
+    }
+
+    /**
+     * Gets all extended properties with a specific name. Wildcards are supported in the name, e.g. <code>X-MOZ-SNOOZE-TIME*</code>.
+     * 
+     * @param extendedProperties The extended properties to check
+     * @param name The property name to match
+     * @return All matching properties, or an empty list if there are none
+     */
+    public static List<ExtendedProperty> findExtendedProperties(ExtendedProperties extendedProperties, String name) {
+        if (null == extendedProperties || extendedProperties.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (-1 == name.indexOf('*') && -1 == name.indexOf('?')) {
+            return extendedProperties.getAll(name);
+        }
+        List<ExtendedProperty> matchingProperties = new ArrayList<ExtendedProperty>();
+        Pattern pattern = Pattern.compile(Strings.wildcardToRegex(name));
+        for (ExtendedProperty property : extendedProperties) {
+            if (null != property.getName() && pattern.matcher(property.getName()).matches()) {
+                matchingProperties.add(property);
+            }
+        }
+        return matchingProperties;
     }
 
     protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {

@@ -56,6 +56,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.itip.ContextSensitiveMessages;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
@@ -132,6 +133,9 @@ public class Sentence {
                 case EMPHASIZED:
                     wrapped.add(wrapper.emphasiszed(argument));
                     break;
+                case ITALIC:
+                    wrapped.add(wrapper.italic(argument));
+                    break;
                 case REFERENCE:
                     wrapped.add(wrapper.reference(argument));
                     break;
@@ -142,7 +146,16 @@ public class Sentence {
                             argument = sh.getString(str);
                         }
                     }
-                    wrapped.add(wrapper.shownAs(argument, (ShownAsTransparency) extraInfo[0]));
+                    if (null != extraInfo && 0 < extraInfo.length && null != extraInfo[0]) {
+                        if (ShownAsTransparency.class.isInstance(extraInfo[0])) {
+                            wrapped.add(wrapper.shownAs(argument, (ShownAsTransparency) extraInfo[0]));        
+                        } else if (Transp.class.isInstance(extraInfo[0])) {
+                            ShownAsTransparency shownAs = Transp.TRANSPARENT.equals(extraInfo[0]) ? ShownAsTransparency.FREE : ShownAsTransparency.RESERVED;
+                            wrapped.add(wrapper.shownAs(argument, shownAs));
+                        } else {
+                            LOGGER.warn("Unexpected transparency {}, skipping.", extraInfo[0]);   
+                        }                        
+                    }
                     break;
 
                 default:

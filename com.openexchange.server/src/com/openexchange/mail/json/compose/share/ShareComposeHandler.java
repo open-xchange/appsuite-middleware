@@ -526,8 +526,10 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                     previews.put(id, encodedThumbnail);
                 }
             } catch (InterruptedException | TimeoutException e) {
+                previews.put(id, getDefaultThumbnail(mimeTypes.get(id), templatePath));
                 LOG.debug(e.getMessage(), e);
             } catch (ExecutionException e) {
+                previews.put(id, getDefaultThumbnail(mimeTypes.get(id), templatePath));
                 LOG.error(e.getMessage(), e);
             }
         }

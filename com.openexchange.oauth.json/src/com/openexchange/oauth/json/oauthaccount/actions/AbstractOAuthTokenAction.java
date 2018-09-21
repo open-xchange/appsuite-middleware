@@ -130,11 +130,11 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
          */
         {
             String oauth_problem = request.getParameter(OAuthConstants.URLPARAM_OAUTH_PROBLEM);
-            if (!Strings.isEmpty(oauth_problem)) {
+            if (Strings.isNotEmpty(oauth_problem)) {
                 throw fromOauthProblem(oauth_problem, request, service);
             }
             oauth_problem = request.getParameter(OAuthConstants.URLPARAM_ERROR);
-            if (!Strings.isEmpty(oauth_problem)) {
+            if (Strings.isNotEmpty(oauth_problem)) {
                 throw fromOauthProblem(oauth_problem, request, service);
             }
         }

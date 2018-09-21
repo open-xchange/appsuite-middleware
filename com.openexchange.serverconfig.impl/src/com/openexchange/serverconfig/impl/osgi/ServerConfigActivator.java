@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.config.Interests;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -132,10 +131,6 @@ public class ServerConfigActivator extends HousekeepingActivator {
                 ServerConfigServiceImpl.invalidateCache();
             }
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
         });
 
         // Register the services that add computed values during creation of the server config

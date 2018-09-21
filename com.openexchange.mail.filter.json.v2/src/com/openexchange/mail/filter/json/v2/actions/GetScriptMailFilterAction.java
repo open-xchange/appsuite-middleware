@@ -77,7 +77,7 @@ public class GetScriptMailFilterAction extends AbstractMailFilterAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        final Credentials credentials = new Credentials(session);
+        final Credentials credentials = getCredentials(session, requestData);
         final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         String result = mailFilterService.getActiveScript(credentials);
         return new AJAXRequestResult(result);

@@ -49,13 +49,9 @@
 
 package com.openexchange.drive.events.apn2.internal;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import com.clevertap.apns.ApnsClient;
-import com.clevertap.apns.Notification;
-import com.clevertap.apns.NotificationRequestError;
-import com.clevertap.apns.NotificationResponse;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options;
@@ -63,6 +59,15 @@ import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.turo.pushy.apns.ApnsClient;
+import com.turo.pushy.apns.PushNotificationResponse;
+import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import com.turo.pushy.apns.util.concurrent.PushNotificationFuture;
 
 
 /**
@@ -111,14 +116,19 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
      */
     protected abstract ApnsHttp2Options getOptions() throws OXException;
 
-    private boolean removeSubscription(Subscription subscription) {
+    /**
+     * Gets the APNS HTTP/2 client for specified options.
+     *
+     * @param options The APNS HTTP/2 options
+     * @return The appropriate client
+     */
+    private ApnsClient getClient(ApnsHttp2Options options) {
         try {
-            DriveSubscriptionStore subscriptionStore = services.getService(DriveSubscriptionStore.class);
-            return subscriptionStore.removeSubscription(subscription);
+            return ApnsHttp2Utility.getApnsClient(options);
         } catch (OXException e) {
-            LoggerHolder.LOG.error("Error removing subscription", e);
+            LoggerHolder.LOG.error("Unable to create APNS HTTP/2 client for service {}", getServiceID(), e);
         }
-        return false;
+        return null;
     }
 
     @Override
@@ -137,114 +147,137 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
             return;
         }
 
-        // Compile appropriate notifications/payloads for available subscriptions
-        List<NotificationAndSubscription> notifications = getNotifications(event, subscriptions);
-        if (notifications.isEmpty()) {
+        int numOfSubscriptions = subscriptions.size();
+        if (numOfSubscriptions == 0) {
             // Nothing to do
             return;
         }
 
+        // Get the APNS HTTP/2 options to use
+        ApnsHttp2Options options;
+        try {
+            options = getOptions();
+        } catch (OXException e) {
+            LoggerHolder.LOG.error("unable to get APNS HTTP/2 options for service {}", getServiceID(), e);
+            return;
+        }
+
         // Get the APNS HTTP/2 client to use
-        ApnsClient client = getClient();
+        ApnsClient client = getClient(options);
         if (null == client) {
             // Nothing to do
             return;
         }
 
-        // Push the notifications & remember responses
-        List<NotificationResponseAndSubscription> responses = new ArrayList<>(notifications.size());
-        for (NotificationAndSubscription notification : notifications) {
-            responses.add(new NotificationResponseAndSubscription(client.push(notification.notification), notification.subscription));
-        }
-
-        processNotificationResponses(responses);
-    }
-
-    private void processNotificationResponses(List<NotificationResponseAndSubscription> notificationResponses) {
-        if (null == notificationResponses || notificationResponses.isEmpty()) {
-            return;
-        }
-
-        for (NotificationResponseAndSubscription notificationResponseAndSubscription : notificationResponses) {
-            NotificationResponse notificationResponse = notificationResponseAndSubscription.notificationResponse;
-            NotificationRequestError error = notificationResponse.getError();
-            if (null == error) {
-                LoggerHolder.LOG.debug("{}", notificationResponse);
-                continue;
+        // Send push notification & handle response
+        ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
+        if (null == threadPool || numOfSubscriptions == 1) {
+            for (Subscription subscription : subscriptions) {
+                Task<Void> task = new SubscriptionDeliveryTask(subscription, event, options, client, services);
+                try {
+                    ThreadPools.execute(task);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    LoggerHolder.LOG.warn("Interrupted while sending push notification for drive event for device token {}", subscription.getToken(), e);
+                    return;
+                } catch (Exception e) {
+                    LoggerHolder.LOG.warn("Failed sending push notification for drive event to device with token {}", subscription.getToken(), e);
+                }
             }
-
-            Subscription subscription = notificationResponseAndSubscription.subscription;
-            if (NotificationRequestError.DeviceTokenInactiveForTopic == error || NotificationRequestError.InvalidProviderToken == error) {
-                LoggerHolder.LOG.warn("Unsuccessful notification for drive event due to inactive or invalid device token: {}", subscription.getToken());
-                removeSubscription(subscription);
-            } else {
-                LoggerHolder.LOG.warn("Unsuccessful notification for drive event for device token {}: {}", subscription.getToken(), error);
+        } else {
+            for (Subscription subscription : subscriptions) {
+                Task<Void> task = new SubscriptionDeliveryTask(subscription, event, options, client, services);
+                threadPool.submit(task, CallerRunsBehavior.getInstance());
             }
         }
     }
 
-    private ApnsClient getClient() {
+    static void processNotificationResponse(NotificationResponseAndSubscription notificationResponseAndSubscription, ServiceLookup services) throws InterruptedException {
+        PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture = notificationResponseAndSubscription.sendNotificationFuture;
+        Subscription subscription = notificationResponseAndSubscription.subscription;
         try {
-            return ApnsHttp2Utility.getApnsClient(getOptions());
-        } catch (OXException e) {
-            LoggerHolder.LOG.error("unable to create APNS HTTP/s client for service {}", getServiceID(), e);
-        }
-        return null;
-    }
-
-    private List<NotificationAndSubscription> getNotifications(DriveEvent event, List<Subscription> subscriptions) {
-        int size = subscriptions.size();
-        if (size <= 0) {
-            return Collections.emptyList();
-        }
-
-        List<NotificationAndSubscription> notifications = new ArrayList<NotificationAndSubscription>(size);
-        for (Subscription subscription : subscriptions) {
-            Notification notification = getNotification(event, subscription);
-            if (null != notification) {
-                notifications.add(new NotificationAndSubscription(notification, subscription));
+            PushNotificationResponse<SimpleApnsPushNotification> pushNotificationResponse = sendNotificationFuture.get();
+            if (pushNotificationResponse.isAccepted()) {
+                LoggerHolder.LOG.debug("Push notification for drive event accepted by APNs gateway for device token: {}", subscription.getToken());
+            } else {
+                if (pushNotificationResponse.getTokenInvalidationTimestamp() != null) {
+                    LoggerHolder.LOG.warn("Unsuccessful notification for drive event due to inactive or invalid device token: {}", subscription.getToken());
+                    removeSubscription(subscription, services.getService(DriveSubscriptionStore.class));
+                } else {
+                    LoggerHolder.LOG.warn("Unsuccessful notification for drive event for device token {}: {}", subscription.getToken(), pushNotificationResponse.getRejectionReason());
+                }
             }
+        } catch (ExecutionException e) {
+            LoggerHolder.LOG.warn("Failed to send push notification for drive event for device token {}", subscription.getToken(), e.getCause());
         }
-        return notifications;
     }
 
-    private Notification getNotification(DriveEvent event, Subscription subscription) {
+    static SimpleApnsPushNotification getNotification(DriveEvent event, Subscription subscription, ApnsHttp2Options options) {
         String pushTokenReference = event.getPushTokenReference();
         if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
             return null;
         }
 
-        return new ApnsHttp2Notification.Builder(subscription.getToken())
-            .withCustomAlertLocKey("TRIGGER_SYNC")
-            .withCustomAlertActionLocKey("OK")
-            .withCustomField("root", subscription.getRootFolderID())
-            .withCustomField("action", "sync")
-            .build();
+        return new ApnsHttp2Notification.Builder(subscription.getToken(), options.getTopic())
+            .withCustomField("container-identifier", "NSFileProviderRootContainerItemIdentifier")
+            .withExpiration(TimeUnit.HOURS.toMillis(1L))
+        .build();
+    }
+
+    static boolean removeSubscription(Subscription subscription, DriveSubscriptionStore subscriptionStore) {
+        try {
+            return subscriptionStore.removeSubscription(subscription);
+        } catch (OXException e) {
+            LoggerHolder.LOG.error("Error removing subscription", e);
+        }
+        return false;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
-    private static class NotificationAndSubscription {
+    private static class NotificationResponseAndSubscription {
 
-        final Notification notification;
+        final PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture;
         final Subscription subscription;
 
-        NotificationAndSubscription(Notification notification, Subscription subscription) {
+        NotificationResponseAndSubscription(PushNotificationFuture<SimpleApnsPushNotification, PushNotificationResponse<SimpleApnsPushNotification>> sendNotificationFuture, Subscription subscription) {
             super();
-            this.notification = notification;
+            this.sendNotificationFuture = sendNotificationFuture;
             this.subscription = subscription;
         }
     }
 
-    private static class NotificationResponseAndSubscription {
+    private static class SubscriptionDeliveryTask extends AbstractTask<Void> {
 
-        final NotificationResponse notificationResponse;
-        final Subscription subscription;
+        private final Subscription subscription;
+        private final DriveEvent event;
+        private final ApnsHttp2Options options;
+        private final ApnsClient client;
+        private final ServiceLookup serviceLookup;
 
-        NotificationResponseAndSubscription(NotificationResponse notificationResponse, Subscription subscription) {
+        /**
+         * Initializes a new {@link ApnsHttp2DriveEventPublisher.SubscriptionDeliveryTask}.
+         */
+        SubscriptionDeliveryTask(Subscription subscription, DriveEvent event, ApnsHttp2Options options, ApnsClient client, ServiceLookup services) {
             super();
-            this.notificationResponse = notificationResponse;
             this.subscription = subscription;
+            this.event = event;
+            this.options = options;
+            this.client = client;
+            this.serviceLookup = services;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            SimpleApnsPushNotification notification = getNotification(event, subscription, options);
+            if (null == notification) {
+                return null;
+            }
+
+            // Push the notification & remember response
+            NotificationResponseAndSubscription response = new NotificationResponseAndSubscription(client.sendNotification(notification), subscription);
+            processNotificationResponse(response, serviceLookup);
+            return null;
         }
     }
 

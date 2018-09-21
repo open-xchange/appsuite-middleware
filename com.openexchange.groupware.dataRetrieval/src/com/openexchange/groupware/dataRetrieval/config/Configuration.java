@@ -58,6 +58,8 @@ import com.openexchange.config.ConfigurationService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Configuration {
+
+    public static final String ENABLE_OPTIONS_NAME = "com.openexchange.groupware.dataRetrieval.enable";
     public static final String LIFETIME_OPTIONS_NAME = "com.openexchange.groupware.dataRetrieval.lifetime";
     public static final String ISONETIME_OPTIONS_NAME = "com.openexchange.groupware.dataRetrieval.onetime";
     private static final String FORCE_PROTOCOL_NAME = "com.openexchange.groupware.dataRetrieval.forceProtocol";
@@ -65,9 +67,11 @@ public class Configuration {
     private long lifetime;
     private boolean expireAfterAccess;
     private String forceProtocol = null;
+    boolean enabled = false;
 
 
     public Configuration(ConfigurationService service) {
+        enabled = service.getBoolProperty(ENABLE_OPTIONS_NAME, false);
         String lifetime = service.getProperty(LIFETIME_OPTIONS_NAME);
         if(lifetime == null) {
             this.lifetime = -1;
@@ -114,11 +118,11 @@ public class Configuration {
         return created + lifetime < System.currentTimeMillis();
     }
 
-
     public String getForcedProtocol() {
         return forceProtocol;
     }
 
-
-
+    public boolean isEnabled() {
+        return enabled;
+    }
 }

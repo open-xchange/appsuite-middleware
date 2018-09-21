@@ -63,6 +63,7 @@ import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
@@ -174,6 +175,11 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             }
         });
         mappings.put(AttendeeField.SENT_BY, new DefaultMapping<CalendarUser, Attendee>() {
+            
+            @Override
+            public boolean equals(Attendee object1, Attendee object2) {
+                return CalendarUtils.equals(get(object1), get(object2));
+            }
 
             @Override
             public void copy(Attendee from, Attendee to) throws OXException {
@@ -311,7 +317,7 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
 
             @Override
             public boolean isSet(Attendee object) {
-                return object.containsPartStat();
+                return object.containsRsvp();
             }
 
             @Override

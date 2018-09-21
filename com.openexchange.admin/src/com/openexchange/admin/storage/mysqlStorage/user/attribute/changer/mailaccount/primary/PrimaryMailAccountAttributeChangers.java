@@ -55,6 +55,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,7 +97,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
     private interface ValueSetter {
 
         /**
-         * 
+         *
          * @param account
          * @param user
          * @param setAttributes
@@ -161,13 +162,8 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
         setters = Collections.unmodifiableMap(s);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
-     */
     @Override
-    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException {
         MailAccountDescription account = new MailAccountDescription();
         Set<com.openexchange.mailaccount.Attribute> changed = new HashSet<>();
         account.setDefaultFlag(true);
@@ -298,7 +294,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
     }
 
     /**
-     * 
+     *
      * @param user
      * @param account
      * @param mapper
@@ -322,7 +318,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
     }
 
     /**
-     * 
+     *
      * @param account
      * @param user
      * @param mapper
@@ -359,7 +355,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
     }
 
     /**
-     * 
+     *
      * @param setAttributes
      * @param mapper
      */
@@ -377,7 +373,7 @@ public class PrimaryMailAccountAttributeChangers extends AbstractAttributeChange
 
     /**
      * Gets the getters from the specified methods
-     * 
+     *
      * @param methods The methods from which to retrieve the getters
      * @return A {@link List} with all the getter methods
      */

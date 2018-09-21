@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.osgi;
 
+import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.internal.ContactServiceImpl;
@@ -56,7 +57,9 @@ import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.folder.FolderService;
+import com.openexchange.groupware.contact.ContactPictureURLService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
@@ -95,11 +98,24 @@ public class ContactServiceActivator extends HousekeepingActivator {
 
             final UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
             track(UserServiceInterceptor.class, interceptorRegistry);
+            track(ContactPictureURLService.class, new SimpleRegistryListener<ContactPictureURLService>() {
+
+                @Override
+                public void added(ServiceReference<ContactPictureURLService> ref, ContactPictureURLService service) {
+                    ServerServiceRegistry.getInstance().addService(ContactPictureURLService.class, service);
+                }
+
+                @Override
+                public void removed(ServiceReference<ContactPictureURLService> ref, ContactPictureURLService service) {
+                    ServerServiceRegistry.getInstance().removeService(ContactPictureURLService.class);
+                }
+            });
             openTrackers();
 
             final ContactService contactService = new ContactServiceImpl(interceptorRegistry);
             super.registerService(ContactService.class, contactService);
             ServerServiceRegistry.getInstance().addService(ContactService.class, contactService);
+
         } catch (final Exception e) {
             LOG.error("error starting \"com.openexchange.contact.service\"", e);
             throw e;

@@ -135,10 +135,6 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
                 WebSocketPushNotificationTransport.invalidateEnabledCache();
             }
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
         });
     }
 

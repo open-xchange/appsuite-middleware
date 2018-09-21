@@ -10,13 +10,14 @@ BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
+BuildRequires: open-xchange-hazelcast
 %if 0%{?suse_version}
 BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -27,6 +28,7 @@ Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces >= @OXVERSION@
+Requires:      open-xchange-hazelcast
 Requires(pre): open-xchange-system >= @OXVERSION@
 Obsoletes:     open-xchange-freebusy < %{version}
 
@@ -541,6 +543,11 @@ EOF
     # SoftwareChange_Request-175
     ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
 
+    # SoftwareChange_Request-193
+    VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+    if [ "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\", \"open-xchange-mobile-api-facade*\"" = "${VALUE}" ]; then
+        ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
+    fi
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -589,6 +596,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Thu Sep 06 2018 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.1 release
 * Fri Jun 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.10.0 release
 * Wed Jun 27 2018 Marcus Klein <marcus.klein@open-xchange.com>

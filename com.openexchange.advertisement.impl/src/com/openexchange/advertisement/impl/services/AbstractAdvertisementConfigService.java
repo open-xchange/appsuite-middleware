@@ -236,7 +236,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
         String id = view.get(PREVIEW_CONFIG, String.class);
-        if (!Strings.isEmpty(id)) {
+        if (Strings.isNotEmpty(id)) {
             int configId = Integer.parseInt(id);
 
             DatabaseService dbService = Services.getService(DatabaseService.class);

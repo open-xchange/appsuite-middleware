@@ -75,7 +75,6 @@ public interface BasicSyncAware extends SyncAware {
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
      * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * <li>{@link CalendarParameters#PARAMETER_SKIP_CLASSIFIED}</li>
      * </ul>
      *
      * @param updatedSince The timestamp since when the updates should be retrieved

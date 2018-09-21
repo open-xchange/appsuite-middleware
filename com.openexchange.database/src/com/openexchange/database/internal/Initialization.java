@@ -57,8 +57,8 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
-import com.openexchange.database.DatabaseConnectionListener;
 import com.openexchange.database.GeneralDatabaseConnectionListener;
+import com.openexchange.database.internal.reloadable.ConnectionReloader;
 import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
@@ -129,8 +129,8 @@ public final class Initialization {
 
     private final Timer timer = new Timer();
     private final Management management = new Management(timer);
-    private final Configuration configuration = new Configuration();
 
+    private Configuration configuration = null;
     private CacheService cacheService;
     private ReplicationMonitor monitor;
     private Pools pools;
@@ -153,14 +153,25 @@ public final class Initialization {
      * @param configViewFactory The config view factory
      * @param migrationService The database migration service, or <code>null</code> if not available
      * @param connectionListeners The connection listeners
+     * @param configuration The {@link Configuration}
+     * @param reloader {@link ConnectionReloader} to reload connection pools 
      * @return The database service
+     * @throws OXException Various
      */
-    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService, ServiceListing<GeneralDatabaseConnectionListener> connectionListeners) throws OXException {
+    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService, ServiceListing<GeneralDatabaseConnectionListener> connectionListeners, Configuration configuration, ConnectionReloaderImpl reloader) throws OXException {
+        this.configuration = configuration;
         if (null != databaseService) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
-        // Parse configuration
-        configuration.readConfiguration(configurationService);
+        
+        
+        
+        
+        // TODO Add Listerner 
+        
+        
+        
+        
         // Set timer interval
         timer.configure(configuration);
         // Setting up database connection pools.
@@ -169,7 +180,7 @@ public final class Initialization {
         monitor = new ReplicationMonitor(configuration.getBoolean(REPLICATION_MONITOR, true), configuration.getBoolean(CHECK_WRITE_CONS, false), connectionListeners);
         management.addOverview(new Overview(pools, monitor));
         // Add life cycle for configuration database
-        final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
+        final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer, reloader);
         pools.addLifeCycle(configDBLifeCycle);
         // Configuration database connection pool service.
         configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor, LockMech.lockMechFor(configuration.getProperty(Configuration.Property.LOCK_MECH, LockMech.ROW_LOCK.getId())));
@@ -177,7 +188,8 @@ public final class Initialization {
             configDatabaseService.setCacheService(cacheService);
         }
         // Context pool life cycle.
-        pools.addLifeCycle(new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService));
+        ContextDatabaseLifeCycle contextLifeCycle = new ContextDatabaseLifeCycle(configuration, management, timer, reloader, configDatabaseService);
+        pools.addLifeCycle(contextLifeCycle);
         Server.setConfigDatabaseService(configDatabaseService);
         Server.start(configurationService);
         try {

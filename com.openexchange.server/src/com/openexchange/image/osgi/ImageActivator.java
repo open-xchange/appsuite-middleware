@@ -57,8 +57,6 @@ import com.openexchange.conversion.DataSource;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.filemanagement.internal.ManagedFileImageDataSource;
-import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
-import com.openexchange.groupware.contact.datasource.UserImageDataSource;
 import com.openexchange.image.ImageActionFactory;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.image.Mp3ImageDataSource;
@@ -106,20 +104,6 @@ public class ImageActivator extends AJAXModuleActivator {
             inlineProps.put("identifier", inlineDataSource.getRegistrationName());
             registerService(DataSource.class, inlineDataSource, inlineProps);
             ImageActionFactory.addMapping(inlineDataSource.getRegistrationName(), inlineDataSource.getAlias());
-        }
-        {
-            ContactImageDataSource contactDataSource = ContactImageDataSource.getInstance();
-            Dictionary<String, Object> contactProps = new Hashtable<String, Object>(1);
-            contactProps.put("identifier", contactDataSource.getRegistrationName());
-            registerService(DataSource.class, contactDataSource, contactProps);
-            ImageActionFactory.addMapping(contactDataSource.getRegistrationName(), contactDataSource.getAlias());
-        }
-        {
-            UserImageDataSource userDataSource = UserImageDataSource.getInstance();
-            Dictionary<String, Object> contactProps = new Hashtable<String, Object>(1);
-            contactProps.put("identifier", userDataSource.getRegistrationName());
-            registerService(DataSource.class, userDataSource, contactProps);
-            ImageActionFactory.addMapping(userDataSource.getRegistrationName(), userDataSource.getAlias());
         }
         {
             Mp3ImageDataSource mp3DataSource = Mp3ImageDataSource.getInstance();

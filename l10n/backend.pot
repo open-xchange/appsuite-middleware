@@ -923,6 +923,13 @@ msgid ""
 "%1$s which is managed by you."
 msgstr ""
 
+#. You have received an E-Mail containing a reply to an appointment that you didn't organize. Best ignore it.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:308
+msgid ""
+"You have received an E-Mail containing a reply to an appointment that you "
+"didn't organize. Best ignore it."
+msgstr ""
+
 #. *
 #. * The event %s couldn't be deleted: %s
 #.
@@ -2327,8 +2334,10 @@ msgstr ""
 #. E.g. Drive Client
 #. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
 #. all translations or remove it from the PO file.
+#. Used to display arbitrary text from a 3rd party component to the user, which provides the information why the login attempt failed
 #: com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
+#: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:119
 msgid "%1$s"
 msgstr ""
 
@@ -2507,8 +2516,8 @@ msgstr ""
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
 #: com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
-#: com.openexchange.subscribe.linkedin/src/com/openexchange/subscribe/linkedin/FormStrings.java:62
 #: com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
+#: com.openexchange.subscribe.oauth/src/com/openexchange/subscribe/oauth/FormStrings.java:62
 msgid "Select an existing account"
 msgstr ""
 
@@ -3710,16 +3719,6 @@ msgstr ""
 
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:82
 msgid "A JSON error occurred: %1$s"
-msgstr ""
-
-#. No Linked-In account available.
-#: com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:63
-msgid "No Linked-In account available."
-msgstr ""
-
-#. Need an e-mail address to look up Linked-In data
-#: com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:66
-msgid "Need an e-mail address to look up Linked-In data."
 msgstr ""
 
 #. Cannot search a contact that is neither an internal user nor has an e-mail address.

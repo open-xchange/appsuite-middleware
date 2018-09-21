@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open Xchange Feedback Bundle
 Bundle-SymbolicName: com.openexchange.userfeedback
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.userfeedback.osgi.Activator
@@ -20,6 +20,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.java,
  com.openexchange.jslob,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.serverconfig,
  com.openexchange.session,

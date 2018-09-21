@@ -49,11 +49,9 @@
 
 package com.openexchange.drive.events.apn2.osgi;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.IOException;
+import java.nio.file.Files;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.events.DriveEventService;
@@ -64,10 +62,10 @@ import com.openexchange.drive.events.apn2.IOSApnsHttp2OptionsProvider;
 import com.openexchange.drive.events.apn2.internal.ApnsHttp2DriveEventPublisher;
 import com.openexchange.drive.events.apn2.internal.IOSApnsHttp2DriveEventPublisher;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -89,7 +87,8 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, ConfigurationService.class, TimerService.class };
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, ConfigurationService.class, TimerService.class,
+            ThreadPoolService.class };
     }
 
     @Override
@@ -191,25 +190,12 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
         return new ApnsHttp2Options(new File(resourceName), password, production, topic);
     }
 
-    private ApnsHttp2Options createOptions(String privateKeyFile, String keyId, String teamId, boolean production, String topic) throws Exception{
-        StringBuilder sPrivateKey = null;
-        {
-            InputStream resourceStream = null;
-            BufferedReader reader = null;
-            try {
-                resourceStream = new FileInputStream(new File(privateKeyFile));
-                reader = new BufferedReader(new InputStreamReader(resourceStream, Charsets.ISO_8859_1));
-                sPrivateKey = new StringBuilder(2048);
-                for (String line; (line = reader.readLine()) != null;) {
-                    if (!line.startsWith("-----BEGIN") && !line.startsWith("-----END")) {
-                        sPrivateKey.append(line);
-                    }
-                }
-            } finally {
-                Streams.close(resourceStream);
-            }
+    private ApnsHttp2Options createOptions(String privateKeyFile, String keyId, String teamId, boolean production, String topic) throws OXException {
+        try {
+            return new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
+        } catch (IOException e) {
+            throw ConfigurationExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
-        return new ApnsHttp2Options(sPrivateKey.toString(), keyId, teamId, production, topic);
     }
 
 }

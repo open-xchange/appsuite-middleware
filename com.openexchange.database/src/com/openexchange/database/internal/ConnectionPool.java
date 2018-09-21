@@ -52,7 +52,7 @@ package com.openexchange.database.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-import com.openexchange.pooling.ExhaustedActions;
+import com.openexchange.pooling.PoolConfig;
 import com.openexchange.pooling.PoolingException;
 import com.openexchange.pooling.ReentrantLockPool;
 
@@ -65,28 +65,25 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConnectionPool.class);
 
     /**
-     * Default time between checks if a connection still works.
-     */
-    public static final long DEFAULT_CHECK_TIME = 120000;
-
-    /**
      * Reference to the lifecycle object.
      */
-    private final ConnectionLifecycle lifecycle;
+    protected final ConnectionLifecycle lifecycle;
 
     /**
      * Full constructor with all parameters.
-     * @param url JDBC url to the database.
+     * @param url JDBC URL to the database.
      * @param info Properties for the connections.
      * @param config pool configuration parameters.
      */
-    public ConnectionPool(final String url, final Properties info, final ReentrantLockPool.Config config) {
+    public ConnectionPool(final String url, final Properties info, final PoolConfig config) {
         super(new ConnectionLifecycle(url, info), config);
         lifecycle = (ConnectionLifecycle) getLifecycle();
     }
 
     /**
      * Gets a connection that does not have any timeouts.
+     * @return A {@link Connection}
+     * @throws PoolingException If object can't be created
      */
     public Connection getWithoutTimeout() throws PoolingException {
         try {
@@ -111,28 +108,5 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements Con
 
     public int getNumberOfDBConnections() {
         return getPoolSize();
-    }
-
-    public static final ReentrantLockPool.Config DEFAULT_CONFIG;
-
-    static {
-        DEFAULT_CONFIG = new ReentrantLockPool.Config();
-        DEFAULT_CONFIG.maxIdle = -1;
-        DEFAULT_CONFIG.maxIdleTime = 60000;
-        DEFAULT_CONFIG.maxActive = -1;
-        DEFAULT_CONFIG.maxWait = 10000;
-        DEFAULT_CONFIG.maxLifeTime = -1;
-        DEFAULT_CONFIG.exhaustedAction = ExhaustedActions.BLOCK;
-        DEFAULT_CONFIG.testOnActivate = false;
-        DEFAULT_CONFIG.testOnDeactivate = true;
-        DEFAULT_CONFIG.testOnIdle = false;
-        DEFAULT_CONFIG.testThreads = false;
-//        try {
-//            CLOSE = Connection.class.getMethod("close", new Class[] {});
-//        } catch (SecurityException e) {
-//            throw new RuntimeException(e);
-//        } catch (NoSuchMethodException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 }

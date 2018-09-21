@@ -128,7 +128,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
     }
 
     @Override
-    public String constructURL(final Session session) throws OXException {
+    public String constructURL(Session session, boolean withRoute) throws OXException {
         if (null != contentType && contentType.regionMatches(true, 0, "image/", 0, 6)) {
             return new ManagedFileImageDataSource(management).generateUrl(new ImageLocation.Builder(id).build(), session);
         }
@@ -155,7 +155,11 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
                 }
                 prefix = sb.toString();
                 sb.setLength(0);
-                httpSessionID = null != hostData.getHTTPSession() ? hostData.getHTTPSession() : "0123456789." + hostData.getRoute();
+                if (withRoute) {
+                    httpSessionID = (null != hostData.getHTTPSession() ? hostData.getHTTPSession() : "0123456789." + hostData.getRoute());
+                } else {
+                    httpSessionID = null;
+                }
             }
         }
         /*

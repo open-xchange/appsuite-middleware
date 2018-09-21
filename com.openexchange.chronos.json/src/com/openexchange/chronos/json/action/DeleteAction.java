@@ -55,6 +55,8 @@ import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.json.converter.CalendarResultsPerEventIdConverter;
@@ -95,10 +97,30 @@ public class DeleteAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         Object data = requestData.getData();
-        if (data == null || !(data instanceof JSONArray)) {
+        if (data == null) {
             throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
         }
-        Map<EventID, ErrorAwareCalendarResult> results = calendarAccess.deleteEvents(parseEventIDs((JSONArray) data), parseClientTimestamp(requestData));
+        JSONArray array = null;
+        if (data instanceof JSONArray) {
+            array = (JSONArray) data;
+        } else if (data instanceof JSONObject) {
+            JSONObject temp = (JSONObject) data;
+            if (!temp.has(EVENTS)) {
+                throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+            }
+
+            try {
+                array = temp.getJSONArray(EVENTS);
+                if (temp.has(BODY_PARAM_COMMENT)) {
+                    calendarAccess.set(BODY_PARAM_COMMENT, temp.get(BODY_PARAM_COMMENT));
+                }
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+            }
+        } else {
+            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+        }
+        Map<EventID, ErrorAwareCalendarResult> results = calendarAccess.deleteEvents(parseEventIDs(array), parseClientTimestamp(requestData));
         return new AJAXRequestResult(results, getMaximumTimestamp(results), CalendarResultsPerEventIdConverter.INPUT_FORMAT);
     }
 

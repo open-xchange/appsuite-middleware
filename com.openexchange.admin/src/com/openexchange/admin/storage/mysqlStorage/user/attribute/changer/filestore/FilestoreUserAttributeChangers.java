@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.files
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -85,7 +86,7 @@ public class FilestoreUserAttributeChangers extends AbstractUserAttributeChanger
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers#initialiseChangers()
      */
     @Override
@@ -115,14 +116,14 @@ public class FilestoreUserAttributeChangers extends AbstractUserAttributeChanger
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
      */
     @Override
-    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException {
         try {
             if (filestoreIdAttributeChanger.changeAttribute(userId, contextId, userData, connection)) {
-                return super.change(userData, userId, contextId, connection);
+                return super.change(userData, userId, contextId, connection, pendingInvocations);
             }
             return EMPTY_SET;
         } catch (SQLException e) {

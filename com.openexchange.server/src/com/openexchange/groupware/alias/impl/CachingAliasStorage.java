@@ -237,6 +237,8 @@ public class CachingAliasStorage implements UserAliasStorage {
                 if (object instanceof Set) {
                     ImmutableSet<String> newAliases = ImmutableSet.<String> builder().addAll((Set<String>) object).add(alias).build();
                     cache.put(key, newAliases, true);
+                } else {
+                    cache.put(key, ImmutableSet.<String> builder().add(alias).build(), true);
                 }
             }
         }
@@ -257,6 +259,8 @@ public class CachingAliasStorage implements UserAliasStorage {
                     newAliases.remove(oldAlias);
                     newAliases.add(newAlias);
                     cache.put(key, ImmutableSet.copyOf(newAliases), true);
+                } else {
+                    cache.remove(key);
                 }
             }
         }
@@ -276,6 +280,8 @@ public class CachingAliasStorage implements UserAliasStorage {
                     Set<String> newAliases = new LinkedHashSet<>((Set<String>) object);
                     newAliases.remove(alias);
                     cache.put(key, ImmutableSet.copyOf(newAliases), true);
+                } else {
+                    cache.remove(key);
                 }
             }
         }
@@ -293,6 +299,8 @@ public class CachingAliasStorage implements UserAliasStorage {
                 Object object = cache.get(key);
                 if (object instanceof Set) {
                     cache.put(key, ImmutableSet.<String> builder().build(), true);
+                } else {
+                    cache.remove(key);
                 }
             }
         }

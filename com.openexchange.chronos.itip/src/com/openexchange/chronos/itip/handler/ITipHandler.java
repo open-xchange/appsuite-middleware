@@ -298,12 +298,13 @@ public class ITipHandler implements CalendarHandler {
         Session session = event.getSession();
         int onBehalfOf = onBehalfOf(event.getCalendarUser(), session);
         CalendarUser principal = ITipUtils.getPrincipal(event.getCalendarParameters());
+        String comment = event.getCalendarParameters().get(CalendarParameters.PARAMETER_COMMENT, String.class);
 
         // Copy event to avoid UOE due UnmodifieableEvent
         if (null != original) {
             original = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
         }
-        ITipMailGenerator generator = generators.create(original, EventMapper.getInstance().copy(update, new Event(), (EventField[]) null), session, onBehalfOf, principal);
+        ITipMailGenerator generator = generators.create(original, EventMapper.getInstance().copy(update, new Event(), (EventField[]) null), session, onBehalfOf, principal, comment);
         List<NotificationParticipant> recipients = generator.getRecipients();
         for (NotificationParticipant notificationParticipant : recipients) {
             NotificationMail mail;
@@ -334,7 +335,7 @@ public class ITipHandler implements CalendarHandler {
                         mail.getMessage().addException(exception);
                     }
                 }
-                sender.sendMail(mail, session, principal);
+                sender.sendMail(mail, session, principal, comment);
             }
         }
     }

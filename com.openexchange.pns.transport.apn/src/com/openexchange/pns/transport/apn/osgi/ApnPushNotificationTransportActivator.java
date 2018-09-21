@@ -143,10 +143,6 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
                 ApnPushNotificationTransport.invalidateEnabledCache();
             }
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
         });
 
         registerService(Reloadable.class, this);

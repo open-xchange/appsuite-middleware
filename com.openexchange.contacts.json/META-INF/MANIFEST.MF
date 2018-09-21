@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Contact JSON Bundle
 Bundle-SymbolicName: com.openexchange.contacts.json
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Activator: com.openexchange.contacts.json.osgi.ContactJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -41,7 +41,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.groupware,
  com.openexchange.groupware.attach,
  com.openexchange.groupware.contact,
- com.openexchange.groupware.contact.datasource,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,

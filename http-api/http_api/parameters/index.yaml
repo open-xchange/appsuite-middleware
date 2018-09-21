@@ -342,6 +342,101 @@ glbQueryParamsAllowEnqueue:
   required: false
   default: false
 
+# image transformation parameters
+glbQueryParamsImageTransformationRotate:
+  in: query
+  name: rotate
+  type: boolean
+  description: Adds a 'rotate' transformation, leading to the image being rotated according to the contained EXIF information.
+  required: false
+  default: false
+glbQueryParamsImageTransformationWidth:
+  in: query
+  name: width
+  type: integer
+  format: int32
+  description: The maximum width of the target image.
+  required: false
+glbQueryParamsImageTransformationHeight:
+  in: query
+  name: height
+  type: integer
+  format: int32
+  description: The maximum height of the target image.
+  required: false
+glbQueryParamsImageTransformationShrinkOnly:
+  in: query
+  name: shrinkOnly
+  type: boolean
+  description: Set to true to only scale images 'greater than' target size.
+  required: false
+  default: false
+glbQueryParamsImageTransformationScaleType:
+  in: query
+  name: scaleType
+  type: string
+  enum:
+  - cover
+  - contain
+  - containforcedimension
+  - coverandcrop
+  - auto
+  description: |
+    Defines the scale type.
+    Possible value: 
+    <ul>
+      <li><code>cover</code> - The "cover" scale type, specifying the minimum target dimensions. <br>
+      The source image will be resized in a way that the resulting image covers the target resolution entirely, with the original aspect ratio being preserved. 
+      For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "cover", will result in the picture being resized to 267x200 pixels.</li>
+
+      <li><code>contain</code> - The "contain" scale type, specifying the maximum target dimensions. <br>
+      The source image will be resized in a way that the resulting image fits into the target resolution entirely, with the original aspect ratio being preserved. 
+      For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "contain", will result in the picture being resized to 200x150 pixels.</li>
+
+      <li><code>containforcedimension</code> - The "containforcedimension" scale type, specifying the maximum target dimensions. <br>
+      The source image will be resized in a way that the resulting image fits into the target resolution entirely, with the original aspect ratio being preserved while smaller sides get 
+      padded to fit exact dimension. For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "containforcedimension", will result in the picture being 
+      first resized to 200x150 pixels, then height gets padded by 25 pixels per side resulting in exactly 200x200 pixels.</li>
+
+      <li><code>coverandcrop</code> - The "coverandcrop" scale type, specifying the target dimensions. <br>
+      If the source image is bigger than the target dimension, in a first step the image will be resized in a way that the resulting image covers the target resolution entirely, 
+      with the original aspect ratio being preserved. In a second step the image will be cropped to fit the target dimension. For example, scaling an image with an original resolution 
+      of 640x480 pixels to 200x200 pixels and type "coverandcrop", will result in the picture being resized to 267x200 pixels and then cropped to fit 200x200. 
+      In case the image is smaller than then target dimension the image will not be resized and instead it gets padded to fit exact dimension. For example, 
+      with an original resolution of 100x100 pixels and a target dimension of 200x200 pixels and type "coverandcrop", will result in the picture being padded on all sides with 50 pixels.</li>
+
+      <li><code>auto</code> - The "auto" scale type.<br></li>
+    </ul>
+  required: false
+glbQueryParamsImageTransformationCropWidth:
+  in: query
+  name: cropWidth
+  type: integer
+  format: int32
+  description: The width of the specified rectangular region.
+  required: false
+glbQueryParamsImageTransformationCropHeight:
+  in: query
+  name: cropHeight
+  type: integer
+  format: int32
+  description: The height of the specified rectangular region.
+  required: false
+glbQueryParamsImageTransformationCropX:
+  in: query
+  name: cropX
+  type: integer
+  format: int32
+  description: The X coordinate of the upper-left corner of the specified rectangular region.
+  required: false
+glbQueryParamsImageTransformationCropY:
+  in: query
+  name: cropY
+  type: integer
+  format: int32
+  description: The Y coordinate of the upper-left corner of the specified rectangular region.
+  required: false
+
 # Chronos parameters
 QueryParamChronosFolder:
   name: folder

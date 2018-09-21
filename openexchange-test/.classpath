@@ -72,7 +72,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contacts.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tasks.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contact.storage.rdb"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.linkedin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.unifiedinbox"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.jcharset"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.version"/>
@@ -137,8 +136,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.templating.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller.rmi"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/stax2-api-3.1.4.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.3.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.7.jar"/>
 	<classpathentry kind="lib" path="lib/socket.io-client-0.8.1.jar" sourcepath="lib/source/socket.io-client-0.8.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/engine.io-client-0.8.1.jar" sourcepath="lib/source/engine.io-client-0.8.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/okhttp-3.4.1.jar" sourcepath="lib/source/okhttp-3.4.1-sources.jar"/>
@@ -197,5 +194,7 @@
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-parsers-1.18.jar" sourcepath="/org.apache.tika/lib/source/tika-parsers-1.18-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.client"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms.tools"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.10.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.6.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -177,7 +177,7 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                 String folderID = FileStorageEventHelper.extractFolderId(event);
                 String objectID = FileStorageEventHelper.extractObjectId(event);
                 String fileName = (String)event.getProperty(FILE_NAME);
-                if (false == Strings.isEmpty(fileName) && (FilenameValidationUtils.isInvalidFileName(fileName) || DriveUtils.isIgnoredFileName(fileName))) {
+                if (Strings.isNotEmpty(fileName) && (FilenameValidationUtils.isInvalidFileName(fileName) || DriveUtils.isIgnoredFileName(fileName))) {
                     LOG.trace("Skipping event processing for ignored file: {}", fileName);
                     return;
                 }

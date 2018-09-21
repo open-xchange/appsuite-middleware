@@ -93,6 +93,7 @@ public class ErrorResultConverter implements ExportResultConverter {
                 }
             }
 
+            @SuppressWarnings("resource")
             private Object csvErrorResult() {
                 ThresholdFileHolder sink = new ThresholdFileHolder();
                 OutputStreamWriter writer = new OutputStreamWriter(sink.asOutputStream(), Charsets.UTF_8);
@@ -102,7 +103,7 @@ public class ErrorResultConverter implements ExportResultConverter {
                     writer.flush();
                     return sink.getClosingStream();
                 } catch (IOException | OXException e) {
-                    // won't happen
+                    sink.close();
                 }
                 return null;
             }

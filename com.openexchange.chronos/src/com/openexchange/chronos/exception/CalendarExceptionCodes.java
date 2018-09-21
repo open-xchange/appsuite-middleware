@@ -202,9 +202,9 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     UNSUPPORTED_FOLDER("Unsupported folder [folder %1$s, content type %2$s]", UNSUPPORTED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4060),
     /**
      * <li>The targeted occurrence is not part of the appointment series. Please select a valid recurrence identifier and try again.</li>
-     * <li>Invalid recurrence id [id %1$s, rule %2$s]</li>
+     * <li>Invalid recurrence id [id %1$s, recurrence data %2$s]</li>
      */
-    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$s, rule %2$s]", INVALID_RECURRENCE_ID_MSG, Category.CATEGORY_USER_INPUT, 4061),
+    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$s, recurrence data %2$s]", INVALID_RECURRENCE_ID_MSG, Category.CATEGORY_USER_INPUT, 4061),
     /**
      * <li>In order to accomplish the search, %1$d or more characters are required.</li>
      * <li>Query too short [minimum %1$d, query %2$s]</li>

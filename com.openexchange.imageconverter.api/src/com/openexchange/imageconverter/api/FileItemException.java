@@ -49,15 +49,13 @@
 
 package com.openexchange.imageconverter.api;
 
-import com.openexchange.exception.OXException;
-
 /**
  * {@link FileItemException}
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
  * @since v7.10.0
  */
-public class FileItemException extends OXException {
+public class FileItemException extends Exception {
 
     /**
      * serialVersionUID
@@ -77,7 +75,7 @@ public class FileItemException extends OXException {
      * @param e
      */
     public FileItemException(final String displayMessage) {
-        super(OXException.general(displayMessage));
+        super(displayMessage);
     }
 
     /**
@@ -95,6 +93,6 @@ public class FileItemException extends OXException {
      * @param e
      */
     public FileItemException(final String displayMessage, final Throwable e) {
-        super(OXException.general(displayMessage, e));
+        super(displayMessage, e);
     }
 }

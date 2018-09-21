@@ -420,23 +420,23 @@ public class CSVContactImporter extends AbstractImporter {
     public ContactSwitcher getContactSwitcher(Locale locale) {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
-        
+
         final TimeZone utc = TimeZoneUtils.getTimeZone("UTC");
         final SimpleDateFormat df1 = new SimpleDateFormat("dd.MM.yyyy");
         df1.setTimeZone(utc);
 
         final SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
-        df2.setTimeZone(utc);        
-        
+        df2.setTimeZone(utc);
+
         dateSwitch.addDateFormat(df1);
         dateSwitch.addDateFormat(df2);
-        
+
         if (null != locale) {
             final DateFormat df3 = DateFormat.getDateInstance(DateFormat.SHORT, locale);
             df3.setTimeZone(utc);
             dateSwitch.addDateFormat(df3);
-        }             
-        
+        }
+
         final ContactSwitcherForTimestamp timestampSwitch = new ContactSwitcherForTimestamp();
         final ContactSwitcherForBooleans boolSwitch = new ContactSwitcherForBooleans();
         ContactSwitcherForEmailAddresses emailSwitch = new ContactSwitcherForEmailAddresses();
@@ -790,7 +790,7 @@ public class CSVContactImporter extends AbstractImporter {
             String[] value = optionalParams.get("charset");
             if (null != value && 1 == value.length) {
                 String charsetName = value[0];
-                if (false == Strings.isEmpty(charsetName) && false == "auto".equalsIgnoreCase(charsetName)) {
+                if (Strings.isNotEmpty(charsetName) && false == "auto".equalsIgnoreCase(charsetName)) {
                     try {
                         return Charsets.forName(value[0]);
                     } catch (IllegalCharsetNameException e) {

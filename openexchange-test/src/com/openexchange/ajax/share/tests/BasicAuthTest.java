@@ -102,6 +102,7 @@ public class BasicAuthTest extends ShareTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -109,6 +110,7 @@ public class BasicAuthTest extends ShareTest {
         calendarManager = new CalendarTestManager(getClient());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -251,7 +253,7 @@ public class BasicAuthTest extends ShareTest {
         HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
 
         String password = ShareTest.getPassword(guestPermission.getRecipient());
-        if (false == Strings.isEmpty(password)) {
+        if (Strings.isNotEmpty(password)) {
             String username = ShareTest.getUsername(guestPermission.getRecipient());
             BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             UsernamePasswordCredentials anonymousCredentials = new UsernamePasswordCredentials(username, password);

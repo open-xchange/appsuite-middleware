@@ -137,6 +137,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected final List<NotificationParticipant> participants;
 
     protected NotificationParticipant onBehalfOf;
+    
+    protected String comment;
 
     protected CalendarUtilities calendarUtilities;
 
@@ -144,7 +146,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         EventField.TRANSP, EventField.TIMESTAMP, EventField.FLAGS };
 
     public NotificationMailGenerator(final ServiceLookup services, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event updated, User user,
-        final User onBehalfOf, final Context ctx, final Session session, CalendarUser principal) throws OXException {
+        final User onBehalfOf, final Context ctx, final Session session, CalendarUser principal, String comment) throws OXException {
         this.util = util;
         this.ctx = ctx;
         this.services = services;
@@ -153,6 +155,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         this.recipients = resolver.resolveAllRecipients(original, updated, user, onBehalfOf, ctx, session, principal);
         this.participants = resolver.getAllParticipants(this.recipients, updated);
         this.resources = resolver.getResources(updated);
+        this.comment = comment;
 
         for (final NotificationParticipant participant : recipients) {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
@@ -185,7 +188,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             this.diff = new ITipEventUpdate(original, updated, true, DEFAULT_SKIP);
         }
 
-        if (actor.hasRole(ITipRole.ORGANIZER) || actor.hasRole(ITipRole.PRINCIPAL)) {
+        if (actor.hasRole(ITipRole.ORGANIZER) || actor.hasRole(ITipRole.PRINCIPAL) || util.isActingOnBehalfOf(updated, session)) {
             state = new OrganizerState();
         } else {
             if (organizer.isExternal()) {
@@ -271,6 +274,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.CANCEL);
         message.setEvent(updated);
+        if (comment != null) {
+            message.setComment(comment);
+        }
 
         mail.setMessage(message);
 
@@ -315,6 +321,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REQUEST);
         message.setEvent(eventToReport);
+        if (comment != null) {
+            message.setComment(comment);
+        }
 
         if (CalendarUtils.isSeriesMaster(eventToReport)) {
             final List<Event> exceptions = util.getExceptions(eventToReport, session);
@@ -360,7 +369,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                     n.setEmail(fromAddr);
                 }
             } catch (OXException e) {
-                LOGGER.debug("Couldn't change sender mail address to configuared defaults.", e);
+                LOGGER.debug("Couldn't change sender mail address to configured defaults.", e);
             }
 
         } else {

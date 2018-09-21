@@ -56,6 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -111,7 +112,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
             }
         });
         valueSetters.put(ReturnType.BOOLEAN, (userData, method, preparedStatement, parameterIndex) -> {
-            boolean result = (Boolean) method.invoke(userData, (Object[]) null);
+            boolean result = ((Boolean) method.invoke(userData, (Object[]) null)).booleanValue();
             preparedStatement.setBoolean(parameterIndex, result);
         });
         valueSetters.put(ReturnType.DATE, (userData, method, preparedStatement, parameterIndex) -> {
@@ -169,13 +170,8 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
         });
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AttributeChangers#change(java.util.Set, com.openexchange.admin.rmi.dataobjects.User, int, int, java.sql.Connection)
-     */
     @Override
-    public Set<String> change(User userData, int userId, int contextId, Connection connection) throws StorageException {
+    public Set<String> change(User userData, int userId, int contextId, Connection connection, Collection<Runnable> pendingInvocations) throws StorageException {
         StringBuilder query = new StringBuilder("UPDATE prg_contacts SET ");
 
         // First we have to check which return value we have. We have to distinguish the return types
@@ -189,7 +185,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
 
     /**
      * Collect all methods that have set values
-     * 
+     *
      * @param userData The {@link User} data
      * @param query The SQL query builder
      * @return A {@link List} with all methods that have set values
@@ -218,7 +214,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
 
     /**
      * Prepares the statement and executes the update
-     * 
+     *
      * @param userData The {@link User} data
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -260,7 +256,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
 
     /**
      * Gets the getters from the specified methods
-     * 
+     *
      * @param methods The methods from which to retrieve the getters
      * @return A {@link List} with all the getter methods
      */
@@ -295,7 +291,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
 
     /**
      * Checks whether an attribute is set by invoking it's respective {@link Method}
-     * 
+     *
      * @param method The {@link Method} to invoke
      * @param userData The {@link User} data object which contains the {@link Method}
      * @return <code>true</code> if the attribute by the denoted {@link Method} is set; <code>false</code> otherwise
@@ -313,7 +309,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
 
     /**
      * Appends to the query and to collected methods the {@link Method} from the specified {@link MethodMetadata}
-     * 
+     *
      * @param methodMetadata The {@link MethodMetadata}
      * @param query The SQL query builder
      * @param collectedMethods The collected {@link Method}s so far
@@ -333,7 +329,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
 
         /**
          * Appends the specified {@link Method} to the query if it's invocation yields any data
-         * 
+         *
          * @param userData The {@link User} data
          * @param method The {@link MethodMetadata} containing the {@link Method} to invoke
          * @param query The SQL query builder
@@ -355,7 +351,7 @@ public class ContactUserAttributeChangers extends AbstractAttributeChangers {
         /**
          * Sets the value of the attribute denoted by the {@link Method} to the specified {@link PreparedStatement}.
          * The parameter index is NOT increased.
-         * 
+         *
          * @param userData The {@link User} data
          * @param method The {@link Method} to invoke for fetching the value
          * @param preparedStatement The {@link PreparedStatement}

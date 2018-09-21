@@ -94,7 +94,7 @@ public class Attach<T extends CalendarComponent, U extends CalendarObject> exten
 
     @Override
     public boolean isSet(U calendarObject) {
-        if (calendarObject.containsAttachmentLink() && !Strings.isEmpty(calendarObject.getAttachmentLink())) {
+        if (calendarObject.containsAttachmentLink() && Strings.isNotEmpty(calendarObject.getAttachmentLink())) {
             return true;
         }
         if (null != calendarObject.getProperty(PROPERTY_MANAGED_ATTACHMENTS) ||

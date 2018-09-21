@@ -59,10 +59,10 @@ import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
-import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.classificationAllowsUpdate;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.injectRecurrenceData;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
@@ -73,12 +73,14 @@ import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -113,9 +115,6 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.java.Strings;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link AbstractUpdatePerformer}
@@ -258,7 +257,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * recursively delete any existing event exceptions
          */
         if (isSeriesMaster(originalEvent)) {
-            for (Event changeException : loadExceptionData(originalEvent.getSeriesId())) {
+            for (Event changeException : loadExceptionData(originalEvent)) {
                 delete(changeException);
             }
         }
@@ -305,7 +304,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         int userId = originalAttendee.getEntity();
         if (isSeriesMaster(originalEvent)) {
-            deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates(), userId);
+            deleteExceptions(originalEvent, originalEvent.getChangeExceptionDates(), userId);
         }
         /*
          * delete event data from storage for this attendee
@@ -331,31 +330,17 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Deletes change exception events from the storage.
-     * <p/>
-     * For each change exception, the data is removed by invoking {@link #delete(Event)} for the exception.
-     *
-     * @param seriesID The series identifier
-     * @param exceptionDates The recurrence identifiers of the change exceptions to delete
-     */
-    protected void deleteExceptions(String seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
-        for (Event originalExceptionEvent : loadExceptionData(seriesID, exceptionDates)) {
-            delete(originalExceptionEvent);
-        }
-    }
-
-    /**
      * Deletes a specific internal user attendee from change exception events from the storage.
      * <p/>
      * For each change exception, the data is removed by invoking {@link #delete(Event, Attendee)} for the exception, in case the
      * user is found the exception's attendee list.
      *
-     * @param seriesID The series identifier
+     * @param seriesMaster The series master event to delete the exceptions from
      * @param exceptionDates The recurrence identifiers of the change exceptions to delete
      * @param userID The identifier of the user attendee to delete
      */
-    protected void deleteExceptions(String seriesID, Collection<RecurrenceId> exceptionDates, int userID) throws OXException {
-        for (Event originalExceptionEvent : loadExceptionData(seriesID, exceptionDates)) {
+    protected void deleteExceptions(Event seriesMaster, Collection<RecurrenceId> exceptionDates, int userID) throws OXException {
+        for (Event originalExceptionEvent : loadExceptionData(seriesMaster, exceptionDates)) {
             Attendee originalUserAttendee = find(originalExceptionEvent.getAttendees(), userID);
             if (null != originalUserAttendee) {
                 delete(originalExceptionEvent, originalUserAttendee);
@@ -487,12 +472,19 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             return false;
         }
         requireWritePermissions(event, Collections.singletonList(session.getEntityResolver().prepareUserAttendee(userId)));
+        int size = updatedAlarms == null ? 0 : updatedAlarms.size();
+        List<Integer> toDelete = new ArrayList<>(size);
+        List<Integer> toAdd = new ArrayList<>(size);
         /*
          * delete removed alarms
          */
         List<Alarm> removedItems = alarmUpdates.getRemovedItems();
         if (0 < removedItems.size()) {
-            storage.getAlarmStorage().deleteAlarms(event.getId(), userId, getAlarmIDs(removedItems));
+            int[] alarmIDs = getAlarmIDs(removedItems);
+            storage.getAlarmStorage().deleteAlarms(event.getId(), userId, alarmIDs);
+            for(int i: alarmIDs) {
+                toDelete.add(i);
+            }
         }
         /*
          * save updated alarms
@@ -506,6 +498,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 alarm.setId(itemUpdate.getOriginal().getId());
                 alarm.setUid(itemUpdate.getOriginal().getUid());
                 alarms.add(Check.alarmIsValid(alarm, itemUpdate.getUpdatedFields().toArray(new AlarmField[itemUpdate.getUpdatedFields().size()])));
+                toDelete.add(alarm.getId());
+                toAdd.add(alarm.getId());
             }
             final String folderView = getFolderView(event, userId);
             if (false == folderView.equals(event.getFolderId())) {
@@ -529,10 +523,22 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * insert new alarms
          */
-        insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
+        List<Alarm> insertAlarms = insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
+        for(Alarm alarm: insertAlarms) {
+            toAdd.add(alarm.getId());
+        }
         Map<Integer, List<Alarm>> loadAlarms = storage.getAlarmStorage().loadAlarms(event);
-        storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
+        storage.getAlarmTriggerStorage().deleteTriggersById(toDelete);
+        if (loadAlarms.containsKey(userId)) {
+            Iterator<Alarm> iterator = loadAlarms.get(userId).iterator();
+            while (iterator.hasNext()) {
+                if (!toAdd.contains(iterator.next().getId())) {
+                    iterator.remove();
+                }
+            }
+        }
+        // only insert the filtered alarms of the current user
+        storage.getAlarmTriggerStorage().insertTriggers(event, Collections.singletonMap(userId, loadAlarms.get(userId)));
 
         return true;
     }
@@ -556,60 +562,26 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Loads all non user-specific data for multiple events, including attendees and attachments.
-     * <p/>
-     * No <i>userization</i> of the events is performed and no alarm data is fetched for a specific attendee, i.e. only the plain/vanilla
-     * event data is loaded from the storage.
-     *
-     * @param ids The identifiers of the event to load
-     * @return The event data
-     * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
-     */
-    protected List<Event> loadEventData(List<String> ids) throws OXException {
-        if (null == ids || 0 == ids.size()) {
-            return Collections.emptyList();
-        }
-        if (1 == ids.size()) {
-            return Collections.singletonList(loadEventData(ids.get(0)));
-        }
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        for (String id : ids) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, id));
-        }
-
-        List<Event> foundEvents = storage.getEventStorage().searchEvents(searchTerm, null, null);
-        foundEvents = storage.getUtilities().loadAdditionalEventData(-1, foundEvents, null);
-        List<Event> events = new ArrayList<Event>(ids.size());
-        for (String id : ids) {
-            Event event = find(foundEvents, id);
-            if (null == event) {
-                throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(id);
-            }
-            events.add(new UnmodifiableEvent(event));
-        }
-        return events;
-    }
-
-    /**
      * Loads all non user-specific data for a all exceptions of an event series, including attendees and attachments.
      * <p/>
      * No <i>userization</i> of the exception events is performed and no alarm data is fetched for a specific attendee, i.e. only the
      * plain/vanilla event data is loaded from the storage.
      *
-     * @param seriesId The identifier of the event series to load the exceptions from
-     * @return The event exception data
+     * @param seriesMaster The series master event to load the exceptions from
+     * @return The event exception data, or an empty list if there are none
      */
-    protected List<Event> loadExceptionData(String seriesId) throws OXException {
-        List<Event> exceptions = storage.getEventStorage().loadExceptions(seriesId, null);
-        if (0 < exceptions.size()) {
-            exceptions = storage.getUtilities().loadAdditionalEventData(-1, exceptions, null);
-            List<Event> unmodifiableExceptions = new ArrayList<Event>(exceptions.size());
-            for (Event exception : exceptions) {
-                unmodifiableExceptions.add(new UnmodifiableEvent(exception));
-            }
-            exceptions = unmodifiableExceptions;
+    protected List<Event> loadExceptionData(Event seriesMaster) throws OXException {
+        if (false == isSeriesMaster(seriesMaster) || isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
+            return Collections.emptyList();
         }
-        return exceptions;
+        List<Event> exceptions = storage.getEventStorage().loadExceptions(seriesMaster.getSeriesId(), null);
+        exceptions = storage.getUtilities().loadAdditionalEventData(-1, exceptions, null);
+        exceptions = injectRecurrenceData(exceptions, new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate()));
+        List<Event> unmodifiableExceptions = new ArrayList<Event>(exceptions.size());
+        for (Event exception : exceptions) {
+            unmodifiableExceptions.add(new UnmodifiableEvent(exception));
+        }
+        return unmodifiableExceptions;
     }
 
     /**
@@ -618,23 +590,25 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * No <i>userization</i> of the exception events is performed and no alarm data is fetched for a specific attendee, i.e. only the
      * plain/vanilla event data is loaded from the storage.
      *
-     * @param seriesId The identifier of the event series to load the exceptions from
+     * @param seriesMaster The series master event to load the exceptions from
      * @param recurrenceIds The recurrence identifiers of the exceptions to load
      * @return The event exception data
      * @throws OXException {@link CalendarExceptionCodes#EVENT_RECURRENCE_NOT_FOUND}
      */
-    protected List<Event> loadExceptionData(String seriesId, Collection<RecurrenceId> recurrenceIds) throws OXException {
-        List<Event> exceptions = new ArrayList<Event>();
+    protected List<Event> loadExceptionData(Event seriesMaster, Collection<RecurrenceId> recurrenceIds) throws OXException {
+        List<Event> changeExceptions = new ArrayList<Event>();
         if (null != recurrenceIds && 0 < recurrenceIds.size()) {
             for (RecurrenceId recurrenceId : recurrenceIds) {
-                Event exception = storage.getEventStorage().loadException(seriesId, recurrenceId, null);
+                Event exception = storage.getEventStorage().loadException(seriesMaster.getSeriesId(), recurrenceId, null);
                 if (null == exception) {
-                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesId, String.valueOf(recurrenceId));
+                    throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesMaster.getSeriesId(), String.valueOf(recurrenceId));
                 }
-                exceptions.add(exception);
+                changeExceptions.add(exception);
             }
         }
-        return storage.getUtilities().loadAdditionalEventData(-1, exceptions, null);
+        changeExceptions = storage.getUtilities().loadAdditionalEventData(-1, changeExceptions, null);
+        changeExceptions = injectRecurrenceData(changeExceptions, new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate()));
+        return changeExceptions;
     }
 
     /**
@@ -643,15 +617,15 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * No <i>userization</i> of the exception event is performed and no alarm data is fetched for a specific attendee, i.e. only the
      * plain/vanilla event data is loaded from the storage.
      *
-     * @param seriesId The identifier of the event series to load the exception from
+     * @param seriesMaster The series master event to load the exception from
      * @param recurrenceId The recurrence identifier of the exception to load
      * @return The event exception data
      * @throws OXException {@link CalendarExceptionCodes#EVENT_RECURRENCE_NOT_FOUND}
      */
-    protected Event loadExceptionData(String seriesId, RecurrenceId recurrenceId) throws OXException {
-        Event changeException = optExceptionData(seriesId, recurrenceId);
+    protected Event loadExceptionData(Event seriesMaster, RecurrenceId recurrenceId) throws OXException {
+        Event changeException = optExceptionData(seriesMaster, recurrenceId);
         if (null == changeException) {
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesId, recurrenceId);
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesMaster.getSeriesId(), recurrenceId);
         }
         return changeException;
     }
@@ -662,14 +636,15 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * No <i>userization</i> of the exception event is performed and no alarm data is fetched for a specific attendee, i.e. only the
      * plain/vanilla event data is loaded from the storage.
      *
-     * @param seriesId The identifier of the event series to load the exception from
+     * @param seriesMaster The series master event to load the exception from
      * @param recurrenceId The recurrence identifier of the exception to load
      * @return The event exception data, or <code>null</code> if not found
      */
-    protected Event optExceptionData(String seriesId, RecurrenceId recurrenceId) throws OXException {
-        Event changeException = storage.getEventStorage().loadException(seriesId, recurrenceId, null);
+    private Event optExceptionData(Event seriesMaster, RecurrenceId recurrenceId) throws OXException {
+        Event changeException = storage.getEventStorage().loadException(seriesMaster.getSeriesId(), recurrenceId, null);
         if (null != changeException) {
             changeException = storage.getUtilities().loadAdditionalEventData(-1, changeException, null);
+            changeException = injectRecurrenceData(changeException, new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate()));
         }
         return changeException;
     }

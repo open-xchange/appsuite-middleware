@@ -61,8 +61,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.ajax.requesthandler.cache.ResourceCache;
-import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -74,7 +72,6 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Contact;
@@ -84,9 +81,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.image.ImageDataSource;
-import com.openexchange.image.ImageLocation;
-import com.openexchange.java.util.Pair;
 import com.openexchange.pns.DefaultPushNotification;
 import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.PushNotification;
@@ -568,39 +562,8 @@ public class EventClient {
         final Event event = new Event("com/openexchange/groupware/contact/update", ht);
         triggerEvent(event);
 
-        if (oldContact.containsImage1() && newContact.containsImage1()) {
-            invalidateOldPictureResourceCache(oldContact);
-        }
-
         final EventObject eventObject = new EventObject(newContact, CHANGED, session);
         EventQueue.add(eventObject);
-    }
-
-    /**
-     * Invalidates any contact picture that might have been cached in the {@link ResourceCache}
-     *
-     * @param oldContact The old {@link Contact} information
-     * @throws OXException if an error is occurred
-     */
-    private void invalidateOldPictureResourceCache(Contact oldContact) throws OXException {
-        Pair<ImageDataSource, ImageLocation> prepareImageData = ContactUtil.prepareImageData(oldContact);
-        if (prepareImageData == null) {
-            return;
-        }
-        ImageDataSource first = prepareImageData.getFirst();
-        if (first == null) {
-            return;
-        }
-        if (!oldContact.containsImageLastModified() || oldContact.getImageLastModified() == null) {
-            return;
-        }
-        ResourceCache resourceCache = ResourceCaches.getResourceCache();
-        if (null == resourceCache) {
-            LOG.debug("Unable to access resource cache, unable to invalidate contact picture.");
-            return;
-        }
-        ImageLocation imageLocation = new ImageLocation.Builder().folder(oldContact.getParentFolderID()).timestamp(Long.toString(oldContact.getImageLastModified().getTime())).build();
-        resourceCache.removeAlikes(first.getETag(imageLocation, session), 0, contextId);
     }
 
     public void delete(final Contact contact) throws OXException, OXException {

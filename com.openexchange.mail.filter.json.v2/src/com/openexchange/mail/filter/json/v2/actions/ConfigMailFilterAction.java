@@ -103,7 +103,7 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        final Credentials credentials = new Credentials(session);
+        final Credentials credentials = getCredentials(session, requestData);
         final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         final Set<String> capabilities = mailFilterService.getCapabilities(credentials);
         final Blacklist blacklists = blacklistService.getBlacklists(credentials.getUserid(), credentials.getContextid());

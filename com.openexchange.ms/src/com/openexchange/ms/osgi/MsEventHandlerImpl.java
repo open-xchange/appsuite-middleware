@@ -88,7 +88,7 @@ public final class MsEventHandlerImpl implements EventHandler {
     private void handleForRemotePublication(final HzMsService msService, final Event event) {
         try {
             final String topicName = (String) event.getProperty(MsEventConstants.PROPERTY_TOPIC_NAME);
-            if (!Strings.isEmpty(topicName)) {
+            if (Strings.isNotEmpty(topicName)) {
                 final Map<String, Object> map = (Map<String, Object>) event.getProperty(MsEventConstants.PROPERTY_DATA_MAP);
                 if (null != map && !map.isEmpty()) {
                     final Topic<Map<String, Object>> msTopic = msService.getTopic(topicName);

@@ -66,18 +66,18 @@ public class FileTargetProxyTypeAnalyzer {
 
     public static TargetProxyType analyzeType(File file) {
         String mimeType = null;
-        if (false == Strings.isEmpty(file.getFileName())) {
+        if (Strings.isNotEmpty(file.getFileName())) {
             mimeType = MimeType2ExtMap.getContentType(file.getFileName(), null);
         }
         if (null == mimeType) {
             mimeType = file.getFileMIMEType();
         }
-        
-        //minimalistic distinction between images and other types 
+
+        //minimalistic distinction between images and other types
         if (null != mimeType && mimeType.startsWith("image")) {
             return KnownTargetProxyType.IMAGE;
         }
-        
+
         return KnownTargetProxyType.FILE;
     }
 }

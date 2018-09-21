@@ -119,7 +119,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
                 iterator.remove();
             }
         }
-        return new EventPostProcessor(session, storage, false).process(changeExceptions, folder).getEvents();
+        return new EventPostProcessor(session, storage).process(changeExceptions, folder).getEvents();
     }
 
 }

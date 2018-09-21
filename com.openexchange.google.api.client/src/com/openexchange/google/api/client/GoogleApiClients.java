@@ -149,7 +149,7 @@ public class GoogleApiClients {
      * @return The {@link OAuthAccount} with the (renewed) token
      * @throws OXException if an error is occurred
      */
-    private static OAuthAccount reacquireIfExpired(final Session session, final boolean reacquireIfExpired, OAuthAccount oauthAccount) throws OXException {
+    public static OAuthAccount reacquireIfExpired(final Session session, final boolean reacquireIfExpired, OAuthAccount oauthAccount) throws OXException {
         if (!reacquireIfExpired) {
             return oauthAccount;
         }

@@ -61,4 +61,9 @@ public interface ForcedReloadable extends Reloadable {
 
     // Marker interface
 
+    @Override
+    default Interests getInterests() {
+        // Doesn't care for forced reloadable
+        return null;
+    }
 }

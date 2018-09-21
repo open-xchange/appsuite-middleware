@@ -55,7 +55,6 @@ import static com.openexchange.chronos.common.CalendarUtils.calculateStart;
 import static com.openexchange.chronos.common.CalendarUtils.combine;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
@@ -65,9 +64,9 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceId;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceIds;
 import static com.openexchange.chronos.impl.Utils.asList;
+import static com.openexchange.chronos.impl.Utils.coversDifferentTimePeriod;
 import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
 import static com.openexchange.java.Autoboxing.b;
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -81,7 +80,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
-import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
@@ -99,6 +97,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.DeltaEvent;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -107,7 +106,6 @@ import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.DeltaEvent;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -149,11 +147,12 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param folder The folder the update operation is performed in
      * @param originalEvent The original event being updated
      * @param originalChangeExceptions The change exceptions of the original series event, or <code>null</code> if not applicable
+     * @param originalSeriesMasterEvent The original series master event when a change exception is updated, or <code>null</code> if not applicable
      * @param updatedEvent The updated event, as passed by the client
      * @param timestamp The timestamp to apply in the updated event data
      * @param ignoredFields Additional fields to ignore during the update
      */
-    public EventUpdateProcessor(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event updatedEvent, Date timestamp, EventField... ignoredFields) throws OXException {
+    public EventUpdateProcessor(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event originalSeriesMasterEvent, Event updatedEvent, Date timestamp, EventField... ignoredFields) throws OXException {
         super();
         this.session = session;
         this.folder = folder;
@@ -162,7 +161,7 @@ public class EventUpdateProcessor implements EventUpdate {
          * apply, check, adjust event update as needed
          */
         Event changedEvent = apply(originalEvent, updatedEvent, ignoredFields);
-        checkIntegrity(originalEvent, changedEvent);
+        checkIntegrity(originalEvent, changedEvent, originalSeriesMasterEvent);
         ensureConsistency(originalEvent, changedEvent, timestamp);
         List<Event> changedChangeExceptions = adjustExceptions(originalEvent, changedEvent, originalChangeExceptions);
         /*
@@ -330,25 +329,27 @@ public class EventUpdateProcessor implements EventUpdate {
         Consistency.setModified(session, timestamp, updatedEvent, session.getUserId());
     }
 
-    private void checkIntegrity(Event originalEvent, Event updatedEvent, EventField updatedField) throws OXException {
+    private void checkIntegrity(Event originalEvent, Event updatedEvent, EventField updatedField, Event originalSeriesMaster) throws OXException {
         switch (updatedField) {
             case GEO:
                 Check.geoLocationIsValid(updatedEvent);
                 break;
             case CLASSIFICATION:
-                /*
-                 * check validity
-                 */
-                Check.classificationIsValid(updatedEvent.getClassification(), folder, updatedEvent.getAttendees());
-                /*
-                 * deny update for change exceptions (but ignore if effectively same classification)
-                 */
-                //TODO: implement correct propagation of classification change to master and change exceptions;
-                //      requires to pass series information in event update processor of change exceptions
-                if (isSeriesException(originalEvent) || isSeriesMaster(originalEvent) && false == isNullOrEmpty(originalEvent.getChangeExceptionDates())) {
-                    if (isPublicClassification(originalEvent) == isPublicClassification(updatedEvent)) {
-                        updatedEvent.setClassification(originalEvent.getClassification());
-                    } else if (false == EventMapper.getInstance().get(EventField.CLASSIFICATION).equals(originalEvent, updatedEvent)) {
+                if (isPublicClassification(originalEvent) == isPublicClassification(updatedEvent)) {
+                    /*
+                     * reset to original value if classification matches
+                     */
+                    updatedEvent.setClassification(originalEvent.getClassification());
+                } else {
+                    /*
+                     * check validity based on folder / attendees
+                     */
+                    Check.classificationIsValid(updatedEvent.getClassification(), folder, updatedEvent.getAttendees());
+                    /*
+                     * deny different values for change exceptions
+                     */
+                    if (isSeriesException(originalEvent) && (null == originalSeriesMaster || 
+                        false == EventMapper.getInstance().get(EventField.CLASSIFICATION).equals(originalSeriesMaster, updatedEvent))) {
                         throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
                             String.valueOf(updatedEvent.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
                     }
@@ -408,10 +409,10 @@ public class EventUpdateProcessor implements EventUpdate {
         }
     }
 
-    private void checkIntegrity(Event originalEvent, Event updatedEvent) throws OXException {
+    private void checkIntegrity(Event originalEvent, Event updatedEvent, Event seriesMaster) throws OXException {
         EventField[] differentFields = EventMapper.getInstance().getDifferentFields(originalEvent, updatedEvent);
         for (EventField updatedField : differentFields) {
-            checkIntegrity(originalEvent, updatedEvent, updatedField);
+            checkIntegrity(originalEvent, updatedEvent, updatedField, seriesMaster);
         }
     }
 
@@ -590,11 +591,20 @@ public class EventUpdateProcessor implements EventUpdate {
          * apply common changes in 'basic' fields'
          */
         EventField[] basicFields = {
-            EventField.CLASSIFICATION, EventField.TRANSP, EventField.STATUS, EventField.CATEGORIES,
-            EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.COLOR, EventField.URL, EventField.GEO
+            EventField.TRANSP, EventField.STATUS, EventField.CATEGORIES, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION,
+            EventField.COLOR, EventField.URL, EventField.GEO
         };
         for (EventField field : basicFields) {
             propagateFieldUpdate(originalMaster, updatedMaster, field, changedChangeExceptions);
+        }
+        /*
+         * always take over a change in classification (to prevent different classification in event series)
+         */
+        Mapping<? extends Object, Event> classificationMapping = EventMapper.getInstance().get(EventField.CLASSIFICATION);
+        if (false == classificationMapping.equals(originalMaster, updatedMaster) && false == isNullOrEmpty(changedChangeExceptions)) {
+            for (Event changeException : changedChangeExceptions) {
+                classificationMapping.copy(updatedMaster, changeException);
+            }
         }
         /*
          * take over changes in start- and/or end-date based on calculated original timeslot
@@ -755,13 +765,13 @@ public class EventUpdateProcessor implements EventUpdate {
             /*
              * start date change, determine start- and end-time of first occurrence
              */
-            RecurrenceIterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(originalEvent, null, null);
+            RecurrenceIterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(originalEvent.getRecurrenceRule(), originalSeriesStart));
             if (iterator.hasNext()) {
-                originalSeriesStart = iterator.next().getStartDate();
+                originalSeriesStart = iterator.next().getValue();
             }
-            iterator = session.getRecurrenceService().iterateEventOccurrences(updatedEvent, null, null);
+            iterator = session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(updatedEvent.getRecurrenceRule(), updatedSeriesStart));
             if (iterator.hasNext()) {
-                updatedSeriesStart = iterator.next().getStartDate();
+                updatedSeriesStart = iterator.next().getValue();
             }
             /*
              * shift recurrence identifiers for delete- and change-exception collections in changed event by same offset
@@ -810,114 +820,10 @@ public class EventUpdateProcessor implements EventUpdate {
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.8">RFC 6638, section 3.2.8</a>
      */
     private boolean needsParticipationStatusReset(Event originalEvent, Event updatedEvent) throws OXException {
-        if (false == CalendarUtils.isOrganizer(originalEvent, calendarUser.getEntity())) {
-            /*
-             * only reset if event is modified by organizer
-             */
-            return false;
-        }
-        if (false == EventMapper.getInstance().get(EventField.RECURRENCE_RULE).equals(originalEvent, updatedEvent)) {
-            /*
-             * reset if there are 'new' occurrences (caused by a modified or extended rule)
-             */
-            if (hasFurtherOccurrences(originalEvent.getRecurrenceRule(), updatedEvent.getRecurrenceRule())) {
-                return true;
-            }
-        }
-        if (false == EventMapper.getInstance().get(EventField.DELETE_EXCEPTION_DATES).equals(originalEvent, updatedEvent)) {
-            /*
-             * reset if there are 'new' occurrences (caused by the reinstatement of previous delete exceptions)
-             */
-            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
-            if (false == exceptionDateUpdates.getRemovedItems().isEmpty()) {
-                return true;
-            }
-        }
-        if (false == EventMapper.getInstance().get(EventField.RECURRENCE_DATES).equals(originalEvent, updatedEvent)) {
-            /*
-             * reset if there are 'new' occurrences (caused by newly introduced recurrence dates)
-             */
-            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getRecurrenceDates(), updatedEvent.getRecurrenceDates());
-            if (false == exceptionDateUpdates.getAddedItems().isEmpty()) {
-                return true;
-            }
-        }
-        if (false == EventMapper.getInstance().get(EventField.START_DATE).equals(originalEvent, updatedEvent)) {
-            /*
-             * reset if updated start is before the original start
-             */
-            if (updatedEvent.getStartDate().before(originalEvent.getStartDate())) {
-                return true;
-            }
-        }
-        if (false == EventMapper.getInstance().get(EventField.END_DATE).equals(originalEvent, updatedEvent)) {
-            /*
-             * reset if updated end is after the original end
-             */
-            if (updatedEvent.getEndDate().after(originalEvent.getEndDate())) {
-                return true;
-            }
-        }
         /*
-         * no reset needed, otherwise
+         * reset participation status if change is performed by organizer, and a different time period will be occupied by the update
          */
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether an updated recurrence rule would produce further, additional occurrences compared to the original
-     * rule.
-     *
-     * @param originalRRule The original recurrence rule, or <code>null</code> if there was none
-     * @param updatedRRule The original recurrence rule, or <code>null</code> if there is none
-     * @return <code>true</code> if the updated rule yields further occurrences, <code>false</code>, otherwise
-     */
-    private static boolean hasFurtherOccurrences(String originalRRule, String updatedRRule) throws OXException {
-        if (null == originalRRule) {
-            return null != updatedRRule;
-        }
-        if (null == updatedRRule) {
-            return false;
-        }
-        RecurrenceRule originalRule = initRecurrenceRule(originalRRule);
-        RecurrenceRule updatedRule = initRecurrenceRule(updatedRRule);
-        /*
-         * check if only UNTIL was changed
-         */
-        RecurrenceRule checkedRule = initRecurrenceRule(updatedRule.toString());
-        checkedRule.setUntil(originalRule.getUntil());
-        if (checkedRule.toString().equals(originalRule.toString())) {
-            return 1 == CalendarUtils.compare(originalRule.getUntil(), updatedRule.getUntil(), null);
-        }
-        /*
-         * check if only COUNT was changed
-         */
-        checkedRule = initRecurrenceRule(updatedRule.toString());
-        if (null == originalRule.getCount()) {
-            checkedRule.setUntil(null);
-        } else {
-            checkedRule.setCount(i(originalRule.getCount()));
-        }
-        if (checkedRule.toString().equals(originalRule.toString())) {
-            int originalCount = null == originalRule.getCount() ? Integer.MAX_VALUE : i(originalRule.getCount());
-            int updatedCount = null == updatedRule.getCount() ? Integer.MAX_VALUE : i(updatedRule.getCount());
-            return updatedCount > originalCount;
-        }
-        /*
-         * check if only the INTERVAL was extended
-         */
-        checkedRule = initRecurrenceRule(updatedRule.toString());
-        checkedRule.setInterval(originalRule.getInterval());
-        if (checkedRule.toString().equals(originalRule.toString())) {
-            return 0 != updatedRule.getInterval() % originalRule.getInterval();
-        }
-
-        /*
-         * check if each BY... part is equally or more restrictive
-         */
-        //TODO
-
-        return true;
+        return CalendarUtils.isOrganizer(originalEvent, calendarUser.getEntity()) && coversDifferentTimePeriod(originalEvent, updatedEvent);
     }
 
 }

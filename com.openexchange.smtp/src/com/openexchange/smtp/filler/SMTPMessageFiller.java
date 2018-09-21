@@ -122,7 +122,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
         setMessageHeaders(mail, smtpMessage);
         if (!mail.containsFrom() || mail.getFrom().length == 0) {
             String envelopeFrom = compositionParameters.getEnvelopeFrom();
-            if (!Strings.isEmpty(envelopeFrom)) {
+            if (Strings.isNotEmpty(envelopeFrom)) {
                 try {
                     smtpMessage.setFrom(new QuotedInternetAddress(envelopeFrom));
                 } catch (MessagingException e) {

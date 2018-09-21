@@ -158,7 +158,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
     }
 
     private static void setupFeedbackQueries(final APNDriveEventPublisher publisher, String feedbackQueryInterval) throws OXException {
-        if (false == Strings.isEmpty(feedbackQueryInterval)) {
+        if (Strings.isNotEmpty(feedbackQueryInterval)) {
             long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval);
             if (60 * 1000 <= interval) {
                 Services.getService(TimerService.class, true).scheduleWithFixedDelay(new Runnable() {

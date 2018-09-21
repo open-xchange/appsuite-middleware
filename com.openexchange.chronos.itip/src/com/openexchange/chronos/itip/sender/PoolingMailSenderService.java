@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.sender;
 
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.EventNotificationPoolService;
@@ -72,17 +73,22 @@ public class PoolingMailSenderService implements MailSenderService {
     }
 
     @Override
-    public void sendMail(NotificationMail mail, Session session, CalendarUser principal) throws OXException {
+    public void sendMail(NotificationMail mail, Session session, CalendarUser principal, String comment) throws OXException {
         if (!mail.shouldBeSent()) {
             return;
         }
         try {
-
             // Pool messages if this is a create mail or a modify mail
             // Dump messages if the appointment is deleted
             if (isDeleteMail(mail)) {
                 pool.drop(mail.getEvent(), session);
-                delegate.sendMail(mail, session, principal);
+                delegate.sendMail(mail, session, principal, comment);
+                return;
+            }
+
+            // Direct send reply messages to external organizers.
+            if (mail.isAboutActorsStateChangeOnly() && !CalendarUtils.isInternal(mail.getOriginal().getOrganizer(), CalendarUserType.INDIVIDUAL)) {
+                poolAwareDirectSend(mail, session, principal);
                 return;
             }
 
@@ -91,7 +97,7 @@ public class PoolingMailSenderService implements MailSenderService {
                 if (mail.getSharedCalendarOwner() != null) {
                     sharedFolderOwner = mail.getSharedCalendarOwner().getIdentifier();
                 }
-                pool.enqueue(mail.getOriginal(), mail.getEvent(), session, sharedFolderOwner, principal);
+                pool.enqueue(mail.getOriginal(), mail.getEvent(), session, sharedFolderOwner, principal, comment);
                 return;
             }
 
@@ -102,10 +108,10 @@ public class PoolingMailSenderService implements MailSenderService {
                     app = mail.getEvent();
                 }
                 pool.fasttrack(app, session);
-                delegate.sendMail(mail, session, principal);
+                delegate.sendMail(mail, session, principal, comment);
                 return;
             }
-            poolAwareDirectSend(mail, session, principal);
+            poolAwareDirectSend(mail, session, principal, comment);
             //delegate.sendMail(mail, session);
 
         } catch (OXException x) {
@@ -120,9 +126,9 @@ public class PoolingMailSenderService implements MailSenderService {
      * @param session The {@link Session}
      * @throws OXException In case sending fails
      */
-    private void poolAwareDirectSend(NotificationMail mail, Session session, CalendarUser principal) throws OXException {
+    private void poolAwareDirectSend(NotificationMail mail, Session session, CalendarUser principal, String comment) throws OXException {
         pool.aware(mail.getEvent(), mail.getRecipient(), session);
-        delegate.sendMail(mail, session, principal);
+        delegate.sendMail(mail, session, principal, comment);
     }
 
     private boolean isStateChange(NotificationMail mail) {

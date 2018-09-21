@@ -136,7 +136,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
     }
 
     @Override
-    public void enqueue(Event original, Event update, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException {
+    public void enqueue(Event original, Event update, Session session, int sharedFolderOwner, CalendarUser principal, String comment) throws OXException {
         if (null == original || null == update || null == session) {
             throw new NullPointerException("Please specify an original event, a new event and a session");
         }
@@ -147,7 +147,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
         try {
             lock.lock();
-            item(I(session.getContextId()), original.getId()).remember(original, update, session, sharedFolderOwner, principal);
+            item(I(session.getContextId()), original.getId()).remember(original, update, session, sharedFolderOwner, principal, comment);
         } finally {
             lock.unlock();
         }
@@ -343,6 +343,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
         private long         lastKnownStartDateForNextOccurrence;
         private Session      session;
         private CalendarUser principal;
+        private String comment;
 
         private final LinkedList<Update> updates = new LinkedList<Update>();
 
@@ -354,8 +355,9 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             super();
         }
 
-        public void remember(Event original, Event newEvent, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException {
+        public void remember(Event original, Event newEvent, Session session, int sharedFolderOwner, CalendarUser principal, String comment) throws OXException {
             this.principal = principal;
+            this.comment = comment;
             if (this.original == null) {
                 this.original = original;
                 this.session = session;
@@ -432,7 +434,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session, principal);
+                    notificationMailer.sendMail(mail, session, principal, comment);
                 }
             }
         }
@@ -452,7 +454,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
                     if (mail != null && mail.getStateType() != State.Type.NEW) {
-                        notificationMailer.sendMail(mail, session, principal);
+                        notificationMailer.sendMail(mail, session, principal, comment);
                     }
                 }
             }
@@ -529,7 +531,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                     }
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
                     if (mail != null && mail.getStateType() != State.Type.NEW) {
-                        notificationMailer.sendMail(mail, session, principal);
+                        notificationMailer.sendMail(mail, session, principal, comment);
                     }
                 }
             }
@@ -566,7 +568,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session, principal);
+                    notificationMailer.sendMail(mail, session, principal, comment);
                 }
             }
         }
@@ -583,7 +585,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session, principal);
+                    notificationMailer.sendMail(mail, session, principal, comment);
                 }
             }
         }
@@ -600,7 +602,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 }
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
                 if (mail != null && mail.getStateType() != State.Type.NEW) {
-                    notificationMailer.sendMail(mail, session, principal);
+                    notificationMailer.sendMail(mail, session, principal, comment);
                 }
             }
         }

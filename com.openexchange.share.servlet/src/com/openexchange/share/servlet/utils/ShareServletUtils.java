@@ -213,7 +213,7 @@ public final class ShareServletUtils {
      * @return The login
      */
     private static String getLogin(GuestInfo guest) {
-        if (false == Strings.isEmpty(guest.getEmailAddress())) {
+        if (Strings.isNotEmpty(guest.getEmailAddress())) {
             return guest.getEmailAddress();
         }
         TranslatorFactory factory = ShareServiceLookup.getService(TranslatorFactory.class);

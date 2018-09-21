@@ -72,24 +72,18 @@ public final class Constants {
     }
 
     private static final ObjectName initReportingName() {
-        ObjectName retval = null;
-        try {
-            retval = new ObjectName("com.openexchange.reporting", "name", "Reporting");
-        } catch (MalformedObjectNameException e) {
-            LOG.error("", e);
-        } catch (NullPointerException e) {
-            LOG.error("", e);
-        }
-        return retval;
+        return getObjectName("Reporting");
     }
 
     private static final ObjectName initOxtenderMonitorName() {
+        return getObjectName("Login Counter");
+    }
+
+    private static ObjectName getObjectName(String name) {
         ObjectName retval = null;
         try {
-            retval = new ObjectName("com.openexchange.reporting", "name", "Login Counter");
-        } catch (MalformedObjectNameException e) {
-            LOG.error("", e);
-        } catch (NullPointerException e) {
+            retval = new ObjectName("com.openexchange.reporting", "name", name);
+        } catch (MalformedObjectNameException | NullPointerException e) {
             LOG.error("", e);
         }
         return retval;

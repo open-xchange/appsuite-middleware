@@ -290,7 +290,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         ComposedConfigProperty<String> property = view.property(propertyName, String.class);
         if (null == property || !property.isDefined()) {
             if (generateIfAbsent) {
-                return OnboardingUtility.constructURLWithParameters(hostData, null, "/carddav", false, null).toString();
+                return OnboardingUtility.constructURLWithParameters(hostData, null, "/carddav", null).toString();
             }
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
@@ -298,7 +298,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         String value = property.get();
         if (Strings.isEmpty(value)) {
             if (generateIfAbsent) {
-                return OnboardingUtility.constructURLWithParameters(hostData, null, "/carddav", false, null).toString();
+                return OnboardingUtility.constructURLWithParameters(hostData, null, "/carddav", null).toString();
             }
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }

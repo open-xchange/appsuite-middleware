@@ -51,6 +51,7 @@ package com.openexchange.groupware.contact;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import java.util.Locale;
 import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
@@ -86,7 +87,7 @@ public class Bug53690Test {
         contact.setYomiLastName("YomiLastName");
         contact.setSurName("SurName");
         contact.setGivenName("GivenName");
-        assertFalse("No sort name", Strings.isEmpty(contact.getSortName()));
-        assertTrue("Yomi names not first", contact.getSortName().startsWith("YomiLastName_YomiFirstName"));
+        assertFalse("No sort name", Strings.isEmpty(contact.getSortName(Locale.JAPANESE)));
+        assertTrue("Yomi names not first", contact.getSortName(Locale.JAPANESE).startsWith("YomiLastName_YomiFirstName"));
     }
 }

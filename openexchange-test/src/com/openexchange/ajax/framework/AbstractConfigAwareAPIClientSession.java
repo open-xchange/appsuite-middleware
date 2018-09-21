@@ -147,12 +147,12 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
     /**
      * Retrieves the scope to use for the configurations.
      *
-     * Can be overwritten by child implementations to change the scope of the configurations. Defaults to "server".
+     * Can be overwritten by child implementations to change the scope of the configurations. Defaults to "user".
      *
      * @return The scope for the configuration.
      */
     protected String getScope() {
-        return "server";
+        return "user";
     }
 
     /**

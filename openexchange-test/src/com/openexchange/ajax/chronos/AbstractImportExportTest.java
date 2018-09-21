@@ -122,7 +122,7 @@ public class AbstractImportExportTest extends AbstractChronosTest {
 
     protected void createContactWithBirthdayEvent(String session) throws Exception {
         if (Strings.isEmpty(contactsFolder)) {
-            contactsFolder = getDefaultContactFolder(session);
+            contactsFolder = getDefaultContactFolder();
         }
         rememberContact(contactsApi.createContact(session, createContactData()).getData().getId());
     }

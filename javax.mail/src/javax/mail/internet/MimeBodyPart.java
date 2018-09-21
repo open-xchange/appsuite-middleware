@@ -1447,6 +1447,8 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 	    return null;
 
 	s = s.trim();	// get rid of trailing spaces
+    if (s.length() == 0)
+        return null;
 	// quick check for known values to avoid unnecessary use
 	// of tokenizer.
 	if (s.equalsIgnoreCase("7bit") || s.equalsIgnoreCase("8bit") ||

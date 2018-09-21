@@ -64,13 +64,17 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.arrays.Collections;
 
 /**
@@ -460,7 +464,8 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
                 while (resultSet.next()) {
-                    Collections.put(attendeesByEventId, resultSet.getString(1), readAttendee(resultSet, mappedFields));
+                    String eventId = resultSet.getString(1);
+                    Collections.put(attendeesByEventId, eventId, readAttendee(eventId, resultSet, mappedFields));
                 }
             }
         }
@@ -500,9 +505,25 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         return statusByEventId;
     }
 
-    private Attendee readAttendee(ResultSet resultSet, AttendeeField[] fields) throws SQLException, OXException {
+    private Attendee readAttendee(String eventId, ResultSet resultSet, AttendeeField[] fields) throws SQLException, OXException {
         Attendee attendee = MAPPER.fromResultSet(resultSet, fields);
-        return entityProcessor.adjustAfterLoad(attendee);
+        try {
+            return entityProcessor.adjustAfterLoad(attendee);
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e) && isInternal(attendee) && Strings.isNotEmpty(attendee.getUri())) {
+                /*
+                 * try to recover by removing the stored URI & assign the default URI for this internal entity
+                 */
+                Attendee fallback = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                fallback.removeUri();
+                fallback = entityProcessor.adjustAfterLoad(fallback);
+                String message = "Invalid stored calendar user address \"" + attendee.getUri() + "\" for entity " + 
+                    attendee.getEntity() + ", falling back to default address \"" + fallback.getUri() + "\"";
+                addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, message, e);
+                return fallback;
+            } 
+            throw e;
+        }
     }
 
 }

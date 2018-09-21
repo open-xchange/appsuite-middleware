@@ -61,6 +61,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
@@ -130,6 +131,13 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         final Event original = util.resolveUid(uid, session);
         if (original == null) {
             analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT, locale));
+            return analysis;
+        }
+
+        if (false == CalendarUtils.isOrganizer(original, user.getId()) && false == util.isActingOnBehalfOf(original, session.getSession())) {
+            // Event is known, but the current user isn't the organizer neither did he organize it on behalf of
+            analysis.recommendAction(ITipAction.IGNORE);
+            analysis.addAnnotation(new ITipAnnotation(Messages.NO_PERMISSION, locale));
             return analysis;
         }
 
@@ -243,8 +251,11 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     private boolean containsPartyCrasher(ITipAnalysis analysis) throws OXException {
-        for (ITipChange change : analysis.getChanges()) {
-            if (false == change.getDiff().getAttendeeUpdates().getAddedItems().isEmpty()) {
+        for (ITipChange change : analysis.getChanges()) { 
+            if (null != change.getDiff() 
+                && null != change.getDiff().getAttendeeUpdates() 
+                && null != change.getDiff().getAttendeeUpdates().getAddedItems() 
+                && false == change.getDiff().getAttendeeUpdates().getAddedItems().isEmpty()) {
                 return true;
             }
         }
@@ -252,7 +263,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
     }
 
     private Attendee getReply(Event update) throws OXException {
-        if (update.getAttendees().size() != 1) {
+        if (null == update.getAttendees() || update.getAttendees().size() != 1) {
             // Not RFC conform
             throw ITipExceptions.NOT_CONFORM.create();
         }

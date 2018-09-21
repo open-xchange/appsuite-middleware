@@ -49,11 +49,7 @@
 
 package com.openexchange.pns.transport.apns_http2.osgi;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
@@ -67,8 +63,6 @@ import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushExceptionCodes;
@@ -144,10 +138,6 @@ public class ApnsHttp2PushNotificationTransportActivator extends HousekeepingAct
                 ApnsHttp2PushNotificationTransport.invalidateEnabledCache();
             }
 
-            @Override
-            public Interests getInterests() {
-                return null;
-            }
         });
 
         registerService(Reloadable.class, this);
@@ -321,24 +311,7 @@ public class ApnsHttp2PushNotificationTransportActivator extends HousekeepingAct
     }
 
     private ApnsHttp2Options createOptions(String clientId, String privateKey, String keyId, String teamId, boolean production, String topic) throws Exception{
-        StringBuilder sPrivateKey = null;
-        {
-            InputStream resourceStream = null;
-            BufferedReader reader = null;
-            try {
-                resourceStream = new FileInputStream(new File(privateKey));
-                reader = new BufferedReader(new InputStreamReader(resourceStream, Charsets.ISO_8859_1));
-                sPrivateKey = new StringBuilder(2048);
-                for (String line; (line = reader.readLine()) != null;) {
-                    if (!line.startsWith("-----BEGIN") && !line.startsWith("-----END")) {
-                        sPrivateKey.append(line).append('\n');
-                    }
-                }
-            } finally {
-                Streams.close(resourceStream);
-            }
-        }
-        return new ApnsHttp2Options(clientId, sPrivateKey.toString(), keyId, teamId, production, topic);
+        return new ApnsHttp2Options(clientId, new File(privateKey), keyId, teamId, production, topic);
     }
 
 }

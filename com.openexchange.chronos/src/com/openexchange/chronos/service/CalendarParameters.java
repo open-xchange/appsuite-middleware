@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
-import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 
@@ -64,15 +63,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
  * @since v7.10.0
  */
 public interface CalendarParameters {
-
-    /**
-     * {@link Boolean}
-     * <p/>
-     * Indicates whether "private" events of the calendar owner, i.e. events whose classification is {@link Classification#CONFIDENTIAL}
-     * should be excluded when fetching events from a shared folder or not. If included, such events are <i>anonymized</i> by stripping
-     * away all information except start date, end date and recurrence information.
-     */
-    static final String PARAMETER_SKIP_CLASSIFIED = "skipClassified";
 
     /**
      * {@link Boolean}
@@ -282,6 +272,14 @@ public interface CalendarParameters {
      * <p/>
      */
     static final String PARAMETER_SUPPRESS_ITIP = "itip.suppress";
+
+    /**
+     * {@link String}
+     * <p/>
+     * A comment set by the user when updating/deleting events.
+     * <p/>
+     */
+    static final String PARAMETER_COMMENT = "comment";
 
     /**
      * Sets a parameter.

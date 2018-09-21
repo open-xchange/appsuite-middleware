@@ -5,8 +5,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.android.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.guava"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.clevertap.apns.apns_http2"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.annotation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.authentication.driver.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
@@ -50,6 +48,10 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.configuration.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contactcollector"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contactcollector.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.datasource"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.picture"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.picture.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.picture.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.storage.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.similarity"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.vcard.impl"/>
@@ -101,6 +103,9 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.configuration"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.hazelcast.serialization"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.health"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.health.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.health.rest"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.client.json"/>
@@ -187,6 +192,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.appsuite"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.appsuite.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.reseller"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rest.services"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rdiff"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rmi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret"/>
@@ -243,6 +249,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.websockets.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.squareup.okhttp3"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.turo.pushy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,de.l3s.boilerpipe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,documentation-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,documentation-tools"/>

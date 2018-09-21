@@ -99,6 +99,15 @@ public interface AlarmTriggerStorage {
     void deleteTriggers(List<String> eventIds) throws OXException;
 
     /**
+     * Removes the triggers for the given alarm ids
+     *
+     * @param alarmIds The alarm ids
+     * @throws OXException
+     */
+    void deleteTriggersById(List<Integer> alarmIds) throws OXException;
+
+
+    /**
      * Deletes any existing triggers of a specific user for multiple events.
      *
      * @param eventIds The identifiers of the events to delete the triggers for

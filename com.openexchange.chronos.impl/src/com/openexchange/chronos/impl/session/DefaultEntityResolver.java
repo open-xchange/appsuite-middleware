@@ -56,6 +56,8 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.i2I;
+import java.sql.Connection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -88,7 +90,10 @@ import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.arrays.Arrays;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -284,8 +289,17 @@ public class DefaultEntityResolver implements EntityResolver {
         /*
          * do the same with a proxy calendar user in "sent-by"
          */
-        if(attendee.getSentBy() != null){
-            applyEntityData(attendee.getSentBy(), CalendarUserType.INDIVIDUAL);
+        if (null != attendee.getSentBy()) {
+            try {
+                applyEntityData(attendee.getSentBy(), CalendarUserType.INDIVIDUAL);
+            } catch (OXException e) {
+                if (CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e)) {
+                    LOG.debug("Ignoring invalid proxy {} for SENT-BY property of {}.", attendee.getSentBy(), attendee, e);
+                    attendee.setSentBy(null);
+                } else {
+                    throw e;
+                }
+            }
         }
         return attendee;
     }
@@ -489,6 +503,7 @@ public class DefaultEntityResolver implements EntityResolver {
         return resource;
     }
 
+
     /**
      * Gets a folder by its identifier.
      *
@@ -496,10 +511,21 @@ public class DefaultEntityResolver implements EntityResolver {
      * @return The folder
      */
     public FolderObject getFolder(int id) throws OXException {
+        return getFolder(id, null);
+    }
+
+    /**
+     * Gets a folder by its identifier.
+     *
+     * @param id The identifier of the folder to get
+     * @param optConnection An optional connection to the database to use, or <code>null</code> to acquire one dynamically
+     * @return The folder
+     */
+    public FolderObject getFolder(int id, Connection optConnection) throws OXException {
         Integer iD = I(id);
         FolderObject folder = knownFolders.get(iD);
         if (null == folder) {
-            folder = loadFolder(iD);
+            folder = loadFolder(iD, optConnection);
             knownFolders.put(iD, folder);
         }
         return folder;
@@ -522,6 +548,24 @@ public class DefaultEntityResolver implements EntityResolver {
         }
     }
 
+    /**
+     * Gets all visible calendar folders for a specific user.
+     *
+     * @param userId The identifier of the user to get the visible folders for
+     * @param optConnection An optional connection to the database to use, or <code>null</code> to acquire one dynamically
+     * @return The folders, or an empty list if there are none
+     */
+    public List<FolderObject> getVisibleFolders(int userId, Connection optConnection) throws OXException {
+        List<FolderObject> folders = loadVisibleFolders(userId, optConnection);
+        if (null == folders) {
+            return Collections.emptyList();
+        }
+        for (FolderObject folder : folders) {
+            knownFolders.put(I(folder.getObjectID()), folder);
+        }
+        return folders;
+    }
+
     private Attendee applyEntityData(Attendee attendee, User user, AttendeeField... fields) throws OXException {
         if (null == fields || Arrays.contains(fields, AttendeeField.ENTITY)) {
             attendee.setEntity(user.getId());
@@ -538,12 +582,15 @@ public class DefaultEntityResolver implements EntityResolver {
             } else {
                 ResourceId resourceId;
                 try {
-                    resourceId = resolve(attendee.getUri());
+                    resourceId = resolve(attendee.getUri(), true, user.getId());
                 } catch (OXException e) {
+                    LOG.debug("Error applying data from user {} for attendee {}", I(user.getId()), attendee, e);
                     throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, attendee.getUri(), I(user.getId()), CalendarUserType.INDIVIDUAL);
                 }
                 if (null == resourceId || resourceId.getEntity() != user.getId()) {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), I(user.getId()), CalendarUserType.INDIVIDUAL);
+                    OXException e = CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), I(user.getId()), CalendarUserType.INDIVIDUAL);
+                    LOG.debug("Unable to apply data from mismatching user {} for attendee {}", I(user.getId()), attendee, e);
+                    throw e;
                 }
                 attendee.setUri(attendee.getUri());
             }
@@ -670,11 +717,25 @@ public class DefaultEntityResolver implements EntityResolver {
         return type;
     }
 
+    /**
+     * Resolves a calendar user address URI to its corresponding resource identifier.
+     * 
+     * @param uri The URI to resolve
+     * @return The resolved resource identifier, or <code>null</code> if not found
+     */
     private ResourceId resolve(String uri) throws OXException {
-        return resolve(uri, true);
+        return resolve(uri, true, -1);
     }
 
-    private ResourceId resolve(String uri, boolean considerAliases) throws OXException {
+    /**
+     * Resolves a calendar user address URI to its corresponding resource identifier.
+     * 
+     * @param uri The URI to resolve
+     * @param considerAliases <code>true</code> to consider user aliases when resolving <code>mailto:</code>-URIs, <code>false</code>, otherwise
+     * @param entity The identifier of the entity to match, or <code>-1</code> if not known
+     * @return The resolved resource identifier, or <code>null</code> if not found
+     */
+    private ResourceId resolve(String uri, boolean considerAliases, int entity) throws OXException {
         if (Strings.isEmpty(uri)) {
             return null;
         }
@@ -683,12 +744,19 @@ public class DefaultEntityResolver implements EntityResolver {
          */
         ResourceId resourceId = ResourceId.parse(uri);
         if (null != resourceId) {
-            return resourceId;
+            return -1 == entity || entity == resourceId.getEntity() ? resourceId : null;
         }
         /*
          * try lookup by e-mail address, otherwise
          */
         String mail = extractEMailAddress(uri);
+        if (-1 != entity) {
+            User user = optUser(entity);
+            if (null != user && (mail.equals(getEMail(user)) || considerAliases && UserAliasUtility.isAlias(mail, user.getAliases()))) {
+                return new ResourceId(context.getContextId(), user.getId(), CalendarUserType.INDIVIDUAL);
+            }
+            return null;
+        }
         for (User knownUser : knownUsers.values()) {
             if (mail.equals(getEMail(knownUser)) || considerAliases && UserAliasUtility.isAlias(mail, knownUser.getAliases())) {
                 return new ResourceId(context.getContextId(), knownUser.getId(), CalendarUserType.INDIVIDUAL);
@@ -760,14 +828,25 @@ public class DefaultEntityResolver implements EntityResolver {
         }
     }
 
-    private FolderObject loadFolder(int id) throws OXException {
+    private FolderObject loadFolder(int id, Connection optConnection) throws OXException {
         try {
-            return new OXFolderAccess(context).getFolderObject(id);
+            return new OXFolderAccess(optConnection, context).getFolderObject(id);
         } catch (OXException e) {
             if ("FLD-0008".equals(e.getErrorCode())) {
                 throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(e, String.valueOf(id));
             }
             throw e;
+        }
+    }
+
+    private List<FolderObject> loadVisibleFolders(int userId, Connection optConnection) throws OXException {
+        SearchIterator<FolderObject> iterator = null;
+        try {
+            iterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                userId, getUser(userId).getGroups(), null, FolderObject.CALENDAR, context, optConnection);
+            return SearchIterators.asList(iterator);
+        } finally {
+            SearchIterators.close(iterator);
         }
     }
 

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange MS Live Subscribe Bundle
 Bundle-SymbolicName: com.openexchange.subscribe.mslive
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -31,6 +31,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.subscribe,
+ com.openexchange.subscribe.oauth,
  org.apache.commons.httpclient,
  org.apache.commons.httpclient.cookie,
  org.apache.commons.httpclient.methods,

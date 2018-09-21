@@ -103,10 +103,10 @@ public final class TikaImageRewritingContentHandler extends ContentHandlerDecora
                 if (src.startsWith(EMBEDDED_PREFIX)) {
                     final String resourceName = src.substring(EMBEDDED_PREFIX.length());
                     try {
-                        final ManagedFile managedFile = fileManagement.createManagedFile(fileManagement.newTempFile());
+                        final ManagedFile managedFile = fileManagement.createManagedFile(fileManagement.newTempFile(), -1, true);
                         managedFile.setContentType("image/*");
                         documentHandler.extractedFiles.put(resourceName, managedFile);
-                        attrs.setValue(i, managedFile.constructURL(documentHandler.session));
+                        attrs.setValue(i, managedFile.constructURL(documentHandler.session, false));
                     } catch (final OXException e) {
                         throw new SAXException("Couldn't create image file.", e);
                     }

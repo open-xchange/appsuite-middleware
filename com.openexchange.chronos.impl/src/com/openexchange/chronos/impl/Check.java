@@ -53,10 +53,12 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.CalendarUserType;
@@ -332,6 +334,38 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
+     * Checks that all attachments referenced by the supplied attachment collection are visible for the current session owner.
+     * 
+     * @param session The calendar session
+     * @param storage The calendar storage
+     * @param attachments The attachments to check
+     * @return The passed attachments, after each one was checked successfully
+     * @throws OXException {@link CalendarExceptionCodes#ATTACHMENT_NOT_FOUND}
+     */
+    public static List<Attachment> attachmentsAreVisible(CalendarSession session, CalendarStorage storage, List<Attachment> attachments) throws OXException {
+        if (null != attachments) {
+            for (Attachment attachment : attachments) {
+                if (0 < attachment.getManagedId()) {
+                    Event event = null;
+                    try {
+                        String eventId = storage.getAttachmentStorage().resolveAttachmentId(attachment.getManagedId());
+                        if (null != eventId) {
+                            event = new ResolvePerformer(session, storage).resolveById(eventId);
+
+                        }
+                    } catch (OXException e) {
+                        throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(e, I(attachment.getManagedId()), null, null);
+                    }
+                    if (null == event || null == CalendarUtils.findAttachment(event.getAttachments(), attachment.getManagedId())) {
+                        throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(I(attachment.getManagedId()), null, null);
+                    }
+                }
+            }
+        }
+        return attachments;
+    }
+
+    /**
      * Checks that a particular attendee exists in an event.
      *
      * @param event The event to check
@@ -449,7 +483,7 @@ public class Check extends com.openexchange.chronos.common.Check {
      */
     public static RecurrenceId recurrenceRangeMatches(RecurrenceId recurrenceId, RecurrenceRange expectedRange) throws OXException {
         if (null == expectedRange && null != recurrenceId.getRange() || null != expectedRange && false == expectedRange.equals(recurrenceId.getRange())) {
-            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new Exception("Expected range " + expectedRange), recurrenceId.getValue(), "");
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new Exception("Expected range " + expectedRange), recurrenceId.getValue(), null);
         }
         return recurrenceId;
     }

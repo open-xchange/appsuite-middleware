@@ -382,7 +382,7 @@ public class ICalHandler extends HttpAuthShareHandler {
         ICalEmitter iCalEmitter = services.getService(ICalEmitter.class);
         ICalSession iCalSession = iCalEmitter.createSession();
         String name = extractName(share, target);
-        if (false == Strings.isEmpty(name)) {
+        if (Strings.isNotEmpty(name)) {
             iCalSession.setName(name);
         }
         /*

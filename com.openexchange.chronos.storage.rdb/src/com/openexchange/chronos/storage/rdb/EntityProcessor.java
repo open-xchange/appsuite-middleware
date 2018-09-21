@@ -78,6 +78,7 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link EntityProcessor}
@@ -154,9 +155,17 @@ public class EntityProcessor {
     public Attendee adjustPriorInsert(Attendee attendee, Set<Integer> usedEntities) throws OXException {
         if (isInternal(attendee)) {
             usedEntities.add(I(attendee.getEntity()));
+            /*
+             * remove redundant properties for non-individual internal attendees 
+             */
+            if (CalendarUserType.GROUP.equals(attendee.getCuType()) || CalendarUserType.RESOURCE.equals(attendee.getCuType()) || 
+                CalendarUserType.ROOM.equals(attendee.getCuType())) {
+                AttendeeField[] preservedFields = Arrays.remove(AttendeeField.values(), AttendeeField.CN, AttendeeField.COMMENT);
+                attendee = com.openexchange.chronos.common.mapping.AttendeeMapper.getInstance().copy(attendee, null, preservedFields);
+            }
             return attendee;
         }
-        Attendee savedAttendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+        Attendee savedAttendee = com.openexchange.chronos.common.mapping.AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
         savedAttendee.setEntity(determineEntity(attendee, usedEntities));
         return savedAttendee;
     }

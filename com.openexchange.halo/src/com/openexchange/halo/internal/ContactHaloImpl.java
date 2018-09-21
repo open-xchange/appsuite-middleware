@@ -70,6 +70,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ParsedDisplayName;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -82,7 +83,6 @@ import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactImageSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.halo.HaloExceptionCodes;
-import com.openexchange.halo.Picture;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
@@ -134,21 +134,18 @@ public class ContactHaloImpl implements ContactHalo {
     }
 
     @Override
-    public Picture getPicture(Contact contact, ServerSession session) throws OXException {
+    public ContactPicture getPicture(Contact contact, ServerSession session) throws OXException {
         HaloContactQuery contactQuery = buildQuery(contact, session, true);
 
         for (HaloContactImageSource source : imageSources) {
             if (!source.isAvailable(session)) {
                 continue;
             }
-            Picture picture = source.getPicture(contactQuery, session);
+            ContactPicture picture = source.getPicture(contactQuery, session);
             if (picture != null){
                 StringBuilder etagBuilder = new StringBuilder();
-                etagBuilder.append(source.getClass().getName()).append("://").append(picture.getEtag());
-
-                picture.setEtag(etagBuilder.toString());
-
-                return picture;
+                etagBuilder.append(source.getClass().getName()).append("://").append(picture.getETag());
+                return new ContactPicture(etagBuilder.toString(), picture.getFileHolder(), picture.getLastModified());
             }
         }
         return null;
@@ -259,7 +256,7 @@ public class ContactHaloImpl implements ContactHalo {
             // Load the associated contact
             resultContact = contactService.getUser(session, user.getId(), fields);
             contactsToMerge.add(resultContact);
-        } else if (false == Strings.isEmpty(resultContact.getEmail1())){
+        } else if (Strings.isNotEmpty(resultContact.getEmail1())) {
             // Try to find a contact
             ContactSearchObject contactSearch = new ContactSearchObject();
             String email = resultContact.getEmail1();
@@ -299,7 +296,7 @@ public class ContactHaloImpl implements ContactHalo {
          * try to decompose display name if no other "name" properties are already set and the contact is "new"
          */
         if (false == resultContact.containsObjectID() &&
-            resultContact.containsDisplayName() && false == Strings.isEmpty(resultContact.getDisplayName()) &&
+            resultContact.containsDisplayName() && Strings.isNotEmpty(resultContact.getDisplayName()) &&
             false == resultContact.containsGivenName() && false == resultContact.containsSurName() &&
             false == resultContact.containsNickname() && false == resultContact.containsCompany()) {
             new ParsedDisplayName(resultContact.getDisplayName()).applyTo(resultContact);

@@ -71,21 +71,23 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     static final Logger LOG = LoggerFactory.getLogger(ReentrantLockPool.class);
 
-    private final int maxIdle;
-    private final long maxIdleTime;
-    private final int maxActive;
-    private final long maxWait;
-    private final long maxLifeTime;
-    private final ExhaustedActions exhaustedAction;
-    private final boolean testOnActivate;
-    private final boolean testOnDeactivate;
-    private final boolean testOnIdle;
-    private final boolean testThreads;
-    private final PoolImplData<T> data = new PoolImplData<T>();
+    private int maxIdle;
+    private long maxIdleTime;
+    private int maxActive;
+    private long maxWait;
+    private long maxLifeTime;
+    private ExhaustedActions exhaustedAction;
+    private boolean testOnActivate;
+    private boolean testOnDeactivate;
+    private boolean testOnIdle;
+    private boolean testThreads;
     private final PoolableLifecycle<T> lifecycle;
-    private final ReentrantLock lock = new ReentrantLock(true);
-    private final Condition idleAvailable = lock.newCondition();
     private final long[] useTimes = new long[1000];
+
+    protected final PoolImplData<T> data = new PoolImplData<T>();
+
+    protected final ReentrantLock lock = new ReentrantLock(true);
+    protected final Condition idleAvailable = lock.newCondition();
 
     private boolean running = true;
     private int useTimePointer;
@@ -117,23 +119,32 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
      * @param lifecycle Implementation of the interface for handling the life cycle of pooled objects.
      * @param config Configuration of the pool parameters.
      */
-    public ReentrantLockPool(final PoolableLifecycle<T> lifecycle, final Config config) {
+    public ReentrantLockPool(final PoolableLifecycle<T> lifecycle, final PoolConfig config) {
         super();
-        maxIdle = config.maxIdle;
-        maxIdleTime = config.maxIdleTime;
-        maxActive = config.maxActive;
-        maxWait = config.maxWait;
-        maxLifeTime = config.maxLifeTime;
-        exhaustedAction = config.exhaustedAction;
-        testOnActivate = config.testOnActivate;
-        testOnDeactivate = config.testOnDeactivate;
-        testOnIdle = config.testOnIdle;
-        testThreads = config.testThreads;
+        setConfig(config);
         this.lifecycle = lifecycle;
     }
 
-    protected final PoolableLifecycle<T> getLifecycle() {
+    protected PoolableLifecycle<T> getLifecycle() {
         return lifecycle;
+    }
+
+    protected void setConfig(PoolConfig config) {
+        lock.lock();
+        try {
+            maxIdle = config.maxIdle;
+            maxIdleTime = config.maxIdleTime;
+            maxActive = config.maxActive;
+            maxWait = config.maxWait;
+            maxLifeTime = config.maxLifeTime;
+            exhaustedAction = config.exhaustedAction;
+            testOnActivate = config.testOnActivate;
+            testOnDeactivate = config.testOnDeactivate;
+            testOnIdle = config.testOnIdle;
+            testThreads = config.testThreads;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -141,29 +152,14 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         if (null == pooled) {
             throw new PoolingException("A null reference was returned to pool.");
         }
-        back(pooled, true);
-    }
-
-    /**
-     * Puts an object into the pool.
-     * @param pooled Object to pool.
-     * @param decrementActive <code>true</code> if an active object is returned.
-     * @return if the object has been put to pool.
-     * @throws PoolingException if the object does not belong to this pool.
-     */
-    private boolean back(final T pooled, final boolean decrementActive) throws PoolingException {
         final long startTime = System.currentTimeMillis();
         // checks
-        final PooledData <T> metaData;
-        if (decrementActive) {
-            lock.lock();
-            try {
-                metaData = data.getActive(pooled);
-            } finally {
-                lock.unlock();
-            }
-        } else {
-            metaData = new PooledData<T>(pooled);
+        final PooledData<T> metaData;
+        lock.lock();
+        try {
+            metaData = data.getActive(pooled);
+        } finally {
+            lock.unlock();
         }
         // object of this pool?
         if (null == metaData) {
@@ -180,6 +176,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             if (!poolable) {
                 numBroken++;
             }
+            poolable &= !metaData.isDeprecated();
             poolable &= (maxLifeTime <= 0 || metaData.getLiveTime() < maxLifeTime);
         } else {
             poolable = false;
@@ -200,9 +197,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             // update meta data
             metaData.resetTrace();
             metaData.touch();
-            if (decrementActive) {
-                data.removeActive(metaData);
-            }
+            data.removeActive(metaData);
             idleAvailable.signal();
             if (maxIdle > 0 && data.numIdle() >= maxIdle) {
                 destroy = true;
@@ -217,7 +212,6 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             lifecycle.destroy(metaData.getPooled());
         }
         LOG.trace("Back time: {}", L(getWaitTime(startTime)));
-        return !destroy;
     }
 
     @Override
@@ -398,7 +392,12 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     }
 
     public boolean isStopped() {
-        return !running;
+        lock.lock();
+        try {
+            return !running;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -580,66 +579,4 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         LOG.trace("Clean run ending. Time: {}", L(getWaitTime(startTime)));
     }
 
-    public static class Config implements Cloneable {
-        public int maxIdle;
-        public long maxIdleTime;
-        public int maxActive;
-        public long maxWait;
-        public long maxLifeTime;
-        public ExhaustedActions exhaustedAction;
-        public boolean testOnActivate;
-        public boolean testOnDeactivate;
-        public boolean testOnIdle;
-        public boolean testThreads;
-
-        public Config() {
-            super();
-            maxIdle = -1;
-            maxIdleTime = 60000;
-            maxActive = -1;
-            maxWait = 10000;
-            maxLifeTime = -1;
-            exhaustedAction = ExhaustedActions.GROW;
-            testOnActivate = true;
-            testOnDeactivate = true;
-            testOnIdle = false;
-            testThreads = false;
-        }
-
-        @Override
-        public Config clone() {
-            try {
-                return (Config) super.clone();
-            } catch (final CloneNotSupportedException e) {
-                // Will not appear!
-                throw new Error("Assertion failed!", e);
-            }
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("Database pooling options:\n\tMaximum idle connections: ");
-            sb.append(maxIdle);
-            sb.append("\n\tMaximum idle time: ");
-            sb.append(maxIdleTime);
-            sb.append("ms\n\tMaximum active connections: ");
-            sb.append(maxActive);
-            sb.append("\n\tMaximum wait time for a connection: ");
-            sb.append(maxWait);
-            sb.append("ms\n\tMaximum life time of a connection: ");
-            sb.append(maxLifeTime);
-            sb.append("ms\n\tAction if connections exhausted: ");
-            sb.append(exhaustedAction.toString());
-            sb.append("\n\tTest connections on activate  : ");
-            sb.append(testOnActivate);
-            sb.append("\n\tTest connections on deactivate: ");
-            sb.append(testOnDeactivate);
-            sb.append("\n\tTest idle connections         : ");
-            sb.append(testOnIdle);
-            sb.append("\n\tTest threads for bad connection usage (SLOW): ");
-            sb.append(testThreads);
-            return sb.toString();
-        }
-    }
 }

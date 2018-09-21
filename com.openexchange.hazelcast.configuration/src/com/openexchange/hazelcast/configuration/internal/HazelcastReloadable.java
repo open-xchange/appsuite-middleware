@@ -107,7 +107,7 @@ public class HazelcastReloadable implements Reloadable {
         // Clear TCP/IP network configuration & add the members one-by-one
         tcpIpConfig.clear();
         for (String member : members) {
-            if (false == Strings.isEmpty(member)) {
+            if (Strings.isNotEmpty(member)) {
                 try {
                     tcpIpConfig.addMember(InetAddress.getByName(member).getHostAddress());
                 } catch (UnknownHostException e) {

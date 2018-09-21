@@ -76,9 +76,30 @@ public interface Timer extends Metric {
      *            whose duration should be timed
      * @param <T> the type of the value returned by {@code event}
      * @return the value returned by {@code event}
-     * @throws OXException if {@code event} throws an {@link Exception}
+     * @throws Exception if an error is occurred during the execution of the {@code event}s
      */
-    <T> T time(Callable<T> event) throws OXException;
+    <T> T time(Callable<T> event) throws Exception;
+
+    /**
+     * Times and records the duration of event. This method is useful where the event may throw
+     * a certain catched exception, that is to be re-thrown immediately. Consider the following
+     * code pattern:
+     *
+     * <pre>
+     * void perform() throws OXException {
+     * // prepare work here...
+     * boolean result = metrics.getTimer(desc).time(() -> {
+     * return innerPerform(input);
+     * });
+     * // act on result here...
+     * }
+     *
+     * boolean innerPerform(Object input) throws OXException {
+     * // produce boolean result or throw exception
+     * }
+     * </pre>
+     */
+    <T, E extends Exception> T time(Timeable<T, E> timeable) throws E;
 
     /**
      * Times and records the duration of event. Should not throw exceptions, for that use the

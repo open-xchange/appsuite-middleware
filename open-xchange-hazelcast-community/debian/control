@@ -1,0 +1,20 @@
+Source: open-xchange-hazelcast-community
+Section: web
+Priority: optional
+Maintainer: Martin Schneider <martin.schneider@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant-optional (>= 1.7.0), openjdk-8-jdk-headless
+Standards-Version: 3.9.8
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-hazelcast-community
+Architecture: all
+Depends: ${misc:Depends}
+Conflicts: open-xchange-hazelcast-enterprise
+Replaces: open-xchange-core (<< 7.10.1)
+Breaks: open-xchange-core (<< 7.10.1)
+Provides: open-xchange-hazelcast
+Description: This package installs the community version of Hazelcast. The
+ implementation uses the freely available version of Hazelcast with a limited
+ set of features (e. g. encrypted transport is missing). This Hazelcast module
+ is mutually exclusive with the enterprise version
+ open-xchange-hazelcast-enterprise

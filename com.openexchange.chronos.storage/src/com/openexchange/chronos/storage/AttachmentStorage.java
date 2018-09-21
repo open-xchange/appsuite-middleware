@@ -147,4 +147,12 @@ public interface AttachmentStorage {
      */
     InputStream loadAttachmentData(int managedId) throws OXException;
 
+    /**
+     * Resolves a managed attachment identifier to its referenced event identifier.
+     * 
+     * @param managedId The managed attachment identifier
+     * @return The event identifier, or <code>null</code> if not found
+     */
+    String resolveAttachmentId(int managedId) throws OXException;
+
 }

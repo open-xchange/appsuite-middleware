@@ -1,0 +1,25 @@
+/health:
+  get:
+    operationId: get
+    tags:
+      - Health
+    summary: Get health status
+    produces:
+      - application/json
+    responses:
+      200:
+        description: |
+          A JSON object containing health data
+        schema:
+          $ref: "#/definitions/HealthData"
+      401:
+        description: Not authorized  
+      500:
+        description: In case of "DOWN"-result or internal server error that might have multiple reasons. Response contains error message.
+        schema:
+          type: string
+
+    x-ox-examples:
+      Example:
+        description: Get health status
+        example: GET http://localhost:8009/health

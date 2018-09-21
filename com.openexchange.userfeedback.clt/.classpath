@@ -8,7 +8,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-common-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-common.source_2.17.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.bundles.repackaged.jersey-guava-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.bundles.repackaged.jersey-guava.source_2.17.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.ws.rs-api-2.0.1.jar" sourcepath="/com.openexchange.bundles/source/javax.ws.rs-api-2.0.1-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.7.jar" sourcepath="/com.openexchange.bundles/source/httpcore-4.4.7-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.api-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.api.source-2.4.0-b10.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.utils-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.utils.source-2.4.0-b10.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.external.javax.inject-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.external.javax.inject.source-2.4.0-b10.jar"/>
@@ -25,5 +24,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.11.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.10.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

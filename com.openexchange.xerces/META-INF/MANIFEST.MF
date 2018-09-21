@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Xerces Compatibility Plugin
 Bundle-SymbolicName: com.openexchange.xerces
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: lib/serializer-2.7.2.jar,
- lib/xercesImpl-2.11.0.jar,
+ lib/xercesImpl-2.12.0.jar,
  lib/xml-apis-1.4.01.jar,
  lib/xml-resolver-1.2.jar
 Eclipse-BuddyPolicy: registered

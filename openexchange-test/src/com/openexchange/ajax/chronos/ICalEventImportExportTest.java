@@ -132,7 +132,7 @@ public class ICalEventImportExportTest extends AbstractImportExportTest {
         for (EventData event : eventData) {
             assertEquals(ICalImportExportManager.RECURRENCE_IMPORT_ICS_SUMMARY, event.getSummary());
             assertEquals(ICalImportExportManager.RECURRENCE_IMPORT_ICS_UID, event.getUid());
-            if (!Strings.isEmpty(event.getRecurrenceId())) {
+            if (Strings.isNotEmpty(event.getRecurrenceId())) {
                 assertEquals(ICalImportExportManager.RECURRENCE_IMPORT_ICS_RECURRENCE_ID, event.getRecurrenceId());
             }
         }

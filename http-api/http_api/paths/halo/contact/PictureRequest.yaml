@@ -3,8 +3,11 @@
     operationId: getHaloContactPicture
     tags:
       - Halo
-    summary: Gets a contact picture.
+    summary: Gets a contact picture. (Deprecated)
     description: |
+      <b>Important:</b>
+      This endpoint is deprecated and will be removed in the future. Use the new /contacts/picture endpoint instead.
+
       At least one of the optional search parameters should be set. All parameters are connected by OR during
       the search. More specific parameters like `user_id` or `id` are prioritized in case of multiple matches.
     parameters:

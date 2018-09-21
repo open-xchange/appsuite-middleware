@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Subscribe Xing Bundle
 Bundle-SymbolicName: com.openexchange.subscribe.xing
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -34,6 +34,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.subscribe,
+ com.openexchange.subscribe.oauth,
  com.openexchange.threadpool,
  com.openexchange.tools.iterator,
  com.openexchange.tools.session,

@@ -69,7 +69,7 @@ public class DriveShareWriter {
         JSONArray jsonFileTargets = new JSONArray();
         JSONArray jsonDirectoryTargets = new JSONArray();
         for (DriveShareTarget target : targets) {
-            if (target.getName() != null && !Strings.isEmpty(target.getName())) {
+            if (target.getName() != null && Strings.isNotEmpty(target.getName())) {
                 jsonFileTargets.put(ShareWriter.writeDriveTarget(target));
             } else {
                 jsonDirectoryTargets.put(ShareWriter.writeDriveTarget(target));

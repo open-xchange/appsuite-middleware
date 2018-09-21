@@ -281,7 +281,7 @@ public abstract class DefaultContactService implements ContactService {
 				searchIterator.close();
 			}
 		}
-		Check.contactNotNull(contact, session.getContextId(), session.getUserId());
+		Check.contactNotNull(contact, session.getContextId(), Integer.valueOf(id));
 		return contact;
 	}
 

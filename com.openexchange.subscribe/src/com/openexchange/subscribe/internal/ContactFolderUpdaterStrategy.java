@@ -294,7 +294,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         if (ContactExceptionCodes.INVALID_EMAIL.equals(e)) {
             if (contact.containsEmail1()) {
                 String value = contact.getEmail1();
-                if (false == Strings.isEmpty(value)) {
+                if (Strings.isNotEmpty(value)) {
                     try {
                         new QuotedInternetAddress(value).validate();
                     } catch (final AddressException x) {
@@ -307,7 +307,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
             }
             if (contact.containsEmail2()) {
                 String value = contact.getEmail2();
-                if (false == Strings.isEmpty(value)) {
+                if (Strings.isNotEmpty(value)) {
                     try {
                         new QuotedInternetAddress(value).validate();
                     } catch (final AddressException x) {
@@ -320,7 +320,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
             }
             if (contact.containsEmail3()) {
                 String value = contact.getEmail3();
-                if (false == Strings.isEmpty(value)) {
+                if (Strings.isNotEmpty(value)) {
                     try {
                         new QuotedInternetAddress(value).validate();
                     } catch (final AddressException x) {

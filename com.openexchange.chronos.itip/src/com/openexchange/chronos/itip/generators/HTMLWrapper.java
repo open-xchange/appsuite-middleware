@@ -141,4 +141,12 @@ public class HTMLWrapper extends PassthroughWrapper {
         return StringEscapeUtils.escapeHtml4(string);
     }
 
+    @Override
+    public String italic(Object argument) {
+        if (argument == null) {
+            return "";
+        }
+        return "<i>" + escapeHtml(argument.toString()) + "</i>";
+    }
+
 }

@@ -19,7 +19,7 @@ public abstract class FileNameFilter extends DefaultFileFilter {
 
         @Override
         protected boolean accept(String fileName) throws OXException {
-            return false == Strings.isEmpty(fileName);
+            return Strings.isNotEmpty(fileName);
         }
     };
 

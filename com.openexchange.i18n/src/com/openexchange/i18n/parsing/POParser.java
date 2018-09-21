@@ -135,7 +135,7 @@ public class POParser {
             StringBuilder string = new StringBuilder();
             collectTexts(tokens, string);
             String s = string.toString();
-            if (!Strings.isEmpty(s)) {
+            if (Strings.isNotEmpty(s)) {
                 strings.add(s);
             }
         } while (tokens.lookahead(POToken.MSGSTR));

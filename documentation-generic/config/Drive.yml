@@ -535,8 +535,8 @@ properties:
         Specifies the path to the local keystore file (PKCS #12) containing the APNS HTTP/2
         certificate and keys for the iOS application, e.g.
         "/opt/open-xchange/etc/drive-apns.p12". Required if
-        "com.openexchange.drive.events.apn2.enabled" is "true", "com.openexchange.drive.events.apn2.ios.authtype"
-        is "certificate" and the package containing the restricted drive components is not installed.
+        [[com.openexchange.drive.events.apn2.enabled]] is <code>true"</code>, [[com.openexchange.drive.events.apn2.ios.authtype]]
+        is <code>certificate</code> and the package containing the restricted drive components is not installed.
       defaultValue:
       version: 7.10.1
       reloadable: false
@@ -550,8 +550,8 @@ properties:
         Specifies the password used when creating the referenced keystore containing
         the certificate of the iOS application. Note that blank or null passwords
         are in violation of the PKCS #12 specifications. Required if
-        "com.openexchange.drive.events.apn2.enabled" is "true", "com.openexchange.drive.events.apn2.ios.authtype"
-        is "certificate" and the package containing the restricted drive components is not installed.
+        [[com.openexchange.drive.events.apn2.enabled]] is <code>true</code>, [[com.openexchange.drive.events.apn2.ios.authtype]]
+        is <code>certificate</code> and the package containing the restricted drive components is not installed.
       defaultValue:
       version: 7.10.1
       reloadable: false
@@ -576,8 +576,8 @@ properties:
     - key: com.openexchange.drive.events.apn2.ios.privatekey
       description: |
         Specifies the private key file used to connect to APNs using provider authentication JSON Web Token (JWT)
-        Required if "com.openexchange.drive.events.apn2.enabled" is "true", "com.openexchange.drive.events.apn2.ios.authtype"
-        is "jwt" and the package containing the restricted drive components is not installed.
+        Required if [[com.openexchange.drive.events.apn2.enabled]] is <code>true</code>, [[com.openexchange.drive.events.apn2.ios.authtype]]
+        is <code>jwt</code> and the package containing the restricted drive components is not installed.
       defaultValue: 
       version: 7.10.1
       reloadable: false
@@ -589,8 +589,8 @@ properties:
     - key: com.openexchange.drive.events.apn2.ios.keyid
       description: |
         Specifies the key identifier used to connect to APNs using provider authentication JSON Web Token (JWT)
-        Required if "com.openexchange.drive.events.apn2.enabled" is "true", "com.openexchange.drive.events.apn2.ios.authtype"
-        is "jwt" and the package containing the restricted drive components is not installed.
+        Required if [[com.openexchange.drive.events.apn2.enabled]] is <code>true</code>, [[com.openexchange.drive.events.apn2.ios.authtype]]
+        is <code>jwt</code> and the package containing the restricted drive components is not installed.
       defaultValue: 
       version: 7.10.1
       reloadable: false
@@ -602,8 +602,8 @@ properties:
     - key: com.openexchange.drive.events.apn2.ios.teamid
       description: |
         Specifies the team identifier used to connect to APNs using provider authentication JSON Web Token (JWT)
-        Required if "com.openexchange.drive.events.apn2.enabled" is "true", "com.openexchange.drive.events.apn2.ios.authtype"
-        is "jwt" and the package containing the restricted drive components is not installed.
+        Required if [[com.openexchange.drive.events.apn2.enabled]] is <code>true</code>, [[com.openexchange.drive.events.apn2.ios.authtype]]
+        is <code>jwt</code> and the package containing the restricted drive components is not installed.
       defaultValue: 
       version: 7.10.1
       reloadable: false
