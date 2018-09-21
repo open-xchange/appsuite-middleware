@@ -100,9 +100,9 @@ public class ConsistencyTest {
 
     private UserImpl admin = null;
 
-    private ContextImpl ctx = null;
-    private ContextImpl ctx2 = null;
-    private ContextImpl ctx3 = null;
+    private Context ctx = null;
+    private Context ctx2 = null;
+    private Context ctx3 = null;
 
     private Entity entity = null;
     private Entity entity2 = null;
@@ -147,17 +147,17 @@ public class ConsistencyTest {
         admin.setId(1);
 
         ctx = new ContextImpl(1);
-        ctx.setFilestoreId(1);
+        ((ContextImpl) ctx).setFilestoreId(1);
         storage.setContext(ctx);
         entity = new EntityImpl(ctx);
 
         ctx2 = new ContextImpl(2);
-        ctx2.setFilestoreId(1);
+        ((ContextImpl) ctx2).setFilestoreId(1);
         storage.setContext(ctx2);
         entity = new EntityImpl(ctx2);
 
         ctx3 = new ContextImpl(3);
-        ctx3.setFilestoreId(2);
+        ((ContextImpl) ctx3).setFilestoreId(2);
         storage2.setContext(ctx3);
         entity = new EntityImpl(ctx3);
 
@@ -413,10 +413,6 @@ public class ConsistencyTest {
 
         assertTrue(entities.toString(), entities.isEmpty());
 
-    }
-
-    private ConsistencyService getConsistencyTool() {
-        return new TestConsistency(database, attachments, storage, contexts);
     }
 
     // Simulation //
