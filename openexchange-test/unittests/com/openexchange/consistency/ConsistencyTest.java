@@ -100,9 +100,9 @@ public class ConsistencyTest {
 
     private UserImpl admin = null;
 
-    private Context ctx = null;
-    private Context ctx2 = null;
-    private Context ctx3 = null;
+    private ContextImpl ctx = null;
+    private ContextImpl ctx2 = null;
+    private ContextImpl ctx3 = null;
 
     private Entity entity = null;
     private Entity entity2 = null;
@@ -147,19 +147,19 @@ public class ConsistencyTest {
         admin.setId(1);
 
         ctx = new ContextImpl(1);
-        ((ContextImpl) ctx).setFilestoreId(1);
+        ctx.setFilestoreId(1);
         storage.setContext(ctx);
         entity = new EntityImpl(ctx);
 
         ctx2 = new ContextImpl(2);
-        ((ContextImpl) ctx2).setFilestoreId(1);
+        ctx2.setFilestoreId(1);
         storage.setContext(ctx2);
-        entity = new EntityImpl(ctx2);
+        entity2 = new EntityImpl(ctx2);
 
         ctx3 = new ContextImpl(3);
-        ((ContextImpl) ctx3).setFilestoreId(2);
+        ctx3.setFilestoreId(2);
         storage2.setContext(ctx3);
-        entity = new EntityImpl(ctx3);
+        entity3 = new EntityImpl(ctx3);
 
         contexts.put(I(ctx.getContextId()), ctx);
         contexts.put(I(ctx2.getContextId()), ctx2);
@@ -189,9 +189,9 @@ public class ConsistencyTest {
         PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class)).withArguments(ctx2);
         PowerMockito.doReturn(storage2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class)).withArguments(ctx3);
 
-        PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class, User.class)).withArguments(ctx, Matchers.any(User.class));
-        PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class, User.class)).withArguments(ctx2, Matchers.any(User.class));
-        PowerMockito.doReturn(storage2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class, User.class)).withArguments(ctx3, Matchers.any(User.class));
+        PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class, User.class)).withArguments(ctx, admin);
+        PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class, User.class)).withArguments(ctx2, admin);
+        PowerMockito.doReturn(storage2).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Context.class, User.class)).withArguments(ctx3, admin);
 
         PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Entity.class)).withArguments(entity);
         PowerMockito.doReturn(storage).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getFileStorage", Entity.class)).withArguments(entity2);
