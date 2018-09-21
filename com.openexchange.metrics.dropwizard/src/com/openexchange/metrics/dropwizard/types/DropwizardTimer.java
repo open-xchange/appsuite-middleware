@@ -53,8 +53,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import com.codahale.metrics.Snapshot;
-import com.openexchange.exception.OXException;
-import com.openexchange.metrics.exceptions.MetricExceptionCode;
+import com.openexchange.metrics.types.Timeable;
 import com.openexchange.metrics.types.Timer;
 
 /**
@@ -89,11 +88,24 @@ public class DropwizardTimer implements Timer {
      * @see com.openexchange.metrics.types.Timer#time(java.util.concurrent.Callable)
      */
     @Override
-    public <T> T time(Callable<T> event) throws OXException {
+    public <T> T time(Callable<T> event) throws Exception {
+        return delegate.time(event);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.metrics.types.Timer#time(com.openexchange.metrics.types.Timeable)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T, E extends Exception> T time(Timeable<T, E> timeable) throws E {
         try {
-            return delegate.time(event);
+            return delegate.time(() -> timeable.call());
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw MetricExceptionCode.ERROR_WHILE_TIMING.create(e);
+            throw (E) e;
         }
     }
 
