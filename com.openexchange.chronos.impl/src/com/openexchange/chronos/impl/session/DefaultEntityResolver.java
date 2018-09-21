@@ -752,16 +752,14 @@ public class DefaultEntityResolver implements EntityResolver {
         String mail = extractEMailAddress(uri);
         if (-1 != entity) {
             User user = optUser(entity);
-            if (null != user && mail.equals(getEMail(user)) || considerAliases && UserAliasUtility.isAlias(mail, user.getAliases())) {
+            if (null != user && (mail.equals(getEMail(user)) || considerAliases && UserAliasUtility.isAlias(mail, user.getAliases()))) {
                 return new ResourceId(context.getContextId(), user.getId(), CalendarUserType.INDIVIDUAL);
             }
             return null;
         }
         for (User knownUser : knownUsers.values()) {
             if (mail.equals(getEMail(knownUser)) || considerAliases && UserAliasUtility.isAlias(mail, knownUser.getAliases())) {
-                if (-1 == entity || entity == knownUser.getId()) {
-                    return new ResourceId(context.getContextId(), knownUser.getId(), CalendarUserType.INDIVIDUAL);
-                }
+                return new ResourceId(context.getContextId(), knownUser.getId(), CalendarUserType.INDIVIDUAL);
             }
         }
         User user;
@@ -776,9 +774,7 @@ public class DefaultEntityResolver implements EntityResolver {
         }
         if (null != user) {
             knownUsers.put(I(user.getId()), user);
-            if (-1 == entity || entity == user.getId()) {
-                return new ResourceId(context.getContextId(), user.getId(), CalendarUserType.INDIVIDUAL);
-            }
+            return new ResourceId(context.getContextId(), user.getId(), CalendarUserType.INDIVIDUAL);
         }
         return null;
     }

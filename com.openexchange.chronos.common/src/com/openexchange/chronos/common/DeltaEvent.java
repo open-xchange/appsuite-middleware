@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.common;
 
 import java.util.Set;
 import com.openexchange.chronos.DelegatingEvent;

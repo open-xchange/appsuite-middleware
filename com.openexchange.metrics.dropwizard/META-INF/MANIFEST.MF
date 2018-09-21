@@ -8,7 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.exception,
  com.openexchange.management,
  com.openexchange.metrics,
- com.openexchange.metrics.exceptions,
  com.openexchange.metrics.jmx,
  com.openexchange.metrics.jmx.beans,
  com.openexchange.metrics.types,
