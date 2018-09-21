@@ -79,6 +79,7 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.util.Pair;
+import com.openexchange.ratelimit.Rate;
 import com.openexchange.ratelimit.RateLimiterFactory;
 
 /**
@@ -404,7 +405,7 @@ class SingleMessageDeliveryTask implements Runnable {
                 int userId = trigger.getUserId();
                 int contextId = ctx.getContextId();
                 if(notificationService.isEnabled(userId, contextId)) {
-                    if(checkRateLimit(alarm.getAction(), notificationService.getAmount(userId, contextId), notificationService.getTimeframe(userId, contextId), trigger.getUserId(), ctx.getContextId())) {
+                if (checkRateLimit(alarm.getAction(), notificationService.getRate(userId, contextId), trigger.getUserId(), ctx.getContextId())) {
                         notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
                         LOG.trace("Message successfully send for {}", key);
                     } else {
@@ -423,12 +424,12 @@ class SingleMessageDeliveryTask implements Runnable {
     /**
      *
      */
-    private boolean checkRateLimit(AlarmAction action, int amount, long timeframe, int userId, int ctxId) {
-        if(amount < 0 || rateLimitFactory == null) {
+    private boolean checkRateLimit(AlarmAction action, Rate rate, int userId, int ctxId) {
+        if (!rate.isEnabled() || rateLimitFactory == null) {
             return true;
         }
         try {
-            return rateLimitFactory.createLimiter(RATE_LIMIT_PREFIX+action.getValue(), amount, timeframe, userId, ctxId).acquire();
+            return rateLimitFactory.createLimiter(RATE_LIMIT_PREFIX + action.getValue(), rate, userId, ctxId).acquire();
         } catch (OXException e) {
             LOG.warn("Unable to create RateLimiter.", e);
             return false;

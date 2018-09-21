@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Calendar Mail Alarm Delivery
 Bundle-SymbolicName: com.openexchange.chronos.alarm.mail
+Automatic-Module-Name: com.openexchange.chronos.alarm.mail
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -30,6 +31,7 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.mail.transport,
  com.openexchange.notification.mail,
  com.openexchange.osgi,
+ com.openexchange.ratelimit,
  com.openexchange.resource,
  com.openexchange.server,
  com.openexchange.serverconfig,

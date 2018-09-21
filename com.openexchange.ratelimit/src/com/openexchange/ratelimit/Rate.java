@@ -47,71 +47,51 @@
  *
  */
 
-package com.openexchange.chronos.alarm.message;
+package com.openexchange.ratelimit;
 
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmAction;
-import com.openexchange.chronos.Event;
-import com.openexchange.exception.OXException;
-import com.openexchange.ratelimit.Rate;
 
 /**
- * {@link AlarmNotificationService} is a service which delivers event messages for a specific type of {@link AlarmAction}s. E.g. transport via mail for {@link AlarmAction#EMAIL}.
+ * {@link Rate} defines a ratelimit (the amount and timeframe).
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.1
  */
-public interface AlarmNotificationService {
+public class Rate {
+
+    private final int amount;
+    private final long timeframe;
 
     /**
-     * Sends the given event
-     *
-     * @param event The event
-     * @param alarm The {@link Alarm}
-     * @param contextId The context id
-     * @param accountId The calendar account id
-     * @param userId The user id
-     * @param trigger The trigger id
-     * @throws OXException
+     * Initializes a new {@link Rate}.
      */
-    public void send(Event event, Alarm alarm, int contextId, int accountId, int userId, long trigger) throws OXException;
+    private Rate(int amount, long timeframe) {
+        this.amount = amount;
+        this.timeframe = timeframe;
+    }
+
+    public static Rate create(int amount, long timeframe) {
+        return new Rate(amount, timeframe);
+    }
 
     /**
-     * Returns the type of {@link AlarmAction} this {@link AlarmNotificationService} is responsible for.
+     * Gets the amount
      *
-     * @return the {@link AlarmAction}
+     * @return The amount
      */
-    public AlarmAction getAction();
+    public int getAmount() {
+        return amount;
+    }
 
     /**
-     * Returns the time in milliseconds a trigger for this {@link AlarmNotificationService} should be shifted forward to compensate the time needed to send the message.
+     * Gets the timeframe
      *
-     * E.g. the average time a mail infrastructure needs to send out a mail.
-     *
-     * @return The time in milliseconds
-     * @throws OXException
+     * @return The timeframe
      */
-    int getShift() throws OXException;
+    public long getTimeframe() {
+        return timeframe;
+    }
 
-    /**
-     * Checks if the {@link AlarmNotificationService} is available for the given user.
-     *
-     * @param userId The user id
-     * @param contextId The context id
-     * @return true if it is available, false otherwise
-     * @throws OXException
-     */
-    boolean isEnabled(int userId, int contextId) throws OXException;
-
-    /**
-     * Returns the {@link Rate} in which this services allows a single user to send messages.
-     *
-     * @param userId The user id
-     * @param contextId The context id
-     * @return The {@link Rate}
-     * @throws OXException
-     */
-    Rate getRate(int userId, int contextId) throws OXException;
-
+    public boolean isEnabled() {
+        return amount >= 0;
+    }
 }

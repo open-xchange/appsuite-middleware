@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.alarm.message.impl;
 
+import java.util.Map.Entry;
 import com.openexchange.chronos.AlarmAction;
+import com.openexchange.chronos.alarm.message.AlarmNotificationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -98,9 +100,9 @@ public class MessageAlarmConfigTreeItem implements PreferencesItemService, Confi
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 setting.addMultiValue(AlarmAction.DISPLAY.getValue());
                 setting.addMultiValue(AlarmAction.AUDIO.getValue());
-                for(AlarmAction action: registry.getActions()) {
-                    if(registry.getService(action).isEnabled(user.getId(), ctx.getContextId())) {
-                        setting.addMultiValue(action.getValue());
+                for (Entry<AlarmAction, AlarmNotificationService> entry : registry.services.entrySet()) {
+                    if (entry.getValue().isEnabled(user.getId(), ctx.getContextId())) {
+                        setting.addMultiValue(entry.getKey().getValue());
                     }
                 }
             }

@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.ratelimit.Rate;
 import com.openexchange.sms.SMSServiceSPI;
 import com.openexchange.user.UserService;
 
@@ -105,7 +106,6 @@ public class SMSNotificationService implements AlarmNotificationService {
             LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", userId, contextId);
             return;
         } else {
-            // TODO add rate limit
             smsService.sendMessage(new String[] {phoneNumber}, generateSMS(event, userId, contextId), userId, contextId);
         }
     }
@@ -162,13 +162,9 @@ public class SMSNotificationService implements AlarmNotificationService {
     }
 
     @Override
-    public int getAmount(int userId, int contextId) throws OXException {
-        return leanConfigurationService.getIntProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_AMOUNT);
-    }
-
-    @Override
-    public long getTimeframe(int userId, int contextId) throws OXException {
-        return leanConfigurationService.getLongProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_TIME_FRAME);
+    public Rate getRate(int userId, int contextId) throws OXException {
+        return Rate.create( leanConfigurationService.getIntProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_AMOUNT), 
+                            leanConfigurationService.getLongProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_TIME_FRAME));
     }
 
 }

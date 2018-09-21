@@ -132,7 +132,7 @@ public class Activator extends HousekeepingActivator {
 
         AdministrativeAlarmTriggerStorage storage = Tools.requireService(AdministrativeAlarmTriggerStorage.class, this);
         TimerService timerService = Tools.requireService(TimerService.class, this);
-        ClusterTimerService clusterTimerService = getOptionalService(ClusterTimerService.class);
+        ClusterTimerService clusterTimerService = Tools.requireService(ClusterTimerService.class, this);
         DatabaseService dbService = Tools.requireService(DatabaseService.class, this);
         CalendarStorageFactory calendarStorageFactory = Tools.requireService(CalendarStorageFactory.class, this);
         ContextService ctxService = Tools.requireService(ContextService.class, this);
@@ -194,11 +194,11 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        super.stopBundle();
         for (Entry<ScheduledTimerTask, MessageAlarmDeliveryWorker> entry : scheduledTasks.entrySet()) {
             entry.getValue().cancel();
             entry.getKey().cancel(true);
         }
+        super.stopBundle();
         LOG.info("Successfully stopped bundle "+this.context.getBundle().getSymbolicName());
     }
 

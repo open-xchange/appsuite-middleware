@@ -60,16 +60,15 @@ import com.openexchange.exception.OXException;
 public interface RateLimiterFactory {
 
     /**
-     * Creates a {@link RateLimiter} with the given amount and timeframe for the given user and context.
+     * Creates a {@link RateLimiter} with the given {@link Rate} for the given user and context.
      *
      * @param id The identifier of the {@link RateLimiter}
-     * @param amount The amount of permits per time-frame
-     * @param timeframe The time-frame in milliseconds
+     * @param rate The rate of the {@link RateLimiter}
      * @param userId The user id
      * @param ctxId The context id
      * @return The {@link RateLimiter}
      * @throws OXException
      */
-    public RateLimiter createLimiter(String id, int amount, long timeframe, int userId, int ctxId) throws OXException;
+    public RateLimiter createLimiter(String id, Rate rate, int userId, int ctxId) throws OXException;
 
 }

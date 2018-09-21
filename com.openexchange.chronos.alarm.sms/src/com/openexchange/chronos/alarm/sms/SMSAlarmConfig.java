@@ -72,7 +72,7 @@ public class SMSAlarmConfig {
     /**
      * Enabled or disables sms alarms.
      */
-    public static final Property SMS_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", true);
+    public static final Property SMS_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", false);
 
     /**
      * The amount of sms allowed to be sent in a given timeframe (see {@link #SMS_LIMIT_TIME_FRAME})

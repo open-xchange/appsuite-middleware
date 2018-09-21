@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -96,12 +97,34 @@ public class RateLimiterImpl implements RateLimiter {
 
     @Override
     public boolean acquire(long permits) {
-        deleteOldPermits();
-        long numberOfPermits = getPermits();
-        if (numberOfPermits + permits > amount) {
-            return false;
+        Connection writeCon = null;
+        boolean readOnly = true;
+        try {
+            writeCon = dbProvider.getWriteConnection(ctx);
+            Databases.startTransaction(writeCon);
+
+            readOnly = deleteOldPermits(writeCon) <= 0;
+            long numberOfPermits = getPermits();
+            if (numberOfPermits + permits > amount) {
+                return false;
+            }
+            insertPermit(permits);
+            writeCon.commit();
+            readOnly = false;
+        } catch (OXException e) {
+            LOG.error("Unable to aquire permits: {}", e.getMessage(), e);
+        } catch (SQLException e) {
+            LOG.error("Unable to aquire permits: {}", e.getMessage(), e);
+        } finally {
+            Databases.autocommit(writeCon);
+            if (writeCon != null) {
+                if (readOnly) {
+                    dbProvider.releaseWriteConnectionAfterReading(ctx, writeCon);
+                } else {
+                    dbProvider.releaseWriteConnection(ctx, writeCon);
+                }
+            }
         }
-        insertPermit(permits);
         return true;
     }
 
@@ -136,29 +159,23 @@ public class RateLimiterImpl implements RateLimiter {
     }
 
 
-    private void deleteOldPermits() {
-        try {
-            Connection con = dbProvider.getWriteConnection(ctx);
-            long start = System.currentTimeMillis() - timeframe;
-            int updates = 0;
-            try (PreparedStatement stmt = con.prepareStatement(SQL_DELTE_OLD)){
-                int index = 1;
-                stmt.setInt(index++, ctx.getContextId());
-                stmt.setInt(index++, userId);
-                stmt.setString(index++, id);
-                stmt.setLong(index, start);
-                updates = stmt.executeUpdate();
-            } catch (SQLException e) {
-                LOG.error("Unable to delete old permits: {}", e.getMessage(), e);
-            } finally {
-                if (updates > 0) {
-                    dbProvider.releaseWriteConnection(ctx, con);
-                } else {
-                    dbProvider.releaseWriteConnectionAfterReading(ctx, con);
-                }
-            }
-        } catch (OXException e) {
+    /**
+     *
+     * @param con The write connection
+     * @return true if it
+     */
+    private int deleteOldPermits(Connection con) {
+        long start = System.currentTimeMillis() - timeframe;
+        try (PreparedStatement stmt = con.prepareStatement(SQL_DELTE_OLD)) {
+            int index = 1;
+            stmt.setInt(index++, ctx.getContextId());
+            stmt.setInt(index++, userId);
+            stmt.setString(index++, id);
+            stmt.setLong(index, start);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
             LOG.error("Unable to delete old permits: {}", e.getMessage(), e);
+            return -1;
         }
     }
 

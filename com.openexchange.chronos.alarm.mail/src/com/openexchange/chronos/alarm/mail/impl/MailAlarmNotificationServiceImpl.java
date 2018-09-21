@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.osgi.Tools;
+import com.openexchange.ratelimit.Rate;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -117,14 +118,8 @@ public class MailAlarmNotificationServiceImpl implements AlarmNotificationServic
     }
 
     @Override
-    public int getAmount(int userId, int contextId) throws OXException {
+    public Rate getRate(int userId, int contextId) throws OXException {
         LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, services);
-        return leanConfig.getIntProperty(userId, contextId, MailAlarmConfig.MAIL_LIMIT_AMOUNT);
-    }
-
-    @Override
-    public long getTimeframe(int userId, int contextId) throws OXException {
-        LeanConfigurationService leanConfig = Tools.requireService(LeanConfigurationService.class, services);
-        return leanConfig.getLongProperty(userId, contextId, MailAlarmConfig.MAIL_LIMIT_TIME_FRAME);
+        return Rate.create(leanConfig.getIntProperty(userId, contextId, MailAlarmConfig.MAIL_LIMIT_AMOUNT), leanConfig.getLongProperty(userId, contextId, MailAlarmConfig.MAIL_LIMIT_TIME_FRAME));
     }
 }

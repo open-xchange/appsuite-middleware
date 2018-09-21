@@ -54,6 +54,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.ratelimit.RateLimiterFactory;
+import com.openexchange.ratelimit.Rate;
 import com.openexchange.ratelimit.RateLimiter;
 import com.openexchange.server.ServiceLookup;
 
@@ -75,11 +76,11 @@ public class RateLimiterFactoryImpl implements RateLimiterFactory{
     }
 
     @Override
-    public RateLimiter createLimiter(String id, int amount, long timeframe, int userId, int ctxId) throws OXException {
+    public RateLimiter createLimiter(String id, Rate rate, int userId, int ctxId) throws OXException {
         ContextService contextService = services.getServiceSafe(ContextService.class);
         Context context = contextService.getContext(ctxId);
         DBProvider dbProvider = services.getServiceSafe(DBProvider.class);
-        return new RateLimiterImpl(id, userId, context, amount, timeframe, dbProvider);
+        return new RateLimiterImpl(id, userId, context, rate.getAmount(), rate.getTimeframe(), dbProvider);
     }
 
 }
