@@ -1214,7 +1214,8 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         if (startsWith) {
             // Filter any folder identifier (full name) which starts with either of POP3 storage folders
             for (Iterator<MailFolder> it = folders.iterator(); it.hasNext();) {
-                if (startsWithAny(it.next().getFullname(), pop3StorageFolders)) {
+                String fullname = it.next().getFullname();
+                if (pop3StorageFolders.contains(fullname) || startsWithAny(fullname + MailProperties.getInstance().getDefaultSeparator(), pop3StorageFolders)) {
                     it.remove();
                 }
             }
@@ -1236,7 +1237,8 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
 
         if (startsWith) {
             for (Iterator<MailFolderInfo> it = folders.iterator(); it.hasNext();) {
-                if (startsWithAny(it.next().getFullname(), pop3StorageFolders)) {
+                String fullname = it.next().getFullname();
+                if (pop3StorageFolders.contains(fullname) || startsWithAny(fullname + MailProperties.getInstance().getDefaultSeparator(), pop3StorageFolders)) {
                     it.remove();
                 }
             }
