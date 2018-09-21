@@ -125,7 +125,7 @@ public class EventManager extends AbstractManager {
         try {
             DeleteBody body = new DeleteBody();
             body.setEvents(eventIds);
-            userApi.getChronosApi().deleteEvent(userApi.getSession(), L(System.currentTimeMillis()), body, null, null, EXPAND_SERIES, Boolean.FALSE);
+            userApi.getChronosApi().deleteEvent(userApi.getSession(), L(System.currentTimeMillis()), body, null, null, EXPAND_SERIES, Boolean.FALSE, null);
         } catch (Exception e) {
             System.err.println("Could not clean up the events for user " + userApi.getCalUser() + ": " + e.getMessage());
             e.printStackTrace();
@@ -475,7 +475,7 @@ public class EventManager extends AbstractManager {
     public void deleteEvent(EventId eventId, long timestamp) throws ApiException {
         DeleteBody body = new DeleteBody();
         body.addEventsItem(eventId);
-        ChronosMultipleCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), L(timestamp), body, null, null, EXPAND_SERIES, Boolean.FALSE);
+        ChronosMultipleCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), L(timestamp), body, null, null, EXPAND_SERIES, Boolean.FALSE, null);
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
         forgetEventId(eventId);
         setLastTimeStamp(deleteResponse.getTimestamp());

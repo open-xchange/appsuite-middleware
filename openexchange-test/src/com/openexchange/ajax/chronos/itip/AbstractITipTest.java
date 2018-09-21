@@ -290,7 +290,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         id.setId(data.getId());
         DeleteBody body  = new DeleteBody();
         body.addEventsItem(id);
-        chronosApi.deleteEvent(session, now(), body, null, null, Boolean.FALSE, Boolean.FALSE);
+        chronosApi.deleteEvent(session, now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null);
     }
 
     private Long now() {

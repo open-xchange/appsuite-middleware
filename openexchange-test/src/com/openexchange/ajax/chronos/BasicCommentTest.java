@@ -176,7 +176,7 @@ public class BasicCommentTest extends AbstractChronosTest {
         body.setComment(DELETE);
         body.setEvents(Collections.singletonList(getEventId()));
 
-        ChronosMultipleCalendarResultResponse response = chronosApi.deleteEvent(apiClient.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE);
+        ChronosMultipleCalendarResultResponse response = chronosApi.deleteEvent(apiClient.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE, null);
         Assert.assertThat(response.getErrorDesc(), response.getError(), nullValue());
         eventData = null;
 
