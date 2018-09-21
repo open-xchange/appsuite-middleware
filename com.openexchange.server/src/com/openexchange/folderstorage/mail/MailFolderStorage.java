@@ -1137,9 +1137,10 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
 
         if (startsWith) {
             // Filter any folder identifier (full name) which starts with either of POP3 storage folders
+            char defaultSeparator = MailProperties.getInstance().getDefaultSeparator();
             for (Iterator<MailFolder> it = folders.iterator(); it.hasNext();) {
                 String fullname = it.next().getFullname();
-                if (pop3StorageFolders.contains(fullname) || startsWithAny(fullname + MailProperties.getInstance().getDefaultSeparator(), pop3StorageFolders)) {
+                if (pop3StorageFolders.contains(fullname) || startsWithAny(fullname, pop3StorageFolders, defaultSeparator)) {
                     it.remove();
                 }
             }
@@ -1160,13 +1161,16 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         }
 
         if (startsWith) {
+            // Filter any folder identifier (full name) which starts with either of POP3 storage folders
+            char defaultSeparator = MailProperties.getInstance().getDefaultSeparator();
             for (Iterator<MailFolderInfo> it = folders.iterator(); it.hasNext();) {
                 String fullname = it.next().getFullname();
-                if (pop3StorageFolders.contains(fullname) || startsWithAny(fullname + MailProperties.getInstance().getDefaultSeparator(), pop3StorageFolders)) {
+                if (pop3StorageFolders.contains(fullname) || startsWithAny(fullname, pop3StorageFolders, defaultSeparator)) {
                     it.remove();
                 }
             }
         } else {
+            // Filter any folder identifier (full name) which is equal to either of POP3 storage folders
             for (Iterator<MailFolderInfo> it = folders.iterator(); it.hasNext();) {
                 if (pop3StorageFolders.contains(it.next().getFullname())) {
                     it.remove();
@@ -1175,9 +1179,9 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
         }
     }
 
-    private static boolean startsWithAny(String toTest, Set<String> prefixes) {
+    private static boolean startsWithAny(String toTest, Set<String> prefixes, char separator) {
         for (String prefix : prefixes) {
-            if (toTest.startsWith(prefix, 0)) {
+            if (toTest.startsWith(prefix + separator, 0)) {
                 return true;
             }
         }

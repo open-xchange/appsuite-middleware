@@ -89,6 +89,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -261,12 +262,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
 
             // More than one "pop3.path" entry available
-            Set<String> set = new HashSet<>(4);
+            ImmutableSet.Builder<String> set = ImmutableSet.builder();
             set.add(firstPop3Path);
             do {
                 set.add(rs.getString(1));
             } while (rs.next());
-            return set;
+            return set.build();
         } catch (final SQLException e) {
             if (null != stmt && LOG.isDebugEnabled()) {
                 final PreparedStatement ps = stmt;
