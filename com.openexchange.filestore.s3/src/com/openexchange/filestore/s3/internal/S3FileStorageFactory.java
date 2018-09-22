@@ -65,7 +65,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -584,21 +583,22 @@ public class S3FileStorageFactory implements FileStorageProvider {
             if (Strings.isEmpty(config)) {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("An empty encryption type is invalid");
             }
-            int index = config.indexOf("+");
+            int index = config.indexOf('+');
             if (index > 0) {
-                List<String> splitAndTrim = Strings.splitAndTrim(config, "+");
-                if (splitAndTrim.size() != 2) {
+                // E.g. rsa+sse-s3
+                String[] encryptionTypes = Strings.splitBy(config, '+', true);
+                if (encryptionTypes.length != 2) {
                     throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("It's only allowed to combine one client side encryption type and one server side encryption type.");
                 }
 
-                EncryptionType typeA = EncryptionType.getTypeByName(splitAndTrim.get(0));
+                EncryptionType typeA = EncryptionType.getTypeByName(encryptionTypes[0]);
                 if (typeA == null) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unkown encryption type: " + splitAndTrim.get(0));
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unkown encryption type: " + encryptionTypes[0]);
                 }
 
-                EncryptionType typeB = EncryptionType.getTypeByName(splitAndTrim.get(1));
+                EncryptionType typeB = EncryptionType.getTypeByName(encryptionTypes[1]);
                 if (typeB == null) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unkown encryption type: " + splitAndTrim.get(1));
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unkown encryption type: " + encryptionTypes[1]);
                 }
 
                 if (typeA.isClientSideEncryption() == typeB.isClientSideEncryption()) {
