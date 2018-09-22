@@ -73,6 +73,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.AbstractUserServiceInterceptor;
 import com.openexchange.userconf.UserPermissionService;
@@ -149,7 +150,7 @@ public class CalendarStorageInterceptor extends AbstractUserServiceInterceptor {
     }
 
     private boolean requiresAddressCheck(Context context, User user) throws OXException {
-        if (null == user) {
+        if (null == user || user.isGuest() || null == user.getMail() || null == user.getAliases()) {
             return false;
         }
         UserPermissionService userPermissionService = services.getOptionalService(UserPermissionService.class);
@@ -255,9 +256,15 @@ public class CalendarStorageInterceptor extends AbstractUserServiceInterceptor {
 
     private static Set<String> getAliases(User user) {
         Set<String> possibleAliases = new HashSet<String>();
-        possibleAliases.add(user.getMail());
+        if (Strings.isNotEmpty(user.getMail())) {
+            possibleAliases.add(user.getMail());
+        }
         if (null != user.getAliases()) {
-            possibleAliases.addAll(Arrays.asList(user.getAliases()));
+            for (String alias : user.getAliases()) {
+                if (Strings.isNotEmpty(alias)) {
+                    possibleAliases.add(alias);
+                }
+            }
         }
         return possibleAliases;
     }
