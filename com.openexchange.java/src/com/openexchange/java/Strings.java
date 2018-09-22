@@ -1290,12 +1290,19 @@ public class Strings {
     }
 
     /**
-     * Takes a String of separated values, splits it at the separator, trims the split values and returns them as List.
+     * Accepts a string of separated values, splits it around matches of the given {@link java.util.regex.Pattern regular expression}, trims
+     * the split values and returns them as a list.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+     * <b>Note</b>: The separator is interpreted a regular expression. Please consider {@link java.util.regex.Pattern#quote(String) quoting}
+     * in case separator should be interpreted as a literal pattern or use the {@link #splitBy(String, char, boolean) splitBy() method}
+     * </div>
      *
-     * @param input String of separated values
-     * @param separator the separator as regular expression used to split the input around this separator
-     * @return the split and trimmed input as List or an empty list
-     * @throws IllegalArgumentException if input or the separator are missing or if the separator isn't a valid pattern
+     * @param input The string of separated values
+     * @param separator The separator as a regular expression used to split the input around this separator
+     * @return The split and trimmed input as a list or an empty list
+     * @throws IllegalArgumentException If input or the separator are missing or if the separator isn't a valid pattern
+     * @see #splitBy(String, char, boolean)
      */
     public static List<String> splitAndTrim(String input, String separator) {
         if (input == null) {
@@ -1309,10 +1316,10 @@ public class Strings {
         }
 
         try {
-            String[] splits = input.split(separator);
-            ArrayList<String> trimmedSplits = new ArrayList<String>(splits.length);
-            for (String string : splits) {
-                trimmedSplits.add(string.trim());
+            String[] tokens = input.split(separator);
+            List<String> trimmedSplits = new ArrayList<String>(tokens.length);
+            for (String token : tokens) {
+                trimmedSplits.add(token.trim());
             }
             return trimmedSplits;
         } catch (PatternSyntaxException pse) {
