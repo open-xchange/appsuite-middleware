@@ -53,7 +53,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.contact.picture.finder.ContactPictureFinder;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.xing.XingInvestigationResultConverter;
 import com.openexchange.halo.xing.XingUserDataSource;
@@ -67,9 +66,7 @@ import com.openexchange.xing.access.XingOAuthAccessProvider;
  */
 public class XingHaloActivator extends HousekeepingActivator {
 
-    volatile ServiceRegistration<HaloContactDataSource> contactRegistration = null;
-
-    private volatile ServiceRegistration<ContactPictureFinder> finderRegistration = null;
+    ServiceRegistration<HaloContactDataSource> contactRegistration = null;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -77,7 +74,7 @@ public class XingHaloActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         registerService(ResultConverter.class, new XingInvestigationResultConverter());
         final BundleContext xingBungleContext = context;
         track(XingOAuthAccessProvider.class, new SimpleRegistryListener<XingOAuthAccessProvider>() {
@@ -91,7 +88,6 @@ public class XingHaloActivator extends HousekeepingActivator {
             @Override
             public void removed(ServiceReference<XingOAuthAccessProvider> ref, XingOAuthAccessProvider service) {
                 unregisterContact();
-                unregisterFinder();
             }
 
         });
@@ -99,9 +95,8 @@ public class XingHaloActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         unregisterContact();
-        unregisterFinder();
         super.stopBundle();
     }
 
@@ -109,13 +104,6 @@ public class XingHaloActivator extends HousekeepingActivator {
         if (contactRegistration != null) {
             contactRegistration.unregister();
             contactRegistration = null;
-        }
-    }
-
-    protected void unregisterFinder() {
-        if (finderRegistration != null) {
-            finderRegistration.unregister();
-            finderRegistration = null;
         }
     }
 
