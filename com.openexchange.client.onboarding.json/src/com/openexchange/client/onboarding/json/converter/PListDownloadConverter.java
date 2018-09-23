@@ -52,6 +52,7 @@ package com.openexchange.client.onboarding.json.converter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -91,7 +92,7 @@ public class PListDownloadConverter implements ResultConverter {
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         PListDict dict = (PListDict) result.getResultObject();
-        Writer writer = new OutputStreamWriter(fileHolder.asOutputStream());
+        Writer writer = new OutputStreamWriter(fileHolder.asOutputStream(), StandardCharsets.UTF_8);
         try {
             dict.writeTo(writer);
             writer.flush();
