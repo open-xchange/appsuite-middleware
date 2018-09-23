@@ -54,7 +54,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.filestore.limit.LimitService;
+import com.openexchange.file.storage.limit.FileLimitService;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folder.json.actions.FolderActionFactory;
@@ -112,7 +112,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
             /*
              * Service trackers
              */
-            track(LimitService.class, new RegistryServiceTrackerCustomizer<LimitService>(context, getInstance(), LimitService.class));
+            track(FileLimitService.class, new RegistryServiceTrackerCustomizer<FileLimitService>(context, getInstance(), FileLimitService.class));
             track(FolderService.class, new RegistryServiceTrackerCustomizer<FolderService>(context, getInstance(), FolderService.class));
             track(ContentTypeDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContentTypeDiscoveryService>(
                 context,

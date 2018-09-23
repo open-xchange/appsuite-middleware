@@ -73,7 +73,7 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
     @Test
     public void testFileQuotaCheckSingleFile_noLimitExceeded() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_SMALL));
-        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "infostore");
+        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
 
         assertEquals(0, checkLimits.getData().getErrors().size());
     }
@@ -81,7 +81,7 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
     @Test
     public void testFileQuotaCheckSingleFile_maxUploadExceeded() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
-        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "infostore");
+        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
 
         assertEquals(1, checkLimits.getData().getErrors().size());
     }
@@ -92,7 +92,7 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_SMALL));
 
-        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "infostore");
+        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
 
         assertEquals(1, checkLimits.getData().getErrors().size());
     }
@@ -103,7 +103,7 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_LARGE));
 
-        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "infostore");
+        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
 
         assertEquals(3, checkLimits.getData().getErrors().size());
     }
@@ -113,10 +113,10 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = new ArrayList<>();
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_SMALL));
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
-        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "infostore");
+        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
 
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_LARGE));
-        checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "infostore");
+        checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
         System.out.println();
     }
 
@@ -132,7 +132,7 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
     @Test
     public void testFileQuotaCheckSingleFile_unknownFolder_returnException() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
-        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), "19191911", "infostore");
+        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), "19191911", "filestorage");
 
         assertEquals("FILE_STORAGE-0029", checkLimits.getCode());
         assertNull(checkLimits.getData());

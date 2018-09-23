@@ -60,9 +60,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.File;
-import com.openexchange.filestore.limit.LimitService;
+import com.openexchange.file.storage.limit.File;
+import com.openexchange.file.storage.limit.FileLimitService;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -92,7 +91,7 @@ public class CheckLimitsAction extends AbstractFolderAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("type");
         }
 
-        LimitService limitsService = ServiceRegistry.getInstance().getService(LimitService.class, true);
+        FileLimitService limitsService = ServiceRegistry.getInstance().getService(FileLimitService.class, true);
 
         List<OXException> exceededLimits = limitsService.checkLimits(request.getSession(), folderId, getFiles(request), type);
         JSONObject jsonObject = createResponse(exceededLimits);
@@ -140,26 +139,26 @@ public class CheckLimitsAction extends AbstractFolderAction {
     }
 
     private File parse(final JSONObject object) throws OXException {
-        final DefaultFile file = new DefaultFile();
+        final File file = new File();
         if (object.hasAndNotNull("size")) {
             try {
-                file.setFileSize(object.getLong("size"));
+                file.setSize(object.getLong("size"));
             } catch (JSONException e) {
                 LOG.debug("Unable to set file size. Will ignore that file in checks.", e);
-                file.setFileSize(0);
+                file.setSize(0);
             }
         } else {
             throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
         }
         if (object.hasAndNotNull("name")) {
             try {
-                file.setFileName(object.getString("name"));
+                file.setName(object.getString("name"));
             } catch (JSONException e) {
                 LOG.debug("Unable to set file name.", e);
-                file.setFileName("Unknown");
+                file.setName("Unknown");
             }
         } else {
-            file.setFileName("Unknown");
+            file.setName("Unknown");
         }
         return file;
     }
