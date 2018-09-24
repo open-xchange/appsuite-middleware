@@ -606,6 +606,7 @@ public final class Init {
 
     private static void startAndInjectBasicServices() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
+            com.openexchange.password.mechanism.impl.osgi.Services.setServiceLookup(LOOKUP);
             final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
 
                 @Override

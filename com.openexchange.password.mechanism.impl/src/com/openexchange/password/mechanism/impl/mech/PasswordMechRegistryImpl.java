@@ -63,6 +63,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.password.mechanism.IPasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
+import com.openexchange.password.mechanism.impl.osgi.Services;
 
 /**
  * {@link PasswordMechRegistryImpl}
@@ -76,6 +77,8 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
 
     private final Map<String, IPasswordMech> registeredPasswordMechs = new ConcurrentSkipListMap<String, IPasswordMech>(String.CASE_INSENSITIVE_ORDER);
 
+    private static final String COM_OPENEXCHANGE_PASSWORD_MECHANISM_ENHANCED_ENABLED = "com.openexchange.password.mechanism.enhanced.enabled";
+
     // -----------------------------------------------------------------------------------
 
     // Dirty hack to keep 'GenerateMasterPasswordCLT' working
@@ -88,7 +91,14 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
 
     private PasswordMechRegistryImpl() {
         super();
-        register(new SHAMech(SHACrypt.SHA1), defaultMech, new SHAMech(SHACrypt.SHA512), new BCryptMech(), new CryptMech());
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        if (configurationService != null) {
+            if (configurationService.getBoolProperty(COM_OPENEXCHANGE_PASSWORD_MECHANISM_ENHANCED_ENABLED, false)) {
+                register(new SHAMech(SHACrypt.SHA256), defaultMech, new SHAMech(SHACrypt.SHA512), new BCryptMech(), new CryptMech());
+                return;
+            }
+        }
+        register(defaultMech, new BCryptMech(), new CryptMech());
     }
 
     /**
@@ -111,7 +121,7 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
         return registeredPasswordMechs.get(id);
     }
 
-    private IPasswordMech defaultMech = new SHAMech(SHACrypt.SHA256);
+    private IPasswordMech defaultMech = new SHAMech(SHACrypt.SHA1);
 
     @Override
     public IPasswordMech getDefault() {
@@ -163,10 +173,7 @@ public class PasswordMechRegistryImpl implements PasswordMechRegistry, Reloadabl
 
     @Override
     public List<String> getIdentifiers() {
-        return registeredPasswordMechs.entrySet().stream()
-            .filter(x -> x.getValue().expose())
-            .map(x->x.getKey())
-            .collect(Collectors.toList());
+        return registeredPasswordMechs.entrySet().stream().filter(x -> x.getValue().expose()).map(x -> x.getKey()).collect(Collectors.toList());
     }
 
     @Override
