@@ -65,6 +65,7 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
@@ -278,6 +279,16 @@ public class Check {
         if (AlarmAction.DISPLAY.equals(alarm.getAction())) {
             if (null == alarm.getDescription() && (null == fields || contains(fields, AlarmField.DESCRIPTION))) {
                 throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.DESCRIPTION.toString());
+            }
+        }
+        if( AlarmAction.SMS.equals(alarm.getAction())) {
+            if(!alarm.containsAttendees()) {
+                throw CalendarExceptionCodes.MANDATORY_FIELD.create(AlarmField.ATTENDEES.toString());
+            }
+            for(Attendee att : alarm.getAttendees()) {
+                if(!att.containsUri() || !att.getUri().toLowerCase().contains("tel:")) {
+                    throw CalendarExceptionCodes.INVALID_ALARM.create(alarm);
+                }
             }
         }
         return alarm;

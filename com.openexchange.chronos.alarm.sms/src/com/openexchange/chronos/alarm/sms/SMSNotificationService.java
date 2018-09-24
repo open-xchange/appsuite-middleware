@@ -57,8 +57,6 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.alarm.message.AlarmNotificationService;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -110,6 +108,8 @@ public class SMSNotificationService implements AlarmNotificationService {
         }
     }
 
+    private static final String TEL_URI_PART = "tel:";
+
     /**
      * Retrieves the phone number for a sms alarm
      *
@@ -117,15 +117,19 @@ public class SMSNotificationService implements AlarmNotificationService {
      * @return The phone number or null
      */
     private String getPhoneNumber(Alarm alarm) {
-        ExtendedProperties extendedProperties = alarm.getExtendedProperties();
-        if(extendedProperties == null) {
-            return null;
+        if(alarm.containsAttendees() && alarm.getAttendees().size() > 0) {
+            String uri = alarm.getAttendees().get(0).getUri();
+            int indexOf = uri.indexOf(TEL_URI_PART);
+            if(indexOf >= 0) {
+                String result = uri.substring(indexOf+TEL_URI_PART.length());
+                int colonIndex = result.indexOf(";");
+                if(colonIndex > 0) {
+                    return result.substring(0, colonIndex);
+                }
+                return result;
+            }
         }
-        ExtendedProperty extendedProperty = extendedProperties.get("SMS-PHONE-NUMBER");
-        if(extendedProperty == null) {
-            return null;
-        }
-        return extendedProperty.getValue().toString();
+        return null;
     }
 
     private String generateSMS(Event event, int userId, int contextId) throws OXException {
@@ -163,7 +167,7 @@ public class SMSNotificationService implements AlarmNotificationService {
 
     @Override
     public Rate getRate(int userId, int contextId) throws OXException {
-        return Rate.create( leanConfigurationService.getIntProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_AMOUNT), 
+        return Rate.create( leanConfigurationService.getIntProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_AMOUNT),
                             leanConfigurationService.getLongProperty(userId, contextId, SMSAlarmConfig.SMS_LIMIT_TIME_FRAME));
     }
 
