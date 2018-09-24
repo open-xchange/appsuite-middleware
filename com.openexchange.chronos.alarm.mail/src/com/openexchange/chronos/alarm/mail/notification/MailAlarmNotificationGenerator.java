@@ -292,6 +292,11 @@ public class MailAlarmNotificationGenerator {
             return none(argument);
         }
 
+        @Override
+        public String italic(Object argument) {
+            return none(argument);
+        }
+
     }
 
     private static List<NotificationParticipant> getResources(ServiceLookup services, Event event, Context ctx, User user) throws OXException {
