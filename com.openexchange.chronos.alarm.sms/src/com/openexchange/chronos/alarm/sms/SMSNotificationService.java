@@ -54,6 +54,10 @@ import java.util.Date;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Event;
@@ -99,41 +103,39 @@ public class SMSNotificationService implements AlarmNotificationService {
 
     @Override
     public void send(Event event, Alarm alarm, int contextId, int accountId, int userId, long trigger) throws OXException {
-        String phoneNumber = getPhoneNumber(alarm);
+        User user = userService.getUser(userId, contextId);
+        String phoneNumber = getPhoneNumber(alarm, user.getLocale());
         if(phoneNumber == null) {
             LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", userId, contextId);
             return;
         } else {
-            smsService.sendMessage(new String[] {phoneNumber}, generateSMS(event, userId, contextId), userId, contextId);
+            smsService.sendMessage(new String[] {phoneNumber}, generateSMS(event, user), userId, contextId);
         }
     }
-
-    private static final String TEL_URI_PART = "tel:";
 
     /**
      * Retrieves the phone number for a sms alarm
      *
      * @param alarm The {@link Alarm}
+     * @param locale The locale to use to parse the number or null.
      * @return The phone number or null
      */
-    private String getPhoneNumber(Alarm alarm) {
-        if(alarm.containsAttendees() && alarm.getAttendees().size() > 0) {
+    private static String getPhoneNumber(Alarm alarm, Locale locale) {
+        if (alarm.containsAttendees() && alarm.getAttendees().size() > 0) {
             String uri = alarm.getAttendees().get(0).getUri();
-            int indexOf = uri.indexOf(TEL_URI_PART);
-            if(indexOf >= 0) {
-                String result = uri.substring(indexOf+TEL_URI_PART.length());
-                int colonIndex = result.indexOf(";");
-                if(colonIndex > 0) {
-                    return result.substring(0, colonIndex);
-                }
-                return result;
+            PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+            try {
+                PhoneNumber phoneNumber = phoneUtil.parse(uri, locale.getCountry());
+                return phoneUtil.format(phoneNumber, PhoneNumberFormat.E164);
+            } catch (NumberParseException e) {
+                LOG.debug("Unable to parse phone number: " + e.getMessage());
+                return null;
             }
         }
         return null;
     }
 
-    private String generateSMS(Event event, int userId, int contextId) throws OXException {
-        User user = userService.getUser(userId, contextId);
+    private String generateSMS(Event event, User user) {
         Locale locale = user.getLocale();
         if (locale == null) {
             locale = Locale.getDefault();
