@@ -130,7 +130,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
                 requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
             }
         }
-        return new EventPostProcessor(session, storage).process(event, folder).getFirstEvent();
+        return postProcessor().process(event, folder).getFirstEvent();
     }
 
     /**
@@ -339,7 +339,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
             return null;
         }
         try {
-            return new EventPostProcessor(session, storage).process(events, folder).getEventsResult();
+            return postProcessor().process(events, folder).getEventsResult();
         } catch (OXException e) {
             return new DefaultEventsResult(e);
         }

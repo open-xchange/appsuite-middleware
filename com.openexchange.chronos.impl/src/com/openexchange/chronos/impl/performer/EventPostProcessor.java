@@ -53,8 +53,8 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
-import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isFirstOccurrence;
+import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isLastOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -83,19 +83,16 @@ import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.arrays.Arrays;
 
@@ -112,8 +109,8 @@ public class EventPostProcessor {
     private final EventField[] requestedFields;
     private final List<Event> events;
     private final Map<String, RecurrenceData> knownRecurrenceData;
-    
-    private SelfProtection selfProtection;
+    private final SelfProtection selfProtection;
+
     private long maximumTimestamp;
 
     /**
@@ -121,19 +118,16 @@ public class EventPostProcessor {
      *
      * @param storage The underlying calendar storage
      * @param session The calendar session
+     * @param selfProtection A reference to the self protection utility
      */
-    public EventPostProcessor(CalendarSession session, CalendarStorage storage) {
+    public EventPostProcessor(CalendarSession session, CalendarStorage storage, SelfProtection selfProtection) {
         super();
         this.session = session;
         this.storage = storage;
+        this.selfProtection = selfProtection;
         this.events = new ArrayList<Event>();
         this.requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         this.knownRecurrenceData = new HashMap<String, RecurrenceData>();
-    }
-
-    public EventPostProcessor setSelfProtection(SelfProtection selfProtection) {
-        this.selfProtection = selfProtection;
-        return this;
     }
 
     /**
@@ -341,15 +335,9 @@ public class EventPostProcessor {
     }
 
     private void checkResultSizeNotExceeded() throws OXException {
-        Check.resultSizeNotExceeded(getSelfProtection(), events, requestedFields);
-    }
-
-    private SelfProtection getSelfProtection() throws OXException {
-        if (selfProtection == null) {
-            LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
-            selfProtection = SelfProtectionFactory.createSelfProtection(leanConfigurationService);
+        if (null != selfProtection) {
+            Check.resultSizeNotExceeded(selfProtection, events, requestedFields);
         }
-        return selfProtection;
     }
 
     private List<Event> resolveOccurrences(Event master) throws OXException {

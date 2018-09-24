@@ -205,7 +205,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          * post process events, based on each requested folder's perspective
          */
         for (Entry<CalendarFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
-            resultsPerFolderId.put(entry.getKey().getId(), new EventPostProcessor(session, storage).process(entry.getValue(), entry.getKey()).getEventsResult());
+            resultsPerFolderId.put(entry.getKey().getId(), postProcessor().process(entry.getValue(), entry.getKey()).getEventsResult());
             Check.resultSizeNotExceeded(getSelfProtection(), resultsPerFolderId, session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
         }
         return resultsPerFolderId;
@@ -296,7 +296,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
-        return new EventPostProcessor(session, storage).process(events, session.getUserId()).getEvents();
+        return postProcessor().process(events, session.getUserId()).getEvents();
     }
 
     /**
@@ -318,7 +318,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
-        return new EventPostProcessor(session, storage).process(events, folder).getEvents();
+        return postProcessor().process(events, folder).getEvents();
     }
 
     private static Map<Integer, List<CalendarFolder>> getFoldersPerCalendarUserId(List<CalendarFolder> folders) {

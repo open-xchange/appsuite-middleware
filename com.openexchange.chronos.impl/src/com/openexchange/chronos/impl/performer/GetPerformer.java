@@ -114,7 +114,7 @@ public class GetPerformer extends AbstractQueryPerformer {
          */
         Check.eventIsVisible(folder, event);
         Check.eventIsInFolder(event, folder);
-        event = new EventPostProcessor(session, storage).process(event, folder).getFirstEvent();
+        event = postProcessor().process(event, folder).getFirstEvent();
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
