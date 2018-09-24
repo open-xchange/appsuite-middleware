@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.MailMessageComparator;
@@ -148,7 +149,7 @@ public final class Conversation {
             final String[] sReferences = message.getReferences();
             if (null != sReferences) {
                 for (final String sReference : sReferences) {
-                    if (null != sReference) {
+                    if (null != sReference && Strings.isNotEmpty(sReference)) {
                         if (references.add(sReference)) {
                             referencesEmpty = false;
                         }
@@ -156,7 +157,7 @@ public final class Conversation {
                 }
             } else {
                 String inReplyTo = message.getInReplyTo();
-                if (null != inReplyTo) {
+                if (null != inReplyTo && Strings.isNotEmpty(inReplyTo)) {
                     if (references.add(inReplyTo)) {
                         referencesEmpty = false;
                     }
