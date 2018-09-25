@@ -883,7 +883,7 @@ properties:
         the mail. The client still is capable to load the content on its own.
          
       defaultValue: false
-      version: 7.10.0
+      version: 7.10.1
       reloadable: true
       configcascadeAware: true
       related:
