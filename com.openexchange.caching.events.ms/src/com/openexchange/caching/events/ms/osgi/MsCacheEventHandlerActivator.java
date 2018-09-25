@@ -50,7 +50,6 @@
 package com.openexchange.caching.events.ms.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.CacheKeyService;
@@ -59,7 +58,7 @@ import com.openexchange.caching.events.ms.internal.MsCacheEventHandler;
 import com.openexchange.caching.events.ms.internal.PortableCacheEventFactory;
 import com.openexchange.caching.events.ms.internal.PortableCacheKey;
 import com.openexchange.caching.events.ms.internal.PortableCacheKeyFactory;
-import com.openexchange.exception.OXException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.ms.PortableMsService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -81,7 +80,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { };
+        return new Class<?>[] {};
     }
 
     @Override
@@ -93,7 +92,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
 
         final BundleContext context = this.context;
 
-        MultipleServiceTracker tracker = new MultipleServiceTracker(context, CacheEventService.class, PortableMsService.class) {
+        MultipleServiceTracker tracker = new MultipleServiceTracker(context, CacheEventService.class, PortableMsService.class, ConfigurationService.class) {
 
             private volatile MsCacheEventHandler eventHandler;
 
@@ -111,12 +110,7 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
             @Override
             protected void onAllAvailable() {
                 logger.debug("Initializing messaging service cache event handler");
-                try {
-                    this.eventHandler = new MsCacheEventHandler(getTrackedService(PortableMsService.class), getTrackedService(CacheEventService.class));
-                } catch (OXException e) {
-                    throw new IllegalStateException(
-                        e.getMessage(), new BundleException(e.getMessage(), BundleException.ACTIVATOR_ERROR, e));
-                }
+                this.eventHandler = new MsCacheEventHandler(getTrackedService(PortableMsService.class), getTrackedService(CacheEventService.class), getTrackedService(ConfigurationService.class));
             }
         };
         rememberTracker(tracker.createTracker());
