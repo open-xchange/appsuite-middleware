@@ -67,6 +67,7 @@ public class Attendee extends CalendarUser {
     private String comment;
     private Boolean rsvp;
     private String folderId;
+    private boolean hidden;
     private List<String> member;
     private Transp transp;
     private List<ExtendedPropertyParameter> extendedParameters;
@@ -466,6 +467,42 @@ public class Attendee extends CalendarUser {
      */
     public boolean containsFolderID() {
         return isSet(AttendeeField.FOLDER_ID);
+    }
+
+    /**
+     * Gets a value indicating whether the event is virtually deleted within the attendee's folder view or not.
+     *
+     * @return <code>true</code> if the event is virtually deleted for the attendee, <code>false</code>, otherwise
+     */
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    /**
+     * Sets the value indicating whether the event is virtually deleted within the attendee's folder view or not.
+     *
+     * @param value <code>true</code> if the event is virtually deleted for the attendee, <code>false</code>, otherwise
+     */
+    public void setHidden(boolean value) {
+        hidden = value;
+        setFields.add(AttendeeField.HIDDEN);
+    }
+
+    /**
+     * Removes the <i>hidden</i> marker to hide the event within the attendee's folder view.
+     */
+    public void removeHidden() {
+        folderId = null;
+        setFields.remove(AttendeeField.HIDDEN);
+    }
+
+    /**
+     * Gets a value indicating whether the <i>hidden</i> marker to hide the event within the attendee's folder view has been set or not.
+     *
+     * @return <code>true</code> if the the <i>hidden</i> marker to hide the event within the attendee's folder view is set, <code>false</code>, otherwise
+     */
+    public boolean containsHidden() {
+        return isSet(AttendeeField.HIDDEN);
     }
 
     /**

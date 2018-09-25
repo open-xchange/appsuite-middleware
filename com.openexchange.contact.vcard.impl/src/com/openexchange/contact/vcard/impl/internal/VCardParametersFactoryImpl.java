@@ -100,7 +100,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
      * @throws OXException
      */
     public void reinitialize(ConfigurationService configService) throws OXException {
-        String value = configService.getProperty("com.openexchange.contact.scaleVCardImages", "");
+        String value = configService.getProperty("com.openexchange.contact.scaleVCardImages", "600x800");
         if (Strings.isNotEmpty(value)) {
             int idx = value.indexOf('x');
             if (1 > idx) {

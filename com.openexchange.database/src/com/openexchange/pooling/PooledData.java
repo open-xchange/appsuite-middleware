@@ -54,6 +54,7 @@ import com.openexchange.database.internal.MysqlUtils;
 
 /**
  * This class stores data about a pooled object.
+ *
  * @param <T> type of object.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -85,8 +86,11 @@ public class PooledData<T> {
 
     private volatile StackTraceElement[] trace;
 
+    private volatile boolean deprecated = false;
+
     /**
      * Default constructor.
+     *
      * @param pooled Pooled object.
      */
     PooledData(final T pooled) {
@@ -140,7 +144,7 @@ public class PooledData<T> {
 
     /**
      * @return the number of milliseconds since this pooled object was last
-     * touched by the pool.
+     *         touched by the pool.
      */
     public long getTimeDiff() {
         return System.currentTimeMillis() - timestamp;
@@ -179,5 +183,23 @@ public class PooledData<T> {
      */
     public int getIdentifier() {
         return identifier;
+    }
+
+    /**
+     * Marks this pooled object as deprecated
+     */
+    public void setDeprecated() {
+        this.deprecated = true;
+    }
+
+    /**
+     * Get a value indicating if the pooled object is deprecated. If so the object needs to be destroyed
+     *
+     * @return <code>true</code> if the pooled object is deprecated
+     *         <code>false</code> otherwise
+     *
+     */
+    public boolean isDeprecated() {
+        return deprecated;
     }
 }

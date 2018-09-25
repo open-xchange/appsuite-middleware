@@ -31,6 +31,11 @@
         description: If set to `true`, an additional diagnostics trace is supplied in the response.
         required: false
       - in: query
+        name: quota
+        type: boolean
+        description: If set to `true`, additional quota information for the folder is supplied in the response.
+        required: false
+      - in: query
         name: pushToken
         type: string
         description: The client's push registration token to associate it to generated events.

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Push implementation bundle using special Dovecot Push extension
 Bundle-SymbolicName: com.openexchange.push.dovecot
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.annotations,
@@ -40,6 +40,7 @@ Import-Package: com.google.common.annotations,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.ldap,
+ com.openexchange.hazelcast,
  com.openexchange.hazelcast.configuration,
  com.openexchange.hazelcast.serialization,
  com.openexchange.imap,

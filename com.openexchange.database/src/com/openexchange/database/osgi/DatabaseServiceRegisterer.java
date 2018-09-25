@@ -54,14 +54,16 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.AssignmentFactory;
-import com.openexchange.database.DatabaseConnectionListener;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.GeneralDatabaseConnectionListener;
 import com.openexchange.database.internal.AssignmentFactoryImpl;
+import com.openexchange.database.internal.Configuration;
 import com.openexchange.database.internal.DatabaseServiceImpl;
 import com.openexchange.database.internal.Initialization;
+import com.openexchange.database.internal.ConnectionReloaderImpl;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.osgi.ServiceListing;
 
@@ -112,7 +114,12 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
             DatabaseServiceImpl databaseService = null;
             try {
                 Initialization.setConfigurationService(configService);
-                databaseService = Initialization.getInstance().start(configService, configViewFactory, migrationService, connectionListeners);
+                // Parse configuration
+                Configuration configuration = new Configuration();
+                configuration.readConfiguration(configService);
+                ConnectionReloaderImpl reloader = new ConnectionReloaderImpl(configuration);
+                context.registerService(Reloadable.class, reloader, null);
+                databaseService = Initialization.getInstance().start(configService, configViewFactory, migrationService, connectionListeners, configuration, reloader);
                 LOG.info("Publishing DatabaseService.");
                 serviceRegistration = context.registerService(DatabaseService.class, databaseService, null);
             } catch (final Exception e) {

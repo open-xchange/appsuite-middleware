@@ -1,0 +1,54 @@
+/contacts/picture?action=get:
+  get:
+    operationId: getContactPicture
+    tags:
+      - Contacts
+    summary: Gets a picture for a contact.
+    description: |
+      Tries to get a picture for a given contact. To specify a contact at least one of three informations must be given:
+      <ul>
+        <li><code>userId</code> - an id of an internal user.</li>
+        <li><code>contactId</code> - an id of an contact.</li>
+        <li><code>mail</code> - an email address.</li>
+      </ul>
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: userId
+        type: string
+        description: |
+          The user identifier.          
+        required: false
+      - in: query
+        name: contactId
+        type: string
+        description: |
+          The contact identifier.
+        required: false
+      - in: query
+        name: folderId
+        type: string
+        description: |
+          The folder id the contact id belongs to.
+        required: false
+      - in: query
+        name: mail
+        type: string
+        description: |
+          The mail address of the contact.
+        required: false
+      - $ref: "#/parameters/glbQueryParamsImageTransformationRotate"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationWidth"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationHeight"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationShrinkOnly"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationScaleType"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropWidth"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropHeight"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropX"
+      - $ref: "#/parameters/glbQueryParamsImageTransformationCropY"  
+    responses:
+      200:
+        description: The content of the requested image is directly written into output stream.
+        schema:
+          type: string
+          format: binary

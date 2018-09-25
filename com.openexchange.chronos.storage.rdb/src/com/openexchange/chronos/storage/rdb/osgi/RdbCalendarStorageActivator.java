@@ -54,10 +54,15 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarAttendeeAddHiddenColumnTask;
+import com.openexchange.chronos.storage.rdb.AdministrativeRdbAlarmTriggerStorage;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddRDateColumnTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddSeriesIndexTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventCorrectFilenamesTask;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarEventCorrectRangesTask;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarStorageInterceptor;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableService;
 import com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask;
 import com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask;
@@ -71,6 +76,8 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaService;
+import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link RdbCalendarStorageActivator}
@@ -97,7 +104,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { CalendarUtilities.class, CacheService.class };
+        return new Class<?>[] { CalendarUtilities.class, CacheService.class, UserPermissionService.class };
     }
 
     @Override
@@ -117,19 +124,23 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
              */
             registerService(CreateTableService.class, new ChronosCreateTableService());
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
-                new ChronosCreateTableTask(), 
-                new CalendarEventAddRDateColumnTask(), 
+                new ChronosCreateTableTask(),
+                new CalendarEventAddRDateColumnTask(),
                 new CalendarEventAddSeriesIndexTask(),
                 new ChronosStorageMigrationTask(this),
-                new CalendarEventCorrectFilenamesTask()
+                new CalendarEventCorrectFilenamesTask(),
+                new CalendarEventCorrectRangesTask(),
+                new CalendarAttendeeAddHiddenColumnTask()
             ));
             if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.migration.purgeLegacyData", false)) {
                 registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosStoragePurgeLegacyDataTask()));
             }
+            registerService(UserServiceInterceptor.class, new CalendarStorageInterceptor(this, defaultDbProvider));
             /*
              * register storage factory services
              */
             registerService(CalendarStorageFactory.class, storageFactory);
+            registerService(AdministrativeAlarmTriggerStorage.class, new AdministrativeRdbAlarmTriggerStorage());
             // Availability disabled until further notice
             //registerService(CalendarAvailabilityStorageFactory.class, new com.openexchange.chronos.storage.rdb.RdbCalendarAvailabilityStorageFactory());
         } catch (Exception e) {

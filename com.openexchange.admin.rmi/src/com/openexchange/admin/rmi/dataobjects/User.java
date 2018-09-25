@@ -74,6 +74,7 @@ import com.openexchange.admin.rmi.utils.URIParser;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public class User extends ExtendableDataObject implements NameAndIdObject, PasswordMechObject {
+
     /**
      * For serialization
      */
@@ -592,6 +593,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     private boolean primaryAccountNameSet = false;
 
     private boolean convertDriveUserFolders = false;
+
+    private Boolean loadRemoteMailContentByDefault = null;
 
     /**
      * Instantiates a new empty user object
@@ -1432,7 +1435,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return uploadFileSizeLimitset;
     }
 
-
     /**
      * Used to check if the upload file size limit per file of this user object has been changed
      *
@@ -1671,7 +1673,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.name = username;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPassword()
      */
     @Override
@@ -2565,12 +2569,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     /**
      * Sets the language for this user object. Note: Language must be constructed like
-     *   <language>_<COUNTRYCODE>
+     * <language>_<COUNTRYCODE>
      * See
-     *  http://www.loc.gov/standards/iso639-2/englangn.html for possible values of <language> and
-     *  http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm
-     *  for possible values of <COUNTRYCODE>
-     *  NOTE: Of course not all variants are supported by OX
+     * http://www.loc.gov/standards/iso639-2/englangn.html for possible values of <language> and
+     * http://www.iso.org/iso/country_codes/iso_3166_code_lists/english_country_names_and_code_elements.htm
+     * for possible values of <COUNTRYCODE>
+     * NOTE: Of course not all variants are supported by OX
      *
      * @param language A {@link String} object containing the language setting
      */
@@ -4015,9 +4019,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     /**
      * Return the name of the primary mail account
+     * 
      * @return A {@link String} containing the name of the primary mail account
      */
-    final public String getPrimaryAccountName(){
+    final public String getPrimaryAccountName() {
         return primaryAccountName;
     }
 
@@ -4080,15 +4085,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return this.aliases;
     }
 
-
     final public void setAliasesForSOAP(List<String> aliases) {
-        if(aliases != null) {
+        if (aliases != null) {
             this.aliases = new HashSet<String>(aliases);
         }
     }
 
     final public List<String> getAliasesForSOAP() {
-        if(this.aliases == null) {
+        if (this.aliases == null) {
             return null;
         }
         return new LinkedList<String>(this.aliases);
@@ -4269,6 +4273,22 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return convertDriveUserFolders;
     }
 
+    public void setLoadRemoteMailContentByDefault(Boolean loadRemoteMailContentByDefault) {
+        this.loadRemoteMailContentByDefault = loadRemoteMailContentByDefault;
+    }
+
+    /**
+     * Indicates whether the loading of content from remote servers is allowed per default when displaying HTML mails
+     * 
+     * @return A {@link Boolean}. The boolean is
+     *         <code>true</code> if loading of content from remote servers is allowed per default when displaying HTML mails
+     *         <code>false</code> if loading of content from remote servers isn't allowed per default when displaying HTML mails
+     *         <code>null</code> if not set
+     */
+    public Boolean isLoadRemoteMailContentByDefault() {
+        return loadRemoteMailContentByDefault;
+    }
+
     @Override
     public String toString() {
         final StringBuilder ret = new StringBuilder();
@@ -4299,12 +4319,12 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     @Override
     public Object clone() throws CloneNotSupportedException {
         final User object = (User) super.clone();
-        if( this.aliases != null ) {
+        if (this.aliases != null) {
             object.aliases = new HashSet<String>(this.aliases);
         }
-        if(this.userAttributes != null) {
+        if (this.userAttributes != null) {
             object.userAttributes = new HashMap<String, Map<String, String>>();
-            for(Map.Entry<String, Map<String, String>> map : userAttributes.entrySet()) {
+            for (Map.Entry<String, Map<String, String>> map : userAttributes.entrySet()) {
                 object.userAttributes.put(map.getKey(), new HashMap<String, String>(map.getValue()));
             }
         }
@@ -4316,7 +4336,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         }
         return object;
     }
-
 
     private void init() {
         initExtendable();
@@ -4442,6 +4461,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.guiPreferences = null;
         this.userAttributes = new HashMap<String, Map<String, String>>();
         this.primaryAccountName = null;
+        this.loadRemoteMailContentByDefault = null;
     }
 
     /**
@@ -4494,7 +4514,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * returned, or an empty array if no fitting extension was found.
      *
      * @param extname
-     *                a String for the extension
+     *            a String for the extension
      * @return the ArrayList of {@link OXUserExtensionInterface} with extname
      * @deprecated
      */
@@ -4527,7 +4547,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPasswordMech()
      */
     @Override
@@ -4535,7 +4557,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return passwordMech;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#setPasswordMech(java.lang.String)
      */
     @Override
@@ -4644,7 +4668,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     /**
      * @param gui_spam_filter_enabled
-     *                the gui_spam_filter_enabled to set
+     *            the gui_spam_filter_enabled to set
      */
     public final void setGui_spam_filter_enabled(Boolean gui_spam_filter_enabled) {
         this.gui_spam_filter_enabledset = true;
@@ -4653,7 +4677,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     /**
      * @param gui_spam_filter_enabled
-     *                the gui_spam_filter_enabled to set
+     *            the gui_spam_filter_enabled to set
      * @deprecated use {@link #setGui_spam_filter_enabled(Boolean)} instead
      */
     @Deprecated
@@ -4721,7 +4745,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return folderTreeSet;
     }
 
-
     public String getDriveFolderMode() {
         return driveFolderMode;
     }
@@ -4751,7 +4774,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     public Map<String, Map<String, String>> getUserAttributes() {
-        if(userAttributes == null) {
+        if (userAttributes == null) {
             userAttributes = new HashMap<String, Map<String, String>>();
         }
         return userAttributes;
@@ -4763,11 +4786,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     public Map<String, String> getNamespace(String namespace) {
-        if(userAttributes == null) {
+        if (userAttributes == null) {
             userAttributes = new HashMap<String, Map<String, String>>();
         }
         Map<String, String> ns = userAttributes.get(namespace);
-        if(ns == null) {
+        if (ns == null) {
             ns = new HashMap<String, String>();
             userAttributes.put(namespace, ns);
         }
@@ -4788,7 +4811,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return guiPreferencesset;
     }
 
-
     /**
      * @return the guiPreferences
      */
@@ -4803,7 +4825,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @param guiValue
      */
     public final void addGuiPreferences(final String path, final String guiValue) {
-        if( guiPreferences == null ) {
+        if (guiPreferences == null) {
             guiPreferences = new HashMap<String, String>();
         }
         guiPreferences.put(path, guiValue);
@@ -4815,7 +4837,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @param path
      */
     public final void removeGuiPreferences(final String path) {
-        if( guiPreferences != null ) {
+        if (guiPreferences != null) {
             guiPreferences.remove(path);
         }
     }
@@ -4823,8 +4845,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     /**
      * @param guiPreferences the guiPreferences to set
      */
-   public final void setGuiPreferences(final Map<String, String> guiPreferences) {
-        if( guiPreferences != null ) {
+    public final void setGuiPreferences(final Map<String, String> guiPreferences) {
+        if (guiPreferences != null) {
             this.guiPreferencesset = true;
         }
         this.guiPreferences = guiPreferences;
@@ -4837,7 +4859,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      */
     @Override
     public final String[] getMandatoryMembersCreate() {
-        return new String[]{ "name", "display_name", "password", "given_name", "sur_name", "primaryEmail", "email1" };
+        return new String[] { "name", "display_name", "password", "given_name", "sur_name", "primaryEmail", "email1" };
     }
 
     /**
@@ -4864,7 +4886,9 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -4911,7 +4935,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + ((folderTree == null) ? 0 : folderTree.hashCode());
         result = prime * result + (folderTreeSet ? 1231 : 1237);
         result = prime * result + ((driveFolderMode == null) ? 0 : driveFolderMode.hashCode());
-        result = prime * result + (driveFolderModeSet ? 1231 :1237);
+        result = prime * result + (driveFolderModeSet ? 1231 : 1237);
         result = prime * result + ((default_group == null) ? 0 : default_group.hashCode());
         result = prime * result + (default_groupset ? 1231 : 1237);
         result = prime * result + ((department == null) ? 0 : department.hashCode());
@@ -5107,11 +5131,14 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + (userfield20set ? 1231 : 1237);
         result = prime * result + ((primaryAccountName == null) ? 0 : primaryAccountName.hashCode());
         result = prime * result + (primaryAccountNameSet ? 1231 : 1237);
-        result = prime * result + (convertDriveUserFolders ? 1231: 1237);
+        result = prime * result + (convertDriveUserFolders ? 1231 : 1237);
+        result = prime * result + (loadRemoteMailContentByDefault == null ? 0 : loadRemoteMailContentByDefault.hashCode());
         return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -6299,13 +6326,20 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (userfield20set != other.userfield20set) {
             return false;
         }
-        if(!primaryAccountName.equals(other.primaryAccountName)){
+        if (!primaryAccountName.equals(other.primaryAccountName)) {
             return false;
         }
-        if(primaryAccountNameSet!=other.primaryAccountNameSet){
+        if (primaryAccountNameSet != other.primaryAccountNameSet) {
             return false;
         }
         if (convertDriveUserFolders != other.convertDriveUserFolders) {
+            return false;
+        }
+        if (loadRemoteMailContentByDefault == null) {
+            if (other.loadRemoteMailContentByDefault != null) {
+                return false;
+            }
+        } else if (!loadRemoteMailContentByDefault.equals(other.loadRemoteMailContentByDefault)) {
             return false;
         }
         return true;

@@ -50,6 +50,8 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
+import static com.openexchange.chronos.common.CalendarUtils.isFirstOccurrence;
+import static com.openexchange.chronos.common.CalendarUtils.isLastOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
@@ -75,8 +77,10 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.impl.AbstractStorageOperation;
@@ -85,6 +89,7 @@ import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.InternalCalendarStorageOperation;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
@@ -104,6 +109,7 @@ public class ResultTracker {
     private final InternalCalendarResult result;
     private final SelfProtection protection;
     private final Map<CalendarFolder, Map<String, Event>> originalUserizedEvents;
+    private final Map<String, RecurrenceData> knownRecurrenceData;
 
     /**
      * Initializes a new {@link ResultTracker}.
@@ -121,6 +127,7 @@ public class ResultTracker {
         this.timestamp = timestamp;
         this.protection = protection;
         this.originalUserizedEvents = new HashMap<CalendarFolder, Map<String, Event>>();
+        this.knownRecurrenceData = new HashMap<String, RecurrenceData>();
         this.result = new InternalCalendarResult(session, getCalendarUserId(folder), folder);
     }
 
@@ -404,7 +411,7 @@ public class ResultTracker {
 
                 @Override
                 protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                    return userize(session, storage, event, getCalendarUserId(folder));
+                    return userize(event, getCalendarUserId(folder));
                 }
             }.executeQuery();
         } finally {
@@ -447,7 +454,7 @@ public class ResultTracker {
      * @see Utils#anonymizeIfNeeded
      */
     private Event userize(Event event, CalendarFolder folder) throws OXException {
-        return userize(session, storage, event, getCalendarUserId(folder));
+        return userize(event, getCalendarUserId(folder));
     }
 
     /**
@@ -468,8 +475,8 @@ public class ResultTracker {
      * @see Utils#applyExceptionDates
      * @see Utils#anonymizeIfNeeded
      */
-    Event userize(CalendarSession session, CalendarStorage storage, Event event, int forUser) throws OXException {
-        return userize(session, storage, event, forUser, false);
+    private Event userize(Event event, int forUser) throws OXException {
+        return userize(event, forUser, false);
     }
 
     /**
@@ -484,8 +491,6 @@ public class ResultTracker {
      * <li>taking over the user's personal list of alarms for the event</li>
      * </ul>
      *
-     * @param storage The calendar storage to use
-     * @param session The calendar session
      * @param event The event to userize
      * @param forUser The identifier of the user in whose point of view the event should be adjusted
      * @param applyExceptionDates <code>true</code> to apply individual exception dates for series master events, <code>false</code> if not needed
@@ -493,7 +498,7 @@ public class ResultTracker {
      * @see Utils#applyExceptionDates
      * @see Utils#anonymizeIfNeeded
      */
-    private Event userize(CalendarSession session, CalendarStorage storage, Event event, int forUser, boolean applyExceptionDates) throws OXException {
+    private Event userize(Event event, int forUser, boolean applyExceptionDates) throws OXException {
         if (applyExceptionDates && isSeriesMaster(event)) {
             event = applyExceptionDates(storage, event, forUser);
         }
@@ -502,6 +507,17 @@ public class ResultTracker {
         EnumSet<EventFlag> flags = CalendarUtils.getFlags(event, forUser, session.getUserId());
         if (null != alarms && 0 < alarms.size()) {
             flags.add(EventFlag.ALARMS);
+        }
+        if (isSeriesException(event)) {
+            RecurrenceData recurrenceData = optRecurrenceData(event);
+            if (null != recurrenceData) {
+                if (isLastOccurrence(event.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
+                    flags.add(EventFlag.LAST_OCCURRENCE);
+                }
+                if (isFirstOccurrence(event.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
+                    flags.add(EventFlag.FIRST_OCCURRENCE);
+                }
+            }
         }
         event = new DelegatingEvent(event) {
 
@@ -537,6 +553,26 @@ public class ResultTracker {
 
         };
         return anonymizeIfNeeded(session, event);
+    }
+
+    private RecurrenceData optRecurrenceData(Event event) throws OXException {
+        String seriesId = event.getSeriesId();
+        if (null == seriesId) {
+            return null;
+        }
+        if (RecurrenceData.class.isInstance(event.getRecurrenceId())) {
+            return ((RecurrenceData) event.getRecurrenceId());
+        }
+        RecurrenceData recurrenceData = knownRecurrenceData.get(seriesId);
+        if (null == recurrenceData) {
+            EventField[] fields = new EventField[] { EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.RECURRENCE_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES };
+            Event seriesMaster = storage.getEventStorage().loadEvent(seriesId, fields);
+            if (null != seriesMaster) {
+                recurrenceData = new DefaultRecurrenceData(seriesMaster);
+                knownRecurrenceData.put(seriesId, recurrenceData);
+            }
+        }
+        return recurrenceData;
     }
 
     /**

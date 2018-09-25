@@ -153,20 +153,22 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     }
 
-    /**
-     * Lists alarm triggers for the given user until the given time in ascending order
-     *
-     * @param user The user id
-     * @param until The upper limit
-     * @return A list of {@link AlarmTrigger}
-     * @throws OXException
-     */
-    private List<AlarmTrigger> getAlarmTriggers(int user, Date until) throws OXException {
-        Connection con = dbProvider.getReadConnection(context);
+    private AlarmTrigger getAlarmTrigger(int id, Connection con) throws OXException {
         try {
-            return getAlarmTriggers(user, until == null ? null : until.getTime(), con);
-        } finally {
-            dbProvider.releaseReadConnection(context, con);
+            AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
+            StringBuilder stringBuilder = new StringBuilder().append("SELECT account,cid,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND account=? AND alarm=?");
+
+            try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, accountId);
+                stmt.setInt(parameterIndex++, id);
+                try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                    return resultSet.next() ? readTrigger(resultSet, mappedFields) : null;
+                }
+            }
+        } catch (SQLException e) {
+            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -201,7 +203,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
-    };
+    }
 
     /**
      * Retrieves an {@link AlarmTrigger} by reading the given {@link AlarmTriggerField}s from the result set.
@@ -266,6 +268,22 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             for (List<String> chunk : Lists.partition(eventIds, DELETE_CHUNK_SIZE)) {
                 updated += deleteTriggers(connection, chunk);
             }
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
+    public void deleteTriggersById(List<Integer> alarmIds) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += deleteTriggersById(connection, alarmIds);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -387,6 +405,22 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
     }
 
+    private int deleteTriggersById(Connection connection, List<Integer> alarmIds) throws SQLException {
+        if (null == alarmIds || 0 == alarmIds.size()) {
+            return 0;
+        }
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND alarm").append(getPlaceholders(alarmIds.size())).append(';');
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            for (Integer id : alarmIds) {
+                stmt.setInt(parameterIndex++, id);
+            }
+            return logExecuteUpdate(stmt);
+        }
+    }
+
     private int deleteTriggers(Connection connection, List<String> ids, int userId) throws SQLException {
         if (null == ids || 0 == ids.size()) {
             return 0;
@@ -417,7 +451,22 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     @Override
     public List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException {
-        return getAlarmTriggers(userId, until);
+        Connection con = dbProvider.getReadConnection(context);
+        try {
+            return getAlarmTriggers(userId, until == null ? null : until.getTime(), con);
+        } finally {
+            dbProvider.releaseReadConnection(context, con);
+        }
+    }
+
+    @Override
+    public AlarmTrigger loadTrigger(int id) throws OXException {
+        Connection con = dbProvider.getReadConnection(context);
+        try {
+            return getAlarmTrigger(id, con);
+        } finally {
+            dbProvider.releaseReadConnection(context, con);
+        }
     }
 
     @Override
@@ -603,6 +652,8 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Unable to determine parent folder for user \"" + userId + "\", skipping insertion of alarm triggers", e);
             return null;
         }
+
+        trigger.setProcessed(0l);
 
         return trigger;
     }

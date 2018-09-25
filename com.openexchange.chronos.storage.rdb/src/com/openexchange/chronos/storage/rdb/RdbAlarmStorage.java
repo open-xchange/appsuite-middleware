@@ -595,7 +595,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     private Alarm readAlarm(String eventId, ResultSet resultSet, AlarmField[] fields) throws SQLException, OXException {
-        return adjustAfterLoad(eventId, MAPPER.fromResultSet(resultSet, fields));
+        return adjustAfterLoad(eventId, MAPPER.fromResultSet(resultSet, MAPPER.getMappedFields(fields)));
     }
 
     /**
@@ -829,6 +829,52 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             modified |= extendedProperties.add(new ExtendedProperty(name, value));
         }
         return modified;
+    }
+
+
+    @Override
+    public Alarm loadAlarm(int alarmId) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectAlarm(connection, context.getContextId(), accountId, alarmId, AlarmField.values());
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    /**
+     * Selects a single {@link Alarm} defined by the given cid / accountId / alarmId combination.
+     *
+     * @param con The connection to use
+     * @param cid The context id
+     * @param accountId The account id
+     * @param alarmId The alarm id
+     * @param fields The fields to request
+     * @return The {@link Alarm}
+     * @throws OXException
+     * @throws SQLException
+     */
+    private Alarm selectAlarm(Connection con, int cid, int accountId, int alarmId, AlarmField[] fields) throws OXException, SQLException {
+        AlarmField[] mappedFields = MAPPER.getMappedFields(fields);
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT event,").append(MAPPER.getColumns(mappedFields))
+            .append(" FROM calendar_alarm WHERE cid=? AND account=? AND id=?;");
+        try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            stmt.setInt(parameterIndex++, accountId);
+            stmt.setInt(parameterIndex++, alarmId);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                if(resultSet.next()) {
+                    String eventId = resultSet.getString(1);
+                    return readAlarm(eventId, resultSet, fields);
+                }
+                return null;
+            }
+        }
     }
 
 }

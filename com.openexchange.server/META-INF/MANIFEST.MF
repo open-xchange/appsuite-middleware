@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.adobe.xmp,
@@ -520,7 +520,6 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.groupware.attach.util,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.contact,
- com.openexchange.groupware.contact.datasource,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
  com.openexchange.groupware.container.mail,

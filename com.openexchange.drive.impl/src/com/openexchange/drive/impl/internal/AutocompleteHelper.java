@@ -74,10 +74,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.image.ImageDataSource;
-import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Streams;
-import com.openexchange.java.util.Pair;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -207,13 +204,13 @@ public class AutocompleteHelper {
         jsonContact.putOpt(ContactFields.LAST_NAME, contact.getSurName());
         jsonContact.putOpt(ContactFields.FIRST_NAME, contact.getGivenName());
         if (0 < contact.getNumberOfImages()) {
-            Pair<ImageDataSource, ImageLocation> imageData = ContactUtil.prepareImageData(contact);
-            if (null != imageData) {
-                try {
-                    jsonContact.putOpt(ContactFields.IMAGE1_URL, imageData.getFirst().generateUrl(imageData.getSecond(), session.getServerSession()));
-                } catch (OXException e) {
-                    getLogger(AutocompleteHelper.class).error("Error generating image URL for contact {}", I(contact.getObjectID()), e);
+            try {
+                String imageUrl = ContactUtil.generateImageUrl(session.getServerSession(), contact);
+                if (null != imageUrl) {
+                    jsonContact.putOpt(ContactFields.IMAGE1_URL, imageUrl);
                 }
+            } catch (OXException e) {
+                getLogger(AutocompleteHelper.class).error("Error generating image URL for contact {}", I(contact.getObjectID()), e);
             }
         }
         JSONObject jsonObject = new JSONObject();

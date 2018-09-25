@@ -13,6 +13,7 @@
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
       - $ref: "#/parameters/QueryParamChronosNotification"
       - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - $ref: "#/parameters/QueryParamChronosPushToken"
       - in: query
         name: timestamp
         type: integer

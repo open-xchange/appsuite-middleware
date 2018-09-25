@@ -250,25 +250,25 @@ properties:
     - key: com.openexchange.hazelcast.network.symmetricEncryption.salt
       description: |
         Specifies the salt value to use when generating the secret key for symmetric encryption.
-      defaultValue: 2mw67LqNDEb3
+      defaultValue: "X-k4nY-Y*v38f=dSJrr)"
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: hazelcast.properties
       packageName: open-xchange-core
-      tags: ["Hazelcast", "Encryption"]
+      tags: ["Hazelcast", "Encryption", "Credential"]
     - key: com.openexchange.hazelcast.network.symmetricEncryption.password
       description: |
         Specifies the pass phrase to use when generating the secret key for symmetric encryption.
-      defaultValue: 2mw67LqNDEb3
+      defaultValue: "&3sFs<^6[cKbWDW#du9s"
       version:
       reloadable: false
       configcascadeAware: false
       related: 
       file: hazelcast.properties
       packageName: open-xchange-core
-      tags: ["Hazelcast", "Encryption"]
+      tags: ["Hazelcast", "Encryption", "Credential"]
     - key: com.openexchange.hazelcast.network.symmetricEncryption.iterationCount
       description: |
         Configures the iteration count to use when generating the secret key for symmetric encryption. 
@@ -376,3 +376,115 @@ properties:
       file: sessionstorage-hazelcast.properties
       packageName: open-xchange-sessionstorage-hazelcast
       tags: ["Hazelcast", "Session"]
+    - key: com.openexchange.hazelcast.network.ssl
+      description: |
+        Requires an enterprise license key. Enables or disables asymmetric encryption via SSL. When enabled, the entire communication between the Hazelcast members is encrypted at socket level.
+        At least each member has to be configured to use a key store. For a detailed instruction please visist documentation.open-xchange.com. 
+        More advanced options may still be configured via the <code>hazelcast.xml</code> file, see instructions on top of this page.
+      defaultValue: false
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.licenseKey
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"]
+    - key: com.openexchange.hazelcast.ssl.protocols
+      description: |
+        A comma separated, ranked list of protocols to use for SSL. The list must start at the oldest protocol to use (default 'TLSv1') and end at the highest protocol to use (default 'TLSv1.3') 
+      defaultValue: TLSv1,TLSv1.1,TLSv1.3
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.licenseKey,com.openexchange.hazelcast.network.ssl
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"]
+    - key: com.openexchange.hazelcast.ssl.keyStore
+      description: |
+        The path to the key store of the Hazelcast member. 
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.licenseKey,com.openexchange.hazelcast.network.ssl
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"]
+    - key: com.openexchange.hazelcast.ssl.keyStorePassword
+      description: |
+        The password for the key store. 
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.ssl.keyStore
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"] 
+    - key: com.openexchange.hazelcast.ssl.keyStoreType
+      description: |
+        The type for the key store. If not set the default type of Java KeyStore is used.
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.ssl.keyStore
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"]  
+    - key: com.openexchange.hazelcast.ssl.keyManagerAlgorithm
+      description: |
+        The algorithm of the certificates within the key store. If not set the default value of the managing entity is used.
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.ssl.keyStore
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"]  
+    - key: com.openexchange.hazelcast.ssl.trustStore
+      description: |
+        The path to the trust store of the Hazelcast member. The CA certificate and all other members certificates need to be a in this store.
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.licenseKey,com.openexchange.hazelcast.network.ssl
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"]
+    - key: com.openexchange.hazelcast.ssl.trustStorePassword
+      description: |
+        The password for the trust store. 
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.ssl.trustStore
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"] 
+    - key: com.openexchange.hazelcast.ssl.trustStoreType
+      description: |
+        The type for the trust store. If not set the default type of Java KeyStore is used.
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.ssl.trustStore
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"]  
+    - key: com.openexchange.hazelcast.ssl.trustManagerAlgorithm
+      description: |
+        The algorithm of the certificates within the trust store. If not set the default value of the managing entity is used.
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.hazelcast.ssl.trustStore
+      file: 
+      packageName: open-xchange-core
+      tags: ["Hazelcast", "Encryption"]  

@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange health check implementation bundle
+Bundle-SymbolicName: com.openexchange.health.impl
+Bundle-Version: 7.10.1
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.health.impl
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.hazelcast.cluster,
+ com.hazelcast.core,
+ com.hazelcast.version,
+ com.openexchange.config.lean,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.health,
+ com.openexchange.java,
+ com.openexchange.logging,
+ com.openexchange.osgi,
+ com.openexchange.pluginsloaded,
+ com.openexchange.server,
+ com.openexchange.threadpool,
+ org.eclipse.microprofile.health,
+ org.eclipse.microprofile.health.spi,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.health.impl.osgi.MWHealthCheckActivator

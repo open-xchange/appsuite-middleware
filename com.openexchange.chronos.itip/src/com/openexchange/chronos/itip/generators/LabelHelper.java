@@ -64,10 +64,12 @@ import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.tools.HTMLUtils;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -87,13 +89,13 @@ public class LabelHelper {
     private final ServiceLookup services;
     private final Pattern patternSlashFixer;
     private static final String fallbackHostname;
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(LabelHelper.class);
 
     protected final NotificationMail mail;
     protected final TypeWrapper wrapper;
     protected final Locale locale;
-    
+
     static {
         String fbHostname;
         try {
@@ -128,6 +130,9 @@ public class LabelHelper {
         }
 
         patternSlashFixer = Pattern.compile("^//+|[^:]//+");
+        if (this.mail == null || this.mail.getEvent() == null) {
+            throw OXExceptions.general("Mandatory field mail/event missing.");
+        }
     }
 
     public String getShowAs() {
@@ -135,18 +140,16 @@ public class LabelHelper {
 
         if (event.getTransp() != null && Transp.TRANSPARENT.equals(event.getTransp().getValue())) {
             return new Sentence(Messages.FREE).getMessage(locale);
-        } else {
-            return new Sentence(Messages.RESERVERD).getMessage(locale);
         }
+        return new Sentence(Messages.RESERVERD).getMessage(locale);
     }
 
     public String getShowAsClass() {
         final Event event = mail.getEvent();
         if (event.getTransp() != null && event.getTransp().getValue() != null && Transp.TRANSPARENT.equals(event.getTransp().getValue())) {
             return "free";
-        } else {
-            return "reserved";
         }
+        return "reserved";
     }
 
     public String getNoteAsHTML() {
@@ -159,7 +162,7 @@ public class LabelHelper {
 
     // Sentences
     public String getAcceptIntroduction() throws OXException {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
 
@@ -167,77 +170,87 @@ public class LabelHelper {
     }
 
     public String getDeclineIntroduction() throws OXException {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
         return delegationState.statusChange(mail.getActor(), ParticipationStatus.DECLINED);
     }
 
     public String getTentativeIntroduction() throws OXException {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
         return delegationState.statusChange(mail.getActor(), ParticipationStatus.TENTATIVE);
     }
 
     public String getNoneIntroduction() throws OXException {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
         return delegationState.statusChange(mail.getActor(), ParticipationStatus.NEEDS_ACTION);
     }
 
     public String getCounterOrganizerIntroduction() {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
         return new Sentence(Messages.COUNTER_ORGANIZER_INTRO).add(mail.getSender().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
     }
 
     public String getCounterParticipantIntroduction() {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
         return new Sentence(Messages.COUNTER_PARTICIPANT_INTRO).add(mail.getSender().getDisplayName(), ArgumentType.PARTICIPANT).add(mail.getOrganizer().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
     }
 
     public String getCreateIntroduction() throws OXException {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
         return delegationState.getCreateIntroduction();
     }
 
     public String getCreateExceptionIntroduction() {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
         return new Sentence(Messages.CREATE_EXCEPTION_INTRO).add(mail.getSender().getDisplayName(), ArgumentType.PARTICIPANT).add(dateHelper.getRecurrenceDatePosition(), ArgumentType.UPDATED).getMessage(wrapper, locale);
     }
 
     public String getRefreshIntroduction() {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
         return new Sentence(Messages.REFRESH_INTRO).add(mail.getSender().getDisplayName(), ArgumentType.PARTICIPANT).add(mail.getEvent().getSummary(), ArgumentType.UPDATED).getMessage(wrapper, locale);
     }
 
     public String getDeclineCounterIntroduction() throws OXException {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
         return delegationState.getDeclineCounterIntroduction();
     }
 
     public String getUpdateIntroduction() throws OXException {
-        if (mail.getActor().isVirtual()) {
+        if (mail.getActor() == null || mail.getActor().isVirtual()) {
             return "";
         }
         return delegationState.getUpdateIntroduction();
     }
+    
+    public String getComment() {
+        if (mail.getActor().isVirtual()) {
+            return "";
+        }
+        if (mail.getMessage() == null || Strings.isEmpty(mail.getMessage().getComment())) {
+            return "";
+        }
+        return new Sentence(Messages.COMMENT_INTRO).add(mail.getMessage().getComment(), ArgumentType.ITALIC).getMessage(wrapper, locale);
+    }
 
     public String getDirectLink() {
-        if (mail.getRecipient().isExternal() || mail.getRecipient().isResource()) {
+        if (mail.getRecipient() == null || mail.getRecipient().isExternal() || mail.getRecipient().isResource()) {
             return null;
         }
         final ConfigurationService config = services.getService(ConfigurationService.class);
@@ -283,7 +296,7 @@ public class LabelHelper {
     }
 
     public String getAttachmentNote() {
-        if (mail.getAttachments().isEmpty() || mail.getRecipient().isExternal()) {
+        if (mail.getAttachments() == null || mail.getAttachments().isEmpty() || mail.getRecipient().isExternal()) {
             return "";
         }
         return new Sentence(Messages.HAS_ATTACHMENTS).add(getDirectLink(), ArgumentType.REFERENCE).getMessage(wrapper, locale);
@@ -330,6 +343,9 @@ public class LabelHelper {
     }
 
     public String getCreator() {
+        if (mail.getOrganizer() == null) {
+            return null;
+        }
         return mail.getOrganizer().getDisplayName();
     }
 
@@ -346,6 +362,9 @@ public class LabelHelper {
 
     public String getJustification() {
         final NotificationParticipant recipient = mail.getRecipient();
+        if (recipient == null) {
+            return null;
+        }
         if (recipient.hasRole(ITipRole.PRINCIPAL)) {
             return new Sentence(Messages.PRINCIPAL_JUSTIFICATION).getMessage(wrapper, locale);
         } else if (recipient.hasRole(ITipRole.ORGANIZER)) {

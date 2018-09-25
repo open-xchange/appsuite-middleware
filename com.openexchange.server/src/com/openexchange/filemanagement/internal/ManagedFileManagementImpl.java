@@ -342,14 +342,20 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public ManagedFile createManagedFile(final File temporaryFile) throws OXException {
-        return createManagedFile(temporaryFile, -1);
+        return createManagedFile(temporaryFile, -1, false);
     }
 
     @Override
-    public ManagedFile createManagedFile(final File temporaryFile, int ttl) throws OXException {
+    public ManagedFile createManagedFile(final File temporaryFile, int ttl, boolean distribute) throws OXException {
         final ManagedFileImpl mf = new ManagedFileImpl(this, UUID.randomUUID().toString(), temporaryFile, ttl, dispatcherPrefixService.getPrefix());
         mf.setSize(temporaryFile.length());
         files.put(mf.getID(), mf);
+        if (distribute) {
+            DistributedFileManagement distributed = getDistributed();
+            if (distributed != null && !distributed.exists(mf.getID())) {
+                distributed.register(mf.getID());
+            }
+        }
         return mf;
     }
 

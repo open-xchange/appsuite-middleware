@@ -140,8 +140,8 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         if (false == isNullOrEmpty(newEvent.getAttendees())) {
             storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newEvent.getAttendees());
         }
-        if (false == isNullOrEmpty(event.getAttachments())) {
-            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newEvent.getId(), event.getAttachments());
+        if (false == isNullOrEmpty(newEvent.getAttachments())) {
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newEvent.getId(), newEvent.getAttachments());
         }
         /*
          * reload created event for further processing
@@ -199,9 +199,10 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Consistency.adjustAllDayDates(event);
         Consistency.adjustTimeZones(session, calendarUserId, event, null);
         /*
-         * attendees
+         * attendees, attachments
          */
         event.setAttendees(Check.maxAttendees(getSelfProtection(), prepareAttendees(eventData.getAttendees())));
+        event.setAttachments(Check.attachmentsAreVisible(session, storage, eventData.getAttachments()));
         /*
          * classification, transparency, color, geo
          */

@@ -393,12 +393,12 @@ glbQueryParamsImageTransformationScaleType:
       The source image will be resized in a way that the resulting image fits into the target resolution entirely, with the original aspect ratio being preserved. 
       For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "contain", will result in the picture being resized to 200x150 pixels.</li>
 
-      <li><code>containforcedimension</code> - The "containForceDimension" scale type, specifying the maximum target dimensions. <br>
+      <li><code>containforcedimension</code> - The "containforcedimension" scale type, specifying the maximum target dimensions. <br>
       The source image will be resized in a way that the resulting image fits into the target resolution entirely, with the original aspect ratio being preserved while smaller sides get 
-      padded to fit exact dimension. For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "contain", will result in the picture being 
+      padded to fit exact dimension. For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "containforcedimension", will result in the picture being 
       first resized to 200x150 pixels, then height gets padded by 25 pixels per side resulting in exactly 200x200 pixels.</li>
 
-      <li><code>coverandcrop</code> - The "cover" scale type, specifying the target dimensions. <br>
+      <li><code>coverandcrop</code> - The "coverandcrop" scale type, specifying the target dimensions. <br>
       If the source image is bigger than the target dimension, in a first step the image will be resized in a way that the resulting image covers the target resolution entirely, 
       with the original aspect ratio being preserved. In a second step the image will be cropped to fit the target dimension. For example, scaling an image with an original resolution 
       of 640x480 pixels to 200x200 pixels and type "coverandcrop", will result in the picture being resized to 267x200 pixels and then cropped to fit 200x200. 
@@ -537,4 +537,10 @@ QueryParamChronosUpdateCache:
     If set to 'true' the cache will be forced to be updated (e. g. by contacting the underlying external account)
   required: false
   default: false
-  
+QueryParamChronosPushToken:
+  name: pushToken
+  in: query
+  type: string
+  description: |
+    The client's push token to allow filtering of push events for modified calendar data
+  required: false

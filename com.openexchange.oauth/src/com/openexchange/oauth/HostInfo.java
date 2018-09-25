@@ -49,8 +49,6 @@
 
 package com.openexchange.oauth;
 
-import com.openexchange.java.Strings;
-
 /**
  * {@link HostInfo} - Provides name/IP address as well as the JVM route for the current host.
  *
@@ -143,82 +141,4 @@ public class HostInfo {
         return builder.toString();
     }
 
-    /**
-     * Injects this instance's JVM route into given URL as a path segment.
-     *
-     * @param url The URL to inject to
-     * @param route The JVM route to inject
-     * @return The URL with JVM route injected
-     */
-    public String injectRoute(String url) {
-        return injectRouteIntoUrl(url, route);
-    }
-
-    /**
-     * Injects this instance's JVM route into given URL as a URL parameter
-     * and removes it in case there is present as a path segment.
-     *
-     * @param url The URL to inject to
-     * @return The URL with JVM route injected as a URL parameter
-     */
-    public String injectRouteAsParameter(String url) {
-        return injectRouteAsParameter(url, route);
-    }
-
-    // ---------------------------------------------------------------------------------------
-
-    /**
-     * Injects specified JVM route into given URL.
-     *
-     * @param url The URL to inject to
-     * @param route The JVM route to inject
-     * @return The URL with JVM route injected
-     */
-    public static String injectRouteIntoUrl(String url, String route) {
-        if (null == url || Strings.isEmpty(route)) {
-            return url;
-        }
-        if (url.indexOf(";jsessionid=") >= 0) {
-            // Route already contained
-            return url;
-        }
-
-        // Check for query string
-        int queryStringPos = url.indexOf('?');
-        if (queryStringPos > 0) {
-            return new StringBuilder(url.substring(0, queryStringPos)).append(";jsessionid=").append(route).append(url.substring(queryStringPos)).toString();
-        }
-        return new StringBuilder(url).append(";jsessionid=").append(route).toString();
-    }
-
-    /**
-     * Injects this instance's JVM route into given URL as a URL parameter.
-     *
-     * @param url The URL to inject to
-     * @param route The JVM route to inject
-     * @return The URL with JVM route injected
-     */
-    private String injectRouteAsParameter(String url, String route) {
-        if (null == url || Strings.isEmpty(route)) {
-            return url;
-        }
-
-        if (url.indexOf("&jsessionid=") >= 0) {
-            // route already contained
-            return url;
-        }
-
-        int queryStringPos = url.indexOf('?');
-        String segmentPath = ";jsessionid=";
-        int segmentPathPos = url.indexOf(segmentPath);
-        String u = url;
-        if (segmentPathPos >= 0) {
-            // Already contained but as path segment
-            u = url.substring(0, segmentPathPos);
-            if (queryStringPos > 0) {
-                u += url.substring(queryStringPos);
-            }
-        }
-        return new StringBuilder(u).append(queryStringPos > 0 ? "&" : "?").append("jsessionid=").append(route).toString();
-    }
 }

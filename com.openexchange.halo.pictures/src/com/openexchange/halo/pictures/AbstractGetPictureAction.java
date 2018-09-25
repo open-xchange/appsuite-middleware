@@ -57,8 +57,8 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
+import com.openexchange.contact.picture.ContactPicture;
 import com.openexchange.exception.OXException;
-import com.openexchange.halo.Picture;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -75,19 +75,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
 
-    static final byte[] TRANSPARENT_GIF = { 71, 73, 70, 56, 57, 97, 1, 0, 1, 0, -128, 0, 0, 0, 0, 0, -1, -1, -1, 33, -7, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 1, 68, 0, 59 };
-
-    static final Picture FALLBACK_PICTURE;
-
-    static {
-        ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(TRANSPARENT_GIF);
-        fileHolder.setContentType("image/gif");
-        fileHolder.setName("image.gif");
-        FALLBACK_PICTURE = new Picture(null, fileHolder);
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------------------
-
     final ServiceLookup services;
 
     /**
@@ -102,7 +89,7 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        Picture picture = getPicture(requestData, session);
+        ContactPicture picture = getPicture(requestData, session);
         if (picture == null) {
             // 404 - Not Found
             AJAXRequestResult result = new AJAXRequestResult();
@@ -110,7 +97,7 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
             return result;
         }
 
-        if (FALLBACK_PICTURE == picture) {
+        if (ContactPicture.FALLBACK_PICTURE == picture) {
             ByteArrayFileHolder fileHolder = (ByteArrayFileHolder) picture.getFileHolder();
             if (requestData.setResponseHeader("Content-Type", fileHolder.getContentType())) {
                 // Set HTTP response headers
@@ -120,7 +107,7 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
                     DownloadUtility.appendFilenameParameter(fileHolder.getName(), fileHolder.getContentType(), requestData.getUserAgent(), sb);
                     requestData.setResponseHeader("Content-Disposition", sb.toString());
 
-                    String eTag = picture.getEtag();
+                    String eTag = picture.getETag();
                     long expires = Tools.getDefaultImageExpiry();
                     if (null == eTag) {
                         if (expires > 0) {
@@ -146,7 +133,7 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
         }
 
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
-        setETag(picture.getEtag(), Tools.getDefaultImageExpiry(), result);
+        setETag(picture.getETag(), Tools.getDefaultImageExpiry(), result);
         return result;
     }
 
@@ -170,7 +157,7 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
         }
     }
 
-    private Picture getPicture(AJAXRequestData req, ServerSession session) throws OXException {
+    private ContactPicture getPicture(AJAXRequestData req, ServerSession session) throws OXException {
         return getPictureResource(req, session, false);
     }
 
@@ -189,7 +176,4 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
      */
     abstract <V> V getPictureResource(AJAXRequestData req, ServerSession session, boolean eTagOnly) throws OXException;
 
-    Picture fallbackPicture() {
-        return FALLBACK_PICTURE;
-    }
 }

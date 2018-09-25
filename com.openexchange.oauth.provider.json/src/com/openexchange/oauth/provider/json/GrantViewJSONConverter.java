@@ -149,10 +149,10 @@ public class GrantViewJSONConverter {
     }
 
     private String buildIconURL(Icon icon) throws OXException  {
-        ManagedFile managedFile = managedFileManagement.createManagedFile(icon.getData());
+        ManagedFile managedFile = managedFileManagement.createManagedFile(icon.getData(), true);
         managedFile.setContentType(icon.getMimeType());
         managedFile.setFileName(MimeType2ExtMap.getFileExtension(icon.getMimeType()));
-        return managedFile.constructURL(session);
+        return managedFile.constructURL(session, false);
     }
 
 }

@@ -78,11 +78,9 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.datasource.ContactImageDataSource;
-import com.openexchange.groupware.contact.datasource.UserImageDataSource;
+import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -94,7 +92,6 @@ import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousListing;
 import com.openexchange.groupware.settings.tree.modules.mail.Whitelist;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.MailFetchListenerRegistry;
@@ -390,23 +387,8 @@ public final class MailJSONActivator extends AJAXModuleActivator {
          */
         private String getImageURL(final ServerSession session, final Contact contact) {
             if (0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1()) {
-                final String timestamp = null != contact.getLastModified() ? String.valueOf(contact.getLastModified().getTime()) : null;
                 try {
-                    if (FolderObject.SYSTEM_LDAP_FOLDER_ID == contact.getParentFolderID() && contact.containsInternalUserId()) {
-                        /*
-                         * prefer user contact image url
-                         */
-                        final ImageLocation imageLocation = new ImageLocation.Builder().id(
-                            String.valueOf(contact.getInternalUserId())).timestamp(timestamp).build();
-                        return UserImageDataSource.getInstance().generateUrl(imageLocation, session);
-                    } else {
-                        /*
-                         * use default contact image data source
-                         */
-                        final ImageLocation imageLocation = new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID()))
-                            .id(String.valueOf(contact.getObjectID())).timestamp(timestamp).build();
-                        return ContactImageDataSource.getInstance().generateUrl(imageLocation, session);
-                    }
+                    return ContactUtil.generateImageUrl(session, contact);
                 } catch (final OXException e) {
                     LOG.warn("Error generating contact image URL", e);
                 }

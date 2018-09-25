@@ -508,6 +508,31 @@ EOF
     # SoftwareChange_Request-175
     ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
 
+    # SoftwareChange_Request-193
+    if dpkg --compare-versions "7.10.1-0" gt-nl "$1"; then
+      VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+      if [ "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\", \"open-xchange-mobile-api-facade*\"" = "${VALUE}" ]; then
+        ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
+      fi
+    fi
+
+    # SoftwareChange_Request-240
+    if dpkg --compare-versions "7.10.1-0" gt-nl "$1"
+    then
+      pfile=/opt/open-xchange/etc/contact.properties
+      image_k=com.openexchange.contact.scaleVCardImages
+      width_k=com.openexchange.contact.image.maxWidth
+      height_k=com.openexchange.contact.image.maxHeight
+      image_v=$(ox_read_property ${image_k} ${pfile})
+      width_v=$(ox_read_property ${width_k} ${pfile})
+      height_v=$(ox_read_property ${height_k} ${pfile})
+      if [ "200x200" == "${image_v}" ] && [ "250" == "${width_v}" ] && [ "250" == "${height_v}" ]
+      then
+        ox_set_property ${image_k} "600x800" ${pfile}
+        ox_set_property ${width_k} "600" ${pfile}
+        ox_set_property ${height_k} "800" ${pfile}
+      fi
+    fi
 }
 
 setConfigFilePermissions() {

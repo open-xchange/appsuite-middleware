@@ -1,2 +1,8 @@
 PasswordChangeHistoryEntry:
   $ref: ./passwordchangehistory/PasswordChangeHistoryEntry.yaml
+HealthData:
+  $ref: ./health/HealthData.yaml
+HealthCheckData:
+  $ref: ./health/HealthCheckData.yaml
+ServiceData:
+  $ref: ./health/ServiceData.yaml

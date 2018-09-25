@@ -1,0 +1,13 @@
+com.mysql.jdbc:
+    useUnicode: true
+    characterEncoding: UTF-8
+    autoReconnect: false
+    useServerPrepStmts: false
+    useTimezone: true
+    serverTimezone: UTC
+    connectTimeout: 15000
+    socketTimeout: 15000
+    useSSL: false
+    requireSSL: false
+    verifyServerCertificate: false
+    enabledTLSProtocols: TLSv1,TLSv1.1,TLSv1.2

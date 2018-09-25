@@ -498,7 +498,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             for (ItemUpdate<Attendee, AttendeeField> attendeeToUpdate : updatedItems) {
                 Attendee originalAttendee = attendeeToUpdate.getOriginal();
                 Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
-                AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
+                AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.HIDDEN, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
                 attendeesToUpdate.add(newAttendee);
             }
             requireWritePermissions(originalEvent, attendeesToUpdate, assumeExternalOrganizerUpdate);
@@ -532,6 +532,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getId(), originalEvent.getId(), attachmentUpdates.getRemovedItems());
         }
         if (0 < attachmentUpdates.getAddedItems().size()) {
+            Check.attachmentsAreVisible(session, storage, attachmentUpdates.getAddedItems());
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), originalEvent.getId(), attachmentUpdates.getAddedItems());
         }
         return true;

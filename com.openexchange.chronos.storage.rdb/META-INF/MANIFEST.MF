@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The chronos RDB storage bundle
 Bundle-SymbolicName: com.openexchange.chronos.storage.rdb
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.github.mangstadt.vinnie,
@@ -33,13 +33,16 @@ Import-Package: com.github.mangstadt.vinnie,
  com.openexchange.group,
  com.openexchange.groupware,
  com.openexchange.groupware.attach,
+ com.openexchange.groupware.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.impl,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.results,
+ com.openexchange.groupware.tools.alias,
  com.openexchange.groupware.tools.mappings,
  com.openexchange.groupware.tools.mappings.database,
  com.openexchange.groupware.update,
+ com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
  com.openexchange.i18n.tools,
  com.openexchange.java,
@@ -64,6 +67,8 @@ Import-Package: com.github.mangstadt.vinnie,
  com.openexchange.tools.sql,
  com.openexchange.tools.update,
  com.openexchange.tx,
+ com.openexchange.user,
+ com.openexchange.userconf,
  javax.mail.internet,
  javax.mail.internet.idn,
  javax.management,

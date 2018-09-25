@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: PGP core functionality
 Bundle-SymbolicName: com.openexchange.pgp.core
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Activator: com.openexchange.pgp.core.osgi.PGPCoreActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -22,13 +22,13 @@ Import-Package: com.openexchange.exception,
  javax.crypto.spec,
  org.apache.commons.io,
  org.apache.commons.lang,
- org.bouncycastle.bcpg;version="1.56.0",
- org.bouncycastle.crypto;version="1.56.0",
- org.bouncycastle.jce.provider;version="1.56.0",
- org.bouncycastle.openpgp;version="1.56.0",
- org.bouncycastle.openpgp.operator;version="1.56.0",
- org.bouncycastle.openpgp.operator.bc;version="1.56.0",
- org.bouncycastle.openpgp.operator.jcajce;version="1.56.0",
+ org.bouncycastle.bcpg;version="1.60.0",
+ org.bouncycastle.crypto;version="1.60.0",
+ org.bouncycastle.jce.provider;version="1.60.0",
+ org.bouncycastle.openpgp;version="1.60.0",
+ org.bouncycastle.openpgp.operator;version="1.60.0",
+ org.bouncycastle.openpgp.operator.bc;version="1.60.0",
+ org.bouncycastle.openpgp.operator.jcajce;version="1.60.0",
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.pgp.core,

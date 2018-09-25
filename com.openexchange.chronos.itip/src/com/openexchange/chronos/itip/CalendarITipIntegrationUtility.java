@@ -146,19 +146,6 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     @Override
-    public void createEvent(final Event event, final CalendarSession session) throws OXException {
-        session.getCalendarService().createEvent(session, event.getFolderId(), event);
-    }
-
-    @Override
-    public void updateEvent(final Event event, final CalendarSession session, final Date clientLastModified) throws OXException {
-        Event loadEvent = getStorage(session).getEventStorage().loadEvent(event.getId(), null);
-        loadEvent = getStorage(session).getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, null);
-        String folder = CalendarUtils.getFolderView(loadEvent, session.getUserId());
-        session.getCalendarService().updateEvent(session, new EventID(folder, event.getId()), event, clientLastModified.getTime());
-    }
-
-    @Override
     public String getFolderIdForUser(Session session, String eventId, int userId) throws OXException {
         CalendarSession calendarSession = Services.getService(CalendarService.class).init(session);
         if (eventId == null) {
@@ -182,29 +169,6 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     @Override
-    public void changeConfirmationForExternalParticipant(Event event, ConfirmationChange change, CalendarSession session) throws OXException {
-        Attendee external = null;
-        if (event.getAttendees() == null) {
-            event = getStorage(session).getUtilities().loadAdditionalEventData(session.getUserId(), event, null);
-        }
-        for (Attendee attendee : event.getAttendees()) {
-            if (change.getIdentifier().equals(attendee.getEMail())) {
-                external = attendee;
-                break;
-            }
-        }
-
-        if (external == null) {
-            return;
-        }
-
-        external.setComment(change.getNewMessage());
-        external.setPartStat(change.getNewStatus());
-
-        session.getCalendarService().updateAttendee(session, new EventID(event.getFolderId(), event.getId()), external, null, event.getLastModified().getTime());
-    }
-
-    @Override
     public void deleteEvent(final Event event, final CalendarSession session, final Date clientLastModified) throws OXException {
         session.getCalendarService().deleteEvent(session, new EventID(event.getFolderId(), event.getId(), event.getRecurrenceId()), clientLastModified.getTime());
     }
@@ -220,6 +184,14 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         Context context = contexts.getContext(session.getSession().getContextId());
         return storageFactory.create(context, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), session.getEntityResolver());
+    }
+
+    @Override
+    public boolean isActingOnBehalfOf(Event event, Session session) {
+        if (null != event && null != session && null != event.getOrganizer() && null != event.getOrganizer().getSentBy()) {
+            return event.getOrganizer().getSentBy().getEntity() == session.getUserId();
+        }
+        return false;
     }
 
 }

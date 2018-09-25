@@ -357,9 +357,12 @@ public class OnboardingViewConverter implements ResultConverter {
             }
         }
 
-        for (Scenario alternative : scenario.getAlternatives(session)) {
-            DeviceAwareScenario alternativeDeviceAwareScenario = onboardingService.getScenario(alternative.getId(), clientDevice, scenario.getDevice(), session);
-            collectActions(alternativeDeviceAwareScenario, alternative.getId(), jActionIds, clientDevice, actionCollector, requestData, onboardingService, session);
+        List<Scenario> alternatives = scenario.getAlternatives(session);
+        if (null != alternatives) {
+            for (Scenario alternative : alternatives) {
+                DeviceAwareScenario alternativeDeviceAwareScenario = onboardingService.getScenario(alternative.getId(), clientDevice, scenario.getDevice(), session);
+                collectActions(alternativeDeviceAwareScenario, alternative.getId(), jActionIds, clientDevice, actionCollector, requestData, onboardingService, session);
+            }
         }
     }
 

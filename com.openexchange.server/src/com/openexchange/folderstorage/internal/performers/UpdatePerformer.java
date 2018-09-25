@@ -298,7 +298,15 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         doRenameVirtual(folder, storage, openedStorages);
                     }
                 } else if (comparedPermissions.hasChanges() || cascadePermissions) {
-                    doPermissionChange(treeId, folderId, folder, comparedPermissions, oldParentId, storageFolder, storage, isRecursion, cascadePermissions, decorator, transactionManager, openedStorages);
+                    try {
+                        doPermissionChange(treeId, folderId, folder, comparedPermissions, oldParentId, storageFolder, storage, isRecursion, cascadePermissions, decorator, transactionManager, openedStorages);
+                    } catch (OXException e) {
+                        if (OXFolderExceptionCode.NO_ADMIN_ACCESS.equals(e)) {
+                            addWarning(e);
+                            return;
+                        }
+                        throw e;
+                    }
                 } else if (changeSubscription || changedMetaInfo || changedProperties) {
                     /*
                      * Change subscription, meta, properties either in real or in virtual storage
@@ -498,7 +506,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
             checkOpenedStorage(storage, openedStorages);
             List<String> subfolderIDs = new ArrayList<String>();
-            try {
                 gatherSubfolders(folder, storage, treeId, subfolderIDs, ignoreWarnings);
                 if (0 < subfolderIDs.size()) {
                     /*
@@ -516,13 +523,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                     updatePermissions(storage, treeId, subfolderIDs, permissions.toArray(new Permission[permissions.size()]));
                 }
-            } catch (OXException e) {
-                if (OXFolderExceptionCode.NO_ADMIN_ACCESS.equals(e)) {
-                    addWarning(e);
-                    return;
-                }
-                throw e;
-            }
         }
         /*
          * delete existing shares for removed guest permissions

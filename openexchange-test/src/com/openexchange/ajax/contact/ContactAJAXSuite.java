@@ -66,6 +66,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     UpdateTest.class,
     UpdatesTest.class,
     ContactImageApiClientScaleTest.class,
+    ContactPictureTest.class,
     MultipleTest.class,
     NewListTest.class,
     SearchInAllContactFoldersTest.class,
@@ -93,5 +94,5 @@ import com.openexchange.test.concurrent.ParallelSuite;
 
 })
 public class ContactAJAXSuite  {
-
+    // empty
 }

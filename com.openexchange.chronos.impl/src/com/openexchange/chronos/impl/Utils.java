@@ -597,7 +597,8 @@ public class Utils {
 
     /**
      * Gets a value indicating whether a specific event is actually present in the supplied folder. Based on the folder type, the
-     * event's public folder identifier or the attendee's personal calendar folder is checked.
+     * event's public folder identifier or the attendee's personal calendar folder is checked, as well as the attendee's <i>hidden</i>
+     * marker.
      *
      * @param event The event to check
      * @param folder The folder where the event should appear in
@@ -608,7 +609,7 @@ public class Utils {
             return folder.getId().equals(event.getFolderId());
         } else {
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
-            return null != userAttendee && folder.getId().equals(userAttendee.getFolderId());
+            return null != userAttendee && folder.getId().equals(userAttendee.getFolderId()) && false == userAttendee.isHidden();
         }
     }
 
@@ -780,6 +781,9 @@ public class Utils {
             .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesMaster.getSeriesId()))
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
             .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(forUser)))
+            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(getSearchTerm(AttendeeField.HIDDEN, SingleOperation.ISNULL))
+                .addSearchTerm(getSearchTerm(AttendeeField.HIDDEN, SingleOperation.NOT_EQUALS, Boolean.TRUE)))
         ;
         EventField[] fields = new EventField[] { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID };
         List<Event> attendedChangeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
@@ -801,7 +805,7 @@ public class Utils {
      * @return The passed event reference, with possibly adjusted exception dates
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.6">RFC 6638, section 3.2.6</a>
      */
-    public static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) throws OXException {
+    private static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) throws OXException {
         /*
          * check which change exceptions exist where the user is attending
          */

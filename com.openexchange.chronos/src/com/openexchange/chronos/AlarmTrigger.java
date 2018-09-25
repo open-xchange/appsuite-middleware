@@ -67,6 +67,7 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
     private RecurrenceId recurrenceId;
     private Long time;
     private Long relatedTime;
+    private Long processed;
     private Integer userId;
     private Boolean pushed;
     private TimeZone timezone;
@@ -81,6 +82,7 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
     private boolean isFolderSet = false;
     private boolean isTimeZoneSet = false;
     private boolean isRelatedTimeSet = false;
+    private boolean isProcessedSet = false;
 
 
     /**
@@ -402,7 +404,7 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
 
     /**
      * Checks whether the {@link AlarmTrigger} contains a timezone
-     * 
+     *
      * @return <code>true</code> if a timezone is set, <code>false</code> otherwise
      */
     public boolean containsTimezone(){
@@ -435,6 +437,34 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
     public void removeRelatedTime(){
         this.relatedTime = null;
         this.isRelatedTimeSet = false;
+    }
+
+    /**
+     * Gets the processed value
+     *
+     * @return The processed value
+     */
+    public Long getProcessed() {
+        return processed;
+    }
+
+    /**
+     * Sets the relatedTime
+     *
+     * @param processed The processed value
+     */
+    public void setProcessed(Long processed) {
+        this.processed = processed;
+        this.isProcessedSet = true;
+    }
+
+    public boolean containsProcessed(){
+        return isProcessedSet;
+    }
+
+    public void removeProcessed(){
+        this.processed = null;
+        this.isProcessedSet = false;
     }
 
     @Override

@@ -8,14 +8,13 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-BuildRequires: open-xchange-rest >= @OXVERSION@
 %if 0%{?suse_version}
 BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -25,7 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange user feedback service
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Requires:      open-xchange-rest >= @OXVERSION@
 
 %description
 This package provides user feedback bundles
@@ -59,6 +57,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/lib/com.openexchange.userfeedback.clt.jar
 
 %changelog
+* Thu Sep 06 2018 Martin Schneider <martin.schneider@open-xchange.com>
+prepare for 7.10.1 release
 * Fri Jun 29 2018 Martin Schneider <martin.schneider@open-xchange.com>
 Fourth candidate for 7.10.0 release
 * Wed Jun 27 2018 Martin Schneider <martin.schneider@open-xchange.com>

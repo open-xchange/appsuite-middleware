@@ -85,25 +85,15 @@ public class NotificationParticipant implements Cloneable {
     private boolean virtual;
 
     public NotificationParticipant(ITipRole role, boolean external, String email) {
-        super();
-        this.roles = EnumSet.of(role);
-        this.external = external;
-        this.email = email;
+        this(EnumSet.of(role), external, email);
     }
 
     public NotificationParticipant(Set<ITipRole> roles, boolean external, String email) {
-        super();
-        this.roles = roles;
-        this.external = external;
-        this.email = email;
+        this(roles, external, email, -1);
     }
 
     public NotificationParticipant(ITipRole role, boolean external, String email, int identifier) {
-        super();
-        this.roles = EnumSet.of(role);
-        this.external = external;
-        this.email = email;
-        this.identifier = identifier;
+        this(EnumSet.of(role), external, email, identifier);
     }
 
     public NotificationParticipant(Set<ITipRole> roles, boolean external, String email, int identifier) {

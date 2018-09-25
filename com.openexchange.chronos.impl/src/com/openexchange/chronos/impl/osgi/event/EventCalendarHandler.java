@@ -55,6 +55,7 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CreateResult;
@@ -98,7 +99,7 @@ public class EventCalendarHandler implements CalendarHandler {
 
     @Override
     public void handle(CalendarEvent event) {
-        if (event == null) {
+        if (event == null || event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
             return;
         }
         try {

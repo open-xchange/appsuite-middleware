@@ -319,6 +319,28 @@ public class AlarmTriggerDBMapper extends DefaultDbMapper<AlarmTrigger, AlarmTri
             }
         });
 
+        mappings.put(AlarmTriggerField.PROCESSED, new BigIntMapping<AlarmTrigger>("processed", "Processed") {
+
+            @Override
+            public void set(AlarmTrigger alarmTrigger, Long value) {
+                alarmTrigger.setProcessed(value);
+            }
+
+            @Override
+            public boolean isSet(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.containsProcessed();
+            }
+
+            @Override
+            public Long get(AlarmTrigger alarmTrigger) {
+                return alarmTrigger.getProcessed();
+            }
+
+            @Override
+            public void remove(AlarmTrigger alarmTrigger) {
+                alarmTrigger.removeProcessed();
+            }
+        });
         return mappings;
     }
 

@@ -435,6 +435,11 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
+    public AlarmTrigger loadTrigger(int id) throws OXException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Integer recalculateFloatingAlarmTriggers(int userId) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -659,6 +664,39 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             return "ReminderData [reminderMinutes=" + reminderMinutes + ", nextTriggerTime=" + new Date(nextTriggerTime) + "]";
         }
 
+    }
+
+    @Override
+    public void deleteTriggersById(List<Integer> alarmIds) throws OXException {
+        Connection con = dbProvider.getWriteConnection(context);
+        int updated = 0;
+        try {
+            updated = deleteReminderTriggersById(con, context.getContextId(), alarmIds);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(con, updated);
+        }
+    }
+
+    /**
+     * Deletes the given reminders
+     *
+     * @param con The connection
+     * @param contextId The context id
+     * @param alarmIds The reminder ids
+     * @return the number of changed items
+     */
+    private int deleteReminderTriggersById(Connection con, int contextId, List<Integer> alarmIds) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND object_id").append(getPlaceholders(alarmIds.size())).append(';');
+        try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextId);
+            for (int id : alarmIds) {
+                stmt.setInt(parameterIndex++, id);
+            }
+            return logExecuteUpdate(stmt);
+        }
     }
 
 }

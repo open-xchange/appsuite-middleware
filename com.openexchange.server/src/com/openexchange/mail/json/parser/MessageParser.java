@@ -572,7 +572,7 @@ public final class MessageParser {
                     /*
                      * Any other value
                      */
-                    mail.setDispositionNotification(null);
+                    mail.removeDispositionNotification();
                 } else {
                     /*
                      * Valid email address
@@ -1038,7 +1038,7 @@ public final class MessageParser {
     }
 
     private static InternetAddress getEmailAddress(String addrStr) {
-        if (com.openexchange.java.Strings.isEmpty(addrStr)) {
+        if (com.openexchange.java.Strings.isEmpty(addrStr) || "false".equalsIgnoreCase(addrStr)) {
             return null;
         }
         try {

@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * This class stores all connection pools. It also removes pools that are empty.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Pools implements Runnable {
@@ -122,6 +123,7 @@ public final class Pools implements Runnable {
     }
 
     private final Runnable cleaner = new Runnable() {
+
         @Override
         public void run() {
             try {

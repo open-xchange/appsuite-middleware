@@ -97,6 +97,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.DeltaEvent;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -105,7 +106,6 @@ import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
-import com.openexchange.chronos.impl.DeltaEvent;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -806,6 +806,7 @@ public class EventUpdateProcessor implements EventUpdate {
             if (calendarUser.getEntity() != attendee.getEntity()) {
                 attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
                 attendee.setComment(null);
+                attendee.setHidden(false);
                 continue;
             }
         }

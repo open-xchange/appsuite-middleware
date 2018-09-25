@@ -1,0 +1,29 @@
+/onboarding?action=link:
+  get:
+    operationId: generateDownloadLinkForClientOnboardingProfile
+    tags: 
+      - Clientonboarding
+    summary: Generate link to direct-download a profile to configure an apple device for CalDAV and/or CardDAV
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: type
+        type: string
+        description: |
+          The identifier of profile to download; one of
+          - caldav
+          - carddav
+          - dav
+        enum: [
+                "caldav",
+                "carddav",
+                "dav"                
+              ]
+        required: true
+    responses:
+      200:
+        description: |
+          The download link for the profile
+        schema:
+          type: string
+          format: json

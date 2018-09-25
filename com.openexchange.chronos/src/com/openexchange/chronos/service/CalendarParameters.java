@@ -182,6 +182,16 @@ public interface CalendarParameters {
     static final String PARAMETER_MASK_ID = "maskId";
 
     /**
+     * {@link String}
+     * <p/>
+     * The push token identifier used by the client to allow filtering of push events for modified calendar data, i.e. to avoid that push
+     * notifications generated from an operation performed within the session are sent back to the acting client.
+     *
+     * @see <a href="https://tools.ietf.org/html/draft-gajda-dav-push-00#section-7.1">draft-gajda-dav-push-00, section 7.1</a>
+     */
+    static final String PARAMETER_PUSH_TOKEN = "pushToken";
+
+    /**
      * {@link UIDConflictStrategy}
      * <p/>
      * Configures what to do in case an event cannot be saved due to another existing event with the same unique identifier. By default, an
@@ -272,6 +282,14 @@ public interface CalendarParameters {
      * <p/>
      */
     static final String PARAMETER_SUPPRESS_ITIP = "itip.suppress";
+
+    /**
+     * {@link String}
+     * <p/>
+     * A comment set by the user when updating/deleting events.
+     * <p/>
+     */
+    static final String PARAMETER_COMMENT = "comment";
 
     /**
      * Sets a parameter.

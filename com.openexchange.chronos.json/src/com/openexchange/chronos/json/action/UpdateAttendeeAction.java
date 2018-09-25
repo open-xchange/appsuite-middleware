@@ -50,6 +50,7 @@
 package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.Collections;
 import java.util.Date;
@@ -91,7 +92,7 @@ public class UpdateAttendeeAction extends ChronosAction {
         super(services);
     }
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_CHECK_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_SEND_INTERNAL_NOTIFICATIONS, PARAM_CHECK_CONFLICTS, PARAM_RANGE_START, PARAM_RANGE_END, PARAM_EXPAND, PARAMETER_FIELDS, PARAMETER_PUSH_TOKEN);
 
     private static final String ATTENDEE_FIELD = "attendee";
     private static final String ALARMS_FIELD = "alarms";

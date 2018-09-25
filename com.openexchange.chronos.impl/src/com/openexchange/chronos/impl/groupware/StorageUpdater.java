@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
@@ -65,6 +64,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EntityResolver;
@@ -91,6 +91,7 @@ class StorageUpdater {
     private final CalendarUser replacement;
     private final Date date;
     private final EntityResolver entityResolver;
+    private final CalendarEventNotificationService notificationService;
 
     /**
      * Initializes a new {@link StorageUpdater}.
@@ -101,7 +102,7 @@ class StorageUpdater {
      * @param attendeeId The identifier of the attendee
      * @param destinationUserId The identifier of the destination user
      */
-    public StorageUpdater(CalendarStorage storage, EntityResolver entityResolver, int attendeeId, int destinationUserId) throws OXException {
+    public StorageUpdater(CalendarStorage storage, EntityResolver entityResolver, CalendarEventNotificationService notificationService, int attendeeId, int destinationUserId) throws OXException {
         super();
         this.entityResolver = entityResolver;
         this.attendeeId = attendeeId;
@@ -109,6 +110,7 @@ class StorageUpdater {
         this.tracker = new SimpleResultTracker();
         this.date = new Date();
         this.storage = storage;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -338,11 +340,10 @@ class StorageUpdater {
      * Notifies the {@link CalendarHandler}s
      *
      * @param session The admin session
-     * @param calendarHandlers The handlers to notify
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      */
-    void notifyCalendarHandlers(Session session, Set<CalendarHandler> handlers, CalendarParameters parameters) throws OXException {
-        tracker.notifyCalenderHandlers(session, entityResolver, handlers, parameters);
+    void notifyCalendarHandlers(Session session, CalendarParameters parameters) throws OXException {
+        tracker.notifyCalenderHandlers(session, entityResolver, notificationService, parameters);
     }
 
     /**

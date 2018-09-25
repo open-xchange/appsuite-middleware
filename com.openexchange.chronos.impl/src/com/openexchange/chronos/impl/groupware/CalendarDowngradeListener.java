@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl.groupware;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SUPPRESS_ITIP;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
@@ -60,6 +59,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
@@ -83,8 +83,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class CalendarDowngradeListener implements DowngradeListener {
 
-    private final Set<CalendarHandler> calendarHandlers;
     private final CalendarUtilities calendarUtilities;
+    private final CalendarEventNotificationService notificationService;
 
     /**
      * Initializes a new {@link CalendarDowngradeListener}.
@@ -92,9 +92,9 @@ public class CalendarDowngradeListener implements DowngradeListener {
      * @param calendarUtilities A reference to the calendar utilities
      * @param calendarHandlers The {@link CalendarHandler}s to notify
      */
-    public CalendarDowngradeListener(CalendarUtilities calendarUtilities, Set<CalendarHandler> calendarHandlers) {
+    public CalendarDowngradeListener(CalendarUtilities calendarUtilities, CalendarEventNotificationService notificationService) {
         super();
-        this.calendarHandlers = calendarHandlers;
+        this.notificationService = notificationService;
         this.calendarUtilities = calendarUtilities;
     }
 
@@ -105,7 +105,7 @@ public class CalendarDowngradeListener implements DowngradeListener {
             SimpleDBProvider dbProvider = new SimpleDBProvider(event.getReadCon(), event.getWriteCon());
             EntityResolver entityResolver = calendarUtilities.getEntityResolver(event.getContext().getContextId());
             CalendarStorage storage = Services.getService(CalendarStorageFactory.class).create(event.getContext(), Utils.ACCOUNT_ID, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
-            StorageUpdater updater = new StorageUpdater(storage, entityResolver, userId, event.getContext().getMailadmin());
+            StorageUpdater updater = new StorageUpdater(storage, entityResolver, notificationService, userId, event.getContext().getMailadmin());
 
             // Get all events which the user attends and that are *NOT* located in his private folders.
             CompositeSearchTerm term = new CompositeSearchTerm(CompositeOperation.AND)
@@ -129,7 +129,7 @@ public class CalendarDowngradeListener implements DowngradeListener {
             updater.deleteEvent(events, ServerSessionAdapter.valueOf(userId, event.getContext().getContextId()));
 
             // Trigger calendar events
-            updater.notifyCalendarHandlers(event.getSession(), calendarHandlers, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
+            updater.notifyCalendarHandlers(event.getSession(), new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
         }
     }
 

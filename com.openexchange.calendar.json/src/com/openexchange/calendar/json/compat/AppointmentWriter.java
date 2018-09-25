@@ -222,7 +222,7 @@ public class AppointmentWriter extends CalendarWriter {
             writeParameter(AppointmentFields.IGNORE_CONFLICTS, true, jsonObj);
         }
         if (appointmentObject.containsTimezone()) {
-            writeParameter(AppointmentFields.TIMEZONE, appointmentObject.getTimezoneFallbackUTC(), jsonObj);
+            writeParameter(AppointmentFields.TIMEZONE, appointmentObject.getTimezone(), jsonObj);
         }
         if (appointmentObject.containsRecurringStart()) {
             writeParameter(CalendarFields.RECURRENCE_START, appointmentObject.getRecurringStart(), jsonObj);
@@ -426,7 +426,7 @@ public class AppointmentWriter extends CalendarWriter {
         m.put(Appointment.TIMEZONE, new AppointmentFieldWriter() {
             @Override
             public void write(final Appointment appointmentObject, final JSONArray jsonArray) {
-                writeValue(appointmentObject.getTimezoneFallbackUTC(), jsonArray);
+                writeValue(appointmentObject.getTimezone(), jsonArray);
             }
         });
         m.put(Appointment.RECURRENCE_START, new AppointmentFieldWriter() {

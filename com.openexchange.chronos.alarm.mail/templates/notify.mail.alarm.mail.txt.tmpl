@@ -1,0 +1,40 @@
+====[       ${mail.event.summary!""}       ]====
+
+${labels.timezoneInfo!""}
+
+${labels.whenLabel} ${formatters.dateSpec} ${formatters.interval}
+<#if mail.event.location??>
+  ${labels.whereLabel} ${mail.event.location!""}
+</#if>
+
+
+<#if mail.event.description??>
+  ====================================
+  ${mail.event.description!""}
+  ====================================
+</#if>
+
+<#if mail.participants?has_content>
+  == ${labels.participantsLabel} ==
+
+  <#list mail.participants as participant>
+  ${participantHelper.participantLine(participant)}
+  </#list>
+</#if>
+
+<#if mail.resources?has_content>
+  == ${labels.resourcesLabel} ==
+
+  <#list mail.resources as participant>
+    ${participantHelper.participantLine(participant)}
+  </#list>
+</#if>
+
+== ${labels.detailsLabel} ==
+
+${labels.showAsLabel} ${labels.showAs}
+${labels.createdLabel} ${formatters.created} <#if labels.creator??>- ${labels.creator}</#if>
+
+${labels.directLink!""}
+
+${labels.attachmentNote!""}

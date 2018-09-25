@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Itip bundle
 Bundle-SymbolicName: com.openexchange.chronos.itip
-Bundle-Version: 7.10.0
+Bundle-Version: 7.10.1
 Bundle-Activator: com.openexchange.chronos.itip.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -77,6 +77,7 @@ Import-Package: com.openexchange.ajax,
  javax.mail,
  javax.mail.internet,
  javax.servlet.http,
+ org.apache.commons.lang3;version="3.7.0",
  org.apache.commons.text,
  org.dmfs.rfc5545,
  org.dmfs.rfc5545.recur,
