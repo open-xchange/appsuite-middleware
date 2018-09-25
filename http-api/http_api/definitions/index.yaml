@@ -233,10 +233,6 @@ SearchData:
   $ref: ./chronos-schedjoules/SearchData.yaml
 SearchResponse:
   $ref: ./chronos-schedjoules/SearchResponse.yaml
-FolderConfigurationData:
-  $ref: ./chronos-schedjoules/FolderConfigurationData.yaml
-FoldersConfigurationData:
-  $ref: ./chronos-schedjoules/FoldersConfigurationData.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml
@@ -272,8 +268,6 @@ MailHeadersResponse:
   $ref: ./mail/MailHeadersResponse.yaml
 MailSourceResponse:
   $ref: ./mail/MailSourceResponse.yaml
-SendMailData:
-  $ref: ./mail/SendMailData.yaml
 MailImportResponse:
   $ref: ./mail/MailImportResponse.yaml
 MailReplyData:
@@ -693,8 +687,6 @@ GuardSecurityResult:
   $ref: ./guard/GuardSecurityResult.yaml
 GuardSignatureResult:
   $ref: ./guard/GuardSignatureResult.yaml
-GuardSendSecurity:
-  $ref: ./guard/GuardSendSecurity.yaml
 # Module: Sessionmanagement
 AllSessionsResponse:
   $ref: ./sessionmanagement/AllSessionsResponse.yaml
