@@ -103,7 +103,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     protected static final char OPT_JMX_AUTH_USER_SHORT = 'J';
     protected static final String OPT_JMX_AUTH_USER_LONG = "jmxauthuser";
 
-    protected static final String OPT_JMX_AUTH_PASSWORD_HASH_LONG = "jmxauthpasswordhash";
+    protected static final String OPT_JMX_AUTH_PASSWORD_HASH_MECH_LONG = "jmxauthpasswordhashmech";
 
     protected static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
@@ -260,7 +260,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         this.timeoutOption = setShortLongOpt(parser, OPT_TIMEOUT_SHORT, OPT_TIMEOUT_LONG, "timeout in seconds for the connection creation to the backend (default 15s)", true, NeededQuadState.notneeded);
         this.jmxuser = setShortLongOpt(parser, OPT_JMX_AUTH_USER_SHORT, OPT_JMX_AUTH_USER_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
         this.jmxpass = setShortLongOpt(parser, OPT_JMX_AUTH_PASSWORD_SHORT, OPT_JMX_AUTH_PASSWORD_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
-        this.jmxpasshash = setLongOpt(parser, OPT_JMX_AUTH_PASSWORD_HASH_LONG, "jmx password hashed used for password encryption (default: SHA)", true, false);
+        this.jmxpasshash = setLongOpt(parser, OPT_JMX_AUTH_PASSWORD_HASH_MECH_LONG, "password hash mechanism used for generating the password (default: SHA)", true, false);
         setFurtherOptions(parser);
     }
 

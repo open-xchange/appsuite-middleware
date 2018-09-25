@@ -94,19 +94,7 @@ public interface CryptoService {
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException;
 
     /**
-     * Encrypts specified data with given password and salt.
-     *
-     * @param data The data to be encrypted
-     * @param password The password
-     * @param salt Used for encryption and stores the salt in the return value, if null uses internal salt constant
-     *            otherwise.
-     * @return EncryptedData object with the Base64 encoded and encrypted String and the used salt
-     * @throws OXException If encryption fails
-     */
-    public EncryptedData encrypt(String data, String password, byte[] salt) throws OXException;
-
-    /**
-     * Decrypts specified encrypted data with the given password.
+     * Decrypts specified encryptedt data with the given password.
      *
      * @param data EncryptedData object with the encrypted data (Base64 String) and salt
      * @param password The password
@@ -115,15 +103,4 @@ public interface CryptoService {
      * @throws OXException If decryption fails
      */
     public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException;
-
-    /**
-     * Decrypts specified encrypted data with the given password and salt.
-     *
-     * @param data EncryptedData object with the encrypted data (Base64 String) and salt
-     * @param password The password
-     * @param salt the salt to use for decryption. If null uses internal salt constant
-     * @return The decrypted data as String
-     * @throws OXException If decryption fails
-     */
-    public String decrypt(EncryptedData data, String password, byte[] salt) throws OXException;
 }

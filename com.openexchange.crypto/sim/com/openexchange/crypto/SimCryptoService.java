@@ -79,22 +79,12 @@ public class SimCryptoService implements CryptoService {
     }
 
     @Override
-    public String decrypt(EncryptedData data, String password, byte[] salt) throws OXException {
-        return null;
-    }
-
-    @Override
     public String encrypt(String data, String password) throws OXException {
         return encrypted;
     }
 
     @Override
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
-        return null;
-    }
-
-    @Override
-    public EncryptedData encrypt(String data, String password, byte[] salt) throws OXException {
         return null;
     }
 }

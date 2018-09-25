@@ -138,6 +138,7 @@ public class CryptoServiceImpl implements CryptoService {
     @Override
     public String decrypt(final String encryptedData, final String password) throws OXException {
         return decrypt(new EncryptedData(encryptedData, null), password, false);
+        // return decrypt(encryptedData, generateSecretKey(password));
     }
 
     @Override
@@ -149,32 +150,12 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public String decrypt(EncryptedData data, String password, byte[] salt) throws OXException {
-        if (salt != null) {
-            return decrypt(data.getData(), generateSecretKey(password, salt));
-        }
-        return decrypt(data.getData(), generateSecretKey(password, SALT));
-
-    }
-
-    @Override
     public EncryptedData encrypt(final String data, final String password, final boolean useSalt) throws OXException {
         if (data == null) {
             return null;
         }
         if (useSalt) {
             final byte[] salt = generateSalt();
-            return new EncryptedData(encrypt(data, generateSecretKey(password, salt)), salt);
-        }
-        return new EncryptedData(encrypt(data, generateSecretKey(password, SALT)), null);
-    }
-
-    @Override
-    public EncryptedData encrypt(String data, String password, byte[] salt) throws OXException {
-        if (data == null) {
-            return null;
-        }
-        if (salt != null) {
             return new EncryptedData(encrypt(data, generateSecretKey(password, salt)), salt);
         }
         return new EncryptedData(encrypt(data, generateSecretKey(password, SALT)), null);
@@ -299,4 +280,5 @@ public class CryptoServiceImpl implements CryptoService {
         }
         return salt;
     }
+
 }

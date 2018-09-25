@@ -1062,9 +1062,6 @@ public class UserTest extends AbstractRMITest {
                 if (map_obj.getGetter().getParameterTypes().length == 0) {
                     Object expected = map_obj.getGetter().invoke(tmp_usr);
                     Object actual = map_obj.getGetter().invoke(user_single_change_loaded);
-                    if (map_obj.getGetter() == null || map_obj.getGetter().getName() == null || expected == null || actual == null) {
-                        System.out.println("halt stopp");
-                    }
                     assertEquals(map_obj.getGetter().getName().substring(3) + " not equal " + expected.getClass().getName() + " " + actual.getClass().getName(), expected, actual);
                 }
             }

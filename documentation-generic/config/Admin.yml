@@ -393,3 +393,19 @@ properties:
       file: AdminUser.properties
       packageName: open-xchange-admin
       tags: ["Admin", "User"]
+    - key: DEFAULT_PASSWORD_MECHANISM
+      description: |
+        Defines the hash algorithm that will be used to hash the user password.
+
+        Possible values are: CRYPT / SHA / SHA256 / SHA512 / BCRYPT
+        Be careful: if you think about doing a rollback to a previous release do not use SHA256 and SHA512!
+        Users that were created with SHA256 or SHA512 won't be able to login then as the middleware won't be 
+        able to process the defined hash mechanism.
+      defaultValue: SHA
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: AdminDaemon.properties
+      packageName: open-xchange-admin
+      tags: ["Admin", "Authentication"]

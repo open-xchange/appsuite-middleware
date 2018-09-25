@@ -145,13 +145,12 @@ public class ShareActivator extends HousekeepingActivator {
 
             @Override
             public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
-                ConfigurationService configurationService = getService(ConfigurationService.class);
-                String cryptKey = configurationService.getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
+                String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
 
-                PasswordMechRegistry passwordMechFactory = getService(PasswordMechRegistry.class);
-                SharePasswordMech sharePasswordMech = new SharePasswordMech(configurationService, service, cryptKey);
-                passwordMechFactory.register(sharePasswordMech);
+                PasswordMechRegistry passwordMechRegistry = getService(PasswordMechRegistry.class);
+                SharePasswordMech sharePasswordMech = new SharePasswordMech(service, cryptKey);
+                passwordMechRegistry.register(sharePasswordMech);
                 shareRegistration = context.registerService(ShareService.class, shareService, null);
                 return service;
             }

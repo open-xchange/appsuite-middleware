@@ -49,8 +49,10 @@ properties:
       tags: ["Management", "Authentication", "Credential"]
     - key: JMXPassword
       description: |
-        Define the JMX password in SHA hashed version.
+        Define the JMX password hashed by the desired hash mechanism (default: SHA).
         This property only has effect if property [[JMXLogin]] is set.
+
+        Examples for SHA:
 
         <h3>Using Perl to generate the SHA hash</h3>
         The following Perl command can be used to generate such a password 
@@ -71,7 +73,19 @@ properties:
       version: 
       reloadable: false
       configcascadeAware: false
-      related: JMXLogin
+      related: JMXLogin, JMXPasswordHashAlgorithm
+      file: management.properties
+      packageName: open-xchange-core
+      tags: ["Management", "Authentication", "Credential"]
+    - key: JMXPasswordHashAlgorithm
+      description: |
+        Define the hash mechanism used to hash the password. Possible hash mechanisms are: CRYPT / SHA / SHA256 / SHA512 / BCRYPT
+        This property only has effect if property [[JMXLogin]] is set.
+      defaultValue: SHA
+      version: 7.10.1
+      reloadable: false
+      configcascadeAware: false
+      related: JMXPassword
       file: management.properties
       packageName: open-xchange-core
       tags: ["Management", "Authentication", "Credential"]
