@@ -788,13 +788,39 @@ public final class MimeMessageUtility {
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static boolean hasAttachments(final Part part) throws MessagingException, OXException, IOException {
+    public static boolean hasAttachments(Part part) throws MessagingException, OXException, IOException {
         if (null == part) {
             return false;
         }
 
         if (part.getContentType().toLowerCase().startsWith("multipart/")) {
             Multipart multipart = getMultipartContentFrom(part);
+            if (null != multipart) {
+                int count = multipart.getCount();
+                return hasAttachments0(multipart, count);
+            }
+        }
+        return hasAttachmentInMetadata(part);
+    }
+
+    /**
+     * Checks if given part contains (file) attachments
+     *
+     * @param part The part to examine
+     * @param optContentType The optional Content-Type or <code>null</code>
+     * @return <code>true</code> if given part contains (file) attachments; otherwise <code>false</code>
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If a mail error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public static boolean hasAttachments(Part part, String optContentType) throws MessagingException, OXException, IOException {
+        if (null == part) {
+            return false;
+        }
+
+        String contentType = null == optContentType ? part.getContentType() : optContentType;
+        if (Strings.asciiLowerCase(contentType).startsWith("multipart/")) {
+            Multipart multipart = getMultipartContentFrom(part, contentType);
             if (null != multipart) {
                 int count = multipart.getCount();
                 return hasAttachments0(multipart, count);
