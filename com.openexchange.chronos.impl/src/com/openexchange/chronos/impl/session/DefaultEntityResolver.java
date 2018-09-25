@@ -284,8 +284,17 @@ public class DefaultEntityResolver implements EntityResolver {
         /*
          * do the same with a proxy calendar user in "sent-by"
          */
-        if(attendee.getSentBy() != null){
-            applyEntityData(attendee.getSentBy(), CalendarUserType.INDIVIDUAL);
+        if (null != attendee.getSentBy()) {
+            try {
+                applyEntityData(attendee.getSentBy(), CalendarUserType.INDIVIDUAL);
+            } catch (OXException e) {
+                if (CalendarExceptionCodes.INVALID_CALENDAR_USER.equals(e)) {
+                    LOG.debug("Ignoring invalid proxy {} for SENT-BY property of {}.", attendee.getSentBy(), attendee, e);
+                    attendee.setSentBy(null);
+                } else {
+                    throw e;
+                }
+            }
         }
         return attendee;
     }
@@ -538,12 +547,15 @@ public class DefaultEntityResolver implements EntityResolver {
             } else {
                 ResourceId resourceId;
                 try {
-                    resourceId = resolve(attendee.getUri());
+                    resourceId = resolve(attendee.getUri(), true, user.getId());
                 } catch (OXException e) {
+                    LOG.debug("Error applying data from user {} for attendee {}", I(user.getId()), attendee, e);
                     throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, attendee.getUri(), I(user.getId()), CalendarUserType.INDIVIDUAL);
                 }
                 if (null == resourceId || resourceId.getEntity() != user.getId()) {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), I(user.getId()), CalendarUserType.INDIVIDUAL);
+                    OXException e = CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), I(user.getId()), CalendarUserType.INDIVIDUAL);
+                    LOG.debug("Unable to apply data from mismatching user {} for attendee {}", I(user.getId()), attendee, e);
+                    throw e;
                 }
                 attendee.setUri(attendee.getUri());
             }
@@ -670,11 +682,25 @@ public class DefaultEntityResolver implements EntityResolver {
         return type;
     }
 
+    /**
+     * Resolves a calendar user address URI to its corresponding resource identifier.
+     * 
+     * @param uri The URI to resolve
+     * @return The resolved resource identifier, or <code>null</code> if not found
+     */
     private ResourceId resolve(String uri) throws OXException {
-        return resolve(uri, true);
+        return resolve(uri, true, -1);
     }
 
-    private ResourceId resolve(String uri, boolean considerAliases) throws OXException {
+    /**
+     * Resolves a calendar user address URI to its corresponding resource identifier.
+     * 
+     * @param uri The URI to resolve
+     * @param considerAliases <code>true</code> to consider user aliases when resolving <code>mailto:</code>-URIs, <code>false</code>, otherwise
+     * @param entity The identifier of the entity to match, or <code>-1</code> if not known
+     * @return The resolved resource identifier, or <code>null</code> if not found
+     */
+    private ResourceId resolve(String uri, boolean considerAliases, int entity) throws OXException {
         if (Strings.isEmpty(uri)) {
             return null;
         }
@@ -683,12 +709,19 @@ public class DefaultEntityResolver implements EntityResolver {
          */
         ResourceId resourceId = ResourceId.parse(uri);
         if (null != resourceId) {
-            return resourceId;
+            return -1 == entity || entity == resourceId.getEntity() ? resourceId : null;
         }
         /*
          * try lookup by e-mail address, otherwise
          */
         String mail = extractEMailAddress(uri);
+        if (-1 != entity) {
+            User user = optUser(entity);
+            if (null != user && (mail.equals(getEMail(user)) || considerAliases && UserAliasUtility.isAlias(mail, user.getAliases()))) {
+                return new ResourceId(context.getContextId(), user.getId(), CalendarUserType.INDIVIDUAL);
+            }
+            return null;
+        }
         for (User knownUser : knownUsers.values()) {
             if (mail.equals(getEMail(knownUser)) || considerAliases && UserAliasUtility.isAlias(mail, knownUser.getAliases())) {
                 return new ResourceId(context.getContextId(), knownUser.getId(), CalendarUserType.INDIVIDUAL);

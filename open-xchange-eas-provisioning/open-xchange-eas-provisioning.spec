@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 15
+%define        ox_release 16
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -105,6 +105,8 @@ ox_add_property com.openexchange.mobile.configuration.generator.PemFile "" /opt/
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Mon Sep 24 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2018-09-21 (4900)
 * Mon Sep 10 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2018-09-17 (4882)
 * Mon Aug 27 2018 Marcus Klein <marcus.klein@open-xchange.com>
