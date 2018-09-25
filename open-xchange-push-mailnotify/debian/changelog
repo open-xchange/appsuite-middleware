@@ -1,3 +1,9 @@
+open-xchange-push-mailnotify (7.10.0-17) stable; urgency=medium
+
+  * Build for patch 2018-10-01 (4897)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 25 Sep 2018 13:56:33 +0200
+
 open-xchange-push-mailnotify (7.10.0-16) stable; urgency=medium
 
   * Build for patch 2018-09-21 (4900)
