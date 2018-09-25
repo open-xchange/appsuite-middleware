@@ -152,7 +152,7 @@ public class GenericChecks {
             }
             throw new InvalidDataException("Invalid PasswordMech: " + mech + ". Use one of the following: " + String.join(",", mechFactory.getIdentifiers()));
         } catch (OXException e) {
-            throw new InvalidDataException("PasswordMechFactory not availble. Did the server start properly?");
+            throw new InvalidDataException("PasswordMechFactory not available. Did the server start properly?");
         }
     }
 

@@ -175,7 +175,7 @@ public class DefaultGuestServiceTest {
         user.setMail(GUEST_MAIL_ADDRESS);
         user.setUserPassword(GUEST_PASSWORD);
         user.setPasswordMech(GUEST_PASSWORD_MECH);
-        user.setSalt(GUEST_PASSWORD_SALT);;
+        user.setSalt(GUEST_PASSWORD_SALT);
 
         contact = new Contact();
         contact.setInternalUserId((int) GUEST_ID);
@@ -236,7 +236,7 @@ public class DefaultGuestServiceTest {
     @Test
     public void testRemoveGuest_assignmentStillExisting_doNotDeleteUser() throws OXException {
         Mockito.when(guestStorage.getNumberOfAssignments(ArgumentMatchers.anyLong(), ArgumentMatchers.any(Connection.class))).thenReturn(10L);
-        
+
         defaultGuestService.removeGuest(CONTEXT_ID, USER_ID);
 
         Mockito.verify(guestStorage, Mockito.times(1)).removeGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
