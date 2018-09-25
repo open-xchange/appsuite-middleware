@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 42
+%define        ox_release 43
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -62,6 +62,8 @@ GLOBIGNORE='*'
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Sep 25 2018 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2018-10-01 (4896)
 * Mon Sep 10 2018 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2018-09-17 (4881)
 * Mon Aug 27 2018 Thorben Betten <thorben.betten@open-xchange.com>

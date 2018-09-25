@@ -20,7 +20,7 @@ BuildRequires: java-devel >= 1.7.0
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define        ox_release 42
+%define        ox_release 43
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -71,6 +71,8 @@ ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchang
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Tue Sep 25 2018 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2018-10-01 (4896)
 * Mon Sep 10 2018 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2018-09-17 (4881)
 * Mon Aug 27 2018 Carsten Hoeger <choeger@open-xchange.com>

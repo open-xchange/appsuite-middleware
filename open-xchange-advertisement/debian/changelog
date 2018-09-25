@@ -1,3 +1,9 @@
+open-xchange-advertisement (7.8.4-43) stable; urgency=medium
+
+  * Build for patch 2018-10-01 (4896)
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Tue, 25 Sep 2018 12:50:59 +0200
+
 open-xchange-advertisement (7.8.4-42) stable; urgency=medium
 
   * Build for patch 2018-09-17 (4881)
