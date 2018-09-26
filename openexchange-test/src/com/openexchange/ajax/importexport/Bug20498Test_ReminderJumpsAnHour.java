@@ -10,6 +10,8 @@ import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
@@ -17,6 +19,7 @@ import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.importexport.ImportResult;
 
+@RunWith(BlockJUnit4ClassRunner.class)
 public class Bug20498Test_ReminderJumpsAnHour extends ManagedAppointmentTest {
 
     @Rule
