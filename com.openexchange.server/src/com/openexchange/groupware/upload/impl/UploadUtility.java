@@ -370,7 +370,7 @@ public final class UploadUtility {
         try {
             action = AJAXServlet.getAction(req);
         } catch (OXException e) {
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e);
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e.getMessage(), e);
         }
 
         // Parse the upload request
