@@ -141,7 +141,7 @@ public interface CalendarConfig {
     int getMaxConflicts();
 
     /**
-     * Gets a value indicating whether the checks of (external) attendee URIs are disabled or not.
+     * Gets a value indicating whether the checks of (external) attendee URIs are generally disabled or not.
      *
      * @return <code>true</code> if the URI checks are disabled, <code>false</code>, otherwise
      */

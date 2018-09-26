@@ -203,6 +203,7 @@ public abstract class AbstractITipAction implements AJAXActionService {
     protected CalendarSession initCalendarSession(ServerSession session) throws OXException {
         CalendarSession calendarSession = services.getService(CalendarService.class).init(session);
         calendarSession.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
+        calendarSession.set(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.TRUE);
         return calendarSession;
     }
 }

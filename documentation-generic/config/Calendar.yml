@@ -240,7 +240,7 @@ properties:
       tags: ["Calendar","Limit"]
     - key: com.openexchange.calendar.skipExternalAttendeeURIChecks
       description: |
-         Controls whether checks of (external) attendee URIs are disabled or not. 
+         Controls whether checks of (external) attendee URIs are always disabled in or not.  
       defaultValue: false
       version: 7.10.0
       reloadable: true
