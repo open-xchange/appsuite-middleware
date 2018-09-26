@@ -91,7 +91,10 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
             instance.add(Calendar.MINUTE, -5);
             overdueTime = instance.getTime();
         }
-        return getAndLockTriggers(con, until == null ? null : until.getTime(), overdueTime.getTime(), lock, actions);
+        if (until == null) {
+            return Collections.emptyMap();
+        }
+        return getAndLockTriggers(con, until.getTime(), overdueTime.getTime(), lock, actions);
     }
 
     private Map<Pair<Integer, Integer>, List<AlarmTrigger>> getAndLockTriggers(Connection con, Long until, Long overdueTime, boolean lock, AlarmAction... actions) throws OXException {
