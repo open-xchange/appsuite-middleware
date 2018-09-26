@@ -49,10 +49,13 @@
 package com.openexchange.rest.services;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -111,24 +114,36 @@ public class RequestTool {
             throw new BadRequestException(e);
         }
 
-        for (String header : httpHeaders.getRequestHeaders().keySet()) {
-            String value = httpHeaders.getRequestHeaders().getFirst(header);
-            if (value != null) {
-                requestData.setHeader(header, value);
+        MultivaluedMap<String, String> requestHeaders = httpHeaders.getRequestHeaders();
+        for (Map.Entry<String, List<String>> headerEntry : requestHeaders.entrySet()) {
+            List<String> values = headerEntry.getValue();
+            if (!values.isEmpty()) {
+                String value = values.get(0);
+                if (value != null) {
+                    requestData.setHeader(headerEntry.getKey(), value);
+                }
             }
         }
 
-        for (String param : uriInfo.getPathParameters().keySet()) {
-            String value = uriInfo.getPathParameters().getFirst(param);
-            if (value != null) {
-                requestData.putParameter(param, value);
+        MultivaluedMap<String, String> pathParameters = uriInfo.getPathParameters();
+        for (Map.Entry<String, List<String>> paramEntry : pathParameters.entrySet()) {
+            List<String> values = paramEntry.getValue();
+            if (!values.isEmpty()) {
+                String value = values.get(0);
+                if (value != null) {
+                    requestData.putParameter(paramEntry.getKey(), value);
+                }
             }
         }
 
-        for (String param : uriInfo.getQueryParameters().keySet()) {
-            String value = uriInfo.getQueryParameters().getFirst(param);
-            if (value != null) {
-                requestData.putParameter(param, value);
+        MultivaluedMap<String, String> queryParameters = uriInfo.getQueryParameters();
+        for (Map.Entry<String, List<String>> paramEntry : queryParameters.entrySet()) {
+            List<String> values = paramEntry.getValue();
+            if (!values.isEmpty()) {
+                String value = values.get(0);
+                if (value != null) {
+                    requestData.putParameter(paramEntry.getKey(), value);
+                }
             }
         }
 
