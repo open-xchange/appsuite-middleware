@@ -64,6 +64,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -180,7 +181,7 @@ public class TestCredentials {
         return KeyStoreCredentialProvider.newInstance(
             tmpFile.getAbsolutePath(),
             SP_KEY_STORE_PASSWORD.toCharArray(),
-            IDP_SIGNING_CERT_ALIAS,
+            Collections.singletonList(IDP_SIGNING_CERT_ALIAS),
             SP_SIGNING_KEY_ALIAS,
             SP_SIGNING_KEY_PASSWORD.toCharArray(),
             SP_ENCRYPTION_KEY_ALIAS,
