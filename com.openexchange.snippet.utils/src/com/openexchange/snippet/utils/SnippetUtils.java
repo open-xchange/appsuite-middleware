@@ -78,7 +78,7 @@ public final class SnippetUtils {
      * @return The sanitized content
      */
     public static String sanitizeContent(String content) {
-        if (com.openexchange.java.Strings.isEmpty(content) || !HTMLDetector.containsHTMLTags(content, true)) {
+        if (com.openexchange.java.Strings.isEmpty(content) || !HTMLDetector.containsHTMLTags(content, "<div")) {
             return content;
         }
 
