@@ -199,6 +199,9 @@ public class AdministrativeRdbAlarmTriggerStorage implements AdministrativeAlarm
 
     @Override
     public Map<Pair<Integer, Integer>, List<AlarmTrigger>> getMessageAlarmTriggers(Connection con, int cid, int account, String eventId, boolean lock, AlarmAction... actions) throws OXException {
+        if (actions == null || actions.length == 0) {
+            return Collections.emptyMap();
+        }
         try {
             AlarmTriggerField[] mappedFields = new AlarmTriggerField[] { AlarmTriggerField.ALARM_ID, AlarmTriggerField.TIME, AlarmTriggerField.EVENT_ID, AlarmTriggerField.USER_ID, AlarmTriggerField.RECURRENCE_ID };
             StringBuilder stringBuilder = new StringBuilder().append("SELECT cid,account,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger WHERE");
